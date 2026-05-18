@@ -3,16 +3,12 @@ package net.hollowcube.mapmaker.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapPlayerData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -29,21 +25,17 @@ public class TopTimesCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
 
     private final ApiClient api;
-    private final MapService maps;
-    private final PlayerService players;
     private final SessionManager sessions;
 
-    public TopTimesCommand(@NotNull ApiClient api, @NotNull MapService maps, @NotNull PlayerService players, @NotNull SessionManager sessions) {
+    public TopTimesCommand(@NotNull ApiClient api, @NotNull SessionManager sessions) {
         super("toptimes", "tt", "leaderboard", "lb");
         this.api = api;
-        this.maps = maps;
-        this.players = players;
         this.sessions = sessions;
 
         category = CommandCategories.MAP;
         description = "Shows the top leaderboard positions for a map";
 
-        mapArg = CoreArgument.Map("map", maps).description("The map to check the leaderboard of");
+        mapArg = CoreArgument.Map("map", api.maps).description("The map to check the leaderboard of");
 
         addSyntax(playerOnly(this::showTopTimes));
         addSyntax(playerOnly(this::showTopTimes), mapArg);
@@ -58,18 +50,7 @@ public class TopTimesCommand extends CommandDsl {
                 return;
             }
         } else {
-            try {
-                map = OpUtils.or(
-                    MiscFunctionality.getCurrentMap(sessions, maps, player),
-                    () -> OpUtils.map(
-                        MapPlayerData.fromPlayer(player).lastPlayedMap(),
-                        id -> maps.getMap(PlayerData.fromPlayer(player).id(), id)
-                    )
-                );
-            } catch (MapService.NotFoundError _) {
-                map = null;
-            }
-
+            map = MiscFunctionality.getCurrentMap(sessions, api.maps, player);
             if (map == null) {
                 player.sendMessage(NO_MAP_PLAYED);
                 return;
@@ -80,10 +61,9 @@ public class TopTimesCommand extends CommandDsl {
             player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id())));
         } else {
             var playerData = PlayerData.fromPlayer(player);
-            var leaderboard = maps.getPlaytimeLeaderboard(map.id(), playerData.id());
+            var leaderboard = api.maps.getMapLeaderboard(map.id(), playerData.id());
 
-            // TODO: we have to fetch the map from v4 api to get the leaderboard config, should port everything here to new api.
-            var lbFormat = api.maps.get(map.id()).settings().leaderboard().format();
+            var lbFormat = map.settings().leaderboard().format();
             var messages = leaderboard.toComponents(api.players, lbFormat, false);
 
             if (messages == null) {

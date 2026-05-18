@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.hub;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.ProxySupport;
@@ -18,11 +18,11 @@ import org.slf4j.LoggerFactory;
 public class HubServerBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(HubServerBridge.class);
 
-    private final MapService mapService;
+    private final ApiClient api;
     private final SessionService sessionService;
 
-    public HubServerBridge(MapService mapService, SessionService sessionService) {
-        this.mapService = mapService;
+    public HubServerBridge(ApiClient api, SessionService sessionService) {
+        this.api = api;
         this.sessionService = sessionService;
     }
 
@@ -34,7 +34,7 @@ public class HubServerBridge implements ServerBridge {
         }
 
         var playerId = player.getUuid().toString();
-        var map = mapService.getMap(playerId, joinConfig.mapId());
+        var map = api.maps.get(joinConfig.mapId());
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {

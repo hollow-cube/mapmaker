@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command.punish;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.kyori.adventure.text.Component;
@@ -26,14 +26,14 @@ public class UnbanCommand extends CommandDsl {
 
     public UnbanCommand(
         @NotNull PunishmentService punishmentService,
-        @NotNull PlayerService playerService
+        @NotNull PlayerClient players
     ) {
         super("unban");
         this.punishmentService = punishmentService;
 
         category = CommandCategories.STAFF;
         description = "Unban a player from the server";
-        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService)
+        this.targetArgument = CoreArgument.AnyPlayerId("target", players)
             .description("The player to unban");
 
         setCondition(staffPerm(Permission.GENERIC_STAFF));

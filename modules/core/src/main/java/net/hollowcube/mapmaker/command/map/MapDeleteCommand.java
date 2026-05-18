@@ -4,11 +4,11 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapPlayerData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -23,16 +23,16 @@ public class MapDeleteCommand extends CommandDsl {
     private final Argument<String> reasonArg = Argument.GreedyString("reason")
         .description("The reason for deleting the map");
 
-    private final MapService mapService;
+    private final MapClient maps;
 
-    public MapDeleteCommand(@NotNull MapService mapService) {
+    public MapDeleteCommand(@NotNull MapClient maps) {
         super("delete");
-        this.mapService = mapService;
+        this.maps = maps;
 
         description = "Deletes a published map";
         examples = List.of("/map delete 123-456-789", "/map delete a12345bc-67de-8f91-ghij-2345k6l78912");
 
-        mapArg = CoreArgument.Map("map", mapService)
+        mapArg = CoreArgument.Map("map", maps)
             .description("The ID of the map to delete");
 
         setCondition(staffPerm(Permission.GENERIC_STAFF));
@@ -53,8 +53,8 @@ public class MapDeleteCommand extends CommandDsl {
             return;
         }
         try {
-            var playerData = MapPlayerData.fromPlayer(player);
-            mapService.deleteMap(playerData.id(), map.id(), reason);
+            var playerData = PlayerData.fromPlayer(player);
+            maps.delete(playerData.id(), map.id(), reason);
             player.sendMessage("deleted map " + map.id());
         } catch (Exception e) {
             player.sendMessage("failed to delete map");

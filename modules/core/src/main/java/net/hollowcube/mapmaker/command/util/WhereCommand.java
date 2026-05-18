@@ -3,10 +3,9 @@ package net.hollowcube.mapmaker.command.util;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -18,19 +17,13 @@ import java.util.Objects;
 public class WhereCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
+    private final ApiClient api;
     private final SessionManager sessionManager;
-    private final PlayerService playerService;
-    private final MapService mapService;
 
-    public WhereCommand(
-        @NotNull SessionManager sessionManager,
-        @NotNull PlayerService playerService,
-        @NotNull MapService mapService
-    ) {
+    public WhereCommand(@NotNull ApiClient api, @NotNull SessionManager sessionManager) {
         super("where", "find");
+        this.api = api;
         this.sessionManager = sessionManager;
-        this.playerService = playerService;
-        this.mapService = mapService;
 
         this.description = "Shows where someone is on the server";
         this.category = CommandCategories.SOCIAL;
@@ -61,7 +54,7 @@ public class WhereCommand extends CommandDsl {
             switch (presence.type()) {
                 case Presence.TYPE_MAPMAKER_HUB -> player.sendMessage(Component.translatable("command.where.self.hub"));
                 case Presence.TYPE_MAPMAKER_MAP -> {
-                    var map = mapService.getMap(senderId, presence.mapId());
+                    var map = api.maps.get(presence.mapId());
                     if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                         player.sendMessage(Component.translatable("command.where.self.building", Component.text(map.name())));
                     } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
@@ -75,7 +68,7 @@ public class WhereCommand extends CommandDsl {
             return;
         }
 
-        var targetName = playerService.getPlayerDisplayName2(target).build();
+        var targetName = api.players.getDisplayName(target).build();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
                 player.sendMessage(Component.translatable("command.where.hub", targetName));
@@ -86,7 +79,7 @@ public class WhereCommand extends CommandDsl {
                     return;
                 }
 
-                var map = mapService.getMap(senderId, presence.mapId());
+                var map = api.maps.get(presence.mapId());
                 if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
                     player.sendMessage(Component.translatable("command.where.building", targetName, Component.text(target), Component.text(map.name())));
                 } else if (Presence.VERIFYING_STATE.equals(presence.state())) {

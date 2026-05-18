@@ -4,7 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
@@ -24,11 +24,11 @@ import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
 public class MapIsolateBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateBridge.class);
 
-    private final MapService mapService;
+    private final ApiClient api;
     private final SessionService sessionService;
 
-    public MapIsolateBridge(MapService mapService, SessionService sessionService) {
-        this.mapService = mapService;
+    public MapIsolateBridge(ApiClient api, SessionService sessionService) {
+        this.api = api;
         this.sessionService = sessionService;
     }
 
@@ -41,7 +41,7 @@ public class MapIsolateBridge implements ServerBridge {
 
         try {
             var playerId = player.getUuid().toString();
-            var map = mapService.getMap(playerId, joinConfig.mapId());
+            var map = api.maps.get(joinConfig.mapId());
 
             var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
             if (playerProtocolVersion < map.protocolVersion()) {

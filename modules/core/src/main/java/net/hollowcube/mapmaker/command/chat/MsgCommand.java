@@ -2,11 +2,10 @@ package net.hollowcube.mapmaker.command.chat;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.BlockedPlayer;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -22,7 +21,7 @@ public class MsgCommand extends AbstractChatCommand {
 
     private final @NotNull PlayerService playerService;
 
-    public MsgCommand(@NotNull SessionManager sessions, @NotNull MapService maps, @NotNull ChatMessageListener messages, @NotNull PlayerService playerService) {
+    public MsgCommand(@NotNull SessionManager sessions, @NotNull MapClient maps, @NotNull ChatMessageListener messages, @NotNull PlayerService playerService) {
         super(sessions, maps, messages, "msg");
 
         this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessions)

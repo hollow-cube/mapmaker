@@ -43,7 +43,7 @@ public class MapServerBridge implements ServerBridge {
             var playerId = player.getUuid().toString();
             logger.debug("trying to join map {} with state {} for {}", joinConfig.mapId(), joinConfig.joinMapState(), playerId);
 
-            var map = server.mapService().getMap(playerId, joinConfig.mapId());
+            var map = server.api().maps.get(joinConfig.mapId());
 
             var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
             if (playerProtocolVersion < map.protocolVersion()) {

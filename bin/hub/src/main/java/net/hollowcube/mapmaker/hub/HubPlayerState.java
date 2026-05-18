@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
@@ -49,8 +48,6 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
 
             world.itemRegistry().setItemStack(player, PlayMapsItem.ID, 0);
             world.itemRegistry().setItemStack(player, CreateMapsItem.ID, 1);
-            if (CoreFeatureFlags.ORGANIZATIONS.test(player))
-                world.itemRegistry().setItemStack(player, OrgMapsItem.ID, 2);
             world.itemRegistry().setItemStack(player, OpenNotificationsItem.ID, 4);
             if (HubTime.Christmas.isActive())
                 world.itemRegistry().setItemStack(player, AdventCalendarItem.ID, 5);

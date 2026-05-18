@@ -4,44 +4,15 @@ import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.player.*;
-import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
-import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 public class NoopPlayerService implements PlayerService {
-    @Override
-    public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
-        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
-        if (player != null) {
-            return PlayerData.fromPlayer(player).displayName2();
-        }
-
-        if (id.equals("597481a0-02fb-441c-9188-c407bec05084"))
-            return new DisplayName(List.of(new DisplayName.Part("username", "TestPlayer", null)));
-
-        return new DisplayName(List.of(new DisplayName.Part("username", "Unknown", null)));
-    }
-
-    @Override
-    public @NotNull String getPlayerId(@NotNull String idOrUsername) {
-        if (idOrUsername.equals("TestPlayer")) {
-            return "597481a0-02fb-441c-9188-c407bec05084";
-        }
-
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull PlayerData getPlayerData(@NotNull String id) {
-        throw new UnsupportedOperationException();
-    }
 
     @Override
     public void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update) {
@@ -64,14 +35,6 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
-        return new TabCompleteResponse(MinecraftServer.getConnectionManager().getOnlinePlayers().stream()
-            .map(p -> new TabCompleteResponse.Entry(p.getUuid().toString(),
-                p.getUsername()))
-            .toList());
     }
 
     @Override
@@ -98,11 +61,6 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId) {
-        return List.of();
     }
 
     @Override

@@ -1,9 +1,8 @@
 package net.hollowcube.mapmaker.to_be_refactored;
 
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.PlayerSession;
-import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
@@ -23,20 +22,18 @@ public class SyntheticTabListManager {
             PlayerInfoUpdatePacket.Action.UPDATE_LIST_ORDER
     );
 
-    private final SessionManager sessionManager;
-    private final PlayerService playerService;
+    private final PlayerClient players;
 
     private final Map<String, PlayerInfoUpdatePacket.Entry> listedPlayers = new ConcurrentHashMap<>();
 
-    public SyntheticTabListManager(@NotNull SessionManager sessionManager, @NotNull PlayerService playerService) {
-        this.sessionManager = sessionManager;
-        this.playerService = playerService;
+    public SyntheticTabListManager(@NotNull PlayerClient players) {
+        this.players = players;
     }
 
     public void addSession(@NotNull PlayerSession session) {
         List<PlayerInfoUpdatePacket.Property> properties = session.skin().texture() == null ? List.of()
                 : List.of(new PlayerInfoUpdatePacket.Property("textures", session.skin().texture(), session.skin().signature()));
-        var displayName = playerService.getPlayerDisplayName2(session.playerId());
+        var displayName = players.getDisplayName(session.playerId());
         var username = Objects.requireNonNullElse(displayName.getUsername(), "Unknown");
         var playerListEntry = new PlayerInfoUpdatePacket.Entry(
                 getListUuid(session.playerId()), username, properties,

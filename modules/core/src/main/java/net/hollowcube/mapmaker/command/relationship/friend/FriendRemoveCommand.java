@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.command.relationship.friend;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -14,13 +15,15 @@ import org.jetbrains.annotations.Nullable;
 public class FriendRemoveCommand extends CommandDsl {
     private final Argument<@Nullable PlayerData> targetArg;
 
+    private final PlayerClient players;
     private final PlayerService playerService;
 
-    public FriendRemoveCommand(@NotNull PlayerService playerService) {
+    public FriendRemoveCommand(@NotNull PlayerClient players, @NotNull PlayerService playerService) {
         super("remove");
+        this.players = players;
         this.playerService = playerService;
 
-        this.targetArg = CoreArgument.AnyPlayerData("target", playerService)
+        this.targetArg = CoreArgument.AnyPlayerData("target", players)
             .description("The friend to remove");
 
         this.addSyntax(playerOnly(this::exec), this.targetArg);
@@ -34,7 +37,7 @@ public class FriendRemoveCommand extends CommandDsl {
             return;
         }
 
-        Component targetDisplayName = playerService.getPlayerDisplayName2(targetData.id()).build();
+        var targetDisplayName = players.getDisplayName(targetData.id()).build();
 
         try {
             this.playerService.removeFriend(player.getUuid().toString(), targetData.id());

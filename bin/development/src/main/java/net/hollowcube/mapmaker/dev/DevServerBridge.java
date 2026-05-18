@@ -27,7 +27,7 @@ public final class DevServerBridge implements ServerBridge {
     public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
         FutureUtil.assertThread();
         var playerId = PlayerData.fromPlayer(player).id();
-        var map = server.mapService().getMap(playerId, joinConfig.mapId());
+        var map = server.api().maps.get(joinConfig.mapId());
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {

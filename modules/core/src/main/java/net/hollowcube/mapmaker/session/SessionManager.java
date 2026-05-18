@@ -7,6 +7,7 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.to_be_refactored.SyntheticTabListManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
@@ -45,6 +46,7 @@ public class SessionManager {
 
     private final SessionService sessionService;
     private final PlayerService playerService;
+    private final PlayerClient players;
 
     private final Map<String, PlayerSession> sessions = new ConcurrentHashMap<>(); // All sessions, including local ones
     private final SyntheticTabListManager syntheticTab;
@@ -54,13 +56,15 @@ public class SessionManager {
     public SessionManager(
         @NotNull SessionService sessionService,
         @NotNull PlayerService playerService,
+        @NotNull PlayerClient players,
         @NotNull JetStreamWrapper jetStream
     ) {
         instance = this;
         this.sessionService = sessionService;
         this.playerService = playerService;
+        this.players = players;
 
-        this.syntheticTab = new SyntheticTabListManager(this, playerService);
+        this.syntheticTab = new SyntheticTabListManager(players);
         MinecraftServer.getGlobalEventHandler()
             .addListener(PlayerSpawnEvent.class, this::handlePlayerSpawn);
 
@@ -218,7 +222,7 @@ public class SessionManager {
     private void broadcastJoinMessage(@NotNull String playerId) {
         List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
             .stream().map(PlayerFriend::playerId).toList();
-        var displayName = this.playerService.getPlayerDisplayName2(playerId);
+        var displayName = players.getDisplayName(playerId);
 
         if (showJoinLeaveMessage(displayName)) {
             // only send to non-friends
@@ -233,7 +237,7 @@ public class SessionManager {
     private void broadcastLeaveMessage(@NotNull String playerId) {
         List<String> friends = this.playerService.getPlayerFriends(playerId, true, new PlayerService.Pageable(1, 10_000)).items()
             .stream().map(PlayerFriend::playerId).toList();
-        var displayName = this.playerService.getPlayerDisplayName2(playerId);
+        var displayName = players.getDisplayName(playerId);
 
         if (showJoinLeaveMessage(displayName)) {
             // only send to non-friends

@@ -17,15 +17,16 @@ public class SaveState {
     private long playtime;
     private long ticks;
     private transient long playStartTime;
-    int dataVersion;
+    public int dataVersion;
     private int protocolVersion;
 
     private Double startLatency;
     private Double endLatency;
     private Double score;
 
-    SaveStateType.Serializer<?> serializer;
-    Object state;
+    // TODO: nothing here should be public in future.
+    public SaveStateType.Serializer<?> serializer;
+    public Object state;
 
     public SaveState() {
     }

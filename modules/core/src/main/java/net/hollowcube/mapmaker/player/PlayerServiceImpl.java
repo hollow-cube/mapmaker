@@ -6,12 +6,10 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.prometheus.client.Summary;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResponse;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,7 +20,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class PlayerServiceImpl extends AbstractHttpService implements PlayerService {
     private static final Summary remoteFetchDisplayNameTime = Summary.build()
@@ -98,60 +95,6 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
         var res = doRequest("buyUpgrade", req, HttpResponse.BodyHandlers.ofString());
         if (res.statusCode() != 200)
             throw new SessionService.InternalError("Failed to buy upgrade (" + res.statusCode() + "): " + res.body());
-    }
-
-    @Override
-    public @NotNull String getPlayerId(@NotNull String idOrUsername) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/" + idOrUsername + "/id"));
-        var res = doRequest("getPlayerId", req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> res.body();
-            case 404 -> throw new NotFoundError();
-            default -> throw new SessionService.InternalError(
-                "Failed to get player id (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull PlayerData getPlayerData(@NotNull String id) {
-        var req = HttpRequest.newBuilder()
-            .uri(URI.create(url + "/players/" + id));
-        var res = doRequest("getPlayerData", req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), PlayerData.class);
-            case 404 -> throw new NotFoundError();
-            default -> throw new SessionService.InternalError(
-                "Failed to get player data (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
-    public @NotNull DisplayName getPlayerDisplayName2(@NotNull String id) {
-        // If the player is online we have an up-to-date display name anyway
-        var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(id));
-        if (player != null) {
-            return PlayerData.fromPlayer(player).displayName2();
-        }
-
-        //todo probably should have some basic cache here
-
-        try (var $ = remoteFetchDisplayNameTime.startTimer()) {
-            var req = HttpRequest.newBuilder()
-                .uri(URI.create(url + "/players/" + id + "/displayname?v=2"));
-            var res = doRequest("getPlayerDisplayName2", req, HttpResponse.BodyHandlers.ofString());
-            return switch (res.statusCode()) {
-                case 200 -> GSON.fromJson(res.body(), DisplayName.class);
-                case 404 -> new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
-                default -> throw new SessionService.InternalError(
-                    "Failed to get player display name (" + res.statusCode() + "): " + res.body());
-            };
-        }
-    }
-
-    @Override
-    public @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit) {
-        return this.getTabCompletions(TabCompleteBody.forUsernames(query, limit));
     }
 
     // This is designed so other tab completions could be added in future if wanted
@@ -263,19 +206,6 @@ public class PlayerServiceImpl extends AbstractHttpService implements PlayerServ
             case 409 -> TotpResult.ALREADY_ENABLED;
             default -> throw new InternalError(
                 "Failed to complete totp setup: (" + response.statusCode() + "): " + response.body());
-        };
-    }
-
-    @Override
-    public @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId) {
-        var req = HttpRequest.newBuilder().uri(URI.create(url + "/players/" + playerId + "/alts")).GET();
-        var res = doRequest("getAlts", req, HttpResponse.BodyHandlers.ofString());
-
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), PlayerAlts.class).results();
-            case 404 -> List.of();
-            default ->
-                throw new SessionService.InternalError("Failed to get alts (" + res.statusCode() + "): " + res.body());
         };
     }
 

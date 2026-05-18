@@ -2,11 +2,13 @@ package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.LockedButton;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 
 import java.util.function.Consumer;
@@ -17,14 +19,16 @@ import static net.hollowcube.mapmaker.panels.RadioSelect.ButtonUpdater.SQUARE_BA
 public class NewMapView extends Panel {
 
     private final MapClient maps;
+    private final PlayerService playerService;
     private final Consumer<MapData> onNewMap;
 
     private final RadioSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
-    public NewMapView(MapClient maps, Consumer<MapData> onNewMap) {
+    public NewMapView(MapClient maps, PlayerService playerService, Consumer<MapData> onNewMap) {
         super(9, 10);
         this.maps = maps;
+        this.playerService = playerService;
         this.onNewMap = onNewMap;
 
         background("create_maps2/new/container", -10, -31);
@@ -68,9 +72,10 @@ public class NewMapView extends Panel {
             };
 
             if (locked) {
-                var button = makeButton.construct(null, 1, 1);
+                var button = makeButton.construct(null, 1, 1)
+                    .onLeftClick(this::handleOpenStore);
                 updateButton.update(button, false);
-                sizeSelect.add(sizeSelect.index++, 0, button); //TODO open purchase page on left click
+                sizeSelect.add(sizeSelect.index++, 0, button);
             } else {
                 sizeSelect.addOption(mapSize, updateButton, makeButton);
             }
@@ -85,6 +90,10 @@ public class NewMapView extends Panel {
             onNewMap.accept(map);
             if (host.canPopView()) host.popView();
         });
+    }
+
+    private void handleOpenStore() {
+        host.pushView(new StoreView(playerService, StoreView.TAB_ADDONS));
     }
 
     private void updateConfirmButton(MapSize size) {

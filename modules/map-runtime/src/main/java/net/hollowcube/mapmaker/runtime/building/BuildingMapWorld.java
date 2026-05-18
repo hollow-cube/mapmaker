@@ -37,7 +37,7 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
     @Override
     protected BuildingState configurePlayer(Player player) {
         if (RateMapItem.isMapRatable(this)) {
-            RateMapItem.initLastRating(server().mapService(), player, map());
+            RateMapItem.initLastRating(server().api().maps, player, map());
         }
 
         player.setRespawnPoint(map().settings().getSpawnPoint());
@@ -55,6 +55,6 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
 
     @Override
     protected @Nullable List<BossBar> createBossBars() {
-        return BossBars.createPlayingBossBar(server().playerService(), map());
+        return BossBars.createPlayingBossBar(server().api().players, map());
     }
 }
