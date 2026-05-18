@@ -7,7 +7,10 @@ import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
-import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
@@ -22,7 +25,6 @@ import net.minestom.server.event.player.PlayerMoveEvent;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.nio.channels.Channels;
 import java.util.Objects;
 import java.util.Random;
@@ -63,12 +65,14 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
 
         // Load scripting engine
         if (ServerRuntime.getRuntime().isDevelopment()) {
-            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
-            var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-            this.scriptContext = new WorldScriptContext(this, baseUrl, false);
+//            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
+//            var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
+//            this.scriptContext = new WorldScriptContext(this, baseUrl, false);
+            this.scriptContext = null;
         } else {
-            var zipUrl = Objects.requireNonNull(HubMapWorld.class.getResource("/net.hollowcube.scripting/hub.zip"));
-            this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
+//            var zipUrl = Objects.requireNonNull(HubMapWorld.class.getResource("/net.hollowcube.scripting/hub.zip"));
+//            this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
+            this.scriptContext = null;
         }
     }
 
@@ -115,14 +119,14 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     public void spawnPlayer(Player player) {
         super.spawnPlayer(player);
 
-        scriptContext.initializePlayer((MapPlayer) player);
+//        scriptContext.initializePlayer((MapPlayer) player);
     }
 
     @Override
     public void removePlayer(Player player) {
         super.removePlayer(player);
 
-        scriptContext.destroyPlayer((MapPlayer) player);
+//        scriptContext.destroyPlayer((MapPlayer) player);
     }
 
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {

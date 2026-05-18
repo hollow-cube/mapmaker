@@ -5,7 +5,7 @@ import net.hollowcube.luau.LuaType;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.Disposable;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
@@ -126,12 +126,12 @@ public final class LibTask {
         state.checkType(1, LuaType.THREAD);
         var thread = Objects.requireNonNull(state.toThread(1)); // checked above
 
-        var context = ScriptContext.get(thread);
+        var context = LegacyScriptContext.get(thread);
         var task = context.getTag(TaskRef.ACTIVE_TASK);
-        if (task == null || task.isDisposed()) {
-            state.pushBoolean(false);
-            return 1;
-        }
+//        if (task == null || task.isDisposed()) {
+//            state.pushBoolean(false);
+//            return 1;
+//        }
 
         task.dispose();
         state.pushBoolean(true);
@@ -158,7 +158,7 @@ public final class LibTask {
     /// Thread is expected to be on the stack at -1, it will remain after the call.
     private static void scheduleLater(LuaState state, int ticks, int[] argRefs) {
         int ref = state.ref(-1);
-        var context = ScriptContext.get(state);
+        var context = LegacyScriptContext.get(state);
         var disposable = new TaskRef();
         disposable.state = state;
         disposable.threadRef = ref;
@@ -208,9 +208,9 @@ public final class LibTask {
             }
         }
 
-        @Override
-        public boolean isDisposed() {
-            return !task.isAlive();
-        }
+//        @Override
+//        public boolean isDisposed() {
+//            return !task.isAlive();
+//        }
     }
 }

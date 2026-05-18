@@ -3,12 +3,9 @@ package net.hollowcube.mapmaker.scripting.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaProperty;
-import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.event.MapPlayerJoinEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerLeaveEvent;
 import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
-import net.minestom.server.entity.PlayerHand;
-import net.minestom.server.event.player.PlayerBlockInteractEvent;
 
 import static net.hollowcube.mapmaker.scripting.api.LibPlayer.pushPlayer;
 
@@ -71,20 +68,20 @@ public final class LibPlayers {
 
     /// Fires when a player right-clicks a block. Receives the player and the block position.
     /// @luaReturn @mapmaker.EventSource<@mapmaker/player.Player, vector>
-    @LuaProperty
-    public static int getOnBlockInteract(LuaState state) {
-        class Impl {
-            static int pushArgs(LuaState state, PlayerBlockInteractEvent event) {
-                if (!(event.getPlayer() instanceof MapPlayer mp) || event.getHand() != PlayerHand.MAIN) return -1;
-
-                pushPlayer(state, mp);
-                LuaVector.push(state, event.getBlockPosition());
-                return 2;
-            }
-        }
-
-        LibBase.pushEventSource(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
-        return 1;
-    }
+//    @LuaProperty
+//    public static int getOnBlockInteract(LuaState state) {
+//        class Impl {
+//            static int pushArgs(LuaState state, PlayerBlockInteractEvent event) {
+//                if (!(event.getPlayer() instanceof MapPlayer mp) || event.getHand() != PlayerHand.MAIN) return -1;
+//
+//                pushPlayer(state, mp);
+//                LuaVector.push(state, event.getBlockPosition());
+//                return 2;
+//            }
+//        }
+//
+//        LibBase.pushEventSource(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
+//        return 1;
+//    }
 
 }

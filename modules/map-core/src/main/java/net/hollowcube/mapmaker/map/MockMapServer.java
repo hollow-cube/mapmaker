@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 
@@ -23,6 +24,7 @@ public class MockMapServer implements MapServer {
     public ServerBridge bridge;
     public Scheduler scheduler;
     public CommandManager commandManager;
+    public JetStreamWrapper jetStream;
 
     @Override
     public @NotNull ApiClient api() {
@@ -67,6 +69,11 @@ public class MockMapServer implements MapServer {
     @Override
     public @NotNull Scheduler scheduler() {
         return Objects.requireNonNull(scheduler, "Scheduler is not initialized");
+    }
+
+    @Override
+    public @NotNull JetStreamWrapper jetStream() {
+        return Objects.requireNonNull(jetStream, "JetStreamWrapper is not initialized");
     }
 
 }

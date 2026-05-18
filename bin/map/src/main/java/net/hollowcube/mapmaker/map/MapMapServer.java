@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.editor.command.*;
 import net.hollowcube.mapmaker.editor.command.navigation.*;
 import net.hollowcube.mapmaker.editor.command.utility.*;
 import net.hollowcube.mapmaker.editor.hdb.command.HdbCommand;
+import net.hollowcube.mapmaker.editor.scripting.ScriptCommand;
 import net.hollowcube.mapmaker.editor.terraform.MapServerModule;
 import net.hollowcube.mapmaker.map.block.InteractionRules;
 import net.hollowcube.mapmaker.map.block.PlacementRules;
@@ -164,6 +165,8 @@ public class MapMapServer extends AbstractMultiMapServer {
         commandManager.register(new AddMarkerCommand());
         commandManager.register(new AddInteractionCommand());
         commandManager.register(new EntitiesCommand());
+
+        commandManager.register(new ScriptCommand());
 
         // Need to update the condition of some commands to allow during build mode.
         var fly = commandManager.xpath("fly");

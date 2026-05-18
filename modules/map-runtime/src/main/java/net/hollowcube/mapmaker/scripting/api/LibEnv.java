@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.scripting.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaProperty;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
 
 /// Information about the script's environment.
 @LuaLibrary(name = "@mapmaker/env")
@@ -15,8 +15,8 @@ public final class LibEnv {
     /// @luaReturn @mapmaker/player.Player
     @LuaProperty
     public static int getPlayer(LuaState state) {
-        var context = ScriptContext.get(state);
-        if (!(context instanceof ScriptContext.Player playerContext))
+        var context = LegacyScriptContext.get(state);
+        if (!(context instanceof LegacyScriptContext.Player playerContext))
             throw state.error("environment player is only available in player-bound scripts");
 
         LibPlayer.pushPlayer(state, playerContext.player());
@@ -28,8 +28,8 @@ public final class LibEnv {
     /// @luaReturn @mapmaker/world.World
     @LuaProperty
     public static int getWorld(LuaState state) {
-        var context = ScriptContext.get(state);
-        if (!(context instanceof ScriptContext.World worldContext))
+        var context = LegacyScriptContext.get(state);
+        if (!(context instanceof LegacyScriptContext.World worldContext))
             throw state.error("environment player is only available in player-bound scripts");
 
 //        LibWorld.pushWorld(state, worldContext.world());

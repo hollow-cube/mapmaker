@@ -276,13 +276,9 @@ public class LanguageProviderV2 {
                 // first walk the tree
                 visitModifying(modTransformation, tagNode, 0);
                 modTransformation.postVisit();
-            }
-
-            if (tag instanceof InsertingWithArgs insertingTag) {
+            } else if (tag instanceof InsertingWithArgs insertingTag) {
                 comp = insertingTag.value(args);
-            }
-
-            if (tag instanceof PlaceholderTag placeholderTag) {
+            } else if (tag instanceof PlaceholderTag placeholderTag) {
                 if (placeholderTag.index >= args.size()) {
                     comp = Component.text("$$" + placeholderTag.index);
                 } else {
@@ -306,8 +302,7 @@ public class LanguageProviderV2 {
                         if (number != null) comp = Component.text(placeholderTag.formatter.format(number));
                     }
                 }
-            }
-            if (tag instanceof Inserting insertingTag) {
+            } else if (tag instanceof Inserting insertingTag) {
                 comp = insertingTag.value();
             }
         }

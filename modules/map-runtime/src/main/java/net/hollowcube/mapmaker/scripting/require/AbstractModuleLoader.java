@@ -4,6 +4,7 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaStatus;
 import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.require.RequireResolver;
+import net.hollowcube.mapmaker.scripting.ScriptFrame;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
@@ -29,6 +30,26 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
 
     /// Implementations should return the luau bytecode for the file at the given path.
     protected abstract byte[] readAndParseFile(String loadName) throws IOException, LuauCompileException;
+
+    /// Public accessor used to load the *entry* script directly (it is not reached
+    /// via require, so it never goes through [#load]).
+    public byte[] readEntry(String loadName) throws IOException, LuauCompileException {
+        return readAndParseFile(loadName);
+    }
+
+    /// Called whenever {@code requiredBy} successfully resolves {@code required}.
+    /// Loaders that support hot reload override this to maintain a dependency
+    /// graph for transitive invalidation. Both names are normalized (no leading
+    /// {@code @}).
+    protected void onResolved(String requiredBy, String required) {
+    }
+
+    /// Strip the leading {@code @} alias marker luau uses for chunk names so that
+    /// scope keys and dependency-graph keys are stable.
+    protected static String normChunk(String chunkName) {
+        if (chunkName == null) return "/";
+        return chunkName.startsWith("@") ? chunkName.substring(1) : chunkName;
+    }
 
     @Override
     public void close() throws IOException {
@@ -108,6 +129,18 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
 
             // new thread needs to have the globals sandboxed
             thread.sandboxThread();
+
+            // Thread-data threading + ownership: a required module runs in its own
+            // scope so a reload of that module only tears down what *it* created.
+            // The dependency edge (requirer -> this module) feeds transitive
+            // invalidation on reload.
+            var moduleChunk = normChunk(chunkName);
+            if (state.getThreadData() instanceof ScriptFrame parentFrame) {
+                onResolved(parentFrame.scope().chunk(), moduleChunk);
+                thread.setThreadData(new ScriptFrame(
+                    parentFrame.owner(),
+                    parentFrame.owner().scope(moduleChunk)));
+            }
 
             byte[] bytecode;
             try {

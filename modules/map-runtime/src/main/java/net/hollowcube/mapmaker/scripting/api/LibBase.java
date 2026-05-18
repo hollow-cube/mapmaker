@@ -6,7 +6,7 @@ import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.Disposable;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.ScriptFrame;
 import net.hollowcube.mapmaker.scripting.api.LibBase.EventSource.EventPusher;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
 import net.minestom.server.event.Event;
@@ -67,9 +67,12 @@ public final class LibBase {
             handle.threadRef = state.ref(-1);
             state.pop(1);
 
-            var context = ScriptContext.get(state);
-            context.eventNode().addListener(handle);
-            context.track(handle);
+            var frame = ScriptFrame.current(state);
+            frame.owner().world().eventNode().addListener((EventListener) handle);
+            ScriptFrame.track(state, handle);
+//            var context = ScriptContext.get(state);
+//            context.eventNode().addListener(handle);
+//            context.track(handle);
 
             // TODO: return handle to cancel
             return 0;
@@ -78,28 +81,28 @@ public final class LibBase {
         /// Calls `handler` the next time this event fires, then unsubscribes.
         ///
         /// @luaParam handler (A...) -> () - the function to run on the next event
-        @LuaMethod
-        public int once(LuaState state) {
-            state.checkType(1, LuaType.FUNCTION);
-
-            EventHandle handle = new EventHandle();
-            handle.eventType = this.eventClass;
-            handle.pusher = this.pusher;
-            handle.state = state;
-            handle.handlerRef = state.ref(1);
-            handle.singleShot = true;
-
-            state.pushThread(state);
-            handle.threadRef = state.ref(-1);
-            state.pop(1);
-
-            var context = ScriptContext.get(state);
-            context.eventNode().addListener(handle);
-            context.track(handle);
-
-            // TODO: return handle to cancel
-            return 0;
-        }
+//        @LuaMethod
+//        public int once(LuaState state) {
+//            state.checkType(1, LuaType.FUNCTION);
+//
+//            EventHandle handle = new EventHandle();
+//            handle.eventType = this.eventClass;
+//            handle.pusher = this.pusher;
+//            handle.state = state;
+//            handle.handlerRef = state.ref(1);
+//            handle.singleShot = true;
+//
+//            state.pushThread(state);
+//            handle.threadRef = state.ref(-1);
+//            state.pop(1);
+//
+//            var context = LegacyScriptContext.get(state);
+//            context.eventNode().addListener(handle);
+//            context.track(handle);
+//
+//            // TODO: return handle to cancel
+//            return 0;
+//        }
 
         /// Pauses the calling thread until the next time this event fires, then resumes
         /// with the event's arguments.
@@ -110,25 +113,25 @@ public final class LibBase {
         /// ```
         ///
         /// @luaReturn A...
-        @LuaMethod
-        public int wait(LuaState state) {
-            EventHandle handle = new EventHandle();
-            handle.eventType = this.eventClass;
-            handle.pusher = this.pusher;
-            handle.state = state;
-            handle.handlerRef = -1; // Resume on trigger
-            handle.singleShot = true;
-
-            state.pushThread(state);
-            handle.threadRef = state.ref(-1);
-            state.pop(1);
-
-            var context = ScriptContext.get(state);
-            context.eventNode().addListener(handle);
-            context.track(handle);
-
-            return state.yield(0);
-        }
+//        @LuaMethod
+//        public int wait(LuaState state) {
+//            EventHandle handle = new EventHandle();
+//            handle.eventType = this.eventClass;
+//            handle.pusher = this.pusher;
+//            handle.state = state;
+//            handle.handlerRef = -1; // Resume on trigger
+//            handle.singleShot = true;
+//
+//            state.pushThread(state);
+//            handle.threadRef = state.ref(-1);
+//            state.pop(1);
+//
+//            var context = LegacyScriptContext.get(state);
+//            context.eventNode().addListener(handle);
+//            context.track(handle);
+//
+//            return state.yield(0);
+//        }
 
         @SuppressWarnings("NotNullFieldNotInitialized")
         private static final class EventHandle implements EventListener<Event>, Disposable {
@@ -182,20 +185,20 @@ public final class LibBase {
                 state.unref(handlerRef);
             }
 
-            @Override
-            public boolean isDisposed() {
-                return expired;
-            }
-
-            @Override
-            public String chunkName() {
-                return chunkName;
-            }
-
-            @Override
-            public boolean disposeOnReload() {
-                return true;
-            }
+//            @Override
+//            public boolean isDisposed() {
+//                return expired;
+//            }
+//
+//            @Override
+//            public String chunkName() {
+//                return chunkName;
+//            }
+//
+//            @Override
+//            public boolean disposeOnReload() {
+//                return true;
+//            }
         }
     }
 

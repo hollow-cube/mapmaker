@@ -5,7 +5,7 @@ import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -72,7 +72,7 @@ public final class LibItem {
         /// @luaReturn string
         @LuaProperty
         public int getId(LuaState state) {
-            var itemRegistry = ScriptContext.get(state).world().itemRegistry();
+            var itemRegistry = LegacyScriptContext.get(state).world().itemRegistry();
             var itemId = Objects.requireNonNullElse(itemRegistry.getItemId(value), value.material().name());
             state.pushString(itemId);
             return 1;

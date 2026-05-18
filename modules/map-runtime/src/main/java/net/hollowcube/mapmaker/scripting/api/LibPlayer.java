@@ -11,7 +11,7 @@ import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.scripting.Disposable;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
@@ -107,7 +107,7 @@ public final class LibPlayer {
         public int getSidebar(LuaState state) {
             if (sidebar == null) {
                 sidebar = new Sidebar(this);
-                ScriptContext.get(state).track(sidebar);
+                LegacyScriptContext.get(state).track(sidebar);
             }
             LibPlayer$luau.pushSidebar(state, sidebar);
             return 1;
@@ -482,16 +482,17 @@ public final class LibPlayer {
 
             entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));
             entity.addViewer(player);
-            ScriptContext.get(state).track(new Disposable() {
+            LegacyScriptContext.get(state).track(new Disposable() {
                 @Override
                 public void dispose() {
                     entity.remove();
                 }
 
-                @Override
-                public boolean isDisposed() {
-                    return entity.isRemoved();
-                }
+                // TODO disposable might self dispose.
+//                @Override
+//                public boolean isDisposed() {
+//                    return entity.isRemoved();
+//                }
             });
 
             LibEntity.pushEntity(state, luaEntity);
@@ -563,7 +564,7 @@ public final class LibPlayer {
             state.pop(1);
             updateRef = state.ref(1);
 
-            updateTask = ScriptContext.get(state).scheduler().scheduleTask(() -> {
+            updateTask = LegacyScriptContext.get(state).scheduler().scheduleTask(() -> {
                 if (this.state == null) return TaskSchedule.stop();
 
                 state.getRef(updateRef);
@@ -607,10 +608,10 @@ public final class LibPlayer {
             disposed = true;
         }
 
-        @Override
-        public boolean isDisposed() {
-            return disposed;
-        }
+//        @Override
+//        public boolean isDisposed() {
+//            return disposed;
+//        }
     }
 
     public static void pushPlayer(LuaState state, net.minestom.server.entity.Player player) {

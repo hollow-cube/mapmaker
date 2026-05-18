@@ -15,18 +15,15 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 // uses @/path as chunknames
-public class ZipRequireResolver extends AbstractModuleLoader {
-    private static final Logger logger = LoggerFactory.getLogger(ZipRequireResolver.class);
+public class BundleModuleLoader extends AbstractModuleLoader {
+    private static final Logger logger = LoggerFactory.getLogger(BundleModuleLoader.class);
 
     private final Map<String, byte[]> vfs;
 
-    public ZipRequireResolver(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
-        this.vfs = readAndCompileEntries(compiler, zip);
-    }
+    public BundleModuleLoader(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
+        // TODO: this should read compiled bytecode from the zip.
 
-    @Deprecated
-    public Map<String, byte[]> getVfsThisIsBadPleaseFix() {
-        return vfs;
+        this.vfs = readAndCompileEntries(compiler, zip);
     }
 
     @Override
