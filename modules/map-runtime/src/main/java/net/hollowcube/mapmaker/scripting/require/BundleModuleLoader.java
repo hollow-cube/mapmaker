@@ -1,13 +1,7 @@
 package net.hollowcube.mapmaker.scripting.require;
 
-import net.hollowcube.luau.compiler.LuauCompileException;
-import net.hollowcube.luau.compiler.LuauCompiler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -16,14 +10,10 @@ import java.util.zip.ZipInputStream;
 
 // uses @/path as chunknames
 public class BundleModuleLoader extends AbstractModuleLoader {
-    private static final Logger logger = LoggerFactory.getLogger(BundleModuleLoader.class);
-
     private final Map<String, byte[]> vfs;
 
-    public BundleModuleLoader(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
-        // TODO: this should read compiled bytecode from the zip.
-
-        this.vfs = readAndCompileEntries(compiler, zip);
+    public BundleModuleLoader(URI zip) throws IOException {
+        this.vfs = readEntries(zip);
     }
 
     @Override
@@ -36,7 +26,7 @@ public class BundleModuleLoader extends AbstractModuleLoader {
         return Objects.requireNonNull(vfs.get(loadName), loadName);
     }
 
-    private static Map<String, byte[]> readAndCompileEntries(LuauCompiler compiler, URI zip) throws IOException, LuauCompileException {
+    private static Map<String, byte[]> readEntries(URI zip) throws IOException {
         var vfs = new HashMap<String, byte[]>();
         try (var is = zip.toURL().openStream()) {
             if (is == null) throw new IOException("Could not open zip stream for URI: " + zip);
@@ -50,9 +40,7 @@ public class BundleModuleLoader extends AbstractModuleLoader {
                     continue;
 
                 var path = normalizePath("/" + entry.getName());
-                var content = new String(zis.readAllBytes(), StandardCharsets.UTF_8);
-                vfs.put(path, compiler.compile(content));
-                logger.info("compiled script {} ({} bytes)", path, content.length());
+                vfs.put(path, zis.readAllBytes());
             }
         }
         return Map.copyOf(vfs);

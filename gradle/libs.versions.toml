@@ -29,8 +29,8 @@ javapoet = "0.7.0"
 luau = "1.0.0"
 directory-watcher = "0.19.1"
 nats = "2.25.1"
-included = "-INCLUDED"
 compile-testing = "0.21.0"
+included = "-INCLUDED"
 
 [libraries]
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }

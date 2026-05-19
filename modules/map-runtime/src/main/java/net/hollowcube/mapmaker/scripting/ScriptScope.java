@@ -10,32 +10,32 @@ import java.util.Deque;
 ///
 /// Every side effect a script creates (event listeners, scheduled tasks, spawned
 /// entities, ...) is registered into the scope of the chunk that created it. When
-/// that chunk is reloaded or its ([ScriptOwner]) is torn down, the scope is
+/// that chunk is reloaded or its ([ScriptRuntime]) is torn down, the scope is
 /// disposed and everything it holds is cleaned up - in reverse registration order
 /// so dependents tear down before the things they depend on.
 ///
 /// Not thread safe: all mutation is confined to the world scheduler thread (see
-/// [ScriptContext]'s reload pipeline), which is the only place chunks are run,
-/// reloaded, or disposed.
-public final class ReloadScope {
-    private static final Logger logger = LoggerFactory.getLogger(ReloadScope.class);
+/// [ScriptEngine] and the editor reload pipeline), which is the only place
+/// chunks are run, reloaded, or disposed.
+public final class ScriptScope {
+    private static final Logger logger = LoggerFactory.getLogger(ScriptScope.class);
 
-    private final ScriptOwner owner;
-    private final String chunk;
+    private final ScriptRuntime owner;
+    private final String chunkName;
     private final Deque<Disposable> resources = new ArrayDeque<>();
     private boolean disposed;
 
-    ReloadScope(ScriptOwner owner, String chunk) {
+    ScriptScope(ScriptRuntime owner, String chunkName) {
         this.owner = owner;
-        this.chunk = chunk;
+        this.chunkName = chunkName;
     }
 
-    public ScriptOwner owner() {
+    public ScriptRuntime owner() {
         return owner;
     }
 
-    public String chunk() {
-        return chunk;
+    public String chunkName() {
+        return chunkName;
     }
 
     public boolean isDisposed() {
@@ -62,7 +62,7 @@ public final class ReloadScope {
             try {
                 disposable.dispose();
             } catch (Exception e) {
-                logger.warn("Disposable failed during dispose of scope '{}'", chunk, e);
+                logger.warn("Disposable failed during dispose of scope '{}'", chunkName, e);
             }
         }
     }

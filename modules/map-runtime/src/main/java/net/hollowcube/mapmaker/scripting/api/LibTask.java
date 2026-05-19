@@ -4,11 +4,9 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.mapmaker.scripting.Disposable;
-import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
-import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.Task;
-import net.minestom.server.timer.TaskSchedule;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.util.LuaCoroutine;
+import net.hollowcube.mapmaker.scripting.util.ScheduledCallback;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -56,15 +54,7 @@ public final class LibTask {
     @LuaMethod
     public static int defer(LuaState state) {
         LuaState thread = toThread(state, 1);
-
-        // Preserve the args for callback
-        int[] argRefs = new int[state.top() - 2];
-        for (int i = 0; i < argRefs.length; i++) {
-            argRefs[i] = state.ref(i + 2);
-        }
-
-        // Schedule one tick later
-        scheduleLater(thread, 1, argRefs);
+        scheduleLater(thread, 1, refArgs(state));
         return 1;
     }
 
@@ -83,14 +73,7 @@ public final class LibTask {
         if (ticks < 0) state.argError(1, "must be a non-negative");
 
         LuaState thread = toThread(state, 2);
-
-        // Preserve the args for callback
-        int[] argRefs = new int[state.top() - 2];
-        for (int i = 0; i < argRefs.length; i++) {
-            argRefs[i] = state.ref(i + 2);
-        }
-
-        scheduleLater(thread, ticks, argRefs);
+        scheduleLater(thread, ticks, refArgs(state));
         return 1;
     }
 
@@ -109,15 +92,13 @@ public final class LibTask {
         if (!state.isYieldable())
             throw state.error("thread is not in a yieldable state");
 
-        state.pushThread(state);
         scheduleLater(state, ticks, new int[0]);
-        state.pop(1); // remove thread
-
         return state.yield(0);
     }
 
     /// Cancels a thread previously returned by `spawn`, `defer`, or `delay`. Returns `true`
-    /// if the thread was running and is now cancelled, `false` if it had already finished.
+    /// if the thread was still scheduled and is now cancelled, `false` if it had already
+    /// finished or was never scheduled.
     ///
     /// @luaParam thread thread
     /// @luaReturn boolean
@@ -126,16 +107,26 @@ public final class LibTask {
         state.checkType(1, LuaType.THREAD);
         var thread = Objects.requireNonNull(state.toThread(1)); // checked above
 
-        var context = LegacyScriptContext.get(thread);
-        var task = context.getTag(TaskRef.ACTIVE_TASK);
-//        if (task == null || task.isDisposed()) {
-//            state.pushBoolean(false);
-//            return 1;
-//        }
+        var frame = ScriptContext.current(thread);
+        var sc = frame == null ? null : frame.owner().activeTask(thread);
+        if (sc == null || !sc.isAlive()) {
+            state.pushBoolean(false);
+            return 1;
+        }
 
-        task.dispose();
+        sc.dispose();
         state.pushBoolean(true);
         return 1;
+    }
+
+    /// Ref every extra arg (stack slots 2..top) so they survive until the
+    /// deferred resume.
+    private static int[] refArgs(LuaState state) {
+        int[] argRefs = new int[state.top() - 2];
+        for (int i = 0; i < argRefs.length; i++) {
+            argRefs[i] = state.ref(i + 2);
+        }
+        return argRefs;
     }
 
     // Leaves the thread on the stack at -1
@@ -155,28 +146,12 @@ public final class LibTask {
         };
     }
 
-    /// Thread is expected to be on the stack at -1, it will remain after the call.
-    private static void scheduleLater(LuaState state, int ticks, int[] argRefs) {
-        int ref = state.ref(-1);
-        var context = LegacyScriptContext.get(state);
-        var disposable = new TaskRef();
-        disposable.state = state;
-        disposable.threadRef = ref;
-        disposable.argRefs = argRefs;
-        disposable.task = context.scheduler().scheduleTask(() -> {
-            state.getRef(ref);
-            state.unref(ref);
-
-            for (int argRef : argRefs) {
-                state.getRef(argRef);
-                state.unref(ref);
-            }
-
-            resume(null, state, argRefs.length);
-            return TaskSchedule.stop();
-        }, TaskSchedule.tick(ticks));
-        context.track(disposable);
-        context.setTag(TaskRef.ACTIVE_TASK, disposable);
+    /// Resume {@code thread} with {@code argRefs} after {@code ticks} ticks. The
+    /// callback pins the thread + args and the scheduled-callback registers it
+    /// under the thread so {@link #cancel} can find it.
+    private static void scheduleLater(LuaState thread, int ticks, int[] argRefs) {
+        var co = LuaCoroutine.of(thread, argRefs);
+        ScheduledCallback.once(thread, co, ticks);
     }
 
     private static void resume(@Nullable LuaState caller, LuaState thread, int nargs) {
@@ -187,30 +162,5 @@ public final class LibTask {
         //    A: the caller takes the thread and resumes it again later
         //    B: a task.wait happened, and we have already saved+scheduled the thread
         // 3: ERROR -> it has already been thrown :)
-    }
-
-    private static final class TaskRef implements Disposable {
-        private static final Tag<TaskRef> ACTIVE_TASK = Tag.Transient("mapmaker/active_task");
-
-        public LuaState state;
-        public Task task;
-        public int threadRef;
-        public int[] argRefs;
-
-        @Override
-        public void dispose() {
-            if (!task.isAlive()) return;
-
-            task.cancel();
-            state.unref(threadRef);
-            for (int argRef : argRefs) {
-                state.unref(argRef);
-            }
-        }
-
-//        @Override
-//        public boolean isDisposed() {
-//            return !task.isAlive();
-//        }
     }
 }

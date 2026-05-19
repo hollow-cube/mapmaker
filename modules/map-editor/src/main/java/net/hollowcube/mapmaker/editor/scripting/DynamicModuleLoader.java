@@ -1,8 +1,10 @@
-package net.hollowcube.mapmaker.scripting.require;
+package net.hollowcube.mapmaker.editor.scripting;
 
 import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.scripting.require.AbstractModuleLoader;
+import net.hollowcube.mapmaker.scripting.require.ScriptCompileException;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -16,8 +18,8 @@ import java.util.*;
 /// dependency graph so a changed file can transitively invalidate its dependents.
 ///
 /// Fetching is blocking IO and must happen OFF the world thread (the change
-/// source's virtual thread). The actual reload swap is driven by [net.hollowcube.mapmaker.scripting.ScriptContext]
-/// on the world thread.
+/// source's virtual thread). The actual reload swap is driven by
+/// [ReloadingScriptSession] on the world thread.
 public final class DynamicModuleLoader extends AbstractModuleLoader {
     private static final Logger logger = LoggerFactory.getLogger(DynamicModuleLoader.class);
 
@@ -43,9 +45,13 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
     }
 
     @Override
-    protected byte[] readAndParseFile(String loadName) throws LuauCompileException {
+    protected byte[] readAndParseFile(String loadName) {
         var source = Objects.requireNonNull(sources.get(normalizeKey(loadName)), loadName);
-        return compiler.compile(source);
+        try {
+            return compiler.compile(source);
+        } catch (LuauCompileException e) {
+            throw new ScriptCompileException(loadName, e);
+        }
     }
 
     @Override
@@ -62,15 +68,16 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
         }
     }
 
-    /// Re-fetch the given changed paths and return the set of *chunk* names
-    /// (no extension) that were affected, for the caller to invalidate.
+    /// Re-fetch the given changed paths and return the set of canonical chunk
+    /// keys that were affected, for the caller to invalidate. Uses the *same*
+    /// [AbstractModuleLoader#canonicalChunk] the resolver keys the graph,
+    /// scopes and require cache on, so the sets line up exactly.
     @Blocking
     public Set<String> reloadFiles(Collection<String> changedPaths) {
         var changedChunks = new HashSet<String>();
         for (var path : changedPaths) {
-            var key = normalizeKey(path);
             loadFile(path);
-            changedChunks.add(chunkOf(key));
+            changedChunks.add(AbstractModuleLoader.canonicalChunk(path));
         }
         return changedChunks;
     }
@@ -90,14 +97,14 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
 
     /// Compile every current source, discarding the bytecode. Throws on the first
     /// failure so the reload pipeline can abort the swap before mutating Lua state.
-    public void compileCheck() throws LuauCompileException {
+    public void compileCheck() throws ScriptCompileException {
         for (var entry : sources.entrySet()) {
             // TODO: we should track this so we dont 2x compile everything on reload.
             try {
                 compiler.compile(entry.getValue());
             } catch (LuauCompileException e) {
                 logger.warn("[scripts:{}] compile failed for {}", mapId, entry.getKey());
-                throw e;
+                throw new ScriptCompileException(entry.getKey(), e);
             }
         }
     }
@@ -117,10 +124,30 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
         return out;
     }
 
-    /// Drop the dependency graph so it is rebuilt cleanly by the next full run.
-    /// Non-destructive *during* a reload - only called once a run succeeds.
+    /// Drop the whole dependency graph. Used only on a *fresh* attach: a new VM
+    /// has an empty require cache, so the graph is rebuilt from scratch by the
+    /// first run.
     public void clear() {
         dependents.clear();
+    }
+
+    /// Incremental graph maintenance for a *scoped* reload. Only the records
+    /// keyed by an invalidated module are dropped: those modules are evicted
+    /// from the require cache and re-run, so their incoming edges are rebuilt
+    /// from scratch via [#onResolved] on the cache-miss reload. Records for
+    /// modules that stay cached are left intact - a cached require never reaches
+    /// the resolver, so they would never be rebuilt and dropping them would lose
+    /// them permanently.
+    ///
+    /// Tradeoff: a stale `requiredBy` left by a since-removed `require` causes
+    /// conservative *over*-invalidation on a later reload (safe - never stale
+    /// code). Known gap: if an invalidated module adds a brand-new `require` of
+    /// an *already-cached* module, that edge isn't recorded until the cached
+    /// module is itself evicted - a later change to it could under-invalidate.
+    /// Closing that needs edge recording at require-resolution time (every
+    /// require, not just cache misses).
+    public void invalidateGraph(Set<String> invalidated) {
+        dependents.keySet().removeAll(invalidated);
     }
 
     private static String normalizeKey(String path) {
@@ -132,12 +159,5 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
 
     private static String stripLeadingSlash(String key) {
         return key.startsWith("/") ? key.substring(1) : key;
-    }
-
-    private static String chunkOf(String key) {
-        for (var suffix : new String[]{".luau", ".lua"}) {
-            if (key.endsWith(suffix)) return key.substring(0, key.length() - suffix.length());
-        }
-        return key;
     }
 }

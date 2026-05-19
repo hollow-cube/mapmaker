@@ -2,9 +2,8 @@ package net.hollowcube.mapmaker.scripting.require;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaStatus;
-import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.require.RequireResolver;
-import net.hollowcube.mapmaker.scripting.ScriptFrame;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Closeable;
@@ -28,12 +27,14 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
 
     protected abstract boolean isFile(String path);
 
-    /// Implementations should return the luau bytecode for the file at the given path.
-    protected abstract byte[] readAndParseFile(String loadName) throws IOException, LuauCompileException;
+    /// Implementations should return the luau bytecode for the file at the given
+    /// path. Compiling loaders signal a compile failure with the unchecked
+    /// [ScriptCompileException] so this contract stays compiler-package free.
+    protected abstract byte[] readAndParseFile(String loadName) throws IOException;
 
     /// Public accessor used to load the *entry* script directly (it is not reached
     /// via require, so it never goes through [#load]).
-    public byte[] readEntry(String loadName) throws IOException, LuauCompileException {
+    public byte[] readEntry(String loadName) throws IOException {
         return readAndParseFile(loadName);
     }
 
@@ -49,6 +50,24 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
     protected static String normChunk(String chunkName) {
         if (chunkName == null) return "/";
         return chunkName.startsWith("@") ? chunkName.substring(1) : chunkName;
+    }
+
+    /// The single canonical key for a module: leading {@code @} stripped, a
+    /// {@code /init.luau}/{@code /init.lua}/{@code .luau}/{@code .lua} suffix
+    /// removed, leading slash ensured. {@code x.luau} and {@code x.lua}
+    /// therefore map to the same module (you must not ship both). This is the
+    /// one form used for the require-cache key, dependency-graph keys and
+    /// reload scopes; only {@code loadName} keeps the real file extension.
+    public static String canonicalChunk(String path) {
+        if (path == null) return "/";
+        var p = path.replace('\\', '/');
+        if (p.startsWith("@")) p = p.substring(1);
+        if (!p.startsWith("/")) p = "/" + p;
+        // Longest first: /init.* before .* so /lib/init.luau -> /lib.
+        for (var suffix : List.of("/init.luau", "/init.lua", ".luau", ".lua")) {
+            if (p.endsWith(suffix)) return p.substring(0, p.length() - suffix.length());
+        }
+        return p;
     }
 
     @Override
@@ -109,8 +128,22 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
     }
 
     @Override
-    public @Nullable Module getModule(LuaState luaState) {
-        return new Module(realPath, absoluteRealPath, absoluteRealPath);
+    public @Nullable Module getModule(LuaState state) {
+        if (realPath == null) return null;
+        // Record the dependency edge on EVERY require. getModule runs before
+        // the require-cache check (hit or miss); load() only runs on a miss.
+        // Recording here keeps the graph complete so a scoped reload of a
+        // changed module still invalidates requirers that hold a *cached*
+        // reference to it.
+        //
+        // chunkName + cacheKey use the canonical (extension-less)
+        // absoluteModulePath - navigation never appends a suffix, so it is
+        // already the stripped form, and it is what the require cache, the
+        // graph and the scopes all key on. loadName keeps the real file path
+        // (with extension) so readAndParseFile can read the bytes.
+        if (state.getThreadData() instanceof ScriptContext requirer)
+            onResolved(requirer.scope().chunk(), absoluteModulePath);
+        return new Module(absoluteModulePath, absoluteRealPath, absoluteModulePath);
     }
 
     @Override
@@ -134,10 +167,12 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
             // scope so a reload of that module only tears down what *it* created.
             // The dependency edge (requirer -> this module) feeds transitive
             // invalidation on reload.
+            // The dependency edge is recorded in getModule (every require, incl.
+            // cache hits); load() only runs on a miss so it just sets up the
+            // module's own scope/thread-data.
             var moduleChunk = normChunk(chunkName);
-            if (state.getThreadData() instanceof ScriptFrame parentFrame) {
-                onResolved(parentFrame.scope().chunk(), moduleChunk);
-                thread.setThreadData(new ScriptFrame(
+            if (state.getThreadData() instanceof ScriptContext parentFrame) {
+                thread.setThreadData(new ScriptContext(
                     parentFrame.owner(),
                     parentFrame.owner().scope(moduleChunk)));
             }
@@ -145,7 +180,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
             byte[] bytecode;
             try {
                 bytecode = readAndParseFile(loadName);
-            } catch (IOException | LuauCompileException e) {
+            } catch (IOException e) {
                 throw new RuntimeException(e);
             }
 

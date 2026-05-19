@@ -15,8 +15,6 @@ dependencies {
     implementation(libs.polar)
     implementation(libs.included.molang)
     implementation(libs.bundles.adventure)
-    implementation(libs.directory.watcher)
-    implementation(libs.nats)
 
     testImplementation(project(":modules:compat"))
     testImplementation(project(":modules:test"))

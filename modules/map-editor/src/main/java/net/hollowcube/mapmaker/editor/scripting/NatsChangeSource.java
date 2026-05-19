@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.scripting;
+package net.hollowcube.mapmaker.editor.scripting;
 
 import io.nats.client.Message;
 import io.nats.client.MessageConsumer;
@@ -22,9 +22,9 @@ import java.util.List;
 /// filtered to just this map; it is auto-cleaned by the {@code inactiveThreshold}
 /// and explicitly torn down on world close.
 ///
-/// Each message is handed to [ScriptContext#notifyFilesChanged] on a virtual
-/// thread (the actual fetch is blocking, and the reload itself is debounced and
-/// confined to the world scheduler by [ScriptContext]).
+/// Each message is handed to [ReloadingScriptSession#notifyFilesChanged] on a
+/// virtual thread (the actual fetch is blocking, and the reload itself is
+/// debounced and confined to the world scheduler by [ReloadingScriptSession]).
 public final class NatsChangeSource implements ScriptChangeSource {
     private static final Logger logger = LoggerFactory.getLogger(NatsChangeSource.class);
 
@@ -36,11 +36,11 @@ public final class NatsChangeSource implements ScriptChangeSource {
 
     private final JetStreamWrapper jetStream;
     private final String mapId;
-    private final ScriptContext scripts;
+    private final ReloadingScriptSession scripts;
 
     private @Nullable MessageConsumer consumer;
 
-    public NatsChangeSource(JetStreamWrapper jetStream, String mapId, ScriptContext scripts) {
+    public NatsChangeSource(JetStreamWrapper jetStream, String mapId, ReloadingScriptSession scripts) {
         this.jetStream = jetStream;
         this.mapId = mapId;
         this.scripts = scripts;
@@ -69,7 +69,7 @@ public final class NatsChangeSource implements ScriptChangeSource {
 
         logger.info("[scripts:{}] file changed: {}", mapId, msg.path());
         // Off the NATS dispatcher thread: notifyFilesChanged does blocking IO,
-        // then hands a debounced, world-thread-confined reload to ScriptContext.
+        // then hands a debounced, world-thread-confined reload to the session.
         FutureUtil.submitVirtual(() -> scripts.notifyFilesChanged(List.of(msg.path())));
     }
 

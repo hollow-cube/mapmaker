@@ -15,6 +15,9 @@ import net.hollowcube.mapmaker.editor.item.SpawnPointItem;
 import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
 import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
 import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
+import net.hollowcube.mapmaker.editor.scripting.NatsChangeSource;
+import net.hollowcube.mapmaker.editor.scripting.ReloadingScriptSession;
+import net.hollowcube.mapmaker.editor.scripting.ScriptChangeSource;
 import net.hollowcube.mapmaker.editor.terraform.TerraformInstanceStorageImpl;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
@@ -36,9 +39,6 @@ import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.marker.FinishMarkerHandler;
 import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
-import net.hollowcube.mapmaker.scripting.NatsChangeSource;
-import net.hollowcube.mapmaker.scripting.ScriptChangeSource;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.hollowcube.terraform.storage.TerraformInstanceStorage;
@@ -94,7 +94,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     private final @Nullable Terraform terraform;
     private final @Nullable TerraformInstanceStorage terraformInstanceStorage;
 
-    private final @Nullable ScriptContext scriptContext;
+    private final @Nullable ReloadingScriptSession scriptSession;
     private final @Nullable ScriptChangeSource scriptChangeSource;
 
     public EditorMapWorld(MapServer server, MapData map, @Nullable Terraform terraform) {
@@ -141,10 +141,10 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         }
 
         if ("f973cc98-e806-464d-9435-fc4b1d49fde7".equals(map.id())) {
-            this.scriptContext = ScriptContext.reloading(server.api().maps, map.id());
-            this.scriptChangeSource = new NatsChangeSource(server.jetStream(), map.id(), scriptContext);
+            this.scriptSession = ReloadingScriptSession.reloading(server.api().maps, map.id());
+            this.scriptChangeSource = new NatsChangeSource(server.jetStream(), map.id(), scriptSession);
         } else {
-            this.scriptContext = null;
+            this.scriptSession = null;
             this.scriptChangeSource = null;
         }
     }
@@ -184,8 +184,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     public void loadWorld() {
         super.loadWorld();
 
-        var scriptContext = this.scriptContext;
-        if (scriptContext != null) scriptContext.bootstrap();
+        var scriptSession = this.scriptSession;
+        if (scriptSession != null) scriptSession.bootstrap();
         var changeSource = this.scriptChangeSource;
         if (changeSource != null) changeSource.start();
 
@@ -219,7 +219,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         autoSaveTask = null;
 
         if (scriptChangeSource != null) scriptChangeSource.close();
-        if (scriptContext != null) scriptContext.close();
+        if (scriptSession != null) scriptSession.close();
 
         testWorldLock.lock();
         try {
@@ -315,7 +315,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                     // Spin up the Luau runtime against the test world now that
                     // one exists. The source store has been kept warm since the
                     // editor world opened, so this runs the current files.
-                    if (scriptContext != null) scriptContext.attach(this.testWorld);
+                    if (scriptSession != null) scriptSession.attach(this.testWorld);
                 }
             } finally {
                 testWorldLock.unlock();

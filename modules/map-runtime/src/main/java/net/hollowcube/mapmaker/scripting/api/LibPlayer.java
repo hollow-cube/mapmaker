@@ -12,7 +12,10 @@ import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.util.LuaCallback;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
+import net.hollowcube.mapmaker.scripting.util.ScheduledCallback;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
@@ -30,8 +33,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.timer.Task;
-import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
@@ -107,7 +108,7 @@ public final class LibPlayer {
         public int getSidebar(LuaState state) {
             if (sidebar == null) {
                 sidebar = new Sidebar(this);
-                LegacyScriptContext.get(state).track(sidebar);
+                ScriptContext.track(state, sidebar);
             }
             LibPlayer$luau.pushSidebar(state, sidebar);
             return 1;
@@ -524,10 +525,8 @@ public final class LibPlayer {
         private final net.minestom.server.scoreboard.Sidebar delegate;
         private boolean disposed = false;
 
-        private @Nullable LuaState state;
-        private int threadRef = -1;
-        private int updateRef = -1;
-        private @Nullable Task updateTask;
+        private @Nullable LuaCallback cb;
+        private @Nullable ScheduledCallback scheduled;
 
         public Sidebar(Player player) {
             this.player = player;
@@ -552,66 +551,47 @@ public final class LibPlayer {
         public void set(LuaState state) {
             state.checkType(1, LuaType.FUNCTION);
 
-            if (threadRef != -1) {
-                state.unref(threadRef);
-                state.unref(updateRef);
-                updateTask.cancel();
-            }
+            // Replacing an existing render: tear down the old callback + task.
+            if (scheduled != null) scheduled.dispose();
 
-            this.state = state;
-            state.pushThread(state);
-            threadRef = state.ref(-1);
-            state.pop(1);
-            updateRef = state.ref(1);
+            var cb = LuaCallback.of(state, 1);
+            this.cb = cb;
+            this.scheduled = ScheduledCallback.recurring(state, cb, () -> {
+                var s = cb.state();
+                LibPlayer$luau.pushPlayer(s, player); // the single render arg
+                cb.call(1, 1);                        // -> [result table]
 
-            updateTask = LegacyScriptContext.get(state).scheduler().scheduleTask(() -> {
-                if (this.state == null) return TaskSchedule.stop();
-
-                state.getRef(updateRef);
-                LibPlayer$luau.pushPlayer(state, player);
-                state.call(1, 1);
-
-                state.checkType(-1, LuaType.TABLE);
-                if (tableGet(state, -1, "title")) {
-                    var title = LuaText.checkAnyText(state, -1);
-                    state.pop(1);
+                s.checkType(-1, LuaType.TABLE);
+                if (tableGet(s, -1, "title")) {
+                    var title = LuaText.checkAnyText(s, -1);
+                    s.pop(1);
                     delegate.setTitle(title);
                 }
 
                 for (var line : Set.copyOf(delegate.getLines())) {
                     delegate.removeLine(line.getId());
                 }
-                if (tableGet(state, -1, "lines")) {
-                    state.checkType(-1, LuaType.TABLE);
-                    arrayForEach(state, -1, (index) -> {
-                        var line = LuaText.checkAnyText(state, -1);
+                if (tableGet(s, -1, "lines")) {
+                    s.checkType(-1, LuaType.TABLE);
+                    arrayForEach(s, -1, (index) -> {
+                        var line = LuaText.checkAnyText(s, -1);
                         delegate.createLine(new net.minestom.server.scoreboard.Sidebar.ScoreboardLine(
                             String.valueOf(index), line, index, net.minestom.server.scoreboard.Sidebar.NumberFormat.blank()));
                     });
-                    state.pop(1);
+                    s.pop(1);
                 }
 
-                state.pop(1);
-
-                return TaskSchedule.nextTick();
-            }, TaskSchedule.nextTick());
+                s.pop(1);
+            });
         }
 
         @Override
         public void dispose() {
-            delegate.removeViewer(player.player);
-
-            state.unref(threadRef);
-            state.unref(updateRef);
-            updateTask.cancel();
-
+            if (disposed) return;
             disposed = true;
+            delegate.removeViewer(player.player);
+            if (scheduled != null) scheduled.dispose(); // cancels task + disposes cb
         }
-
-//        @Override
-//        public boolean isDisposed() {
-//            return disposed;
-//        }
     }
 
     public static void pushPlayer(LuaState state, net.minestom.server.entity.Player player) {
