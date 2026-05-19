@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.gui.map.details;
 
-import net.hollowcube.mapmaker.map.MapRating;
-import net.hollowcube.mapmaker.map.MapService;
+import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.player.PlayerData;
 import org.jetbrains.annotations.UnknownNullability;
 
 class MapDetailsRatePanel extends Panel {
-    private final MapService mapService;
+    private final MapClient maps;
     private final String mapId;
 
     private final Button likeButton;
@@ -17,9 +17,9 @@ class MapDetailsRatePanel extends Panel {
 
     private MapRating.@UnknownNullability State ratingState; // notnull after init
 
-    public MapDetailsRatePanel(MapService mapService, String mapId) {
+    public MapDetailsRatePanel(MapClient maps, String mapId) {
         super(9, 4);
-        this.mapService = mapService;
+        this.maps = maps;
         this.mapId = mapId;
 
         background("map_details/rate/container");
@@ -38,7 +38,7 @@ class MapDetailsRatePanel extends Panel {
 
         var playerId = PlayerData.fromPlayer(host.player()).id();
         async(() -> {
-            var rating = mapService.getMapRating(this.mapId, playerId);
+            var rating = maps.getPlayerRating(this.mapId, playerId);
             sync(() -> updateLocalRatingState(rating.state()));
         });
     }
@@ -49,7 +49,7 @@ class MapDetailsRatePanel extends Panel {
 
         // Update the remote state async TODO: this should cancel prior request if there is already one out.
         var playerId = PlayerData.fromPlayer(host.player()).id();
-        async(() -> mapService.setMapRating(this.mapId, playerId, new MapRating(resultState, null)));
+        async(() -> maps.setPlayerRating(this.mapId, playerId, new MapRating(resultState, null)));
     }
 
     private void updateLocalRatingState(MapRating.State newState) {

@@ -5,10 +5,9 @@ import io.nats.client.MessageConsumer;
 import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.CreatedMapInviteMessage;
 import net.hollowcube.mapmaker.invite.types.InviteType;
-import net.hollowcube.mapmaker.map.MapService;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
@@ -32,18 +31,16 @@ public final class MapInviteListener implements Closeable {
         .inactiveThreshold(Duration.ofMinutes(5))
         .build();
 
-    private final MapService mapService;
-    private final PlayerService playerService;
+    private final ApiClient api;
     private final SessionManager sessionManager;
 
     private final MessageConsumer consumer;
 
     public MapInviteListener(
-        @NotNull MapService mapService, @NotNull PlayerService playerService,
+        @NotNull ApiClient api,
         @NotNull SessionManager sessionManager, @NotNull JetStreamWrapper jetStream
     ) {
-        this.mapService = mapService;
-        this.playerService = playerService;
+        this.api = api;
         this.sessionManager = sessionManager;
 
         this.consumer = jetStream.subscribe(STREAM, CONSUMER_CONFIG, CreatedMapInviteMessage.class, this::handleInviteMessage);
@@ -68,7 +65,7 @@ public final class MapInviteListener implements Closeable {
             return;
         }
 
-        var map = this.mapService.getMap(message.senderId(), message.mapId());
+        var map = api.maps.get(message.mapId());
         var mapName = Component.text(map.name());
 
         var senderSession = this.sessionManager.getSession(message.senderId());
@@ -78,7 +75,7 @@ public final class MapInviteListener implements Closeable {
         }
 
         var senderName = Component.text(senderSession.username());
-        var senderDisplayName = this.playerService.getPlayerDisplayName2(message.senderId());
+        var senderDisplayName = api.players.getDisplayName(message.senderId());
 
         var playBuild = map.isPublished() ? "play" : "build";
         var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";

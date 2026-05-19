@@ -4,11 +4,10 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -21,20 +20,18 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
     private final Argument<@Nullable String> playerArg;
     private final Argument<?> notifyArg;
 
-    private final PlayerService playerService;
-    private final MapService mapService;
+    private final ApiClient api;
 
-    public MapLeaderboardDeleteCommand(@NotNull PlayerService playerService, @NotNull MapService mapService) {
+    public MapLeaderboardDeleteCommand(@NotNull ApiClient api) {
         super("delete");
-        this.playerService = playerService;
-        this.mapService = mapService;
+        this.api = api;
 
         description = "Removes a player's or all completion times on a map";
         examples = List.of("/map lb delete 123-456-789", "/map lb delete 123-456-789 SethPRG");
 
-        mapArg = CoreArgument.Map("map", mapService)
+        mapArg = CoreArgument.Map("map", api.maps)
                 .description("The ID of the map to delete entries from");
-        playerArg = CoreArgument.AnyPlayerId("player", playerService)
+        playerArg = CoreArgument.AnyPlayerId("player", api.players)
                 .description("The player (optional) to delete the entries of");
         notifyArg = Argument.Literal("notify")
                 .description("Whether to notify the player(s) about the deletion");
@@ -61,7 +58,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
 
         var playerId = PlayerData.fromPlayer(player).id();
         try {
-            mapService.deletePlaytimeLeaderboard(playerId, map.id(), target, notify);
+            api.maps.deleteMapLeaderboard(map.id(), target, notify);
             player.sendMessage("deleted for " + target);
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");

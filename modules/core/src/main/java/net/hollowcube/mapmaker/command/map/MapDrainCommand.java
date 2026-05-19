@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapMgmtConsumer;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
@@ -25,14 +25,14 @@ public class MapDrainCommand extends CommandDsl {
 
     private final JetStreamWrapper jetStream;
 
-    public MapDrainCommand(@NotNull MapService mapService, @NotNull JetStreamWrapper jetStream) {
+    public MapDrainCommand(@NotNull MapClient maps, @NotNull JetStreamWrapper jetStream) {
         super("drain");
         this.jetStream = jetStream;
 
         description = "Drains all active instances of a map";
         examples = List.of("/map drain 123-456-789", "/map drain a12345bc-67de-8f91-ghij-2345k6l78912");
 
-        mapArg = CoreArgument.Map("map", mapService)
+        mapArg = CoreArgument.Map("map", maps)
             .description("The ID of the map to drain");
 
         setCondition(staffPerm(Permission.GENERIC_STAFF));

@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.gui.map.browser;
 
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
@@ -13,15 +12,15 @@ import org.jetbrains.annotations.NotNull;
 
 public class MapContestBrowserView extends MapBrowserView {
 
-    public MapContestBrowserView(@NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge) {
-        this(api, mapService, bridge, true);
+    public MapContestBrowserView(@NotNull ApiClient api, @NotNull ServerBridge bridge) {
+        this(api, bridge, true);
     }
 
     public MapContestBrowserView(
-        @NotNull ApiClient api, @NotNull MapService mapService, @NotNull ServerBridge bridge,
+        @NotNull ApiClient api, @NotNull ServerBridge bridge,
         boolean fetchOnMount
     ) {
-        super(api, mapService, bridge, fetchOnMount);
+        super(api, bridge, fetchOnMount);
 
         background("map_browser/contest_container", -10, -31);
         this.titleText.text("Comp Submissions");
@@ -40,7 +39,7 @@ public class MapContestBrowserView extends MapBrowserView {
         if (!isInitial) return;
 
         var playerId = host.player().getUuid().toString();
-        pagination.reset(MapSearchParams.builder(playerId)
+        pagination.reset(MapSearchParams.builder()
             .contest("c9354e33-96c2-414a-9f4a-8c2ff4669086"));
     }
 

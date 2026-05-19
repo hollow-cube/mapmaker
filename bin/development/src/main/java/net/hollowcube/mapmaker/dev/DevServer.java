@@ -100,7 +100,6 @@ public class DevServer extends AbstractMultiMapServer {
     private void performHubInit() {
         this.hubWorld = FutureUtil.getUnchecked(createWorld(HubServer.HUB_MAP_DATA,
             false, map -> new HubMapWorld(this, map), false));
-        addBinding(HubMapWorld.class, hubWorld, "world", "hubWorld", "hubMapWorld");
 
         HubServer.registerCommands(this, hubCommandManager, hubWorld, MinecraftServer.getSchedulerManager());
         hubCommandManager.register(PlayNbsCommand.INSTANCE);
@@ -118,12 +117,12 @@ public class DevServer extends AbstractMultiMapServer {
         };
         var terraformEvents = EventNode.event("tf-events", EventFilter.INSTANCE, filter);
         var interactionEvents = EventNode.event("tf-events", EventFilter.INSTANCE, filter);
-        this.terraform = MapMapServer.initBuildLogic(mapService(), mapCommandManager, terraformEvents, interactionEvents);
+        this.terraform = MapMapServer.initBuildLogic(mapCommandManager, terraformEvents, interactionEvents, globalConfig.noop());
 
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
         mapCommandManager.register(PlayNbsCommand.INSTANCE);
-        MapMapServer.registerCommands(this, mapCommandManager, mapService());
+        MapMapServer.registerCommands(this, mapCommandManager);
     }
 
     protected void handlePreLogin(@NotNull AsyncPlayerPreLoginEvent event) {

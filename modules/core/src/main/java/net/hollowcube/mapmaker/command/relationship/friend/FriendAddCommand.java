@@ -3,12 +3,12 @@ package net.hollowcube.mapmaker.command.relationship.friend;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -16,13 +16,15 @@ import org.jetbrains.annotations.Nullable;
 public class FriendAddCommand extends CommandDsl {
     private final Argument<@Nullable PlayerData> targetArg;
 
+    private final PlayerClient players;
     private final PlayerService playerService;
 
-    public FriendAddCommand(@NotNull PlayerService playerService) {
+    public FriendAddCommand(@NotNull PlayerClient players, @NotNull PlayerService playerService) {
         super("add");
+        this.players = players;
         this.playerService = playerService;
 
-        this.targetArg = CoreArgument.AnyPlayerData("target", playerService)
+        this.targetArg = CoreArgument.AnyPlayerData("target", players)
             .description("The player to add as a friend");
 
         addSyntax(playerOnly(this::exec), this.targetArg);
@@ -38,7 +40,7 @@ public class FriendAddCommand extends CommandDsl {
 
         SendFriendRequestResult result = this.playerService.sendFriendRequest(player.getUuid().toString(),
                                                                               targetData.id());
-        Component targetDisplayName = playerService.getPlayerDisplayName2(targetData.id()).build();
+        Component targetDisplayName = players.getDisplayName(targetData.id()).build();
 
         if (result.successful()) {
             if (result.isRequest()) {

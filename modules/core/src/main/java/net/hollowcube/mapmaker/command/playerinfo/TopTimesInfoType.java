@@ -5,12 +5,10 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.PlayerTopTimeEntry;
-import net.hollowcube.mapmaker.map.responses.PlayerTopTimesResponse;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
@@ -24,19 +22,16 @@ import java.util.List;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public class TopTimesInfoType extends CommandDsl {
+    private final ApiClient api;
 
     private final Argument<String> targetArgument;
     private final Argument<Integer> pageArgument;
 
-    private final MapService mapService;
-    private final PlayerService playerService;
-
-    public TopTimesInfoType(MapService mapService, PlayerService playerService) {
+    public TopTimesInfoType(ApiClient api) {
         super("top_times");
-        this.mapService = mapService;
-        this.playerService = playerService;
+        this.api = api;
 
-        this.targetArgument = CoreArgument.AnyPlayerId("target", playerService);
+        this.targetArgument = CoreArgument.AnyPlayerId("target", api.players);
         this.pageArgument = Argument.Int("page").min(1).defaultValue(1);
 
         this.addSyntax(this::exec, this.targetArgument);
@@ -51,10 +46,10 @@ public class TopTimesInfoType extends CommandDsl {
             sender.sendMessage(Component.text("Player not found"));
             return;
         }
-        Component targetName = this.playerService.getPlayerDisplayName2(targetId).asComponent();
+        Component targetName = api.players.getDisplayName(targetId).asComponent();
 
-        PlayerTopTimesResponse resp = this.mapService.getPlayerTopTimes(targetId, page, 15);
-        int maxPage = Math.ceilDiv(resp.totalItems(), 15);
+        var resp = api.maps.getPlayerTopTimes(targetId, page - 1, 15);
+        int maxPage = Math.ceilDiv(resp.count(), 15);
         if (maxPage == 0) {
             sender.sendMessage(targetName.append(Component.text(" has no top times")));
             return;
@@ -62,13 +57,13 @@ public class TopTimesInfoType extends CommandDsl {
 
         if (page > maxPage) {
             page = maxPage;
-            resp = this.mapService.getPlayerTopTimes(targetId, page, 15);
+            resp = api.maps.getPlayerTopTimes(targetId, page - 1, 15);
         }
 
         sender.sendMessage(targetName.append(
-            Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.totalItems(), 15)))));
+            Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.count(), 15)))));
         List<LeaderboardData.Entry> entries = new ArrayList<>();
-        for (PlayerTopTimeEntry entry : resp.items()) {
+        for (PlayerTopTimeEntry entry : resp.results()) {
             entries.add(
                 new LeaderboardData.Entry(entry.mapName(), entry.publishedId(), entry.completionTime(), entry.rank()));
         }

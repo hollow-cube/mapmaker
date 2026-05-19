@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
@@ -47,9 +48,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         super(server, map, makeMapInstance(map, 'h', null),
             HubPlayerState.class);
 
-        itemRegistry().register(new PlayMapsItem(server.api(), server.mapService(), server.bridge()));
-        itemRegistry().register(new CreateMapsItem(server.api(), server.playerService(), server.mapService(), server.bridge()));
-        itemRegistry().register(new OrgMapsItem());
+        itemRegistry().register(new PlayMapsItem(server.api(), server.bridge()));
+        itemRegistry().register(new CreateMapsItem(server.api(), server.playerService(), server.bridge()));
         itemRegistry().register(new OpenCosmeticsMenuItem(server.playerService()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
         itemRegistry().register(new AdventCalendarItem());
@@ -92,8 +92,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     protected void loadWorldData() {
         ReadableMapData mapWorldData = null;
         try {
-            mapWorldData = server().mapService().getMapWorldAsStream(map().id(), false);
-        } catch (MapService.NotFoundError error) {
+            mapWorldData = server().api().maps.getWorldStream(map().id());
+        } catch (ApiClient.NotFoundError error) {
             if (!map().id().equals(MapData.SPAWN_MAP_ID)) {
                 throw error;
             }

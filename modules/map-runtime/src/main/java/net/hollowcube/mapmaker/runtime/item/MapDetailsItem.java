@@ -42,7 +42,7 @@ public class MapDetailsItem extends ItemHandler {
 
             DisplayName authorName;
             try {
-                authorName = world.server().playerService().getPlayerDisplayName2(world.map().owner());
+                authorName = world.server().api().players.getDisplayName(world.map().owner());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
                 authorName = new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
@@ -51,7 +51,7 @@ public class MapDetailsItem extends ItemHandler {
 
             // TODO(v4 api): we refetch the map so it includes leaderboard info
             var map = world.server().api().maps.get(world.map().id());
-            Panel.open(player, new MapDetailsView(world.server().api(), world.server().mapService(),
+            Panel.open(player, new MapDetailsView(world.server().api(),
                 world.server().bridge(), map, finalAuthorName, false));
         });
     }

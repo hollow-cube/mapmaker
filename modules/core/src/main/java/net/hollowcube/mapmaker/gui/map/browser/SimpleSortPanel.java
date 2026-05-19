@@ -119,7 +119,7 @@ class SimpleSortPanel extends Panel {
     }
 
     private void onSearchChange() {
-        var params = MapSearchParams.builder(host.player().getUuid().toString());
+        var params = MapSearchParams.builder();
         if (!difficulties.isEmpty() && difficulties.size() != 5) {
             // Only set if not 0 or all. In those cases we also want to include unknown so can use default.
             params.difficulties(difficulties.toArray(new MapData.Difficulty[0]));

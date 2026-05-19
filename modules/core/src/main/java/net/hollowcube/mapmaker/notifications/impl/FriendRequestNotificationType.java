@@ -25,7 +25,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
 
     @Override
     public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
-        var username = context.players().getPlayerDisplayName2(entry.key());
+        var username = context.api().players.getDisplayName(entry.key());
 
         return new PlayerNotification(
             entry,
@@ -61,7 +61,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
 
     @Override
     public Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
-        var username = context.players().getPlayerDisplayName2(entry.key());
+        var username = context.api().players.getDisplayName(entry.key());
         return Component.translatable("gui.notification.friend_request.toast", username);
     }
 }

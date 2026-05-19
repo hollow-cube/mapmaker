@@ -4,7 +4,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.gui.create.CreateMapsView;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerService;
@@ -21,14 +20,12 @@ public class CreateMapsItem extends ItemHandler {
 
     private final ApiClient api;
     private final PlayerService playerService;
-    private final MapService mapService;
     private final ServerBridge bridge;
 
-    public CreateMapsItem(ApiClient api, PlayerService playerService, MapService mapService, ServerBridge bridge) {
+    public CreateMapsItem(ApiClient api, PlayerService playerService, ServerBridge bridge) {
         super(ID, RIGHT_CLICK_ANY);
         this.api = api;
         this.playerService = playerService;
-        this.mapService = mapService;
         this.bridge = bridge;
     }
 
@@ -43,7 +40,7 @@ public class CreateMapsItem extends ItemHandler {
 
         FutureUtil.submitVirtual(() -> {
             try {
-                CreateMapsView.open(player, api, mapService, playerService, bridge);
+                CreateMapsView.open(player, api, playerService, bridge);
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
             }

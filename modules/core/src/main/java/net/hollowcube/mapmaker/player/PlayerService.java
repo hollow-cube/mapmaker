@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.player.responses.PlayerAlts;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -21,14 +20,6 @@ import java.util.Set;
 public interface PlayerService {
     int DEFAULT_TAB_COMPLETE_LIMIT = 25;
 
-    @NotNull
-    DisplayName getPlayerDisplayName2(@NotNull String id);
-
-    @NotNull
-    String getPlayerId(@NotNull String idOrUsername);
-
-    @NotNull PlayerData getPlayerData(@NotNull String id);
-
     void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update);
 
     /**
@@ -43,13 +34,6 @@ public interface PlayerService {
     );
 
     void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta);
-
-    @NotNull
-    TabCompleteResponse getUsernameTabCompletions(@NotNull String query, int limit);
-
-    default @NotNull TabCompleteResponse getUsernameTabCompletions(@NotNull String query) {
-        return this.getUsernameTabCompletions(query, DEFAULT_TAB_COMPLETE_LIMIT);
-    }
 
     record CreateCheckoutLinkResponse(@NotNull String url) {
     }
@@ -80,8 +64,6 @@ public interface PlayerService {
     @Nullable TotpSetupResponse beginTotpSetup(@NotNull String playerId);
 
     @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code);
-
-    @NotNull List<PlayerAlts.Alt> getAlts(@NotNull String playerId);
 
     // Friendships
 

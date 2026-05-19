@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.runtime.parkour.item;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.gui.map.RateMapView;
 import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapRating;
-import net.hollowcube.mapmaker.map.MapService;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -31,10 +31,10 @@ public class RateMapItem extends ItemHandler {
         return world.map().isPublished() && world instanceof ParkourMapWorld;
     }
 
-    public static void initLastRating(MapService mapService, Player player, MapData map) {
+    public static void initLastRating(MapClient maps, Player player, MapData map) {
         player.setTag(LAST_RATING_TAG, FutureUtil.fork(() -> {
             try {
-                return mapService.getMapRating(map.id(), player.getUuid().toString());
+                return maps.getPlayerRating(map.id(), player.getUuid().toString());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
                 // It's fine to default to a new rating since its valid to overwrite a rating anyway.
@@ -62,7 +62,7 @@ public class RateMapItem extends ItemHandler {
         var lastRatingFuture = player.getTag(LAST_RATING_TAG);
         if (lastRatingFuture != null)
             initialState = Objects.requireNonNullElse(lastRatingFuture.resultNow(), new MapRating()).state();
-        Panel.open(player, new RateMapView(world.server().mapService(), world.map(), initialState, newState ->
+        Panel.open(player, new RateMapView(world.server().api().maps, world.map(), initialState, newState ->
                 player.setTag(LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
     }
 

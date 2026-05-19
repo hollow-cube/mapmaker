@@ -76,7 +76,7 @@ public class MapIsolateServer extends AbstractMapServer {
 
     @Override
     protected ServerBridge createBridge() {
-        return new MapIsolateBridge(mapService(), sessionService());
+        return new MapIsolateBridge(api(), sessionService());
     }
 
     @Override
@@ -114,8 +114,6 @@ public class MapIsolateServer extends AbstractMapServer {
             logger.error("Error allocating map", e);
             throw new RuntimeException(e);
         }
-
-        addBinding(Scheduler.class, world.instance().scheduler());
 
         var serverId = ServerRuntime.getRuntime().hostname();
         var worldMessage = MapWorldMessage.created(serverId, mapId, "playing");

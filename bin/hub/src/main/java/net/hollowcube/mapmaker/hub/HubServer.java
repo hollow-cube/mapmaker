@@ -79,7 +79,7 @@ public class HubServer extends AbstractMapServer {
 
     @Override
     protected ServerBridge createBridge() {
-        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(mapService(), sessionService());
+        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(api(), sessionService());
     }
 
     @Override
@@ -102,9 +102,6 @@ public class HubServer extends AbstractMapServer {
         var scheduler = MinecraftServer.getSchedulerManager();
         scheduler.scheduleEndOfTick(() -> scheduler.submitTask(world::safePointTick, ExecutionType.TICK_END));
 
-        addBinding(HubMapWorld.class, world, "world", "hubWorld", "hubMapWorld");
-        addBinding(Scheduler.class, world.scheduler());
-
         registerCommands(this, commandManager(), world, world.instance().scheduler());
         loadHubFeatures(this, world);
     }
@@ -112,7 +109,7 @@ public class HubServer extends AbstractMapServer {
     // Static so it can be referenced from DevHubServer
     public static void registerCommands(AbstractMapServer server, CommandManager commandManager, HubMapWorld hubWorld, Scheduler scheduler) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
-        commandManager.register(new PlayerInfoCommand(server.playerService(), server.mapService(), server.sessionManager()));
+        commandManager.register(new PlayerInfoCommand(server.api(), server.sessionManager()));
 
         commandManager.register(new HubFlyCommand());
         commandManager.register(new HubSpawnCommand());
