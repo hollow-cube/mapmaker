@@ -15,7 +15,6 @@ dependencies {
     implementation(libs.polar)
     implementation(libs.included.molang)
     implementation(libs.bundles.adventure)
-    implementation(libs.directory.watcher)
 
     testImplementation(project(":modules:compat"))
     testImplementation(project(":modules:test"))
@@ -34,5 +33,20 @@ dependencies {
     }
     if (DefaultNativePlatform.getCurrentOperatingSystem().isWindows) {
         implementation(libs.luau.natives.windows.x64)
+    }
+}
+
+val luauApiFragmentsDir = layout.buildDirectory.dir("luau-api-fragments")
+
+tasks.compileJava {
+    options.compilerArgs.add("-Aluau.modelOut=${luauApiFragmentsDir.get().asFile.absolutePath}")
+    outputs.dir(luauApiFragmentsDir).withPropertyName("luauApiFragments")
+}
+
+val luauApiFragments by configurations.creating {
+    isCanBeConsumed = true
+    isCanBeResolved = false
+    outgoing.artifact(luauApiFragmentsDir) {
+        builtBy(tasks.compileJava)
     }
 }

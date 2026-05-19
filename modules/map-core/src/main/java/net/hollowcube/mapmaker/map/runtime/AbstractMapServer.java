@@ -188,7 +188,6 @@ public abstract class AbstractMapServer implements MapServer {
 
     @Blocking
     public final void start() {
-        MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION = true;
         MinestomAdventure.COMPONENT_TRANSLATOR = (component, locale) -> LanguageProviderV2.translate(component);
 
         EventExtensions.init();
@@ -320,6 +319,11 @@ public abstract class AbstractMapServer implements MapServer {
     @Override
     public @NotNull CommandManager commandManager() {
         return commandManager;
+    }
+
+    @Override
+    public @NotNull JetStreamWrapper jetStream() {
+        return this.jetStream;
     }
 
     @Override

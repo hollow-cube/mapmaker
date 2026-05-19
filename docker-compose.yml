@@ -65,9 +65,23 @@ services:
 
       SESSION_TEBEX_SECRET: "explicit_ignore"
 
+      SESSION_KEYRING_KEYS: "1:ZrQMC+nxDqEVo0FbHoeuGevh/4lfsZl94dHtcoaW5Y4"
+
+      SESSION_AUTH_EXTERNAL_URL: "http://localhost:10000"
+
       SESSION_KUBERNETES_NAMESPACE: "disabled"
     ports:
       - "9127:9124"
+
+  envoy:
+    image: envoyproxy/envoy:v1.31-latest
+    restart: unless-stopped
+    depends_on: [ api-server ]
+    command: [ "-c", "/etc/envoy/envoy.yaml", "--service-cluster", "mapmaker-edge" ]
+    volumes:
+      - ./deploy/envoy-local.yaml:/etc/envoy/envoy.yaml:ro
+    ports:
+      - "10000:10000"
 
 volumes:
   postgres-data:

@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
@@ -73,7 +72,6 @@ import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -201,14 +199,15 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         if (map.getSetting(MapSettings.HAS_SCRIPT_BUNDLE)) {
             // TODO(scripting): Generalize this init logic
-            if (ServerRuntime.getRuntime().isDevelopment()) {
-                var playerScript = Objects.requireNonNull(ParkourMapWorld.class.getResource("/scripts/" + map.id() + "/player.luau"));
-                var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-                this.scriptContext = new WorldScriptContext(this, baseUrl, false);
-            } else {
-                var zipUrl = Objects.requireNonNull(ParkourMapWorld.class.getResource("/net.hollowcube.scripting/" + map.id() + ".zip"));
-                this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
-            }
+//            if (ServerRuntime.getRuntime().isDevelopment()) {
+//                var playerScript = Objects.requireNonNull(ParkourMapWorld.class.getResource("/scripts/" + map.id() + "/player.luau"));
+//                var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
+//                this.scriptContext = new WorldScriptContext(this, baseUrl, false);
+//            } else {
+//                var zipUrl = Objects.requireNonNull(ParkourMapWorld.class.getResource("/net.hollowcube.scripting/" + map.id() + ".zip"));
+//                this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
+//            }
+            this.scriptContext = null;
         } else {
             this.scriptContext = null;
         }

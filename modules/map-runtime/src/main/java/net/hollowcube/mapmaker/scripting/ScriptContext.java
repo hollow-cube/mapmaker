@@ -1,120 +1,36 @@
 package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.mapmaker.map.MapPlayer;
-import net.hollowcube.mapmaker.map.MapWorld;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.event.Event;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.tag.Tag;
-import net.minestom.server.tag.TagHandler;
-import net.minestom.server.tag.TagReadable;
-import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.UnknownNullability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Objects;
-import java.util.function.UnaryOperator;
-
-/// ScriptContext exists to manage resources associated with a given thread (group)
+/// Lua-thread-local context for script api evaluation.
 ///
-/// For example, the world itself gets a ScriptContext as well as any player scripts.
-/// Threads created within those contexts will inherit the same ScriptContext (possibly
-/// via a Holder, for example on a task or coroutine thread).
-public sealed interface ScriptContext extends ThreadData, TagHandler {
+/// This should be the entrypoint for any api logic which needs to interact with the runtime.
+///
+/// Stored in the lua thread data with the following rules:
+///  - The entry thread gets a frame for the entry chunk's scope.
+///  - A {@code require()}'d module thread gets a *new* frame for that module's
+///    own scope (so a reload of the module only tears down its resources).
+///  - Coroutine / task threads inherit their parent's frame verbatim (see
+///    [ScriptEngine]'s userThread callback), so a deferred callback registered
+///    by chunk C is still attributed to C even when it runs much later.
+public record ScriptContext(ScriptRuntime runtime, ScriptScope scope) {
+    private static final Logger logger = LoggerFactory.getLogger(ScriptContext.class);
 
-    static ScriptContext get(LuaState state) {
-        final Object data = state.getThreadData();
-        if (data instanceof ThreadData threadData)
-            return threadData.scriptContext();
-        throw new IllegalStateException("ScriptContext not set (was '" + data + "')");
+    public static @Nullable ScriptContext current(LuaState state) {
+        return state.getThreadData() instanceof ScriptContext frame ? frame : null;
     }
 
-    non-sealed interface World extends ScriptContext {
-
-    }
-
-    non-sealed interface Player extends ScriptContext {
-
-        MapPlayer player();
-
-        @Override
-        default MapWorld world() {
-            return Objects.requireNonNull(MapWorld.forPlayer(player()));
+    public static void track(LuaState state, Disposable disposable) {
+        var frame = current(state);
+        if (frame == null) {
+            // Even though this is probably wrong, we should not leak it.
+            logger.warn("No script frame for thread, cannot track resource, disposing immediately. This is probably a bug.");
+            disposable.dispose();
+            return;
         }
+        frame.scope().register(disposable);
     }
-
-    MapWorld world();
-
-    void track(Disposable disposable);
-
-    Scheduler scheduler();
-
-    /// Kinda unsafe to use since it may actually be filtered more than is obvious.
-    EventNode<Event> eventNode();
-
-    TagHandler tagHandler();
-
-    //region ThreadData impl
-
-    @Override
-    default ScriptContext scriptContext() {
-        return this;
-    }
-
-    //endregion
-
-    //region TagHandler impl
-
-    @Override
-    default <T> @UnknownNullability T getTag(Tag<T> tag) {
-        return tagHandler().getTag(tag);
-    }
-
-    @Override
-    default <T> void setTag(Tag<T> tag, @Nullable T value) {
-        tagHandler().setTag(tag, value);
-    }
-
-    @Override
-    default <T> @Nullable T getAndSetTag(Tag<T> tag, @Nullable T value) {
-        return tagHandler().getAndSetTag(tag, value);
-    }
-
-    @Override
-    default <T> void updateTag(Tag<T> tag, UnaryOperator<@UnknownNullability T> value) {
-        tagHandler().updateTag(tag, value);
-    }
-
-    @Override
-    default <T> @UnknownNullability T updateAndGetTag(Tag<T> tag, UnaryOperator<@UnknownNullability T> value) {
-        return tagHandler().updateAndGetTag(tag, value);
-    }
-
-    @Override
-    default <T> @UnknownNullability T getAndUpdateTag(Tag<T> tag, UnaryOperator<@UnknownNullability T> value) {
-        return tagHandler().getAndUpdateTag(tag, value);
-    }
-
-    @Override
-    default TagReadable readableCopy() {
-        return tagHandler().readableCopy();
-    }
-
-    @Override
-    default TagHandler copy() {
-        return tagHandler().copy();
-    }
-
-    @Override
-    default void updateContent(CompoundBinaryTag compound) {
-        tagHandler().updateContent(compound);
-    }
-
-    @Override
-    default CompoundBinaryTag asCompound() {
-        return tagHandler().asCompound();
-    }
-
-    //endregion
 }

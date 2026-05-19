@@ -155,6 +155,16 @@ public interface MapClient {
         throw notImplemented();
     }
 
+    // Map files
+
+    default ResultList<FileHeader> listMapFiles(String mapId) {
+        throw notImplemented();
+    }
+
+    default byte @Nullable [] getMapFile(String mapId, String path) {
+        throw notImplemented();
+    }
+
 
     record Http(HttpClientWrapper http) implements MapClient {
         private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
@@ -443,6 +453,30 @@ public interface MapClient {
                 V4_PREFIX + "/" + mapId + "/leaderboard",
                 Map.of()
             );
+        }
+
+        @Override
+        public ResultList<FileHeader> listMapFiles(String mapId) {
+            return http.get(
+                "listMapFiles",
+                V4_PREFIX + "/" + mapId + "/files",
+                new TypeToken<>() {}
+            );
+        }
+
+        @Override
+        public byte @Nullable [] getMapFile(String mapId, String path) {
+            var res = http.doRequest(
+                "getMapFile",
+                HttpRequest.newBuilder()
+                    .uri(http.url(V4_PREFIX + "/" + mapId + "/files/" + path))
+                    .GET(),
+                HttpResponse.BodyHandlers.ofByteArray());
+            if (res.statusCode() == 404) {
+                return null;
+            }
+            http.maybeThrowResponse(res);
+            return res.body();
         }
     }
 

@@ -121,7 +121,7 @@ public class LanguageProviderV2 {
 
         // Apply the args to the partial (after translating the args)
         var args = translatable.arguments().stream()
-            .map(translationArgument -> translate(translationArgument.asComponent()))
+            .map(translationArgument -> (ComponentLike) translate(translationArgument.asComponent()))
             .toList();
         Component result;
         try {
@@ -142,7 +142,7 @@ public class LanguageProviderV2 {
         // Apply the args to the partials (after translating the args)
         var translatedArgs = args.stream()
             .map(ComponentLike::asComponent)
-            .map(LanguageProviderV2::translate)
+            .map((comp) -> (ComponentLike) translate(comp))
             .toList();
         return partials.stream()
             .map(partial -> BASE_EMPTY.append(treeToComponent(partial, translatedArgs)))
@@ -182,7 +182,7 @@ public class LanguageProviderV2 {
 
     public static final Component BASE_EMPTY = Component.text("", NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false);
 
-    private record PlaceholderTag(int index, @Nullable NumberFormat formatter) implements Tag {
+    private record PlaceholderTag(int index, @Nullable NumberFormat formatter) implements Inserting {
         private static final TagResolver RESOLVER = new TagResolver() {
             @Override
             public @Nullable Tag resolve(@NotNull String name, @NotNull ArgumentQueue arguments, @NotNull Context ctx) throws ParsingException {
@@ -204,6 +204,11 @@ public class LanguageProviderV2 {
                 }
             }
         };
+
+        @Override
+        public Component value() {
+            throw new UnsupportedOperationException("should never be called");
+        }
     }
 
     static @Nullable ElementNode parseComponent(@NotNull String id) {
@@ -236,7 +241,7 @@ public class LanguageProviderV2 {
         return (ElementNode) MINI_MESSAGE.deserializeToTree(value, PlaceholderTag.RESOLVER, MyHoverTag.RESOLVER, MyClickTag.RESOLVER);
     }
 
-    static @NotNull String replaceInString(@NotNull String value, @NotNull List<Component> args) {
+    static @NotNull String replaceInString(@NotNull String value, @NotNull List<ComponentLike> args) {
         return ARG_PATTERN.matcher(value)
             .replaceAll(match -> {
                 var index = Integer.parseInt(match.group("index"));
@@ -249,15 +254,15 @@ public class LanguageProviderV2 {
                     if (formatter != null && component instanceof TranslationArgument argument && argument.value() instanceof Number number) {
                         return formatter.format(number);
                     }
-                    return PLAIN_TEXT.serialize(component);
+                    return PLAIN_TEXT.serialize(component.asComponent());
                 }
             });
     }
 
     // The following are taken directly from MiniMessageParser inside minimessage. It is an internal API.
 
-    static @NotNull Component treeToComponent(final @NotNull ElementNode node, @NotNull List<Component> args) {
-        Component comp = Component.empty();
+    static @NotNull Component treeToComponent(final @NotNull ElementNode node, @NotNull List<ComponentLike> args) {
+        ComponentLike comp = Component.empty();
         Tag tag = null;
         if (node instanceof ValueNode) {
             comp = Component.text(((ValueNode) node).value());
@@ -271,16 +276,9 @@ public class LanguageProviderV2 {
                 // first walk the tree
                 visitModifying(modTransformation, tagNode, 0);
                 modTransformation.postVisit();
-            }
-
-            if (tag instanceof Inserting insertingTag) {
-                comp = insertingTag.value();
-            }
-            if (tag instanceof InsertingWithArgs insertingTag) {
+            } else if (tag instanceof InsertingWithArgs insertingTag) {
                 comp = insertingTag.value(args);
-            }
-
-            if (tag instanceof PlaceholderTag placeholderTag) {
+            } else if (tag instanceof PlaceholderTag placeholderTag) {
                 if (placeholderTag.index >= args.size()) {
                     comp = Component.text("$$" + placeholderTag.index);
                 } else {
@@ -304,24 +302,27 @@ public class LanguageProviderV2 {
                         if (number != null) comp = Component.text(placeholderTag.formatter.format(number));
                     }
                 }
+            } else if (tag instanceof Inserting insertingTag) {
+                comp = insertingTag.value();
             }
         }
 
+        var finalComp = comp.asComponent();
         if (!node.unsafeChildren().isEmpty()) {
-            final List<Component> children = new ArrayList<>(comp.children().size() + node.children().size());
-            children.addAll(comp.children());
+            final List<Component> children = new ArrayList<>(finalComp.children().size() + node.children().size());
+            children.addAll(finalComp.children());
             for (final ElementNode child : node.unsafeChildren()) {
                 children.add(treeToComponent(child, args));
             }
-            comp = comp.children(children);
+            finalComp = finalComp.children(children);
         }
 
         // special case for gradient and stuff
         if (tag instanceof Modifying) {
-            comp = handleModifying((Modifying) tag, comp, 0);
+            finalComp = handleModifying((Modifying) tag, finalComp, 0);
         }
 
-        return comp;
+        return finalComp;
     }
 
     private static void visitModifying(final Modifying modTransformation, final ElementNode node, final int depth) {

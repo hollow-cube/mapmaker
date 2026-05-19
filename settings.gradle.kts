@@ -40,6 +40,7 @@ include(
 include(
     "tools:native-image-helper",
     "tools:lua-slopgen:api",
+    "tools:lua-slopgen:post",
     "tools:lua-slopgen",
 )
 

@@ -5,13 +5,14 @@ import net.hollowcube.luau.gen.LuaExport;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
 import java.util.Objects;
 
+/// Items and item stacks.
 @LuaLibrary(name = "@mapmaker/item")
 public final class LibItem {
 
@@ -48,6 +49,10 @@ public final class LibItem {
         return LibItem$luau.checkItemArg(state, argIndex).value;
     }
 
+    /// **Deprecated.** Creates an `Item` from a vanilla material key.
+    ///
+    /// @luaParam material string
+    /// @luaReturn @mapmaker/item.Item
     @LuaMethod
     public static int deprecated_makeItemFromMaterial(LuaState state) {
         var name = state.checkString(1);
@@ -58,12 +63,16 @@ public final class LibItem {
         return 1;
     }
 
+    /// A stack of items. Empty stacks are returned as `nil` rather than an `Item`.
     @LuaExport
     public record Item(ItemStack value) {
 
+        /// The item's id.
+        ///
+        /// @luaReturn string
         @LuaProperty
         public int getId(LuaState state) {
-            var itemRegistry = ScriptContext.get(state).world().itemRegistry();
+            var itemRegistry = LegacyScriptContext.get(state).world().itemRegistry();
             var itemId = Objects.requireNonNullElse(itemRegistry.getItemId(value), value.material().name());
             state.pushString(itemId);
             return 1;
