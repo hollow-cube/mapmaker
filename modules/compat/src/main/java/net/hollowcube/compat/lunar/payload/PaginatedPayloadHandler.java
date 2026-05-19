@@ -4,15 +4,15 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.jspecify.annotations.Nullable;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class PaginatedPayloadHandler {
 
     private final Cache<String, List<LunarPayload.Paginated<?>>> received = Caffeine.newBuilder()
         .maximumSize(10_000)
-        .expireAfterAccess(Duration.ofMinutes(1))
+        .expireAfterWrite(1, TimeUnit.MINUTES)
         .build();
 
     @SuppressWarnings("unchecked")
