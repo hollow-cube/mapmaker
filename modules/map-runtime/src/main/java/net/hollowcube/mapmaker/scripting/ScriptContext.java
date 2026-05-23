@@ -23,14 +23,26 @@ public record ScriptContext(ScriptRuntime runtime, ScriptScope scope) {
         return state.getThreadData() instanceof ScriptContext frame ? frame : null;
     }
 
+    public static ScriptContext get(LuaState state) {
+        var context = current(state);
+        if (context == null) {
+            throw new IllegalStateException("No script context for thread, cannot run API logic. This is probably a bug.");
+        }
+        return context;
+    }
+
     public static void track(LuaState state, Disposable disposable) {
-        var frame = current(state);
-        if (frame == null) {
+        var context = current(state);
+        if (context == null) {
             // Even though this is probably wrong, we should not leak it.
             logger.warn("No script frame for thread, cannot track resource, disposing immediately. This is probably a bug.");
             disposable.dispose();
             return;
         }
-        frame.scope().register(disposable);
+        context.track(disposable);
+    }
+
+    public void track(Disposable disposable) {
+        scope.register(disposable);
     }
 }

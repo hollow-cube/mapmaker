@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
@@ -16,7 +15,6 @@ import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.scripting.WorldScriptContext;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -44,8 +42,6 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         );
     }
 
-    private final WorldScriptContext scriptContext;
-
     public HubMapWorld(MapServer server, MapData map) {
         super(server, map, makeMapInstance(map, 'h', null),
             HubPlayerState.class);
@@ -62,18 +58,6 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
-
-        // Load scripting engine
-        if (ServerRuntime.getRuntime().isDevelopment()) {
-//            var playerScript = Objects.requireNonNull(HubMapWorld.class.getResource("/scripts/player.luau"));
-//            var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-//            this.scriptContext = new WorldScriptContext(this, baseUrl, false);
-            this.scriptContext = null;
-        } else {
-//            var zipUrl = Objects.requireNonNull(HubMapWorld.class.getResource("/net.hollowcube.scripting/hub.zip"));
-//            this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
-            this.scriptContext = null;
-        }
     }
 
     @Override
@@ -118,15 +102,11 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     @Override
     public void spawnPlayer(Player player) {
         super.spawnPlayer(player);
-
-//        scriptContext.initializePlayer((MapPlayer) player);
     }
 
     @Override
     public void removePlayer(Player player) {
         super.removePlayer(player);
-
-//        scriptContext.destroyPlayer((MapPlayer) player);
     }
 
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {

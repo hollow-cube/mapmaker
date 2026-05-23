@@ -8,19 +8,11 @@ import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
-import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
-import net.hollowcube.mapmaker.scripting.Disposable;
-import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
-import net.hollowcube.mapmaker.scripting.util.LuaCallback;
-import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
-import net.hollowcube.mapmaker.scripting.util.ScheduledCallback;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.PlayerHand;
@@ -32,11 +24,9 @@ import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.potion.Potion;
 import net.minestom.server.potion.PotionEffect;
+import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Set;
-import java.util.UUID;
 
 import static net.hollowcube.mapmaker.scripting.util.LuaHelpers.*;
 
@@ -106,12 +96,13 @@ public final class LibPlayer {
         /// @luaReturn @mapmaker/player.Sidebar
         @LuaProperty
         public int getSidebar(LuaState state) {
-            if (sidebar == null) {
-                sidebar = new Sidebar(this);
-                ScriptContext.track(state, sidebar);
-            }
-            LibPlayer$luau.pushSidebar(state, sidebar);
-            return 1;
+            throw new UnsupportedOperationException("TODO");
+//            if (sidebar == null) {
+//                sidebar = new Sidebar(this);
+//                ScriptContext.track(state, sidebar);
+//            }
+//            LibPlayer$luau.pushSidebar(state, sidebar);
+//            return 1;
         }
 
         /// The world as the player sees it. Use this to apply effects only this player can
@@ -149,7 +140,7 @@ public final class LibPlayer {
                 }
             }
 
-            LibBase.pushEventSource(state, EntityAttackEvent.class, Impl::pushArgs);
+            LibBase.pushSignal(state, EntityAttackEvent.class, Impl::pushArgs);
             return 1;
         }
 
@@ -165,7 +156,7 @@ public final class LibPlayer {
                 }
             }
 
-            LibBase.pushEventSource(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
+            LibBase.pushSignal(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
             return 1;
         }
 
@@ -179,7 +170,7 @@ public final class LibPlayer {
                 }
             }
 
-            LibBase.pushEventSource(state, PlayerJumpEvent.class, Impl::pushArgs);
+            LibBase.pushSignal(state, PlayerJumpEvent.class, Impl::pushArgs);
             return 1;
         }
 
@@ -194,7 +185,7 @@ public final class LibPlayer {
                 }
             }
 
-            LibBase.pushEventSource(state, PlayerUseItemEvent.class, Impl::pushArgs);
+            LibBase.pushSignal(state, PlayerUseItemEvent.class, Impl::pushArgs);
             return 1;
         }
 
@@ -448,56 +439,57 @@ public final class LibPlayer {
         /// @luaReturn @mapmaker/entity.TextDisplay
         @LuaMethod
         public int spawnEntity(LuaState state) {
-            var typeName = state.checkString(1); // entity type
-            state.checkType(2, LuaType.TABLE); // init
-
-            if (!typeName.equals("text"))
-                throw state.error("Only text entity is supported");
-
-            var entity = new DisplayEntity.Text(UUID.randomUUID());
-            entity.setAutoViewable(false);
-//            entity.updateViewerRule(other -> other == player);
-
-            var luaEntity = new LibEntity.TextDisplay(entity);
-            LuaHelpers.tableForEach(state, 2, (key) -> {
-                if ("position".equals(key) || "yaw".equals(key) || "pitch".equals(key))
-                    return; // Special handling below
-                if (!luaEntity.readField(state, key, -1)) {
-                    state.argError(2, "Unknown property: " + key);
-                }
-            });
-
-            if (!tableGet(state, 2, "position"))
-                state.argError(2, "Missing position");
-            Point point = LuaVector.check(state, -1);
-            state.pop(1); // remove position
-            float yaw = 0, pitch = 0;
-            if (tableGet(state, 2, "yaw")) {
-                yaw = (float) state.toNumber(-1);
-                state.pop(1); // remove yaw
-            }
-            if (tableGet(state, 2, "pitch")) {
-                pitch = (float) state.toNumber(-1);
-                state.pop(1); // remove position
-            }
-
-            entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));
-            entity.addViewer(player);
-            LegacyScriptContext.get(state).track(new Disposable() {
-                @Override
-                public void dispose() {
-                    entity.remove();
-                }
-
-                // TODO disposable might self dispose.
-//                @Override
-//                public boolean isDisposed() {
-//                    return entity.isRemoved();
+            throw new UnsupportedOperationException("TODO");
+//            var typeName = state.checkString(1); // entity type
+//            state.checkType(2, LuaType.TABLE); // init
+//
+//            if (!typeName.equals("text"))
+//                throw state.error("Only text entity is supported");
+//
+//            var entity = new DisplayEntity.Text(UUID.randomUUID());
+//            entity.setAutoViewable(false);
+////            entity.updateViewerRule(other -> other == player);
+//
+//            var luaEntity = new LibEntity.TextDisplay(entity);
+//            LuaHelpers.tableForEach(state, 2, (key) -> {
+//                if ("position".equals(key) || "yaw".equals(key) || "pitch".equals(key))
+//                    return; // Special handling below
+//                if (!luaEntity.readField(state, key, -1)) {
+//                    state.argError(2, "Unknown property: " + key);
 //                }
-            });
-
-            LibEntity.pushEntity(state, luaEntity);
-            return 1;
+//            });
+//
+//            if (!tableGet(state, 2, "position"))
+//                state.argError(2, "Missing position");
+//            Point point = LuaVector.check(state, -1);
+//            state.pop(1); // remove position
+//            float yaw = 0, pitch = 0;
+//            if (tableGet(state, 2, "yaw")) {
+//                yaw = (float) state.toNumber(-1);
+//                state.pop(1); // remove yaw
+//            }
+//            if (tableGet(state, 2, "pitch")) {
+//                pitch = (float) state.toNumber(-1);
+//                state.pop(1); // remove position
+//            }
+//
+//            entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));
+//            entity.addViewer(player);
+//            LegacyScriptContext.get(state).track(new Disposable() {
+//                @Override
+//                public void dispose() {
+//                    entity.remove();
+//                }
+//
+//                // TODO disposable might self dispose.
+////                @Override
+////                public boolean isDisposed() {
+////                    return entity.isRemoved();
+////                }
+//            });
+//
+//            LibEntity.pushEntity(state, luaEntity);
+//            return 1;
         }
 
         /// Sets a block visible only to this player. The actual world is unchanged.
@@ -518,81 +510,81 @@ public final class LibPlayer {
 
     }
 
-    /// A scoreboard sidebar shown on the right side of the player's screen.
-    @LuaExport
-    public static final class Sidebar implements Disposable {
-        private final Player player;
-        private final net.minestom.server.scoreboard.Sidebar delegate;
-        private boolean disposed = false;
-
-        private @Nullable LuaCallback cb;
-        private @Nullable ScheduledCallback scheduled;
-
-        public Sidebar(Player player) {
-            this.player = player;
-            delegate = new net.minestom.server.scoreboard.Sidebar(Component.empty());
-            delegate.addViewer(player.player);
-        }
-
-        /// Sets the sidebar's contents. The render function is called each tick and must
-        /// return a table containing `title` and an array of `lines`.
-        ///
-        /// ```luau
-        /// player.sidebar:set(function(p)
-        ///     return {
-        ///         title = "<gold>Stats</gold>",
-        ///         lines = { "Name: " .. p.name },
-        ///     }
-        /// end)
-        /// ```
-        ///
-        /// @luaParam render (player: @mapmaker/player.Player) -> { title: AnyText, lines: { AnyText } }
-        @LuaMethod
-        public void set(LuaState state) {
-            state.checkType(1, LuaType.FUNCTION);
-
-            // Replacing an existing render: tear down the old callback + task.
-            if (scheduled != null) scheduled.dispose();
-
-            var cb = LuaCallback.of(state, 1);
-            this.cb = cb;
-            this.scheduled = ScheduledCallback.recurring(state, cb, () -> {
-                var s = cb.state();
-                LibPlayer$luau.pushPlayer(s, player); // the single render arg
-                cb.call(1, 1);                        // -> [result table]
-
-                s.checkType(-1, LuaType.TABLE);
-                if (tableGet(s, -1, "title")) {
-                    var title = LuaText.checkAnyText(s, -1);
-                    s.pop(1);
-                    delegate.setTitle(title);
-                }
-
-                for (var line : Set.copyOf(delegate.getLines())) {
-                    delegate.removeLine(line.getId());
-                }
-                if (tableGet(s, -1, "lines")) {
-                    s.checkType(-1, LuaType.TABLE);
-                    arrayForEach(s, -1, (index) -> {
-                        var line = LuaText.checkAnyText(s, -1);
-                        delegate.createLine(new net.minestom.server.scoreboard.Sidebar.ScoreboardLine(
-                            String.valueOf(index), line, index, net.minestom.server.scoreboard.Sidebar.NumberFormat.blank()));
-                    });
-                    s.pop(1);
-                }
-
-                s.pop(1);
-            });
-        }
-
-        @Override
-        public void dispose() {
-            if (disposed) return;
-            disposed = true;
-            delegate.removeViewer(player.player);
-            if (scheduled != null) scheduled.dispose(); // cancels task + disposes cb
-        }
-    }
+//    /// A scoreboard sidebar shown on the right side of the player's screen.
+//    @LuaExport
+//    public static final class Sidebar implements Disposable {
+//        private final Player player;
+//        private final net.minestom.server.scoreboard.Sidebar delegate;
+//        private boolean disposed = false;
+//
+//        private @Nullable LuaCallback cb;
+//        private @Nullable ScheduledCallback scheduled;
+//
+//        public Sidebar(Player player) {
+//            this.player = player;
+//            delegate = new net.minestom.server.scoreboard.Sidebar(Component.empty());
+//            delegate.addViewer(player.player);
+//        }
+//
+//        /// Sets the sidebar's contents. The render function is called each tick and must
+//        /// return a table containing `title` and an array of `lines`.
+//        ///
+//        /// ```luau
+//        /// player.sidebar:set(function(p)
+//        ///     return {
+//        ///         title = "<gold>Stats</gold>",
+//        ///         lines = { "Name: " .. p.name },
+//        ///     }
+//        /// end)
+//        /// ```
+//        ///
+//        /// @luaParam render (player: @mapmaker/player.Player) -> { title: AnyText, lines: { AnyText } }
+//        @LuaMethod
+//        public void set(LuaState state) {
+//            state.checkType(1, LuaType.FUNCTION);
+//
+//            // Replacing an existing render: tear down the old callback + task.
+//            if (scheduled != null) scheduled.dispose();
+//
+//            var cb = LuaCallback.of(state, 1);
+//            this.cb = cb;
+//            this.scheduled = ScheduledCallback.recurring(state, cb, () -> {
+//                var s = cb.state();
+//                LibPlayer$luau.pushPlayer(s, player); // the single render arg
+//                cb.call(1, 1);                        // -> [result table]
+//
+//                s.checkType(-1, LuaType.TABLE);
+//                if (tableGet(s, -1, "title")) {
+//                    var title = LuaText.checkAnyText(s, -1);
+//                    s.pop(1);
+//                    delegate.setTitle(title);
+//                }
+//
+//                for (var line : Set.copyOf(delegate.getLines())) {
+//                    delegate.removeLine(line.getId());
+//                }
+//                if (tableGet(s, -1, "lines")) {
+//                    s.checkType(-1, LuaType.TABLE);
+//                    arrayForEach(s, -1, (index) -> {
+//                        var line = LuaText.checkAnyText(s, -1);
+//                        delegate.createLine(new net.minestom.server.scoreboard.Sidebar.ScoreboardLine(
+//                            String.valueOf(index), line, index, net.minestom.server.scoreboard.Sidebar.NumberFormat.blank()));
+//                    });
+//                    s.pop(1);
+//                }
+//
+//                s.pop(1);
+//            });
+//        }
+//
+//        @Override
+//        public void dispose() {
+//            if (disposed) return;
+//            disposed = true;
+//            delegate.removeViewer(player.player);
+//            if (scheduled != null) scheduled.dispose(); // cancels task + disposes cb
+//        }
+//    }
 
     public static void pushPlayer(LuaState state, net.minestom.server.entity.Player player) {
         // We want to reuse the lua player within a script runtime since it stores some extra state

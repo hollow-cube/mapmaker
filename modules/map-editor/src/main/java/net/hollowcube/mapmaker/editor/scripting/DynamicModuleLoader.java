@@ -4,7 +4,6 @@ import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.scripting.require.AbstractModuleLoader;
-import net.hollowcube.mapmaker.scripting.require.ScriptCompileException;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -50,7 +49,7 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
         try {
             return compiler.compile(source);
         } catch (LuauCompileException e) {
-            throw new ScriptCompileException(loadName, e);
+            throw new RuntimeException(loadName, e);
         }
     }
 
@@ -97,14 +96,14 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
 
     /// Compile every current source, discarding the bytecode. Throws on the first
     /// failure so the reload pipeline can abort the swap before mutating Lua state.
-    public void compileCheck() throws ScriptCompileException {
+    public void compileCheck() {
         for (var entry : sources.entrySet()) {
             // TODO: we should track this so we dont 2x compile everything on reload.
             try {
                 compiler.compile(entry.getValue());
             } catch (LuauCompileException e) {
                 logger.warn("[scripts:{}] compile failed for {}", mapId, entry.getKey());
-                throw new ScriptCompileException(entry.getKey(), e);
+                throw new RuntimeException(entry.getKey(), e);
             }
         }
     }

@@ -312,10 +312,11 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                 if (this.testWorld == null) {
                     this.testWorld = testWorld = createTestWorld();
                     this.testWorld.loadWorld();
-                    // Spin up the Luau runtime against the test world now that
-                    // one exists. The source store has been kept warm since the
-                    // editor world opened, so this runs the current files.
-                    if (scriptSession != null) scriptSession.attach(this.testWorld);
+
+                    // Run the current scripts in the test world.
+                    if (scriptSession != null) {
+                        scriptSession.attach(this.testWorld);
+                    }
                 }
             } finally {
                 testWorldLock.unlock();

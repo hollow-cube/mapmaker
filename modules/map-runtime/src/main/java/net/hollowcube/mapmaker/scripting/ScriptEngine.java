@@ -4,10 +4,7 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.runtime.GeneratedStringAtoms;
 import net.hollowcube.luau.require.RequireResolver;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.scripting.api.LibBase$luau;
-import net.hollowcube.mapmaker.scripting.api.LibPlayer$luau;
-import net.hollowcube.mapmaker.scripting.api.LibPlayers$luau;
-import net.hollowcube.mapmaker.scripting.api.LuaGlobals;
+import net.hollowcube.mapmaker.scripting.api.*;
 import net.hollowcube.mapmaker.scripting.require.AbstractModuleLoader;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Nullable;
@@ -28,17 +25,18 @@ public final class ScriptEngine {
     private final MapWorld world;
     private final LuaState global;
     private final AbstractModuleLoader loader;
-    private final ScriptRuntime owner;
+
+    private final ScriptRuntime runtime;
     private volatile boolean closed;
 
-    /// Start a runtime against {@code world}, registering {@code loader} as the
-    /// require resolver. Builds the VM now and schedules the entry script to run
-    /// on the next tick.
     public ScriptEngine(MapWorld world, AbstractModuleLoader loader) {
         this.world = world;
         this.loader = loader;
         this.global = createGlobalState(loader);
-        this.owner = new ScriptRuntime(world);
+
+        this.runtime = new ScriptRuntime(world);
+        this.closed = false;
+
         world.scheduler().scheduleNextTick(this::runEntry);
         logger.info("[scripts:{}] script engine started", world.map().id());
     }
@@ -55,15 +53,21 @@ public final class ScriptEngine {
         if (closed) return; // sanity
 
         try {
-            owner.disposeScope(ENTRY_CHUNK); // tear down any previous generation
-            var thread = global.newThread();
-            thread.setThreadData(new ScriptContext(owner, owner.scope(ENTRY_CHUNK)));
-            global.pop(1); // remove thread from the main stack; the frame keeps it reachable
-            thread.sandboxThread();
+            runtime.disposeScope(ENTRY_CHUNK); // tear down any previous generation
 
-            var bytecode = loader.readEntry(ENTRY_PATH);
-            thread.load(ENTRY_CHUNK, bytecode);
-            thread.call(0, 0);
+            var thread = global.newThread();
+            int threadRef = global.ref(-1); // pin the thread while we execute it
+            global.pop(1);
+            try {
+                thread.setThreadData(new ScriptContext(runtime, runtime.scope(ENTRY_CHUNK)));
+                thread.sandboxThread();
+
+                var bytecode = loader.readEntry(ENTRY_PATH);
+                thread.load(ENTRY_CHUNK, bytecode);
+                thread.call(0, 0);
+            } finally {
+                global.unref(threadRef);
+            }
         } catch (Exception e) {
             report("failed to run " + ENTRY_PATH, e);
         }
@@ -78,7 +82,7 @@ public final class ScriptEngine {
         closed = true;
 
         try {
-            owner.disposeAll();
+            runtime.disposeAll();
         } finally {
             try {
                 global.close();
@@ -92,7 +96,7 @@ public final class ScriptEngine {
     }
 
     public void disposeScope(String chunkName) {
-        owner.disposeScope(chunkName);
+        runtime.disposeScope(chunkName);
     }
 
     public void clearRequireCache(String chunkName) {
@@ -110,10 +114,23 @@ public final class ScriptEngine {
         state.openLibs();
         state.openRequire(requireResolver);
 
-        LuaGlobals.register(state);
-
         GeneratedStringAtoms.register(state);
+        LuaGlobals.register(state);
+        LuaVector.register(state);
+        LuaRuntime$luau.register(state);
+        LuaText$luau.register(state);
+
+        LibTask$luau.register(state);
+
         LibBase$luau.register(state);
+
+        LibItem$luau.register(state);
+        LibItem.registerSlotGlobal(state);
+
+        LibEntity$luau.register(state);
+
+        LibStore$luau.register(state);
+
         LibPlayers$luau.register(state);
         LibPlayer$luau.register(state);
 

@@ -142,7 +142,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
         // graph and the scopes all key on. loadName keeps the real file path
         // (with extension) so readAndParseFile can read the bytes.
         if (state.getThreadData() instanceof ScriptContext requirer)
-            onResolved(requirer.scope().chunk(), absoluteModulePath);
+            onResolved(requirer.scope().chunkName(), absoluteModulePath);
         return new Module(absoluteModulePath, absoluteRealPath, absoluteModulePath);
     }
 
@@ -173,8 +173,8 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
             var moduleChunk = normChunk(chunkName);
             if (state.getThreadData() instanceof ScriptContext parentFrame) {
                 thread.setThreadData(new ScriptContext(
-                    parentFrame.owner(),
-                    parentFrame.owner().scope(moduleChunk)));
+                    parentFrame.runtime(),
+                    parentFrame.runtime().scope(moduleChunk)));
             }
 
             byte[] bytecode;

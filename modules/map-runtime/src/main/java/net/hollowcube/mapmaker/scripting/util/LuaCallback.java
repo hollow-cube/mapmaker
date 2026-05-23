@@ -1,15 +1,17 @@
 package net.hollowcube.mapmaker.scripting.util;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.mapmaker.scripting.Disposable;
+import net.hollowcube.luau.LuaType;
 
 /// A captured lua function value.
 ///
 /// Keeps the function and its owning thread alive until disposed.
-public final class LuaCallback implements Disposable {
+public final class LuaCallback implements LuaResumable {
 
-    public static LuaCallback of(LuaState state, int fnIdx) {
-        int fn = state.ref(fnIdx);
+    public static LuaCallback of(LuaState state, int index) {
+        state.checkType(index, LuaType.FUNCTION);
+
+        int fn = state.ref(index);
         state.pushThread(state);
         int sr = state.ref(-1);
         state.pop(1); // pop thread
@@ -37,6 +39,11 @@ public final class LuaCallback implements Disposable {
         state.getRef(fnRef);
         state.insert(state.top() - nargs); // move fn beneath the nargs args
         state.call(nargs, nret);
+    }
+
+    @Override
+    public void resume(int nargs) {
+        call(nargs, 0);
     }
 
     @Override

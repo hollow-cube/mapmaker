@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.scripting.api;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.LuaLibrary;
 import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.mapmaker.scripting.LegacyScriptContext;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
 
 /// Read and write the world this script is running in. For per-player effects, use
 /// `player.world` instead.
@@ -17,7 +17,7 @@ public final class LibWorld {
     /// @luaReturn string
     @LuaMethod
     public static int getBlock(LuaState state) {
-        var world = LegacyScriptContext.get(state).world();
+        var world = ScriptContext.get(state).runtime().world();
         var pos = LuaVector.check(state, 1);
 
         var block = world.instance().getBlock(pos);

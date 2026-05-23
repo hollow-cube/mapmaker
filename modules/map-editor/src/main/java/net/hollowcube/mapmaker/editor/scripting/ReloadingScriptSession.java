@@ -121,7 +121,7 @@ public final class ReloadingScriptSession {
         dynamic.clear();
         pendingChunks.clear();
         drainScheduled = false;
-        this.runtime = new ScriptEngine(world, dynamic, mapId);
+        this.runtime = new ScriptEngine(world, dynamic);
     }
 
     /// Tear down the runtime. The source store + change source are untouched, so

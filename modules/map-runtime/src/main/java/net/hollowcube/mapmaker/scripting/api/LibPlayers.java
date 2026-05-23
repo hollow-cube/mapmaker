@@ -32,7 +32,7 @@ public final class LibPlayers {
             }
         }
 
-        LibBase.pushEventSource(state, MapPlayerJoinEvent.class, Impl::pushArgs);
+        LibBase.pushSignal(state, MapPlayerJoinEvent.class, Impl::pushArgs);
         return 1;
     }
 
@@ -47,7 +47,7 @@ public final class LibPlayers {
             }
         }
 
-        LibBase.pushEventSource(state, MapPlayerLeaveEvent.class, Impl::pushArgs);
+        LibBase.pushSignal(state, MapPlayerLeaveEvent.class, Impl::pushArgs);
         return 1;
     }
 
@@ -62,7 +62,7 @@ public final class LibPlayers {
             }
         }
 
-        LibBase.pushEventSource(state, PlayerLandEvent.class, Impl::pushArgs);
+        LibBase.pushSignal(state, PlayerLandEvent.class, Impl::pushArgs);
         return 1;
     }
 
