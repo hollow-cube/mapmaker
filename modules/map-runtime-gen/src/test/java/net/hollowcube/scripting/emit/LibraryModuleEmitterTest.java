@@ -114,7 +114,7 @@ class LibraryModuleEmitterTest {
     @Test
     void unionAliasEmitsSyntheticCommonShapeAndUnion() {
         // Mirrors the LibProp authoring shape: abstract sealed parent + two final variants. The
-        // alias's id property must end up on the synthetic __PropMembers shape, not on Prop.
+        // alias's id property must end up on the synthetic Prop_Fields shape, not on Prop.
         var propType = ClassName.get("p", "Prop");
         var blockType = ClassName.get("p", "Block");
         var itemType = ClassName.get("p", "Item");
@@ -140,19 +140,19 @@ class LibraryModuleEmitterTest {
         String out = EMPTY_REFS.emit(lib("@mapmaker/prop", List.of(prop, block, item),
             List.of(), List.of()));
         assertTrue(out.contains("""
-            type __PropMembers = {
+            type Prop_Fields = {
             \tread id: string,
             }
             export type Prop = Block | Item
             """), out);
         assertTrue(out.contains("""
-            export type Block = __PropMembers & {
+            export type Block = Prop_Fields & {
             \tread kind: "block",
             \tread block: string,
             }
             """), out);
         assertTrue(out.contains("""
-            export type Item = __PropMembers & {
+            export type Item = Prop_Fields & {
             \tread kind: "item",
             \tread item: string,
             }
@@ -176,9 +176,9 @@ class LibraryModuleEmitterTest {
             Model.Export.Kind.UNION_VARIANT, List.of(), null, "");
 
         String out = EMPTY_REFS.emit(lib("@mapmaker/r", List.of(root, a), List.of(), List.of()));
-        assertTrue(out.contains("type __RootMembers = {}"), out);
+        assertTrue(out.contains("type Root_Fields = {}"), out);
         assertTrue(out.contains("export type Root = A"), out);
-        assertTrue(out.contains("export type A = __RootMembers & {\n\tread x: number,\n}"), out);
+        assertTrue(out.contains("export type A = Root_Fields & {\n\tread x: number,\n}"), out);
     }
 
     @Test

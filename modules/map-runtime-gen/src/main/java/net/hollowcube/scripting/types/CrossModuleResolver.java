@@ -157,6 +157,20 @@ public final class CrossModuleResolver {
     }
 
     private void walkNamed(LuauType.Named n, Model.Library lib, String location, GenericScope scope) {
+        if (n.module() == null && MetaTypes.isMetaTypeName(n.name())) {
+            // Meta-type reference — validated and expanded by MetaTypeResolver later in the
+            // pipeline. Still walk its args so any referenced types are resolved here.
+            for (var arg : n.args()) {
+                switch (arg) {
+                    case LuauType.TypeArg.Single s -> walk(s.type(), lib, location, scope);
+                    case LuauType.TypeArg.Pack p -> {
+                        for (var t : p.types()) walk(t, lib, location, scope);
+                        if (p.tail() != null) walk(p.tail().element(), lib, location, scope);
+                    }
+                }
+            }
+            return;
+        }
         if (n.module() == null && n.args().isEmpty() && scope.scalars().contains(n.name())) {
             return; // generic reference
         }

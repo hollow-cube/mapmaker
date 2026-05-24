@@ -3,6 +3,7 @@ package net.hollowcube.scripting;
 import net.hollowcube.scripting.emit.*;
 import net.hollowcube.scripting.gen.LuaLibrary;
 import net.hollowcube.scripting.types.CrossModuleResolver;
+import net.hollowcube.scripting.types.MetaTypeResolver;
 import net.hollowcube.scripting.types.ResolveDiagnostic;
 import net.hollowcube.scripting.types.SymbolTable;
 
@@ -89,6 +90,19 @@ public final class LuaApiProcessor extends AbstractProcessor {
             for (var d : resolveDiagnostics)
                 messager.printMessage(
                     Diagnostic.Kind.WARNING, d.location() + " — " + d.message(), anchor);
+        }
+
+        // ----- Meta-type expansion. After this pass, no `$`-prefixed Named survives. -----
+        var metaDiagnostics = new ArrayList<ResolveDiagnostic>();
+        var metaResolver = new MetaTypeResolver(symbols, libraries.values(), metaDiagnostics);
+        var expanded = new LinkedHashMap<TypeElement, Model.Library>();
+        for (var entry : libraries.entrySet())
+            expanded.put(entry.getKey(), metaResolver.rewrite(entry.getValue()));
+        libraries = expanded;
+        if (!metaDiagnostics.isEmpty()) {
+            var anchor = libraries.keySet().iterator().next();
+            for (var d : metaDiagnostics)
+                messager.printError(d.location() + " — " + d.message(), anchor);
         }
 
         // ----- Generated Java glue per library. -----

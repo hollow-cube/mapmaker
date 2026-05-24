@@ -127,7 +127,7 @@ public final class LuauTypeParser {
                 case '@':
                     return readModuleRef(start);
             }
-            if (Character.isLetter(c) || c == '_') {
+            if (Character.isLetter(c) || c == '_' || c == '$') {
                 return readName(start);
             }
             throw new LuauParseException(start, "unexpected character '" + c + "'");
@@ -178,12 +178,17 @@ public final class LuauTypeParser {
         }
 
         private Token readName(int start) {
+            // Consume optional leading `$` for meta-types (`$Writable`, etc.) — the body
+            // chars are still letter/digit/_, so the loop below picks up from there.
+            if (pos < src.length() && src.charAt(pos) == '$') pos++;
             while (pos < src.length()) {
                 char c = src.charAt(pos);
                 if (Character.isLetterOrDigit(c) || c == '_') pos++;
                 else break;
             }
             String text = src.substring(start, pos);
+            if (text.equals("$"))
+                throw new LuauParseException(start, "expected meta-type name after '$'");
             TokenType kw = switch (text) {
                 case "nil" -> TokenType.K_NIL;
                 case "true" -> TokenType.K_TRUE;

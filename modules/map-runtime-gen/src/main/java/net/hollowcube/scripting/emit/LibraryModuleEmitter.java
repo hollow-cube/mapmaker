@@ -71,9 +71,11 @@ public final class LibraryModuleEmitter {
 
     /// Synthetic non-exported common-shape name for a [Model.Export.Kind#UNION_ALIAS]'s
     /// declared members. Variants intersect with this rather than the alias itself so the union
-    /// type isn't self-referential.
+    /// type isn't self-referential. Naming mirrors the `_Fields` / `_Meta` convention used by
+    /// metamethod-bearing exports — both shapes are module-local `type` declarations carrying
+    /// the field surface of their owning export.
     private static String commonShapeName(String aliasLuaName) {
-        return "__" + aliasLuaName + "Members";
+        return aliasLuaName + "_Fields";
     }
 
     // ===================== Exports =====================
@@ -128,7 +130,7 @@ public final class LibraryModuleEmitter {
             .append(", {} :: ").append(name).append("_Meta").append(guse).append("))\n");
     }
 
-    /// Render a UNION_ALIAS as `type __NameMembers = {...}` (private) + `export type Name =
+    /// Render a UNION_ALIAS as `type Name_Fields = {...}` (private) + `export type Name =
     /// V1 | V2`. The synthetic shape carries the parent's declared properties and methods;
     /// variants intersect with it instead of the alias to avoid `Name` referencing itself.
     private void emitUnionAlias(StringBuilder out, Model.Export ex, RenderContext ctx) {

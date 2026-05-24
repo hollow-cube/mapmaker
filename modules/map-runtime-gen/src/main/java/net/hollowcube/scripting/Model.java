@@ -48,10 +48,11 @@ public sealed interface Model {
         ///
         ///  - [Kind#STRUCT]: a normal `@LuaExport` — emits as `export type Name = (Super &)? {...}`.
         ///  - [Kind#UNION_ALIAS]: an `@LuaExport @LuaUnion` abstract parent — its declared members
-        ///    emit as a synthetic non-exported common shape (`__NameMembers`), and the public
-        ///    `export type Name = V1 | V2` alias names the union of its variants.
+        ///    emit as a synthetic non-exported common shape (`Name_Fields`, matching the existing
+        ///    metatable-export naming convention), and the public `export type Name = V1 | V2`
+        ///    alias names the union of its variants.
         ///  - [Kind#UNION_VARIANT]: a permitted subtype of a [Kind#UNION_ALIAS] parent — emits as
-        ///    `export type Name = __ParentMembers & {...}`, anchored on the synthetic shape
+        ///    `export type Name = Parent_Fields & {...}`, anchored on the synthetic shape
         ///    instead of the union alias itself (avoids a circular reference).
         public enum Kind { STRUCT, UNION_ALIAS, UNION_VARIANT }
 

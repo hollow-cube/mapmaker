@@ -36,7 +36,7 @@ type Player_Meta = {
 export type Player = typeof(setmetatable({} :: Player_Fields, {} :: Player_Meta))
 
 export type WorldView = {
-	read spawn_entity: (self: WorldView, entityType: string, init: { position: vector, yaw: number?, pitch: number? }) -> Entity.TextDisplay,
+	read spawn_entity: (self: WorldView, entityType: string, init: { scale: vector?, billboard: ("fixed" | "vertical" | "horizontal" | "center")?, text: AnyText?, shadow: boolean?, background: number?, opacity: number? } & { position: vector, yaw: number?, pitch: number? }) -> Entity.TextProp,
 	read set_block: (self: WorldView, position: vector, blockState: string) -> (),
 }
 

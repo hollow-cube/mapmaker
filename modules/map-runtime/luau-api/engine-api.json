@@ -1260,45 +1260,145 @@
                   "name": "init",
                   "optional": false,
                   "type": {
-                    "kind": "table",
-                    "fields": [
+                    "kind": "intersection",
+                    "conjuncts": [
                       {
-                        "name": "position",
-                        "type": {
-                          "kind": "named",
-                          "module": null,
-                          "name": "vector",
-                          "args": []
-                        }
+                        "kind": "table",
+                        "fields": [
+                          {
+                            "name": "scale",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "vector",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "billboard",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "union",
+                                "alternatives": [
+                                  {
+                                    "kind": "string",
+                                    "value": "fixed"
+                                  },
+                                  {
+                                    "kind": "string",
+                                    "value": "vertical"
+                                  },
+                                  {
+                                    "kind": "string",
+                                    "value": "horizontal"
+                                  },
+                                  {
+                                    "kind": "string",
+                                    "value": "center"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "text",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "AnyText",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "shadow",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "boolean",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "background",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "opacity",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          }
+                        ],
+                        "arrayElement": null,
+                        "indexerKey": null,
+                        "indexerValue": null
                       },
                       {
-                        "name": "yaw",
-                        "type": {
-                          "kind": "optional",
-                          "inner": {
-                            "kind": "named",
-                            "module": null,
-                            "name": "number",
-                            "args": []
+                        "kind": "table",
+                        "fields": [
+                          {
+                            "name": "position",
+                            "type": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "vector",
+                              "args": []
+                            }
+                          },
+                          {
+                            "name": "yaw",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "pitch",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
                           }
-                        }
-                      },
-                      {
-                        "name": "pitch",
-                        "type": {
-                          "kind": "optional",
-                          "inner": {
-                            "kind": "named",
-                            "module": null,
-                            "name": "number",
-                            "args": []
-                          }
-                        }
+                        ],
+                        "arrayElement": null,
+                        "indexerKey": null,
+                        "indexerValue": null
                       }
-                    ],
-                    "arrayElement": null,
-                    "indexerKey": null,
-                    "indexerValue": null
+                    ]
                   },
                   "description": ""
                 }
@@ -1308,7 +1408,7 @@
                   "type": {
                     "kind": "named",
                     "module": "@mapmaker/entity",
-                    "name": "TextDisplay",
+                    "name": "TextProp",
                     "args": []
                   },
                   "description": ""

@@ -401,4 +401,31 @@ class LuauTypeParserTest {
         var f = assertInstanceOf(LuauType.Function.class, ty);
         assertEquals(List.of(), f.returns());
     }
+
+    // ===================== Meta-types =====================
+
+    @Test
+    void metaTypeNameLexesAsSingleNamed() {
+        var ty = LuauTypeParser.parse("$Writable<Foo>");
+        var n = assertInstanceOf(LuauType.Named.class, ty);
+        assertNull(n.module());
+        assertEquals("$Writable", n.name());
+        assertEquals(1, n.args().size());
+        var arg = assertInstanceOf(LuauType.TypeArg.Single.class, n.args().getFirst());
+        assertEquals("Foo", assertInstanceOf(LuauType.Named.class, arg.type()).name());
+    }
+
+    @Test
+    void barDollarRejected() {
+        // Bare `$` with no name after it is a parse error — meta-types must name something.
+        assertThrows(LuauParseException.class, () -> LuauTypeParser.parse("$"));
+    }
+
+    @Test
+    void metaTypeNestedInside() {
+        var ty = LuauTypeParser.parse("Map<string, $Writable<Foo>>");
+        var outer = assertInstanceOf(LuauType.Named.class, ty);
+        var second = assertInstanceOf(LuauType.TypeArg.Single.class, outer.args().get(1));
+        assertEquals("$Writable", assertInstanceOf(LuauType.Named.class, second.type()).name());
+    }
 }

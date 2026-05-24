@@ -2,7 +2,7 @@
 
 local lib = require("./init")
 
-type __PropMembers = {
+type Prop_Fields = {
 	read position: vector,
 	read yaw: number,
 	read pitch: number,
@@ -15,7 +15,7 @@ type __PropMembers = {
 }
 export type Prop = TextProp
 
-export type TextProp = __PropMembers & {
+export type TextProp = Prop_Fields & {
 	read kind: "text",
 	read text: lib.Text,
 	write text: AnyText,

@@ -435,8 +435,8 @@ public final class LibPlayer {
         /// ```
         ///
         /// @luaParam entityType string
-        /// @luaParam init { position: vector, yaw: number?, pitch: number? }
-        /// @luaReturn @mapmaker/entity.TextDisplay
+        /// @luaParam init $Writable<@mapmaker/entity.TextProp> & { position: vector, yaw: number?, pitch: number? }
+        /// @luaReturn @mapmaker/entity.TextProp
         @LuaMethod
         public int spawnEntity(LuaState state) {
             throw new UnsupportedOperationException("TODO");

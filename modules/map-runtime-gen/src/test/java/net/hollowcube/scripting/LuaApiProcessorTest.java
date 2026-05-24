@@ -145,4 +145,53 @@ class LuaApiProcessorTest {
         assertTrue(libB.contains(".Thing"),
             "LibB module should reference the foreign type by alias.Thing. Got:\n" + libB);
     }
+
+    @Test
+    void writableMetaTypeExpandedBeforeOutput() throws Exception {
+        // A library with one export `Thing` that has a writable `name` and a writable `count`,
+        // plus a static method whose param uses `$Writable<Thing>`. After processing:
+        //   - no '$' appears anywhere in engine-api.json or in the .luau bundle
+        //   - the .luau bundle types `set` as `{name: string?, count: number?}`
+        var compilation = compiler().compile(
+            JavaFileObjects.forSourceString("fixtures.LibMeta", """
+                package fixtures;
+                import net.hollowcube.luau.LuaState;
+                import net.hollowcube.scripting.gen.LuaExport;
+                import net.hollowcube.scripting.gen.LuaLibrary;
+                import net.hollowcube.scripting.gen.LuaMethod;
+                import net.hollowcube.scripting.gen.LuaProperty;
+                @LuaLibrary(name = "@t/meta")
+                public final class LibMeta {
+                    @LuaExport public static final class Thing {
+                        /// @luaReturn string
+                        @LuaProperty public int getName(LuaState s) { return 1; }
+                        /// @luaParam value string
+                        @LuaProperty public void setName(LuaState s) {}
+                        /// @luaReturn number
+                        @LuaProperty public int getCount(LuaState s) { return 1; }
+                        /// @luaParam value number
+                        @LuaProperty public void setCount(LuaState s) {}
+                    }
+                    /// @luaParam props $Writable<Thing>
+                    @LuaMethod public static void set(LuaState s) {}
+                }
+                """));
+        assertThat(compilation).succeeded();
+
+        var json = Files.readString(outDir.resolve("engine-api.json"));
+        assertFalse(json.contains("$Writable"),
+            "engine-api.json should not contain the unexpanded $Writable marker:\n" + json);
+        // The expanded shape should appear: a Table with name/count fields.
+        assertTrue(json.contains("\"name\""), () -> "expected 'name' in JSON:\n" + json);
+        assertTrue(json.contains("\"count\""), () -> "expected 'count' in JSON:\n" + json);
+
+        var luau = Files.readString(outDir.resolve("types/@t/meta.luau"));
+        assertFalse(luau.contains("$"),
+            ".luau bundle should not contain any '$' character (meta-type residue):\n" + luau);
+        // Both writable fields should be present as optional record fields.
+        assertTrue(luau.contains("name: string?"),
+            () -> "expected `name: string?` in .luau output:\n" + luau);
+        assertTrue(luau.contains("count: number?"),
+            () -> "expected `count: number?` in .luau output:\n" + luau);
+    }
 }
