@@ -1,14 +1,14 @@
 package net.hollowcube.common.lang;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.Style;
-import net.kyori.adventure.text.minimessage.tag.Tag;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class MyClickTagImpl implements Tag, InsertingWithArgs {
+public class MyClickTagImpl implements InsertingWithArgs {
     private final ClickEvent.Action action;
     private final String text;
 
@@ -18,9 +18,9 @@ public class MyClickTagImpl implements Tag, InsertingWithArgs {
     }
 
     @Override
-    public @NotNull Component value(@NotNull List<Component> args) {
+    public @NotNull Component value(@NotNull List<ComponentLike> args) {
         var replacedText = LanguageProviderV2.replaceInString(this.text, args);
-        return Component.text("", Style.style(ClickEvent.clickEvent(action, replacedText)));
+        return Component.text("", Style.style(ClickEvent.clickEvent(action, ClickEvent.Payload.string(replacedText))));
     }
 
 //    @Override
