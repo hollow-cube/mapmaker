@@ -2,10 +2,7 @@ package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.luau.gen.LuaProperty;
+import net.hollowcube.luau.gen.*;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
@@ -16,107 +13,31 @@ import java.util.Locale;
 @LuaLibrary(name = "@mapmaker/entity")
 public final class LibEntity {
 
-    public static void pushEntity(LuaState state, Entity entity) {
-        LibEntity$luau.pushEntity(state, entity);
-    }
+//    public static void pushProp(LuaState state, Entity entity) {
+//        LibEntity$luau.pushEntity(state, entity);
+//    }
 
-    /// The base type for all entities.
+    /// The base type for all props.
     @LuaExport
-    public static class Entity {
-        private final net.minestom.server.entity.Entity delegate;
+    @LuaUnion(discriminator = "kind")
+    public static sealed class Prop permits TextProp {
+        private final DisplayEntity delegate;
 
-        public Entity(net.minestom.server.entity.Entity delegate) {
+        protected Prop(DisplayEntity delegate) {
             this.delegate = delegate;
         }
 
-        protected net.minestom.server.entity.Entity delegate() {
+        protected DisplayEntity delegate() {
             return this.delegate;
         }
 
         public boolean readField(LuaState state, String key, int index) {
-            return switch (key) {
-                /* position, yaw, pitch have special cases in spawnEntity */
-                default -> false;
-            };
-        }
-
-        //region Properties
-
-        /// The entity's UUID.
-        ///
-        /// @luaReturn string
-        @LuaProperty
-        public int getUuid(LuaState state) {
-            state.pushString(delegate.getUuid().toString());
-            return 1;
-        }
-
-        /// The entity's current position.
-        /// @luaReturn vector
-        @LuaProperty
-        public int getPosition(LuaState state) {
-            var pos = delegate().getPosition();
-            state.pushVector((float) pos.x(), (float) pos.y(), (float) pos.z());
-            return 1;
-        }
-
-        /// The entity's yaw (horizontal rotation), in degrees.
-        /// @luaReturn number
-        @LuaProperty
-        public int getYaw(LuaState state) {
-            state.pushNumber(delegate().getPosition().yaw());
-            return 1;
-        }
-
-        /// The entity's pitch (vertical rotation), in degrees.
-        /// @luaReturn number
-        @LuaProperty
-        public int getPitch(LuaState state) {
-            state.pushNumber(delegate().getPosition().pitch());
-            return 1;
-        }
-
-        //endregion
-
-        //region Instance Methods
-
-        /// Removes the entity from the world. Has no effect if the entity is already removed.
-        @LuaMethod
-        public void remove(LuaState state) {
-            if (delegate.isRemoved())
-                return;
-
-            delegate.remove();
-        }
-
-        //endregion
-    }
-
-    /// An entity that renders something at its position — usually text, a block, or an
-    /// item. Most properties on `Display` and its subtypes can be smoothly animated with
-    /// `:interpolate`.
-    @LuaExport
-    public static class Display extends Entity {
-
-        public Display(net.minestom.server.entity.Entity delegate) {
-            super(delegate);
-        }
-
-        @Override
-        protected DisplayEntity delegate() {
-            return (DisplayEntity) super.delegate();
-        }
-
-        @Override
-        public boolean readField(LuaState state, String key, int index) {
             // TODO: should support extra string atoms added via annotations as constants (eg LibEntity$luau.ATOM_BILLBOARD)
-
-            // Interpolated fields should ONLY be added to readInterpField, not this method.
             switch (key) {
+                /* position, yaw, pitch have special cases in spawnEntity */
                 case "billboard" -> setBillboard(state, index);
                 default -> {
-                    return readInterpField(state, key, index)
-                           || super.readField(state, key, index);
+                    return readInterpField(state, key, index);
                 }
             }
             return true;
@@ -134,7 +55,57 @@ public final class LibEntity {
 
         //region Properties
 
-        /// How the display orients itself toward the player.
+        /// The prop's current position in the world.
+        /// @luaReturn vector
+        @LuaProperty
+        public int getPosition(LuaState state) {
+            var pos = delegate().getPosition();
+            state.pushVector((float) pos.x(), (float) pos.y(), (float) pos.z());
+            return 1;
+        }
+
+        /// The prop's yaw (horizontal rotation), in degrees.
+        /// @luaReturn number
+        @LuaProperty
+        public int getYaw(LuaState state) {
+            state.pushNumber(delegate().getPosition().yaw());
+            return 1;
+        }
+
+        /// The prop's pitch (vertical rotation), in degrees.
+        /// @luaReturn number
+        @LuaProperty
+        public int getPitch(LuaState state) {
+            state.pushNumber(delegate().getPosition().pitch());
+            return 1;
+        }
+
+        // TODO: block light, sky light, glow color override, width, height, shadow radius, shadow strength, view range, translation
+
+        /// The display's scale. Each axis can be set independently. Interpolatable.
+        ///
+        /// @luaReturn vector
+        @LuaProperty
+        public int getScale(LuaState state) {
+            LuaVector.push(state, delegate().getEntityMeta().getScale());
+            return 1;
+        }
+
+        /// @luaParam value vector
+        @LuaProperty
+        public void setScale(LuaState state) {
+            setScale(state, 1);
+        }
+
+        private void setScale(LuaState state, int index) {
+            var scale = LuaVector.check(state, index);
+            delegate().getEntityMeta().setScale(scale.asVec());
+        }
+
+        // TODO: leftRotation, rightRotation, transformation
+
+        /// How the prop orients itself toward the player.
+        ///
         /// @luaReturn "fixed" | "vertical" | "horizontal" | "center"
         @LuaProperty
         public int getBillboard(LuaState state) {
@@ -161,29 +132,6 @@ public final class LibEntity {
             }
         }
 
-        // TODO: block light, sky light, glow color override, width, height, shadow radius, shadow strength, view range, translation
-
-        /// The display's scale. Each axis can be set independently. Interpolatable.
-        /// @luaReturn vector
-        @LuaProperty
-        public int getScale(LuaState state) {
-            LuaVector.push(state, delegate().getEntityMeta().getScale());
-            return 1;
-        }
-
-        /// @luaParam value vector
-        @LuaProperty
-        public void setScale(LuaState state) {
-            setScale(state, 1);
-        }
-
-        private void setScale(LuaState state, int index) {
-            var scale = LuaVector.check(state, index);
-            delegate().getEntityMeta().setScale(scale.asVec());
-        }
-
-        // TODO: leftRotation, rightRotation, transformation
-
         //endregion
 
         //region Instance Methods
@@ -192,7 +140,7 @@ public final class LibEntity {
         /// interpolatable properties can appear in the target table.
         ///
         /// ```luau
-        /// display:interpolate(20, { scale = vector(2, 2, 2) })  -- grow over one second
+        /// prop:interpolate(20, { scale = vector(2, 2, 2) })  -- grow over one second
         /// ```
         ///
         /// @luaParam duration number
@@ -219,15 +167,23 @@ public final class LibEntity {
             return 0;
         }
 
-        //endregion
+        /// Removes the entity from the world. Has no effect if the entity is already removed.
+        @LuaMethod
+        public void remove(LuaState state) {
+            if (delegate.isRemoved())
+                return;
 
+            delegate.remove();
+        }
+
+        //endregion
     }
 
     /// A display that renders styled text floating in the world.
     @LuaExport
-    public static final class TextDisplay extends Display {
+    public static final class TextProp extends Prop {
 
-        public TextDisplay(net.minestom.server.entity.Entity delegate) {
+        private TextProp(DisplayEntity delegate) {
             super(delegate);
         }
 
@@ -264,6 +220,13 @@ public final class LibEntity {
         }
 
         //region Properties
+
+        /// @luaReturn "text"
+        @LuaProperty
+        public int getKind(LuaState state) {
+            state.pushString("text");
+            return 1;
+        }
 
         /// The text shown by this display.
         /// @luaReturn @mapmaker.Text
