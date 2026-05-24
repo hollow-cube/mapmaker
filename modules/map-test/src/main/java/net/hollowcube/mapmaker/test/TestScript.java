@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.test;
 
+import org.intellij.lang.annotations.Language;
+
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
@@ -8,5 +10,6 @@ import java.lang.annotation.*;
 public @interface TestScript {
     String path() default "/main.luau";
 
+    @Language("Luau")
     String value();
 }

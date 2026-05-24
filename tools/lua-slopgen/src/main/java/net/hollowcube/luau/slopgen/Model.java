@@ -39,11 +39,45 @@ public sealed interface Model {
         List<MetaMethod> metaMethods,
         int userDataTag,
         boolean hasSubtypes,
+        Kind kind,
+        List<TypeName> unionVariants,
+        @Nullable String discriminator,
         String description
     ) implements Model {
+        /// Classifies an export for type emission:
+        ///
+        ///  - [Kind#STRUCT]: a normal `@LuaExport` — emits as `export type Name = (Super &)? {...}`.
+        ///  - [Kind#UNION_ALIAS]: an `@LuaExport @LuaUnion` abstract parent — its declared members
+        ///    emit as a synthetic non-exported common shape (`__NameMembers`), and the public
+        ///    `export type Name = V1 | V2` alias names the union of its variants.
+        ///  - [Kind#UNION_VARIANT]: a permitted subtype of a [Kind#UNION_ALIAS] parent — emits as
+        ///    `export type Name = __ParentMembers & {...}`, anchored on the synthetic shape
+        ///    instead of the union alias itself (avoids a circular reference).
+        public enum Kind { STRUCT, UNION_ALIAS, UNION_VARIANT }
+
+        /// Back-compat constructor: pre-union call sites (tests, fixtures, JSON read-back without
+        /// `unionKind`) keep their argument shape and get a [Kind#STRUCT] export by default.
+        public Export(
+            TypeName javaType,
+            String luaName,
+            @Nullable TypeName superExport,
+            boolean isFinal,
+            List<GenericParam> generics,
+            List<Property> properties,
+            List<Method> methods,
+            List<MetaMethod> metaMethods,
+            int userDataTag,
+            boolean hasSubtypes,
+            String description
+        ) {
+            this(javaType, luaName, superExport, isFinal, generics, properties, methods,
+                metaMethods, userDataTag, hasSubtypes, Kind.STRUCT, List.of(), null, description);
+        }
+
         public Export withSubtypes(boolean hasSubtypes) {
             return new Export(javaType, luaName, superExport, isFinal,
-                generics, properties, methods, metaMethods, userDataTag, hasSubtypes, description);
+                generics, properties, methods, metaMethods, userDataTag, hasSubtypes,
+                kind, unionVariants, discriminator, description);
         }
     }
 

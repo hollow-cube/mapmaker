@@ -179,6 +179,223 @@ class LibraryModelBuilderTest {
     }
 
     @Test
+    void unionAliasStampsKindAndVariantsAndDiscriminator() {
+        var library = parseSingle("fixtures.LibProp", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaProperty;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/prop")
+            public final class LibProp {
+                @LuaExport
+                @LuaUnion(discriminator = "kind")
+                public static abstract sealed class Prop permits Block, Item {
+                    /// @luaReturn string
+                    @LuaProperty public int getId(LuaState s) { return 1; }
+                }
+                @LuaExport
+                public static final class Block extends Prop {
+                    /// @luaReturn "block"
+                    @LuaProperty public int getKind(LuaState s) { return 1; }
+                    /// @luaReturn string
+                    @LuaProperty public int getBlock(LuaState s) { return 1; }
+                }
+                @LuaExport
+                public static final class Item extends Prop {
+                    /// @luaReturn "item"
+                    @LuaProperty public int getKind(LuaState s) { return 1; }
+                    /// @luaReturn string
+                    @LuaProperty public int getItem(LuaState s) { return 1; }
+                }
+            }
+            """);
+        var prop = findExport(library, "Prop");
+        var block = findExport(library, "Block");
+        var item = findExport(library, "Item");
+        assertEquals(Model.Export.Kind.UNION_ALIAS, prop.kind());
+        assertEquals(Model.Export.Kind.UNION_VARIANT, block.kind());
+        assertEquals(Model.Export.Kind.UNION_VARIANT, item.kind());
+        assertEquals("kind", prop.discriminator());
+        assertEquals(2, prop.unionVariants().size());
+        assertEquals(ClassName.get("fixtures", "LibProp", "Block"), prop.unionVariants().get(0));
+        assertEquals(ClassName.get("fixtures", "LibProp", "Item"), prop.unionVariants().get(1));
+    }
+
+    @Test
+    void unionAliasWithoutDiscriminatorLeavesDiscriminatorNull() {
+        var library = parseSingle("fixtures.LibUnt", """
+            package fixtures;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/unt")
+            public final class LibUnt {
+                @LuaExport @LuaUnion
+                public static abstract sealed class Shape permits Circle, Square {}
+                @LuaExport public static final class Circle extends Shape {}
+                @LuaExport public static final class Square extends Shape {}
+            }
+            """);
+        var shape = findExport(library, "Shape");
+        assertEquals(Model.Export.Kind.UNION_ALIAS, shape.kind());
+        assertNull(shape.discriminator());
+        assertEquals(2, shape.unionVariants().size());
+    }
+
+    @Test
+    void unionParentMustBeSealed() {
+        var compilation = compile("fixtures.LibUS", """
+            package fixtures;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/us")
+            public final class LibUS {
+                @LuaExport @LuaUnion
+                public static abstract class Open {}
+            }
+            """);
+        assertThat(compilation).hadErrorContaining(
+            "@LuaUnion requires the class to be `sealed`");
+    }
+
+    @Test
+    void unionParentMustBeAbstract() {
+        var compilation = compile("fixtures.LibUA", """
+            package fixtures;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/ua")
+            public final class LibUA {
+                @LuaExport @LuaUnion
+                public static sealed class Concrete permits LibUA.Sub {}
+                @LuaExport public static final class Sub extends Concrete {}
+            }
+            """);
+        assertThat(compilation).hadErrorContaining(
+            "@LuaUnion requires the class to be `abstract`");
+    }
+
+    @Test
+    void unionVariantMissingLuaExportIsAnError() {
+        var compilation = compile("fixtures.LibUV", """
+            package fixtures;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/uv")
+            public final class LibUV {
+                @LuaExport @LuaUnion
+                public static abstract sealed class Root permits LibUV.Plain {}
+                public static final class Plain extends Root {}
+            }
+            """);
+        assertThat(compilation).hadErrorContaining("is missing @LuaExport");
+    }
+
+    @Test
+    void unionVariantSkippingLevelIsAnError() {
+        var compilation = compile("fixtures.LibSkip", """
+            package fixtures;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/skip")
+            public final class LibSkip {
+                @LuaExport @LuaUnion
+                public static abstract sealed class Top permits LibSkip.Leaf {}
+                @LuaExport
+                public static non-sealed abstract class Middle extends Top {}
+                @LuaExport
+                public static final class Leaf extends Middle {}
+            }
+            """);
+        // Top permits Leaf directly, but Leaf's `extends` chain goes through Middle.
+        // The validator should flag that Leaf doesn't extend Top directly.
+        assertThat(compilation).hadErrorContaining(
+            "must extend its union parent 'Top' directly");
+    }
+
+    @Test
+    void discriminatorMissingPropertyIsAnError() {
+        var compilation = compile("fixtures.LibMissD", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaProperty;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/missd")
+            public final class LibMissD {
+                @LuaExport @LuaUnion(discriminator = "kind")
+                public static abstract sealed class Prop permits LibMissD.Block {}
+                @LuaExport
+                public static final class Block extends Prop {
+                    /// @luaReturn string
+                    @LuaProperty public int getBlock(LuaState s) { return 1; }
+                }
+            }
+            """);
+        assertThat(compilation).hadErrorContaining(
+            "to declare a @LuaProperty getter named 'kind'");
+    }
+
+    @Test
+    void discriminatorNonLiteralTypeIsAnError() {
+        var compilation = compile("fixtures.LibNonLit", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaProperty;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/nonlit")
+            public final class LibNonLit {
+                @LuaExport @LuaUnion(discriminator = "kind")
+                public static abstract sealed class Prop permits LibNonLit.Block {}
+                @LuaExport
+                public static final class Block extends Prop {
+                    /// @luaReturn string
+                    @LuaProperty public int getKind(LuaState s) { return 1; }
+                }
+            }
+            """);
+        assertThat(compilation).hadErrorContaining("to be typed as a string literal");
+    }
+
+    @Test
+    void duplicateDiscriminatorLiteralIsAnError() {
+        var compilation = compile("fixtures.LibDup", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.luau.gen.LuaLibrary;
+            import net.hollowcube.luau.gen.LuaExport;
+            import net.hollowcube.luau.gen.LuaProperty;
+            import net.hollowcube.luau.gen.LuaUnion;
+            @LuaLibrary(name = "@t/dup")
+            public final class LibDup {
+                @LuaExport @LuaUnion(discriminator = "kind")
+                public static abstract sealed class Prop permits LibDup.A, LibDup.B {}
+                @LuaExport
+                public static final class A extends Prop {
+                    /// @luaReturn "x"
+                    @LuaProperty public int getKind(LuaState s) { return 1; }
+                }
+                @LuaExport
+                public static final class B extends Prop {
+                    /// @luaReturn "x"
+                    @LuaProperty public int getKind(LuaState s) { return 1; }
+                }
+            }
+            """);
+        assertThat(compilation).hadErrorContaining(
+            "literal \"x\" is shared by variants 'A' and 'B'");
+    }
+
+    @Test
     void inheritanceChainPopulatesSuperAndHasSubtypes() {
         var library = parseSingle("fixtures.LibTree", """
             package fixtures;

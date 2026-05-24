@@ -2,10 +2,7 @@ package net.hollowcube.luau.slopgen;
 
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.TypeName;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.luau.gen.LuaProperty;
+import net.hollowcube.luau.gen.*;
 import net.hollowcube.luau.slopgen.docs.DocTag;
 import net.hollowcube.luau.slopgen.docs.Docs;
 import net.hollowcube.luau.slopgen.docs.JavadocTagParser;
@@ -59,11 +56,14 @@ public final class LibraryModelBuilder {
         var staticSetterDocs = new LinkedHashMap<String, Docs>();
         var staticMethods = new ArrayList<Model.Method>();
         var rawExports = new ArrayList<Model.Export>();
+        var rawExportElements = new ArrayList<TypeElement>();
 
         for (var member : libraryClass.getEnclosedElements()) {
             if (member instanceof TypeElement nested) {
-                if (nested.getAnnotation(LuaExport.class) != null)
+                if (nested.getAnnotation(LuaExport.class) != null) {
                     rawExports.add(buildExport(nested));
+                    rawExportElements.add(nested);
+                }
                 continue;
             }
             if (!(member instanceof ExecutableElement method)) continue;
@@ -106,6 +106,8 @@ public final class LibraryModelBuilder {
         // Reserve atoms in source-declaration order so the emitter's literal references match.
         for (var p : staticProperties) idents.atomFor(p.luaName());
         for (var m : staticMethods) idents.atomFor(m.luaName());
+
+        applyUnionMetadata(rawExports, rawExportElements);
 
         var supersUsed = new HashSet<TypeName>();
         for (var ex : rawExports)
@@ -202,7 +204,149 @@ public final class LibraryModelBuilder {
 
         return new Model.Export(javaType, luaName, superExport, isFinal,
             typeGenerics, properties, methods, metaMethods, tag,
-            /*hasSubtypes=*/false, exportDocs.description());
+            /*hasSubtypes=*/false,
+            Model.Export.Kind.STRUCT, List.of(), null,
+            exportDocs.description());
+    }
+
+    /// Post-pass: stamp each `@LuaUnion`-marked export and its permitted variants with the
+    /// correct [Model.Export.Kind]. Validates the union contract (sealed + abstract parent,
+    /// every permitted type also `@LuaExport`, every variant `extends` the parent directly) and
+    /// — when `@LuaUnion#discriminator` is set — the per-variant discriminator property.
+    ///
+    /// Mutates `rawExports` in-place, replacing entries with their union-stamped counterparts.
+    /// Validation diagnostics are printed against the offending element so authors land on the
+    /// right line in their editor.
+    private void applyUnionMetadata(List<Model.Export> rawExports, List<TypeElement> exportElements) {
+        // First pass: collect union parents.
+        var byJavaType = new HashMap<TypeName, Integer>();
+        for (int i = 0; i < rawExports.size(); i++)
+            byJavaType.put(rawExports.get(i).javaType(), i);
+
+        for (int parentIdx = 0; parentIdx < rawExports.size(); parentIdx++) {
+            var parentElement = exportElements.get(parentIdx);
+            var luaUnion = parentElement.getAnnotation(LuaUnion.class);
+            if (luaUnion == null) continue;
+
+            // Parent must be sealed + abstract. Sealed gives us a deterministic variant list;
+            // abstract enforces that you can only construct the variants (the alias itself has
+            // no runtime representation).
+            var mods = parentElement.getModifiers();
+            if (!mods.contains(Modifier.SEALED)) {
+                env.getMessager().printError(
+                    "@LuaUnion requires the class to be `sealed` so its variant set is closed",
+                    parentElement);
+                continue;
+            }
+            if (!mods.contains(Modifier.ABSTRACT)) {
+                env.getMessager().printError(
+                    "@LuaUnion requires the class to be `abstract` — the alias names a union of "
+                    + "variants and can't be instantiated directly",
+                    parentElement);
+                continue;
+            }
+
+            var parent = rawExports.get(parentIdx);
+            var variantTypes = new ArrayList<TypeName>();
+            var variantIndices = new ArrayList<Integer>();
+            boolean variantsValid = true;
+
+            for (var permittedMirror : parentElement.getPermittedSubclasses()) {
+                var permittedName = TypeName.get(permittedMirror);
+                var variantIdx = byJavaType.get(permittedName);
+                if (variantIdx == null) {
+                    var permittedElement = ((javax.lang.model.type.DeclaredType) permittedMirror)
+                        .asElement();
+                    env.getMessager().printError(
+                        "@LuaUnion permitted variant '" + permittedName
+                        + "' is missing @LuaExport — every variant must be exported",
+                        permittedElement);
+                    variantsValid = false;
+                    continue;
+                }
+
+                var variant = rawExports.get(variantIdx);
+                if (variant.superExport() == null
+                    || !variant.superExport().equals(parent.javaType())) {
+                    env.getMessager().printError(
+                        "@LuaUnion variant '" + variant.luaName() + "' must extend its union "
+                        + "parent '" + parent.luaName() + "' directly (no intermediate class)",
+                        exportElements.get(variantIdx));
+                    variantsValid = false;
+                    continue;
+                }
+
+                variantTypes.add(permittedName);
+                variantIndices.add(variantIdx);
+            }
+
+            String discriminator = luaUnion.discriminator().isEmpty() ? null : luaUnion.discriminator();
+            if (discriminator != null && variantsValid)
+                validateDiscriminator(parent, discriminator, variantIndices, rawExports, exportElements);
+
+            // Stamp variants first, then parent, so the rewrite is atomic per family.
+            for (int idx : variantIndices)
+                rawExports.set(idx, withKind(rawExports.get(idx),
+                    Model.Export.Kind.UNION_VARIANT, List.of(), null));
+            rawExports.set(parentIdx, withKind(parent,
+                Model.Export.Kind.UNION_ALIAS, List.copyOf(variantTypes), discriminator));
+        }
+    }
+
+    /// Per-variant discriminator contract: every variant must declare a [LuaProperty] named
+    /// `discriminator` whose return type is a [LuauType.StringLiteral], and the literals must be
+    /// pairwise distinct across the family. The literal must come from `@luaReturn "..."` on the
+    /// getter — anything else (plain `string`, a union of literals, missing tag) is rejected.
+    private void validateDiscriminator(
+        Model.Export parent, String discriminator,
+        List<Integer> variantIndices, List<Model.Export> rawExports, List<TypeElement> exportElements
+    ) {
+        var literalToVariant = new LinkedHashMap<String, String>();
+        for (int idx : variantIndices) {
+            var variant = rawExports.get(idx);
+            var element = exportElements.get(idx);
+            var prop = findProperty(variant, discriminator);
+            if (prop == null || prop.getter() == null) {
+                env.getMessager().printError(
+                    "@LuaUnion(discriminator = \"" + discriminator + "\") requires variant '"
+                    + variant.luaName() + "' to declare a @LuaProperty getter named '"
+                    + discriminator + "' returning a string literal type",
+                    element);
+                continue;
+            }
+            if (!(prop.getter().type() instanceof LuauType.StringLiteral lit)) {
+                env.getMessager().printError(
+                    "@LuaUnion(discriminator = \"" + discriminator + "\") requires variant '"
+                    + variant.luaName() + "'.'" + discriminator + "' to be typed as a string "
+                    + "literal (e.g. `@luaReturn \"" + variant.luaName().toLowerCase() + "\"`)",
+                    element);
+                continue;
+            }
+            var prior = literalToVariant.put(lit.value(), variant.luaName());
+            if (prior != null) {
+                env.getMessager().printError(
+                    "@LuaUnion(discriminator = \"" + discriminator + "\") literal \""
+                    + lit.value() + "\" is shared by variants '" + prior + "' and '"
+                    + variant.luaName() + "' — discriminator values must be pairwise distinct",
+                    element);
+            }
+        }
+    }
+
+    private static @Nullable Model.Property findProperty(Model.Export ex, String luaName) {
+        for (var p : ex.properties()) if (luaName.equals(p.luaName())) return p;
+        return null;
+    }
+
+    private static Model.Export withKind(
+        Model.Export ex, Model.Export.Kind kind, List<TypeName> unionVariants,
+        @Nullable String discriminator
+    ) {
+        return new Model.Export(
+            ex.javaType(), ex.luaName(), ex.superExport(), ex.isFinal(),
+            ex.generics(), ex.properties(), ex.methods(), ex.metaMethods(),
+            ex.userDataTag(), ex.hasSubtypes(),
+            kind, unionVariants, discriminator, ex.description());
     }
 
     /// Reject method-level `@luaGeneric` declarations that reuse a name already bound by an

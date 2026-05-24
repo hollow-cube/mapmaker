@@ -72,6 +72,14 @@ public final class GlobalDeclEmitter {
     // ===================== declare class =====================
 
     private void emitClass(StringBuilder out, Model.Export ex, RenderContext ctx) {
+        // `declare` syntax has no `type T = A | B` form, so a union alias can't be represented
+        // in an ambient file. Fail loudly rather than emitting malformed Luau.
+        if (ex.kind() == Model.Export.Kind.UNION_ALIAS)
+            throw new UnrepresentableGlobalException(
+                "global export '" + ex.luaName() + "' is a @LuaUnion alias; Luau `declare` "
+                + "grammar has no type-alias form, so unions can't be ambient. Use REQUIRE "
+                + "scope for the library that owns this union.");
+
         String header = "declare class " + ex.luaName();
         var sup = superName(ex);
         if (sup != null) header += " extends " + sup;

@@ -129,6 +129,23 @@ public final class SchemaJson {
             }
         }
 
+        // Same FQCN-to-simple-name fold for union variant references.
+        if (o.has("unionVariants")) {
+            var arr = o.get("unionVariants");
+            if (arr instanceof JsonArray ja) {
+                var folded = new JsonArray();
+                for (var variant : ja) {
+                    if (variant.isJsonPrimitive()) {
+                        var fqcn = variant.getAsString();
+                        folded.add(fqcn.substring(fqcn.lastIndexOf('.') + 1));
+                    } else {
+                        folded.add(variant);
+                    }
+                }
+                o.add("unionVariants", folded);
+            }
+        }
+
         for (var entry : new ArrayList<>(o.entrySet())) {
             slim(entry.getValue());
             if (isEmpty(entry.getValue())) o.remove(entry.getKey());
@@ -213,6 +230,7 @@ public final class SchemaJson {
     private static final Type GENERIC_LIST = new TypeToken<List<Model.GenericParam>>() {}.getType();
     private static final Type PARAM_LIST = new TypeToken<List<Model.Param>>() {}.getType();
     private static final Type RETURN_LIST = new TypeToken<List<Model.Return>>() {}.getType();
+    private static final Type TYPE_NAME_LIST = new TypeToken<List<TypeName>>() {}.getType();
 
     /// `{schemaVersion, kind, libraries:{moduleName→Library}, globals:[Library]}`. The split by
     /// `@LuaLibrary` scope replaces a per-library `scope` field; read-back restores the scope
@@ -330,6 +348,14 @@ public final class SchemaJson {
             o.add("metaMethods", gson.toJsonTree(v.metaMethods(), META_LIST));
             o.addProperty("userDataTag", v.userDataTag());
             o.addProperty("hasSubtypes", v.hasSubtypes());
+            // STRUCT exports omit unionKind/unionVariants/discriminator so legacy schemas
+            // round-trip unchanged. The slim() pass also drops them when empty.
+            if (v.kind() != Model.Export.Kind.STRUCT)
+                o.addProperty("unionKind", v.kind().name());
+            if (!v.unionVariants().isEmpty())
+                o.add("unionVariants", gson.toJsonTree(v.unionVariants(), TYPE_NAME_LIST));
+            if (v.discriminator() != null)
+                o.addProperty("discriminator", v.discriminator());
             o.addProperty("description", v.description());
             gson.toJson(o, out);
         }
@@ -337,6 +363,15 @@ public final class SchemaJson {
         @Override
         public Model.Export read(JsonReader in) {
             JsonObject o = JsonParser.parseReader(in).getAsJsonObject();
+            Model.Export.Kind kind = Model.Export.Kind.STRUCT;
+            if (o.has("unionKind") && !o.get("unionKind").isJsonNull())
+                kind = Model.Export.Kind.valueOf(o.get("unionKind").getAsString());
+            List<TypeName> variants = List.of();
+            if (o.has("unionVariants") && !o.get("unionVariants").isJsonNull())
+                variants = gson.fromJson(o.get("unionVariants"), TYPE_NAME_LIST);
+            String discriminator = null;
+            if (o.has("discriminator") && !o.get("discriminator").isJsonNull())
+                discriminator = o.get("discriminator").getAsString();
             return new Model.Export(
                 gson.fromJson(o.get("javaType"), TypeName.class),
                 o.get("name").getAsString(),
@@ -348,6 +383,7 @@ public final class SchemaJson {
                 gson.fromJson(o.get("metaMethods"), META_LIST),
                 o.get("userDataTag").getAsInt(),
                 o.get("hasSubtypes").getAsBoolean(),
+                kind, variants, discriminator,
                 o.get("description").getAsString());
         }
     }
