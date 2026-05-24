@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.editor.scripting;
 
 import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.compiler.LuauCompiler;
-import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.scripting.require.AbstractModuleLoader;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
@@ -13,8 +12,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /// Module loader for the editing/testing flow. Sources live in memory and are
-/// (re)fetched from the backend via [MapClient]; the loader also tracks a
-/// dependency graph so a changed file can transitively invalidate its dependents.
+/// (re)fetched from a [ScriptSource] (production: the backend over HTTP;
+/// tests: an in-memory store); the loader also tracks a dependency graph so
+/// a changed file can transitively invalidate its dependents.
 ///
 /// Fetching is blocking IO and must happen OFF the world thread (the change
 /// source's virtual thread). The actual reload swap is driven by
@@ -23,8 +23,8 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
     private static final Logger logger = LoggerFactory.getLogger(DynamicModuleLoader.class);
 
     private final LuauCompiler compiler;
-    private final MapClient maps;
-    private final String mapId;
+    private final ScriptSource source;
+    private final String label;
 
     /// File path (eg. /lib/util.luau) -> source.
     private final Map<String, String> sources = new HashMap<>();
@@ -32,10 +32,10 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
     /// module chunk (eg. /lib/util) -> chunks that require it.
     private final Map<String, Set<String>> dependents = new HashMap<>();
 
-    public DynamicModuleLoader(LuauCompiler compiler, MapClient maps, String mapId) {
+    public DynamicModuleLoader(LuauCompiler compiler, ScriptSource source, String label) {
         this.compiler = compiler;
-        this.maps = maps;
-        this.mapId = mapId;
+        this.source = source;
+        this.label = label;
     }
 
     @Override
@@ -45,9 +45,9 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
 
     @Override
     protected byte[] readAndParseFile(String loadName) {
-        var source = Objects.requireNonNull(sources.get(normalizeKey(loadName)), loadName);
+        var src = Objects.requireNonNull(sources.get(normalizeKey(loadName)), loadName);
         try {
-            return compiler.compile(source);
+            return compiler.compile(src);
         } catch (LuauCompileException e) {
             throw new RuntimeException(loadName, e);
         }
@@ -61,9 +61,9 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
     @Blocking
     public void loadAllFiles() {
         sources.clear();
-        for (var header : maps.listMapFiles(mapId)) {
+        for (var path : source.listFiles()) {
             // TODO: only load luau files
-            loadFile(header.path());
+            loadFile(path);
         }
     }
 
@@ -84,13 +84,13 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
     @Blocking
     private void loadFile(String path) {
         var key = normalizeKey(path);
-        byte @Nullable [] content = maps.getMapFile(mapId, stripLeadingSlash(key));
+        byte @Nullable [] content = source.readFile(key);
         if (content == null) {
             sources.remove(key);
-            logger.info("[scripts:{}] removed {}", mapId, key);
+            logger.info("[scripts:{}] removed {}", label, key);
         } else {
             sources.put(key, new String(content, StandardCharsets.UTF_8));
-            logger.info("[scripts:{}] fetched {} ({} bytes)", mapId, key, content.length);
+            logger.info("[scripts:{}] fetched {} ({} bytes)", label, key, content.length);
         }
     }
 
@@ -102,7 +102,7 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
             try {
                 compiler.compile(entry.getValue());
             } catch (LuauCompileException e) {
-                logger.warn("[scripts:{}] compile failed for {}", mapId, entry.getKey());
+                logger.warn("[scripts:{}] compile failed for {}", label, entry.getKey());
                 throw new RuntimeException(entry.getKey(), e);
             }
         }
@@ -154,9 +154,5 @@ public final class DynamicModuleLoader extends AbstractModuleLoader {
         if (p.startsWith("@")) p = p.substring(1);
         if (!p.startsWith("/")) p = "/" + p;
         return p;
-    }
-
-    private static String stripLeadingSlash(String key) {
-        return key.startsWith("/") ? key.substring(1) : key;
     }
 }

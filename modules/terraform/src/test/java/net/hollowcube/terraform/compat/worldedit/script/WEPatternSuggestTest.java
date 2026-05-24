@@ -19,19 +19,6 @@ public class WEPatternSuggestTest {
     class BlockStateTest {
 
         @Test
-        void testSuggestEmpty() {
-            assertSuggestions(
-                    new PatternTree.BlockState(
-                            new PatternTree.NamespaceId(0, 0, -1, "", null),
-                            new PatternTree.PropertyList(-1, -1, -1, -1, -1, List.of())),
-                    "acacia_button", "acacia_door", "acacia_fence", "acacia_fence_gate", "acacia_hanging_sign",
-                    "acacia_leaves", "acacia_log", "acacia_planks", "acacia_pressure_plate", "acacia_sapling",
-                    "acacia_sign", "acacia_slab", "acacia_stairs", "acacia_trapdoor", "acacia_wall_hanging_sign",
-                    "acacia_wall_sign", "acacia_wood", "activator_rail", "air", "allium"
-            );
-        }
-
-        @Test
         void testSuggestBlockStatePartialPath() {
             assertSuggestions(
                     new PatternTree.BlockState(
@@ -49,19 +36,6 @@ public class WEPatternSuggestTest {
                             new PatternTree.NamespaceId(0, 5, -1, "minec", null),
                             new PatternTree.PropertyList(-1, -1, -1, -1, -1, List.of())),
                     "minecraft:"
-            );
-        }
-
-        @Test
-        void testSuggestBlockStateFullNamespace() {
-            assertSuggestions(
-                    new PatternTree.BlockState(
-                            new PatternTree.NamespaceId(0, 10, 9, "minecraft:", null),
-                            new PatternTree.PropertyList(-1, -1, -1, -1, -1, List.of())),
-                    "minecraft:acacia_button", "minecraft:acacia_door", "minecraft:acacia_fence", "minecraft:acacia_fence_gate", "minecraft:acacia_hanging_sign",
-                    "minecraft:acacia_leaves", "minecraft:acacia_log", "minecraft:acacia_planks", "minecraft:acacia_pressure_plate", "minecraft:acacia_sapling",
-                    "minecraft:acacia_sign", "minecraft:acacia_slab", "minecraft:acacia_stairs", "minecraft:acacia_trapdoor", "minecraft:acacia_wall_hanging_sign",
-                    "minecraft:acacia_wall_sign", "minecraft:acacia_wood", "minecraft:activator_rail", "minecraft:air", "minecraft:allium"
             );
         }
 

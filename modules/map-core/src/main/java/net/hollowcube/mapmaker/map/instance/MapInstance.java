@@ -14,7 +14,6 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.ChunkLoader;
 import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
@@ -28,7 +27,6 @@ import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class MapInstance extends InstanceContainer {
-    private static final InstanceManager INSTANCE_MANAGER = MinecraftServer.getInstanceManager();
 
     public enum LightingMode {
         // Run the light engine on changes.
@@ -66,7 +64,7 @@ public class MapInstance extends InstanceContainer {
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);
 
-        INSTANCE_MANAGER.registerInstance(this);
+        MinecraftServer.getInstanceManager().registerInstance(this);
     }
 
     public void load(byte @NotNull [] worldData, @Nullable PolarWorldAccess worldAccess) {
@@ -122,7 +120,7 @@ public class MapInstance extends InstanceContainer {
             // Something went wrong removing people, but to not unregister would be worse so kick the players.
             Set.copyOf(getPlayers()).forEach(player -> player.kick("Map unloaded"));
         }
-        INSTANCE_MANAGER.unregisterInstance(this);
+        MinecraftServer.getInstanceManager().unregisterInstance(this);
     }
 
     private void handleEntityRemoved(@NotNull RemoveEntityFromInstanceEvent event) {

@@ -25,5 +25,6 @@ dependencies {
     implementation(libs.nats)
 
     testImplementation(project(":modules:test"))
+    testImplementation(project(":modules:map-test"))
 
 }

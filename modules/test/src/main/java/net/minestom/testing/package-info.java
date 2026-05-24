@@ -1,4 +1,4 @@
 @NotNullByDefault
-package net.hollowcube.mapmaker.local;
+package net.minestom.testing;
 
 import org.jetbrains.annotations.NotNullByDefault;

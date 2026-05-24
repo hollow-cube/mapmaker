@@ -43,11 +43,24 @@ public final class ReloadingScriptSession {
         .vectorCtor("vec")
         .build();
 
+    /// The shared editor compiler. Tests reuse this so their compile-time
+    /// behavior matches production exactly.
+    public static LuauCompiler editorCompiler() {
+        return LUAU_COMPILER;
+    }
+
     /// Editing flow: sources fetched from the backend and hot reloaded. The
     /// runtime is *not* started here - call [#bootstrap] on start, then
     /// [#attach]/[#detach] around the test world's lifetime.
     public static ReloadingScriptSession reloading(MapClient maps, String mapId) {
-        return new ReloadingScriptSession(mapId, new DynamicModuleLoader(LUAU_COMPILER, maps, mapId));
+        return reloading(new MapClientScriptSource(maps, mapId), mapId);
+    }
+
+    /// Same as [#reloading(MapClient, String)] but takes a [ScriptSource]
+    /// directly; lets tests inject an in-memory source without going through
+    /// the full HTTP-backed [MapClient].
+    public static ReloadingScriptSession reloading(ScriptSource source, String label) {
+        return new ReloadingScriptSession(label, new DynamicModuleLoader(LUAU_COMPILER, source, label));
     }
 
     private final String mapId;

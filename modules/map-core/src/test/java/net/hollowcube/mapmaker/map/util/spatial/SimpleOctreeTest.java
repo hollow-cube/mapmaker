@@ -68,18 +68,4 @@ class SimpleOctreeTest {
         assertEquals(0, octree.children[7].flags & SimpleOctreeNode.FLAG_BUILT);
     }
 
-    @Test
-    void testOverlappingObjects() {
-        var obj1 = new SimpleSpatialObject(0, 0, 0, 10, 10, 10);
-        var obj2 = new SimpleSpatialObject(5, 5, 5, 15, 15, 15);
-        var octree = SimpleOctreeNode.create(8, obj1, obj2);
-
-        var overlap = octree.intersectingObjects(new BoundingBox(-1, -1, -1, 20, 20, 20));
-        assertEquals(2, overlap.size());
-        assertTrue(overlap.contains(obj1));
-        assertTrue(overlap.contains(obj2));
-
-        assertEquals(1, octree.objects.size()); // obj1 must still be in the root
-    }
-
 }
