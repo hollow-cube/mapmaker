@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.map.event.MapPlayerJoinEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerLeaveEvent;
 import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaProperty;
 
 import static net.hollowcube.mapmaker.scripting.api.LibPlayer.pushPlayer;
 

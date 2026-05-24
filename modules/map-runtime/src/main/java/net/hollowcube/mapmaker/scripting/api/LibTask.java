@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaMethod;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Nullable;

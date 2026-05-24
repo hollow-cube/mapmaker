@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaMethod;
 
 /// Read and write the world this script is running in. For per-player effects, use
 /// `player.world` instead.

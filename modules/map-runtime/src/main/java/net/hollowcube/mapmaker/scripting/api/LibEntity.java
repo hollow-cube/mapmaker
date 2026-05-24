@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.gen.*;
 import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
+import net.hollowcube.scripting.gen.*;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 
 import java.util.Locale;
@@ -20,7 +20,7 @@ public final class LibEntity {
     /// The base type for all props.
     @LuaExport
     @LuaUnion(discriminator = "kind")
-    public static sealed class Prop permits TextProp {
+    public static sealed abstract class Prop permits TextProp {
         private final DisplayEntity delegate;
 
         protected Prop(DisplayEntity delegate) {

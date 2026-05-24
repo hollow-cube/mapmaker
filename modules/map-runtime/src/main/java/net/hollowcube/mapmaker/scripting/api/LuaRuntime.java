@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaLibrary.Scope;
-import net.hollowcube.luau.gen.LuaProperty;
+import net.hollowcube.scripting.gen.LuaExport;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaLibrary.Scope;
+import net.hollowcube.scripting.gen.LuaProperty;
 
 import java.lang.management.ManagementFactory;
 

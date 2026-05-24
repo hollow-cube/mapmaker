@@ -1,15 +1,15 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
-import net.hollowcube.luau.gen.LuaProperty;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
 import net.hollowcube.mapmaker.scripting.util.LuaCallback;
 import net.hollowcube.mapmaker.scripting.util.LuaMarshaller;
 import net.hollowcube.mapmaker.scripting.util.LuaResumable;
+import net.hollowcube.scripting.gen.LuaExport;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaMethod;
+import net.hollowcube.scripting.gen.LuaProperty;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.EventNode;

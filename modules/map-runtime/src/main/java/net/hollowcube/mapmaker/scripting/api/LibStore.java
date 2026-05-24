@@ -4,10 +4,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
+import net.hollowcube.scripting.gen.LuaExport;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaMethod;
 import net.minestom.server.tag.Tag;
 
 /// Per-player state storage.

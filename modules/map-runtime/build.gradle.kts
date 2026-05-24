@@ -23,8 +23,8 @@ dependencies {
         exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
     }
 
-    compileOnly(project(":tools:lua-slopgen:api"))
-    annotationProcessor(project(":tools:lua-slopgen"))
+    compileOnly(project(":modules:map-runtime-gen:annotations"))
+    annotationProcessor(project(":modules:map-runtime-gen"))
     implementation(libs.luau.core)
     if (DefaultNativePlatform.getCurrentOperatingSystem().isMacOsX) {
         implementation(libs.luau.natives.macos.arm64)
@@ -37,17 +37,13 @@ dependencies {
     }
 }
 
-val luauApiFragmentsDir = layout.buildDirectory.dir("luau-api-fragments")
+/// Generated Luau API artifacts (engine-api.json + types/*.luau) are committed under
+/// `modules/map-runtime/luau-api/` so PR diffs surface API drift. The annotation processor
+/// writes here directly during `compileJava`. The path is required — slopgen fails the build
+/// if the option is unset.
+val luauApiDir = layout.projectDirectory.dir("luau-api")
 
 tasks.compileJava {
-    options.compilerArgs.add("-Aluau.modelOut=${luauApiFragmentsDir.get().asFile.absolutePath}")
-    outputs.dir(luauApiFragmentsDir).withPropertyName("luauApiFragments")
-}
-
-val luauApiFragments by configurations.creating {
-    isCanBeConsumed = true
-    isCanBeResolved = false
-    outgoing.artifact(luauApiFragmentsDir) {
-        builtBy(tasks.compileJava)
-    }
+    options.compilerArgs.add("-Aluau.outputDir=${luauApiDir.asFile.absolutePath}")
+    outputs.dir(luauApiDir).withPropertyName("luauApi")
 }
