@@ -10,6 +10,7 @@ import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
+import java.util.Locale;
 import java.util.Objects;
 
 /// Items and item stacks.
@@ -31,7 +32,7 @@ public final class LibItem {
         state.newTable();
         for (var slot : EquipmentSlot.values()) {
             state.pushLightUserDataTagged(slot.ordinal(), SLOT_TAG);
-            state.setField(-2, slot.name());
+            state.setField(-2, slot.name().toLowerCase(Locale.ROOT));
         }
         state.setReadOnly(-1, true);
         state.setGlobal("Slot");

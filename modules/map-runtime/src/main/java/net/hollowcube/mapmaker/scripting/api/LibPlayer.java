@@ -4,7 +4,10 @@ import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.LuaType;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.entity.impl.DisplayEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
+import net.hollowcube.mapmaker.scripting.ScriptContext;
+import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
 import net.hollowcube.scripting.gen.LuaExport;
 import net.hollowcube.scripting.gen.LuaLibrary;
 import net.hollowcube.scripting.gen.LuaMethod;
@@ -13,6 +16,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.PlayerHand;
@@ -27,6 +31,8 @@ import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.scripting.util.LuaHelpers.*;
 
@@ -423,74 +429,44 @@ public final class LibPlayer {
             this.player = player;
         }
 
-        /// Spawns an entity that only this player can see. `init` describes the entity —
-        /// `position` is required, plus any of the entity's properties.
-        ///
-        /// Currently only `"text"` (a text display) is supported.
-        ///
-        /// ```luau
-        /// player.world:spawn_entity("text", {
-        ///     position = vector(0, 64, 0),
-        ///     text = "<red>only you can see me</red>",
-        /// })
-        /// ```
-        ///
-        /// @luaParam entityType string
         /// @luaParam init $Writable<@mapmaker/entity.TextProp> & { position: vector, yaw: number?, pitch: number? }
         /// @luaReturn @mapmaker/entity.TextProp
         @LuaMethod
-        public int spawnEntity(LuaState state) {
-            throw new UnsupportedOperationException("TODO");
-//            var typeName = state.checkString(1); // entity type
-//            state.checkType(2, LuaType.TABLE); // init
-//
-//            if (!typeName.equals("text"))
-//                throw state.error("Only text entity is supported");
-//
-//            var entity = new DisplayEntity.Text(UUID.randomUUID());
-//            entity.setAutoViewable(false);
-////            entity.updateViewerRule(other -> other == player);
-//
-//            var luaEntity = new LibEntity.TextDisplay(entity);
-//            LuaHelpers.tableForEach(state, 2, (key) -> {
-//                if ("position".equals(key) || "yaw".equals(key) || "pitch".equals(key))
-//                    return; // Special handling below
-//                if (!luaEntity.readField(state, key, -1)) {
-//                    state.argError(2, "Unknown property: " + key);
-//                }
-//            });
-//
-//            if (!tableGet(state, 2, "position"))
-//                state.argError(2, "Missing position");
-//            Point point = LuaVector.check(state, -1);
-//            state.pop(1); // remove position
-//            float yaw = 0, pitch = 0;
-//            if (tableGet(state, 2, "yaw")) {
-//                yaw = (float) state.toNumber(-1);
-//                state.pop(1); // remove yaw
-//            }
-//            if (tableGet(state, 2, "pitch")) {
-//                pitch = (float) state.toNumber(-1);
-//                state.pop(1); // remove position
-//            }
-//
-//            entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));
-//            entity.addViewer(player);
-//            LegacyScriptContext.get(state).track(new Disposable() {
-//                @Override
-//                public void dispose() {
-//                    entity.remove();
-//                }
-//
-//                // TODO disposable might self dispose.
-////                @Override
-////                public boolean isDisposed() {
-////                    return entity.isRemoved();
-////                }
-//            });
-//
-//            LibEntity.pushEntity(state, luaEntity);
-//            return 1;
+        public int spawnTextProp(LuaState state) {
+            state.checkType(1, LuaType.TABLE); // init
+
+            var entity = new DisplayEntity.Text(UUID.randomUUID());
+            entity.setAutoViewable(false);
+
+            var prop = new LibEntity.TextProp(entity);
+            LuaHelpers.tableForEach(state, 2, (key) -> {
+                if ("position".equals(key) || "yaw".equals(key) || "pitch".equals(key))
+                    return; // Special handling below
+                if (!prop.readField(state, key, -1)) {
+                    state.argError(2, "Unknown property: " + key);
+                }
+            });
+
+            if (!tableGet(state, 2, "position"))
+                state.argError(2, "Missing position");
+            Point point = LuaVector.check(state, -1);
+            state.pop(1); // remove position
+            float yaw = 0, pitch = 0;
+            if (tableGet(state, 2, "yaw")) {
+                yaw = (float) state.toNumber(-1);
+                state.pop(1); // remove yaw
+            }
+            if (tableGet(state, 2, "pitch")) {
+                pitch = (float) state.toNumber(-1);
+                state.pop(1); // remove position
+            }
+
+            entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));
+            entity.addViewer(player);
+            ScriptContext.trackEntity(state, entity);
+
+            LibEntity.pushProp(state, prop);
+            return 1;
         }
 
         /// Sets a block visible only to this player. The actual world is unchanged.

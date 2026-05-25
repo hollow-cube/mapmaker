@@ -13,9 +13,9 @@ import java.util.Locale;
 @LuaLibrary(name = "@mapmaker/entity")
 public final class LibEntity {
 
-//    public static void pushProp(LuaState state, Entity entity) {
-//        LibEntity$luau.pushEntity(state, entity);
-//    }
+    public static void pushProp(LuaState state, Prop prop) {
+        LibEntity$luau.pushProp(state, prop);
+    }
 
     /// The base type for all props.
     @LuaExport
@@ -184,7 +184,7 @@ public final class LibEntity {
     @LuaExport
     public static final class TextProp extends Prop {
 
-        private TextProp(DisplayEntity delegate) {
+        public TextProp(DisplayEntity delegate) {
             super(delegate);
         }
 

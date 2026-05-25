@@ -682,18 +682,8 @@
                 "type": {
                   "kind": "named",
                   "module": null,
-                  "name": "EventSource",
-                  "args": [
-                    {
-                      "kind": "single",
-                      "type": {
-                        "kind": "named",
-                        "module": "@mapmaker/player",
-                        "name": "Player",
-                        "args": []
-                      }
-                    }
-                  ]
+                  "name": "nil",
+                  "args": []
                 }
               },
               "setter": null
@@ -1261,21 +1251,10 @@
           "properties": [],
           "methods": [
             {
-              "name": "spawn_entity",
-              "description": "Spawns an entity that only this player can see. `init` describes the entity —\n`position` is required, plus any of the entity's properties.\n\nCurrently only `\"text\"` (a text display) is supported.\n\n```luau\nplayer.world:spawn_entity(\"text\", {\n    position = vector(0, 64, 0),\n    text = \"<red>only you can see me</red>\",\n})\n```",
+              "name": "spawn_text_prop",
+              "description": "",
               "generics": [],
               "params": [
-                {
-                  "name": "entityType",
-                  "optional": false,
-                  "type": {
-                    "kind": "named",
-                    "module": null,
-                    "name": "string",
-                    "args": []
-                  },
-                  "description": ""
-                },
                 {
                   "name": "init",
                   "optional": false,
@@ -1491,18 +1470,8 @@
             "type": {
               "kind": "named",
               "module": null,
-              "name": "EventSource",
-              "args": [
-                {
-                  "kind": "single",
-                  "type": {
-                    "kind": "named",
-                    "module": "@mapmaker/player",
-                    "name": "Player",
-                    "args": []
-                  }
-                }
-              ]
+              "name": "nil",
+              "args": []
             }
           },
           "setter": null
@@ -1515,18 +1484,8 @@
             "type": {
               "kind": "named",
               "module": null,
-              "name": "EventSource",
-              "args": [
-                {
-                  "kind": "single",
-                  "type": {
-                    "kind": "named",
-                    "module": "@mapmaker/player",
-                    "name": "Player",
-                    "args": []
-                  }
-                }
-              ]
+              "name": "nil",
+              "args": []
             }
           },
           "setter": null
@@ -1539,18 +1498,8 @@
             "type": {
               "kind": "named",
               "module": null,
-              "name": "EventSource",
-              "args": [
-                {
-                  "kind": "single",
-                  "type": {
-                    "kind": "named",
-                    "module": "@mapmaker/player",
-                    "name": "Player",
-                    "args": []
-                  }
-                }
-              ]
+              "name": "nil",
+              "args": []
             }
           },
           "setter": null
