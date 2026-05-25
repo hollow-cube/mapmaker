@@ -29,21 +29,35 @@ dependencies {
 
 val outPath = layout.buildDirectory.dir("resources/main/net.hollowcube.scripting")
 
-val zipHubScripts = tasks.register<Zip>("zipHubScripts") {
-    archiveFileName.set("hub.zip")
-    destinationDirectory.set(outPath)
-    from(project.projectDir.resolve("src/main/resources/scripts"))
+val scriptBundlerClasspath: Configuration by configurations.creating {
+    isCanBeConsumed = false
+    isCanBeResolved = true
+}
 
-    include("**/*.luau")
-    include("**/.luaurc")
-    exclude(".types")
-    exclude(".vscode")
+dependencies {
+    scriptBundlerClasspath(project(":bin:script-bundler"))
+}
+
+val bundleHubScripts = tasks.register<JavaExec>("bundleHubScripts") {
+    val sourceDir = project.projectDir.resolve("scripts")
+    val zipFile = outPath.get().asFile.resolve("hub.zip")
+
+    classpath = scriptBundlerClasspath
+    mainClass = "net.hollowcube.mapmaker.bundle.BundlerMain"
+    args(
+        "--source-dir", sourceDir.absolutePath,
+        "--out", zipFile.absolutePath,
+    )
+
+    inputs.dir(sourceDir).withPropertyName("hubScriptsSource")
+    outputs.file(zipFile).withPropertyName("hubScriptsBundle")
 
     group = "scripting"
+    description = "Compile hub-local Luau scripts and pack them into hub.zip for the hub binary's resources."
 }
 
 tasks.named("processResources") {
-    dependsOn(zipHubScripts)
+    dependsOn(bundleHubScripts)
 }
 
 application {

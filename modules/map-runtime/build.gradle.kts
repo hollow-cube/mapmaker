@@ -19,6 +19,7 @@ dependencies {
     testImplementation(project(":modules:compat"))
     testImplementation(project(":modules:test"))
     testImplementation(project(":modules:map-test"))
+    testImplementation(libs.logback)  // BundleModuleLoaderTest uses logback's ListAppender to capture diagnostics
     testImplementation(libs.bundles.otel) {
         exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
     }
