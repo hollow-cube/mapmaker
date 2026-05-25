@@ -83,14 +83,7 @@ public final class LuaApiProcessor extends AbstractProcessor {
         var resolveDiagnostics = new ArrayList<ResolveDiagnostic>();
         for (var lib : libraries.values())
             CrossModuleResolver.resolve(lib, symbols, resolveDiagnostics);
-        // Resolve diagnostics aren't bound to a specific element — report them on the first
-        // library so the build log surfaces them with useful context.
-        if (!resolveDiagnostics.isEmpty()) {
-            var anchor = libraries.keySet().iterator().next();
-            for (var d : resolveDiagnostics)
-                messager.printMessage(
-                    Diagnostic.Kind.WARNING, d.location() + " — " + d.message(), anchor);
-        }
+        reportDiagnostics(messager, libraries, resolveDiagnostics);
 
         // ----- Meta-type expansion. After this pass, no `$`-prefixed Named survives. -----
         var metaDiagnostics = new ArrayList<ResolveDiagnostic>();
@@ -99,11 +92,7 @@ public final class LuaApiProcessor extends AbstractProcessor {
         for (var entry : libraries.entrySet())
             expanded.put(entry.getKey(), metaResolver.rewrite(entry.getValue()));
         libraries = expanded;
-        if (!metaDiagnostics.isEmpty()) {
-            var anchor = libraries.keySet().iterator().next();
-            for (var d : metaDiagnostics)
-                messager.printError(d.location() + " — " + d.message(), anchor);
-        }
+        reportDiagnostics(messager, libraries, metaDiagnostics);
 
         // ----- Generated Java glue per library. -----
         var libraryEmitter = new LibraryEmitter(idents, AtomTableEmitter.LUA_STRING_ATOMS);
@@ -132,6 +121,26 @@ public final class LuaApiProcessor extends AbstractProcessor {
         writeEngineApiOutputs(outputDir, libraries.values());
 
         return false; // Don't claim @LuaLibrary; nobody else processes it either, but be polite.
+    }
+
+    /// Drain a diagnostic list to javac, mapping each entry's severity onto the corresponding
+    /// `Diagnostic.Kind`. Diagnostics aren't bound to a specific source element, so each is
+    /// reported on the first library — the message itself carries the slash-separated location
+    /// trail an author needs to find the tag.
+    private static void reportDiagnostics(
+        javax.annotation.processing.Messager messager,
+        java.util.Map<TypeElement, Model.Library> libraries,
+        java.util.List<ResolveDiagnostic> diagnostics
+    ) {
+        if (diagnostics.isEmpty()) return;
+        var anchor = libraries.keySet().iterator().next();
+        for (var d : diagnostics) {
+            var kind = switch (d.severity()) {
+                case ERROR -> Diagnostic.Kind.ERROR;
+                case WARNING -> Diagnostic.Kind.WARNING;
+            };
+            messager.printMessage(kind, d.location() + " — " + d.message(), anchor);
+        }
     }
 
     /// Walk the round's `@LuaLibrary` elements in a deterministic order (qualified name).

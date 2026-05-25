@@ -2,23 +2,23 @@
 
 local task = {}
 
-function task.spawn(): ()
+function task.spawn(): thread
 	return nil :: any
 end
 
-function task.defer(): ()
+function task.defer(): thread
 	return nil :: any
 end
 
-function task.delay(): ()
+function task.delay(): thread
 	return nil :: any
 end
 
-function task.wait(): ()
+function task.wait(): nil
 	return nil :: any
 end
 
-function task.cancel(): ()
+function task.cancel(): boolean
 	return nil :: any
 end
 

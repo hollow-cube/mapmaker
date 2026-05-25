@@ -107,6 +107,7 @@ public final class LuaText {
         //region Meta Methods
 
         /// Concatenates two `Text` values, or a `Text` with any string-able value.
+        /// @luaReturn Text
         @LuaMethod(meta = "__concat")
         public int luaConcat(LuaState state) {
             var rhs = checkAnyText(state, 1);
@@ -115,6 +116,7 @@ public final class LuaText {
         }
 
         /// Returns the length of the rendered plain text, ignoring formatting.
+        /// @luaReturn number
         @LuaMethod(meta = "__len")
         public int luaLen(LuaState state) {
             state.pushInteger(PLAIN_TEXT_SERIALIZER.serialize(value).length());
@@ -122,6 +124,7 @@ public final class LuaText {
         }
 
         /// Returns the plain-text form, without any formatting.
+        /// @luaReturn string
         @LuaMethod(meta = "__tostring")
         public int luaToString(LuaState state) {
             state.pushString(PLAIN_TEXT_SERIALIZER.serialize(value));

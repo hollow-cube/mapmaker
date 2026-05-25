@@ -53,7 +53,7 @@ public final class LuaRuntime {
     // TODO: cpu and memory objects
 
     /// Hot-reload controls.
-    /// @luaReturn runtime.Hot
+    /// @luaReturn Hot
     @LuaProperty
     public static int getHot(LuaState state) {
         // todo should be dependent on whether hot reload is supported in the current context

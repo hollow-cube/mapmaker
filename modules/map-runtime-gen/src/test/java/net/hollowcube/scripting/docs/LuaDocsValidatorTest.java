@@ -31,7 +31,9 @@ class LuaDocsValidatorTest {
                 @LuaMethod public static int oops(LuaState s) { s.pushInteger(1); return 1; }
             }
             """);
-        assertThat(compilation).hadWarningContaining("must declare at least one @luaReturn");
+        // Non-void without @luaReturn would emit a Luau signature returning nothing while the
+        // Java implementation pushes a value — always wrong, hard-error.
+        assertThat(compilation).hadErrorContaining("must declare at least one @luaReturn");
     }
 
     @Test
@@ -79,7 +81,8 @@ class LuaDocsValidatorTest {
                 @LuaProperty public static int getX(LuaState s) { return 1; }
             }
             """);
-        assertThat(compilation).hadWarningContaining(
+        // Missing @luaReturn emits a `nil`-typed property — silently breaks every reader.
+        assertThat(compilation).hadErrorContaining(
             "@LuaProperty getter must declare exactly one @luaReturn");
     }
 
@@ -112,7 +115,8 @@ class LuaDocsValidatorTest {
                 @LuaProperty public static void setX(LuaState s) {}
             }
             """);
-        assertThat(compilation).hadWarningContaining(
+        // Missing @luaParam emits a setter accepting `nil` only — never intended.
+        assertThat(compilation).hadErrorContaining(
             "@LuaProperty setter must declare exactly one @luaParam");
     }
 
@@ -131,25 +135,6 @@ class LuaDocsValidatorTest {
             }
             """);
         assertThat(compilation).hadWarningContaining("setter must not declare @luaReturn");
-    }
-
-    @Test
-    void getterAndSetterTypeMismatchFails() {
-        var compilation = compile("fixtures.LibMis", """
-            package fixtures;
-            import net.hollowcube.luau.LuaState;
-            import net.hollowcube.scripting.gen.LuaLibrary;
-            import net.hollowcube.scripting.gen.LuaProperty;
-            @LuaLibrary(name = "@t/mis")
-            public final class LibMis {
-                /// @luaReturn number
-                @LuaProperty public static int getX(LuaState s) { return 1; }
-                /// @luaParam value string
-                @LuaProperty public static void setX(LuaState s) {}
-            }
-            """);
-        assertThat(compilation).hadWarningContaining(
-            "Property getter @luaReturn and setter @luaParam must declare the same type");
     }
 
     @Test
@@ -193,7 +178,29 @@ class LuaDocsValidatorTest {
                 @LuaMethod public static int oops(LuaState s) { return 1; }
             }
             """);
-        assertThat(compilation).hadWarningContaining("Malformed slopgen tag");
+        // Malformed @lua tag is dropped silently, so codegen emits a signature missing the
+        // param/return entirely. Hard-error so authors can't ship the typo.
+        assertThat(compilation).hadErrorContaining("Malformed slopgen tag");
+    }
+
+    @Test
+    void methodMissingParamTypeFails() {
+        // `@luaParam x` with no type body is rejected by the regex layer as a malformed tag.
+        // Asserted separately from the param-name-only case above because this is the more
+        // common drift scenario (added a Java param, forgot to give the @luaParam a type).
+        var compilation = compile("fixtures.LibMissingParam", """
+            package fixtures;
+            import net.hollowcube.luau.LuaState;
+            import net.hollowcube.scripting.gen.LuaLibrary;
+            import net.hollowcube.scripting.gen.LuaMethod;
+            @LuaLibrary(name = "@t/mp")
+            public final class LibMissingParam {
+                /// @luaParam x
+                /// @luaReturn number
+                @LuaMethod public static int oops(LuaState s) { return 1; }
+            }
+            """);
+        assertThat(compilation).hadErrorContaining("Malformed slopgen tag");
     }
 
     private Compilation compile(String fqcn, String source) {

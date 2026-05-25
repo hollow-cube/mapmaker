@@ -145,6 +145,7 @@ public final class LibEntity {
         ///
         /// @luaParam duration number
         /// @luaParam properties { [string]: any }
+        /// @luaReturn nil
         @LuaMethod
         public int interpolate(LuaState state) {
             int duration = state.checkInteger(1);
@@ -229,7 +230,7 @@ public final class LibEntity {
         }
 
         /// The text shown by this display.
-        /// @luaReturn @mapmaker.Text
+        /// @luaReturn Text
         @LuaProperty
         public int getText(LuaState state) {
             var text = delegate().getEntityMeta().getText();

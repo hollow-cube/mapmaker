@@ -14,6 +14,7 @@ import java.util.Objects;
 @LuaLibrary(name = "@mapmaker/task")
 public final class LibTask {
 
+    /// @luaReturn thread
     @LuaMethod
     public static int spawn(LuaState state) {
         LuaState thread = toThread(state, 1);
@@ -23,6 +24,7 @@ public final class LibTask {
         return 1;
     }
 
+    /// @luaReturn thread
     @LuaMethod
     public static int defer(LuaState state) {
         LuaState thread = toThread(state, 1);
@@ -32,6 +34,7 @@ public final class LibTask {
         return 1;
     }
 
+    /// @luaReturn thread
     @LuaMethod
     public static int delay(LuaState state) {
         int ticks = state.optInteger(1, 0);
@@ -43,6 +46,7 @@ public final class LibTask {
         return 1;
     }
 
+    /// @luaReturn nil
     @LuaMethod
     public static int wait(LuaState state) {
         int ticks = state.optInteger(1, 0);
@@ -58,6 +62,7 @@ public final class LibTask {
         return state.yield(0);
     }
 
+    /// @luaReturn boolean
     @LuaMethod
     public static int cancel(LuaState state) {
         throw new UnsupportedOperationException("todo");

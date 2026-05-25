@@ -22,7 +22,7 @@ public final class LibPlayers {
 
     /// Fires when a player joins the map.
     ///
-    /// @luaReturn @mapmaker.EventSource<@mapmaker/player.Player>
+    /// @luaReturn EventSource<@ mapmaker / player.Player>
     @LuaProperty
     public static int getOnJoin(LuaState state) {
         class Impl {
@@ -37,7 +37,7 @@ public final class LibPlayers {
     }
 
     /// Fires when a player leaves the map.
-    /// @luaReturn @mapmaker.EventSource<@mapmaker/player.Player>
+    /// @luaReturn EventSource<@ mapmaker / player.Player>
     @LuaProperty
     public static int getOnLeave(LuaState state) {
         class Impl {
@@ -52,7 +52,7 @@ public final class LibPlayers {
     }
 
     /// Fires when a player lands on the ground after being airborne.
-    /// @luaReturn @mapmaker.EventSource<@mapmaker/player.Player>
+    /// @luaReturn EventSource<@ mapmaker / player.Player>
     @LuaProperty
     public static int getOnLand(LuaState state) {
         class Impl {
@@ -67,7 +67,7 @@ public final class LibPlayers {
     }
 
     /// Fires when a player right-clicks a block. Receives the player and the block position.
-    /// @luaReturn @mapmaker.EventSource<@mapmaker/player.Player, vector>
+    /// @luaReturn EventSource<@ mapmaker / player.Player, vector>
 //    @LuaProperty
 //    public static int getOnBlockInteract(LuaState state) {
 //        class Impl {

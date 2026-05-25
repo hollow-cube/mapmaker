@@ -93,7 +93,7 @@ public final class LibPlayer {
         }
 
         /// The player's sidebar.
-        /// @luaReturn @mapmaker/player.Sidebar
+        /// @luaReturn Sidebar
         @LuaProperty
         public int getSidebar(LuaState state) {
             throw new UnsupportedOperationException("TODO");
@@ -127,7 +127,7 @@ public final class LibPlayer {
         //region Events
 
         /// Fires when this player hits another player. Receives the player who was hit.
-        /// @luaReturn @mapmaker.EventSource<@mapmaker/player.Player>
+        /// @luaReturn EventSource<@ mapmaker / player.Player>
         @LuaProperty
         public int getOnHitPlayer(LuaState state) {
             class Impl {
@@ -145,7 +145,7 @@ public final class LibPlayer {
         }
 
         /// Fires when this player right-clicks a block. Receives the block position.
-        /// @luaReturn @mapmaker.EventSource<vector>
+        /// @luaReturn EventSource<vector>
         @LuaProperty
         public int getOnInteractBlock(LuaState state) {
             class Impl {
@@ -161,7 +161,7 @@ public final class LibPlayer {
         }
 
         /// Fires when this player jumps.
-        /// @luaReturn @mapmaker.EventSource<()>
+        /// @luaReturn EventSource<( )>
         @LuaProperty
         public int getOnJump(LuaState state) {
             class Impl {
@@ -175,7 +175,7 @@ public final class LibPlayer {
         }
 
         /// Fires when this player right-clicks while holding an item.
-        /// @luaReturn @mapmaker.EventSource<()>
+        /// @luaReturn EventSource<( )>
         @LuaProperty
         public int getOnUseItem(LuaState state) {
             class Impl {
@@ -400,6 +400,7 @@ public final class LibPlayer {
         //region Meta Methods
 
         /// Two `Player` values are equal when they refer to the same player.
+        /// @luaReturn boolean
         @LuaMethod(meta = "__eq")
         public int luaEq(LuaState state) {
             var result = state.isUserData(1)

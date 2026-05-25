@@ -52,8 +52,6 @@ public final class LibraryModelBuilder {
 
         var staticGetters = new LinkedHashMap<String, Model.Accessor>();
         var staticSetters = new LinkedHashMap<String, Model.Accessor>();
-        var staticGetterDocs = new LinkedHashMap<String, Docs>();
-        var staticSetterDocs = new LinkedHashMap<String, Docs>();
         var staticMethods = new ArrayList<Model.Method>();
         var rawExports = new ArrayList<Model.Export>();
         var rawExportElements = new ArrayList<TypeElement>();
@@ -86,11 +84,9 @@ public final class LibraryModelBuilder {
                 if (javaName.startsWith("set")) {
                     docsValidator.validateSetter(method, memberDocs);
                     staticSetters.put(luaName, buildSetter(method, javaName, enclosingType, memberDocs));
-                    staticSetterDocs.put(luaName, memberDocs);
                 } else {
                     docsValidator.validateGetter(method, memberDocs);
                     staticGetters.put(luaName, buildGetter(method, javaName, enclosingType, memberDocs));
-                    staticGetterDocs.put(luaName, memberDocs);
                 }
             } else {
                 var luaName = LuaNames.toLuaMethod(javaName);
@@ -101,7 +97,6 @@ public final class LibraryModelBuilder {
         }
 
         var staticProperties = mergeAccessors(staticGetters, staticSetters);
-        validateAccessorPairing(staticProperties, staticGetterDocs, staticSetterDocs, libraryClass);
 
         // Reserve atoms in source-declaration order so the emitter's literal references match.
         for (var p : staticProperties) idents.atomFor(p.luaName());
@@ -150,8 +145,6 @@ public final class LibraryModelBuilder {
 
         var getters = new LinkedHashMap<String, Model.Accessor>();
         var setters = new LinkedHashMap<String, Model.Accessor>();
-        var getterDocs = new LinkedHashMap<String, Docs>();
-        var setterDocs = new LinkedHashMap<String, Docs>();
         var methods = new ArrayList<Model.Method>();
         var metaMethods = new ArrayList<Model.MetaMethod>();
 
@@ -180,11 +173,9 @@ public final class LibraryModelBuilder {
                 if (javaName.startsWith("set")) {
                     docsValidator.validateSetter(method, memberDocs);
                     setters.put(name, buildSetter(method, javaName, javaType, memberDocs));
-                    setterDocs.put(name, memberDocs);
                 } else {
                     docsValidator.validateGetter(method, memberDocs);
                     getters.put(name, buildGetter(method, javaName, javaType, memberDocs));
-                    getterDocs.put(name, memberDocs);
                 }
             } else if (!luaMethod.meta().isEmpty()) {
                 docsValidator.validateMeta(method, memberDocs, isVoid);
@@ -197,7 +188,6 @@ public final class LibraryModelBuilder {
         }
 
         var properties = mergeAccessors(getters, setters);
-        validateAccessorPairing(properties, getterDocs, setterDocs, exportClass);
 
         for (var p : properties) idents.atomFor(p.luaName());
         for (var m : methods) idents.atomFor(m.luaName());
@@ -453,28 +443,6 @@ public final class LibraryModelBuilder {
 
     private Docs parseDocs(Element element) {
         return JavadocTagParser.parse(env.getElementUtils().getDocComment(element));
-    }
-
-    /// Cross-check getter/setter type expressions on a merged property list. Reports against
-    /// the setter element so authors see the error at the side that's typically the reactive
-    /// edit (you usually add a setter to an existing typed getter).
-    private void validateAccessorPairing(
-        List<Model.Property> properties,
-        Map<String, Docs> getterDocs,
-        Map<String, Docs> setterDocs,
-        Element fallback
-    ) {
-        for (var p : properties) {
-            if (p.getter() == null || p.setter() == null) continue;
-            var g = getterDocs.get(p.luaName());
-            var s = setterDocs.get(p.luaName());
-            if (g == null || s == null) continue;
-            // The validator wants the actual setter element for IDE pinning. We don't have it
-            // directly here, so re-locate via the enclosing element. In practice both accessors
-            // belong to the same enclosing class, so attaching to `fallback` is acceptable until
-            // we plumb the original elements through; the message text identifies the property.
-            docsValidator.validatePropertyConsistency(fallback, g, s);
-        }
     }
 
     private static List<Model.Property> mergeAccessors(

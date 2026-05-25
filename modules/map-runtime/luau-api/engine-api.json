@@ -328,7 +328,17 @@
                   "description": ""
                 }
               ],
-              "returns": []
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "nil",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
             },
             {
               "name": "remove",
@@ -374,7 +384,7 @@
                 "paramName": null,
                 "type": {
                   "kind": "named",
-                  "module": "@mapmaker",
+                  "module": null,
                   "name": "Text",
                   "args": []
                 }
@@ -629,7 +639,7 @@
                 "paramName": null,
                 "type": {
                   "kind": "named",
-                  "module": "@mapmaker/player",
+                  "module": null,
                   "name": "Sidebar",
                   "args": []
                 }
@@ -671,7 +681,7 @@
                 "paramName": null,
                 "type": {
                   "kind": "named",
-                  "module": "@mapmaker",
+                  "module": null,
                   "name": "EventSource",
                   "args": [
                     {
@@ -695,7 +705,7 @@
                 "paramName": null,
                 "type": {
                   "kind": "named",
-                  "module": "@mapmaker",
+                  "module": null,
                   "name": "EventSource",
                   "args": [
                     {
@@ -719,7 +729,7 @@
                 "paramName": null,
                 "type": {
                   "kind": "named",
-                  "module": "@mapmaker",
+                  "module": null,
                   "name": "EventSource",
                   "args": [
                     {
@@ -739,7 +749,7 @@
                 "paramName": null,
                 "type": {
                   "kind": "named",
-                  "module": "@mapmaker",
+                  "module": null,
                   "name": "EventSource",
                   "args": [
                     {
@@ -1225,7 +1235,17 @@
               "description": "Two `Player` values are equal when they refer to the same player.",
               "generics": [],
               "params": [],
-              "returns": []
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "boolean",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
             }
           ],
           "userDataTag": 6,
@@ -1470,7 +1490,7 @@
             "paramName": null,
             "type": {
               "kind": "named",
-              "module": "@mapmaker",
+              "module": null,
               "name": "EventSource",
               "args": [
                 {
@@ -1494,7 +1514,7 @@
             "paramName": null,
             "type": {
               "kind": "named",
-              "module": "@mapmaker",
+              "module": null,
               "name": "EventSource",
               "args": [
                 {
@@ -1518,7 +1538,7 @@
             "paramName": null,
             "type": {
               "kind": "named",
-              "module": "@mapmaker",
+              "module": null,
               "name": "EventSource",
               "args": [
                 {
@@ -1706,35 +1726,85 @@
           "description": "",
           "generics": [],
           "params": [],
-          "returns": []
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "thread",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
         },
         {
           "name": "defer",
           "description": "",
           "generics": [],
           "params": [],
-          "returns": []
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "thread",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
         },
         {
           "name": "delay",
           "description": "",
           "generics": [],
           "params": [],
-          "returns": []
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "thread",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
         },
         {
           "name": "wait",
           "description": "",
           "generics": [],
           "params": [],
-          "returns": []
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "nil",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
         },
         {
           "name": "cancel",
           "description": "",
           "generics": [],
           "params": [],
-          "returns": []
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "boolean",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
         }
       ],
       "staticProperties": [],
@@ -1865,7 +1935,7 @@
             "paramName": null,
             "type": {
               "kind": "named",
-              "module": "runtime",
+              "module": null,
               "name": "Hot",
               "args": []
             }
@@ -1894,21 +1964,51 @@
               "description": "Concatenates two `Text` values, or a `Text` with any string-able value.",
               "generics": [],
               "params": [],
-              "returns": []
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "Text",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
             },
             {
               "meta": "__len",
               "description": "Returns the length of the rendered plain text, ignoring formatting.",
               "generics": [],
               "params": [],
-              "returns": []
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "number",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
             },
             {
               "meta": "__tostring",
               "description": "Returns the plain-text form, without any formatting.",
               "generics": [],
               "params": [],
-              "returns": []
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
             }
           ],
           "userDataTag": 10,

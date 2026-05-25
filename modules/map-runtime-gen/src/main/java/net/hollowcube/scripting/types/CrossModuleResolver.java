@@ -46,7 +46,9 @@ public final class CrossModuleResolver {
         if (ex.superExport() != null) {
             var entry = symbols.lookupByJavaType(ex.superExport().toString());
             if (entry == null) {
-                diagnostics.add(new ResolveDiagnostic(
+                // Dispatch chains and `Child & Parent` intersection emission both reference
+                // the parent by name — a missing entry produces broken codegen.
+                diagnostics.add(ResolveDiagnostic.error(
                     lib.moduleName() + ":" + ex.luaName() + ".superExport",
                     "superExport '" + ex.superExport() + "' does not match any known @LuaExport"));
             }
@@ -102,7 +104,9 @@ public final class CrossModuleResolver {
         for (var g : generics) (g.pack() ? packs : scalars).add(g.name());
         for (var s : scalars)
             if (packs.contains(s))
-                diagnostics.add(new ResolveDiagnostic(
+                // Contradictory declaration — renderer would pick one arbitrarily, the other
+                // would be wrong at every use site.
+                diagnostics.add(ResolveDiagnostic.error(
                     lib.moduleName() + ":" + pathPrefix,
                     "generic '" + s + "' is declared both as a scalar and as a pack"));
         return new GenericScope(Set.copyOf(scalars), Set.copyOf(packs));
@@ -118,11 +122,12 @@ public final class CrossModuleResolver {
             case LuauType.GenericPack gp -> {
                 if (!scope.packs().contains(gp.name())) {
                     if (scope.scalars().contains(gp.name())) {
-                        diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location,
+                        // Mismatch between declaration and use — emitted type would be malformed.
+                        diagnostics.add(ResolveDiagnostic.error(lib.moduleName() + ":" + location,
                             "generic '" + gp.name() + "' is used as a pack '" + gp.name()
                             + "...' but declared as a scalar"));
                     } else {
-                        diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location,
+                        diagnostics.add(ResolveDiagnostic.error(lib.moduleName() + ":" + location,
                             "generic-pack reference '" + gp.name()
                             + "...' is not declared via @luaGeneric " + gp.name() + "..."));
                     }
@@ -175,7 +180,8 @@ public final class CrossModuleResolver {
             return; // generic reference
         }
         if (n.module() == null && n.args().isEmpty() && scope.packs().contains(n.name())) {
-            diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location,
+            // Type-system violation — pack used where scalar expected.
+            diagnostics.add(ResolveDiagnostic.error(lib.moduleName() + ":" + location,
                 "generic pack '" + n.name() + "...' used in scalar position"));
             return;
         }
@@ -183,19 +189,29 @@ public final class CrossModuleResolver {
             if (BUILT_IN_PRIMITIVES.contains(n.name())) {
                 // ok
             } else if (symbols.lookupBareInModule(lib.moduleName(), n.name()) == null) {
-                diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location,
+                // Bare unresolved name STAYS A WARNING — it might legitimately be a global
+                // declared in global.d.luau (e.g. `AnyText`, `Text`, `vector`) that slopgen
+                // can't see. Emitting the name verbatim produces correct code in that case.
+                // If the global doesn't exist either, Luau's type checker catches it at script
+                // call sites. Module-qualified misses (the `n.module() != null` branches below)
+                // are unambiguously codegen bugs and error out.
+                diagnostics.add(ResolveDiagnostic.warning(lib.moduleName() + ":" + location,
                     "unresolved type '" + n.name() + "' — declare via @luaGeneric, "
                     + "use a @LuaExport in the same library, or fully-qualify cross-library "
                     + "references like '@mapmaker/<module>." + n.name() + "'"));
             }
         } else if (n.module().startsWith("@")) {
             if (symbols.lookupByKey(n.module(), n.name()) == null) {
-                diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location,
+                // Author explicitly named a library — there's no ambiguity that we expected
+                // to find an export there. Renderer would emit `<localBinding>.Name` which
+                // is broken Luau.
+                diagnostics.add(ResolveDiagnostic.error(lib.moduleName() + ":" + location,
                     "unresolved cross-library type '" + n.module() + "." + n.name()
                     + "' — no such @LuaExport"));
             }
         } else {
-            diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location,
+            // Malformed reference shape — never produces valid Luau.
+            diagnostics.add(ResolveDiagnostic.error(lib.moduleName() + ":" + location,
                 "short-form module qualifier '" + n.module() + "." + n.name()
                 + "' is not supported. Use bare '" + n.name() + "' for the same library, "
                 + "or fully-qualify like '@<group>/" + n.module() + "." + n.name() + "'."));

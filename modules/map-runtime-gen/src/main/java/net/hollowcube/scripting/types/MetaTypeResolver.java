@@ -134,7 +134,7 @@ public final class MetaTypeResolver {
     /// unchanged when nothing applies).
     private LuauType expand(LuauType type, Model.Library lib, String location, int depth) {
         if (depth > MAX_DEPTH) {
-            diagnostics.add(new ResolveDiagnostic(
+            diagnostics.add(ResolveDiagnostic.error(
                 lib.moduleName() + ":" + location,
                 "meta-type expansion exceeded depth " + MAX_DEPTH
                 + " — likely a pathological composition"));
@@ -195,7 +195,7 @@ public final class MetaTypeResolver {
 
         var meta = MetaTypes.lookup(n.name());
         if (meta == null) {
-            diagnostics.add(new ResolveDiagnostic(
+            diagnostics.add(ResolveDiagnostic.error(
                 lib.moduleName() + ":" + location,
                 "unknown meta-type '" + n.name() + "'"));
             return new LuauType.Named(null, "nil", List.of());
@@ -253,7 +253,7 @@ public final class MetaTypeResolver {
 
         @Override
         public void error(String location, String message) {
-            diagnostics.add(new ResolveDiagnostic(lib.moduleName() + ":" + location, message));
+            diagnostics.add(ResolveDiagnostic.error(lib.moduleName() + ":" + location, message));
         }
 
         @Override
