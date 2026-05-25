@@ -3,8 +3,8 @@ package net.hollowcube.mapmaker.bundle;
 import net.hollowcube.luau.compiler.LuauCompileException;
 import net.hollowcube.luau.compiler.LuauCompiler;
 import net.hollowcube.mapmaker.editor.scripting.ScriptSource;
-import net.hollowcube.mapmaker.scripting.bundle.BundleMetadata;
-import net.hollowcube.mapmaker.scripting.bundle.BundleMetadataJson;
+import net.hollowcube.mapmaker.scripting.BundleMetadata;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -68,12 +68,12 @@ public final class BundleAssembler {
             }
 
             int versionForMetadata = observedBytecodeVersion == -1
-                ? net.hollowcube.mapmaker.scripting.bundle.BundleConstants.LUAU_BYTECODE_VERSION
+                ? BundleMetadata.LUAU_BYTECODE_VERSION
                 : observedBytecodeVersion;
 
             var metadata = BundleMetadata.current(versionForMetadata);
             zip.putNextEntry(new ZipEntry("metadata.json"));
-            zip.write(BundleMetadataJson.write(metadata).getBytes(StandardCharsets.UTF_8));
+            zip.write(AbstractHttpService.GSON_PRETTY.toJson(metadata).getBytes(StandardCharsets.UTF_8));
             zip.closeEntry();
         }
     }

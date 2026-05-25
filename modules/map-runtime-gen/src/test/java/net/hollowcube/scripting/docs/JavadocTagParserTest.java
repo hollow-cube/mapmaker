@@ -202,4 +202,71 @@ class JavadocTagParserTest {
         var docs = JavadocTagParser.parse(raw);
         assertTrue(docs.description().contains("    local x = foo()"));
     }
+
+    // ---------- backtick-wrapped type expressions ----------
+    // IntelliJ's Javadoc formatter helpfully inserts spaces inside `<…>` and `…/…`, mangling
+    // type expressions like `EventSource<@mapmaker/player.Player>`. Wrapping the type in
+    // single backticks tells the IDE to treat it as inline code and leave it alone; the
+    // parser strips the backticks before handing the expression downstream.
+
+    @Test
+    void returnTagBacktickedWrappedType() {
+        var docs = JavadocTagParser.parse("@luaReturn `EventSource<@mapmaker/player.Player>`");
+        assertEquals(1, docs.returns().size());
+        assertEquals("EventSource<@mapmaker/player.Player>", docs.returns().get(0).typeExpr());
+        assertEquals("", docs.returns().get(0).description());
+        assertTrue(docs.diagnostics().isEmpty());
+    }
+
+    @Test
+    void returnTagBacktickedWrappedTypeWithDescription() {
+        var docs = JavadocTagParser.parse(
+            "@luaReturn `EventSource<@mapmaker/player.Player>` - fires on hit");
+        assertEquals(1, docs.returns().size());
+        assertEquals("EventSource<@mapmaker/player.Player>", docs.returns().get(0).typeExpr());
+        assertEquals("fires on hit", docs.returns().get(0).description());
+    }
+
+    @Test
+    void paramTagBacktickedWrappedType() {
+        var docs = JavadocTagParser.parse("@luaParam init `$Writable<TextProp> & { x: number }`");
+        assertEquals(1, docs.params().size());
+        var p = docs.params().get(0);
+        assertEquals("init", p.name());
+        assertFalse(p.optional());
+        assertEquals("$Writable<TextProp> & { x: number }", p.typeExpr());
+        assertEquals("", p.description());
+    }
+
+    @Test
+    void paramTagBacktickedWrappedTypeWithDescription() {
+        var docs = JavadocTagParser.parse(
+            "@luaParam init `$Writable<TextProp>` - initial property table");
+        assertEquals(1, docs.params().size());
+        var p = docs.params().get(0);
+        assertEquals("init", p.name());
+        assertEquals("$Writable<TextProp>", p.typeExpr());
+        assertEquals("initial property table", p.description());
+    }
+
+    @Test
+    void backtickedTypePreservesSlashes() {
+        // The exact case the user hit: IntelliJ would have inserted spaces inside the angle
+        // brackets without the backtick wrapper. With backticks, the spaces never appear and
+        // the parser sees the canonical form.
+        var docs = JavadocTagParser.parse("@luaReturn `EventSource<@mapmaker/player.Player>`");
+        assertEquals("EventSource<@mapmaker/player.Player>",
+            docs.returns().get(0).typeExpr());
+    }
+
+    @Test
+    void unterminatedBacktickFallsThroughToSplitter() {
+        // An opening backtick with no closing one is malformed. We don't throw — the type
+        // parser downstream will produce a clearer error pinned to the offending element —
+        // but the typeExpr returned should still contain the original characters (minus the
+        // splitter) so the downstream error message names what the author actually wrote.
+        var docs = JavadocTagParser.parse("@luaReturn `unclosed");
+        assertEquals(1, docs.returns().size());
+        assertEquals("`unclosed", docs.returns().get(0).typeExpr());
+    }
 }

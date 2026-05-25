@@ -1461,8 +1461,18 @@
             "type": {
               "kind": "named",
               "module": null,
-              "name": "nil",
-              "args": []
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
             }
           },
           "setter": null
@@ -1475,8 +1485,18 @@
             "type": {
               "kind": "named",
               "module": null,
-              "name": "nil",
-              "args": []
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
             }
           },
           "setter": null
@@ -1489,8 +1509,51 @@
             "type": {
               "kind": "named",
               "module": null,
-              "name": "nil",
-              "args": []
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "on_attack_player",
+          "getter": {
+            "description": "",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                },
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
             }
           },
           "setter": null

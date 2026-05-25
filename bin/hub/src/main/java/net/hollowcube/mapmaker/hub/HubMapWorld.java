@@ -15,23 +15,33 @@ import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.scripting.ScriptEngine;
+import net.hollowcube.mapmaker.scripting.require.BundleModuleLoader;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.channels.Channels;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
+    private static final Logger logger = LoggerFactory.getLogger(HubMapWorld.class);
+
     private static final Pos MIN_SPAWN_POINT = new Pos(-1, 40, -1, 90, 0);
 
     private static final Vec HUB_BB_MIN = new Vec(-250, -40, -150);
     private static final Vec HUB_BB_MAX = new Vec(60, 160, 150);
+
+    private static final String SCRIPT_BUNDLE_RESOURCE = "/net.hollowcube.scripting/hub.zip";
 
     public static Pos spawnPointFor(Player player) {
         var seeded = new Random(player.getUuid().getLeastSignificantBits());
@@ -41,6 +51,8 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             (seeded.nextDouble() * 10) % 3
         );
     }
+
+    private final ScriptEngine scriptEngine;
 
     public HubMapWorld(MapServer server, MapData map) {
         super(server, map, makeMapInstance(map, 'h', null),
@@ -58,6 +70,30 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
             .addListener(PlayerMoveEvent.class, this::handlePlayerMove);
+
+        this.scriptEngine = createScriptEngine();
+    }
+
+    private ScriptEngine createScriptEngine() {
+        var resource = HubMapWorld.class.getResource(SCRIPT_BUNDLE_RESOURCE);
+        if (resource == null) {
+            throw new IllegalStateException("missing hub script bundle");
+        }
+        try {
+            return new ScriptEngine(this, new BundleModuleLoader(resource.toURI()));
+        } catch (IOException | URISyntaxException e) {
+            throw new IllegalStateException("failed to load hub script bundle", e);
+        }
+    }
+
+    @Override
+    public CompletableFuture<Void> close() {
+        try {
+            scriptEngine.close();
+        } catch (Exception e) {
+            logger.warn("script engine close failed for hub world", e);
+        }
+        return super.close();
     }
 
     @Override
@@ -97,16 +133,6 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
         }
 
         instance().loadStream(mapWorldData, new ReadWorldAccess(this));
-    }
-
-    @Override
-    public void spawnPlayer(Player player) {
-        super.spawnPlayer(player);
-    }
-
-    @Override
-    public void removePlayer(Player player) {
-        super.removePlayer(player);
     }
 
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {

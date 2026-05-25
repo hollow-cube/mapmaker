@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
+import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.event.MapPlayerJoinEvent;
 import net.hollowcube.mapmaker.map.event.MapPlayerLeaveEvent;
 import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
 import net.hollowcube.scripting.gen.LuaLibrary;
 import net.hollowcube.scripting.gen.LuaProperty;
+import net.minestom.server.event.entity.EntityAttackEvent;
 
 import static net.hollowcube.mapmaker.scripting.api.LibPlayer.pushPlayer;
 
@@ -22,7 +24,7 @@ public final class LibPlayers {
 
     /// Fires when a player joins the map.
     ///
-    /// @luaReturn EventSource<@ mapmaker / player.Player>
+    /// @luaReturn `EventSource<@mapmaker/player.Player>`
     @LuaProperty
     public static int getOnJoin(LuaState state) {
         class Impl {
@@ -37,7 +39,8 @@ public final class LibPlayers {
     }
 
     /// Fires when a player leaves the map.
-    /// @luaReturn EventSource<@ mapmaker / player.Player>
+    ///
+    /// @luaReturn `EventSource<@mapmaker/player.Player>`
     @LuaProperty
     public static int getOnLeave(LuaState state) {
         class Impl {
@@ -52,7 +55,8 @@ public final class LibPlayers {
     }
 
     /// Fires when a player lands on the ground after being airborne.
-    /// @luaReturn EventSource<@ mapmaker / player.Player>
+    ///
+    /// @luaReturn `EventSource<@mapmaker/player.Player>`
     @LuaProperty
     public static int getOnLand(LuaState state) {
         class Impl {
@@ -66,8 +70,28 @@ public final class LibPlayers {
         return 1;
     }
 
-    /// Fires when a player right-clicks a block. Receives the player and the block position.
-    /// @luaReturn EventSource<@ mapmaker / player.Player, vector>
+    /// @luaReturn `EventSource<@mapmaker/player.Player, @mapmaker/player.Player>`
+    @LuaProperty
+    public static int getOnAttackPlayer(LuaState state) {
+        class Impl {
+            static int pushArgs(LuaState state, EntityAttackEvent event) {
+                if (!(event.getEntity() instanceof MapPlayer attacker))
+                    return -1;
+                if (!(event.getTarget() instanceof MapPlayer victim))
+                    return -1;
+
+                pushPlayer(state, attacker);
+                pushPlayer(state, victim);
+                return 2;
+            }
+        }
+
+        LibBase.pushSignal(state, EntityAttackEvent.class, Impl::pushArgs);
+        return 1;
+    }
+
+//    /// Fires when a player right-clicks a block. Receives the player and the block position.
+//    /// @luaReturn EventSource<@ mapmaker / player.Player, vector>
 //    @LuaProperty
 //    public static int getOnBlockInteract(LuaState state) {
 //        class Impl {

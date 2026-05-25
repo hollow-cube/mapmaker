@@ -25,6 +25,17 @@ import java.util.regex.Pattern;
 ///   `@luaParam name[?] typeExpr [- free description]`
 ///   `@luaReturn typeExpr [- free description]`
 ///   `@luaGeneric name[...] [- free description]`
+///
+/// **Backtick-wrapped type expressions** are supported as a defense against IDE Javadoc
+/// formatters (notably IntelliJ's) that helpfully insert spaces inside angle-bracket or slash
+/// constructs they mistake for prose. Wrapping the type in single backticks tells the IDE to
+/// treat the span as inline code and leave it alone:
+///
+///   `@luaReturn `EventSource<@mapmaker/player.Player>``
+///   `@luaParam init `$Writable<TextProp> & { x: number }` - free description`
+///
+/// The backticks themselves are stripped before parsing. The description separator still
+/// applies *after* the closing backtick.
 public final class JavadocTagParser {
 
     private static final Pattern TAG_PARAM = Pattern.compile("^@luaParam\\s*(\\w+)(\\?)?\\s+(.+?)\\s*$");
@@ -82,8 +93,28 @@ public final class JavadocTagParser {
     /// Splits a "rest-of-line" body at the first ` - ` (space-dash-space), returning the type
     /// expression and an optional description. Luau type expressions don't include ` - ` (the
     /// arrow is `->`, not `-`), so the first occurrence is unambiguous.
+    ///
+    /// If the body starts with a backtick, the closing backtick delimits the type expression;
+    /// any ` - description` follows the closing backtick. This is the escape hatch for IDE
+    /// formatters that mangle whitespace inside `<…>` or `…/…` (see class doc). The backticks
+    /// themselves are stripped before returning.
     private static Split splitTypeAndDescription(String rest) {
         var trimmed = rest.strip();
+        if (!trimmed.isEmpty() && trimmed.charAt(0) == '`') {
+            int close = trimmed.indexOf('`', 1);
+            if (close > 1) {
+                var type = trimmed.substring(1, close);
+                var tail = trimmed.substring(close + 1).stripLeading();
+                if (tail.isEmpty()) return new Split(type, "");
+                if (tail.startsWith("- ")) return new Split(type, tail.substring(2).strip());
+                // Anything after the closing backtick that isn't the description separator is
+                // suspicious (trailing junk). Treat it as description so authors aren't surprised
+                // by silently-dropped text, but the validator can still flag it downstream.
+                return new Split(type, tail);
+            }
+            // Unterminated backtick — fall through to the legacy splitter so the type expression
+            // still gets parsed (and the type parser will likely flag it with a clearer error).
+        }
         int sep = trimmed.indexOf(DESC_SEP);
         if (sep < 0) return new Split(trimmed, "");
         return new Split(trimmed.substring(0, sep).strip(), trimmed.substring(sep + DESC_SEP.length()).strip());
