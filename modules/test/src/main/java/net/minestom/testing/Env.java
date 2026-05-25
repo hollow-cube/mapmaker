@@ -5,34 +5,34 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventFilter;
-import net.minestom.server.event.EventNode;
 import net.minestom.server.instance.ChunkLoader;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.PlayerProvider;
-import org.jetbrains.annotations.NotNull;
+import net.minestom.server.network.player.GameProfile;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
 public interface Env {
-    @NotNull ServerProcess process();
+    ServerProcess process();
 
-    @NotNull TestConnection createConnection();
+    TestConnection createConnection(GameProfile gameProfile);
 
-    <E extends Event, H> @NotNull Collector<E> trackEvent(@NotNull Class<E> eventType, @NotNull EventFilter<? super E, H> filter, @NotNull H actor);
-
-    default <E extends Event> @NotNull FlexibleListener<E> listen(@NotNull Class<E> eventType) {
-        return listen(process().eventHandler(), eventType);
+    default TestConnection createConnection() {
+        return createConnection(new GameProfile(UUID.randomUUID(), "RandName"));
     }
 
-    <E extends Event> @NotNull FlexibleListener<E> listen(@NotNull EventNode<?> node, @NotNull Class<E> eventType);
+    <E extends Event, H> Collector<E> trackEvent(Class<E> eventType, EventFilter<? super E, H> filter, H actor);
+
+    <E extends Event> FlexibleListener<E> listen(Class<E> eventType);
 
     default void tick() {
         process().ticker().tick(System.nanoTime());
     }
 
-    default boolean tickWhile(BooleanSupplier condition, Duration timeout) {
+    default boolean tickWhile(BooleanSupplier condition, @Nullable Duration timeout) {
         var ticker = process().ticker();
         final long start = System.nanoTime();
         while (condition.getAsBoolean()) {
@@ -45,22 +45,26 @@ public interface Env {
         return true;
     }
 
-    default @NotNull Player createPlayer(@NotNull Instance instance, @NotNull Pos pos) {
-        return createConnection().connect(null, instance, pos);
+    default Player createPlayer(Instance instance, Pos pos) {
+        return createConnection().connect(instance, pos);
     }
 
-    default @NotNull Player createPlayer(@NotNull PlayerProvider playerProvider, @NotNull Instance instance, @NotNull Pos pos) {
-        return createConnection().connect(playerProvider, instance, pos);
-    }
-
-    default @NotNull Instance createFlatInstance() {
+    default Instance createFlatInstance() {
         return createFlatInstance(null);
     }
 
-    default @NotNull Instance createFlatInstance(ChunkLoader chunkLoader) {
+    default Instance createFlatInstance(@Nullable ChunkLoader chunkLoader) {
         var instance = process().instance().createInstanceContainer(chunkLoader);
         instance.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
         return instance;
+    }
+
+    default Instance createEmptyInstance() {
+        return process().instance().createInstanceContainer();
+    }
+
+    default Instance createEmptyInstance(ChunkLoader chunkLoader) {
+        return process().instance().createInstanceContainer(chunkLoader);
     }
 
     default void destroyInstance(Instance instance) {

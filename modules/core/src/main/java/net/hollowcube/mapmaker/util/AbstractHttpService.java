@@ -88,6 +88,7 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(UnsignedLongAdapter.class, new UnsignedLongAdapter.Creator())
         .disableJdkUnsafe()
         .create();
+    public static final Gson GSON_PRETTY = GSON.newBuilder().setPrettyPrinting().create();
     public static final TextMapSetter<HttpRequest.Builder> CONTEXT_PROPAGATOR = (carrier, key, value) -> {
         if (carrier == null) return;
         carrier.header(key, value);

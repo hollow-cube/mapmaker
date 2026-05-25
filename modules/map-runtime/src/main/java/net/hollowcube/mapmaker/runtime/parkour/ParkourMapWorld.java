@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
@@ -47,7 +46,6 @@ import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
-import net.hollowcube.mapmaker.scripting.WorldScriptContext;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.molang.MolangExpr;
@@ -73,7 +71,6 @@ import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Nullable;
 
-import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -148,7 +145,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     private final MolangExpr leaderboardScoreExpr;
-    private final @Nullable WorldScriptContext scriptContext;
 
     private final SaveStateType saveStateType;
 
@@ -199,20 +195,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         scheduler().submitTask(this::visibilityTick);
 
-        if (map.getSetting(MapSettings.HAS_SCRIPT_BUNDLE)) {
-            // TODO(scripting): Generalize this init logic
-            if (ServerRuntime.getRuntime().isDevelopment()) {
-                var playerScript = Objects.requireNonNull(ParkourMapWorld.class.getResource("/scripts/" + map.id() + "/player.luau"));
-                var baseUrl = URI.create(playerScript.toString().substring(0, playerScript.toString().lastIndexOf('/')));
-                this.scriptContext = new WorldScriptContext(this, baseUrl, false);
-            } else {
-                var zipUrl = Objects.requireNonNull(ParkourMapWorld.class.getResource("/net.hollowcube.scripting/" + map.id() + ".zip"));
-                this.scriptContext = new WorldScriptContext(this, URI.create(zipUrl.toString()), true);
-            }
-        } else {
-            this.scriptContext = null;
-        }
-
         // We throw on world creation if the expression is invalid. We parse when setting it, so this
         // should not happen. Not sure if theres any better recourse than failing to load.
         this.leaderboardScoreExpr = MolangOptimizer.optimizeAst(MolangExpr.parseOrThrow(map.settings().leaderboard().score()));
@@ -220,10 +202,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public int defaultResetHeight() {
         return defaultResetHeight;
-    }
-
-    public @Nullable WorldScriptContext scriptContext() {
-        return scriptContext;
     }
 
     // region Player Lifecycle

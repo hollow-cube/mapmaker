@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "kind": "luau-engine-api",
+  "libraries": {
+    "@test/sample": {
+      "sourceType": "fixtures.LibSample",
+      "glueType": "fixtures.LibSample$luau",
+      "moduleName": "@test/sample",
+      "exports": [
+        {
+          "javaType": "fixtures.LibSample.Animal",
+          "name": "Animal",
+          "superExport": null,
+          "isFinal": false,
+          "generics": [],
+          "properties": [
+            {
+              "name": "name",
+              "getter": {
+                "description": "The animal's display name.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": null
+            }
+          ],
+          "methods": [],
+          "metaMethods": [],
+          "userDataTag": 1,
+          "hasSubtypes": true,
+          "description": "A non-final base export representing any animal."
+        },
+        {
+          "javaType": "fixtures.LibSample.Dog",
+          "name": "Dog",
+          "superExport": "fixtures.LibSample.Animal",
+          "isFinal": true,
+          "generics": [],
+          "properties": [
+            {
+              "name": "breed",
+              "getter": {
+                "description": "",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              }
+            }
+          ],
+          "methods": [
+            {
+              "name": "bark",
+              "description": "Make the dog bark loudly.",
+              "generics": [],
+              "params": [],
+              "returns": []
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 2,
+          "hasSubtypes": false,
+          "description": "A specific kind of animal."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [],
+      "staticProperties": [
+        {
+          "name": "version",
+          "getter": {
+            "description": "The current sample API version.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "number",
+              "args": []
+            }
+          },
+          "setter": null
+        }
+      ],
+      "description": "A fixture library with a static getter, a base export, and a final subtype."
+    }
+  },
+  "globals": []
+}

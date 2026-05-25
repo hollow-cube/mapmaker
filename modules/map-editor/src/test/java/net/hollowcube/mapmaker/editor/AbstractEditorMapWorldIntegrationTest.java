@@ -41,6 +41,7 @@ public class AbstractEditorMapWorldIntegrationTest {
         player = env.createPlayer(world.instance(), new Pos(0, 40, 0));
         player.setTag(PlayerData.TAG, new PlayerData(player));
 
+
         world.configurePlayer(new AsyncPlayerConfigurationEvent(player, true));
         world.spawnPlayer(player);
 

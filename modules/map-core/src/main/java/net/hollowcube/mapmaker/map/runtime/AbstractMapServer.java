@@ -322,6 +322,11 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
+    public @NotNull JetStreamWrapper jetStream() {
+        return this.jetStream;
+    }
+
+    @Override
     public @NotNull Scheduler scheduler() {
         return MinecraftServer.getSchedulerManager();
     }

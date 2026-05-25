@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.ServiceContext;
+import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 
@@ -41,5 +42,7 @@ public interface MapServer {
     @NotNull CommandManager commandManager();
 
     @NotNull Scheduler scheduler();
+
+    @NotNull JetStreamWrapper jetStream();
 
 }

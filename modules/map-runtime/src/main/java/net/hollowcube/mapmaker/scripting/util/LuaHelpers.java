@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.scripting.util;
 
+import com.google.gson.*;
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.internal.vm.lua_Debug;
 import net.kyori.adventure.key.Key;
@@ -22,6 +23,7 @@ public final class LuaHelpers {
     ///
     /// The state should be left _exactly_ as it was before the call (value at -1).
     public static void tableForEach(LuaState state, int tableIndex, Consumer<String> func) {
+        ensureValidStackIndex(state, tableIndex, "tableForEach");
         state.pushNil();
         while (state.next(tableIndex)) {
             // Key is at index -2, value is at index -1
@@ -33,14 +35,37 @@ public final class LuaHelpers {
         }
     }
 
+    /// Iterates over an array (sequence) table in order from index 1 to #table.
+    /// During the callback, the value is at index -1.
+    /// The state is left exactly as it was before the call.
+    public static void arrayForEach(LuaState state, int tableIndex, Consumer<Integer> func) {
+        ensureValidStackIndex(state, tableIndex, "arrayForEach");
+        int absIndex = state.absIndex(tableIndex);
+        int length = state.len(absIndex);
+        for (int i = 1; i <= length; i++) {
+            state.rawGetI(absIndex, i);
+            func.accept(i);
+            state.pop(1);
+        }
+    }
+
     /// Returns true if the key exists, it is at the top of the stack.
     public static boolean tableGet(LuaState state, int tableIndex, String key) {
+        ensureValidStackIndex(state, tableIndex, "tableGet");
         state.getField(tableIndex, key);
         if (state.isNil(-1)) {
             state.pop(1); // Remove nil
             return false;
         }
         return true;
+    }
+
+    private static void ensureValidStackIndex(LuaState state, int index, String helper) {
+        if (index > 0 && index > state.top())
+            throw new IllegalArgumentException(
+                helper + " called with stack index " + index + " but top is " + state.top()
+                + " — usually a sign that the caller forgot the `self` slot was removed by"
+                + " namecall dispatch, or that an argument check failed silently.");
     }
 
     public static @Nullable Key checkOptKey(LuaState state, int index) {
@@ -80,6 +105,55 @@ public final class LuaHelpers {
 
             return lua_Debug.source(debug).getString(0);
         }
+    }
+
+    public static void pushJsonElement(LuaState state, JsonElement element) {
+        switch (element) {
+            case JsonObject object -> {
+                state.newTable();
+                for (var entry : object.entrySet()) {
+                    pushJsonElement(state, entry.getValue());
+                    state.setField(-2, entry.getKey());
+                }
+            }
+            case JsonArray array -> {
+                state.newTable();
+                for (int i = 0; i < array.size(); i++) {
+                    pushJsonElement(state, array.get(i));
+                    state.rawSetI(-2, i + 1);
+                }
+            }
+            case JsonNull _ -> state.pushNil();
+            case JsonPrimitive primitive -> {
+                if (primitive.isBoolean()) {
+                    state.pushBoolean(primitive.getAsBoolean());
+                } else if (primitive.isNumber()) {
+                    state.pushNumber(primitive.getAsDouble());
+                } else {
+                    state.pushString(primitive.getAsString());
+                }
+            }
+            default -> throw new IllegalArgumentException("Unknown JsonElement type: " + element.getClass());
+        }
+    }
+
+    public static JsonElement toJsonElement(LuaState state, int index) {
+        return switch (state.type(index)) {
+            case NIL -> JsonNull.INSTANCE;
+            case BOOLEAN -> new JsonPrimitive(state.toBoolean(-1));
+            case NUMBER -> new JsonPrimitive(state.toNumber(-1));
+            case STRING -> new JsonPrimitive(state.toString(-1));
+            case TABLE -> {
+                int absIndex = state.absIndex(index);
+                var obj = new JsonObject();
+                tableForEach(state, absIndex, key -> obj.add(key, toJsonElement(state, -1)));
+                yield obj;
+            }
+            // todo support vector type, some userdata types, and buffer type (probably)
+            case NONE, FUNCTION, LIGHTUSERDATA, USERDATA, VECTOR, THREAD, BUFFER -> {
+                throw new IllegalArgumentException("Cannot read JSON from type " + state.typeName(index));
+            }
+        };
     }
 
 }

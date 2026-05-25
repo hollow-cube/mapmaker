@@ -15,7 +15,10 @@ import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
-import net.hollowcube.mapmaker.runtime.parkour.hud.*;
+import net.hollowcube.mapmaker.runtime.parkour.hud.FinishedModeHud;
+import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourTimerHud;
+import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
+import net.hollowcube.mapmaker.runtime.parkour.hud.SpectatorModeHud;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
@@ -95,12 +98,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 saveState().setStartLatency(mp.averageLatency());
             } else ((MapPlayer) player).resetTouchingState();
 
-            var scriptContext = world.scriptContext();
-            if (scriptContext != null) scriptContext.initializePlayer((MapPlayer) player);
-
-            if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
-                ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
-            }
+//            if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
+//                ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
+//            }
 
             var map = world.map();
             switch (map.getSetting(MapSettings.CAN_SEND_POSE)) {
@@ -113,9 +113,6 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         default void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
-            var scriptContext = world.scriptContext();
-            if (scriptContext != null) scriptContext.destroyPlayer((MapPlayer) player);
-
             player.updateViewerRule(null);
 
             // Any time we switch away from playing we attempt to save the current state.

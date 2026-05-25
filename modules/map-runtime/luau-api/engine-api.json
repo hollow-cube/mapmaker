@@ -1,0 +1,2091 @@
+{
+  "schemaVersion": 1,
+  "kind": "luau-engine-api",
+  "libraries": {
+    "@mapmaker": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibBase",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibBase$luau",
+      "moduleName": "@mapmaker",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibBase.Signal",
+          "name": "Signal",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [
+            {
+              "name": "A",
+              "pack": true,
+              "description": ""
+            }
+          ],
+          "properties": [],
+          "methods": [
+            {
+              "name": "connect",
+              "description": "Calls `handler` every time this event fires.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "handler",
+                  "optional": false,
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": null,
+                        "type": {
+                          "kind": "genericPack",
+                          "name": "A"
+                        }
+                      }
+                    ],
+                    "varargs": null,
+                    "returns": []
+                  },
+                  "description": "the function to run on each event"
+                }
+              ],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "Connection",
+                    "args": []
+                  },
+                  "description": "a reference to the newly created connection"
+                }
+              ]
+            },
+            {
+              "name": "once",
+              "description": "Calls `handler` the next time this event fires, then unsubscribes.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "handler",
+                  "optional": false,
+                  "type": {
+                    "kind": "function",
+                    "params": [
+                      {
+                        "name": null,
+                        "type": {
+                          "kind": "genericPack",
+                          "name": "A"
+                        }
+                      }
+                    ],
+                    "varargs": null,
+                    "returns": []
+                  },
+                  "description": "the function to run on the next event"
+                }
+              ],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "Connection",
+                    "args": []
+                  },
+                  "description": "a reference to the newly created connection"
+                }
+              ]
+            },
+            {
+              "name": "wait",
+              "description": "Pauses the calling thread until the next time this event fires, then resumes\nwith the event's arguments.\n\n```luau\nlocal player = players.on_join:wait()\nprint(player.name .. \" joined\")\n```",
+              "generics": [],
+              "params": [],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "genericPack",
+                    "name": "A"
+                  },
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 1,
+          "hasSubtypes": false,
+          "description": "A stream of events you can subscribe to. Use `:connect` to react every time the event\nfires, `:once` to handle just the next one, or `:wait` to pause the current thread\nuntil the next event.\n\n```luau\nlocal players = require(\"@mapmaker/players\")\nplayers.on_join:connect(function(player)\n    player:send_message(\"welcome!\")\nend)\n```"
+        },
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibBase.Connection",
+          "name": "Connection",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [
+            {
+              "name": "disconnected",
+              "getter": {
+                "description": "Returns true if this connection is currently active, false otherwise.\n\nA connection becomes inactive if it is explicitly disconnected, if it was\na single-use connection that has already fired.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "boolean",
+                  "args": []
+                }
+              },
+              "setter": null
+            }
+          ],
+          "methods": [
+            {
+              "name": "disconnect",
+              "description": "Disconnects this handler from the event.\nAfter calling this, the handler will no longer be called when the event fires.",
+              "generics": [],
+              "params": [],
+              "returns": []
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 2,
+          "hasSubtypes": false,
+          "description": ""
+        }
+      ],
+      "enums": [],
+      "staticMethods": [],
+      "staticProperties": [],
+      "description": ""
+    },
+    "@mapmaker/entity": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibEntity",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibEntity$luau",
+      "moduleName": "@mapmaker/entity",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibEntity.Prop",
+          "name": "Prop",
+          "superExport": null,
+          "isFinal": false,
+          "generics": [],
+          "properties": [
+            {
+              "name": "position",
+              "getter": {
+                "description": "The prop's current position in the world.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "vector",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "yaw",
+              "getter": {
+                "description": "The prop's yaw (horizontal rotation), in degrees.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "pitch",
+              "getter": {
+                "description": "The prop's pitch (vertical rotation), in degrees.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "scale",
+              "getter": {
+                "description": "The display's scale. Each axis can be set independently. Interpolatable.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "vector",
+                  "args": []
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "vector",
+                  "args": []
+                }
+              }
+            },
+            {
+              "name": "billboard",
+              "getter": {
+                "description": "How the prop orients itself toward the player.",
+                "paramName": null,
+                "type": {
+                  "kind": "union",
+                  "alternatives": [
+                    {
+                      "kind": "string",
+                      "value": "fixed"
+                    },
+                    {
+                      "kind": "string",
+                      "value": "vertical"
+                    },
+                    {
+                      "kind": "string",
+                      "value": "horizontal"
+                    },
+                    {
+                      "kind": "string",
+                      "value": "center"
+                    }
+                  ]
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "union",
+                  "alternatives": [
+                    {
+                      "kind": "string",
+                      "value": "fixed"
+                    },
+                    {
+                      "kind": "string",
+                      "value": "vertical"
+                    },
+                    {
+                      "kind": "string",
+                      "value": "horizontal"
+                    },
+                    {
+                      "kind": "string",
+                      "value": "center"
+                    }
+                  ]
+                }
+              }
+            }
+          ],
+          "methods": [
+            {
+              "name": "interpolate",
+              "description": "Smoothly transitions properties to new values over `duration` ticks. Only\ninterpolatable properties can appear in the target table.\n\n```luau\nprop:interpolate(20, { scale = vector(2, 2, 2) })  -- grow over one second\n```",
+              "generics": [],
+              "params": [
+                {
+                  "name": "duration",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "number",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "properties",
+                  "optional": false,
+                  "type": {
+                    "kind": "table",
+                    "fields": [],
+                    "arrayElement": null,
+                    "indexerKey": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "string",
+                      "args": []
+                    },
+                    "indexerValue": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "any",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "nil",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "name": "remove",
+              "description": "Removes the entity from the world. Has no effect if the entity is already removed.",
+              "generics": [],
+              "params": [],
+              "returns": []
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 3,
+          "hasSubtypes": true,
+          "unionKind": "UNION_ALIAS",
+          "unionVariants": [
+            "net.hollowcube.mapmaker.scripting.api.LibEntity.TextProp"
+          ],
+          "discriminator": "kind",
+          "description": "The base type for all props."
+        },
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibEntity.TextProp",
+          "name": "TextProp",
+          "superExport": "net.hollowcube.mapmaker.scripting.api.LibEntity.Prop",
+          "isFinal": true,
+          "generics": [],
+          "properties": [
+            {
+              "name": "kind",
+              "getter": {
+                "description": "",
+                "paramName": null,
+                "type": {
+                  "kind": "string",
+                  "value": "text"
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "text",
+              "getter": {
+                "description": "The text shown by this display.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "Text",
+                  "args": []
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "AnyText",
+                  "args": []
+                }
+              }
+            },
+            {
+              "name": "shadow",
+              "getter": {
+                "description": "Whether the text is rendered with a drop shadow.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "boolean",
+                  "args": []
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "boolean",
+                  "args": []
+                }
+              }
+            },
+            {
+              "name": "background",
+              "getter": {
+                "description": "The background colour behind the text, as a packed ARGB integer.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              }
+            },
+            {
+              "name": "opacity",
+              "getter": {
+                "description": "The text's opacity, between `0` (fully transparent) and `1` (fully opaque).",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": {
+                "description": "",
+                "paramName": "value",
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              }
+            }
+          ],
+          "methods": [],
+          "metaMethods": [],
+          "userDataTag": 4,
+          "hasSubtypes": false,
+          "unionKind": "UNION_VARIANT",
+          "description": "A display that renders styled text floating in the world."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [],
+      "staticProperties": [],
+      "description": "Entity types. To spawn an entity, call `player.world:spawn_entity(...)`."
+    },
+    "@mapmaker/item": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibItem",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibItem$luau",
+      "moduleName": "@mapmaker/item",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibItem.Item",
+          "name": "Item",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [
+            {
+              "name": "id",
+              "getter": {
+                "description": "The item's id.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": null
+            }
+          ],
+          "methods": [],
+          "metaMethods": [],
+          "userDataTag": 5,
+          "hasSubtypes": false,
+          "description": "A stack of items. Empty stacks are returned as `nil` rather than an `Item`."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [
+        {
+          "name": "deprecated_make_item_from_material",
+          "description": "**Deprecated.** Creates an `Item` from a vanilla material key.",
+          "generics": [],
+          "params": [
+            {
+              "name": "material",
+              "optional": false,
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "string",
+                "args": []
+              },
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": "@mapmaker/item",
+                "name": "Item",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "staticProperties": [],
+      "description": "Items and item stacks."
+    },
+    "@mapmaker/player": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibPlayer",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibPlayer$luau",
+      "moduleName": "@mapmaker/player",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibPlayer.Player",
+          "name": "Player",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [
+            {
+              "name": "uuid",
+              "getter": {
+                "description": "The player's UUID.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "name",
+              "getter": {
+                "description": "The player's username.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "position",
+              "getter": {
+                "description": "The player's current position.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "vector",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "yaw",
+              "getter": {
+                "description": "The player's yaw (horizontal rotation), in degrees.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "pitch",
+              "getter": {
+                "description": "The player's pitch (vertical rotation), in degrees.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "sidebar",
+              "getter": {
+                "description": "The player's sidebar.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "Sidebar",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "world",
+              "getter": {
+                "description": "The world as the player sees it. Use this to apply effects only this player can\nsee, like ghost blocks or attached entities.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": "@mapmaker/player",
+                  "name": "WorldView",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "deprecated_scale",
+              "getter": {
+                "description": "**Deprecated.** The player's current scale.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "number",
+                  "args": []
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "on_interact_block",
+              "getter": {
+                "description": "Fires when this player right-clicks a block. Receives the block position.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "EventSource",
+                  "args": [
+                    {
+                      "kind": "single",
+                      "type": {
+                        "kind": "named",
+                        "module": null,
+                        "name": "vector",
+                        "args": []
+                      }
+                    }
+                  ]
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "on_jump",
+              "getter": {
+                "description": "Fires when this player jumps.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "EventSource",
+                  "args": [
+                    {
+                      "kind": "pack",
+                      "types": [],
+                      "tail": null
+                    }
+                  ]
+                }
+              },
+              "setter": null
+            },
+            {
+              "name": "on_use_item",
+              "getter": {
+                "description": "Fires when this player right-clicks while holding an item.",
+                "paramName": null,
+                "type": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "EventSource",
+                  "args": [
+                    {
+                      "kind": "pack",
+                      "types": [],
+                      "tail": null
+                    }
+                  ]
+                }
+              },
+              "setter": null
+            }
+          ],
+          "methods": [
+            {
+              "name": "send_message",
+              "description": "Sends a chat message to this player.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "message",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "AnyText",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "show_title",
+              "description": "Shows a title (and optional subtitle) on this player's screen.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "title",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "AnyText",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "subtitle",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "AnyText",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "play_sound",
+              "description": "Plays a sound for this player. The sound follows the player as they move.\n\n`options` can include `volume` (0–1), `pitch` (0–2), and `category`.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "sound",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "options",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "table",
+                      "fields": [
+                        {
+                          "name": "volume",
+                          "type": {
+                            "kind": "optional",
+                            "inner": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "number",
+                              "args": []
+                            }
+                          }
+                        },
+                        {
+                          "name": "pitch",
+                          "type": {
+                            "kind": "optional",
+                            "inner": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "number",
+                              "args": []
+                            }
+                          }
+                        },
+                        {
+                          "name": "category",
+                          "type": {
+                            "kind": "optional",
+                            "inner": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "string",
+                              "args": []
+                            }
+                          }
+                        }
+                      ],
+                      "arrayElement": null,
+                      "indexerKey": null,
+                      "indexerValue": null
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "play_sound_at",
+              "description": "Plays a sound for this player at a specific position. Volume falls off with distance.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "sound",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "position",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "vector",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "options",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "table",
+                      "fields": [
+                        {
+                          "name": "volume",
+                          "type": {
+                            "kind": "optional",
+                            "inner": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "number",
+                              "args": []
+                            }
+                          }
+                        },
+                        {
+                          "name": "pitch",
+                          "type": {
+                            "kind": "optional",
+                            "inner": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "number",
+                              "args": []
+                            }
+                          }
+                        },
+                        {
+                          "name": "category",
+                          "type": {
+                            "kind": "optional",
+                            "inner": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "string",
+                              "args": []
+                            }
+                          }
+                        }
+                      ],
+                      "arrayElement": null,
+                      "indexerKey": null,
+                      "indexerValue": null
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "stop_sound",
+              "description": "Stops sounds playing for this player. With no arguments, stops every sound.\nPass `sound` to stop a specific key, `category` to stop a category, or both.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "sound",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "string",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "category",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "string",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "teleport",
+              "description": "Teleports the player. Yaw and pitch default to the player's current values.\n\n`relative` is a string containing any of the characters `xyzrw` — each one means\nthat axis is interpreted as an offset from the player's current value rather than\nan absolute coordinate. `r` covers yaw, `w` covers pitch.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "position",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "vector",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "yaw",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "number",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "pitch",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "number",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "relative",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "string",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "get_slot",
+              "description": "Returns the item equipped in `slot`, or an empty item if the slot is empty.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "slot",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/item",
+                    "name": "Item",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "name": "set_slot",
+              "description": "Sets the item equipped in `slot`.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "slot",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "item",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/item",
+                    "name": "Item",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "set_item",
+              "description": "Places an item in the player's inventory. Slot indices: hotbar 0–8, main inventory\n9–35, armor 36–39, off-hand 40.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "slot",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "number",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "item",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/item",
+                    "name": "Item",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "add_effect",
+              "description": "Applies a potion effect to this player. `amplifier` is 1-based — pass `1` for\nlevel I. Duration is in ticks; omit it for an infinite effect.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "effect",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "amplifier",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "number",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "duration",
+                  "optional": false,
+                  "type": {
+                    "kind": "optional",
+                    "inner": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "number",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "remove_effect",
+              "description": "Removes an active potion effect from this player.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "effect",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            },
+            {
+              "name": "clear_effects",
+              "description": "Removes all active potion effects from this player.",
+              "generics": [],
+              "params": [],
+              "returns": []
+            }
+          ],
+          "metaMethods": [
+            {
+              "meta": "__eq",
+              "description": "Two `Player` values are equal when they refer to the same player.",
+              "generics": [],
+              "params": [],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "boolean",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "userDataTag": 6,
+          "hasSubtypes": false,
+          "description": "A player connected to the map."
+        },
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibPlayer.WorldView",
+          "name": "WorldView",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [],
+          "methods": [
+            {
+              "name": "spawn_text_prop",
+              "description": "",
+              "generics": [],
+              "params": [
+                {
+                  "name": "init",
+                  "optional": false,
+                  "type": {
+                    "kind": "intersection",
+                    "conjuncts": [
+                      {
+                        "kind": "table",
+                        "fields": [
+                          {
+                            "name": "scale",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "vector",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "billboard",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "union",
+                                "alternatives": [
+                                  {
+                                    "kind": "string",
+                                    "value": "fixed"
+                                  },
+                                  {
+                                    "kind": "string",
+                                    "value": "vertical"
+                                  },
+                                  {
+                                    "kind": "string",
+                                    "value": "horizontal"
+                                  },
+                                  {
+                                    "kind": "string",
+                                    "value": "center"
+                                  }
+                                ]
+                              }
+                            }
+                          },
+                          {
+                            "name": "text",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "AnyText",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "shadow",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "boolean",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "background",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "opacity",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          }
+                        ],
+                        "arrayElement": null,
+                        "indexerKey": null,
+                        "indexerValue": null
+                      },
+                      {
+                        "kind": "table",
+                        "fields": [
+                          {
+                            "name": "position",
+                            "type": {
+                              "kind": "named",
+                              "module": null,
+                              "name": "vector",
+                              "args": []
+                            }
+                          },
+                          {
+                            "name": "yaw",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          },
+                          {
+                            "name": "pitch",
+                            "type": {
+                              "kind": "optional",
+                              "inner": {
+                                "kind": "named",
+                                "module": null,
+                                "name": "number",
+                                "args": []
+                              }
+                            }
+                          }
+                        ],
+                        "arrayElement": null,
+                        "indexerKey": null,
+                        "indexerValue": null
+                      }
+                    ]
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/entity",
+                    "name": "TextProp",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "name": "set_block",
+              "description": "Sets a block visible only to this player. The actual world is unchanged.\n\n`blockState` accepts a block id with optional state, e.g. `\"minecraft:stone\"`\nor `\"minecraft:oak_stairs[facing=north]\"`.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "position",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "vector",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "blockState",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 7,
+          "hasSubtypes": false,
+          "description": "The world as seen by a single player. Effects applied here are visible only to that\nplayer."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [],
+      "staticProperties": [],
+      "description": "The `Player` type and per-player helpers like `Sidebar` and `WorldView`."
+    },
+    "@mapmaker/players": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibPlayers",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibPlayers$luau",
+      "moduleName": "@mapmaker/players",
+      "exports": [],
+      "enums": [],
+      "staticMethods": [],
+      "staticProperties": [
+        {
+          "name": "on_join",
+          "getter": {
+            "description": "Fires when a player joins the map.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "on_leave",
+          "getter": {
+            "description": "Fires when a player leaves the map.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "on_land",
+          "getter": {
+            "description": "Fires when a player lands on the ground after being airborne.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "on_attack_player",
+          "getter": {
+            "description": "",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "EventSource",
+              "args": [
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                },
+                {
+                  "kind": "single",
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  }
+                }
+              ]
+            }
+          },
+          "setter": null
+        }
+      ],
+      "description": "Events that fire across all players in the map.\n\n```luau\nlocal players = require(\"@mapmaker/players\")\nplayers.on_join:listen(function(player)\n    player:send_message(\"welcome, \" .. player.name)\nend)\n```"
+    },
+    "@mapmaker/store": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibStore",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibStore$luau",
+      "moduleName": "@mapmaker/store",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LibStore.StateDefinition",
+          "name": "StateDefinition",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [],
+          "methods": [
+            {
+              "name": "get",
+              "description": "Returns this player's value for the slot.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "player",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "table",
+                    "fields": [],
+                    "arrayElement": null,
+                    "indexerKey": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "string",
+                      "args": []
+                    },
+                    "indexerValue": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "any",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "name": "set",
+              "description": "Replaces this player's value for the slot.",
+              "generics": [],
+              "params": [
+                {
+                  "name": "player",
+                  "optional": false,
+                  "type": {
+                    "kind": "named",
+                    "module": "@mapmaker/player",
+                    "name": "Player",
+                    "args": []
+                  },
+                  "description": ""
+                },
+                {
+                  "name": "value",
+                  "optional": false,
+                  "type": {
+                    "kind": "table",
+                    "fields": [],
+                    "arrayElement": null,
+                    "indexerKey": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "string",
+                      "args": []
+                    },
+                    "indexerValue": {
+                      "kind": "named",
+                      "module": null,
+                      "name": "any",
+                      "args": []
+                    }
+                  },
+                  "description": ""
+                }
+              ],
+              "returns": []
+            }
+          ],
+          "metaMethods": [],
+          "userDataTag": 8,
+          "hasSubtypes": false,
+          "description": "A handle to one named state slot. Returned by `define_state`."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [
+        {
+          "name": "define_state",
+          "description": "Defines a named state slot. Cache the returned definition at module scope; calling\n`define_state` more than once for the same name produces independent slots.",
+          "generics": [],
+          "params": [
+            {
+              "name": "name",
+              "optional": false,
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "string",
+                "args": []
+              },
+              "description": ""
+            },
+            {
+              "name": "defaultValue",
+              "optional": false,
+              "type": {
+                "kind": "table",
+                "fields": [],
+                "arrayElement": null,
+                "indexerKey": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "string",
+                  "args": []
+                },
+                "indexerValue": {
+                  "kind": "named",
+                  "module": null,
+                  "name": "any",
+                  "args": []
+                }
+              },
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": "@mapmaker/store",
+                "name": "StateDefinition",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "staticProperties": [],
+      "description": "Per-player state storage.\n\n```luau\nlocal store = require(\"@mapmaker/store\")\nlocal stats = store.define_state(\"stats\", { wins = 0, kills = 0 })\n\nplayers.on_join:listen(function(p)\n    local data = stats:get(p)\n    p:send_message(\"welcome back, you have \" .. data.wins .. \" wins\")\nend)\n```"
+    },
+    "@mapmaker/task": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibTask",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibTask$luau",
+      "moduleName": "@mapmaker/task",
+      "exports": [],
+      "enums": [],
+      "staticMethods": [
+        {
+          "name": "spawn",
+          "description": "",
+          "generics": [],
+          "params": [],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "thread",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "defer",
+          "description": "",
+          "generics": [],
+          "params": [],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "thread",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "delay",
+          "description": "",
+          "generics": [],
+          "params": [],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "thread",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "wait",
+          "description": "",
+          "generics": [],
+          "params": [],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "nil",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "cancel",
+          "description": "",
+          "generics": [],
+          "params": [],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "boolean",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "staticProperties": [],
+      "description": ""
+    },
+    "@mapmaker/world": {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LibWorld",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LibWorld$luau",
+      "moduleName": "@mapmaker/world",
+      "exports": [],
+      "enums": [],
+      "staticMethods": [
+        {
+          "name": "get_block",
+          "description": "Returns the block at the given position. Currently returns the block's id as a\nstring (e.g. `\"minecraft:stone\"`).",
+          "generics": [],
+          "params": [
+            {
+              "name": "position",
+              "optional": false,
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "vector",
+                "args": []
+              },
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "string",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "staticProperties": [],
+      "description": "Read and write the world this script is running in. For per-player effects, use\n`player.world` instead."
+    }
+  },
+  "globals": [
+    {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LuaRuntime",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LuaRuntime$luau",
+      "moduleName": "runtime",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LuaRuntime.Hot",
+          "name": "Hot",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [],
+          "methods": [],
+          "metaMethods": [],
+          "userDataTag": 9,
+          "hasSubtypes": false,
+          "description": "Controls for hot-reloading scripts."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [],
+      "staticProperties": [
+        {
+          "name": "version",
+          "getter": {
+            "description": "The server version.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "string",
+              "args": []
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "build",
+          "getter": {
+            "description": "The short commit hash of the running build.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "string",
+              "args": []
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "size",
+          "getter": {
+            "description": "The server's size class.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "string",
+              "args": []
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "age",
+          "getter": {
+            "description": "How long the server has been running, in seconds.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "number",
+              "args": []
+            }
+          },
+          "setter": null
+        },
+        {
+          "name": "hot",
+          "getter": {
+            "description": "Hot-reload controls.",
+            "paramName": null,
+            "type": {
+              "kind": "named",
+              "module": null,
+              "name": "Hot",
+              "args": []
+            }
+          },
+          "setter": null
+        }
+      ],
+      "description": "Information about the server this script is running on. Available as a global named\n`runtime`, without `require`."
+    },
+    {
+      "sourceType": "net.hollowcube.mapmaker.scripting.api.LuaText",
+      "glueType": "net.hollowcube.mapmaker.scripting.api.LuaText$luau",
+      "moduleName": "Text",
+      "exports": [
+        {
+          "javaType": "net.hollowcube.mapmaker.scripting.api.LuaText.Text",
+          "name": "Text",
+          "superExport": null,
+          "isFinal": true,
+          "generics": [],
+          "properties": [],
+          "methods": [],
+          "metaMethods": [
+            {
+              "meta": "__concat",
+              "description": "Concatenates two `Text` values, or a `Text` with any string-able value.",
+              "generics": [],
+              "params": [],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "Text",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "meta": "__len",
+              "description": "Returns the length of the rendered plain text, ignoring formatting.",
+              "generics": [],
+              "params": [],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "number",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            },
+            {
+              "meta": "__tostring",
+              "description": "Returns the plain-text form, without any formatting.",
+              "generics": [],
+              "params": [],
+              "returns": [
+                {
+                  "type": {
+                    "kind": "named",
+                    "module": null,
+                    "name": "string",
+                    "args": []
+                  },
+                  "description": ""
+                }
+              ]
+            }
+          ],
+          "userDataTag": 10,
+          "hasSubtypes": false,
+          "description": "A piece of styled text. Built with `Text.new`, accepted anywhere the API takes a\nmessage or label."
+        }
+      ],
+      "enums": [],
+      "staticMethods": [
+        {
+          "name": "new",
+          "description": "Parses a MiniMessage-formatted string into a `Text`. Always escape user input with\n`Text.sanitize` first to prevent unintended formatting.\n\n```luau\nlocal greeting = Text.new(\"<red>welcome!</red>\")\nplayer:send_message(greeting)\n```",
+          "generics": [],
+          "params": [
+            {
+              "name": "text",
+              "optional": false,
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "string",
+                "args": []
+              },
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "Text",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        },
+        {
+          "name": "sanitize",
+          "description": "Escapes any MiniMessage tags in a string. Use this before passing user-supplied text\nto `Text.new` to prevent injected formatting.\n\n```luau\nlocal safe = Text.sanitize(player_input)\nplayer:send_message(Text.new(\"you said: \" .. safe))\n```",
+          "generics": [],
+          "params": [
+            {
+              "name": "text",
+              "optional": false,
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "string",
+                "args": []
+              },
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": {
+                "kind": "named",
+                "module": null,
+                "name": "string",
+                "args": []
+              },
+              "description": ""
+            }
+          ]
+        }
+      ],
+      "staticProperties": [],
+      "description": "Build and manipulate styled text. `Text` values can be passed anywhere the API accepts a\nmessage, title, or label. Available as a global named `Text`, without `require`."
+    }
+  ]
+}

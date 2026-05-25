@@ -30,6 +30,9 @@ include(
     "modules:map-core",
     "modules:map-editor",
     "modules:map-runtime",
+    "modules:map-runtime-gen",
+    "modules:map-runtime-gen:annotations",
+    "modules:map-test",
     "modules:nbs",
     "modules:replay",
     "modules:terraform",
@@ -39,18 +42,16 @@ include(
 
 include(
     "tools:native-image-helper",
-    "tools:lua-slopgen:api",
-    "tools:lua-slopgen",
 )
 
 include(
     "bin:config",
     "bin:development",
     "bin:hub",
-    "bin:local",
     "bin:map",
     "bin:map-isolate",
     "bin:packer",
     "bin:proxy-plugin",
+    "bin:script-bundler",
     "bin:world-converter",
 )

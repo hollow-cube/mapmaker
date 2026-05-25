@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.api;
 
+import net.hollowcube.mapmaker.api.auth.AuthClient;
 import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -15,19 +16,22 @@ public final class ApiClient {
     public final HeadDatabaseClient headDatabase;
     public final InteractionClient interactions;
     public final NotificationClient notifications;
+    public final AuthClient auth;
 
     public ApiClient(
         PlayerClient players,
         MapClient maps,
         HeadDatabaseClient headDatabase,
         InteractionClient interactions,
-        NotificationClient notifications
+        NotificationClient notifications,
+        AuthClient auth
     ) {
         this.players = players;
         this.maps = maps;
         this.headDatabase = headDatabase;
         this.interactions = interactions;
         this.notifications = notifications;
+        this.auth = auth;
     }
 
     public ApiClient(HttpClientWrapper http) {
@@ -36,6 +40,7 @@ public final class ApiClient {
         this.headDatabase = new HeadDatabaseClient.Http(http);
         this.interactions = new InteractionClient.Http(http);
         this.notifications = new NotificationClient.Http(http);
+        this.auth = new AuthClient.Http(http);
     }
 
     public static class Error extends RuntimeException {

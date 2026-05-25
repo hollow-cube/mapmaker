@@ -19,6 +19,10 @@ dependencies {
     implementation(libs.included.schem)
     implementation(libs.included.molang)
 
+    implementation(libs.luau.core)
+    implementation(libs.nats)
+
     testImplementation(project(":modules:test"))
+    testImplementation(project(":modules:map-test"))
 
 }

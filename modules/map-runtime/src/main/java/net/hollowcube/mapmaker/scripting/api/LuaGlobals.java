@@ -1,10 +1,7 @@
 package net.hollowcube.mapmaker.scripting.api;
 
-import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.luau.LuaFunc;
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.mapmaker.scripting.ScriptContext;
-import net.kyori.adventure.text.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,6 +15,7 @@ public final class LuaGlobals {
         state.setGlobal("print");
     }
 
+
     private static int print(LuaState state) {
         var builder = new StringBuilder();
         int top = state.top();
@@ -29,13 +27,13 @@ public final class LuaGlobals {
 
         LOGGER.info("[SCRIPT] {}", builder);
 
-        if (ServerRuntime.getRuntime().isDevelopment()) {
-            var world = switch (ScriptContext.get(state)) {
-                case ScriptContext.World w -> w.world().instance();
-                case ScriptContext.Player p -> p.player().getInstance();
-            };
-            world.sendMessage(Component.text("[SCRIPT] " + builder));
-        }
+//        if (ServerRuntime.getRuntime().isDevelopment()) {
+//            var world = switch (LegacyScriptContext.get(state)) {
+//                case LegacyScriptContext.World w -> w.world().instance();
+//                case LegacyScriptContext.Player p -> p.player().getInstance();
+//            };
+//            world.sendMessage(Component.text("[SCRIPT] " + builder));
+//        }
 
         return 0;
     }

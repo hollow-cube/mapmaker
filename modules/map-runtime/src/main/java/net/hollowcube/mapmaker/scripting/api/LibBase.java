@@ -1,175 +1,191 @@
 package net.hollowcube.mapmaker.scripting.api;
 
 import net.hollowcube.luau.LuaState;
-import net.hollowcube.luau.LuaType;
-import net.hollowcube.luau.gen.LuaExport;
-import net.hollowcube.luau.gen.LuaLibrary;
-import net.hollowcube.luau.gen.LuaMethod;
 import net.hollowcube.mapmaker.scripting.Disposable;
 import net.hollowcube.mapmaker.scripting.ScriptContext;
-import net.hollowcube.mapmaker.scripting.api.LibBase.EventSource.EventPusher;
-import net.hollowcube.mapmaker.scripting.util.LuaHelpers;
+import net.hollowcube.mapmaker.scripting.util.LuaCallback;
+import net.hollowcube.mapmaker.scripting.util.LuaMarshaller;
+import net.hollowcube.mapmaker.scripting.util.LuaResumable;
+import net.hollowcube.scripting.gen.LuaExport;
+import net.hollowcube.scripting.gen.LuaLibrary;
+import net.hollowcube.scripting.gen.LuaMethod;
+import net.hollowcube.scripting.gen.LuaProperty;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventListener;
+import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.EntityEvent;
-import org.jetbrains.annotations.NotNull;
+import net.minestom.server.event.trait.InstanceEvent;
+import org.jetbrains.annotations.Nullable;
 
 @LuaLibrary(name = "@mapmaker")
 public final class LibBase {
 
-    public static <E extends EntityEvent> void pushEventSource(LuaState state, Class<E> event, EventPusher<E> pusher) {
-        LibBase$luau.pushEventSource(state, new EventSource(event, pusher));
+    public static <E extends EntityEvent> void pushSignal(LuaState state, Class<E> event, LuaMarshaller<E> pusher) {
+        LibBase$luau.pushSignal(state, new Signal(event, pusher));
+    }
+
+    /// A stream of events you can subscribe to. Use `:connect` to react every time the event
+    /// fires, `:once` to handle just the next one, or `:wait` to pause the current thread
+    /// until the next event.
+    ///
+    /// ```luau
+    /// local players = require("@mapmaker/players")
+    /// players.on_join:connect(function(player)
+    ///     player:send_message("welcome!")
+    /// end)
+    /// ```
+    ///
+    /// @luaGeneric A...
+    @LuaExport
+    public static final class Signal {
+        private final Class<? extends Event> eventClass;
+        private final LuaMarshaller<? extends Event> marshaller;
+
+        private Signal(Class<? extends Event> eventClass, LuaMarshaller<? extends Event> marshaller) {
+            this.eventClass = eventClass;
+            this.marshaller = marshaller;
+        }
+
+        /// Calls `handler` every time this event fires.
+        ///
+        /// @luaParam handler (A...) -> () - the function to run on each event
+        /// @luaReturn Connection - a reference to the newly created connection
+        @LuaMethod
+        public int connect(LuaState state) {
+            var callback = LuaCallback.of(state, 1);
+
+            var handle = new Connection(eventClass, marshaller, callback);
+            handle.registerAndTrack(state);
+            return handle.push(state);
+        }
+
+        /// Calls `handler` the next time this event fires, then unsubscribes.
+        ///
+        /// @luaParam handler (A...) -> () - the function to run on the next event
+        /// @luaReturn Connection - a reference to the newly created connection
+        @LuaMethod
+        public int once(LuaState state) {
+            var callback = LuaCallback.of(state, 1);
+
+            var handle = new Connection(eventClass, marshaller, callback);
+            handle.singleShot = true;
+            handle.registerAndTrack(state);
+            return handle.push(state);
+        }
+
+        /// Pauses the calling thread until the next time this event fires, then resumes
+        /// with the event's arguments.
+        ///
+        /// ```luau
+        /// local player = players.on_join:wait()
+        /// print(player.name .. " joined")
+        /// ```
+        ///
+        /// @luaReturn A...
+        @LuaMethod
+        public int wait(LuaState state) {
+            throw new UnsupportedOperationException("not implemented"); // todo
+//            var handle = new Connection(eventClass, marshaller, null);
+//            handle.singleShot = true;
+//            handle.registerAndTrack(state);
+//            return state.yield(0);
+        }
     }
 
     @LuaExport
-    public static final class EventSource {
+    public static final class Connection implements EventListener<Event>, Disposable {
+        private final Class<Event> eventType;
+        private final LuaMarshaller<Event> marshaller;
+        private final LuaResumable handler;
+        boolean singleShot = false;
 
-        @FunctionalInterface
-        public interface EventPusher<E extends Event> {
-            int pushArgs(LuaState state, E event);
+        private @Nullable EventNode<InstanceEvent> node;
+        private boolean disposed;
+
+        @SuppressWarnings("unchecked")
+        private Connection(
+            Class<? extends Event> eventType,
+            LuaMarshaller<? extends Event> marshaller,
+            LuaResumable handler
+        ) {
+            this.eventType = (Class<Event>) eventType;
+            this.marshaller = (LuaMarshaller<Event>) marshaller;
+            this.handler = handler;
         }
 
-        private final Class<? extends Event> eventClass;
-        private final EventPusher<? extends Event> pusher;
-
-        private EventSource(Class<? extends Event> eventClass, EventPusher<? extends Event> pusher) {
-            this.eventClass = eventClass;
-            this.pusher = pusher;
+        /// Returns true if this connection is currently active, false otherwise.
+        ///
+        /// A connection becomes inactive if it is explicitly disconnected, if it was
+        /// a single-use connection that has already fired.
+        ///
+        /// @luaReturn boolean
+        @LuaProperty
+        public int getDisconnected(LuaState state) {
+            state.pushBoolean(disposed);
+            return 1;
         }
 
+        /// Disconnects this handler from the event.
+        /// After calling this, the handler will no longer be called when the event fires.
         @LuaMethod
-        public int listen(LuaState state) {
-            state.checkType(1, LuaType.FUNCTION);
-
-            EventHandle handle = new EventHandle();
-            handle.chunkName = LuaHelpers.currentChunkName(state);
-            handle.eventType = this.eventClass;
-            handle.pusher = this.pusher;
-            handle.state = state;
-            handle.handlerRef = state.ref(1);
-
-            state.pushThread(state);
-            handle.threadRef = state.ref(-1);
-            state.pop(1);
-
-            var context = ScriptContext.get(state);
-            context.eventNode().addListener(handle);
-            context.track(handle);
-
-            // TODO: return handle to cancel
-            return 0;
+        public void disconnect(LuaState state) {
+            dispose();
         }
 
-        @LuaMethod
-        public int once(LuaState state) {
-            state.checkType(1, LuaType.FUNCTION);
+        //region Event and disposable impl
 
-            EventHandle handle = new EventHandle();
-            handle.eventType = this.eventClass;
-            handle.pusher = this.pusher;
-            handle.state = state;
-            handle.handlerRef = state.ref(1);
-            handle.singleShot = true;
-
-            state.pushThread(state);
-            handle.threadRef = state.ref(-1);
-            state.pop(1);
-
-            var context = ScriptContext.get(state);
-            context.eventNode().addListener(handle);
-            context.track(handle);
-
-            // TODO: return handle to cancel
-            return 0;
+        @Override
+        public Class<Event> eventType() {
+            return eventType;
         }
 
-        @LuaMethod
-        public int wait(LuaState state) {
-            EventHandle handle = new EventHandle();
-            handle.eventType = this.eventClass;
-            handle.pusher = this.pusher;
-            handle.state = state;
-            handle.handlerRef = -1; // Resume on trigger
-            handle.singleShot = true;
+        @Override
+        public Result run(Event event) {
+            if (disposed || handler.isDisposed())
+                return Result.EXPIRED;
 
-            state.pushThread(state);
-            handle.threadRef = state.ref(-1);
-            state.pop(1);
+            int nargs = marshaller.marshal(handler.state(), event);
+            if (nargs < 0) return Result.INVALID; // marshaller ignored this event.
 
-            var context = ScriptContext.get(state);
-            context.eventNode().addListener(handle);
-            context.track(handle);
+            handler.resume(nargs);
 
-            return state.yield(0);
+            if (singleShot) {
+                dispose();
+                return Result.EXPIRED;
+            }
+            return Result.SUCCESS;
         }
 
-        @SuppressWarnings("NotNullFieldNotInitialized")
-        private static final class EventHandle implements EventListener<Event>, Disposable {
-            public String chunkName;
-            public Class<? extends Event> eventType;
-            public EventPusher<? extends Event> pusher;
-            public LuaState state;
-            public int threadRef;
-            public int handlerRef = -1; // Resume on call
-            public boolean singleShot = false;
-
-            private boolean expired = false;
-
-            @Override
-            public Class<Event> eventType() {
-                //noinspection unchecked
-                return (Class<Event>) eventType;
+        @Override
+        public void dispose() {
+            if (disposed) return;
+            if (node != null) {
+                //noinspection rawtypes,unchecked
+                node.removeListener((EventListener) this);
             }
-
-            @Override
-            public Result run(Event event) {
-                if (expired) return Result.EXPIRED;
-
-                // If we have a handler ref then push the function for calling.
-                if (handlerRef != -1) state.getRef(handlerRef);
-
-                // Push the args from the events
-                //noinspection unchecked
-                int nargs = ((EventPusher<@NotNull Event>) pusher).pushArgs(state, event);
-                if (nargs < 0) {
-                    // Ignored the event, continue
-                    state.pop(1); // remove handler
-                    return Result.INVALID;
-                }
-
-                // Call or resume depending on what we have.
-                if (handlerRef != -1) state.call(nargs, 0);
-                else state.resume(null, nargs);
-
-                if (singleShot) {
-                    dispose();
-                    return Result.EXPIRED;
-                }
-                return Result.SUCCESS;
-            }
-
-            @Override
-            public void dispose() {
-                expired = true;
-                state.unref(threadRef);
-                state.unref(handlerRef);
-            }
-
-            @Override
-            public boolean isDisposed() {
-                return expired;
-            }
-
-            @Override
-            public String chunkName() {
-                return chunkName;
-            }
-
-            @Override
-            public boolean disposeOnReload() {
-                return true;
-            }
+            disposed = true;
+            handler.dispose();
         }
+
+        private void registerAndTrack(LuaState state) {
+            var context = ScriptContext.current(state);
+            if (context == null) {
+                handler.dispose();
+                return;
+            }
+
+            this.node = context.runtime().world().eventNode();
+            //noinspection rawtypes,unchecked
+            node.addListener((EventListener) this);
+            context.track(this);
+        }
+
+        private int push(LuaState state) {
+            LibBase$luau.pushConnection(state, this);
+            return 1;
+        }
+
+        //endregion
     }
 
 }

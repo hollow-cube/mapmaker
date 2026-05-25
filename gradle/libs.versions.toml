@@ -13,7 +13,7 @@ noxesium = "2.5.0"
 zstd = "1.5.7-2"
 otel = "1.45.0"
 otel-semconv = "1.28.0-alpha"
-polar = "1.15.0"
+polar = "1.15.1"
 similarity = "2.0.0"
 completely = "0.9.0"
 jctools = "4.0.5"
@@ -26,9 +26,9 @@ blossom = "2.1.0"
 velocity = "3.5.0-SNAPSHOT"
 classgraph = "4.8.179"
 javapoet = "0.7.0"
-luau = "1.0.0"
-directory-watcher = "0.19.1"
+luau = "1.1.0"
 nats = "2.25.1"
+compile-testing = "0.21.0"
 included = "-INCLUDED"
 
 [libraries]
@@ -56,7 +56,6 @@ luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-maco
 luau-natives-linux-x64 = { group = "dev.hollowcube", name = "luau-natives-linux-x64", version.ref = "luau" }
 luau-natives-windows-x64 = { group = "dev.hollowcube", name = "luau-natives-windows-x64", version.ref = "luau" }
 javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "javapoet" }
-directory-watcher = { group = "io.methvin", name = "directory-watcher", version.ref = "directory-watcher" }
 nats = { group = "io.nats", name = "jnats", version.ref = "nats" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
@@ -89,6 +88,7 @@ otel-semconv = { group = "io.opentelemetry.semconv", name = "opentelemetry-semco
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+compile-testing = { group = "com.google.testing.compile", name = "compile-testing", version.ref = "compile-testing" }
 
 [bundles]
 adventure = ["adventure-api", "adventure-key", "adventure-text-minimessage", "adventure-text-serializer-plain", "adventure-nbt"]

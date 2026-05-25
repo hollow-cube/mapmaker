@@ -52,4 +52,6 @@ tasks.withType<Test> {
     useJUnitPlatform()
 
     systemProperty("minestom.inside-test", "true")
+
+    jvmArgs("--sun-misc-unsafe-memory-access=allow")
 }

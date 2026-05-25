@@ -15,6 +15,9 @@ import net.hollowcube.mapmaker.editor.item.SpawnPointItem;
 import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
 import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
 import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
+import net.hollowcube.mapmaker.editor.scripting.NatsChangeSource;
+import net.hollowcube.mapmaker.editor.scripting.ReloadingScriptSession;
+import net.hollowcube.mapmaker.editor.scripting.ScriptChangeSource;
 import net.hollowcube.mapmaker.editor.terraform.TerraformInstanceStorageImpl;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
@@ -91,6 +94,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     private final @Nullable Terraform terraform;
     private final @Nullable TerraformInstanceStorage terraformInstanceStorage;
 
+    private final @Nullable ReloadingScriptSession scriptSession;
+    private final @Nullable ScriptChangeSource scriptChangeSource;
+
     public EditorMapWorld(MapServer server, MapData map, @Nullable Terraform terraform) {
         super(server, map, makeMapInstance(map, 'e'), EditorState.class);
 
@@ -133,6 +139,14 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         } else {
             terraformInstanceStorage = null;
         }
+
+        if (map.settings().get(MapSettings.HAS_SCRIPT_BUNDLE)) {
+            this.scriptSession = ReloadingScriptSession.reloading(server.api().maps, map.id());
+            this.scriptChangeSource = new NatsChangeSource(server.jetStream(), map.id(), scriptSession);
+        } else {
+            this.scriptSession = null;
+            this.scriptChangeSource = null;
+        }
     }
 
     public Terraform terraform() {
@@ -170,6 +184,11 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     public void loadWorld() {
         super.loadWorld();
 
+        var scriptSession = this.scriptSession;
+        if (scriptSession != null) scriptSession.bootstrap();
+        var changeSource = this.scriptChangeSource;
+        if (changeSource != null) changeSource.start();
+
         // Kick off autosave
         if (map().verification() == MapVerification.UNVERIFIED) {
             autoSaveTask = instance().scheduler().buildTask(FutureUtil.wrapVirtual(() -> save(true)))
@@ -198,6 +217,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     public CompletableFuture<Void> close() {
         if (autoSaveTask != null) autoSaveTask.cancel();
         autoSaveTask = null;
+
+        if (scriptChangeSource != null) scriptChangeSource.close();
+        if (scriptSession != null) scriptSession.close();
 
         testWorldLock.lock();
         try {
@@ -290,6 +312,11 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                 if (this.testWorld == null) {
                     this.testWorld = testWorld = createTestWorld();
                     this.testWorld.loadWorld();
+
+                    // Run the current scripts in the test world.
+                    if (scriptSession != null) {
+                        scriptSession.attach(this.testWorld);
+                    }
                 }
             } finally {
                 testWorldLock.unlock();
