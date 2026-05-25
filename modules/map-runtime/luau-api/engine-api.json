@@ -678,30 +678,6 @@
               "setter": null
             },
             {
-              "name": "on_hit_player",
-              "getter": {
-                "description": "Fires when this player hits another player. Receives the player who was hit.",
-                "paramName": null,
-                "type": {
-                  "kind": "named",
-                  "module": null,
-                  "name": "EventSource",
-                  "args": [
-                    {
-                      "kind": "single",
-                      "type": {
-                        "kind": "named",
-                        "module": "@mapmaker/player",
-                        "name": "Player",
-                        "args": []
-                      }
-                    }
-                  ]
-                }
-              },
-              "setter": null
-            },
-            {
               "name": "on_interact_block",
               "getter": {
                 "description": "Fires when this player right-clicks a block. Receives the block position.",

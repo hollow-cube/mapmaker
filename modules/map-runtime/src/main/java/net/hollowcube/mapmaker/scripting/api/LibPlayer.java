@@ -22,7 +22,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.attribute.Attribute;
-import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.instance.block.Block;
@@ -131,24 +130,6 @@ public final class LibPlayer {
         //endregion
 
         //region Events
-
-        /// Fires when this player hits another player. Receives the player who was hit.
-        /// @luaReturn EventSource<@ mapmaker / player.Player>
-        @LuaProperty
-        public int getOnHitPlayer(LuaState state) {
-            class Impl {
-                static int pushArgs(LuaState state, EntityAttackEvent event) {
-                    if (!(event.getTarget() instanceof MapPlayer other))
-                        return -1;
-
-                    pushPlayer(state, other);
-                    return 1;
-                }
-            }
-
-            LibBase.pushSignal(state, EntityAttackEvent.class, Impl::pushArgs);
-            return 1;
-        }
 
         /// Fires when this player right-clicks a block. Receives the block position.
         /// @luaReturn EventSource<vector>
@@ -439,26 +420,26 @@ public final class LibPlayer {
             entity.setAutoViewable(false);
 
             var prop = new LibEntity.TextProp(entity);
-            LuaHelpers.tableForEach(state, 2, (key) -> {
+            LuaHelpers.tableForEach(state, 1, (key) -> {
                 if ("position".equals(key) || "yaw".equals(key) || "pitch".equals(key))
                     return; // Special handling below
                 if (!prop.readField(state, key, -1)) {
-                    state.argError(2, "Unknown property: " + key);
+                    state.argError(1, "Unknown property: " + key);
                 }
             });
 
-            if (!tableGet(state, 2, "position"))
-                state.argError(2, "Missing position");
+            if (!tableGet(state, 1, "position"))
+                state.argError(1, "Missing position");
             Point point = LuaVector.check(state, -1);
             state.pop(1); // remove position
             float yaw = 0, pitch = 0;
-            if (tableGet(state, 2, "yaw")) {
+            if (tableGet(state, 1, "yaw")) {
                 yaw = (float) state.toNumber(-1);
                 state.pop(1); // remove yaw
             }
-            if (tableGet(state, 2, "pitch")) {
+            if (tableGet(state, 1, "pitch")) {
                 pitch = (float) state.toNumber(-1);
-                state.pop(1); // remove position
+                state.pop(1); // remove pitch
             }
 
             entity.setInstance(player.getInstance(), new Pos(point, yaw, pitch));

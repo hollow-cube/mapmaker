@@ -23,6 +23,7 @@ public final class LuaHelpers {
     ///
     /// The state should be left _exactly_ as it was before the call (value at -1).
     public static void tableForEach(LuaState state, int tableIndex, Consumer<String> func) {
+        ensureValidStackIndex(state, tableIndex, "tableForEach");
         state.pushNil();
         while (state.next(tableIndex)) {
             // Key is at index -2, value is at index -1
@@ -38,6 +39,7 @@ public final class LuaHelpers {
     /// During the callback, the value is at index -1.
     /// The state is left exactly as it was before the call.
     public static void arrayForEach(LuaState state, int tableIndex, Consumer<Integer> func) {
+        ensureValidStackIndex(state, tableIndex, "arrayForEach");
         int absIndex = state.absIndex(tableIndex);
         int length = state.len(absIndex);
         for (int i = 1; i <= length; i++) {
@@ -49,12 +51,21 @@ public final class LuaHelpers {
 
     /// Returns true if the key exists, it is at the top of the stack.
     public static boolean tableGet(LuaState state, int tableIndex, String key) {
+        ensureValidStackIndex(state, tableIndex, "tableGet");
         state.getField(tableIndex, key);
         if (state.isNil(-1)) {
             state.pop(1); // Remove nil
             return false;
         }
         return true;
+    }
+
+    private static void ensureValidStackIndex(LuaState state, int index, String helper) {
+        if (index > 0 && index > state.top())
+            throw new IllegalArgumentException(
+                helper + " called with stack index " + index + " but top is " + state.top()
+                + " — usually a sign that the caller forgot the `self` slot was removed by"
+                + " namecall dispatch, or that an argument check failed silently.");
     }
 
     public static @Nullable Key checkOptKey(LuaState state, int index) {
