@@ -19,9 +19,7 @@ dependencies {
     implementation(libs.included.schem)
     implementation(libs.included.molang)
 
-    // Editor-only Luau tooling: on-demand compilation + hot-reload change source.
     implementation(libs.luau.core)
-    implementation(libs.directory.watcher)
     implementation(libs.nats)
 
     testImplementation(project(":modules:test"))

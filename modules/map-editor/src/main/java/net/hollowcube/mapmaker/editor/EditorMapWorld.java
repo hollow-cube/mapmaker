@@ -140,7 +140,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             terraformInstanceStorage = null;
         }
 
-        if ("f973cc98-e806-464d-9435-fc4b1d49fde7".equals(map.id())) {
+        if (map.settings().get(MapSettings.HAS_SCRIPT_BUNDLE)) {
             this.scriptSession = ReloadingScriptSession.reloading(server.api().maps, map.id());
             this.scriptChangeSource = new NatsChangeSource(server.jetStream(), map.id(), scriptSession);
         } else {
