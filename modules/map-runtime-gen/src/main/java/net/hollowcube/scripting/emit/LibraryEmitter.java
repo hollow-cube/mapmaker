@@ -80,6 +80,24 @@ public final class LibraryEmitter {
             }
         }
 
+        // Inner-enum static fields: light-userdata tag + Java values array. Order is per-enum
+        // source declaration so atom assignment downstream stays deterministic. Java identifier
+        // names use the enum's Java simple name (matches the `pushItem`/`checkItemArg`
+        // convention); only the Lua-visible identifiers carry the `@LuaEnum(name)` override.
+        for (var en : library.enums()) {
+            String javaName = en.sourceType().simpleName().toUpperCase();
+            glue.addField(FieldSpec.builder(int.class, javaName + "_TAG")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$L", en.lightUserDataTag())
+                .build());
+            glue.addField(FieldSpec.builder(
+                    com.palantir.javapoet.ArrayTypeName.of(en.sourceType()),
+                    javaName + "_VALUES")
+                .addModifiers(Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.values()", en.sourceType())
+                .build());
+        }
+
         // Static method LuaFunc fields.
         for (var m : library.staticMethods()) {
             if (m.isVoid()) continue; // matches existing behavior; void statics are diagnostic-only
@@ -105,6 +123,12 @@ public final class LibraryEmitter {
             if (!isRoot(ex)) continue;
             glue.addMethod(pushMethod(ex));
             glue.addMethod(checkArgMethod(ex));
+        }
+
+        // push / check methods for each inner enum.
+        for (var en : library.enums()) {
+            glue.addMethod(enumPushMethod(en));
+            glue.addMethod(enumCheckArgMethod(en));
         }
 
         // Per-export meta method body wrappers (source order).
@@ -177,6 +201,40 @@ public final class LibraryEmitter {
             .endControlFlow()
             .addStatement("state.typeError(argIndex, $S)", ex.luaName())
             .addStatement("return null")
+            .build();
+    }
+
+    /// `pushLuaSlot(state, LuaSlot value)` — pushes a tagged light userdata carrying the
+    /// enum's ordinal. Method name tracks the Java simple name; the userdata tag identifier
+    /// uses the same upper-cased Java name.
+    private static MethodSpec enumPushMethod(Model.EnumDecl en) {
+        String javaName = en.sourceType().simpleName();
+        return MethodSpec.methodBuilder("push" + javaName)
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(NOT_NULL_STATE)
+            .addParameter(en.sourceType(), "value")
+            .addStatement("state.pushLightUserDataTagged(value.ordinal(), $L_TAG)",
+                javaName.toUpperCase())
+            .build();
+    }
+
+    /// `checkLuaSlotArg(state, idx)` — verifies the tag matches and looks the value back up by
+    /// ordinal. The runtime error string uses the Lua-visible name so script authors see the
+    /// label they wrote; everything else uses the Java name.
+    private static MethodSpec enumCheckArgMethod(Model.EnumDecl en) {
+        String javaName = en.sourceType().simpleName();
+        return MethodSpec.methodBuilder("check" + javaName + "Arg")
+            .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+            .addParameter(NOT_NULL_STATE)
+            .addParameter(int.class, "argIndex")
+            .returns(en.sourceType().annotated(AnnotationSpec.builder(NotNull.class).build()))
+            .beginControlFlow("if ($L_TAG != state.lightUserDataTag(argIndex))",
+                javaName.toUpperCase())
+            .addStatement("state.typeError(argIndex, $S)", en.luaName())
+            .addStatement("return null")
+            .endControlFlow()
+            .addStatement("return $L_VALUES[(int) state.toLightUserData(argIndex)]",
+                javaName.toUpperCase())
             .build();
     }
 
@@ -391,6 +449,22 @@ public final class LibraryEmitter {
         b.addStatement("state.setField(-2, $S)", LuaNames.NEWINDEX_META_NAME);
         b.addStatement("state.pushFunction(NAMECALL)");
         b.addStatement("state.setField(-2, $S)", LuaNames.NAMECALL_META_NAME);
+        // Inner enums: build each constant table as a field on the library metatable. The index
+        // metamethod fetches them from here at access time — keeping the table identity stable
+        // across accesses so `Lib.Slot == Lib.Slot` holds.
+        for (var en : library.enums()) {
+            b.addCode("\n");
+            b.addComment("Enum table for $L", en.luaName());
+            b.addStatement("state.newTable()");
+            String tagBase = en.sourceType().simpleName().toUpperCase();
+            for (var c : en.constants()) {
+                b.addStatement("state.pushLightUserDataTagged($L, $L_TAG)",
+                    c.ordinal(), tagBase);
+                b.addStatement("state.setField(-2, $S)", c.luaName());
+            }
+            b.addStatement("state.setReadOnly(-1, true)");
+            b.addStatement("state.setField(-2, $S)", en.luaName());
+        }
         b.addStatement("state.setReadOnly(-1, true)");
         b.addStatement("state.setMetaTable(-2)");
         if (library.scope() == LuaLibrary.Scope.GLOBAL) {
@@ -449,6 +523,19 @@ public final class LibraryEmitter {
             var label = LuaNames.atomLabel(atomsClass, m.luaName(), atom);
             b.beginControlFlow("case $L/*$L*/ -> ", label, m.luaName());
             b.addStatement("state.pushFunction($L)", m.luaName().toUpperCase());
+            b.addStatement("yield 1");
+            b.endControlFlow();
+        }
+        // Inner enums: their constant tables live on the library's metatable. Fetch via
+        // `getMetaTable(1)` → `getField(-1, "<EnumName>")` → drop the metatable. Three ops per
+        // access, the table identity is stable (built once at register time).
+        for (var en : library.enums()) {
+            short atom = idents.atomFor(en.luaName());
+            var label = LuaNames.atomLabel(atomsClass, en.luaName(), atom);
+            b.beginControlFlow("case $L/*$L*/ -> ", label, en.luaName());
+            b.addStatement("state.getMetaTable(1)");
+            b.addStatement("state.getField(-1, $S)", en.luaName());
+            b.addStatement("state.remove(-2)");
             b.addStatement("yield 1");
             b.endControlFlow();
         }

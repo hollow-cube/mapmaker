@@ -81,6 +81,7 @@
           "description": "A specific kind of animal."
         }
       ],
+      "enums": [],
       "staticMethods": [],
       "staticProperties": [
         {

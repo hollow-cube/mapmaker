@@ -153,6 +153,7 @@
           "description": ""
         }
       ],
+      "enums": [],
       "staticMethods": [],
       "staticProperties": [],
       "description": ""
@@ -478,6 +479,7 @@
           "description": "A display that renders styled text floating in the world."
         }
       ],
+      "enums": [],
       "staticMethods": [],
       "staticProperties": [],
       "description": "Entity types. To spawn an entity, call `player.world:spawn_entity(...)`."
@@ -516,6 +518,7 @@
           "description": "A stack of items. Empty stacks are returned as `nil` rather than an `Item`."
         }
       ],
+      "enums": [],
       "staticMethods": [
         {
           "name": "deprecated_make_item_from_material",
@@ -682,8 +685,18 @@
                 "type": {
                   "kind": "named",
                   "module": null,
-                  "name": "nil",
-                  "args": []
+                  "name": "EventSource",
+                  "args": [
+                    {
+                      "kind": "single",
+                      "type": {
+                        "kind": "named",
+                        "module": "@mapmaker/player",
+                        "name": "Player",
+                        "args": []
+                      }
+                    }
+                  ]
                 }
               },
               "setter": null
@@ -1451,6 +1464,7 @@
           "description": "The world as seen by a single player. Effects applied here are visible only to that\nplayer."
         }
       ],
+      "enums": [],
       "staticMethods": [],
       "staticProperties": [],
       "description": "The `Player` type and per-player helpers like `Sidebar` and `WorldView`."
@@ -1460,6 +1474,7 @@
       "glueType": "net.hollowcube.mapmaker.scripting.api.LibPlayers$luau",
       "moduleName": "@mapmaker/players",
       "exports": [],
+      "enums": [],
       "staticMethods": [],
       "staticProperties": [
         {
@@ -1608,6 +1623,7 @@
           "description": "A handle to one named state slot. Returned by `define_state`."
         }
       ],
+      "enums": [],
       "staticMethods": [
         {
           "name": "define_state",
@@ -1669,6 +1685,7 @@
       "glueType": "net.hollowcube.mapmaker.scripting.api.LibTask$luau",
       "moduleName": "@mapmaker/task",
       "exports": [],
+      "enums": [],
       "staticMethods": [
         {
           "name": "spawn",
@@ -1764,6 +1781,7 @@
       "glueType": "net.hollowcube.mapmaker.scripting.api.LibWorld$luau",
       "moduleName": "@mapmaker/world",
       "exports": [],
+      "enums": [],
       "staticMethods": [
         {
           "name": "get_block",
@@ -1819,6 +1837,7 @@
           "description": "Controls for hot-reloading scripts."
         }
       ],
+      "enums": [],
       "staticMethods": [],
       "staticProperties": [
         {
@@ -1965,6 +1984,7 @@
           "description": "A piece of styled text. Built with `Text.new`, accepted anywhere the API takes a\nmessage or label."
         }
       ],
+      "enums": [],
       "staticMethods": [
         {
           "name": "new",

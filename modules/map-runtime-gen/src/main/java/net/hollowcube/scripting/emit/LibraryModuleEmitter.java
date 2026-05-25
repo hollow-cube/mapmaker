@@ -64,9 +64,26 @@ public final class LibraryModuleEmitter {
             emitExport(out, ex, ctx, exportsBySimpleType);
         }
 
+        // Inner enums: each becomes a phantom-property branded type so the value type is
+        // nominally distinct from other userdata types. The actual constant table is added to
+        // the module's return cast below.
+        for (var en : lib.enums()) {
+            out.append('\n');
+            emitEnumType(out, en);
+        }
+
         out.append('\n');
         emitModuleValue(out, lib, ctx);
         return out.toString();
+    }
+
+    /// `export type <Name> = { read __<name>: () -> () }`. The phantom property gives nominal
+    /// distinctness — two enums with different names produce types that aren't structurally
+    /// interchangeable. Runtime values are light userdata regardless; the type checker just
+    /// sees the brand and won't allow cross-assignment.
+    private static void emitEnumType(StringBuilder out, Model.EnumDecl en) {
+        out.append("export type ").append(en.luaName())
+            .append(" = { read __").append(en.luaName().toLowerCase()).append(": () -> () }\n");
     }
 
     /// Synthetic non-exported common-shape name for a [Model.Export.Kind#UNION_ALIAS]'s
@@ -207,9 +224,10 @@ public final class LibraryModuleEmitter {
     private void emitModuleValue(StringBuilder out, Model.Library lib, RenderContext ctx) {
         var props = lib.staticProperties();
         var methods = lib.staticMethods();
+        var enums = lib.enums();
 
         if (methods.isEmpty()) {
-            if (props.isEmpty()) {
+            if (props.isEmpty() && enums.isEmpty()) {
                 out.append("return {}\n");
                 return;
             }
@@ -218,6 +236,8 @@ public final class LibraryModuleEmitter {
                 var acc = p.getter() != null ? p.getter() : p.setter();
                 lines.add("read " + p.luaName() + ": " + LuauTypeRenderer.render(acc.type(), ctx));
             }
+            // Enum tables in the return cast nest one level deeper than the outer module table.
+            for (var en : enums) lines.add("read " + en.luaName() + ": " + enumTableShape(en, "\t\t", "\t"));
             out.append("return (nil :: any) :: ").append(table(lines)).append('\n');
             return;
         }
@@ -229,6 +249,12 @@ public final class LibraryModuleEmitter {
             out.append(m).append('.').append(p.luaName())
                 .append(" = (nil :: any) :: ").append(LuauTypeRenderer.render(acc.type(), ctx)).append('\n');
         }
+        for (var en : enums) {
+            // No outer table — the enum table value sits directly under a top-level assignment,
+            // so its inner lines need a single tab of indent.
+            out.append(m).append('.').append(en.luaName())
+                .append(" = (nil :: any) :: ").append(enumTableShape(en, "\t", "")).append('\n');
+        }
         for (var sm : lib.staticMethods()) {
             out.append('\n').append("function ").append(m).append('.').append(sm.luaName())
                 .append(genericDecl(sm.generics())).append('(')
@@ -237,6 +263,21 @@ public final class LibraryModuleEmitter {
                 .append("\n\treturn nil :: any\nend\n");
         }
         out.append("\nreturn ").append(m).append('\n');
+    }
+
+    /// `{ read MainHand: Slot, read OffHand: Slot, ... }` — the typed shape of an enum's
+    /// constant table as it appears in the module value. `innerIndent` prefixes each constant
+    /// line; `closeIndent` prefixes the closing brace. Two parameters because the table appears
+    /// at different nesting depths depending on whether the module value is a single return
+    /// cast or a per-line assignment.
+    private static String enumTableShape(Model.EnumDecl en, String innerIndent, String closeIndent) {
+        if (en.constants().isEmpty()) return "{}";
+        var sb = new StringBuilder("{\n");
+        for (var c : en.constants())
+            sb.append(innerIndent).append("read ").append(c.luaName()).append(": ")
+                .append(en.luaName()).append(",\n");
+        sb.append(closeIndent).append('}');
+        return sb.toString();
     }
 
     /// Value-declaration parameter list. A trailing generic-pack-typed param becomes the typed

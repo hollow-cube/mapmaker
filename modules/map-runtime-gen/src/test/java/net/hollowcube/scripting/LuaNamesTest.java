@@ -76,4 +76,33 @@ class LuaNamesTest {
         assertEquals("spawn_entity", LuaNames.toLuaMethod("spawnEntity"));
         assertEquals("once", LuaNames.toLuaMethod("once"));
     }
+
+    @Test
+    void snakeToPascalConvertsScreamingSnake() {
+        // Standard enum-constant renames for @LuaEnum.
+        assertEquals("MainHand", LuaNames.snakeToPascal("MAIN_HAND"));
+        assertEquals("OakPlanks", LuaNames.snakeToPascal("OAK_PLANKS"));
+        assertEquals("Helmet", LuaNames.snakeToPascal("HELMET"));
+    }
+
+    @Test
+    void snakeToPascalHandlesDigits() {
+        // Digits stay where they are; the next letter capitalizes.
+        assertEquals("Option2", LuaNames.snakeToPascal("OPTION_2"));
+        assertEquals("V2Handler", LuaNames.snakeToPascal("V2_HANDLER"));
+    }
+
+    @Test
+    void snakeToPascalCollapsesAdjacentUnderscores() {
+        // Leading and consecutive underscores are dropped; the next letter still capitalizes.
+        assertEquals("Leading", LuaNames.snakeToPascal("_LEADING"));
+        assertEquals("AB", LuaNames.snakeToPascal("A__B"));
+        assertEquals("AbCd", LuaNames.snakeToPascal("AB__CD"));
+    }
+
+    @Test
+    void snakeToPascalEmptyAndNull() {
+        assertEquals("", LuaNames.snakeToPascal(""));
+        assertEquals(null, LuaNames.snakeToPascal(null));
+    }
 }

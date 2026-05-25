@@ -122,6 +122,7 @@ class InheritanceOrderingTest {
             List.copyOf(exports),
             List.of(),
             List.of(),
+            List.of(),
             "");
     }
 

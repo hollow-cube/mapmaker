@@ -30,6 +30,38 @@ public final class LuaNames {
         return toSnakeCase(name);
     }
 
+    /// Convert a `SCREAMING_SNAKE_CASE` identifier (typical Java enum constant) to `PascalCase`.
+    /// Used by [LuaEnum][net.hollowcube.scripting.gen.LuaEnum] codegen to rename enum constants
+    /// for the Lua side.
+    ///
+    /// Behavior:
+    ///
+    ///   - `MAIN_HAND`   → `MainHand`
+    ///   - `OAK_PLANKS`  → `OakPlanks`
+    ///   - `STONE`       → `Stone`
+    ///   - `OPTION_2`    → `Option2`
+    ///   - `_LEADING`    → `Leading`
+    ///   - `A__B`        → `AB`
+    public static String snakeToPascal(String input) {
+        if (input == null || input.isEmpty()) return input;
+        var sb = new StringBuilder(input.length());
+        boolean nextUpper = true;
+        for (int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if (c == '_') {
+                nextUpper = true;
+                continue;
+            }
+            if (nextUpper) {
+                sb.append(Character.toUpperCase(c));
+                nextUpper = false;
+            } else {
+                sb.append(Character.toLowerCase(c));
+            }
+        }
+        return sb.toString();
+    }
+
     /// Convert a camelCase / PascalCase / mixed identifier to snake_case.
     ///
     /// Handles consecutive-uppercase acronyms and letter/digit boundaries:

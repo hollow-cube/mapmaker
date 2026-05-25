@@ -8,6 +8,19 @@ end
 
 declare class Hot end
 
+	declare class Slot
+end
+declare Slot: {
+	read MainHand: Slot,
+	read OffHand: Slot,
+	read Boots: Slot,
+	read Leggings: Slot,
+	read Chestplate: Slot,
+	read Helmet: Slot,
+	read Body: Slot,
+	read Saddle: Slot,
+}
+
 declare Text: {
 	new: (text: string) -> Text,
 	sanitize: (text: string) -> string,

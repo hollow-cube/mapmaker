@@ -38,7 +38,7 @@ class MetaTypeResolverTest {
             ClassName.get("fixtures", "Lib"),
             ClassName.get("fixtures", "Lib$luau"),
             "@t/lib", LuaLibrary.Scope.REQUIRE,
-            List.of(export), List.of(consume), List.of(), "");
+            List.of(export), List.of(), List.of(consume), List.of(), "");
 
         var symbols = SymbolTable.build(List.of(lib));
         var diags = new ArrayList<ResolveDiagnostic>();
@@ -156,7 +156,7 @@ class MetaTypeResolverTest {
             ClassName.get("fixtures", "Lib"),
             ClassName.get("fixtures", "Lib$luau"),
             "@t/lib", LuaLibrary.Scope.REQUIRE,
-            List.of(animal, dog), List.of(consume), List.of(), "");
+            List.of(animal, dog), List.of(), List.of(consume), List.of(), "");
         var symbols = SymbolTable.build(List.of(lib));
         var diags = new ArrayList<ResolveDiagnostic>();
         var resolver = new MetaTypeResolver(symbols, List.of(lib), diags);
@@ -232,6 +232,7 @@ class MetaTypeResolverTest {
             ClassName.get("fixtures", "Lib"), ClassName.get("fixtures", "Lib$luau"),
             "@t/lib", LuaLibrary.Scope.REQUIRE,
             List.of(dummy),
+            List.of(),
             List.of(new Model.Method("consume", "consume", true,
                 ClassName.get("fixtures", "Lib"), "", List.of(),
                 List.of(new Model.Param("p", false,
@@ -252,6 +253,7 @@ class MetaTypeResolverTest {
             ClassName.get("fixtures", "Lib"), ClassName.get("fixtures", "Lib$luau"),
             "@t/lib", LuaLibrary.Scope.REQUIRE,
             List.of(dummy),
+            List.of(),
             List.of(new Model.Method("consume", "consume", true,
                 ClassName.get("fixtures", "Lib"), "", List.of(),
                 List.of(new Model.Param("p", false,
@@ -281,7 +283,7 @@ class MetaTypeResolverTest {
         var lib = new Model.Library(
             ClassName.get("fixtures", "Lib"), ClassName.get("fixtures", "Lib$luau"),
             "@t/lib", LuaLibrary.Scope.REQUIRE,
-            List.of(foo), List.of(consume), List.of(), "");
+            List.of(foo), List.of(), List.of(consume), List.of(), "");
         var symbols = SymbolTable.build(List.of(lib));
         var diags = new ArrayList<ResolveDiagnostic>();
         var rewritten = new MetaTypeResolver(symbols, List.of(lib), diags).rewrite(lib);

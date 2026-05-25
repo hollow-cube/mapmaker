@@ -20,7 +20,7 @@ class GlobalDeclEmitterTest {
     private static Model.Library global(String module, List<Model.Export> exports,
                                         List<Model.Method> statics) {
         return new Model.Library(ClassName.get("p", "G"), ClassName.get("p", "G$luau"),
-            module, LuaLibrary.Scope.GLOBAL, exports, statics, List.of(), "");
+            module, LuaLibrary.Scope.GLOBAL, exports, List.of(), statics, List.of(), "");
     }
 
     @Test

@@ -29,7 +29,7 @@ class LibraryModuleEmitterTest {
     private static Model.Library lib(String module, List<Model.Export> exports,
                                      List<Model.Method> statics, List<Model.Property> staticProps) {
         return new Model.Library(ClassName.get("p", "Lib"), ClassName.get("p", "Lib$luau"),
-            module, LuaLibrary.Scope.REQUIRE, exports, statics, staticProps, "");
+            module, LuaLibrary.Scope.REQUIRE, exports, List.of(), statics, staticProps, "");
     }
 
     @Test

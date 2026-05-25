@@ -12,7 +12,7 @@ type Player_Fields = {
 	read sidebar: Sidebar,
 	read world: WorldView,
 	read deprecated_scale: number,
-	read on_hit_player: nil,
+	read on_hit_player: EventSource<Player>,
 	read on_interact_block: EventSource<vector>,
 	read on_jump: EventSource<()>,
 	read on_use_item: EventSource<()>,

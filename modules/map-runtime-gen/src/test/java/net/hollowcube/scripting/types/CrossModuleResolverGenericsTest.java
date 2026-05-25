@@ -146,7 +146,7 @@ class CrossModuleResolverGenericsTest {
             ClassName.get("fixtures", "Lib"),
             ClassName.get("fixtures", "Lib$luau"),
             "@t/lib", LuaLibrary.Scope.REQUIRE,
-            List.of(export), List.of(), List.of(), "");
+            List.of(export), List.of(), List.of(), List.of(), "");
         var symbols = SymbolTable.build(List.of(lib));
         var diagnostics = new ArrayList<ResolveDiagnostic>();
         CrossModuleResolver.resolve(lib, symbols, diagnostics);

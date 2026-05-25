@@ -2,9 +2,11 @@ package net.hollowcube.mapmaker.scripting;
 
 import net.hollowcube.luau.LuaState;
 import net.hollowcube.luau.gen.runtime.GeneratedStringAtoms;
+import net.hollowcube.luau.gen.runtime.LuaApiRegistry;
 import net.hollowcube.luau.require.RequireResolver;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.scripting.api.*;
+import net.hollowcube.mapmaker.scripting.api.LuaGlobals;
+import net.hollowcube.mapmaker.scripting.api.LuaVector;
 import net.hollowcube.mapmaker.scripting.require.AbstractModuleLoader;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Nullable;
@@ -114,27 +116,11 @@ public final class ScriptEngine {
         state.openLibs();
         state.openRequire(requireResolver);
 
-        GeneratedStringAtoms.register(state);
         LuaGlobals.register(state);
         LuaVector.register(state);
-        LuaRuntime$luau.register(state);
-        LuaText$luau.register(state);
 
-        LibTask$luau.register(state);
-
-        LibBase$luau.register(state);
-
-        LibItem$luau.register(state);
-        LibItem.registerSlotGlobal(state);
-
-        LibEntity$luau.register(state);
-
-        LibStore$luau.register(state);
-
-        LibPlayers$luau.register(state);
-        LibPlayer$luau.register(state);
-
-        // TODO: register the remaining api libraries here once that module is rebuilt.
+        GeneratedStringAtoms.register(state);
+        LuaApiRegistry.register(state);
 
         state.sandbox();
         return state;

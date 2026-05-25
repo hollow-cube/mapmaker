@@ -55,12 +55,17 @@ public final class LibraryModelBuilder {
         var staticMethods = new ArrayList<Model.Method>();
         var rawExports = new ArrayList<Model.Export>();
         var rawExportElements = new ArrayList<TypeElement>();
+        var rawEnums = new ArrayList<Model.EnumDecl>();
 
         for (var member : libraryClass.getEnclosedElements()) {
             if (member instanceof TypeElement nested) {
                 if (nested.getAnnotation(LuaExport.class) != null) {
                     rawExports.add(buildExport(nested));
                     rawExportElements.add(nested);
+                }
+                if (nested.getAnnotation(LuaEnum.class) != null) {
+                    var ed = EnumModelBuilder.build(env, idents, nested, glueType, luaLibrary.scope());
+                    if (ed != null) rawEnums.add(ed);
                 }
                 continue;
             }
@@ -101,6 +106,7 @@ public final class LibraryModelBuilder {
         // Reserve atoms in source-declaration order so the emitter's literal references match.
         for (var p : staticProperties) idents.atomFor(p.luaName());
         for (var m : staticMethods) idents.atomFor(m.luaName());
+        for (var en : rawEnums) idents.atomFor(en.luaName());
 
         applyUnionMetadata(rawExports, rawExportElements);
 
@@ -114,7 +120,7 @@ public final class LibraryModelBuilder {
 
         return new Model.Library(
             sourceType, glueType, luaLibrary.name(), luaLibrary.scope(),
-            finalizedExports, staticMethods, staticProperties, libraryDocs.description());
+            finalizedExports, rawEnums, staticMethods, staticProperties, libraryDocs.description());
     }
 
     private Model.Export buildExport(TypeElement exportClass) {

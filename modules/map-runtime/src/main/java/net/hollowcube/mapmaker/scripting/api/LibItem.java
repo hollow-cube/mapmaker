@@ -6,37 +6,14 @@ import net.hollowcube.scripting.gen.LuaExport;
 import net.hollowcube.scripting.gen.LuaLibrary;
 import net.hollowcube.scripting.gen.LuaMethod;
 import net.hollowcube.scripting.gen.LuaProperty;
-import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
-import java.util.Locale;
 import java.util.Objects;
 
 /// Items and item stacks.
 @LuaLibrary(name = "@mapmaker/item")
 public final class LibItem {
-
-    private static final EquipmentSlot[] SLOTS = EquipmentSlot.values();
-    public static final int SLOT_TAG = 1; // todo: slopgen so we dont reuse the same tag
-
-    public static EquipmentSlot checkSlot(LuaState state, int index) {
-        if (SLOT_TAG != state.lightUserDataTag(index)) {
-            state.argError(index, "Expected Slot");
-            return EquipmentSlot.MAIN_HAND; // unreachable
-        }
-        return SLOTS[(int) state.toLightUserData(index)];
-    }
-
-    public static void registerSlotGlobal(LuaState state) {
-        state.newTable();
-        for (var slot : EquipmentSlot.values()) {
-            state.pushLightUserDataTagged(slot.ordinal(), SLOT_TAG);
-            state.setField(-2, slot.name().toLowerCase(Locale.ROOT));
-        }
-        state.setReadOnly(-1, true);
-        state.setGlobal("Slot");
-    }
 
     public static void pushItem(LuaState state, ItemStack itemStack) {
         if (itemStack.isAir()) {

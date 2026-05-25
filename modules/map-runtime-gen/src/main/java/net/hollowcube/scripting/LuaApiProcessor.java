@@ -38,10 +38,26 @@ public final class LuaApiProcessor extends AbstractProcessor {
 
     public static final String OUTPUT_DIR_OPTION = "luau.outputDir";
 
+    /// Run-once latch. Aggregating APs are invoked again in later rounds (and in the cleanup
+    /// round with `processingOver() == true`); re-processing yields stale `Elements`/`Trees`
+    /// whose source positions and `getDocComment` results may be null, producing phantom
+    /// validator errors that disappear on rerun. We do all work in the first non-empty round
+    /// and become a no-op for the rest.
+    private boolean processed = false;
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        // The cleanup round (`processingOver`) carries no new source — never act in it.
+        if (roundEnv.processingOver() || processed) return false;
+
         var libraryElements = collectLibraryElements(roundEnv);
-        if (libraryElements.isEmpty()) return false;
+        var topLevelEnumElements = collectTopLevelEnumElements(roundEnv);
+        if (libraryElements.isEmpty() && topLevelEnumElements.isEmpty()) return false;
+
+        // From here on we commit to one full processing pass — even if subsequent rounds
+        // expose new annotated elements (which shouldn't happen for slopgen's surface, but
+        // be defensive), we leave them alone rather than risk a stale-Element re-validation.
+        processed = true;
 
         var outputDir = requireOutputDir();
         var messager = processingEnv.getMessager();
@@ -76,7 +92,32 @@ public final class LuaApiProcessor extends AbstractProcessor {
             if (library != null) libraries.put(typeElement, library);
         }
 
-        if (libraries.isEmpty()) return false;
+        // ----- Top-level `@LuaEnum` classes: stand-alone, own glue file, ambient declaration. -----
+        var topLevelEnums = new LinkedHashMap<TypeElement, Model.EnumDecl>();
+        for (var enumElement : topLevelEnumElements) {
+            var ann = enumElement.getAnnotation(net.hollowcube.scripting.gen.LuaEnum.class);
+            // Spec: a top-level `@LuaEnum` MUST be `scope = GLOBAL` (the default). REQUIRE has
+            // no representation today — there's no library to attach it to.
+            if (ann != null && ann.scope() != LuaLibrary.Scope.GLOBAL) {
+                messager.printError(
+                    "Top-level @LuaEnum must use scope = GLOBAL. Place this enum inside an "
+                    + "@LuaLibrary to export it as a module field instead.",
+                    enumElement);
+                continue;
+            }
+
+            var packageName = elementUtils.getPackageOf(enumElement).getQualifiedName().toString();
+            var glueSimpleName = enumElement.getSimpleName() + "$luau";
+            var glueQualifiedName = packageName + "." + glueSimpleName;
+            if (elementUtils.getTypeElement(glueQualifiedName) != null) continue;
+            var glueType = com.palantir.javapoet.ClassName.get(packageName, glueSimpleName);
+
+            var enumDecl = EnumModelBuilder.build(processingEnv, idents, enumElement, glueType,
+                LuaLibrary.Scope.GLOBAL);
+            if (enumDecl != null) topLevelEnums.put(enumElement, enumDecl);
+        }
+
+        if (libraries.isEmpty() && topLevelEnums.isEmpty()) return false;
 
         // ----- Cross-module resolution against the full in-memory set. -----
         var symbols = SymbolTable.build(libraries.values());
@@ -105,20 +146,40 @@ public final class LuaApiProcessor extends AbstractProcessor {
             }
         }
 
-        // ----- Cross-cutting atom tables. Aggregating contract: all libraries originate. -----
-        var originating = libraries.keySet().toArray(new Element[0]);
+        // ----- Generated Java glue per top-level enum. -----
+        var enumEmitter = new EnumEmitter();
+        for (var entry : topLevelEnums.entrySet()) {
+            try {
+                enumEmitter.emit(entry.getValue(), entry.getKey()).writeTo(filer);
+            } catch (IOException e) {
+                messager.printError(
+                    "Failed to write generated enum file: " + e.getMessage(), entry.getKey());
+            }
+        }
+
+        // ----- Cross-cutting atom tables + API registry. Aggregating contracts. -----
+        // Originating set: every library plus every top-level enum. Either alone is enough to
+        // trigger emission, so we combine for the originating-elements argument that Gradle
+        // uses to track incremental sources.
+        var originatingSet = new ArrayList<Element>(libraries.keySet());
+        originatingSet.addAll(topLevelEnums.keySet());
+        var originating = originatingSet.toArray(new Element[0]);
         var atomEmitter = new AtomTableEmitter();
         try {
             if (elementUtils.getTypeElement(AtomTableEmitter.LUA_STRING_ATOMS.canonicalName()) == null)
                 atomEmitter.emitConstants(idents, originating).writeTo(filer);
             if (elementUtils.getTypeElement(AtomTableEmitter.GENERATED_STRING_ATOMS.canonicalName()) == null)
                 atomEmitter.emit(idents, originating).writeTo(filer);
+            // Single-entrypoint registry — host calls LuaApiRegistry.register(state) once
+            // instead of listing every <Lib>$luau / <Enum>$luau by hand.
+            if (elementUtils.getTypeElement(ApiRegistryEmitter.LUA_API_REGISTRY.canonicalName()) == null)
+                new ApiRegistryEmitter().emit(libraries.values(), topLevelEnums.values(), originating).writeTo(filer);
         } catch (IOException e) {
             throw new UncheckedIOException("Failed to write atom-table files", e);
         }
 
         // ----- Aggregate JSON + .luau type bundle to the committed output dir. -----
-        writeEngineApiOutputs(outputDir, libraries.values());
+        writeEngineApiOutputs(outputDir, libraries.values(), topLevelEnums.values());
 
         return false; // Don't claim @LuaLibrary; nobody else processes it either, but be polite.
     }
@@ -155,6 +216,38 @@ public final class LuaApiProcessor extends AbstractProcessor {
         return out;
     }
 
+    /// Top-level `@LuaEnum` types only — enums nested inside a `@LuaLibrary` are picked up by
+    /// [LibraryModelBuilder] during library traversal. "Top level" here means the enclosing
+    /// element is a `PACKAGE`; an enum nested in a non-library class falls through both paths
+    /// and is reported as an error.
+    private java.util.List<TypeElement> collectTopLevelEnumElements(RoundEnvironment roundEnv) {
+        var out = new ArrayList<TypeElement>();
+        var elements = new ArrayList<Element>(roundEnv.getElementsAnnotatedWith(
+            net.hollowcube.scripting.gen.LuaEnum.class));
+        elements.sort(Comparator.comparing(e -> {
+            if (e instanceof TypeElement t) return t.getQualifiedName().toString();
+            return e.getSimpleName().toString();
+        }));
+        for (var e : elements) {
+            if (!(e instanceof TypeElement t)) continue;
+            var enclosing = t.getEnclosingElement();
+            if (enclosing.getKind() == javax.lang.model.element.ElementKind.PACKAGE) {
+                out.add(t);
+                continue;
+            }
+            // Nested in another type. If that type is an @LuaLibrary, the library builder
+            // handles it — skip silently. Otherwise the placement is unsupported.
+            if (enclosing instanceof TypeElement parent
+                && parent.getAnnotation(LuaLibrary.class) != null) {
+                continue;
+            }
+            processingEnv.getMessager().printError(
+                "@LuaEnum may be a top-level class or nested inside an @LuaLibrary — placing it "
+                + "inside a non-library class is not supported", t);
+        }
+        return out;
+    }
+
     private Path requireOutputDir() {
         var raw = processingEnv.getOptions().get(OUTPUT_DIR_OPTION);
         if (raw == null || raw.isBlank()) {
@@ -167,7 +260,8 @@ public final class LuaApiProcessor extends AbstractProcessor {
         return Path.of(raw);
     }
 
-    private void writeEngineApiOutputs(Path outputDir, Iterable<Model.Library> libraries) {
+    private void writeEngineApiOutputs(Path outputDir, Iterable<Model.Library> libraries,
+                                       Iterable<Model.EnumDecl> topLevelEnums) {
         try {
             Files.createDirectories(outputDir);
 
@@ -195,8 +289,11 @@ public final class LuaApiProcessor extends AbstractProcessor {
             }
             requires.sort(Comparator.comparing(Model.Library::moduleName));
 
-            if (!globals.isEmpty()) {
-                var text = new GlobalDeclEmitter(exportsByJavaType).emit(globals);
+            var topLevelEnumList = new ArrayList<Model.EnumDecl>();
+            for (var en : topLevelEnums) topLevelEnumList.add(en);
+
+            if (!globals.isEmpty() || !topLevelEnumList.isEmpty()) {
+                var text = new GlobalDeclEmitter(exportsByJavaType).emit(globals, topLevelEnumList);
                 writeFile(typesDir.resolve(ModuleLayout.globalFile()), text);
             }
             var libModuleEmitter = new LibraryModuleEmitter(exportsByJavaType);
@@ -216,7 +313,10 @@ public final class LuaApiProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Set.of(LuaLibrary.class.getName());
+        // Top-level `@LuaEnum` doesn't sit under a `@LuaLibrary`, so it has to be a triggering
+        // annotation in its own right — otherwise the processor never runs for a file that only
+        // contains a standalone enum.
+        return Set.of(LuaLibrary.class.getName(), net.hollowcube.scripting.gen.LuaEnum.class.getName());
     }
 
     @Override

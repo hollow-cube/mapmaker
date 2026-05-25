@@ -22,11 +22,36 @@ public sealed interface Model {
         String moduleName,
         LuaLibrary.Scope scope,
         List<Export> exports,
+        List<EnumDecl> enums,
         List<Method> staticMethods,
         List<Property> staticProperties,
         String description
     ) implements Model {
     }
+
+    /// A Java `enum` exposed to Lua as a constant table + nominal type. Constants are
+    /// represented at runtime as tagged light userdata (the int is the Java enum's `ordinal()`),
+    /// resolved back to the Java enum value via the constant array baked into the generated
+    /// glue. Top-level enums own their own `<Name>$luau` glue file; inner enums fold their
+    /// push/check methods into the enclosing library's glue.
+    record EnumDecl(
+        ClassName sourceType,
+        /// Glue class to emit. For top-level enums this is `<Pkg>.<Name>$luau`; for inner enums
+        /// it equals the enclosing library's glueType (the methods are appended there).
+        ClassName glueType,
+        String luaName,
+        /// GLOBAL for top-level enums and inner enums of a GLOBAL library; REQUIRE for inner
+        /// enums of a REQUIRE library.
+        LuaLibrary.Scope scope,
+        int lightUserDataTag,
+        List<EnumConstant> constants,
+        String description
+    ) implements Model {
+    }
+
+    /// One enum constant. `javaName` is the original `SCREAMING_SNAKE` Java identifier (also the
+    /// constant array key) and `luaName` is the `PascalCase` Lua-side field name.
+    record EnumConstant(String javaName, String luaName, int ordinal, String description) {}
 
     record Export(
         TypeName javaType,

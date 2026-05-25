@@ -45,7 +45,7 @@ public final class MetaTypeResolver {
         for (var ex : lib.exports()) exports.add(rewriteExport(lib, ex));
         return new Model.Library(
             lib.sourceType(), lib.glueType(), lib.moduleName(), lib.scope(),
-            List.copyOf(exports), staticMethods, staticProperties, lib.description());
+            List.copyOf(exports), lib.enums(), staticMethods, staticProperties, lib.description());
     }
 
     private Model.Export rewriteExport(Model.Library lib, Model.Export ex) {

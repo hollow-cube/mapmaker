@@ -31,7 +31,11 @@ public final class GlobalDeclEmitter {
         }
     }
 
-    public String emit(List<Model.Library> globalLibs) {
+    /// Two-arg form for top-level enums + GLOBAL libraries. Inner enums of a GLOBAL library
+    /// are picked up via [Model.Library#enums]; top-level enums (no enclosing library) come
+    /// through `topLevelEnums`. The split exists because top-level enums don't synthesize a
+    /// library wrapper.
+    public String emit(List<Model.Library> globalLibs, List<Model.EnumDecl> topLevelEnums) {
         // Stable order by module name.
         var libs = new ArrayList<>(globalLibs);
         libs.sort(java.util.Comparator.comparing(Model.Library::moduleName));
@@ -47,6 +51,19 @@ public final class GlobalDeclEmitter {
             emitClass(out, ex, ctx);
         }
 
+        // Top-level enums first, then inner enums of GLOBAL libraries — both render with the
+        // same `declare class <Name> end` + `declare <Name>: { … }` shape.
+        for (var en : sortedEnums(topLevelEnums)) {
+            out.append('\n');
+            emitEnum(out, en);
+        }
+        for (var lib : libs) {
+            for (var en : sortedEnums(lib.enums())) {
+                out.append('\n');
+                emitEnum(out, en);
+            }
+        }
+
         for (var lib : libs) {
             if (lib.staticMethods().isEmpty() && lib.staticProperties().isEmpty()) continue;
             RenderContext ctx = ambientContext(lib, lib.moduleName());
@@ -54,6 +71,29 @@ public final class GlobalDeclEmitter {
             emitLibTable(out, lib, ctx);
         }
         return out.toString();
+    }
+
+    /// Back-compat single-arg overload for tests that don't care about enums.
+    public String emit(List<Model.Library> globalLibs) {
+        return emit(globalLibs, List.of());
+    }
+
+    private static List<Model.EnumDecl> sortedEnums(List<Model.EnumDecl> in) {
+        var copy = new ArrayList<>(in);
+        copy.sort(java.util.Comparator.comparing(Model.EnumDecl::luaName));
+        return copy;
+    }
+
+    /// Ambient enum: a nominal placeholder class for the value type and a typed singleton table
+    /// of its constants. Distinct from `declare class` for libraries — enums have no methods,
+    /// just constant values.
+    private static void emitEnum(StringBuilder out, Model.EnumDecl en) {
+        out.append("declare class ").append(en.luaName()).append(" end\n");
+        out.append("declare ").append(en.luaName()).append(": {\n");
+        for (var c : en.constants())
+            out.append('\t').append("read ").append(c.luaName()).append(": ")
+                .append(en.luaName()).append(",\n");
+        out.append("}\n");
     }
 
     private RenderContext ambientContext(Model.Library lib, String what) {

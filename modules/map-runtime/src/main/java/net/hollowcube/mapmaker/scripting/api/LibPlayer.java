@@ -337,7 +337,7 @@ public final class LibPlayer {
         /// @luaReturn @mapmaker/item.Item
         @LuaMethod
         public int getSlot(LuaState state) {
-            var slot = LibItem.checkSlot(state, 1);
+            var slot = LuaSlot.checkArg(state, 1);
             LibItem.pushItem(state, player.getEquipment(slot));
             return 1;
         }
@@ -348,7 +348,7 @@ public final class LibPlayer {
         /// @luaParam item @mapmaker/item.Item
         @LuaMethod
         public void setSlot(LuaState state) {
-            var slot = LibItem.checkSlot(state, 1);
+            var slot = LuaSlot.checkArg(state, 1);
             var item = LibItem.checkItemArg(state, 2);
             player.setEquipment(slot, item);
         }

@@ -96,6 +96,8 @@ public final class SchemaJson {
             Class<?> raw = typeToken.getRawType();
             if (raw == Schema.class) return (TypeAdapter<T>) new SchemaAdapter(gson).nullSafe();
             if (raw == Model.Library.class) return (TypeAdapter<T>) new LibraryAdapter(gson).nullSafe();
+            if (raw == Model.EnumDecl.class) return (TypeAdapter<T>) new EnumDeclAdapter(gson).nullSafe();
+            if (raw == Model.EnumConstant.class) return (TypeAdapter<T>) new EnumConstantAdapter().nullSafe();
             if (raw == Model.Export.class) return (TypeAdapter<T>) new ExportAdapter(gson).nullSafe();
             if (raw == Model.Property.class) return (TypeAdapter<T>) new PropertyAdapter(gson).nullSafe();
             if (raw == Model.Accessor.class) return (TypeAdapter<T>) new AccessorAdapter(gson).nullSafe();
@@ -105,6 +107,8 @@ public final class SchemaJson {
         }
     }
 
+    private static final Type ENUM_LIST = new TypeToken<List<Model.EnumDecl>>() {}.getType();
+    private static final Type ENUM_CONSTANT_LIST = new TypeToken<List<Model.EnumConstant>>() {}.getType();
     private static final Type EXPORT_LIST = new TypeToken<List<Model.Export>>() {}.getType();
     private static final Type METHOD_LIST = new TypeToken<List<Model.Method>>() {}.getType();
     private static final Type META_LIST = new TypeToken<List<Model.MetaMethod>>() {}.getType();
@@ -156,10 +160,46 @@ public final class SchemaJson {
             o.add("glueType", gson.toJsonTree(v.glueType(), ClassName.class));
             o.addProperty("moduleName", v.moduleName());
             o.add("exports", gson.toJsonTree(v.exports(), EXPORT_LIST));
+            o.add("enums", gson.toJsonTree(v.enums(), ENUM_LIST));
             o.add("staticMethods", gson.toJsonTree(v.staticMethods(), METHOD_LIST));
             o.add("staticProperties", gson.toJsonTree(v.staticProperties(), PROPERTY_LIST));
             o.addProperty("description", v.description());
             gson.toJson(o, out);
+        }
+    }
+
+    /// Enums are serialized in full (constants + tag + description). The Java side fields
+    /// (`sourceType`, `glueType`, `lightUserDataTag`) are kept because downstream consumers may
+    /// want to know which Java identity backs each enum — same trade-off as `Export`.
+    private static final class EnumDeclAdapter extends WriteOnly<Model.EnumDecl> {
+        private final Gson gson;
+
+        EnumDeclAdapter(Gson gson) {
+            this.gson = gson;
+        }
+
+        @Override
+        public void write(JsonWriter out, Model.EnumDecl v) throws IOException {
+            var o = new JsonObject();
+            o.add("sourceType", gson.toJsonTree(v.sourceType(), ClassName.class));
+            o.add("glueType", gson.toJsonTree(v.glueType(), ClassName.class));
+            o.addProperty("name", v.luaName());
+            o.addProperty("lightUserDataTag", v.lightUserDataTag());
+            o.add("constants", gson.toJsonTree(v.constants(), ENUM_CONSTANT_LIST));
+            o.addProperty("description", v.description());
+            gson.toJson(o, out);
+        }
+    }
+
+    private static final class EnumConstantAdapter extends WriteOnly<Model.EnumConstant> {
+        @Override
+        public void write(JsonWriter out, Model.EnumConstant v) throws IOException {
+            var o = new JsonObject();
+            o.addProperty("javaName", v.javaName());
+            o.addProperty("name", v.luaName());
+            o.addProperty("ordinal", v.ordinal());
+            o.addProperty("description", v.description());
+            new Gson().toJson(o, out);
         }
     }
 
