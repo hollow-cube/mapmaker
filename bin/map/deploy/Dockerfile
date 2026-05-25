@@ -1,5 +1,7 @@
 FROM azul/zulu-openjdk-alpine:25-latest
 
+RUN apk add --no-cache libstdc++
+
 WORKDIR /app
 COPY ./bin/map/build/libs/map-all.jar /app/server.jar
 
