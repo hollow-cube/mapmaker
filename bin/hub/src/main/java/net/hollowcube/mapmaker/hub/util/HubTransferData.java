@@ -5,8 +5,4 @@ import net.minestom.server.coordinate.Pos;
 import org.jetbrains.annotations.NotNull;
 
 @RuntimeGson
-public record HubTransferData(
-        @NotNull Pos position,
-        int slot
-) {
-}
+public record HubTransferData(@NotNull Pos position, int slot) {}

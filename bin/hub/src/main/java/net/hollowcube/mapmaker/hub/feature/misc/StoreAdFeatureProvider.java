@@ -39,18 +39,23 @@ public class StoreAdFeatureProvider implements HubFeature {
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         this.playerService = server.playerService();
 
-        var viewStoreEntity = BaseNpcEntity.createInteractionEntity(
-            3, 4, this::handleStoreClick);
+        var viewStoreEntity = BaseNpcEntity.createInteractionEntity(3, 4, this::handleStoreClick);
         viewStoreEntity.setInstance(world.instance(), STORE_AD_POS);
 
-        goldBlockEntity.getEntityMeta().setItemStack(ItemStack.of(Material.GOLD_BLOCK)
-            .with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true));
+        goldBlockEntity.getEntityMeta().setItemStack(
+            ItemStack.of(Material.GOLD_BLOCK).with(DataComponents.ENCHANTMENT_GLINT_OVERRIDE, true)
+        );
         goldBlockEntity.getEntityMeta().setScale(new Vec(1));
         goldBlockEntity.setInstance(world.instance(), GOLD_BLOCK_ENTITY_POS);
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+    private void handleStoreClick(
+        @NotNull Player player,
+        @NotNull BaseNpcEntity npc,
+        @NotNull PlayerHand hand,
+        boolean isLeftClick
+    ) {
         if (hand != PlayerHand.MAIN) return;
 
         Panel.open(player, new StoreView(playerService, StoreView.TAB_HYPERCUBE));
@@ -65,13 +70,23 @@ public class StoreAdFeatureProvider implements HubFeature {
         double verticalOffset = (goldBlockEntityRotationTarget % 360) / 90.0 * 0.25;
         if (verticalOffset > 1) verticalOffset = 2 - verticalOffset;
         meta.setTranslation(new Vec(0, 0, verticalOffset));
-        meta.setRightRotation(new Quaternion(new Vec(0, 0, 1).normalize(), Math.toRadians(goldBlockEntityRotationTarget)).into());
+        meta.setRightRotation(
+            new Quaternion(
+                new Vec(0, 0, 1).normalize(),
+                Math.toRadians(goldBlockEntityRotationTarget)
+            ).into()
+        );
         goldBlockEntityRotationTarget += 90;
 
-        goldBlockEntity.sendPacketToViewers(new ParticlePacket(
-            Particle.FIREWORK, goldBlockEntity.getPosition().add(0, verticalOffset, 0),
-            new Vec(0.1), 0.1f, 5
-        ));
+        goldBlockEntity.sendPacketToViewers(
+            new ParticlePacket(
+                Particle.FIREWORK,
+                goldBlockEntity.getPosition().add(0, verticalOffset, 0),
+                new Vec(0.1),
+                0.1f,
+                5
+            )
+        );
 
         meta.setNotifyAboutChanges(true);
         return TaskSchedule.tick(GOLD_BLOCK_ENTITY_UPDATE_INTERVAL * 20);

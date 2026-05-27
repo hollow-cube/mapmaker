@@ -40,15 +40,17 @@ import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ServiceLoader;
-
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
 public class HubServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServer.class);
-    private static final Presence HUB_PRESENCE = new Presence(Presence.TYPE_MAPMAKER_HUB,
-        "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
+    private static final Presence HUB_PRESENCE = new Presence(
+        Presence.TYPE_MAPMAKER_HUB,
+        "__hub_unused__",
+        ServerRuntime.getRuntime().hostname(),
+        "hub"
+    );
 
     public static final MapData HUB_MAP_DATA = new MapData(MapData.SPAWN_MAP_ID, Uuids.ZERO);
 
@@ -65,11 +67,13 @@ public class HubServer extends AbstractMapServer {
     HubServer(ConfigLoaderV3 config) {
         super(config);
 
-        MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("hub-init")
-            .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
-            .addListener(PlayerSpawnEvent.class, this::handleSpawn)
-            .addListener(PlayerDisconnectEvent.class, this::handleDisconnect)
-            .addListener(ServerBeginShutdownEvent.class, this::handleServerShutdown));
+        MinecraftServer.getGlobalEventHandler().addChild(
+            EventNode.all("hub-init")
+                .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+                .addListener(PlayerSpawnEvent.class, this::handleSpawn)
+                .addListener(PlayerDisconnectEvent.class, this::handleDisconnect)
+                .addListener(ServerBeginShutdownEvent.class, this::handleServerShutdown)
+        );
     }
 
     @Override
@@ -79,7 +83,9 @@ public class HubServer extends AbstractMapServer {
 
     @Override
     protected ServerBridge createBridge() {
-        return globalConfig.noop() ? new NoopServerBridge() : new HubServerBridge(api(), sessionService());
+        return globalConfig.noop()
+            ? new NoopServerBridge()
+            : new HubServerBridge(api(), sessionService());
     }
 
     @Override
@@ -91,8 +97,7 @@ public class HubServer extends AbstractMapServer {
     protected void prepareStart() {
         super.prepareStart();
 
-        MinecraftServer.getConnectionManager()
-            .setPlayerProvider(simpleMapPlayer(commandManager()));
+        MinecraftServer.getConnectionManager().setPlayerProvider(simpleMapPlayer(commandManager()));
 
         world = new HubMapWorld(this, HUB_MAP_DATA);
         world.loadWorld();
@@ -100,14 +105,21 @@ public class HubServer extends AbstractMapServer {
         // We schedule on first tick end because submitTask invokes the executor immediately to determine
         // the first schedule. If we executed it here, that would be on the wrong thread.
         var scheduler = MinecraftServer.getSchedulerManager();
-        scheduler.scheduleEndOfTick(() -> scheduler.submitTask(world::safePointTick, ExecutionType.TICK_END));
+        scheduler.scheduleEndOfTick(
+            () -> scheduler.submitTask(world::safePointTick, ExecutionType.TICK_END)
+        );
 
         registerCommands(this, commandManager(), world, world.instance().scheduler());
         loadHubFeatures(this, world);
     }
 
     // Static so it can be referenced from DevHubServer
-    public static void registerCommands(AbstractMapServer server, CommandManager commandManager, HubMapWorld hubWorld, Scheduler scheduler) {
+    public static void registerCommands(
+        AbstractMapServer server,
+        CommandManager commandManager,
+        HubMapWorld hubWorld,
+        Scheduler scheduler
+    ) {
         commandManager.register(new HelpCommand(commandManager, CommandCategories.GLOBAL));
         commandManager.register(new PlayerInfoCommand(server.api(), server.sessionManager()));
 
@@ -123,7 +135,10 @@ public class HubServer extends AbstractMapServer {
                 logger.debug("Loading feature {}", feature.getClass().getName());
                 feature.load(server, world);
             } catch (Exception e) {
-                throw new RuntimeException("Failed to load feature " + feature.getClass().getName(), e);
+                throw new RuntimeException(
+                    "Failed to load feature " + feature.getClass().getName(),
+                    e
+                );
             }
         }
     }
@@ -167,8 +182,12 @@ public class HubServer extends AbstractMapServer {
         FutureUtil.submitVirtual(() -> {
             for (var player : players) {
                 try {
-                    var hub = sessionService().joinHubV2(new JoinHubRequest(
-                        player.getUuid().toString(), AbstractHttpService.hostname));
+                    var hub = sessionService().joinHubV2(
+                        new JoinHubRequest(
+                            player.getUuid().toString(),
+                            AbstractHttpService.hostname
+                        )
+                    );
 
                     var state = new HubTransferData(player.getPosition(), player.getHeldSlot());
                     ProxySupport.transferWithData(player, hub.serverClusterIp(), state);

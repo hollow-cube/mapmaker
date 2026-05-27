@@ -38,20 +38,38 @@ public class HubServerBridge implements ServerBridge {
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
         if (playerProtocolVersion < map.protocolVersion()) {
-            player.sendMessage(Component.translatable("map_join.wrongversion",
-                    Component.text(map.name()), Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))));
+            player.sendMessage(
+                Component.translatable(
+                    "map_join.wrongversion",
+                    Component.text(map.name()),
+                    Component.text(ProtocolVersions.getProtocolName(map.protocolVersion()))
+                )
+            );
             return;
         }
 
         MiscFunctionality.sendFadeout(player);
         try {
-            logger.debug("trying to join map {} with state {} for {}", joinConfig.mapId(), joinConfig.joinMapState(), playerId);
-            var res = sessionService.joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), switch (joinConfig.joinMapState()) {
-                case EDITING -> MapPresence.STATE_EDITING;
-                case PLAYING -> MapPresence.STATE_PLAYING;
-                case VERIFYING -> MapPresence.STATE_VERIFYING;
-                case SPECTATING -> MapPresence.STATE_SPECTATING;
-            }, joinConfig.source(), joinConfig.isolateOverride()));
+            logger.debug(
+                "trying to join map {} with state {} for {}",
+                joinConfig.mapId(),
+                joinConfig.joinMapState(),
+                playerId
+            );
+            var res = sessionService.joinMapV2(
+                new JoinMapRequest(
+                    playerId,
+                    joinConfig.mapId(),
+                    switch (joinConfig.joinMapState()) {
+                        case EDITING -> MapPresence.STATE_EDITING;
+                        case PLAYING -> MapPresence.STATE_PLAYING;
+                        case VERIFYING -> MapPresence.STATE_VERIFYING;
+                        case SPECTATING -> MapPresence.STATE_SPECTATING;
+                    },
+                    joinConfig.source(),
+                    joinConfig.isolateOverride()
+                )
+            );
             logger.info("join map result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
         } catch (Exception e) {

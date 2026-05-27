@@ -8,10 +8,8 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
-
 import java.util.ArrayList;
 import java.util.List;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.info;
 
@@ -52,7 +50,9 @@ public class AdventCalendarPanel extends Panel {
         var isAvailable = eventDay >= day;
         var claimed = this.data.hasPresent(day);
         var presentTimeAvailable = HubTime.Christmas.getSecondsUntilDay(day);
-        var hintTimeAvailable = day == 25 ? presentTimeAvailable : HubTime.Christmas.getSecondsUntilDay(day + 1);
+        var hintTimeAvailable = day == 25
+            ? presentTimeAvailable
+            : HubTime.Christmas.getSecondsUntilDay(day + 1);
 
         var button = new Button(null, 1, 1);
         if (cosmetic != null && isAvailable) {
@@ -66,29 +66,49 @@ public class AdventCalendarPanel extends Panel {
 
         var dayTranslationKey = "gui.advent.day.%d".formatted(day);
 
-        Component title = claimed ?
-                LanguageProviderV2.translate(Component.translatable("gui.advent.day.name.collected", Component.text(day))) :
-                LanguageProviderV2.translate(Component.translatable("gui.advent.day.name", Component.text(day)));
+        Component title = claimed
+            ? LanguageProviderV2.translate(
+            Component.translatable("gui.advent.day.name.collected", Component.text(day))
+        )
+            : LanguageProviderV2.translate(
+            Component.translatable("gui.advent.day.name", Component.text(day))
+        );
 
         if (isAvailable) {
-            var hint = hintTimeAvailable <= 0 ?
-                    LanguageProviderV2.translateMulti(dayTranslationKey + ".hint", List.of()) :
-                    LanguageProviderV2.translateMulti("gui.advent.day.hint", List.of(formatTime(hintTimeAvailable)));
+            var hint = hintTimeAvailable <= 0
+                ? LanguageProviderV2.translateMulti(dayTranslationKey + ".hint", List.of())
+                : LanguageProviderV2.translateMulti(
+                "gui.advent.day.hint",
+                List.of(formatTime(hintTimeAvailable))
+            );
 
             var cosmeticText = cosmetic != null ? cosmetic.displayName() : Component.text("???");
             var subtitle = hint.isEmpty() ? Component.empty() : hint.getFirst();
 
-            var lore = new ArrayList<>(LanguageProviderV2.translateMulti("gui.advent.day.hint.lore", List.of(subtitle)));
+            var lore = new ArrayList<>(
+                LanguageProviderV2.translateMulti("gui.advent.day.hint.lore", List.of(subtitle))
+            );
             if (hint.size() > 1) lore.addAll(hint.subList(1, hint.size()));
 
             if (LanguageProviderV2.hasTranslationKey(dayTranslationKey + ".rewards.lore")) {
                 lore.add(Component.empty());
-                lore.addAll(LanguageProviderV2.translateMulti(dayTranslationKey + ".rewards.lore", List.of(cosmeticText)));
+                lore.addAll(
+                    LanguageProviderV2.translateMulti(
+                        dayTranslationKey + ".rewards.lore",
+                        List.of(cosmeticText)
+                    )
+                );
             }
 
             button.text(title, lore);
         } else {
-            button.text(title, LanguageProviderV2.translateMulti("gui.advent.day.locked", List.of(formatTime(presentTimeAvailable))));
+            button.text(
+                title,
+                LanguageProviderV2.translateMulti(
+                    "gui.advent.day.locked",
+                    List.of(formatTime(presentTimeAvailable))
+                )
+            );
         }
         return button;
     }

@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.hub.feature.contest.MapContest;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
@@ -44,8 +43,10 @@ public class CountdownTimer implements Supplier<TaskSchedule> {
 
     public long timeToNextWeek() {
         var now = LocalDateTime.now(ZoneId.of("America/New_York"));
-        return ChronoUnit.MINUTES.between(now, now.isAfter(MapContest.START_DATE)
-                ? MapContest.END_DATE : MapContest.START_DATE);
+        return ChronoUnit.MINUTES.between(
+            now,
+            now.isAfter(MapContest.START_DATE) ? MapContest.END_DATE : MapContest.START_DATE
+        );
     }
 
     public void setDigits(int[] newDigits) {

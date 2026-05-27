@@ -24,7 +24,6 @@ import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -55,17 +54,21 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private final ScriptEngine scriptEngine;
 
     public HubMapWorld(MapServer server, MapData map) {
-        super(server, map, makeMapInstance(map, 'h', null),
-            HubPlayerState.class);
+        super(server, map, makeMapInstance(map, 'h', null), HubPlayerState.class);
 
         itemRegistry().register(new PlayMapsItem(server.api(), server.bridge()));
-        itemRegistry().register(new CreateMapsItem(server.api(), server.playerService(), server.bridge()));
+        itemRegistry().register(
+            new CreateMapsItem(server.api(), server.playerService(), server.bridge())
+        );
         itemRegistry().register(new OpenCosmeticsMenuItem(server.playerService()));
         itemRegistry().register(OpenStoreItem.INSTANCE);
         itemRegistry().register(new AdventCalendarItem());
         itemRegistry().register(OpenNotificationsItem.INSTANCE);
 
-        objectEntityHandlers().registerForInteractions(PresentObjectHandler.ID, PresentObjectHandler::new);
+        objectEntityHandlers().registerForInteractions(
+            PresentObjectHandler.ID,
+            PresentObjectHandler::new
+        );
 
         eventNode().addChild(EventUtil.READ_ONLY_NODE)
             .addListener(PlayerChangeHeldSlotEvent.class, this::handleSwitchSlot)
@@ -126,7 +129,10 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             try (var is = getClass().getResourceAsStream("/spawn/hcspawn.polar")) {
                 if (is == null) throw new IOException("hcspawn.polar not found");
                 var worldFileContent = Objects.requireNonNull(is.readAllBytes());
-                mapWorldData = new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(worldFileContent)), worldFileContent.length);
+                mapWorldData = new ReadableMapData(
+                    Channels.newChannel(new ByteArrayInputStream(worldFileContent)),
+                    worldFileContent.length
+                );
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -142,9 +148,12 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
 
     private void handlePlayerMove(PlayerMoveEvent event) {
         Pos playerPos = event.getPlayer().getPosition();
-        if (playerPos.x() < HUB_BB_MIN.x() || playerPos.x() > HUB_BB_MAX.x() ||
-            playerPos.y() < HUB_BB_MIN.y() || playerPos.y() > HUB_BB_MAX.y() ||
-            playerPos.z() < HUB_BB_MIN.z() || playerPos.z() > HUB_BB_MAX.z()) {
+        if (playerPos.x() < HUB_BB_MIN.x()
+            || playerPos.x() > HUB_BB_MAX.x()
+            || playerPos.y() < HUB_BB_MIN.y()
+            || playerPos.y() > HUB_BB_MAX.y()
+            || playerPos.z() < HUB_BB_MIN.z()
+            || playerPos.z() > HUB_BB_MAX.z()) {
             event.getPlayer().teleport(spawnPointFor(event.getPlayer()));
         }
     }

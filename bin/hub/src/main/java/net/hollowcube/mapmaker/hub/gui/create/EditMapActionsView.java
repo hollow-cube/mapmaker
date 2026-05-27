@@ -9,9 +9,7 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
-
 import java.util.Objects;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 
@@ -31,17 +29,30 @@ public class EditMapActionsView extends Panel {
 
         add(0, 0, backOrClose());
 
-        add(1, 1, new Text(null, 7, 1, "map actions")
-            .font("small").align(Text.CENTER, Text.CENTER));
+        add(
+            1,
+            1,
+            new Text(null, 7, 1, "map actions").font("small").align(Text.CENTER, Text.CENTER)
+        );
 
         add(1, 2, new Button("gui.create_maps.actions.copy_map", 3, 2));
 
-        add(5, 2, new Button(3, 2).translationKey("gui.create_maps.actions.resize_map", map.settings().getSize()));
+        add(
+            5,
+            2,
+            new Button(
+                3,
+                2
+            ).translationKey("gui.create_maps.actions.resize_map", map.settings().getSize())
+        );
 
         add(1, 4, new Button("gui.create_maps.actions.transfer_ownership", 3, 2));
 
-        add(5, 4, new Button("gui.create_maps.actions.delete_map", 3, 2)
-            .onLeftClick(this::beginDeleteMap));
+        add(
+            5,
+            4,
+            new Button("gui.create_maps.actions.delete_map", 3, 2).onLeftClick(this::beginDeleteMap)
+        );
     }
 
     private void beginDeleteMap() {

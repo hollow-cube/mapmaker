@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.feature.event.newyears;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.packet.server.play.ParticlePacket;
 import net.minestom.server.particle.Particle;
-
 import java.util.List;
 
 public class CustomFirework extends Firework {
@@ -57,13 +56,9 @@ public class CustomFirework extends Firework {
                 var y = offset.y() + localY;
                 var z = offset.z() + (localX * sin);
 
-                firework.sendPacketToViewers(new ParticlePacket(
-                    Particle.END_ROD,
-                    true, true,
-                    x, y, z,
-                    0, 0, 0,
-                    0f, 1
-                ));
+                firework.sendPacketToViewers(
+                    new ParticlePacket(Particle.END_ROD, true, true, x, y, z, 0, 0, 0, 0f, 1)
+                );
             }
         }
     }

@@ -12,7 +12,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.component.FireworkExplosion;
 import net.minestom.server.item.component.FireworkList;
 import net.minestom.server.timer.TaskSchedule;
-
 import java.io.IOException;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -64,7 +63,8 @@ public class NewYearsFeature implements HubFeature {
                 for (var entry : ZONES_TO_REGIONS.entrySet()) {
                     if (isNewYearsInZone(entry.getKey())) {
                         for (var region : entry.getValue()) {
-                            celebrating.computeIfAbsent(region.country, _ -> new ArrayList<>()).add(region.region);
+                            celebrating.computeIfAbsent(region.country, _ -> new ArrayList<>())
+                                .add(region.region);
                         }
                     }
                 }
@@ -79,7 +79,10 @@ public class NewYearsFeature implements HubFeature {
                             random.nextDouble(MIN_SPAWN_BOX.y(), MAX_SPAWN_BOX.y()),
                             random.nextDouble(MIN_SPAWN_BOX.z(), MAX_SPAWN_BOX.z())
                         );
-                        var delay = random.nextInt(FIREWORKS_SPAWN_DELAY_MIN, FIREWORKS_SPAWN_DELAY_MAX + 1);
+                        var delay = random.nextInt(
+                            FIREWORKS_SPAWN_DELAY_MIN,
+                            FIREWORKS_SPAWN_DELAY_MAX + 1
+                        );
                         if (delay > 0) {
                             server.scheduler()
                                 .buildTask(() -> spawnFirework(world, position))
@@ -92,17 +95,13 @@ public class NewYearsFeature implements HubFeature {
 
                     server.scheduler()
                         .buildTask(() -> {
-                            new CustomFirework(20, FireworkShapes.TWO)
-                                .withRotation(-90)
+                            new CustomFirework(20, FireworkShapes.TWO).withRotation(-90)
                                 .setInstance(world.instance(), new Vec(-200, 95, 4));
-                            new CustomFirework(20, FireworkShapes.ZERO)
-                                .withRotation(-90)
+                            new CustomFirework(20, FireworkShapes.ZERO).withRotation(-90)
                                 .setInstance(world.instance(), new Vec(-200, 95, 1.5));
-                            new CustomFirework(20, FireworkShapes.TWO)
-                                .withRotation(-90)
+                            new CustomFirework(20, FireworkShapes.TWO).withRotation(-90)
                                 .setInstance(world.instance(), new Vec(-200, 95, -1.5));
-                            new CustomFirework(20, FireworkShapes.SIX)
-                                .withRotation(-90)
+                            new CustomFirework(20, FireworkShapes.SIX).withRotation(-90)
                                 .setInstance(world.instance(), new Vec(-200, 95, -4));
                         })
                         .delay(TaskSchedule.tick(FIREWORKS_SPAWN_DELAY_MAX + 5))
@@ -118,13 +117,18 @@ public class NewYearsFeature implements HubFeature {
         var instance = world.instance();
         var random = ThreadLocalRandom.current();
 
-        var fireworks = new FireworkList(0, List.of(new FireworkExplosion(
-            FIREWORK_SHAPES[random.nextInt(FIREWORK_SHAPES.length)],
-            List.of(ColorUtil.fromHsv(random.nextFloat(), 1f, 1f)),
-            List.of(ColorUtil.fromHsv(random.nextFloat(), 1f, 1f)),
-            true,
-            true
-        )));
+        var fireworks = new FireworkList(
+            0,
+            List.of(
+                new FireworkExplosion(
+                    FIREWORK_SHAPES[random.nextInt(FIREWORK_SHAPES.length)],
+                    List.of(ColorUtil.fromHsv(random.nextFloat(), 1f, 1f)),
+                    List.of(ColorUtil.fromHsv(random.nextFloat(), 1f, 1f)),
+                    true,
+                    true
+                )
+            )
+        );
         var ticks = random.nextInt(FIREWORK_TICKS_MIN, FIREWORK_TICKS_MAX + 1);
         var firework = new Firework(ticks, fireworks);
         firework.setInstance(instance, position);
@@ -144,25 +148,34 @@ public class NewYearsFeature implements HubFeature {
             } else {
                 var lore = Component.text(country)
                     .appendNewline()
-                    .append(regionList.stream()
-                                .map(region -> Component.text(" - " + region))
-                                .collect(Component.toComponent(Component.text("\n")))
+                    .append(
+                        regionList.stream()
+                            .map(region -> Component.text(" - " + region))
+                            .collect(Component.toComponent(Component.text("\n")))
                     );
                 places.add(Component.text("*" + country).hoverEvent(HoverEvent.showText(lore)));
             }
         }
 
-        world.instance().sendMessage(Component.translatable(
-            "new_years.message",
-            Component.join(JoinConfiguration.commas(true), places)
-        ));
+        world.instance().sendMessage(
+            Component.translatable(
+                "new_years.message",
+                Component.join(JoinConfiguration.commas(true), places)
+            )
+        );
     }
 
     private static boolean isNewYearsInZone(ZoneId zoneId) {
         var now = ZonedDateTime.now(zoneId);
-        if (now.getMonthValue() == 12 && now.getDayOfMonth() == 31 && now.getHour() == 23 && now.getMinute() >= 55) {
+        if (now.getMonthValue() == 12
+            && now.getDayOfMonth() == 31
+            && now.getHour() == 23
+            && now.getMinute() >= 55) {
             return true;
-        } else if (now.getMonthValue() == 1 && now.getDayOfMonth() == 1 && now.getHour() == 0 && now.getMinute() < 5) {
+        } else if (now.getMonthValue() == 1
+                   && now.getDayOfMonth() == 1
+                   && now.getHour() == 0
+                   && now.getMinute() < 5) {
             return true;
         }
         return false;

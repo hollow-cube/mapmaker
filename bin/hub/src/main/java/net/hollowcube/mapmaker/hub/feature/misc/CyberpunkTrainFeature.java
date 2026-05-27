@@ -24,7 +24,6 @@ public class CyberpunkTrainFeature implements HubFeature {
     private static final Vec MIDDLE_TRANSLATION = Vec.ZERO;
     private static final Vec END_TRANSLATION = new Vec(-5, 0, -1);
 
-
     private final NpcItemModel trainFront = new NpcItemModel();
     private final NpcItemModel trainMiddle = new NpcItemModel();
     private final NpcItemModel trainBack = new NpcItemModel();
@@ -38,8 +37,9 @@ public class CyberpunkTrainFeature implements HubFeature {
         trainFront.getEntityMeta().setScale(new Vec(4));
         trainFront.getEntityMeta().setBrightness(15, 15);
         var metaFront = trainFront.getEntityMeta();
-        metaFront.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
-                Math.toRadians(-90)).into());
+        metaFront.setLeftRotation(
+            new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into()
+        );
         metaFront.setTranslation(FRONT_TRANSLATION);
         trainFront.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0));
 
@@ -47,16 +47,18 @@ public class CyberpunkTrainFeature implements HubFeature {
         trainMiddle.getEntityMeta().setScale(new Vec(4));
         trainMiddle.getEntityMeta().setBrightness(15, 15);
         var metaMiddle = trainMiddle.getEntityMeta();
-        metaMiddle.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
-                Math.toRadians(-90)).into());
+        metaMiddle.setLeftRotation(
+            new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into()
+        );
         trainMiddle.setInstance(world.instance(), new Pos(TRAIN_START, 27.5f, 0));
 
         trainBack.setModel(Material.STICK, BadSprite.require("train_front"));
         trainBack.getEntityMeta().setScale(new Vec(4));
         trainBack.getEntityMeta().setBrightness(15, 15);
         var metaBack = trainBack.getEntityMeta();
-        metaBack.setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
-                Math.toRadians(-90)).into());
+        metaBack.setLeftRotation(
+            new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into()
+        );
         metaBack.setTranslation(END_TRANSLATION);
         trainBack.setInstance(world.instance(), new Pos(TRAIN_START, -180 + 26f, 0));
 

@@ -24,15 +24,17 @@ public class MainLeaderboardFeature implements HubFeature {
         var api = server.api();
         parkourLeaderboard = new Leaderboard2(
             () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, null),
-            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
+            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, playerId)
+                .player()
+                .score(),
             () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, null),
-            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, playerId).player().score(),
+            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, playerId)
+                .player()
+                .score(),
             playerId -> api.players.getDisplayName(playerId).build(),
-                10);
-        buildingLeaderboard = new Leaderboard2(
-                null, null,
-                null, null,
-                null, 10);
+            10
+        );
+        buildingLeaderboard = new Leaderboard2(null, null, null, null, null, 10);
 
         assert parkourLeaderboard.left != null;
         parkourLeaderboard.left.setTitle(Component.text("ᴍᴀᴘѕ ʙᴇᴀᴛᴇɴ", NamedTextColor.GOLD));

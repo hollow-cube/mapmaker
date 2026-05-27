@@ -24,7 +24,12 @@ public class InteractionEntity extends Entity {
     private final Target target;
     private final double interactionDistance;
 
-    public InteractionEntity(int width, int height, double interactionDistance, @NotNull Target target) {
+    public InteractionEntity(
+        int width,
+        int height,
+        double interactionDistance,
+        @NotNull Target target
+    ) {
         super(EntityType.INTERACTION);
         this.target = target;
         this.interactionDistance = interactionDistance;

@@ -4,7 +4,6 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapTags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKCHANGEORREMOVE;
 
 public class EditableMapTagList extends Panel {
@@ -34,21 +33,33 @@ public class EditableMapTagList extends Panel {
         for (; i < 7 && i < tags.size(); i++) {
             var tag = tags.get(i);
             final int index = i;
-            add(i, 0, new Button(1, 1)
-                .translationKey(tag.baseTranslationKey())
-                .lorePostfix(LORE_POSTFIX_CLICKCHANGEORREMOVE)
-                .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
-                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, newTag -> handleReplaceTag(index, newTag))))
-                .onRightClick(() -> handleRemoveTag(index)));
+            add(
+                i,
+                0,
+                new Button(1, 1).translationKey(tag.baseTranslationKey())
+                    .lorePostfix(LORE_POSTFIX_CLICKCHANGEORREMOVE)
+                    .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
+                    .onLeftClick(
+                        () -> host.pushTransientView(
+                            new SelectTagView(map, newTag -> handleReplaceTag(index, newTag))
+                        )
+                    )
+                    .onRightClick(() -> handleRemoveTag(index))
+            );
         }
 
         if (i < 7) {
             final String tagCategory = getCategory(i);
 
-            add(i, 0, new Button(1, 1)
-                .translationKey("gui.create_maps.edit.tags.add." + tagCategory)
-                .sprite("icon2/1_1/plus", 1, 1)
-                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, this::handleAddTag))));
+            add(
+                i,
+                0,
+                new Button(1, 1).translationKey("gui.create_maps.edit.tags.add." + tagCategory)
+                    .sprite("icon2/1_1/plus", 1, 1)
+                    .onLeftClick(
+                        () -> host.pushTransientView(new SelectTagView(map, this::handleAddTag))
+                    )
+            );
         }
     }
 

@@ -11,15 +11,15 @@ import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 @SuppressWarnings("UnstableApiUsage")
 public class NpcPlayer extends BaseNpcEntity {
-    public static final Team NPC_TEAM = MinecraftServer.getTeamManager().createBuilder("hub_npcs")
-            .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
-            .build();
+    public static final Team NPC_TEAM = MinecraftServer.getTeamManager()
+        .createBuilder("hub_npcs")
+        .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
+        .build();
 
     private final String username;
     private final PlayerSkin skin;
@@ -38,7 +38,9 @@ public class NpcPlayer extends BaseNpcEntity {
         this.skin = skin;
 
         this.nameTag.setAutoViewable(false);
-        this.nameTag.getEntityMeta().setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.CENTER);
+        this.nameTag.getEntityMeta().setBillboardRenderConstraints(
+            AbstractDisplayMeta.BillboardConstraints.CENTER
+        );
         this.nameTag.getEntityMeta().setText(Component.text(username));
     }
 
@@ -63,35 +65,65 @@ public class NpcPlayer extends BaseNpcEntity {
         for (var viewer : getViewers()) {
             if (this.position.distanceSquared(viewer.getPosition()) > 100) return;
 
-            var newPosition = this.position.add(0, getEyeHeight(), 0).withLookAt(viewer.getPosition().add(0, viewer.getEyeHeight(), 0));
-            var p1 = new EntityRotationPacket(getEntityId(), newPosition.yaw(), newPosition.pitch(), true);
+            var newPosition = this.position.add(0, getEyeHeight(), 0)
+                .withLookAt(viewer.getPosition().add(0, viewer.getEyeHeight(), 0));
+            var p1 = new EntityRotationPacket(
+                getEntityId(),
+                newPosition.yaw(),
+                newPosition.pitch(),
+                true
+            );
             viewer.sendPacket(p1);
             var p2 = new EntityHeadLookPacket(getEntityId(), newPosition.yaw());
             viewer.sendPacket(p2);
         }
-
     }
 
     @Override
     public void updateNewViewer(@NotNull Player player) {
         var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
         if (this.skin != null) {
-            properties.add(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
+            properties.add(
+                new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature())
+            );
         }
-        var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), username, properties, false, 0, GameMode.SURVIVAL, null, null, 0, true);
-        player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
+        var entry = new PlayerInfoUpdatePacket.Entry(
+            getUuid(),
+            username,
+            properties,
+            false,
+            0,
+            GameMode.SURVIVAL,
+            null,
+            null,
+            0,
+            true
+        );
+        player.sendPacket(
+            new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry)
+        );
 
         // Spawn the player entity
         super.updateNewViewer(player);
 
         // Enable skin layers
-        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(
-                MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
-                Metadata.Byte((byte) 0b1111111))
-        ));
+        player.sendPackets(
+            new EntityMetaDataPacket(
+                getEntityId(),
+                Map.of(
+                    MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
+                    Metadata.Byte((byte) 0b1111111)
+                )
+            )
+        );
 
         if (equipment.containsKey(EquipmentSlot.HELMET)) {
-            player.sendPacket(new TeamsPacket(NPC_TEAM.getTeamName(), new TeamsPacket.AddEntitiesToTeamAction(List.of(username))));
+            player.sendPacket(
+                new TeamsPacket(
+                    NPC_TEAM.getTeamName(),
+                    new TeamsPacket.AddEntitiesToTeamAction(List.of(username))
+                )
+            );
             nameTag.addViewer(player);
         }
         if (!equipment.isEmpty()) {
@@ -108,7 +140,10 @@ public class NpcPlayer extends BaseNpcEntity {
     }
 
     @Override
-    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+    public CompletableFuture<Void> setInstance(
+        @NotNull Instance instance,
+        @NotNull Pos spawnPosition
+    ) {
         if (equipment.containsKey(EquipmentSlot.HELMET))
             this.nameTag.setInstance(instance, spawnPosition.add(0, 2.4, 0));
         return super.setInstance(instance, spawnPosition);

@@ -21,13 +21,14 @@ import net.minestom.server.particle.Particle;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 public class PresentObjectHandler extends ObjectEntityHandler {
 
     public static final String ID = "hub:present";
-    private static final Tag<Thread> CLICK_TASK = Tag.Transient("hub/event/christmas/present/click_task");
+    private static final Tag<Thread> CLICK_TASK = Tag.Transient(
+        "hub/event/christmas/present/click_task"
+    );
 
     private final Present model;
     private int day = -1;
@@ -80,21 +81,30 @@ public class PresentObjectHandler extends ObjectEntityHandler {
         } else {
             var reward = PresentConstants.getRewardForDay(eventData.getPresentCount() + 1);
             playerData.setSetting(EventData.SETTING, eventData.withPresent(day));
-            player.sendPacket(new SoundEffectPacket(
+            player.sendPacket(
+                new SoundEffectPacket(
                     SoundEvent.BLOCK_AMETHYST_BLOCK_CHIME,
                     Sound.Source.PLAYER,
                     entity.getPosition(),
-                    75f, 2f,
+                    75f,
+                    2f,
                     entity.getEntityId()
-            ));
+                )
+            );
 
             player.updateTag(CLICK_TASK, previous -> {
                 if (previous != null && previous.isAlive()) return previous;
                 return FutureUtil.createVirtual(() -> {
                     playerData.writeUpdatesUpstream(service);
-                    if (reward != null && !service.getUnlockedCosmetics(playerId).contains(reward.path())) {
+                    if (reward != null
+                        && !service.getUnlockedCosmetics(playerId).contains(reward.path())) {
                         service.buyCosmetic(playerId, reward, 0, 0, null);
-                        player.sendMessage(Component.translatable("advent.present.found_cosmetic", reward.displayName()));
+                        player.sendMessage(
+                            Component.translatable(
+                                "advent.present.found_cosmetic",
+                                reward.displayName()
+                            )
+                        );
                     } else {
                         player.sendMessage(Component.translatable("advent.present.found"));
                     }
@@ -115,9 +125,11 @@ public class PresentObjectHandler extends ObjectEntityHandler {
             this.setInstance(parent.getInstance(), parent.getPosition().add(0, 0.5, 0).withYaw(45));
 
             this.missingPresentPackets = List.of(
-                    createMissingPacket(Particle.EFFECT.withProperties(NamedTextColor.RED, 0.75f)),
-                    createMissingPacket(Particle.EFFECT.withProperties(NamedTextColor.DARK_GREEN, 0.75f)),
-                    createMissingPacket(Particle.EFFECT.withProperties(NamedTextColor.WHITE, 0.75f))
+                createMissingPacket(Particle.EFFECT.withProperties(NamedTextColor.RED, 0.75f)),
+                createMissingPacket(
+                    Particle.EFFECT.withProperties(NamedTextColor.DARK_GREEN, 0.75f)
+                ),
+                createMissingPacket(Particle.EFFECT.withProperties(NamedTextColor.WHITE, 0.75f))
             );
         }
 
@@ -134,13 +146,13 @@ public class PresentObjectHandler extends ObjectEntityHandler {
 
         private SendablePacket createMissingPacket(Particle particle) {
             return new ParticlePacket(
-                    particle,
-                    false,
-                    false,
-                    position.add(0, 0.3, 0),
-                    Vec.ZERO,
-                    0.5f,
-                    4
+                particle,
+                false,
+                false,
+                position.add(0, 0.3, 0),
+                Vec.ZERO,
+                0.5f,
+                4
             );
         }
 

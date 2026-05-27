@@ -1,5 +1,7 @@
 plugins {
     java
+    id("dev.javafmt.gradle")
+
     application
     id("com.gradleup.shadow")
 }

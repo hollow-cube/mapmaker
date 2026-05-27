@@ -11,23 +11,28 @@ import net.minestom.server.event.player.PlayerStartFlyingEvent;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.ThreadLocalRandom;
 
 @AutoService(HubFeature.class)
 public class DoubleJumpFeature implements HubFeature {
-    public static final Tag<Boolean> TAG = net.minestom.server.tag.Tag.Boolean("mapmaker:hub-double-jump").defaultValue(true);
-    private static final Tag<Boolean> COOLDOWN_TAG = Tag.Boolean("mapmaker:hub-double-jump-cooldown");
+    public static final Tag<Boolean> TAG = net.minestom.server.tag.Tag
+        .Boolean("mapmaker:hub-double-jump")
+        .defaultValue(true);
+    private static final Tag<Boolean> COOLDOWN_TAG = Tag.Boolean(
+        "mapmaker:hub-double-jump-cooldown"
+    );
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        world.eventNode().addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
-                .addListener(PlayerMoveEvent.class, this::handleMovement);
+        world.eventNode()
+            .addListener(PlayerStartFlyingEvent.class, this::handleStartFlying)
+            .addListener(PlayerMoveEvent.class, this::handleMovement);
     }
 
     private void handleStartFlying(@NotNull PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
-        if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
+        if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE)
+            return;
         if (!player.getTag(TAG)) return; // Explicitly disabled to allow normal flight
         player.setFlying(false);
         if (player.hasTag(COOLDOWN_TAG)) return;
@@ -38,7 +43,10 @@ public class DoubleJumpFeature implements HubFeature {
         player.setAllowFlying(false);
 
         var randomPitch = ThreadLocalRandom.current().nextFloat(0.9f, 1f);
-        player.playSound(Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch), Sound.Emitter.self());
+        player.playSound(
+            Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch),
+            Sound.Emitter.self()
+        );
     }
 
     private void handleMovement(@NotNull PlayerMoveEvent event) {

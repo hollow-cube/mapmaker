@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.hub.entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.UUID;
 
 public class NpcTextModel extends BaseNpcEntity {

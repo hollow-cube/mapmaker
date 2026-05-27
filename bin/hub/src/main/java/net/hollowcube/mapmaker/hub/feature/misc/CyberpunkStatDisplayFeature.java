@@ -24,7 +24,6 @@ import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.atomic.AtomicReference;
 
 @AutoService(HubFeature.class)
@@ -45,12 +44,15 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        EVENT_HANDLER.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
+        EVENT_HANDLER.addListener(
+            ServerTickMonitorEvent.class,
+            event -> LAST_TICK.set(event.getTickMonitor())
+        );
 
         // Nice positions for toying locally
-//        var staticTextPos = new Pos(-3 + 0.001, 41.15, 0.53, -90, 0);
-//        var tickTimeBarPos = new Pos(-3 + 0.001, 42.1, 1.76);
-//        var memoryUsageBarPos = new Pos(-3 + 0.001, 41.35, 1.76);
+        //        var staticTextPos = new Pos(-3 + 0.001, 41.15, 0.53, -90, 0);
+        //        var tickTimeBarPos = new Pos(-3 + 0.001, 42.1, 1.76);
+        //        var memoryUsageBarPos = new Pos(-3 + 0.001, 41.35, 1.76);
 
         // Real positions
         var staticTextPos = new Pos(-112.53 - 32, 72.15 - 9, -52.999 - 20);
@@ -66,14 +68,18 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         createBarEntity(world.instance(), memoryUsageBarPos.sub(0, 0, 0.001));
 
         // Static title text, no need to update all the time
-        leftText.setText(Component.text()
+        leftText.setText(
+            Component.text()
                 .append(Component.text("ᴛɪᴄᴋ", TextColor.color(0x696969)))
-                .appendNewline().appendNewline().appendNewline()
+                .appendNewline()
+                .appendNewline()
+                .appendNewline()
                 .append(Component.text("ᴍᴇᴍᴏʀʏ", TextColor.color(0x696969)))
-
-                .appendNewline().appendNewline()
+                .appendNewline()
+                .appendNewline()
                 .append(Component.text(FontUtil.computeOffset(100)))
-                .build());
+                .build()
+        );
 
         // Align right
         rightText.setAlignLeft(false);
@@ -91,23 +97,41 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         var memoryUsageMb = BENCHMARK_MANAGER.getUsedMemory() / 1e6;
 
         // Update text
-        rightText.setText(Component.text()
-                .append(Component.text(MathUtils.round(tickTimeMs, 2) + "ms", TextColor.color(0xCCCCCC)))
-                .appendNewline().appendNewline().appendNewline()
-                .append(Component.text(MathUtils.round(memoryUsageMb, 2) + "MB", TextColor.color(0xCCCCCC)))
-
-                // Static alignment
-                .appendNewline().appendNewline()
+        rightText.setText(
+            Component.text()
+                .append(
+                    Component.text(MathUtils.round(tickTimeMs, 2) + "ms", TextColor.color(0xCCCCCC))
+                )
+                .appendNewline()
+                .appendNewline()
+                .appendNewline()
+                .append(
+                    Component.text(
+                        MathUtils.round(memoryUsageMb, 2) + "MB",
+                        TextColor.color(0xCCCCCC)
+                    )
+                )
+                .appendNewline()
+                .appendNewline()
                 .append(Component.text(FontUtil.computeOffset(100)))
-                .build());
+                .build()
+        );
 
         // Update maxs
         var tickTimeScaled = tickTimeMs / MAX_TICK_MS;
         tickTimeBar.setBlockState(percentToColor(tickTimeScaled));
-        tickTimeBar.setScale(tickTimeBar.getScale().withX(MathUtils.clamp(tickTimeScaled * MAX_WIDTH, 0.001, MAX_WIDTH)));
+        tickTimeBar.setScale(
+            tickTimeBar.getScale().withX(
+                MathUtils.clamp(tickTimeScaled * MAX_WIDTH, 0.001, MAX_WIDTH)
+            )
+        );
         var memoryUsageScaled = memoryUsageMb / MAX_MEMORY_MB;
         memoryUsageBar.setBlockState(percentToColor(memoryUsageScaled));
-        memoryUsageBar.setScale(memoryUsageBar.getScale().withX(MathUtils.clamp(memoryUsageScaled * MAX_WIDTH, 0.001, MAX_WIDTH)));
+        memoryUsageBar.setScale(
+            memoryUsageBar.getScale().withX(
+                MathUtils.clamp(memoryUsageScaled * MAX_WIDTH, 0.001, MAX_WIDTH)
+            )
+        );
 
         return TaskSchedule.tick(40);
     }
@@ -122,14 +146,18 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         }
     }
 
-    private @NotNull TextDisplayMeta createTextEntity(@NotNull Instance instance, @NotNull Pos pos) {
+    private @NotNull TextDisplayMeta createTextEntity(
+        @NotNull Instance instance,
+        @NotNull Pos pos
+    ) {
         var entity = new Entity(EntityType.TEXT_DISPLAY) {
             {
                 hasPhysics = false;
                 setNoGravity(true);
             }
 
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };
@@ -142,14 +170,18 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         return meta;
     }
 
-    private @NotNull BlockDisplayMeta createBarEntity(@NotNull Instance instance, @NotNull Pos pos) {
+    private @NotNull BlockDisplayMeta createBarEntity(
+        @NotNull Instance instance,
+        @NotNull Pos pos
+    ) {
         var entity = new Entity(EntityType.BLOCK_DISPLAY) {
             {
                 hasPhysics = false;
                 setNoGravity(true);
             }
 
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };

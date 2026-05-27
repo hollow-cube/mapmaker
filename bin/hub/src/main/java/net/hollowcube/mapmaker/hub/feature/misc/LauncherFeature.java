@@ -18,7 +18,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import net.minestom.server.sound.SoundEvent;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.concurrent.CompletableFuture;
 
 @AutoService(HubFeature.class)
@@ -67,7 +66,10 @@ public class LauncherFeature implements HubFeature {
         }
 
         @Override
-        public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+        public CompletableFuture<Void> setInstance(
+            @NotNull Instance instance,
+            @NotNull Pos spawnPosition
+        ) {
             this.bb = new BoundingBox(SIZE.x(), SIZE.y(), SIZE.z(), MIN.add(spawnPosition));
             return super.setInstance(instance, spawnPosition);
         }
@@ -75,9 +77,15 @@ public class LauncherFeature implements HubFeature {
         @Override
         public void tick(long time) {
             if (this.state == State.COOLDOWN) {
-                var sound = remaining % 2 == 0 ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF;
-                getViewersAsAudience().playSound(Sound.sound(sound, Sound.Source.BLOCK, 0.5f, 0.3f),
-                        getPosition().x(), getPosition().y(), getPosition().z());
+                var sound = remaining % 2 == 0
+                    ? SoundEvent.BLOCK_STONE_BUTTON_CLICK_OFF
+                    : SoundEvent.BLOCK_WOODEN_BUTTON_CLICK_OFF;
+                getViewersAsAudience().playSound(
+                    Sound.sound(sound, Sound.Source.BLOCK, 0.5f, 0.3f),
+                    getPosition().x(),
+                    getPosition().y(),
+                    getPosition().z()
+                );
             }
 
             if (remaining > 0) {
@@ -91,16 +99,32 @@ public class LauncherFeature implements HubFeature {
 
                     int launched = 0;
                     for (var player : getInstance().getPlayers()) {
-                        var isInBox = this.bb.intersectBox(player.getPosition().mul(-1), player.getBoundingBox());
+                        var isInBox = this.bb.intersectBox(
+                            player.getPosition().mul(-1),
+                            player.getBoundingBox()
+                        );
                         if (!isInBox) continue;
 
                         Vec motion;
                         if (player.getPosition().yaw() > 90 || player.getPosition().yaw() < -90) {
-                            motion = new Vec(-16.5, 3, getPosition().x() < 0 ? -1f : 2f); // Send to middle
+                            motion = new Vec(
+                                -16.5,
+                                3,
+                                getPosition().x() < 0 ? -1f : 2f
+                            ); // Send to middle
                         } else {
-                            motion = new Vec(-16, 3, getPosition().x() < 0 ? 2f : -1f); // Send to edge
+                            motion = new Vec(
+                                -16,
+                                3,
+                                getPosition().x() < 0 ? 2f : -1f
+                            ); // Send to edge
                         }
-                        player.teleport(Pos.ZERO, motion, null, RelativeFlags.COORD | RelativeFlags.VIEW);
+                        player.teleport(
+                            Pos.ZERO,
+                            motion,
+                            null,
+                            RelativeFlags.COORD | RelativeFlags.VIEW
+                        );
                         launched++;
                     }
 
@@ -111,7 +135,9 @@ public class LauncherFeature implements HubFeature {
                     editEntityMeta(ItemDisplayMeta.class, meta -> {
                         meta.setTransformationInterpolationStartDelta(0);
                         meta.setTransformationInterpolationDuration(3);
-                        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1), Math.toRadians(-90)).into());
+                        meta.setLeftRotation(
+                            new Quaternion(new Vec(0, 0, 1), Math.toRadians(-90)).into()
+                        );
                     });
 
                     this.remaining = state.duration;
@@ -125,7 +151,9 @@ public class LauncherFeature implements HubFeature {
                     editEntityMeta(ItemDisplayMeta.class, meta -> {
                         meta.setTransformationInterpolationStartDelta(0);
                         meta.setTransformationInterpolationDuration(20);
-                        meta.setLeftRotation(new Quaternion(new Vec(0, 0, 1), Math.toRadians(0)).into());
+                        meta.setLeftRotation(
+                            new Quaternion(new Vec(0, 0, 1), Math.toRadians(0)).into()
+                        );
                     });
 
                     this.remaining = state.duration;

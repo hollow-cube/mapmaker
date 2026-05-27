@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.motw;
 
-import com.google.auto.service.AutoService;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.BaseNpcEntity;
@@ -21,7 +20,6 @@ import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -60,7 +58,12 @@ public class MapOfTheWeekFeature implements HubFeature {
         server.scheduler().submitTask(this::mapEntityUpdate, ExecutionType.TICK_START);
     }
 
-    private void handleMapInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
+    private void handleMapInteract(
+        @NotNull Player player,
+        @NotNull BaseNpcEntity npc,
+        @NotNull PlayerHand hand,
+        boolean isLeftClick
+    ) {
         if (isLeftClick) return;
         var millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
         if (millisToStart > 0) {
@@ -79,7 +82,9 @@ public class MapOfTheWeekFeature implements HubFeature {
         meta.setTransformationInterpolationDuration(20 * MAP_ENTITY_UPDATE_INTERVAL);
         var millisToStart = ChronoUnit.MILLIS.between(LocalDateTime.now(), MapContest.START_DATE);
         var rot = millisToStart > 0 ? new Vec(0, 0, 1) : new Vec(0, 1, 0);
-        meta.setLeftRotation(new Quaternion(rot.normalize(), Math.toRadians(mapEntityRotationTarget)).into());
+        meta.setLeftRotation(
+            new Quaternion(rot.normalize(), Math.toRadians(mapEntityRotationTarget)).into()
+        );
         mapEntityRotationTarget += 90;
 
         meta.setNotifyAboutChanges(true);

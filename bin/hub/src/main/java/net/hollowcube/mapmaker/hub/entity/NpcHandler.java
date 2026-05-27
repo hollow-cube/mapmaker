@@ -12,22 +12,28 @@ import org.jetbrains.annotations.NotNull;
 public interface NpcHandler {
     Tag<NpcHandler> TAG = Tag.Transient("mapmaker:hub/npc_handler");
 
-    void handlePlayerInteract(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick);
+    void handlePlayerInteract(
+        @NotNull Player player,
+        @NotNull BaseNpcEntity npc,
+        @NotNull PlayerHand hand,
+        boolean isLeftClick
+    );
 
-    EventNode<InstanceEvent> EVENT_NODE = EventNode.type("mapmaker:hub/npc_handler", EventFilter.INSTANCE)
-            .addListener(PlayerEntityInteractEvent.class, event -> {
-                if (!(event.getTarget() instanceof BaseNpcEntity npc)) return;
-                if (!npc.hasTag(TAG)) return;
+    EventNode<InstanceEvent> EVENT_NODE = EventNode
+        .type("mapmaker:hub/npc_handler", EventFilter.INSTANCE)
+        .addListener(PlayerEntityInteractEvent.class, event -> {
+            if (!(event.getTarget() instanceof BaseNpcEntity npc)) return;
+            if (!npc.hasTag(TAG)) return;
 
-                npc.getTag(TAG).handlePlayerInteract(event.getPlayer(), npc, event.getHand(), false);
-            });
+            npc.getTag(TAG).handlePlayerInteract(event.getPlayer(), npc, event.getHand(), false);
+        });
     // Left click is disabled everywhere for now, its pretty annoying.
-//            .addListener(EntityAttackEvent.class, event -> {
-//                if (!(event.getTarget() instanceof BaseNpcEntity npc)) return;
-//                if (!(event.getEntity() instanceof Player p)) return;
-//                if (!npc.hasTag(TAG)) return;
-//
-//                npc.getTag(TAG).handlePlayerInteract(p, npc, Player.Hand.MAIN, true);
-//            });
+    //            .addListener(EntityAttackEvent.class, event -> {
+    //                if (!(event.getTarget() instanceof BaseNpcEntity npc)) return;
+    //                if (!(event.getEntity() instanceof Player p)) return;
+    //                if (!npc.hasTag(TAG)) return;
+    //
+    //                npc.getTag(TAG).handlePlayerInteract(p, npc, Player.Hand.MAIN, true);
+    //            });
 
 }

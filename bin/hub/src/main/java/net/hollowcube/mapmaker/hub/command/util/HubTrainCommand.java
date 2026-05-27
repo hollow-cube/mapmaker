@@ -20,11 +20,9 @@ import net.minestom.server.item.Material;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
-
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class HubTrainCommand extends CommandDsl {
@@ -46,8 +44,12 @@ public class HubTrainCommand extends CommandDsl {
 
     private void handleTrainAttack(@NotNull Player player, @NotNull CommandContext context) {
         Consumer<Player> callback = switch (context.get(type).toLowerCase(Locale.ROOT)) {
-            case "kick" -> target -> target.kick(Component.text("Ran over by a train.", NamedTextColor.RED));
-            default -> target -> target.sendMessage(Component.text("The train has spared you.", NamedTextColor.GRAY));
+            case "kick" -> target -> target.kick(
+                Component.text("Ran over by a train.", NamedTextColor.RED)
+            );
+            default -> target -> target.sendMessage(
+                Component.text("The train has spared you.", NamedTextColor.GRAY)
+            );
         };
         for (Entity entity : context.get(players).find(player)) {
             if (entity instanceof Player target) {
@@ -83,14 +85,27 @@ public class HubTrainCommand extends CommandDsl {
             if (state == 0) {
                 for (NpcItemModel model : train) {
                     // Spawn the train in the world, we will set the proper position in the charge step
-                    model.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into());
+                    model.getEntityMeta().setLeftRotation(
+                        new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(-90)).into()
+                    );
                     model.getEntityMeta().setScale(new Vec(0));
-                    model.setInstance(target.getInstance(), target.getPosition().add(target.getPosition().direction().withY(0).normalize().mul(20)));
+                    model.setInstance(
+                        target.getInstance(),
+                        target.getPosition().add(
+                            target.getPosition().direction().withY(0).normalize().mul(20)
+                        )
+                    );
                 }
-                target.sendMessage(Component.text("You hear the rumbling of a distant train...", NamedTextColor.RED));
+                target.sendMessage(
+                    Component.text(
+                        "You hear the rumbling of a distant train...",
+                        NamedTextColor.RED
+                    )
+                );
                 // Spawn train
                 state++;
-                return TaskSchedule.tick(windupDelay - 2); // Spare 2 ticks to move it into the right position
+                // Spare 2 ticks to move it into the right position
+                return TaskSchedule.tick(windupDelay - 2);
             } else if (state == 1) {
                 // Correct position (if the player has been moving)
                 trainDirection = target.getPosition().direction().withY(0).normalize();
@@ -98,7 +113,8 @@ public class HubTrainCommand extends CommandDsl {
                 int offset = 0;
                 for (NpcItemModel model : train) {
                     // Move further parts of the train back with offset so it doesn't overlap
-                    Pos offsetStart = trainStart.add(trainDirection.mul(5 * offset)).withView(target.getPosition().yaw() + 90f, 0f);
+                    Pos offsetStart = trainStart.add(trainDirection.mul(5 * offset))
+                        .withView(target.getPosition().yaw() + 90f, 0f);
                     model.teleport(offsetStart);
                     offset++;
                 }
@@ -110,7 +126,9 @@ public class HubTrainCommand extends CommandDsl {
                     // Move further parts of the train back with offset so it doesn't overlap
                     model.getEntityMeta().setScale(new Vec(4));
                     model.getEntityMeta().setPosRotInterpolationDuration(trainActive);
-                    model.teleport(model.getPosition().add(trainDirection.mul(distanceFromPlayer * -2)));
+                    model.teleport(
+                        model.getPosition().add(trainDirection.mul(distanceFromPlayer * -2))
+                    );
                 }
                 state++;
                 return TaskSchedule.tick(trainActive / 2);

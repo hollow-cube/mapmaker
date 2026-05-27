@@ -16,11 +16,9 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-
 import static net.hollowcube.mapmaker.util.LeaderboardDisplay.SUBTITLE_SCALE;
 import static net.hollowcube.mapmaker.util.LeaderboardDisplay.initTextEntity;
 
@@ -29,7 +27,10 @@ public class Leaderboard2 {
     private static final double SCREEN_WIDTH = 11; // The width of the inner part of the screen model
     private static final double MODEL_SCALE = 16;
 
-    private static final Component NOW_TEXT = Component.text("ᴜᴘᴅᴀᴛᴇᴅ ᴊᴜѕᴛ ɴᴏᴡ", NamedTextColor.DARK_GRAY);
+    private static final Component NOW_TEXT = Component.text(
+        "ᴜᴘᴅᴀᴛᴇᴅ ᴊᴜѕᴛ ɴᴏᴡ",
+        NamedTextColor.DARK_GRAY
+    );
 
     private final NpcItemModel screenModel = new NpcItemModel();
     private final LeaderboardDisplay.TextDisplay updatedTextEntity = new LeaderboardDisplay.TextDisplay();
@@ -41,17 +42,18 @@ public class Leaderboard2 {
     private long lastRefresh = -1;
 
     public Leaderboard2(
-            @Nullable Supplier<LeaderboardData> leftGlobalLeaderboardSupplier,
-            @Nullable Function<String, Long> leftPlayerScoreSupplier,
-            @Nullable Supplier<LeaderboardData> rightGlobalLeaderboardSupplier,
-            @Nullable Function<String, Long> rightPlayerScoreSupplier,
-            @NotNull Function<String, Component> displayNameSupplier,
-            double screenAngle
+        @Nullable Supplier<LeaderboardData> leftGlobalLeaderboardSupplier,
+        @Nullable Function<String, Long> leftPlayerScoreSupplier,
+        @Nullable Supplier<LeaderboardData> rightGlobalLeaderboardSupplier,
+        @Nullable Function<String, Long> rightPlayerScoreSupplier,
+        @NotNull Function<String, Component> displayNameSupplier,
+        double screenAngle
     ) {
         screenModel.setModel(Material.STICK, BadSprite.require("lb_screen"));
         screenModel.getEntityMeta().setScale(new Vec(MODEL_SCALE));
-        screenModel.getEntityMeta().setLeftRotation(new Quaternion(new Vec(1, 0, 0).normalize(),
-                Math.toRadians(screenAngle)).into());
+        screenModel.getEntityMeta().setLeftRotation(
+            new Quaternion(new Vec(1, 0, 0).normalize(), Math.toRadians(screenAngle)).into()
+        );
         screenModel.setStatic(true);
 
         initTextEntity(updatedTextEntity, 0, SUBTITLE_SCALE, 1.1, screenAngle);
@@ -61,12 +63,28 @@ public class Leaderboard2 {
         // X: The text is centered in the displays so we need to put it at 1/4 of the width of the screen to be aligned with the other one.
         //    however it looked kinda strange so i did a completely arbitrary subtraction of 0.5 to bias the text towards the center.
         if (leftGlobalLeaderboardSupplier != null && leftPlayerScoreSupplier != null) {
-            left = new LeaderboardDisplay(screenModel, leftGlobalLeaderboardSupplier, leftPlayerScoreSupplier, displayNameSupplier,
-                    -(SCREEN_WIDTH - CENTER_BIAS) / 4, screenAngle, 1.6, 1);
+            left = new LeaderboardDisplay(
+                screenModel,
+                leftGlobalLeaderboardSupplier,
+                leftPlayerScoreSupplier,
+                displayNameSupplier,
+                -(SCREEN_WIDTH - CENTER_BIAS) / 4,
+                screenAngle,
+                1.6,
+                1
+            );
         } else left = null;
         if (rightGlobalLeaderboardSupplier != null && rightPlayerScoreSupplier != null) {
-            right = new LeaderboardDisplay(screenModel, rightGlobalLeaderboardSupplier, rightPlayerScoreSupplier, displayNameSupplier,
-                    (SCREEN_WIDTH - CENTER_BIAS) / 4, screenAngle, 1.6, 1);
+            right = new LeaderboardDisplay(
+                screenModel,
+                rightGlobalLeaderboardSupplier,
+                rightPlayerScoreSupplier,
+                displayNameSupplier,
+                (SCREEN_WIDTH - CENTER_BIAS) / 4,
+                screenAngle,
+                1.6,
+                1
+            );
         } else right = null;
     }
 
@@ -87,9 +105,11 @@ public class Leaderboard2 {
             updatedTextEntity.getEntityMeta().setText(NOW_TEXT);
         } else {
             long minutes = (now - lastRefresh) / 1000 / 60;
-            updatedTextEntity.getEntityMeta().setText(Component.text("ᴜᴘᴅᴀᴛᴇᴅ ", NamedTextColor.DARK_GRAY)
+            updatedTextEntity.getEntityMeta().setText(
+                Component.text("ᴜᴘᴅᴀᴛᴇᴅ ", NamedTextColor.DARK_GRAY)
                     .append(Component.text(FontUtil.rewrite("smallnums", String.valueOf(minutes))))
-                    .append(Component.text("ᴍ ᴀɢᴏ")));
+                    .append(Component.text("ᴍ ᴀɢᴏ"))
+            );
         }
     }
 

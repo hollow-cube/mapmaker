@@ -15,7 +15,6 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.scoreboard.Team;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
@@ -24,14 +23,20 @@ import java.util.concurrent.CompletableFuture;
  */
 @SuppressWarnings("UnstableApiUsage")
 public class NpcPlayerEntity extends BaseNpcEntity {
-    private static final Team NPC_TEAM = MinecraftServer.getTeamManager().createBuilder("npcs")
-            .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
-            .build();
+    private static final Team NPC_TEAM = MinecraftServer.getTeamManager()
+        .createBuilder("npcs")
+        .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
+        .build();
 
-    private static final BadSprite RMB_SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("icon/mouse_right_small"), "icon/mouse_right_small");
+    private static final BadSprite RMB_SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("icon/mouse_right_small"),
+        "icon/mouse_right_small"
+    );
     private static final Component PROMPT_BASE = Component.text("", TextColor.color(0xCCCCCC))
-            .append(Component.text(RMB_SPRITE.fontChar() + FontUtil.computeOffset(3), NamedTextColor.WHITE))
-            .append(Component.text("ᴛᴏ "));
+        .append(
+            Component.text(RMB_SPRITE.fontChar() + FontUtil.computeOffset(3), NamedTextColor.WHITE)
+        )
+        .append(Component.text("ᴛᴏ "));
 
     private static int nameCounter = 1;
 
@@ -68,7 +73,8 @@ public class NpcPlayerEntity extends BaseNpcEntity {
 
         titleEntity.getEntityMeta().setText(Component.text(name()));
         var prompt = nbt.getString("prompt");
-        if (prompt != null) subtitleEntity.getEntityMeta().setText(PROMPT_BASE.append(Component.text(prompt)));
+        if (prompt != null)
+            subtitleEntity.getEntityMeta().setText(PROMPT_BASE.append(Component.text(prompt)));
     }
 
     @Override
@@ -77,14 +83,22 @@ public class NpcPlayerEntity extends BaseNpcEntity {
     }
 
     public @NotNull String name() {
-        return Objects.requireNonNullElseGet(nbt.getString("name"), () -> Objects.requireNonNullElse(nbt.getString("type"), "mapmaker:unknown"));
+        return Objects.requireNonNullElseGet(
+            nbt.getString("name"),
+            () -> Objects.requireNonNullElse(nbt.getString("type"), "mapmaker:unknown")
+        );
     }
 
     @Override
-    public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
+    public CompletableFuture<Void> setInstance(
+        @NotNull Instance instance,
+        @NotNull Pos spawnPosition
+    ) {
         return super.setInstance(instance, spawnPosition).thenRun(() -> {
-            titleEntity.setInstance(instance, spawnPosition).thenRun(() -> addPassenger(titleEntity));
-            subtitleEntity.setInstance(instance, spawnPosition).thenRun(() -> addPassenger(subtitleEntity));
+            titleEntity.setInstance(instance, spawnPosition)
+                .thenRun(() -> addPassenger(titleEntity));
+            subtitleEntity.setInstance(instance, spawnPosition)
+                .thenRun(() -> addPassenger(subtitleEntity));
         });
     }
 
@@ -96,35 +110,62 @@ public class NpcPlayerEntity extends BaseNpcEntity {
         for (var viewer : getViewers()) {
             if (this.position.distanceSquared(viewer.getPosition()) > 100) return;
 
-            var newPosition = this.position.add(0, getEyeHeight(), 0).withLookAt(viewer.getPosition().add(0, viewer.getEyeHeight(), 0));
-            var p1 = new EntityRotationPacket(getEntityId(), newPosition.yaw(), newPosition.pitch(), true);
+            var newPosition = this.position.add(0, getEyeHeight(), 0)
+                .withLookAt(viewer.getPosition().add(0, viewer.getEyeHeight(), 0));
+            var p1 = new EntityRotationPacket(
+                getEntityId(),
+                newPosition.yaw(),
+                newPosition.pitch(),
+                true
+            );
             viewer.sendPacket(p1);
             var p2 = new EntityHeadLookPacket(getEntityId(), newPosition.yaw());
             viewer.sendPacket(p2);
         }
-
     }
 
     @Override
     public void updateNewViewer(@NotNull Player player) {
         var properties = new ArrayList<PlayerInfoUpdatePacket.Property>();
         if (skin != null)
-            properties.add(new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature()));
-        var entry = new PlayerInfoUpdatePacket.Entry(getUuid(), fakeUsername, properties, false, 0, GameMode.SURVIVAL, null, null, 0, true);
-        player.sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry));
+            properties.add(
+                new PlayerInfoUpdatePacket.Property("textures", skin.textures(), skin.signature())
+            );
+        var entry = new PlayerInfoUpdatePacket.Entry(
+            getUuid(),
+            fakeUsername,
+            properties,
+            false,
+            0,
+            GameMode.SURVIVAL,
+            null,
+            null,
+            0,
+            true
+        );
+        player.sendPacket(
+            new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.ADD_PLAYER, entry)
+        );
 
         // Spawn the player entity
         super.updateNewViewer(player);
 
         // Enable skin layers
-        player.sendPackets(new EntityMetaDataPacket(getEntityId(), Map.of(
-                MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
-                Metadata.Byte((byte) 0b1111111))
-        ));
+        player.sendPackets(
+            new EntityMetaDataPacket(
+                getEntityId(),
+                Map.of(
+                    MetadataDef.Avatar.DISPLAYED_MODEL_PARTS_FLAGS.index(),
+                    Metadata.Byte((byte) 0b1111111)
+                )
+            )
+        );
 
         // Put them on the NPC team to hide their name tag
-        final TeamsPacket addPlayerPacket = new TeamsPacket(NPC_TEAM.getTeamName(),
-                new TeamsPacket.AddEntitiesToTeamAction(List.of(fakeUsername)));
+        final TeamsPacket addPlayerPacket = new TeamsPacket(
+            NPC_TEAM.getTeamName(),
+            new TeamsPacket.AddEntitiesToTeamAction(List.of(fakeUsername))
+        );
         sendPacketToViewers(addPlayerPacket);
     }
 

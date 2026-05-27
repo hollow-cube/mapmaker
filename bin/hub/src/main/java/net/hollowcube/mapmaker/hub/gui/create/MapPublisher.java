@@ -14,7 +14,6 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
-
 import java.time.Duration;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -29,15 +28,20 @@ final class MapPublisher {
     private final Button button;
 
     @Blocking MapPublisher(
-        ApiClient api, ServerBridge bridge, MapData map,
-        Supplier<InventoryHost> hostSupplier, Consumer<MapData> onPublish
+        ApiClient api,
+        ServerBridge bridge,
+        MapData map,
+        Supplier<InventoryHost> hostSupplier,
+        Consumer<MapData> onPublish
     ) {
         this.api = api;
         this.bridge = bridge;
         this.map = map;
 
-        this.button = new Button(3, 3)
-            .onLeftClickAsync(() -> this.onVerifyPublish(hostSupplier.get(), onPublish));
+        this.button = new Button(
+            3,
+            3
+        ).onLeftClickAsync(() -> this.onVerifyPublish(hostSupplier.get(), onPublish));
         this.updateStage();
     }
 
@@ -70,7 +74,12 @@ final class MapPublisher {
 
         try {
             host.close();
-            this.bridge.joinMap(host.player(), this.map.id(), ServerBridge.JoinMapState.VERIFYING, "edit_maps_gui_verify");
+            this.bridge.joinMap(
+                host.player(),
+                this.map.id(),
+                ServerBridge.JoinMapState.VERIFYING,
+                "edit_maps_gui_verify"
+            );
         } catch (Exception exception) {
             host.player().sendMessage(Component.translatable("map.verify.fail"));
             ExceptionReporter.reportException(exception, host.player());
@@ -126,7 +135,12 @@ final class MapPublisher {
     private PublishStage getCurrentStage() {
         long currentPlaytime;
         try {
-            var saveState = api.maps.getLatestSaveState(map.id(), map.owner(), SaveStateType.EDITING, null);
+            var saveState = api.maps.getLatestSaveState(
+                map.id(),
+                map.owner(),
+                SaveStateType.EDITING,
+                null
+            );
             currentPlaytime = saveState.getPlaytime();
         } catch (ApiClient.NotFoundError _) {
             return PublishStage.ERROR_BUILD_AMOUNT;
@@ -151,7 +165,7 @@ final class MapPublisher {
     }
 
     private static final int DEFAULT_MIN_PLAYTIME = ServerRuntime.getRuntime().isDevelopment()
-        ? 1 // In development, we skip min playtime entirely
+        ? 1
         : (int) Duration.ofMinutes(5).toMillis();
 
     private static int getMinPlaytime() {
@@ -159,13 +173,25 @@ final class MapPublisher {
     }
 
     private enum PublishStage {
-        ERROR_BUILD_AMOUNT("gui.create_maps.edit.verify.error.build_amount", "create_maps2/edit/verify_red"),
+        ERROR_BUILD_AMOUNT(
+            "gui.create_maps.edit.verify.error.build_amount",
+            "create_maps2/edit/verify_red"
+        ),
         VERIFICATION_READY("gui.create_maps.edit.verify", "create_maps2/edit/verify_orange"),
 
-        ERROR_NO_NAME("gui.create_maps.edit.publish.error.no_name", "create_maps2/edit/publish_red"),
-        ERROR_NO_ICON("gui.create_maps.edit.publish.error.no_icon", "create_maps2/edit/publish_red"),
+        ERROR_NO_NAME(
+            "gui.create_maps.edit.publish.error.no_name",
+            "create_maps2/edit/publish_red"
+        ),
+        ERROR_NO_ICON(
+            "gui.create_maps.edit.publish.error.no_icon",
+            "create_maps2/edit/publish_red"
+        ),
         ERROR_NO_TAG("gui.create_maps.edit.publish.error.no_tag", "create_maps2/edit/publish_red"),
-        ERROR_BUILD_TIME("gui.create_maps.edit.publish.error.build_time", "create_maps2/edit/publish_red"),
+        ERROR_BUILD_TIME(
+            "gui.create_maps.edit.publish.error.build_time",
+            "create_maps2/edit/publish_red"
+        ),
         PUBLISH_READY("gui.create_maps.edit.publish", "create_maps2/edit/publish_green");
 
         final String translationKey;

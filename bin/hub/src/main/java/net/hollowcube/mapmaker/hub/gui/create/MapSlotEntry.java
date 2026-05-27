@@ -17,7 +17,6 @@ import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.confirm;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.MODEL_8X;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPlayerHead2d;
@@ -32,8 +31,10 @@ public class MapSlotEntry extends Panel {
 
     private MapSlotEntry(
         ApiClient api,
-        PlayerService playerService, ServerBridge bridge,
-        MapSlot slot, Runnable onPublish
+        PlayerService playerService,
+        ServerBridge bridge,
+        MapSlot slot,
+        Runnable onPublish
     ) {
         super(9, 1);
         this.api = api;
@@ -69,7 +70,13 @@ public class MapSlotEntry extends Panel {
 
         async(() -> {
             // TODO: this constructor is blocking, which is kinda confusing and im not a fan overall.
-            var view = new EditMapView(this.api, this.playerService, this.bridge, slot, this.onPublish);
+            var view = new EditMapView(
+                this.api,
+                this.playerService,
+                this.bridge,
+                slot,
+                this.onPublish
+            );
             sync(() -> host.pushView(view));
         });
     }
@@ -86,16 +93,21 @@ public class MapSlotEntry extends Panel {
     protected void removeFromMap() {
         var player = host.player();
         var playerId = PlayerData.fromPlayer(player).id();
-        host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
-            try {
-                api.maps.removeMapBuilder(slot.map().id(), playerId);
-                player.closeInventory();
-                player.sendMessage(Component.translatable("leave.other.map"));
-            } catch (RuntimeException e) {
-                ExceptionReporter.reportException(e, playerId);
-                player.sendMessage(Component.translatable("generic.unknown_error"));
-            }
-        })));
+        host.pushView(
+            confirm(
+                "Leave Map?",
+                () -> FutureUtil.submitVirtual(() -> {
+                    try {
+                        api.maps.removeMapBuilder(slot.map().id(), playerId);
+                        player.closeInventory();
+                        player.sendMessage(Component.translatable("leave.other.map"));
+                    } catch (RuntimeException e) {
+                        ExceptionReporter.reportException(e, playerId);
+                        player.sendMessage(Component.translatable("generic.unknown_error"));
+                    }
+                })
+            )
+        );
     }
 
     private boolean isOwner(Player player) {
@@ -105,8 +117,10 @@ public class MapSlotEntry extends Panel {
     public static final class Owner extends MapSlotEntry {
         public Owner(
             ApiClient api,
-            PlayerService playerService, ServerBridge bridge,
-            MapSlot slot, Runnable onPublish
+            PlayerService playerService,
+            ServerBridge bridge,
+            MapSlot slot,
+            Runnable onPublish
         ) {
             super(api, playerService, bridge, slot, onPublish);
 
@@ -117,21 +131,31 @@ public class MapSlotEntry extends Panel {
             // TODO: If ready to publish, green background
             background("create_maps2/slot/blue", 1, 1);
 
-            var iconButton = add(0, 0, new Button(null, 1, 1)
-                .translationKey(translationKey, mapName)
-                .onLeftClick(this::editMapDetails));
+            var iconButton = add(
+                0,
+                0,
+                new Button(null, 1, 1).translationKey(translationKey, mapName)
+                    .onLeftClick(this::editMapDetails)
+            );
             var userIcon = map.settings().getIcon();
             if (userIcon != null) iconButton.model(userIcon.toString(), null);
             else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
 
-            add(1, 0, new Text(7, 1, mapName)
-                .align(2, Text.CENTER)
-                .translationKey(translationKey, mapName)
-                .onLeftClick(this::editMapDetails));
+            add(
+                1,
+                0,
+                new Text(7, 1, mapName).align(2, Text.CENTER)
+                    .translationKey(translationKey, mapName)
+                    .onLeftClick(this::editMapDetails)
+            );
 
-            add(8, 0, new Button("gui.create_maps.slot_selection.quick_build", 1, 1)
-                .sprite("icon2/1_1/hammer", 1, 1)
-                .onLeftClickAsync(this::buildInWorld));
+            add(
+                8,
+                0,
+                new Button("gui.create_maps.slot_selection.quick_build", 1, 1)
+                    .sprite("icon2/1_1/hammer", 1, 1)
+                    .onLeftClickAsync(this::buildInWorld)
+            );
         }
     }
 
@@ -147,8 +171,10 @@ public class MapSlotEntry extends Panel {
 
         public Builder(
             ApiClient api,
-            PlayerService playerService, ServerBridge bridge,
-            MapSlot slot, Runnable onPublish
+            PlayerService playerService,
+            ServerBridge bridge,
+            MapSlot slot,
+            Runnable onPublish
         ) {
             super(api, playerService, bridge, slot, onPublish);
             this.api = api;
@@ -160,21 +186,31 @@ public class MapSlotEntry extends Panel {
             // TODO: Different background for builder maps
             background("create_maps2/slot/blue", 1, 1);
 
-            this.iconButton = add(0, 0, new Button(null, 1, 1)
-                .translationKey(TRANSLATION_KEY, mapName, LOADING)
-                .background("create_maps2/head_outline", 4, 4)
-                .profile(getPlayerHead2d(map.owner()))
-                .model(MODEL_8X, null)
-                .onLeftClickAsync(this::buildInWorld));
+            this.iconButton = add(
+                0,
+                0,
+                new Button(null, 1, 1).translationKey(TRANSLATION_KEY, mapName, LOADING)
+                    .background("create_maps2/head_outline", 4, 4)
+                    .profile(getPlayerHead2d(map.owner()))
+                    .model(MODEL_8X, null)
+                    .onLeftClickAsync(this::buildInWorld)
+            );
 
-            this.nameButton = add(1, 0, new Text(7, 1, mapName)
-                .align(2, Text.CENTER)
-                .translationKey(TRANSLATION_KEY, mapName, LOADING)
-                .onLeftClickAsync(this::buildInWorld));
+            this.nameButton = add(
+                1,
+                0,
+                new Text(7, 1, mapName).align(2, Text.CENTER)
+                    .translationKey(TRANSLATION_KEY, mapName, LOADING)
+                    .onLeftClickAsync(this::buildInWorld)
+            );
 
-            add(8, 0, new Button("gui.create_maps.slot.other.leave", 1, 1)
-                .sprite("icon2/1_1/running_out_door", 1, 1)
-                .onLeftClick(this::removeFromMap));
+            add(
+                8,
+                0,
+                new Button("gui.create_maps.slot.other.leave", 1, 1)
+                    .sprite("icon2/1_1/running_out_door", 1, 1)
+                    .onLeftClick(this::removeFromMap)
+            );
         }
 
         @Override
@@ -191,16 +227,16 @@ public class MapSlotEntry extends Panel {
                     this.nameButton.translationKey(TRANSLATION_KEY, mapName, ownerDisplayName);
                 });
             });
-
-
         }
     }
 
     public static final class Published extends MapSlotEntry {
         public Published(
             ApiClient api,
-            PlayerService playerService, ServerBridge bridge,
-            MapSlot slot, Runnable onPublish
+            PlayerService playerService,
+            ServerBridge bridge,
+            MapSlot slot,
+            Runnable onPublish
         ) {
             super(api, playerService, bridge, slot, onPublish);
 
@@ -210,17 +246,23 @@ public class MapSlotEntry extends Panel {
 
             background("create_maps2/slot/gray", 1, 1);
 
-            var iconButton = add(0, 0, new Button(null, 1, 1)
-                .translationKey(translationKey, mapName)
-                .onLeftClick(this::viewMapDetails));
+            var iconButton = add(
+                0,
+                0,
+                new Button(null, 1, 1).translationKey(translationKey, mapName)
+                    .onLeftClick(this::viewMapDetails)
+            );
             var userIcon = map.settings().getIcon();
             if (userIcon != null) iconButton.model(userIcon.toString(), null);
             else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
 
-            add(1, 0, new Text(8, 1, mapName)
-                .align(2, Text.CENTER)
-                .translationKey(translationKey, mapName)
-                .onLeftClick(this::viewMapDetails));
+            add(
+                1,
+                0,
+                new Text(8, 1, mapName).align(2, Text.CENTER)
+                    .translationKey(translationKey, mapName)
+                    .onLeftClick(this::viewMapDetails)
+            );
         }
     }
 }

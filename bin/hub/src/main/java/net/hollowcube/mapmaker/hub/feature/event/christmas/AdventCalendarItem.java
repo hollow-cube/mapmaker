@@ -5,11 +5,13 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.Objects;
 
 public class AdventCalendarItem extends ItemHandler {
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/calendar"), "calendar");
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/calendar"),
+        "calendar"
+    );
     public static final Key ID = Key.key("mapmaker:advent_calendar");
 
     public AdventCalendarItem() {

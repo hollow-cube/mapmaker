@@ -17,23 +17,33 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
-
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
-    public static void open(Player player, ApiClient api, PlayerService playerService, ServerBridge bridge) {
+    public static void open(
+        Player player,
+        ApiClient api,
+        PlayerService playerService,
+        ServerBridge bridge
+    ) {
         var playerId = PlayerData.fromPlayer(player).id();
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
-            Panel.open(player, new NewMapView(api.maps, playerService, _ -> FutureUtil.submitVirtual(() -> open(player, api, playerService, bridge))));
+            Panel.open(
+                player,
+                new NewMapView(
+                    api.maps,
+                    playerService,
+                    _ -> FutureUtil.submitVirtual(() -> open(player, api, playerService, bridge))
+                )
+            );
         } else {
             Panel.open(player, new CreateMapsView(api, playerService, bridge, slots));
         }
@@ -53,7 +63,12 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, PlayerService playerService, ServerBridge bridge, List<MapSlot> initialSlots) {
+    public CreateMapsView(
+        ApiClient api,
+        PlayerService playerService,
+        ServerBridge bridge,
+        List<MapSlot> initialSlots
+    ) {
         super(9, 10);
         this.api = api;
         this.playerService = playerService;
@@ -65,22 +80,27 @@ public class CreateMapsView extends Panel {
 
         add(0, 0, backOrClose());
 
-        this.searchTextElement = add(1, 0, new Text("gui.create_maps.search", 7, 1, "Search...")
-            .align(7, 5));
+        this.searchTextElement = add(
+            1,
+            0,
+            new Text("gui.create_maps.search", 7, 1, "Search...").align(7, 5)
+        );
         this.searchTextElement.onLeftClick(this::openSearchInput);
         this.searchTextElement.onShiftLeftClick(this::clearSearch);
 
-        this.pagination = add(0, 1, new Pagination<>(9, 5, Unit.INSTANCE)
-            .fetch(this::onSearch));
+        this.pagination = add(0, 1, new Pagination<>(9, 5, Unit.INSTANCE).fetch(this::onSearch));
         add(2, 6, this.pagination.prevButton());
         add(3, 6, this.pagination.pageText(3, 1));
         add(6, 6, this.pagination.nextButton());
 
-        this.createButton = add(8, 0, new Button(1, 1)
-            .background("generic2/btn/default/1_1")
-            .sprite("icon2/1_1/plus", 1, 1)
-            .onLeftClick(this::createMapOrOpenStore)
-            .onRightClick(this::tryOpenSecondaryStore));
+        this.createButton = add(
+            8,
+            0,
+            new Button(1, 1).background("generic2/btn/default/1_1")
+                .sprite("icon2/1_1/plus", 1, 1)
+                .onLeftClick(this::createMapOrOpenStore)
+                .onRightClick(this::tryOpenSecondaryStore)
+        );
 
         pagination.renderSync();
     }
@@ -141,7 +161,9 @@ public class CreateMapsView extends Panel {
 
         String hypercubeKey = isHypercube ? "has_hypercube" : "no_hypercube";
         String cubitsKey = hasCubits ? "has_cubits" : "no_cubits";
-        this.createButton.translationKey("gui.create_maps.new.no_space." + hypercubeKey + "." + cubitsKey);
+        this.createButton.translationKey(
+            "gui.create_maps.new.no_space." + hypercubeKey + "." + cubitsKey
+        );
     }
 
     private void createMapOrOpenStore() {
@@ -168,7 +190,9 @@ public class CreateMapsView extends Panel {
         var playerData = PlayerData.fromPlayer(this.host.player());
         if (playerData.isHypercube()) return;
 
-        var secondaryTab = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits() ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
+        var secondaryTab = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits()
+            ? StoreView.TAB_HYPERCUBE
+            : StoreView.TAB_CUBITS;
         this.host.pushView(new StoreView(playerService, secondaryTab));
     }
 
@@ -180,8 +204,7 @@ public class CreateMapsView extends Panel {
 
             // If they now have an available slot (which is not always the case
             // if they have over-created maps and lost slots), move to create screen.
-            if (getAvailableSlots() > 0)
-                createMapOrOpenStore();
+            if (getAvailableSlots() > 0) createMapOrOpenStore();
         });
     }
 
@@ -195,20 +218,21 @@ public class CreateMapsView extends Panel {
     private int getUsedSlots() {
         int count = 0;
         for (var slot : this.slots) {
-            if (slot.map().isPublished())
-                continue;
+            if (slot.map().isPublished()) continue;
             count++;
         }
         return count;
     }
 
     private void openSearchInput() {
-        this.host.pushView(simpleAnvil(
-            "generic2/anvil/field_container",
-            "map_browser/search_anvil_icon",
-            "Search Created Maps",
-            this::handleSearchTextChange
-        ));
+        this.host.pushView(
+            simpleAnvil(
+                "generic2/anvil/field_container",
+                "map_browser/search_anvil_icon",
+                "Search Created Maps",
+                this::handleSearchTextChange
+            )
+        );
     }
 
     private void clearSearch() {
@@ -228,11 +252,35 @@ public class CreateMapsView extends Panel {
             Runnable onPublish = () -> this.remountTask = this::rebuildSlots;
 
             if (slot.map().isPublished()) {
-                entries.add(new MapSlotEntry.Published(this.api, this.playerService, this.bridge, slot, onPublish));
+                entries.add(
+                    new MapSlotEntry.Published(
+                        this.api,
+                        this.playerService,
+                        this.bridge,
+                        slot,
+                        onPublish
+                    )
+                );
             } else if (slot.role() == MapRole.OWNER) {
-                entries.add(new MapSlotEntry.Owner(this.api, this.playerService, this.bridge, slot, onPublish));
+                entries.add(
+                    new MapSlotEntry.Owner(
+                        this.api,
+                        this.playerService,
+                        this.bridge,
+                        slot,
+                        onPublish
+                    )
+                );
             } else {
-                entries.add(new MapSlotEntry.Builder(this.api, this.playerService, this.bridge, slot, onPublish));
+                entries.add(
+                    new MapSlotEntry.Builder(
+                        this.api,
+                        this.playerService,
+                        this.bridge,
+                        slot,
+                        onPublish
+                    )
+                );
             }
         }
 
@@ -244,7 +292,9 @@ public class CreateMapsView extends Panel {
         this.searchText = newValue.trim();
         if (this.searchText.equals(oldValue)) return;
 
-        var translationKey = this.searchText.isEmpty() ? "gui.create_maps.search" : "gui.create_maps.search.with_data";
+        var translationKey = this.searchText.isEmpty()
+            ? "gui.create_maps.search"
+            : "gui.create_maps.search.with_data";
         this.searchTextElement.translationKey(translationKey);
         this.searchTextElement.text(this.searchText.isEmpty() ? "Search..." : this.searchText);
         this.pagination.reset();

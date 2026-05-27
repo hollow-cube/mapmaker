@@ -14,10 +14,10 @@ public record EventData(IntSet presents) {
 
     public static final EventData EMPTY = new EventData(IntSet.of());
     public static final PlayerSetting<EventData> SETTING = PlayerSetting.create(
-            "hub.event",
-            EMPTY,
-            EventData::toJson,
-            EventData::fromJson
+        "hub.event",
+        EMPTY,
+        EventData::toJson,
+        EventData::fromJson
     );
     private static final String KEY = "christmas_2025";
 
@@ -56,11 +56,14 @@ public record EventData(IntSet presents) {
     private static JsonElement toJson(EventData data) {
         JsonObject json = new JsonObject();
         json.addProperty(KEY, true);
-        json.add("presents", OpUtils.build(new JsonArray(), array -> {
-            for (int present : data.presents) {
-                array.add(present);
-            }
-        }));
+        json.add(
+            "presents",
+            OpUtils.build(new JsonArray(), array -> {
+                for (int present : data.presents) {
+                    array.add(present);
+                }
+            })
+        );
         return json;
     }
 }

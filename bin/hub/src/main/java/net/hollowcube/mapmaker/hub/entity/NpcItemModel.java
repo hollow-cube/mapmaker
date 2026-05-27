@@ -8,7 +8,6 @@ import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Objects;
 import java.util.UUID;
 import java.util.function.BiConsumer;
@@ -60,7 +59,9 @@ public class NpcItemModel extends BaseNpcEntity {
         var meta = getEntityMeta();
         meta.setDisplayContext(ItemDisplayMeta.DisplayContext.FIXED);
         var model = Objects.requireNonNull(sprite.model(), "sprite must have a model");
-        meta.setItemStack(ItemStack.builder(material).set(DataComponents.ITEM_MODEL, model).build());
+        meta.setItemStack(
+            ItemStack.builder(material).set(DataComponents.ITEM_MODEL, model).build()
+        );
     }
 
     @Override

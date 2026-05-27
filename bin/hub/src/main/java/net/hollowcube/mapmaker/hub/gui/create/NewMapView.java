@@ -10,9 +10,7 @@ import net.hollowcube.mapmaker.panels.buttons.LockedButton;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
-
 import java.util.function.Consumer;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.panels.RadioSelect.ButtonUpdater.SQUARE_BACKGROUND_EX;
 
@@ -40,11 +38,14 @@ public class NewMapView extends Panel {
         sizeSelect = add(1, 2, new RadioSelect<>(4, 1, MapSize.NORMAL))
             .onChange(this::updateConfirmButton);
 
-        confirmButton = add(2, 4, new Text(5, 1, "Create")
-            .align(Text.CENTER, Text.CENTER)
-            .background("generic2/btn/success/5_1")
-            .lorePostfix(LORE_POSTFIX_CLICKCREATE)
-            .onLeftClickAsync(this::handleSubmit));
+        confirmButton = add(
+            2,
+            4,
+            new Text(5, 1, "Create").align(Text.CENTER, Text.CENTER)
+                .background("generic2/btn/success/5_1")
+                .lorePostfix(LORE_POSTFIX_CLICKCREATE)
+                .onLeftClickAsync(this::handleSubmit)
+        );
 
         updateConfirmButton(sizeSelect.selected()); // Update to initial
     }
@@ -65,15 +66,20 @@ public class NewMapView extends Panel {
             RadioSelect.ButtonUpdater updateButton = (button, selected) -> {
                 SQUARE_BACKGROUND_EX.update(button, selected);
                 if (locked) {
-                    button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + ".locked");
+                    button.translationKey(
+                        "gui.create_maps.new.size." + mapSize.name().toLowerCase() + ".locked"
+                    );
                 } else {
-                    button.translationKey("gui.create_maps.new.size." + mapSize.name().toLowerCase() + (selected ? ".on" : ".off"));
+                    button.translationKey(
+                        "gui.create_maps.new.size."
+                        + mapSize.name().toLowerCase()
+                        + (selected ? ".on" : ".off")
+                    );
                 }
             };
 
             if (locked) {
-                var button = makeButton.construct(null, 1, 1)
-                    .onLeftClick(this::handleOpenStore);
+                var button = makeButton.construct(null, 1, 1).onLeftClick(this::handleOpenStore);
                 updateButton.update(button, false);
                 sizeSelect.add(sizeSelect.index++, 0, button);
             } else {
@@ -99,9 +105,11 @@ public class NewMapView extends Panel {
     private void updateConfirmButton(MapSize size) {
         var sizeNameKey = "gui.create_maps.new.size." + size.name().toLowerCase() + ".on.name";
         var actualSizeKey = "gui.create_maps.new.size." + size.name().toLowerCase() + ".size";
-        confirmButton.translationKey("gui.create_maps.new.confirm",
+        confirmButton.translationKey(
+            "gui.create_maps.new.confirm",
             Component.translatable(sizeNameKey),
-            Component.translatable(actualSizeKey));
+            Component.translatable(actualSizeKey)
+        );
     }
 
     private boolean isLocked(MapSize size) {

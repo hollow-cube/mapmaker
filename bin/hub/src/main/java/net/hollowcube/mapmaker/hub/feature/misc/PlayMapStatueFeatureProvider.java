@@ -27,7 +27,6 @@ import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.Map;
 import java.util.function.Consumer;
 
@@ -63,8 +62,10 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         appendInteractor(edgeEntities[3], 3, 5, this::handleBestMapsClick, false);
 
         edgeEntities[4] = new NpcItemModel();
-        edgeEntities[4].getEntityMeta().setItemStack(ItemStack.of(Material.STICK)
-            .with(DataComponents.ITEM_MODEL, BadSprite.require("hub/5x5/blossom_itmg").model()));
+        edgeEntities[4].getEntityMeta().setItemStack(
+            ItemStack.of(Material.STICK)
+                .with(DataComponents.ITEM_MODEL, BadSprite.require("hub/5x5/blossom_itmg").model())
+        );
         edgeEntities[4].getEntityMeta().setScale(new Vec(5)); // 5x because its 5x5x5
         edgeEntities[4].getEntityMeta().setTranslation(new Vec(0, 1 + BASE_OFFSET, 0));
         edgeEntities[4].setInstance(world.instance(), MIDDLE.withView(90, 0));
@@ -127,42 +128,58 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
         browser.openSearchInput();
     }
 
-    private void appendInteractor(@NotNull Entity entity, int width, int height, @NotNull Consumer<Player> onClick, boolean isCenter) {
+    private void appendInteractor(
+        @NotNull Entity entity,
+        int width,
+        int height,
+        @NotNull Consumer<Player> onClick,
+        boolean isCenter
+    ) {
         var entityId = entity.getEntityId();
-        var interactionEntity = new InteractionEntity(width, height, 40, new InteractionEntity.Target() {
-            @Override
-            public void beginHover(@NotNull Player player) {
-                // Enable glowing - This works because we never set any other flags in this set, otherwise
-                // it would be overridden when sending other metadata changes.
-                player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
-                    MetadataDef.ENTITY_FLAGS.index(),
-                    Metadata.Byte((byte) 0x40)
-                )));
-            }
+        var interactionEntity = new InteractionEntity(
+            width,
+            height,
+            40,
+            new InteractionEntity.Target() {
+                @Override
+                public void beginHover(@NotNull Player player) {
+                    // Enable glowing - This works because we never set any other flags in this set, otherwise
+                    // it would be overridden when sending other metadata changes.
+                    player.sendPacket(
+                        new EntityMetaDataPacket(
+                            entityId,
+                            Map.of(MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte((byte) 0x40))
+                        )
+                    );
+                }
 
-            @Override
-            public void endHover(@NotNull Player player) {
-                // Disable glowing - See above for how/why this is functional.
-                if (player.getPlayerConnection().getServerState() == ConnectionState.PLAY) {
-                    player.sendPacket(new EntityMetaDataPacket(entityId, Map.of(
-                        MetadataDef.ENTITY_FLAGS.index(),
-                        Metadata.Byte((byte) 0x0)
-                    )));
+                @Override
+                public void endHover(@NotNull Player player) {
+                    // Disable glowing - See above for how/why this is functional.
+                    if (player.getPlayerConnection().getServerState() == ConnectionState.PLAY) {
+                        player.sendPacket(
+                            new EntityMetaDataPacket(
+                                entityId,
+                                Map.of(MetadataDef.ENTITY_FLAGS.index(), Metadata.Byte((byte) 0x0))
+                            )
+                        );
+                    }
+                }
+
+                @Override
+                public void onRightClick(@NotNull Player player) {
+                    onClick.accept(player);
                 }
             }
-
-            @Override
-            public void onRightClick(@NotNull Player player) {
-                onClick.accept(player);
-            }
-        });
+        );
         interactionEntity.setInstance(entity.getInstance(), entity.getPosition());
     }
 
     private @NotNull TaskSchedule entityUpdate() {
         int updateInterval = (int) (20 * 0.5) * ENTITY_UPDATE_INTERVAL;
 
-        {   // Spawn some particles around the center entity
+        {
+            // Spawn some particles around the center entity
         }
 
         for (int i = 0; i < edgeEntities.length; i++) {
@@ -174,21 +191,25 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
 
             double verticalOffset = ((entityHeightTarget + i) % 8) * (1 / 8.0);
             if (verticalOffset > 0.5) verticalOffset = 1 - verticalOffset;
-            var yTranslation = new Vec(0, (i == 4 ? 1 : 0) + BASE_OFFSET + (verticalOffset * 0.75), 0);
+            var yTranslation = new Vec(
+                0,
+                (i == 4 ? 1 : 0) + BASE_OFFSET + (verticalOffset * 0.75),
+                0
+            );
             meta.setTranslation(yTranslation);
 
             meta.setNotifyAboutChanges(true);
 
             // For the middle one we also want to spawn some extra particles
             // they look ugly as is
-//            if (i == 4) {
-//                edgeEntities[i].sendPacketToViewers(new ParticlePacket(
-//                        Particle.DUST_COLOR_TRANSITION.withProperties(
-//                                new Color(0xFFFFFF), new Color(0xFF0000), 1
-//                        ), MIDDLE.add(0, yTranslation.y(), 0), new Vec(0.8),
-//                        0f, 10
-//                ));
-//            }
+            //            if (i == 4) {
+            //                edgeEntities[i].sendPacketToViewers(new ParticlePacket(
+            //                        Particle.DUST_COLOR_TRANSITION.withProperties(
+            //                                new Color(0xFFFFFF), new Color(0xFF0000), 1
+            //                        ), MIDDLE.add(0, yTranslation.y(), 0), new Vec(0.8),
+            //                        0f, 10
+            //                ));
+            //            }
         }
 
         entityHeightTarget += 1;

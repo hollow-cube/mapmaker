@@ -1,3 +1,16 @@
+pluginManagement {
+    repositories {
+        // TEMP: consume javafmt from mavenLocal while debugging plugin bugs. Revert once fixes ship.
+        mavenLocal {
+            content {
+                includeGroup("dev.javafmt")
+                includeGroup("dev.javafmt.gradle")
+            }
+        }
+        gradlePluginPortal()
+    }
+}
+
 buildscript {
     repositories {
         mavenCentral()

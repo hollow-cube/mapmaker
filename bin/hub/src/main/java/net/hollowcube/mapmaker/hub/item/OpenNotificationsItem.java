@@ -13,12 +13,13 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
 public class OpenNotificationsItem extends ItemHandler {
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/notifications"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/notifications")
+    );
 
     public static final Key ID = Key.key("mapmaker:notifications");
     public static final OpenNotificationsItem INSTANCE = new OpenNotificationsItem();
@@ -59,7 +60,10 @@ public class OpenNotificationsItem extends ItemHandler {
                 ToastManager.showNotification(
                     target,
                     Component.translatable("gui.notification.toast"),
-                    Component.translatable("gui.notification.toast.unread" + (hasOne ? "" : ".multiple"), Component.text(amount))
+                    Component.translatable(
+                        "gui.notification.toast.unread" + (hasOne ? "" : ".multiple"),
+                        Component.text(amount)
+                    )
                 );
             });
         });

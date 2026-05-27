@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
-import com.google.auto.service.AutoService;
 import net.hollowcube.common.physics.BoundingBox;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
@@ -16,12 +15,10 @@ import net.minestom.server.instance.Weather;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
-
 import static java.util.function.Predicate.not;
 
 //@AutoService(HubFeature.class)
@@ -31,7 +28,12 @@ public class CyberpunkRainFeature implements HubFeature {
     private static final Point MIN = new Vec(-184, 60, -98);
     private static final Point MAX = new Vec(-105, 128, -31);
     private static final Point SIZE = MAX.sub(MIN);
-    private static final BoundingBox BOUNDING_BOX = new BoundingBox(SIZE.x(), SIZE.y(), SIZE.z(), MIN);
+    private static final BoundingBox BOUNDING_BOX = new BoundingBox(
+        SIZE.x(),
+        SIZE.y(),
+        SIZE.z(),
+        MIN
+    );
 
     private static final List<Point> LIGHTNING_POINTS = List.of(
         new Vec(-128, 83, -78),
@@ -57,11 +59,14 @@ public class CyberpunkRainFeature implements HubFeature {
     }
 
     private @NotNull TaskSchedule lightningTask() {
-        var point = LIGHTNING_POINTS.get(ThreadLocalRandom.current().nextInt(LIGHTNING_POINTS.size()));
+        var point = LIGHTNING_POINTS.get(
+            ThreadLocalRandom.current().nextInt(LIGHTNING_POINTS.size())
+        );
 
         if (lightningEntity != null) lightningEntity.remove();
         lightningEntity = new Entity(EntityType.LIGHTNING_BOLT) {
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };
@@ -69,8 +74,8 @@ public class CyberpunkRainFeature implements HubFeature {
         lightningEntity.setInstance(instance, point);
         rainyPlayers.forEach(lightningEntity::addViewer);
 
-//        var nextLightingTicks = ThreadLocalRandom.current().nextInt(20 * 60) + (20 * 60);
-//        return TaskSchedule.tick(nextLightingTicks);
+        //        var nextLightingTicks = ThreadLocalRandom.current().nextInt(20 * 60) + (20 * 60);
+        //        return TaskSchedule.tick(nextLightingTicks);
         return TaskSchedule.tick(20 * 15);
     }
 
@@ -78,7 +83,10 @@ public class CyberpunkRainFeature implements HubFeature {
         var instancePlayers = instance.getPlayers();
         rainyPlayers.removeIf(not(instancePlayers::contains));
         for (var player : instancePlayers) {
-            var isInRain = BOUNDING_BOX.intersectBox(player.getPosition().mul(-1), player.getBoundingBox());
+            var isInRain = BOUNDING_BOX.intersectBox(
+                player.getPosition().mul(-1),
+                player.getBoundingBox()
+            );
             if (isInRain && !rainyPlayers.contains(player)) {
                 rainyPlayers.add(player);
                 onEnterRain(player);

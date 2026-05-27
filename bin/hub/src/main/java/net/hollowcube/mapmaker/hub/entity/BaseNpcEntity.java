@@ -5,15 +5,19 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import org.jetbrains.annotations.NotNull;
-
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class BaseNpcEntity extends Entity {
 
-    public static @NotNull BaseNpcEntity createInteractionEntity(int width, int height, @NotNull NpcHandler handler) {
+    public static @NotNull BaseNpcEntity createInteractionEntity(
+        int width,
+        int height,
+        @NotNull NpcHandler handler
+    ) {
         var storeEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {
-            @Override protected void movementTick() {
+            @Override
+            protected void movementTick() {
                 // Intentionally do nothing
             }
         };
@@ -39,7 +43,11 @@ public class BaseNpcEntity extends Entity {
         return setInteractionBox(width, height, Pos.ZERO);
     }
 
-    public @NotNull CompletableFuture<Void> setInteractionBox(int width, int height, @NotNull Pos offset) { //todo move along with the npc
+    public @NotNull CompletableFuture<Void> setInteractionBox(
+        int width,
+        int height,
+        @NotNull Pos offset
+    ) { //todo move along with the npc
         if (this.interactionEntity != null) this.interactionEntity.remove();
 
         this.interactionEntity = new BaseNpcEntity(EntityType.INTERACTION, UUID.randomUUID()) {
@@ -56,8 +64,12 @@ public class BaseNpcEntity extends Entity {
 
         this.interactionEntity.setTag(NpcHandler.TAG, (player, npc, hand, isLeftHand) -> {
             if (!BaseNpcEntity.this.hasTag(NpcHandler.TAG)) return;
-            BaseNpcEntity.this.getTag(NpcHandler.TAG).handlePlayerInteract(player, BaseNpcEntity.this, hand, isLeftHand);
+            BaseNpcEntity.this.getTag(NpcHandler.TAG)
+                .handlePlayerInteract(player, BaseNpcEntity.this, hand, isLeftHand);
         });
-        return this.interactionEntity.setInstance(this.getInstance(), this.getPosition().add(offset));
+        return this.interactionEntity.setInstance(
+            this.getInstance(),
+            this.getPosition().add(offset)
+        );
     }
 }
