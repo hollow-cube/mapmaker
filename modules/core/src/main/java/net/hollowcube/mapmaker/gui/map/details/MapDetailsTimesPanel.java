@@ -1,8 +1,5 @@
 package net.hollowcube.mapmaker.gui.map.details;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.Leaderboard;
 import net.hollowcube.mapmaker.map.LeaderboardData;
@@ -12,20 +9,15 @@ import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.CoreSkulls;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.network.player.ResolvableProfile;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 
 public class MapDetailsTimesPanel extends Panel {
-    private static final Logger logger = LoggerFactory.getLogger(MapDetailsTimesPanel.class);
-
     private static final Component MISSING_PLAYER = text("Not set!");
     public static final String MODEL_8X = "mapmaker:2d_player_head";
     private static final String MODEL_8X_OFFSET_1 = "mapmaker:2d_player_head_offset1";
@@ -102,19 +94,9 @@ public class MapDetailsTimesPanel extends Panel {
         });
     }
 
-
-    private static final Cache<String, ResolvableProfile> HEAD_CACHE = Caffeine.newBuilder()
-        .expireAfterWrite(60, TimeUnit.MINUTES)
-        .maximumSize(1000)
-        .build();
-
     public static ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
         if (uuid == null) return CoreSkulls.UNKNOWN_PLAYER;
-        return HEAD_CACHE.get(uuid, key -> OpUtils.mapOr(
-            PlayerSkin.fromUuid(key),
-            CoreSkulls::create,
-            ResolvableProfile.EMPTY
-        ));
+        return new ResolvableProfile(new ResolvableProfile.Partial(null, UUID.fromString(uuid), List.of()));
     }
 
     private static class TopThreePanel extends Panel {
