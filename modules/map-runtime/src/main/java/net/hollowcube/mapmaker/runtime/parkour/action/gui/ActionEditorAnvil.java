@@ -42,7 +42,14 @@ public class ActionEditorAnvil<T extends Action> extends AbstractAnvilView {
                 return newValue;
             });
         } catch (Exception e) {
-            ExceptionReporter.reportException(e, host.player());
+            // player may not be available here if the ui was closed and then created an error.
+            // its kind of an error but masks the underlying error so not worth
+            if (host != null) {
+                ExceptionReporter.reportException(e, host.player());
+            } else {
+                ExceptionReporter.reportException(e);
+            }
+
         }
         super.onSubmit(text); // Pop the view
     }
