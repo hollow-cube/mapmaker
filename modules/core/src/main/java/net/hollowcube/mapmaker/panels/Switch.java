@@ -31,12 +31,18 @@ public class Switch extends Element {
         if (index < 0 || index >= children.size()) {
             throw new IndexOutOfBoundsException("Index out of bounds: " + index);
         }
-        if (selectedIndex >= 0 && selectedIndex < children.size())
-            children.get(selectedIndex).unmount();
-        selectedIndex = index;
-        boolean isInitial = !mountMask.get(index);
-        mountMask.set(index);
-        children.get(index).mount(host, isInitial);
+
+        if (host != null) {
+            // only mount the child if we are currently mounted.
+            if (selectedIndex >= 0 && selectedIndex < children.size())
+                children.get(selectedIndex).unmount();
+            selectedIndex = index;
+            boolean isInitial = !mountMask.get(index);
+            mountMask.set(index);
+            children.get(index).mount(host, isInitial);
+        } else {
+            selectedIndex = index;
+        }
 
         for (var consumer : onSelect) {
             consumer.accept(index);
