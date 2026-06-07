@@ -100,6 +100,7 @@ public final class NbtUtil {
 
     public static @NotNull ItemStack readItemStack(@NotNull BinaryTag tag) {
         if (!(tag instanceof CompoundBinaryTag compound)) return ItemStack.AIR;
+        compound = coerceProfileId(compound);
         var itemStack = ItemStack.fromItemNBT(compound);
 
         var itemModel = itemStack.get(DataComponents.ITEM_MODEL);
@@ -208,5 +209,23 @@ public final class NbtUtil {
             return (T) builder.build();
         }
         return right;
+    }
+
+    /// Sometimes we are receiving profile IDs as number arrays instead of int arrays (but with a uuid-looking value)
+    /// from Axiom entity edits. Axiom uses the normal mojang serializer so im not exactly sure where this comes from,
+    /// but I (matt) cant find any scenario where we would create this and its close enough we can handle it.
+    private static @NotNull CompoundBinaryTag coerceProfileId(@NotNull CompoundBinaryTag item) {
+        if (!(item.get("components") instanceof CompoundBinaryTag components)) return item;
+        if (!(components.get("minecraft:profile") instanceof CompoundBinaryTag profile)) return item;
+        if (!(profile.get("id") instanceof ListBinaryTag id)) return item;
+
+        var uuid = new int[id.size()];
+        for (int i = 0; i < id.size(); i++) {
+            if (!(id.get(i) instanceof NumberBinaryTag number)) return item; // Unexpected shape, leave untouched
+            uuid[i] = number.intValue();
+        }
+
+        var fixedProfile = profile.put("id", IntArrayBinaryTag.intArrayBinaryTag(uuid));
+        return item.put("components", components.put("minecraft:profile", fixedProfile));
     }
 }
