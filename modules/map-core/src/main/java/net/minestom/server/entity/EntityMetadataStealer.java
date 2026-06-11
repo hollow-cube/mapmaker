@@ -1,8 +1,9 @@
 package net.minestom.server.entity;
 
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Objects;
 
 public final class EntityMetadataStealer {
 
@@ -10,17 +11,15 @@ public final class EntityMetadataStealer {
         return entity.metadata;
     }
 
-    public static @NotNull NetworkBuffer.Type<Object> metadataSerializer(int type) {
-        final MetadataImpl.EntryImpl<?> value = (MetadataImpl.EntryImpl<?>) MetadataImpl.EMPTY_VALUES.get(type);
-        Check.notNull(value, "Unknown metadata type: " + type);
-        return value == null ? null : (NetworkBuffer.Type<Object>) value.serializer();
-    }
-
     @Deprecated
     public static @NotNull Metadata.Entry<?> legacyReadEntry(@NotNull NetworkBuffer buffer, int type) {
-        final MetadataImpl.EntryImpl<?> value = (MetadataImpl.EntryImpl<?>) MetadataImpl.EMPTY_VALUES.get(type);
-        Check.notNull(value, "Unknown metadata type: " + type);
-        return new MetadataImpl.EntryImpl<>(type, value.serializer().read(buffer), (NetworkBuffer.Type<Object>) value.serializer());
+        final Metadata.Type<?> metadataType = Metadata.typeById(type);
+        Objects.requireNonNull(metadataType, "Unknown metadata type: " + type);
+        return readEntry(buffer, metadataType);
+    }
+
+    private static <T> Metadata.Entry<T> readEntry(@NotNull NetworkBuffer buffer, @NotNull Metadata.Type<T> type) {
+        return type.entry(buffer.read(type.serializer()));
     }
 
 }
