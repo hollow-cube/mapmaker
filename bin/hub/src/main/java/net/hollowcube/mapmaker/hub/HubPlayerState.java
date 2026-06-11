@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.hub;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.compat.api.discord.DiscordRichPresenceManager;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
@@ -61,6 +62,8 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
             if (player instanceof MapPlayer mp) {
                 mp.setCanSendPose(false);
             }
+
+            DiscordRichPresenceManager.queueRichPresenceUpdate(player, "In the", "lobby", "play.hollowcube.net");
         }
 
         @Override

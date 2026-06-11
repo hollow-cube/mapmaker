@@ -14,6 +14,7 @@ dependencies {
     implementation(project(":modules:map-core"))
     implementation(project(":modules:map-runtime"))
     implementation(project(":modules:terraform"))
+    implementation(project(":modules:compat"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
