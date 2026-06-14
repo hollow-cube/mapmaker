@@ -37,6 +37,8 @@ public final class Autocompletors {
         }
         for (var sound : SoundEvent.values()) {
             if (!(sound instanceof BuiltinSoundEvent event)) continue;
+            // Placeholder "no sound" event, not a real selectable sound.
+            if (sound == SoundEvent.INTENTIONALLY_EMPTY) continue;
             sounds.add(new IndexableProtocolObject<>(event));
         }
     }

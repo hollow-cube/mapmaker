@@ -22,6 +22,8 @@ import java.util.List;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public class TopTimesInfoType extends CommandDsl {
+    private static final int PAGE_SIZE = 15;
+
     private final ApiClient api;
 
     private final Argument<String> targetArgument;
@@ -48,8 +50,8 @@ public class TopTimesInfoType extends CommandDsl {
         }
         Component targetName = api.players.getDisplayName(targetId).asComponent();
 
-        var resp = api.maps.getPlayerTopTimes(targetId, page - 1, 15);
-        int maxPage = Math.ceilDiv(resp.count(), 15);
+        var resp = api.maps.getPlayerTopTimes(targetId, page - 1, PAGE_SIZE);
+        int maxPage = Math.ceilDiv(resp.count(), PAGE_SIZE);
         if (maxPage == 0) {
             sender.sendMessage(targetName.append(Component.text(" has no top times")));
             return;
@@ -57,11 +59,11 @@ public class TopTimesInfoType extends CommandDsl {
 
         if (page > maxPage) {
             page = maxPage;
-            resp = api.maps.getPlayerTopTimes(targetId, page - 1, 15);
+            resp = api.maps.getPlayerTopTimes(targetId, page - 1, PAGE_SIZE);
         }
 
         sender.sendMessage(targetName.append(
-            Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.count(), 15)))));
+            Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.count(), PAGE_SIZE)))));
         List<LeaderboardData.Entry> entries = new ArrayList<>();
         for (PlayerTopTimeEntry entry : resp.results()) {
             entries.add(
