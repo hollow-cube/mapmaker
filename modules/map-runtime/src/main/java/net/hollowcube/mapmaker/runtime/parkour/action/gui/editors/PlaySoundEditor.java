@@ -82,10 +82,14 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
 
         var id = sound.key().asMinimalString();
 
-        var key = id.substring(0, id.indexOf('.'));
-        var path = id.indexOf('.', key.length() + 1) != -1 ?
-            id.substring(key.length() + 1, id.indexOf('.', key.length() + 1)) :
-            id.substring(key.length() + 1);
+        // Some sound keys have no category prefix (e.g. "intentionally_empty"), so there may
+        // be no '.' to split on. Treat the whole id as the key, which falls through to the
+        // default icon in the switch below.
+        var firstDot = id.indexOf('.');
+        var key = firstDot == -1 ? id : id.substring(0, firstDot);
+        var secondDot = firstDot == -1 ? -1 : id.indexOf('.', firstDot + 1);
+        var path = firstDot == -1 ? "" :
+            secondDot != -1 ? id.substring(firstDot + 1, secondDot) : id.substring(firstDot + 1);
         var icon = switch (key) {
             case "block" -> OpUtils.mapOr(Block.fromKey(path), it -> it.registry().material(), Material.BARRIER);
             case "entity" -> {
