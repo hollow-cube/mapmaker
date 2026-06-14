@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 
-public final class InteractionEntity extends ObjectEntity {
+public final class InteractionEntity extends ObjectEntity<InteractionMeta> {
 
     public InteractionEntity(@NotNull UUID uuid) {
         super(EntityType.INTERACTION, uuid);
@@ -25,11 +25,6 @@ public final class InteractionEntity extends ObjectEntity {
 
     public InteractionEntity() {
         this(UUID.randomUUID());
-    }
-
-    @Override
-    public @NotNull InteractionMeta getEntityMeta() {
-        return (InteractionMeta) super.getEntityMeta();
     }
 
     @Override

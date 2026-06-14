@@ -21,13 +21,13 @@ public final class LibEntity {
     @LuaExport
     @LuaUnion(discriminator = "kind")
     public static sealed abstract class Prop permits TextProp {
-        private final DisplayEntity delegate;
+        private final DisplayEntity<?> delegate;
 
-        protected Prop(DisplayEntity delegate) {
+        protected Prop(DisplayEntity<?> delegate) {
             this.delegate = delegate;
         }
 
-        protected DisplayEntity delegate() {
+        protected DisplayEntity<?> delegate() {
             return this.delegate;
         }
 
@@ -184,7 +184,7 @@ public final class LibEntity {
     @LuaExport
     public static final class TextProp extends Prop {
 
-        public TextProp(DisplayEntity delegate) {
+        public TextProp(DisplayEntity<?> delegate) {
             super(delegate);
         }
 

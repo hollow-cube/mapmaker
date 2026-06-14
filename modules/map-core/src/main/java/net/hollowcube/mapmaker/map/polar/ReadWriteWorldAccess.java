@@ -76,11 +76,11 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         return entitiesTag.build();
     }
 
-    private Set<MapEntity> getRootEntities(Chunk chunk) {
+    private Set<MapEntity<?>> getRootEntities(Chunk chunk) {
         var entities = chunk.getInstance().getChunkEntities(chunk);
         return entities.stream()
-                .filter(e -> e instanceof MapEntity && e.getVehicle() == null)
-                .map(e -> (MapEntity) e)
+                .filter(e -> e instanceof MapEntity<?> && e.getVehicle() == null)
+                .map(e -> (MapEntity<?>) e)
                 .collect(Collectors.toSet());
     }
 }

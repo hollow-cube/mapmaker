@@ -15,7 +15,13 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.command.arg.MapArgument;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
+import net.hollowcube.mapmaker.map.block.handler.SignBlockHandler;
+import net.hollowcube.mapmaker.map.block.handler.sign.SignData;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
+import net.hollowcube.mapmaker.map.entity.MapEntity;
+import net.hollowcube.mapmaker.map.entity.MapEntityType;
+import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoRegistry;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -28,6 +34,7 @@ import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.LightingChunk;
@@ -36,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
@@ -91,8 +99,8 @@ public class DebugCommand extends CommandDsl {
             "show map octree");
         createPermissionedSubcommand("fixthedripleaf", this::fixTheDripleaf,
             "add dripleaf block handlers to relevant blocks");
-        createPermissionedSubcommand("latency", this::handleLatency,
-                                     "show latency to other players");
+        createPermissionedSubcommand("latency", this::handleLatency, "show latency to other players");
+        createPermissionedSubcommand("mobs", this::handleMobs, "spawn one of each mob for testing");
 
         var vjoin = createPermissionedSubcommand("vjoin", this::handleVerificationJoin,
             "join a verification state of a map");
@@ -292,6 +300,54 @@ public class DebugCommand extends CommandDsl {
 
     private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
         player.scheduleNextTick(_ -> ActionBar.forPlayer(player).toggleProvider(new ServerLatencyHud()));
+    }
+
+    private void handleMobs(@NotNull Player player, @NotNull CommandContext context) {
+        var instance = player.getInstance();
+        var start = player.getPosition();
+        var size = (int) Math.ceil(Math.sqrt(EntityType.values().size()));
+        var padding = 5; // 5x5 grid with 3 blocks of padding in between
+
+        for (var entity : EntityType.values()) {
+            var index = entity.id();
+            var x = (index % size) * padding;
+            var z = (index / size) * padding;
+
+            for (int xOffset = -1; xOffset <= 1; xOffset++) {
+                for (int zOffset = -1; zOffset <= 1; zOffset++) {
+                    instance.setBlock(new Vec(start.x() + x + xOffset, start.y() - 1, start.z() + z + zOffset), Block.ORANGE_CONCRETE);
+                }
+            }
+
+            var sign = Block.SPRUCE_SIGN
+                .withHandler(BlockHandlers.SIGN)
+                .withTag(SignBlockHandler.FRONT_TEXT, SignData.empty().withLines(new Component[]{
+                    Component.text(entity.key().asMinimalString()),
+                    Component.text("ID: " + entity.key().asMinimalString()),
+                    Component.empty(),
+                    Component.text("Protocol ID: " + entity.id())
+                }));
+
+            instance.setBlock(new Vec(start.x() + x, start.y(), start.z() + z + 1), sign);
+
+            if (MapEntityType.hasOverride(entity)) {
+                if (MapEntityType.create(entity, UUID.randomUUID()) instanceof MapEntity<?> override && MapEntityInfoRegistry.get(override) != null) {
+                    for (int xOffset = -1; xOffset <= 1; xOffset++) {
+                        for (int zOffset = -1; zOffset <= 1; zOffset++) {
+                            instance.setBlock(new Vec(start.x() + x + xOffset, start.y() - 1, start.z() + z + zOffset), Block.LIME_CONCRETE);
+                        }
+                    }
+
+                    override.setInstance(instance, new Vec(start.x() + x + 0.5, start.y(), start.z() + z + 0.5));
+                } else {
+                    for (int xOffset = -1; xOffset <= 1; xOffset++) {
+                        for (int zOffset = -1; zOffset <= 1; zOffset++) {
+                            instance.setBlock(new Vec(start.x() + x + xOffset, start.y() - 1, start.z() + z + zOffset), Block.YELLOW_CONCRETE);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private void handleVerificationJoin(@NotNull Player player, @NotNull CommandContext context) {

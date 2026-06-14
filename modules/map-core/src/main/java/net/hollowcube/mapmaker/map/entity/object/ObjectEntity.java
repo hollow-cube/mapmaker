@@ -23,6 +23,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.RelativeFlags;
+import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.instance.EntityTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.registry.RegistryTranscoder;
@@ -40,7 +41,7 @@ import java.util.concurrent.CompletableFuture;
  * An object entity is an entity of which axiom can modify, or another feature can modify in a similar way.
  * These act as markers in the axiom client but can be any entity in the server.
  */
-public abstract class ObjectEntity extends MapEntity implements TerraformAxiomUpdateCustomEntityDataEvent.Receiver {
+public abstract class ObjectEntity<M extends EntityMeta> extends MapEntity<M> implements TerraformAxiomUpdateCustomEntityDataEvent.Receiver {
 
     private static final BoundingBox NO_BB = new BoundingBox(0, 0, 0);
     private static final Key UNKNOWN_TYPE = Key.key("mapmaker:unknown");
