@@ -74,6 +74,10 @@ public class HCNativeImageFeature implements Feature {
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.player.PlayerSocketConnection"));
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.network.packet.PacketVanilla"));
 
+            // LoginListener holds a static SecureRandom. GraalVM disallows Random/SecureRandom instances in the
+            // image heap entirely, so it must not be initialized at build time by the blanket net.minestom init.
+            RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("net.minestom.server.listener.preplay.LoginListener"));
+
             // https://github.com/nats-io/nats.java#integration-with-graalvm
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("java.security.SecureRandom"));
             RuntimeClassInitialization.initializeAtRunTime(access.findClassByName("io.nats.client.support.RandomUtils"));
