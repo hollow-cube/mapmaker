@@ -5,19 +5,8 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Fluid (and powder snow) detection over an entity bounding box, mirroring the vanilla
- * per-block fluid height scan.
- */
 public final class FluidUtil {
 
-    private FluidUtil() {
-    }
-
-    /**
-     * Result of a fluid scan. The heights are the fluid surface height above the scanned
-     * position's Y (the entity's feet) and are only meaningful when the matching flag is set.
-     */
     public record Result(boolean inWater, boolean inLava, boolean inPowderSnow,
                          double waterHeight, double lavaHeight) {
     }
@@ -60,10 +49,8 @@ public final class FluidUtil {
         return new Result(inWater, inLava, inPowderSnow, waterHeight, lavaHeight);
     }
 
-    /**
-     * Fluid height within a single block, decoded from the {@code level} property on an
-     * 8-scale, or -1 if the block is not a fluid. Waterlogged blocks are always full.
-     */
+    /// Fluid height within a single block, decoded from the {@code level} property on an
+    /// 8-scale, or -1 if the block is not a fluid. Waterlogged blocks are always full.
     private static double getFluidHeight(@NotNull Block block) {
         var level = block.getProperty("level");
         if (level == null) return BlockUtil.isWaterlogged(block) ? 8 : -1;

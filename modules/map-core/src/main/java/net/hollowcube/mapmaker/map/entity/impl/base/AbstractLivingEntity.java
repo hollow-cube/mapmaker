@@ -13,6 +13,8 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeModifier;
+import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
@@ -170,8 +172,41 @@ public class AbstractLivingEntity<M extends LivingEntityMeta> extends MapEntity<
         )));
     }
 
+    /// Applies `modifiers` on top of `base` following vanilla `AttributeInstance` value computation
+    /// (add value, then multiply-base, then multiply-total), clamped to the attribute's range.
+    public void setAttribute(Attribute attribute, double base, List<AttributeModifier> modifiers) {
+        for (var modifier : modifiers) {
+            if (modifier.operation() == AttributeOperation.ADD_VALUE) base += modifier.amount();
+        }
+        double value = base;
+        for (var modifier : modifiers) {
+            if (modifier.operation() == AttributeOperation.ADD_MULTIPLIED_BASE) value += base * modifier.amount();
+        }
+        for (var modifier : modifiers) {
+            if (modifier.operation() == AttributeOperation.ADD_MULTIPLIED_TOTAL) value *= 1.0 + modifier.amount();
+        }
+        setAttribute(attribute, Math.clamp(value, attribute.minValue(), attribute.maxValue()));
+    }
+
     public double getAttribute(Attribute attribute) {
         return this.attributes.getOrDefault(attribute, attribute.defaultValue());
+    }
+
+    // Physics
+
+    @Override
+    protected double bounciness() {
+        return getAttribute(Attribute.BOUNCINESS);
+    }
+
+    @Override
+    protected double frictionModifier() {
+        return getAttribute(Attribute.FRICTION_MODIFIER);
+    }
+
+    @Override
+    protected double airDragModifier() {
+        return getAttribute(Attribute.AIR_DRAG_MODIFIER);
     }
 
     // viewer stuff
