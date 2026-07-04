@@ -1,0 +1,9 @@
+{
+  "sources": [
+    {
+      "type": "minecraft:single",
+      "resource": "minecraft:block/iron_chain",
+      "sprite": "minecraft:block/chain"
+    }
+  ]
+}
