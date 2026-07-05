@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.impl.projectile;
 
 import net.hollowcube.mapmaker.map.MapPlayer;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.Aerodynamics;
@@ -26,6 +27,12 @@ import java.util.concurrent.ThreadLocalRandom;
 public class WindChargeEntity extends AbstractProjectileEntity {
     private static final float EXPLOSION_RADIUS = 1.2f;
     private static final float PROJECTILE_SHOOT_POWER = 1.5f;
+
+    public static @NotNull WindChargeEntity restore(@NotNull MapPlayer owner, @NotNull CompoundBinaryTag nbt) {
+        var entity = new WindChargeEntity(owner);
+        entity.loadOwnedEntityData(nbt);
+        return entity;
+    }
 
     public static @NotNull WindChargeEntity shootFromPlayerDirection(@NotNull Player shooter, boolean shooterOnly) {
         shooter.playSound(Sound.sound(SoundEvent.ENTITY_WIND_CHARGE_THROW, Sound.Source.NEUTRAL,

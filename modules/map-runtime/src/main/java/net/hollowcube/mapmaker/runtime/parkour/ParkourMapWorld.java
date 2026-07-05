@@ -173,6 +173,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             .addListener(PlayerTickEndEvent.class, this::handleClientPlayerTick)
             .addChild(DelayedBlockInteractions.EVENT_NODE)
             .addChild(LegacyActionStateManager.EVENT_NODE)
+            .addChild(OwnedEntityStateManager.EVENT_NODE)
             .addChild(ResetHeightDisplay.EVENT_NODE)
             .addChild(DoubleJumpSetting.EVENT_NODE)
             .addChild(NoJumpSetting.EVENT_NODE)

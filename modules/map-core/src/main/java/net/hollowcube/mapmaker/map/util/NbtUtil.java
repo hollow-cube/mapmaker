@@ -72,8 +72,8 @@ public final class NbtUtil {
 
     public static @NotNull Pos readRotation(@NotNull Point pos, ListBinaryTag rot) {
         float yaw = 0, pitch = 0;
-        if (rot.size() >= 1) yaw = ((FloatBinaryTag) rot.get(0)).value();
-        if (rot.size() >= 2) pitch = ((FloatBinaryTag) rot.get(1)).value();
+        if (rot.size() >= 1) yaw = ((NumberBinaryTag) rot.get(0)).floatValue();
+        if (rot.size() >= 2) pitch = ((NumberBinaryTag) rot.get(1)).floatValue();
         return new Pos(pos, yaw, pitch);
     }
 
