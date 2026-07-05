@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.ListBinaryTag;
-import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.entity.Player;
@@ -17,10 +16,8 @@ import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.network.packet.server.LazyPacket;
 import net.minestom.server.network.packet.server.play.EntityAttributesPacket;
 import net.minestom.server.network.packet.server.play.EntityEquipmentPacket;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -106,7 +103,7 @@ public class AbstractLivingEntity<M extends LivingEntityMeta> extends MapEntity<
     @Override
     public void setEquipment(@NotNull EquipmentSlot slot, @NotNull ItemStack itemStack) {
         equipment[slot.ordinal()] = itemStack;
-        sendPacketToViewersAndSelf(new LazyPacket(this::getEquipmentsPacket));
+        sendPacketToViewersAndSelf(getEquipmentsPacket());
     }
 
     @Override
@@ -182,8 +179,8 @@ public class AbstractLivingEntity<M extends LivingEntityMeta> extends MapEntity<
     @Override
     public void updateNewViewer(@NotNull Player player) {
         super.updateNewViewer(player);
-        player.sendPacket(new LazyPacket(this::getEquipmentsPacket));
-        player.sendPacket(new LazyPacket(this::getAttributesPacket));
+        player.sendPacket(getEquipmentsPacket());
+        player.sendPacket(getAttributesPacket());
     }
 
 }

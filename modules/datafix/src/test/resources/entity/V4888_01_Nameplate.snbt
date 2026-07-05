@@ -1,0 +1,13 @@
+{
+    id: "minecraft:zombie",
+    attributes: [
+        {
+            id: "minecraft:nameplate_distance",
+            base: 64.0d
+        },
+        {
+            id: "minecraft:max_health",
+            base: 20.0d
+        }
+    ]
+}

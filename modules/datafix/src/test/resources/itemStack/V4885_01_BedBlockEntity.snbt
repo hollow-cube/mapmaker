@@ -1,0 +1,10 @@
+{
+    id: "minecraft:white_bed",
+    count: 1,
+    components: {
+        "minecraft:block_entity_data": {
+            id: "minecraft:bed"
+        },
+        "minecraft:damage": 5
+    }
+}

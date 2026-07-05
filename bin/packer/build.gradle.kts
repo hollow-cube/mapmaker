@@ -21,6 +21,7 @@ val mcVersions = mapOf(
     "1.21.8" to 772,
     "1.21.9" to 773,
     "26.1" to 775,
+    "26.2" to 776,
 )
 
 tasks.register<DefaultTask>("downloadMinecraft") {

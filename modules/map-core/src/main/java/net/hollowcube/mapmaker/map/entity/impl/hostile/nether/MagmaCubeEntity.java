@@ -4,7 +4,7 @@ import net.hollowcube.mapmaker.map.entity.impl.base.AbstractLivingEntity;
 import net.hollowcube.mapmaker.map.entity.impl.base.AbstractMobEntity;
 import net.hollowcube.mapmaker.map.entity.info.MapEntityInfo;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.metadata.other.MagmaCubeMeta;
+import net.minestom.server.entity.metadata.cube.MagmaCubeMeta;
 
 import java.util.UUID;
 
