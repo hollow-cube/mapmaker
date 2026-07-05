@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.impl.projectile;
 
 import net.hollowcube.mapmaker.map.MapPlayer;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.Aerodynamics;
@@ -21,6 +22,12 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public class EnderPearlEntity extends AbstractProjectileEntity {
     private static final float PROJECTILE_SHOOT_POWER = 1.5f;
+
+    public static @NotNull EnderPearlEntity restore(@NotNull MapPlayer owner, @NotNull CompoundBinaryTag nbt) {
+        var entity = new EnderPearlEntity(owner);
+        entity.loadOwnedEntityData(nbt);
+        return entity;
+    }
 
     public static @NotNull EnderPearlEntity shootFromPlayerDirection(@NotNull Player shooter, boolean shooterOnly) {
         shooter.playSound(Sound.sound(SoundEvent.ENTITY_ENDER_PEARL_THROW, Sound.Source.NEUTRAL,

@@ -3,6 +3,11 @@ package net.hollowcube.mapmaker.map.entity.impl.projectile;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
+import net.hollowcube.mapmaker.map.entity.OwnedEntity;
+import net.hollowcube.mapmaker.map.util.NbtUtil;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.BinaryTagTypes;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.*;
@@ -22,9 +27,10 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /// Credit to [AtlasProjectiles](https://github.com/AtlasEngineCa/AtlasProjectiles/tree/main).
-public abstract class AbstractProjectileEntity extends Entity {
+public abstract class AbstractProjectileEntity extends Entity implements OwnedEntity {
     public static final int MAX_LIFETIME = 20 * 60; // 1 minute
 
     protected final Player shooter;
@@ -44,6 +50,44 @@ public abstract class AbstractProjectileEntity extends Entity {
     }
 
     public abstract void shoot(@NotNull Point from, @NotNull Point to, double power, double spread);
+
+    // TODO: projectiles are not MapEntity (so no read/writeData), so we just duplicate a small section of that api
+    //  in future we need to allow this to reusemapentity without triggering a global save. We should maybe support
+    //  any MapEntity as an ownedEntity but its a bit of a mess right now.
+
+    @Override
+    public @NonNull Key ownedEntityType() {
+        return getEntityType().key();
+    }
+
+    @Override
+    public @NotNull CompoundBinaryTag saveOwnedEntityData() {
+        var tag = CompoundBinaryTag.builder();
+        var position = getPosition();
+        tag.put("Pos", NbtUtil.into(position));
+        tag.put("Rotation", NbtUtil.writeRotation(position));
+        var motion = getVelocity().div(ServerFlag.SERVER_TICKS_PER_SECOND);
+        if (!motion.isZero()) tag.put("Motion", NbtUtil.into(motion));
+        return tag.build();
+    }
+
+    protected void loadOwnedEntityData(@NotNull CompoundBinaryTag tag) {
+        var instance = shooter.getInstance();
+        if (instance == null) return; // Sanity, restore only happens with the shooter in a world
+
+        var position = NbtUtil.readRotation(
+                NbtUtil.from(tag.getList("Pos", BinaryTagTypes.DOUBLE)),
+                tag.getList("Rotation", BinaryTagTypes.FLOAT));
+        var motion = NbtUtil.from(tag.get("Motion"));
+
+        setAutoViewable(false);
+        setInstance(instance, position).whenComplete((result, throwable) -> {
+            if (throwable != null) return;
+            synchronizePosition(); // initial synchronization, same as shoot
+            if (motion != null) setVelocity(motion.mul(ServerFlag.SERVER_TICKS_PER_SECOND));
+        });
+        addViewer(shooter);
+    }
 
     @Override
     public void tick(long time) {

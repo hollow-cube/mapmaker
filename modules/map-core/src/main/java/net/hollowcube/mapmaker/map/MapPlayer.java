@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
-import it.unimi.dsi.fastutil.ints.*;
+import it.unimi.dsi.fastutil.ints.Int2IntArrayMap;
+import it.unimi.dsi.fastutil.ints.Int2IntMap;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.longs.LongPriorityQueue;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
@@ -18,6 +20,7 @@ import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
+import net.hollowcube.mapmaker.map.entity.OwnedEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
@@ -136,7 +139,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     // This does solve the issue but its very gross :(
     private final AtomicInteger pendingTeleports = new AtomicInteger(0);
 
-    private final IntList ownedEntities = new IntArrayList();
+    private final List<Entity> ownedEntities = new ArrayList<>();
 
     private final Object2IntMap<String> cooldownGroups = new Object2IntArrayMap<>();
 
@@ -401,26 +404,30 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     //region EXT: Owned Entities
 
-    public void addOwnedEntity(@NotNull Entity entity) {
+    public <E extends Entity & OwnedEntity> void addOwnedEntity(@NotNull E entity) {
         FutureUtil.assertTickThread();
         Check.argCondition(entity.isAutoViewable() || entity.getViewers().size() != 1 || !entity.getViewers().contains(this),
             "Owned entity must not be auto viewable and must be viewing only this player");
 
-        this.ownedEntities.add(entity.getEntityId());
+        this.ownedEntities.add(entity);
     }
 
     public void removeOwnedEntities() {
         FutureUtil.assertTickThread();
 
-        var instance = getInstance();
-        if (instance == null) return;
+        for (var entity : ownedEntities) entity.remove();
+        ownedEntities.clear();
+    }
 
-        var iter = ownedEntities.intIterator();
-        while (iter.hasNext()) {
-            var entity = instance.getEntityById(iter.nextInt());
-            if (entity != null) entity.remove();
-            iter.remove();
+    public @NotNull List<OwnedEntity> ownedEntities() {
+        FutureUtil.assertTickThread();
+
+        var snapshots = new ArrayList<OwnedEntity>();
+        for (var entity : ownedEntities) {
+            if (!entity.isRemoved() && entity instanceof OwnedEntity snapshot)
+                snapshots.add(snapshot);
         }
+        return snapshots;
     }
 
     //endregion

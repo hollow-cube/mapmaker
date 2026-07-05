@@ -23,6 +23,8 @@ public class Attachments {
             Key.key("mapmaker:settings"), SavedMapSettings.CODEC);
     public static final PlayState.Attachment<VariableStorage> VARIABLES = PlayState.attachment(
             Key.key("mapmaker:variables"), VariableStorage.CODEC);
+    public static final PlayState.Attachment<OwnedEntityList> OWNED_ENTITIES = PlayState.attachment(
+        Key.key("mapmaker:owned_entities"), OwnedEntityList.CODEC);
 
     // If set, indicates that the start plate actions have been applied.
     public static final PlayState.Attachment<Boolean> START_ACTIONS_APPLIED = PlayState.attachment(
