@@ -26,6 +26,7 @@ profile.jfr
 
 .env
 .bazelbsp
+.claude
 # Ignore Gradle build output directory
 build
 
