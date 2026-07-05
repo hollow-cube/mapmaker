@@ -26,4 +26,10 @@ public final class MathUtil {
         }
     }
 
+    /// Vanilla `Mth.clampedMap`: inverse-lerp `value` within `[fromMin, fromMax]`, then clamped-lerp into `[toMin, toMax]`.
+    public static double clampedMap(double value, double fromMin, double fromMax, double toMin, double toMax) {
+        double t = Math.clamp((value - fromMin) / (fromMax - fromMin), 0.0, 1.0);
+        return toMin + t * (toMax - toMin);
+    }
+
 }

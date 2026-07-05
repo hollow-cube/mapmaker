@@ -17,6 +17,7 @@ import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.require.BundleModuleLoader;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -50,6 +51,13 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
             0,
             (seeded.nextDouble() * 10) % 3
         );
+    }
+
+    /// Whether {@code point} is inside the hub's playable bounds (the box players are kept within).
+    public static boolean inWorldBounds(Point point) {
+        return point.x() >= HUB_BB_MIN.x() && point.x() <= HUB_BB_MAX.x()
+            && point.y() >= HUB_BB_MIN.y() && point.y() <= HUB_BB_MAX.y()
+            && point.z() >= HUB_BB_MIN.z() && point.z() <= HUB_BB_MAX.z();
     }
 
     private final ScriptEngine scriptEngine;
@@ -142,9 +150,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
 
     private void handlePlayerMove(PlayerMoveEvent event) {
         Pos playerPos = event.getPlayer().getPosition();
-        if (playerPos.x() < HUB_BB_MIN.x() || playerPos.x() > HUB_BB_MAX.x() ||
-            playerPos.y() < HUB_BB_MIN.y() || playerPos.y() > HUB_BB_MAX.y() ||
-            playerPos.z() < HUB_BB_MIN.z() || playerPos.z() > HUB_BB_MAX.z()) {
+        if (!inWorldBounds(playerPos)) {
             event.getPlayer().teleport(spawnPointFor(event.getPlayer()));
         }
     }

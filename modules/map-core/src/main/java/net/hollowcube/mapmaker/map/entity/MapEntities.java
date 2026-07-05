@@ -23,6 +23,7 @@ import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.HuskEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.ZombieEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.ZombifiedPiglinEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.*;
+import net.hollowcube.mapmaker.map.entity.impl.physics.SulfurCubeEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.VillagerEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.WanderingTraderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.ZombieVillagerEntity;
@@ -158,6 +159,7 @@ public final class MapEntities {
         MapEntityType.override(EntityType.ENDERMITE, EndermiteEntity::new);
         MapEntityType.override(EntityType.SLIME, SlimeEntity::new);
         MapEntityType.override(EntityType.MAGMA_CUBE, MagmaCubeEntity::new);
+        MapEntityType.override(EntityType.SULFUR_CUBE, SulfurCubeEntity::new);
         MapEntityType.override(EntityType.PILLAGER, PillagerEntity::new);
         MapEntityType.override(EntityType.VINDICATOR, VindicatorEntity::new);
         MapEntityType.override(EntityType.EVOKER, EvokerEntity::new);

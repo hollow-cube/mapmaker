@@ -19,6 +19,7 @@ import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.SpiderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.*;
 import net.hollowcube.mapmaker.map.entity.impl.other.ArmorStandEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
+import net.hollowcube.mapmaker.map.entity.impl.physics.SulfurCubeEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.VillagerEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.WanderingTraderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.ZombieVillagerEntity;
@@ -103,6 +104,7 @@ public class MapEntityInfoRegistry {
         register(EndermiteEntity.class, EndermiteEntity.INFO);
         register(SlimeEntity.class, SlimeEntity.INFO);
         register(MagmaCubeEntity.class, MagmaCubeEntity.INFO);
+        register(SulfurCubeEntity.class, SulfurCubeEntity.INFO);
         register(PillagerEntity.class, PillagerEntity.INFO);
         register(VindicatorEntity.class, VindicatorEntity.INFO);
         register(EvokerEntity.class, EvokerEntity.INFO);

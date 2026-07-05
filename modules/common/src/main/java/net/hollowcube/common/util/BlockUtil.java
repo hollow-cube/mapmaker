@@ -179,4 +179,14 @@ public final class BlockUtil {
         NO_BLOCK_TYPE, BLOCK_NOT_FOUND, INVALID_PROPERTIES, INVALID_PROPERTY_VALUE
     }
 
+    public static boolean suppressesBounce(@NotNull Block block) {
+        return block.compare(Block.HONEY_BLOCK);
+    }
+
+    public static double blockRestitution(@NotNull Block block) {
+        if (block.compare(Block.SLIME_BLOCK)) return 1.0;
+        if (block.key().value().endsWith("_bed")) return 0.75;
+        return 0.0;
+    }
+
 }
