@@ -14,7 +14,9 @@ import net.minestom.server.event.instance.RemoveEntityFromInstanceEvent;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.ChunkLoader;
 import net.minestom.server.instance.InstanceContainer;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.registry.RegistryKey;
+import net.minestom.server.utils.chunk.ChunkSupplier;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -38,6 +40,7 @@ public class MapInstance extends InstanceContainer {
     }
 
     private final LightingMode lightingMode;
+    private final ChunkSupplier chunkSupplier;
 
     public MapInstance(@NotNull String dimensionName, @NotNull LightingMode lightingMode) {
         this(dimensionName, lightingMode == LightingMode.FULL_BRIGHT ? DimensionTypes.FULL_BRIGHT : DimensionType.OVERWORLD, lightingMode);
@@ -53,13 +56,14 @@ public class MapInstance extends InstanceContainer {
         // Lighting and dummy chunk loader. The chunk loader will be replaced if there is world data
         // for the map to load, otherwise we keep this one.
         if (lightingMode == LightingMode.GENERATED) {
-            setChunkSupplier(LitChunk::new);
+            this.chunkSupplier = LitChunk::new;
         } else if (lightingMode == LightingMode.LOADED) {
-            setChunkSupplier(UnlitChunk::new);
+            this.chunkSupplier = UnlitChunk::new;
         } else {
             var fullBrightLightData = UnlitChunk.createStaticLightData(this, 15, 0);
-            setChunkSupplier((instance, chunkX, chunkZ) -> new UnlitChunk(instance, chunkX, chunkZ, fullBrightLightData));
+            this.chunkSupplier = (instance, chunkX, chunkZ) -> new UnlitChunk(instance, chunkX, chunkZ, fullBrightLightData);
         }
+        setChunkSupplier(chunkSupplier);
         setChunkLoader(new PolarLoader(new PolarWorld()));
 
         eventNode().addListener(RemoveEntityFromInstanceEvent.class, this::handleEntityRemoved);
@@ -92,27 +96,38 @@ public class MapInstance extends InstanceContainer {
     public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
         FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
                 PolarDataFixer.INSTANCE, worldAccess, lightingMode != LightingMode.FULL_BRIGHT));
-        setChunkSupplier(EmptyChunk::new);
+        // Chunks inside the border must be editable even without world data (eg unloaded chunks),
+        // so EmptyChunk is only used outside of it.
+        setChunkSupplier((instance, chunkX, chunkZ) -> chunkIntersectsBorder(chunkX, chunkZ)
+            ? chunkSupplier.createChunk(instance, chunkX, chunkZ)
+                : new EmptyChunk(instance, chunkX, chunkZ));
         setChunkLoader(ChunkLoader.noop());
+    }
+
+    private boolean chunkIntersectsBorder(int chunkX, int chunkZ) {
+        var border = getWorldBorder();
+        final double radius = border.diameter() / 2d;
+        final int minX = chunkX * Chunk.CHUNK_SIZE_X, minZ = chunkZ * Chunk.CHUNK_SIZE_Z;
+        return minX < border.centerX() + radius && minX + Chunk.CHUNK_SIZE_X - 1 >= border.centerX() - radius
+                && minZ < border.centerZ() + radius && minZ + Chunk.CHUNK_SIZE_Z - 1 >= border.centerZ() - radius;
     }
 
     @Blocking
     public byte @NotNull [] save(@NotNull PolarWorldAccess worldAccess) {
-        // Since we deleted the loader we need a new one
-        var polarWorld = new PolarWorld();
-        setChunkLoader(new PolarLoader(polarWorld)
-                .setWorldAccess(worldAccess));
+        // Save through a local loader without installing it on the instance, so a chunk load
+        // racing the save can never read from (or write into) the partially written world.
+        var polarWorld = new PolarWorld(getCachedDimensionType());
+        var loader = new PolarLoader(polarWorld)
+                .setWorldAccess(worldAccess);
 
-        FutureUtil.getUnchecked(saveInstance());
+        polarWorld.userData(NetworkBuffer.makeArray(buffer -> worldAccess.saveWorldData(this, buffer)));
+        loader.saveChunks(getChunks().stream()
+                .filter(chunk -> !(chunk instanceof EmptyChunk))
+                .toList());
 
         if (polarWorld.chunks().isEmpty())
             throw new IllegalStateException("Avoiding saving empty instance!");
-        var worldData = PolarWriter.write(polarWorld, PolarDataFixer.INSTANCE);
-
-        // Reset to noop
-        setChunkLoader(ChunkLoader.noop());
-
-        return worldData;
+        return PolarWriter.write(polarWorld, PolarDataFixer.INSTANCE);
     }
 
     public void unload() {

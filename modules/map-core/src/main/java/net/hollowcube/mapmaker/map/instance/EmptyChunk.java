@@ -29,25 +29,23 @@ import java.util.Map;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
 
 public class EmptyChunk extends Chunk {
-    private static final List<Section> SECTIONS;
     private static final ChunkData CHUNK_DATA;
     private static final LightData LIGHT_DATA;
 
     static {
-        var theSections = new ArrayList<Section>();
+        var sections = new ArrayList<Section>();
         for (int i = 0; i < 24; i++) {
-            theSections.add(new Section());
+            sections.add(new Section());
         }
-        SECTIONS = List.copyOf(theSections);
         CHUNK_DATA = new ChunkData(Map.of(), NetworkBuffer.makeArray(networkBuffer -> {
-            for (Section section : SECTIONS) {
+            for (Section section : sections) {
                 networkBuffer.write(SHORT, (short) section.blockPalette().count());
                 networkBuffer.write(SHORT, (short) 0); // fluid count
                 networkBuffer.write(Palette.BLOCK_SERIALIZER, section.blockPalette());
                 networkBuffer.write(Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size()), section.biomePalette());
             }
         }), Map.of());
-        LIGHT_DATA = createLightData(true);
+        LIGHT_DATA = createLightData(sections);
     }
 
     public EmptyChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
@@ -61,12 +59,17 @@ public class EmptyChunk extends Chunk {
 
     @Override
     public @NotNull List<Section> getSections() {
-        return SECTIONS;
+        // new set of empty sections in case someone mutates for some reason. we always return the stored chunk data anyway.
+        var sections = new ArrayList<Section>(maxSection - minSection);
+        for (int i = minSection; i < maxSection; i++) {
+            sections.add(new Section());
+        }
+        return sections;
     }
 
     @Override
     public @NotNull Section getSection(int section) {
-        return SECTIONS.get(section - minSection);
+        return new Section();
     }
 
     @Override
@@ -133,7 +136,7 @@ public class EmptyChunk extends Chunk {
 
     }
 
-    private static LightData createLightData(boolean requiredFullChunk) {
+    private static LightData createLightData(List<Section> sections) {
         BitSet skyMask = new BitSet();
         BitSet blockMask = new BitSet();
         BitSet emptySkyMask = new BitSet();
@@ -142,7 +145,7 @@ public class EmptyChunk extends Chunk {
         List<byte[]> blockLights = new ArrayList<>();
 
         int index = 0;
-        for (Section section : SECTIONS) {
+        for (Section section : sections) {
             index++;
             final byte[] skyLight = section.skyLight().array();
             final byte[] blockLight = section.blockLight().array();

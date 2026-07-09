@@ -21,7 +21,7 @@ record WorldViewInstanceSnapshot(
 
     @Override
     public boolean contains(int x, int y, int z) {
-        return WorldViewInstance.fastBorderTest(border, x, y, z, worldMin, worldMax);
+        return WorldViewInstance.fastBorderTest(border, worldMin, worldMax, x, y, z);
     }
 
     @Override

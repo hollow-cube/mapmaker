@@ -12,7 +12,9 @@ import java.util.function.BiConsumer;
 public final class ChunkHack {
 
     public static void invalidateChunk(@NotNull Chunk chunk) {
-        ((DynamicChunk) chunk).chunkCache.invalidate();
+        // EmptyChunk should never be invalidated
+        if (!(chunk instanceof DynamicChunk dynamicChunk)) return;
+        dynamicChunk.chunkCache.invalidate();
     }
 
     /// Runs consumer for each tickable block in the chunk.
