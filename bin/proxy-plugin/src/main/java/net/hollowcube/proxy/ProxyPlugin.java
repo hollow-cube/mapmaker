@@ -51,10 +51,11 @@ public class ProxyPlugin {
         ProtocolVersion.MINECRAFT_1_21_7,
         ProtocolVersion.MINECRAFT_1_21_9,
         ProtocolVersion.MINECRAFT_1_21_11,
-        ProtocolVersion.MINECRAFT_26_1
+        ProtocolVersion.MINECRAFT_26_1,
+        ProtocolVersion.MINECRAFT_26_2
     );
-    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_1;
-    private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.1.1";
+    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_2;
+    private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.2";
 
     private final Logger logger;
     private final ProxyServer proxy;
