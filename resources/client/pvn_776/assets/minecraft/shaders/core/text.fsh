@@ -1,10 +1,10 @@
 #version 330
 
 #if !defined(IS_GUI) && !defined(IS_SEE_THROUGH)
-#moj_import < minecraft:fog.glsl >
+#moj_import <minecraft:fog.glsl>
 #endif
 
-#moj_import < minecraft:dynamictransforms.glsl >
+#moj_import <minecraft:dynamictransforms.glsl>
 
 uniform sampler2D Sampler0;
 

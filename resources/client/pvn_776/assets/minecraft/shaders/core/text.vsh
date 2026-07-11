@@ -1,12 +1,12 @@
 #version 330
 
 #if !defined(IS_GUI) && !defined(IS_SEE_THROUGH)
-#moj_import < minecraft:fog.glsl >
-#moj_import < minecraft:sample_lightmap.glsl >
+#moj_import <minecraft:fog.glsl>
+#moj_import <minecraft:sample_lightmap.glsl>
 #endif
 
-#moj_import < minecraft:dynamictransforms.glsl >
-#moj_import < minecraft:projection.glsl >
+#moj_import <minecraft:dynamictransforms.glsl>
+#moj_import <minecraft:projection.glsl>
 
 in vec3 Position;
 in vec4 Color;
