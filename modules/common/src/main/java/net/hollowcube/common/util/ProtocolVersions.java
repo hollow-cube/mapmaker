@@ -26,6 +26,7 @@ public final class ProtocolVersions {
     public static final int V1_21_9 = 773;
     public static final int V1_21_11 = 774;
     public static final int V26_1 = 775;
+    public static final int V26_2 = 776;
 
     public static final int UNKNOWN = -1;
     public static final int MIN_SUPPORTED = V1_21_7;
@@ -88,7 +89,8 @@ public final class ProtocolVersions {
         Map.entry("1.21.7", V1_21_7),
         Map.entry("1.21.9", V1_21_9),
         Map.entry("1.21.11", V1_21_11),
-        Map.entry("26.1", V26_1)
+        Map.entry("26.1", V26_1),
+        Map.entry("26.2", V26_2)
     );
     private static final Map<Integer, String> NAME_TO_ID = ID_TO_NAME.entrySet().stream()
         .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
