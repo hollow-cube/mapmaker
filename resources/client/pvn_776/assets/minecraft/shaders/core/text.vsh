@@ -48,6 +48,12 @@ void main() {
         pos.xy += target - origin + vec2(-1.0, float(icol.g - 128) - 1.0);
 
         color = vec4(vec3(icol.b >> 5, (icol.b >> 2) & 7, icol.b & 3) / vec3(7.0, 7.0, 3.0), 1.0);
+    } else if (icol.a == 0x4E && (icol.r >> 4) == 0xB) {
+        // Relative-offset glyph (container titles, toasts): move down by a 12-bit y offset
+        // from wherever vanilla drew it, canceling the shadow displacement. No anchoring.
+        pos.xy += vec2(-1.0, float(((icol.r & 15) << 8 | icol.g) - 2048) - 1.0);
+
+        color = vec4(vec3(icol.b >> 5, (icol.b >> 2) & 7, icol.b & 3) / vec3(7.0, 7.0, 3.0), 1.0);
     }
 
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);

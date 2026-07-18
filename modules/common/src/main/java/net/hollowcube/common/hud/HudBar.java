@@ -67,6 +67,11 @@ public final class HudBar {
         default int cacheKey(@NotNull Player player) {
             return ThreadLocalRandom.current().nextInt();
         }
+
+        /** Epoch millis after which the module is removed automatically, or -1 to never expire. */
+        default long expiration() {
+            return -1;
+        }
     }
 
     private final Set<Module> modules = new CopyOnWriteArraySet<>();
@@ -110,6 +115,9 @@ public final class HudBar {
             player.hideBossBar(bar);
             player.showBossBar(bar);
         }
+
+        long now = System.currentTimeMillis();
+        modules.removeIf(module -> module.expiration() > 0 && module.expiration() < now);
 
         int hash = 1;
         for (Module module : modules) {

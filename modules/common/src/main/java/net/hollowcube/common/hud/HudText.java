@@ -19,6 +19,7 @@ public final class HudText {
 
     private static final int SENTINEL_ALPHA = 0x4E;
     private static final int FEATURE_ANCHOR = 0xA0;
+    private static final int FEATURE_OFFSET = 0xB0;
 
     private HudText() {
     }
@@ -53,6 +54,21 @@ public final class HudText {
         return ShadowColor.shadowColor((SENTINEL_ALPHA << 24)
                 | ((FEATURE_ANCHOR | anchor.ordinal()) << 16)
                 | ((yOffset + 128) << 8)
+                | rgb332(tint));
+    }
+
+    /**
+     * A relative vertical offset marker: moves the glyph down by yOffset from wherever it was
+     * drawn, without anchoring. For text positioned within a vanilla-placed surface (container
+     * titles, toasts). 12-bit offset: low nibble of R + all of G.
+     */
+    public static @NotNull ShadowColor offset(int yOffset, @NotNull TextColor tint) {
+        if (yOffset < -2048 || yOffset > 2047) throw new IllegalArgumentException("yOffset out of range: " + yOffset);
+
+        int biased = yOffset + 2048;
+        return ShadowColor.shadowColor((SENTINEL_ALPHA << 24)
+                | ((FEATURE_OFFSET | (biased >> 8)) << 16)
+                | ((biased & 0xFF) << 8)
                 | rgb332(tint));
     }
 
