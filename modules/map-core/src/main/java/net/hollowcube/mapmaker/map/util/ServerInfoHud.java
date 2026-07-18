@@ -31,8 +31,8 @@ public class ServerInfoHud implements HudBar.Module {
 
     // Past the right edge of the hotbar (91px half-width), two rows stacked above the bottom edge.
     private static final int OFFSET_X = 130;
-    private static final int LINE_1_Y = -20;
-    private static final int LINE_2_Y = -10;
+    private static final int LINE_1_Y = -35;
+    private static final int LINE_2_Y = -25;
 
     private long lastUpdate = 0;
 
