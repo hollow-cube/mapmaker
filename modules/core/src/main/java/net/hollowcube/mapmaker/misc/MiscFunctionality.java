@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.misc;
 
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudBar;
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.api.ApiClient;
@@ -10,13 +13,13 @@ import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.CoreTeams;
 import net.hollowcube.mapmaker.util.ItemUtils;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.title.Title;
@@ -83,8 +86,13 @@ public final class MiscFunctionality {
 
     private static final BadSprite CURRENCY_DISPLAY = BadSprite.SPRITE_MAP.get("hud/currency_display");
 
-    public static final class CurrencyDisplayHud implements ActionBar.Provider {
+    public static final class CurrencyDisplayHud implements HudBar.Module {
         public static final CurrencyDisplayHud INSTANCE = new CurrencyDisplayHud();
+
+        // Replace the sprite's old texture-encoded shift_y of 35 and the currency font's baked
+        // y of 32 (both were relative to the actionbar row at -72).
+        private static final int SPRITE_Y = -37;
+        private static final int TEXT_Y = -40;
 
         private CurrencyDisplayHud() {
         }
@@ -99,22 +107,31 @@ public final class MiscFunctionality {
         }
 
         @Override
-        public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+        public @NotNull Component render(@NotNull Player player) {
             // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
             // which should not show this ui for sure (it looks awful).
-            if (player.getGameMode() == GameMode.SPECTATOR) return;
+            if (player.getGameMode() == GameMode.SPECTATOR) return Component.empty();
 
             var playerData = PlayerData.fromPlayer(player);
 
-            builder.pushShadowColor(ShadowColor.none());
+            var builder = new FontUIBuilder();
+            builder.pushColor(HudText.KILL);
+
+            builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, SPRITE_Y, NamedTextColor.WHITE));
             builder.pos(11).drawInPlace(CURRENCY_DISPLAY);
+            builder.popShadowColor();
 
             int MAX_TEXT_WIDTH = 22;
 
+            builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, TEXT_Y, NamedTextColor.WHITE));
             var coinText = NumberUtil.formatCurrency(playerData.coins());
             builder.pos(15 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", coinText))).append("currency", coinText);
             var cubitText = NumberUtil.formatCurrency(playerData.cubits());
             builder.pos(56 + (MAX_TEXT_WIDTH - FontUtil.measureText("currency", cubitText))).append("currency", cubitText);
+            builder.popShadowColor();
+
+            builder.popColor();
+            return builder.build(true);
         }
     }
 

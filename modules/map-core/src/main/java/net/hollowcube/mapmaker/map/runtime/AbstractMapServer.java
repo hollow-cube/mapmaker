@@ -587,11 +587,11 @@ public abstract class AbstractMapServer implements MapServer {
 
         // The hud bar carrier must be created (shown) before any other boss bar so the
         // anchored text shader's first-bar origin assumption holds.
-        HudBar.forPlayer(player);
+        var hudBar = HudBar.forPlayer(player);
+        hudBar.addModule(ChatChannelDisplay.INSTANCE);
+        hudBar.addModule(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
 
         var actionBar = ActionBar.forPlayer(player);
-        actionBar.addProvider(ChatChannelDisplay.INSTANCE);
-        actionBar.addProvider(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
         actionBar.addProvider(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into

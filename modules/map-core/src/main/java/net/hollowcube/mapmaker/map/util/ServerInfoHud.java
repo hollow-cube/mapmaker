@@ -4,7 +4,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.hud.HudAnchor;
 import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.common.hud.HudText;
-import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -29,9 +29,10 @@ public class ServerInfoHud implements HudBar.Module {
                 .addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
     }
 
-    // Just past the right edge of the hotbar (91px half-width), roughly centered on its height.
+    // Just past the right edge of the hotbar (91px half-width), two rows stacked above the bottom edge.
     private static final int OFFSET_X = 100;
-    private static final int OFFSET_Y = -15;
+    private static final int LINE_1_Y = -20;
+    private static final int LINE_2_Y = -10;
 
     private long lastUpdate = 0;
 
@@ -55,18 +56,25 @@ public class ServerInfoHud implements HudBar.Module {
             lastUpdate = now;
         }
 
-        var text = String.format("%.2f", lastTickTime) + "ms // " + lastMemoryUsage + "MB";
+        var builder = new FontUIBuilder();
+        builder.pushColor(HudText.KILL);
+
+        builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, LINE_1_Y, NamedTextColor.WHITE));
+        builder.pos(OFFSET_X);
+        builder.append(String.format("%.2f", lastTickTime) + "ms // " + lastMemoryUsage + "MB");
+        builder.popShadowColor();
+
         var world = MapWorld.forPlayer(player);
         if (world != null) {
-            text += " // " + world.map().settings().getSize().name().toLowerCase(Locale.ROOT)
-                    + "-" + ServerRuntime.getRuntime().size();
+            builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, LINE_2_Y, NamedTextColor.WHITE));
+            builder.pos(OFFSET_X);
+            builder.append(world.map().settings().getSize().name().toLowerCase(Locale.ROOT)
+                    + "-" + ServerRuntime.getRuntime().size());
+            builder.popShadowColor();
         }
 
-        return Component.text()
-                .append(Component.text(FontUtil.computeOffset(OFFSET_X)))
-                .append(HudText.text(text, HudAnchor.BOTTOM, OFFSET_Y, NamedTextColor.WHITE))
-                .append(Component.text(FontUtil.computeOffset(-OFFSET_X - FontUtil.measureText(text))))
-                .build();
+        builder.popColor();
+        return builder.build(true);
     }
 
     @Override
