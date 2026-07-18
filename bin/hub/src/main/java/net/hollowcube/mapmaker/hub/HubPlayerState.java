@@ -5,6 +5,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
+import net.hollowcube.mapmaker.hub.feature.misc.HudAnchorDemo;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTime;
 import net.hollowcube.mapmaker.map.MapPlayer;
@@ -56,6 +57,9 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
 
             OpenNotificationsItem.checkForUnread(world, new WeakReference<>(player));
 
+            // The anchor demo bar must be the first boss bar; the text shader assumes
+            // the carrier's name renders at the first bar's origin.
+            player.showBossBar(HudAnchorDemo.BAR);
             BOSS_BARS.forEach(player::showBossBar);
 
             if (player instanceof MapPlayer mp) {
