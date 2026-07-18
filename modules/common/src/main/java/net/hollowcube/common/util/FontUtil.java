@@ -40,23 +40,10 @@ public final class FontUtil {
 
         result.put("ascii", DEFAULT_FONT_WIDTHS);
         result.put("line_0", DEFAULT_FONT_WIDTHS);
-        result.put("line_1", DEFAULT_FONT_WIDTHS);
-        result.put("line_2", DEFAULT_FONT_WIDTHS);
-        result.put("line_3", DEFAULT_FONT_WIDTHS);
-        result.put("line_3_1", DEFAULT_FONT_WIDTHS);
-        result.put("line_4", DEFAULT_FONT_WIDTHS);
-        result.put("line_4_1", DEFAULT_FONT_WIDTHS);
-        result.put("bossbar_ascii_1", DEFAULT_FONT_WIDTHS);
         result.put("currency", FontWidths.CURRENCY_WIDTHS);
-        result.put("currency_creative", FontWidths.CURRENCY_WIDTHS);
         result.put("smallnums", FontWidths.CURRENCY_WIDTHS);
-        result.put("addons_tab_line1", FontWidths.CURRENCY_WIDTHS);
-        result.put("addons_tab_line2", FontWidths.CURRENCY_WIDTHS);
-        result.put("small_bossbar_line2", FontWidths.CURRENCY_WIDTHS);
         result.put("small", FontWidths.SMALL_WIDTHS);
         result.put("small_tall", FontWidths.SMALL_TALL_WIDTHS);
-        result.put("bossbar_small_1", FontWidths.SMALL_TALL_WIDTHS);
-        result.put("bossbar_small_2", FontWidths.SMALL_TALL_WIDTHS);
 
         CUSTOM_FONT_WIDTHS = Map.copyOf(result);
     }
