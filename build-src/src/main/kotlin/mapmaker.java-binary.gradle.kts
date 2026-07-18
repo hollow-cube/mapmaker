@@ -49,4 +49,6 @@ java {
 
 tasks.shadowJar {
     mergeServiceFiles()
+
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
