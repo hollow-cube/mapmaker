@@ -29,7 +29,7 @@ import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
+import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -299,7 +299,7 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
-        player.scheduleNextTick(_ -> ActionBar.forPlayer(player).toggleProvider(new ServerLatencyHud()));
+        player.scheduleNextTick(_ -> HudBar.forPlayer(player).toggleModule(new ServerLatencyHud()));
     }
 
     private void handleMobs(@NotNull Player player, @NotNull CommandContext context) {

@@ -94,6 +94,13 @@ public final class HudBar {
         modules.remove(module);
     }
 
+    public void toggleModule(@NotNull Module module) {
+        FutureUtil.assertTickThreadWarn();
+        if (!modules.remove(module)) {
+            modules.add(module);
+        }
+    }
+
     private @NotNull TaskSchedule update() {
         if (player.getPlayerConnection().getClientState() != ConnectionState.PLAY)
             return TaskSchedule.tick(2);

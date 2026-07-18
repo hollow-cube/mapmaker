@@ -1,16 +1,22 @@
 package net.hollowcube.mapmaker.map.util;
 
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudBar;
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.map.MapPlayer;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.kyori.adventure.text.format.ShadowColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public class ServerLatencyHud implements ActionBar.Provider {
+public class ServerLatencyHud implements HudBar.Module {
+
+    private static final int OFFSET_X = -230;
+    private static final int START_Y = -60;
+    private static final int LINE_HEIGHT = 12;
 
     private long lastUpdate = 0;
 
@@ -21,32 +27,31 @@ public class ServerLatencyHud implements ActionBar.Provider {
     }
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+    public @NotNull Component render(@NotNull Player player) {
         this.lastUpdate = System.currentTimeMillis();
 
-        builder.offset(250);
+        var builder = new FontUIBuilder();
+        builder.pushColor(HudText.KILL);
 
-        int y = -50;
+        int y = START_Y;
         for (var otherPlayer : player.getInstance().getPlayers()) {
             if (otherPlayer instanceof MapPlayer mp) {
                 int latency = mp.getLatency();
                 double avgLatency = mp.averageLatency();
 
                 var text = "%s: %dms (avg %.2fms)".formatted(mp.getUsername(), latency, avgLatency);
-                var textWidth = FontUtil.measureText(text);
 
-                builder.pushShadowColor(ShadowColor.none());
-                builder.pushColor(FontUtil.computeVerticalOffset(y));
-                builder.append(FontUtil.rewrite("anvil_title", text), textWidth);
+                builder.pushShadowColor(HudText.marker(HudAnchor.RIGHT, y, NamedTextColor.WHITE));
+                builder.pos(OFFSET_X);
+                builder.append(text);
                 builder.popShadowColor();
-                builder.popColor();
 
-                builder.tempReset();
-                builder.offset(250);
-
-                y += 12;
+                y += LINE_HEIGHT;
             }
         }
+
+        builder.popColor();
+        return builder.build(true);
     }
 
     @Override
