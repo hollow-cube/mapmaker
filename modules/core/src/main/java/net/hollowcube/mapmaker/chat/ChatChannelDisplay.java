@@ -17,8 +17,8 @@ public class ChatChannelDisplay implements HudBar.Module {
 
     public static final ChatChannelDisplay INSTANCE = new ChatChannelDisplay();
 
-    private static final int NORMAL_OFFSET = -96;
-    private static final int OFF_HAND_OFFSET = -125;
+    private static final int NORMAL_OFFSET = -98;
+    private static final int OFF_HAND_OFFSET = -127;
     // Replaces the sprites' old texture-encoded shift_y of 52 (relative to the actionbar row at -72).
     private static final int OFFSET_Y = -20;
 
