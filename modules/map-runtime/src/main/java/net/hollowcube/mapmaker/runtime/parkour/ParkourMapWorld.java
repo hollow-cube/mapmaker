@@ -42,12 +42,10 @@ import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListene
 import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
-import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourDebugHud;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.MolangOptimizer;
@@ -305,9 +303,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     @Override
     public void removePlayer(Player player) {
-        // Always try to remove, feature flag could have been removed since entering world and we still want it gone
-        ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
-
         player.removeTag(BEST_SAVESTATE);
 
         if (player instanceof MapPlayer mp) {

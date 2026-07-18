@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.map.item.vanilla;
 
 import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.ExtraTags;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
+import net.hollowcube.common.hud.HudBar;
+import net.hollowcube.mapmaker.util.TempHudMessage;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -75,8 +75,7 @@ public class DebugStickItem extends VanillaItemHandler {
     }
 
     private void sendActionBar(@NotNull Player player, @NotNull String message) {
-        var ab = ActionBar.forPlayer(player);
-        ab.addProvider(new GenericTempActionBarProvider(message, 1000L));
+        HudBar.forPlayer(player).addModule(new TempHudMessage(message, 1000L));
     }
 
     private static String cycle(@NotNull String[] array, @Nullable String current, int amount) {

@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +38,6 @@ public final class FontUtil {
         var result = new HashMap<String, Int2IntFunction>();
 
         result.put("ascii", DEFAULT_FONT_WIDTHS);
-        result.put("line_0", DEFAULT_FONT_WIDTHS);
         result.put("currency", FontWidths.CURRENCY_WIDTHS);
         result.put("smallnums", FontWidths.CURRENCY_WIDTHS);
         result.put("small", FontWidths.SMALL_WIDTHS);
@@ -192,10 +190,6 @@ public final class FontUtil {
         if (offset < -50 || offset > 205) throw new IllegalArgumentException("Offset out of range: " + offset);
 
         return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
-    }
-
-    public static @NotNull ShadowColor computeVerticalOffsetShadow(int offset) {
-        return ShadowColor.shadowColor(computeVerticalOffset(offset), 80);
     }
 
     public static String shorten(String text, int maxWidth, int defaultCharWidth) {

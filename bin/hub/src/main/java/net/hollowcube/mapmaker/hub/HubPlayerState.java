@@ -6,7 +6,6 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
 import net.hollowcube.mapmaker.hub.feature.misc.DoubleJumpFeature;
-import net.hollowcube.mapmaker.hub.feature.misc.HudAnchorDemo;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTime;
 import net.hollowcube.mapmaker.map.MapPlayer;
@@ -57,9 +56,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
 
             OpenNotificationsItem.checkForUnread(world, new WeakReference<>(player));
 
-            var hudBar = HudBar.forPlayer(player);
-            hudBar.addModule(HudAnchorDemo.MODULE);
-            hudBar.addModule(TITLE);
+            HudBar.forPlayer(player).addModule(TITLE);
 
             if (player instanceof MapPlayer mp) {
                 mp.setCanSendPose(false);
@@ -69,9 +66,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
         @Override
         public void resetPlayer(HubMapWorld world, Player player, @Nullable HubPlayerState nextState) {
             player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).removeModifier(REACH_MOD);
-            var hudBar = HudBar.forPlayer(player);
-            hudBar.removeModule(HudAnchorDemo.MODULE);
-            hudBar.removeModule(TITLE);
+            HudBar.forPlayer(player).removeModule(TITLE);
 
             // Write their settings to the database
             var playerData = PlayerData.fromPlayer(player);

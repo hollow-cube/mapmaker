@@ -1,18 +1,25 @@
 package net.hollowcube.mapmaker.misc;
 
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudBar;
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.format.ShadowColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.to_be_refactored.BadSprite.require;
 
-public class ExpBarRenderer implements ActionBar.Provider {
+public class ExpBarRenderer implements HudBar.Module {
     private static final int XP_BAR_WIDTH = 182;
+    // Replace the level sprites' old texture-encoded shift_y (bar 36, nums 29), relative to
+    // the actionbar row at -72.
+    private static final int BAR_Y = -36;
+    private static final int NUMS_Y = -43;
 
     private static final BadSprite[] XP_BAR_BACKGROUND = new BadSprite[]{
             require("hud/level/xp_bar_background_off"), require("hud/level/xp_bar_background_on"),
@@ -61,15 +68,17 @@ public class ExpBarRenderer implements ActionBar.Provider {
     }
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
+    public @NotNull Component render(@NotNull Player player) {
         // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
         // which should not show this ui for sure (it looks awful).
-        if (player.getGameMode() == GameMode.SPECTATOR) return;
+        if (player.getGameMode() == GameMode.SPECTATOR) return Component.empty();
 
         var hasExperienceBar = player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE;
-        if (hasExperienceBar) return; // Use the builtin one for these.
+        if (hasExperienceBar) return Component.empty(); // Use the builtin one for these.
 
-        builder.pushShadowColor(ShadowColor.none());
+        var builder = new FontUIBuilder();
+        builder.pushColor(HudText.KILL);
+        builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, BAR_Y, NamedTextColor.WHITE));
 
         int pixel = (int) (XP_BAR_WIDTH * player.getExp());
 
@@ -159,17 +168,22 @@ public class ExpBarRenderer implements ActionBar.Provider {
             builder.drawInPlace(XP_BAR_EDGE[0]);
         }
 
+        builder.popShadowColor();
+
         int level = player.getLevel();
         if (level > 0) {
+            builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, NUMS_Y, NamedTextColor.WHITE));
             var levelChars = String.valueOf(level).toCharArray();
             builder.pos(-(6 * levelChars.length) / 2 + 1);
             for (char c : levelChars) {
                 var sprite = NUMS[c - '0'];
                 builder.offset(-1).drawInPlace(sprite);
             }
+            builder.popShadowColor();
         }
 
-        builder.popShadowColor();
+        builder.popColor();
+        return builder.build(true);
     }
 
 }

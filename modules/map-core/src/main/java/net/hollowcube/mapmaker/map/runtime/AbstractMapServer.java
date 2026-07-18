@@ -20,6 +20,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.dialogs.DialogButtons;
+import net.hollowcube.common.hud.HudAnchorDemo;
 import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.common.events.EventExtensions;
 import net.hollowcube.common.lang.LanguageProviderV2;
@@ -59,6 +60,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.accessory.AbstractAccessoryImpl;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.posthog.PostHogFeatureFlagProvider;
 import net.hollowcube.mapmaker.feature.unleash.UnleashConfig;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.gui.settings.PlayerSettingsScreen;
 import net.hollowcube.mapmaker.invite.MapInviteAcceptedOrRejectedListener;
 import net.hollowcube.mapmaker.invite.MapInviteListener;
@@ -87,7 +89,6 @@ import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.hollowcube.mapmaker.util.nats.NatsConfig;
@@ -590,9 +591,11 @@ public abstract class AbstractMapServer implements MapServer {
         var hudBar = HudBar.forPlayer(player);
         hudBar.addModule(ChatChannelDisplay.INSTANCE);
         hudBar.addModule(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
+        if (playerData.getSetting(PlayerSettings.DEBUG_UI_OVERLAY)) {
+            hudBar.addModule(HudAnchorDemo.MODULE);
+        }
 
-        var actionBar = ActionBar.forPlayer(player);
-        actionBar.addProvider(new ExpBarRenderer());
+        hudBar.addModule(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into
         var world = MapWorld.forInstance(player.getInstance());

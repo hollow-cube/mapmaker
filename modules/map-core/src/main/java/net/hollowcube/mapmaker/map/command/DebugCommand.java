@@ -27,8 +27,10 @@ import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.common.hud.HudAnchorDemo;
 import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
@@ -100,6 +102,7 @@ public class DebugCommand extends CommandDsl {
         createPermissionedSubcommand("fixthedripleaf", this::fixTheDripleaf,
             "add dripleaf block handlers to relevant blocks");
         createPermissionedSubcommand("latency", this::handleLatency, "show latency to other players");
+        createPermissionedSubcommand("ui", this::handleUiOverlay, "toggle the ui anchor debug overlay");
         createPermissionedSubcommand("mobs", this::handleMobs, "spawn one of each mob for testing");
 
         var vjoin = createPermissionedSubcommand("vjoin", this::handleVerificationJoin,
@@ -300,6 +303,18 @@ public class DebugCommand extends CommandDsl {
 
     private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
         player.scheduleNextTick(_ -> HudBar.forPlayer(player).toggleModule(new ServerLatencyHud()));
+    }
+
+    private void handleUiOverlay(@NotNull Player player, @NotNull CommandContext context) {
+        var playerData = PlayerData.fromPlayer(player);
+        boolean enabled = !playerData.getSetting(PlayerSettings.DEBUG_UI_OVERLAY);
+        playerData.setSetting(PlayerSettings.DEBUG_UI_OVERLAY, enabled);
+        player.scheduleNextTick(_ -> {
+            var hudBar = HudBar.forPlayer(player);
+            if (enabled) hudBar.addModule(HudAnchorDemo.MODULE);
+            else hudBar.removeModule(HudAnchorDemo.MODULE);
+        });
+        player.sendMessage("UI debug overlay " + (enabled ? "enabled" : "disabled"));
     }
 
     private void handleMobs(@NotNull Player player, @NotNull CommandContext context) {

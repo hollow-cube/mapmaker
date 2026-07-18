@@ -1,8 +1,5 @@
-package net.hollowcube.mapmaker.hub.feature.misc;
+package net.hollowcube.common.hud;
 
-import net.hollowcube.common.hud.HudAnchor;
-import net.hollowcube.common.hud.HudBar;
-import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
