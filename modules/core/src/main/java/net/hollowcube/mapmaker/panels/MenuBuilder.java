@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.panels;
 
 import it.unimi.dsi.fastutil.ints.IntIntPair;
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
@@ -136,9 +138,11 @@ public class MenuBuilder {
     public void draw(int x, int y, BadSprite sprite) {
         int startX = computeAbsoluteX(x), startY = computeAbsoluteY(y);
 
-        title.pushColor(FontUtil.computeVerticalOffset(startY));
+        title.pushColor(HudText.KILL);
+        title.pushShadowColor(HudText.offset(startY, NamedTextColor.WHITE));
         title.pos(startX);
         title.drawInPlace(sprite);
+        title.popShadowColor();
         title.popColor();
     }
 
@@ -148,12 +152,12 @@ public class MenuBuilder {
         // Account for font height. Not sure this is the solution i want for that.
         startY += FontUtil.DEFAULT_HEIGHT - 1;
 
-        title.pushShadowColor(FontUtil.computeVerticalOffsetShadow(startY));
-        title.pushColor(FontUtil.computeVerticalOffset(startY));
+        title.pushColor(HudText.KILL);
+        title.pushShadowColor(HudText.offset(startY, NamedTextColor.WHITE));
         title.pos(startX);
         title.append(text, width);
-        title.popColor();
         title.popShadowColor();
+        title.popColor();
     }
 
     public Component getTitle() {
