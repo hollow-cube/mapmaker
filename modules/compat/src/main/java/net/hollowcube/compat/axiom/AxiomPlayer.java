@@ -30,7 +30,7 @@ public final class AxiomPlayer {
     static final Tag<Boolean> AXIOM_PENDING_ENABLE = Tag.Transient("axiom:pending_enable");
 
     private static final AxiomClientboundEnablePacket.ServerConfig SERVER_CONFIG = new AxiomClientboundEnablePacket.ServerConfig(
-            0x100000, // 1mb,
+        0x100000, // 1mb,
             AxiomAPI.BLUEPRINT_VERSION,
             List.of(), List.of() // Custom Blocks
     );
