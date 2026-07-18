@@ -29,8 +29,8 @@ public class ServerInfoHud implements HudBar.Module {
                 .addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
     }
 
-    // Just past the right edge of the hotbar (91px half-width), two rows stacked above the bottom edge.
-    private static final int OFFSET_X = 100;
+    // Past the right edge of the hotbar (91px half-width), two rows stacked above the bottom edge.
+    private static final int OFFSET_X = 130;
     private static final int LINE_1_Y = -20;
     private static final int LINE_2_Y = -10;
 
