@@ -1,5 +1,8 @@
 package net.hollowcube.mapmaker.runtime.parkour.hud;
 
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudBar;
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.OpUtils;
@@ -8,17 +11,21 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.format.ShadowColor;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
-public class ParkourTimerHud implements ActionBar.Provider {
+public class ParkourTimerHud implements HudBar.Module {
     private static final BackgroundSpriteSet BACKGROUND = new BackgroundSpriteSet("hud/bossbar/line1");
     private static final BadSprite TIMER = BadSprite.SPRITE_MAP.get("hud/timer");
     private static final int BACKGROUND_PADDING = 2;
+    // The old actionbar row relative to the bottom anchor; text adds the old bossbar_ascii_1 font shift.
+    private static final int OFFSET_Y = -72;
+    private static final int TEXT_OFFSET_Y = OFFSET_Y + 2;
 
     public static final ParkourTimerHud INSTANCE = new ParkourTimerHud();
 
@@ -34,12 +41,12 @@ public class ParkourTimerHud implements ActionBar.Provider {
     }
 
     @Override
-    public void provide(Player player, FontUIBuilder builder) {
+    public @NotNull Component render(@NotNull Player player) {
         var world = ParkourMapWorld.forPlayer(player);
-        if (world == null) return;
+        if (world == null) return Component.empty();
 
         if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return;
+            return Component.empty();
 
         long time = p.saveState().getRealPlaytime();
         var startingTimer = OpUtils.map(world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS),
@@ -57,22 +64,28 @@ public class ParkourTimerHud implements ActionBar.Provider {
             var timer = p.saveState().state(PlayState.class).get(EditTimerAction.SAVE_DATA);
             if (timer != null) time = timer.toMillis();
         } else {
-            return; // Don't show the normal timer for testing, only playing
+            return Component.empty(); // Don't show the normal timer for testing, only playing
         }
 
         var text = formatMapPlaytime(time, true);
         // Text + spacing of same size of the ends of the background + timer width
         var width = FontUtil.measureText(text) + BACKGROUND_PADDING * 4 + TIMER.width();
 
-        builder.pushShadowColor(ShadowColor.none());
+        var builder = new FontUIBuilder();
+        builder.pushColor(HudText.KILL);
+        builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, OFFSET_Y, NamedTextColor.WHITE));
         builder.pos(-width / 2);
         builder.append(BACKGROUND.build(width - BACKGROUND_PADDING * 2), width);
         builder.offset(-width);
         builder.offset(BACKGROUND_PADDING);
         builder.drawInPlace(TIMER);
         builder.offset(BACKGROUND_PADDING);
-        builder.append("bossbar_ascii_1", text);
         builder.popShadowColor();
+        builder.pushShadowColor(HudText.marker(HudAnchor.BOTTOM, TEXT_OFFSET_Y, NamedTextColor.WHITE));
+        builder.append(text);
+        builder.popShadowColor();
+        builder.popColor();
+        return builder.build(true);
     }
 
     @Override

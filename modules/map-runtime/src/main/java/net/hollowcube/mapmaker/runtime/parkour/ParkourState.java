@@ -21,6 +21,7 @@ import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.hud.SpectatorModeHud;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
+import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -67,7 +68,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             noxesium.set(NoxesiumGameComponents.CLIENT_AUTHORITATIVE_ELYTRA, true);
 
             // Timer is only added for scorable playing states.
-            ActionBar.forPlayer(player).addProvider(ParkourTimerHud.INSTANCE);
+            HudBar.forPlayer(player).addModule(ParkourTimerHud.INSTANCE);
 
             final var playState = saveState().state(PlayState.class);
 
@@ -145,7 +146,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             if (nextState instanceof AnyPlaying) return;
 
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
-            ActionBar.forPlayer(player).removeProvider(ParkourTimerHud.INSTANCE);
+            HudBar.forPlayer(player).removeModule(ParkourTimerHud.INSTANCE);
 
             if (nextState != null || player.isRemoved()) return;
 
