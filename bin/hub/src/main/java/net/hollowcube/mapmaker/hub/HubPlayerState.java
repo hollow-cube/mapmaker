@@ -11,9 +11,8 @@ import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTime;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.PlayerState;
-import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.GameMode;
@@ -32,9 +31,9 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
         private static final AttributeModifier REACH_MOD = new AttributeModifier("mapmaker:hub_reach",
                 40 - Attribute.ENTITY_INTERACTION_RANGE.defaultValue(), AttributeOperation.ADD_VALUE);
 
-        private static final List<BossBar> BOSS_BARS = List.of(
-                BossBars.createLine1(Component.text(FontUtil.rewrite("bossbar_ascii_1", "Map Maker Early Access"), TextColor.color(0x3895FF))),
-                BossBars.ADDRESS_LINE
+        private static final HudBar.Module TITLE = TitleHud.module(
+                TitleHud.line1(TitleHud.text1(Component.text("Map Maker Early Access", TextColor.color(0x3895FF)))),
+                TitleHud.ADDRESS_LINE
         );
 
         @Override
@@ -58,8 +57,9 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
 
             OpenNotificationsItem.checkForUnread(world, new WeakReference<>(player));
 
-            HudBar.forPlayer(player).addModule(HudAnchorDemo.MODULE);
-            BOSS_BARS.forEach(player::showBossBar);
+            var hudBar = HudBar.forPlayer(player);
+            hudBar.addModule(HudAnchorDemo.MODULE);
+            hudBar.addModule(TITLE);
 
             if (player instanceof MapPlayer mp) {
                 mp.setCanSendPose(false);
@@ -69,7 +69,9 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
         @Override
         public void resetPlayer(HubMapWorld world, Player player, @Nullable HubPlayerState nextState) {
             player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE).removeModifier(REACH_MOD);
-            BossBars.clear(player);
+            var hudBar = HudBar.forPlayer(player);
+            hudBar.removeModule(HudAnchorDemo.MODULE);
+            hudBar.removeModule(TITLE);
 
             // Write their settings to the database
             var playerData = PlayerData.fromPlayer(player);

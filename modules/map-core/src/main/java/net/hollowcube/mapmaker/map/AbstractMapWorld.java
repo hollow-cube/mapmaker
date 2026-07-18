@@ -16,9 +16,8 @@ import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
-import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.FeatureFlag;
@@ -85,7 +84,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     private Octree octree = Octree.emptyOctree();
     private boolean octreeDirty = true;
 
-    private @Nullable List<BossBar> bossBars;
+    private HudBar.@Nullable Module titleHud;
 
     @SuppressWarnings("unchecked")
     protected AbstractMapWorld(MapServer server, MapData map, MapInstance instance, Class<S> stateClass) {
@@ -247,7 +246,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             stateChangeEvent.end();
         }
 
-        if (this.bossBars != null) bossBars.forEach(player::showBossBar);
+        if (this.titleHud != null) HudBar.forPlayer(player).addModule(titleHud);
 
         callEvent(new MapPlayerJoinEvent(this, (MapPlayer) player));
     }
@@ -265,7 +264,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
         callEvent(new MapPlayerLeaveEvent(this, (MapPlayer) player));
 
-        if (this.bossBars != null) BossBars.clear(player);
+        if (this.titleHud != null) HudBar.forPlayer(player).removeModule(titleHud);
 
         // Have to get and remove later because we need to still be in the state when resetting
         // them out of it (this is a contract of this interface). However this is OK because all
@@ -378,7 +377,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     public void loadWorld() {
         loadWorldData();
 
-        this.bossBars = createBossBars();
+        this.titleHud = createTitleHud();
     }
 
     public CompletableFuture<Void> close() {
@@ -396,8 +395,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         return CompletableFuture.completedFuture(null);
     }
 
-    protected @Nullable List<BossBar> createBossBars() {
-        return List.of();
+    protected HudBar.@Nullable Module createTitleHud() {
+        return null;
     }
 
     protected void loadWorldData() {

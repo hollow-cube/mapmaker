@@ -31,6 +31,21 @@ public final class HudBar {
         return instance;
     }
 
+    /** A module with fixed content, keyed by identity for the cache. */
+    public static @NotNull Module staticModule(@NotNull Component content) {
+        return new Module() {
+            @Override
+            public @NotNull Component render(@NotNull Player player) {
+                return content;
+            }
+
+            @Override
+            public int cacheKey(@NotNull Player player) {
+                return System.identityHashCode(this);
+            }
+        };
+    }
+
     public interface Module {
         /**
          * Content for this module. Every glyph must be anchored ({@link HudText}) and the

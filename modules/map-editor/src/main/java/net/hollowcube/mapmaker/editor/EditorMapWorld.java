@@ -30,7 +30,8 @@ import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
-import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.common.hud.HudBar;
+import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -44,7 +45,6 @@ import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.hollowcube.terraform.storage.TerraformInstanceStorage;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.MinecraftServer;
@@ -202,8 +202,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     @Override
-    protected @Nullable List<BossBar> createBossBars() {
-        return BossBars.createEditingBossBar(map());
+    protected HudBar.@Nullable Module createTitleHud() {
+        return TitleHud.editing(map());
     }
 
     @Override

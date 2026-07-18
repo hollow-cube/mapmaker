@@ -35,4 +35,13 @@ public class BackgroundSpriteSet {
     public @NotNull String build(int contentWidth) {
         return build(contentWidth, true, true);
     }
+
+    /** The net advance of {@link #build}: glyph advances (width + 1 each) minus the -1 overlap offsets. */
+    public int advance(int contentWidth) {
+        int total = left.width() + right.width() + 1;
+        for (int i = 0; i < widthSprites.length; i++) {
+            if ((contentWidth & (1 << i)) != 0) total += widthSprites[i].width();
+        }
+        return total;
+    }
 }

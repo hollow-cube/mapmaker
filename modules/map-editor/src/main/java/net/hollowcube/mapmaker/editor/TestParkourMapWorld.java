@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.molang.MolangExpr;
-import net.kyori.adventure.bossbar.BossBar;
+import net.hollowcube.common.hud.HudBar;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -96,7 +96,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     }
 
     @Override
-    protected @Nullable List<BossBar> createBossBars() {
+    protected HudBar.@Nullable Module createTitleHud() {
         return null; // Inherit from parent
     }
 

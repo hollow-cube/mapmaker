@@ -54,6 +54,7 @@ public final class FontUtil {
         result.put("addons_tab_line2", FontWidths.CURRENCY_WIDTHS);
         result.put("small_bossbar_line2", FontWidths.CURRENCY_WIDTHS);
         result.put("small", FontWidths.SMALL_WIDTHS);
+        result.put("small_tall", FontWidths.SMALL_TALL_WIDTHS);
         result.put("bossbar_small_1", FontWidths.SMALL_TALL_WIDTHS);
         result.put("bossbar_small_2", FontWidths.SMALL_TALL_WIDTHS);
 

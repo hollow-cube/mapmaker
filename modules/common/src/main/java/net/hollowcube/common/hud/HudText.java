@@ -1,6 +1,7 @@
 package net.hollowcube.common.hud;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
@@ -24,6 +25,26 @@ public final class HudText {
 
     public static @NotNull Component text(@NotNull String text, @NotNull HudAnchor anchor, int yOffset, @NotNull TextColor tint) {
         return Component.text(text).color(KILL).shadowColor(marker(anchor, yOffset, tint));
+    }
+
+    /**
+     * Anchors an existing component tree: every run keeps its layout and non-color style
+     * (hover events, etc), but its color moves into the marker tint (quantized to RGB 3:3:2)
+     * with the visible color replaced by {@link #KILL}. Uncolored runs tint white.
+     */
+    public static @NotNull Component anchored(@NotNull Component component, @NotNull HudAnchor anchor, int yOffset) {
+        return anchored(component, anchor, yOffset, NamedTextColor.WHITE);
+    }
+
+    private static @NotNull Component anchored(@NotNull Component component, @NotNull HudAnchor anchor, int yOffset, @NotNull TextColor inherited) {
+        var tint = component.color() != null ? component.color() : inherited;
+        var result = component.color(KILL).shadowColor(marker(anchor, yOffset, tint));
+        if (!component.children().isEmpty()) {
+            result = result.children(component.children().stream()
+                    .map(child -> anchored(child, anchor, yOffset, tint))
+                    .toList());
+        }
+        return result;
     }
 
     public static @NotNull ShadowColor marker(@NotNull HudAnchor anchor, int yOffset, @NotNull TextColor tint) {

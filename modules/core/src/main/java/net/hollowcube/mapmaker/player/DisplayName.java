@@ -1,8 +1,11 @@
 package net.hollowcube.mapmaker.player;
 
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -54,19 +57,19 @@ public record DisplayName(
                     var color = context == Context.NAME_TAG ? NamedTextColor.WHITE : TextColor.color(0xB0B0B0);
                     if (part.color != null && !part.color.isEmpty()) color = TextColor.fromCSSHexString(part.color);
 
-                    var text = part.text;
-                    if (context == Context.BOSS_BAR) text = FontUtil.rewrite("bossbar_ascii_1", text);
-                    builder.append(Component.text(text, color));
+                    Component text = Component.text(part.text, color);
+                    if (context == Context.BOSS_BAR) text = HudText.anchored(text, HudAnchor.TOP, TitleHud.LINE_1_TEXT_Y);
+                    builder.append(text);
                 }
                 case "badge" -> {
                     if (context == Context.PLAIN) continue;
 
-                    // FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain)
-
                     var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
                     if (context == Context.BOSS_BAR) icon += "_bb";
-                    builder.append(Component.text(BadSprite.require(icon).fontChar() + FontUtil.computeOffset(1), NamedTextColor.WHITE)
-                        .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
+                    Component badge = Component.text(BadSprite.require(icon).fontChar() + FontUtil.computeOffset(1), NamedTextColor.WHITE)
+                        .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore"))));
+                    if (context == Context.BOSS_BAR) badge = HudText.anchored(badge, HudAnchor.TOP, TitleHud.LINE_1_Y);
+                    builder.append(badge);
                 }
                 default -> throw new IllegalArgumentException("Unknown part type: " + part.type);
             }
