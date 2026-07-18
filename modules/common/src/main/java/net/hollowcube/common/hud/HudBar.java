@@ -3,7 +3,9 @@ package net.hollowcube.common.hud;
 import net.hollowcube.common.util.FutureUtil;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
@@ -21,6 +23,15 @@ import java.util.concurrent.ThreadLocalRandom;
  */
 public final class HudBar {
     private static final Tag<HudBar> TAG = Tag.Transient("hud_bar");
+
+    static {
+        // (Re)configuration wipes all boss bars client side while the server still counts the
+        // player as a viewer, so the carrier must be re-sent after every configuration phase.
+        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
+            var hud = event.getPlayer().getTag(TAG);
+            if (hud != null) hud.needsReshow = true;
+        });
+    }
 
     public static @NotNull HudBar forPlayer(@NotNull Player player) {
         var instance = player.getTag(TAG);
@@ -63,6 +74,7 @@ public final class HudBar {
     private final BossBar bar = BossBar.bossBar(Component.empty(), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
 
     private int lastHash = 0;
+    private volatile boolean needsReshow = false;
 
     private HudBar(@NotNull Player player) {
         this.player = player;
@@ -85,6 +97,12 @@ public final class HudBar {
     private @NotNull TaskSchedule update() {
         if (player.getPlayerConnection().getClientState() != ConnectionState.PLAY)
             return TaskSchedule.tick(2);
+
+        if (needsReshow) {
+            needsReshow = false;
+            player.hideBossBar(bar);
+            player.showBossBar(bar);
+        }
 
         int hash = 1;
         for (Module module : modules) {
