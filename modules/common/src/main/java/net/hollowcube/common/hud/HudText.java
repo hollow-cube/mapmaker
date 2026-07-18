@@ -6,6 +6,8 @@ import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.Function;
+
 /**
  * Anchored HUD text, rendered through the shadow quad: the anchor payload rides
  * {@link ShadowColor} (A=0x4E sentinel, R=0xA0|anchor, G=yOffset+128, B=RGB 3:3:2 tint)
@@ -34,15 +36,20 @@ public final class HudText {
      * with the visible color replaced by {@link #KILL}. Uncolored runs tint white.
      */
     public static @NotNull Component anchored(@NotNull Component component, @NotNull HudAnchor anchor, int yOffset) {
-        return anchored(component, anchor, yOffset, NamedTextColor.WHITE);
+        return mapTint(component, NamedTextColor.WHITE, tint -> marker(anchor, yOffset, tint));
     }
 
-    private static @NotNull Component anchored(@NotNull Component component, @NotNull HudAnchor anchor, int yOffset, @NotNull TextColor inherited) {
+    /** Like {@link #anchored} but with the relative-offset marker. */
+    public static @NotNull Component offset(@NotNull Component component, int yOffset) {
+        return mapTint(component, NamedTextColor.WHITE, tint -> offset(yOffset, tint));
+    }
+
+    private static @NotNull Component mapTint(@NotNull Component component, @NotNull TextColor inherited, @NotNull Function<TextColor, ShadowColor> marker) {
         var tint = component.color() != null ? component.color() : inherited;
-        var result = component.color(KILL).shadowColor(marker(anchor, yOffset, tint));
+        var result = component.color(KILL).shadowColor(marker.apply(tint));
         if (!component.children().isEmpty()) {
             result = result.children(component.children().stream()
-                    .map(child -> anchored(child, anchor, yOffset, tint))
+                    .map(child -> mapTint(child, tint, marker))
                     .toList());
         }
         return result;

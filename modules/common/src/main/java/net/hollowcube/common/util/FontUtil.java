@@ -15,7 +15,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -184,12 +183,6 @@ public final class FontUtil {
 
     public static @NotNull String computeOffset(int offset) {
         return FontSpacing.compute(offset);
-    }
-
-    public static @NotNull TextColor computeVerticalOffset(int offset) {
-        if (offset < -50 || offset > 205) throw new IllegalArgumentException("Offset out of range: " + offset);
-
-        return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
     }
 
     public static String shorten(String text, int maxWidth, int defaultCharWidth) {
