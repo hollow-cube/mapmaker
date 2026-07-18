@@ -1,17 +1,10 @@
 package net.hollowcube.mapmaker.panels;
 
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.ShadowColor;
-import net.kyori.adventure.text.format.TextDecoration;
-import net.minestom.server.component.DataComponents;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 public class Element {
     protected @UnknownNullability InventoryHost host; // Set after construction, should be careful with use.
@@ -41,7 +34,7 @@ public class Element {
     }
 
     public Element background(@Nullable String sprite, int x, int y) {
-        return background(sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), null, x, y));
+        return background(sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), x, y));
     }
 
     public Element background(@Nullable Sprite sprite) {
@@ -62,16 +55,6 @@ public class Element {
         for (var sprite : sprites) {
             if (sprite == null) continue;
             builder.draw(sprite.offsetX(), sprite.offsetY(), sprite.sprite());
-
-            if (sprite.hoverSprite() != null) {
-                var withHoverIcon = Component.text(sprite.hoverSprite().fontChar())
-                    .color(FontUtil.computeShadowPos(FontUtil.Size.S3X3, builder.absoluteX(), builder.absoluteY()))
-                    .shadowColor(ShadowColor.none())
-                    .decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(FontUtil.computeOffset(-sprite.hoverSprite().width() - 1)));
-                builder.editSlots(0, 0, builder.availWidth(), builder.availHeight(), DataComponents.CUSTOM_NAME, (Function<Component, Component>)
-                    old -> withHoverIcon.append(Objects.requireNonNullElse(old, Component.empty())));
-            }
         }
     }
 

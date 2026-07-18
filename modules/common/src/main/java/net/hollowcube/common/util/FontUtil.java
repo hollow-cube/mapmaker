@@ -233,35 +233,6 @@ public final class FontUtil {
         return result.toString();
     }
 
-    // This enum must match exactly the values in the text shader.
-    // May only have 8 values.
-    public enum Size {
-        S1X1,
-        S2X1,
-        S3X1,
-        S3X2,
-        S3X3,
-        S4X3,
-        UNUSED1,
-        UNUSED2;
-
-        public static Size fromSize(int width, int height) {
-            if (width == 1 && height == 1) return S1X1;
-            if (width == 2 && height == 1) return S2X1;
-            if (width == 3 && height == 1) return S3X1;
-            if (width == 3 && height == 2) return S3X2;
-            if (width == 3 && height == 3) return S3X3;
-            if (width == 4 && height == 3) return S4X3;
-            throw new IllegalArgumentException("Invalid size: " + width + "x" + height);
-        }
-    }
-
-    public static @NotNull TextColor computeShadowPos(@NotNull Size size, int slotX, int slotY) {
-        int slotIndex = slotX + slotY * 9;
-        return TextColor.color(78, (11 << 2) | (size.ordinal() >> 1),
-                ((size.ordinal() & 1) << 7) | (slotIndex & 0x7F));
-    }
-
     /**
      * Strips all "invalid" characters for use by players. The returned string may be empty, but will never be null.
      *

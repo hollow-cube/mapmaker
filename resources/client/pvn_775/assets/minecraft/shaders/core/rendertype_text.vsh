@@ -17,13 +17,8 @@ out float cylindricalVertexDistance;
 out vec4 vertexColor;
 out vec2 texCoord0;
 
-vec2[4] corners = vec2[](vec2(0, 0), vec2(0, 1), vec2(1, 1), vec2(1, 0));
-vec2[8] sizes = vec2[](vec2(1, 21./18.), vec2(2, 1), vec2(3, 21./18.), vec2(3, 2), vec2(3, 3), vec2(4, 3), vec2(1, 1), vec2(1, 1));
-
 void main() {
-    vec4 color = Color;
     vec3 pos = vec3(Position.xyz);
-    ivec4 icol = ivec4(round(Color * 255));
 
     // More book handling
     if (Color == vec4(78/255., 92/255., 38/255., Color.a)) {
@@ -33,35 +28,11 @@ void main() {
         pos.y += (Color.b * 255) - 50;
     }
 
-    // Hover icon handling
-    if (icol.x == 78 && icol.y >> 2 == 11) {
-        color = vec4(1);// Remove our marker color
-
-        vec2 center = vec2(
-        trunc((ceil(2.0/ProjMat[0][0] - 0.001) - 176.0)/2.0)+88.0,
-        trunc((ceil(2.0/(-ProjMat[1][1]) - 0.001) - 222.0)/2.0)+111.0
-        );
-        center -= vec2(81, 94);
-
-        int sizeIndex = ((icol.y & 3) << 1) | ((icol.z >> 7) & 1);
-        vec2 offset = (corners[gl_VertexID % 4] * sizes[sizeIndex]) * 18;
-
-        int slotIndex = icol.z & 0x7F;
-        vec2 slotPos = vec2(slotIndex % 9, slotIndex / 9) * 18;
-        if (slotPos.y > 5 * 18) {
-            // offset between main and player slots
-            slotPos += vec2(0, 13);
-        }
-        // TODO: offset between player and hotbar slots.
-
-        pos = vec3(center + round(offset + slotPos), pos.z - 4.0);
-    }
-
     gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
 
     sphericalVertexDistance = fog_spherical_distance(pos);
     cylindricalVertexDistance = fog_cylindrical_distance(pos);
-    vertexColor = color * sample_lightmap(Sampler2, UV2);
+    vertexColor = Color * sample_lightmap(Sampler2, UV2);
     texCoord0 = UV0;
 
     // More book handling

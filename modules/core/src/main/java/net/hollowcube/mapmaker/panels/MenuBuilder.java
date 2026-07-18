@@ -53,13 +53,6 @@ public class MenuBuilder {
         return this.slotHeight - this.slotY;
     }
 
-    public int absoluteX() {
-        return this.slotX;
-    }
-
-    public int absoluteY() {
-        return this.slotY;
-    }
 
     public record Bounds(int x, int y, int width, int height) {
 
