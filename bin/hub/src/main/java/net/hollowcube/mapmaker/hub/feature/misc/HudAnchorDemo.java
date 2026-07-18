@@ -1,21 +1,21 @@
 package net.hollowcube.mapmaker.hub.feature.misc;
 
 import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.util.FontUtil;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 
 /**
- * Demo of the anchored text shader: one label in each of the nine screen anchors,
- * delivered through a single (first) boss bar composed to net-zero advance.
+ * Demo of the anchored text shader: one label in each of the nine screen anchors.
  */
-public final class HudAnchorDemo {
+public final class HudAnchorDemo implements HudBar.Module {
     private static final int MARGIN = 2;
     private static final int TEXT_HEIGHT = 8;
 
@@ -25,9 +25,21 @@ public final class HudAnchorDemo {
             TextColor.color(0xFF55FF), TextColor.color(0xFFFF55), TextColor.color(0xAAAAAA),
     };
 
-    public static final BossBar BAR = BossBar.bossBar(buildName(), 1, BossBar.Color.YELLOW, BossBar.Overlay.PROGRESS);
+    public static final HudAnchorDemo MODULE = new HudAnchorDemo();
+
+    private static final Component CONTENT = buildName();
 
     private HudAnchorDemo() {
+    }
+
+    @Override
+    public @NotNull Component render(@NotNull Player player) {
+        return CONTENT;
+    }
+
+    @Override
+    public int cacheKey(@NotNull Player player) {
+        return 0;
     }
 
     private static @NotNull Component buildName() {

@@ -20,6 +20,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.dialogs.DialogButtons;
+import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.common.events.EventExtensions;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
@@ -71,7 +72,7 @@ import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.util.ACHook;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
-import net.hollowcube.mapmaker.map.util.ServerStatsHud;
+import net.hollowcube.mapmaker.map.util.ServerInfoHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerInviteService;
@@ -584,6 +585,10 @@ public abstract class AbstractMapServer implements MapServer {
 
         PlayerBackpack.fromPlayer(player).refresh();
 
+        // The hud bar carrier must be created (shown) before any other boss bar so the
+        // anchored text shader's first-bar origin assumption holds.
+        HudBar.forPlayer(player);
+
         var actionBar = ActionBar.forPlayer(player);
         actionBar.addProvider(ChatChannelDisplay.INSTANCE);
         actionBar.addProvider(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
@@ -606,7 +611,7 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (CoreFeatureFlags.SERVER_STAT_OVERLAY.test(player)) {
-            actionBar.addProvider(new ServerStatsHud());
+            HudBar.forPlayer(player).addModule(new ServerInfoHud());
         }
 
         // Garbage below

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.common.hud.HudBar;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
@@ -57,9 +58,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
 
             OpenNotificationsItem.checkForUnread(world, new WeakReference<>(player));
 
-            // The anchor demo bar must be the first boss bar; the text shader assumes
-            // the carrier's name renders at the first bar's origin.
-            player.showBossBar(HudAnchorDemo.BAR);
+            HudBar.forPlayer(player).addModule(HudAnchorDemo.MODULE);
             BOSS_BARS.forEach(player::showBossBar);
 
             if (player instanceof MapPlayer mp) {
