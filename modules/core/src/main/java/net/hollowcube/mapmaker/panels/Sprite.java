@@ -6,13 +6,12 @@ import org.jetbrains.annotations.Nullable;
 public record Sprite(
     String name,
     BadSprite sprite,
-    @Nullable BadSprite hoverSprite,
     int offsetX,
     int offsetY
 ) {
 
     public Sprite(String sprite, int offsetX, int offsetY) {
-        this(sprite, BadSprite.require(sprite), BadSprite.SPRITE_MAP.get(sprite + "_hover"), offsetX, offsetY);
+        this(sprite, BadSprite.require(sprite), offsetX, offsetY);
     }
 
     public Sprite(String sprite) {
@@ -20,6 +19,6 @@ public record Sprite(
     }
 
     public Sprite withOffset(int offsetX, int offsetY) {
-        return new Sprite(name, sprite, hoverSprite, offsetX, offsetY);
+        return new Sprite(name, sprite, offsetX, offsetY);
     }
 }

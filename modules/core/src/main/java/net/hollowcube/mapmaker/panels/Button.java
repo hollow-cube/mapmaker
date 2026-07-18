@@ -2,14 +2,12 @@ package net.hollowcube.mapmaker.panels;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.MessagesBase;
-import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.noxesium.NoxesiumAPI;
 import net.hollowcube.mapmaker.util.OverlayItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
-import net.kyori.adventure.text.format.ShadowColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponentMap;
@@ -58,7 +56,6 @@ public class Button extends Element implements ButtonClickAliases {
     protected @Nullable ResolvableProfile itemProfile = null;
     protected @Nullable DataComponentMap extraComponents = null;
     protected @Nullable Sprite sprite;
-    protected boolean disableHoverSprite = false;
     protected boolean disableTooltip = false;
 
     private @Nullable OnClickTypeSlot onLeftClick;
@@ -240,15 +237,6 @@ public class Button extends Element implements ButtonClickAliases {
         Component title = Objects.requireNonNullElse(this.itemTitle, Component.empty());
         if (sprite != null) {
             builder.draw(sprite.offsetX(), sprite.offsetY(), sprite.sprite());
-
-            if (!disableHoverSprite && sprite.hoverSprite() != null) {
-                var withHoverIcon = Component.text(sprite.hoverSprite().fontChar())
-                    .color(FontUtil.computeShadowPos(FontUtil.Size.fromSize(slotWidth, slotHeight), builder.absoluteX(), builder.absoluteY()))
-                    .shadowColor(ShadowColor.none())
-                    .decoration(TextDecoration.ITALIC, false)
-                    .append(Component.text(FontUtil.computeOffset(-sprite.hoverSprite().width() - 1)));
-                title = withHoverIcon.append(title);
-            }
         }
 
         if (this.itemModel == null || this.itemLore == null) return;
