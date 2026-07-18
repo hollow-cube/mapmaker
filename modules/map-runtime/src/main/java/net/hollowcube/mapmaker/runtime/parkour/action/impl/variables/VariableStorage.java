@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.action.impl.variables;
 
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.hollowcube.molang.eval.MolangValue;
 import net.minestom.server.codec.Codec;
@@ -34,6 +35,10 @@ public class VariableStorage {
 
     public void set(String name, double value) {
         this.variables.put(name, value);
+    }
+
+    public Map<String, Double> view() {
+        return Object2DoubleMaps.unmodifiable(this.variables);
     }
 
     @Override

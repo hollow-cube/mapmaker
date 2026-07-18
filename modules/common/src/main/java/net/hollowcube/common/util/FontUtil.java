@@ -15,8 +15,6 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.kyori.adventure.text.format.ShadowColor;
-import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -39,23 +37,10 @@ public final class FontUtil {
         var result = new HashMap<String, Int2IntFunction>();
 
         result.put("ascii", DEFAULT_FONT_WIDTHS);
-        result.put("line_0", DEFAULT_FONT_WIDTHS);
-        result.put("line_1", DEFAULT_FONT_WIDTHS);
-        result.put("line_2", DEFAULT_FONT_WIDTHS);
-        result.put("line_3", DEFAULT_FONT_WIDTHS);
-        result.put("line_3_1", DEFAULT_FONT_WIDTHS);
-        result.put("line_4", DEFAULT_FONT_WIDTHS);
-        result.put("line_4_1", DEFAULT_FONT_WIDTHS);
-        result.put("bossbar_ascii_1", DEFAULT_FONT_WIDTHS);
         result.put("currency", FontWidths.CURRENCY_WIDTHS);
-        result.put("currency_creative", FontWidths.CURRENCY_WIDTHS);
         result.put("smallnums", FontWidths.CURRENCY_WIDTHS);
-        result.put("addons_tab_line1", FontWidths.CURRENCY_WIDTHS);
-        result.put("addons_tab_line2", FontWidths.CURRENCY_WIDTHS);
-        result.put("small_bossbar_line2", FontWidths.CURRENCY_WIDTHS);
         result.put("small", FontWidths.SMALL_WIDTHS);
-        result.put("bossbar_small_1", FontWidths.SMALL_TALL_WIDTHS);
-        result.put("bossbar_small_2", FontWidths.SMALL_TALL_WIDTHS);
+        result.put("small_tall", FontWidths.SMALL_TALL_WIDTHS);
 
         CUSTOM_FONT_WIDTHS = Map.copyOf(result);
     }
@@ -198,16 +183,6 @@ public final class FontUtil {
 
     public static @NotNull String computeOffset(int offset) {
         return FontSpacing.compute(offset);
-    }
-
-    public static @NotNull TextColor computeVerticalOffset(int offset) {
-        if (offset < -50 || offset > 205) throw new IllegalArgumentException("Offset out of range: " + offset);
-
-        return TextColor.color(0x4E5A00 | ((offset + 50) & 0xFF));
-    }
-
-    public static @NotNull ShadowColor computeVerticalOffsetShadow(int offset) {
-        return ShadowColor.shadowColor(computeVerticalOffset(offset), 80);
     }
 
     public static String shorten(String text, int maxWidth, int defaultCharWidth) {

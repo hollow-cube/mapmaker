@@ -7,7 +7,6 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
@@ -89,14 +88,14 @@ public class PlayerDataUpdateConsumer implements Closeable {
             case CUBITS -> {
                 player.sendMessage(Component.translatable("store.confirmation.cubits", Component.text(reason.quantity())));
 
-                var displayName = players.getDisplayName(player.getUuid().toString()).build(DisplayName.Context.DEFAULT);
+                var displayName = players.getDisplayName(player.getUuid().toString()).build();
                 Audiences.all().sendMessage(Component.translatable("store.broadcast.cubits", displayName));
             }
             case HYPERCUBE -> {
                 var months = Component.text(reason.quantity() / MINUTES_TO_MONTHS);
                 player.sendMessage(Component.translatable("store.confirmation.hypercube", months));
 
-                var displayName = players.getDisplayName(player.getUuid().toString()).build(DisplayName.Context.DEFAULT);
+                var displayName = players.getDisplayName(player.getUuid().toString()).build();
                 Audiences.all().sendMessage(Component.translatable("store.broadcast.hypercube", displayName));
 
                 //todo need to refresh the players display name everywhere, it probably changed.

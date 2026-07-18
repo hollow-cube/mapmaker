@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
@@ -21,7 +22,7 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.item.vanilla.*;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
-import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -41,16 +42,13 @@ import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListene
 import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
-import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourDebugHud;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.molang.MolangExpr;
 import net.hollowcube.molang.MolangOptimizer;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -305,9 +303,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     @Override
     public void removePlayer(Player player) {
-        // Always try to remove, feature flag could have been removed since entering world and we still want it gone
-        ActionBar.forPlayer(player).removeProvider(ParkourDebugHud.INSTANCE);
-
         player.removeTag(BEST_SAVESTATE);
 
         if (player instanceof MapPlayer mp) {
@@ -552,8 +547,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     @Override
-    protected @Nullable List<BossBar> createBossBars() {
-        return BossBars.createPlayingBossBar(server().api().players, map());
+    protected PlayerHud.@Nullable Module createTitleHud() {
+        return TitleHud.playing(server().api().players, map());
     }
 
     //endregion

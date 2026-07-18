@@ -1,13 +1,18 @@
 package net.hollowcube.mapmaker.runtime.parkour.hud;
 
-import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.format.ShadowColor;
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudNode;
+import net.hollowcube.common.hud.PlayerHud;
 import net.minestom.server.entity.Player;
 
-public class SpectatorModeHud implements ActionBar.Provider {
-    private static final BadSprite SPECTATOR_SPRITE = BadSprite.require("hud/spectator");
+public class SpectatorModeHud implements PlayerHud.Module {
+    // The old actionbar row relative to the bottom anchor.
+    private static final int OFFSET_Y = -72;
+
+    private static final HudNode.Anchored CONTENT = HudNode.sprite("hud/spectator")
+        .frame(0, HudNode.Align.CENTER)
+        .offset(0, OFFSET_Y)
+        .anchored(HudAnchor.BOTTOM);
 
     public static final SpectatorModeHud INSTANCE = new SpectatorModeHud();
 
@@ -15,14 +20,8 @@ public class SpectatorModeHud implements ActionBar.Provider {
     }
 
     @Override
-    public int cacheKey(Player player) {
-        return 0;
-    }
-
-    @Override
-    public void provide(Player player, FontUIBuilder builder) {
-        builder.pushShadowColor(ShadowColor.none());
-        builder.pos(-SPECTATOR_SPRITE.width() / 2).drawInPlace(SPECTATOR_SPRITE);
+    public HudNode.Anchored render(Player player) {
+        return CONTENT;
     }
 
     @Override

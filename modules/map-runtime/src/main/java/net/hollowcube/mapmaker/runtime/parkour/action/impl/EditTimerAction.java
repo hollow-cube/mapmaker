@@ -53,8 +53,8 @@ public record EditTimerAction(Operation operation, int time) implements Action {
         return new EditTimerAction(operation, this.time);
     }
 
-    public EditTimerAction withLives(int lives) {
-        return new EditTimerAction(this.operation, lives);
+    public EditTimerAction withTime(int time) {
+        return new EditTimerAction(this.operation, time);
     }
 
     @Override
@@ -102,7 +102,7 @@ public record EditTimerAction(Operation operation, int time) implements Action {
                     .sprites(SPRITE_SET.withOffset(2, 3),
                             SPRITE_ADD.withOffset(2, 3),
                             SPRITE_SUBTRACT.withOffset(2, 3)));
-            this.valueInput = add(1, 3, new ControlledNumberInput("timer.value", update(EditTimerAction::withLives))
+            this.valueInput = add(1, 3, new ControlledNumberInput("timer.value", update(EditTimerAction::withTime))
                     .formatted(i -> i == 0 ? "Disable Timer" : NumberUtil.formatDuration(i * 50L)) // Ticks to milliseconds
                     .parsed(i -> i == 0 ? "" : NumberUtil.formatDuration(i * 50L).trim(), NumberUtil::parseDurationToTicks)
                     .stepped(20, 5 * 20).range(NO_TIMER, MAX_TIMER));

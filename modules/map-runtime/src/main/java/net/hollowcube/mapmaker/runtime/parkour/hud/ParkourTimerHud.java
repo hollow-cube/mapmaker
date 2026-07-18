@@ -1,24 +1,27 @@
 package net.hollowcube.mapmaker.runtime.parkour.hud;
 
-import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.hud.BackgroundSpriteSet;
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudNode;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.misc.BackgroundSpriteSet;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
-public class ParkourTimerHud implements ActionBar.Provider {
+public class ParkourTimerHud implements PlayerHud.Module {
     private static final BackgroundSpriteSet BACKGROUND = new BackgroundSpriteSet("hud/bossbar/line1");
     private static final BadSprite TIMER = BadSprite.SPRITE_MAP.get("hud/timer");
     private static final int BACKGROUND_PADDING = 2;
+    // The old actionbar row relative to the bottom anchor; text adds the old bossbar_ascii_1 font shift.
+    private static final int OFFSET_Y = -72;
+    private static final int TEXT_OFFSET_Y = 2;
 
     public static final ParkourTimerHud INSTANCE = new ParkourTimerHud();
 
@@ -26,24 +29,14 @@ public class ParkourTimerHud implements ActionBar.Provider {
     }
 
     @Override
-    public int cacheKey(Player player) {
+    public @Nullable HudNode.Anchored render(Player player) {
         var world = ParkourMapWorld.forPlayer(player);
-        var state = world == null ? null : world.getPlayerState(player);
-        var saveState = state instanceof ParkourState.AnyPlaying p ? p.saveState() : null;
-        return saveState == null ? -1 : Long.hashCode(saveState.getRealPlaytime());
-    }
-
-    @Override
-    public void provide(Player player, FontUIBuilder builder) {
-        var world = ParkourMapWorld.forPlayer(player);
-        if (world == null) return;
-
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return;
+        if (world == null || !(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
+            return null;
 
         long time = p.saveState().getRealPlaytime();
         var startingTimer = OpUtils.map(world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS),
-                checkpoint -> checkpoint.actions().findLast(EditTimerAction.class));
+            checkpoint -> checkpoint.actions().findLast(EditTimerAction.class));
 
         // Append the countdown timer, but only if it's not a testing map.
         // We should not show the normal timer in testing mode.
@@ -57,22 +50,19 @@ public class ParkourTimerHud implements ActionBar.Provider {
             var timer = p.saveState().state(PlayState.class).get(EditTimerAction.SAVE_DATA);
             if (timer != null) time = timer.toMillis();
         } else {
-            return; // Don't show the normal timer for testing, only playing
+            return null; // Don't show the normal timer for testing, only playing
         }
 
-        var text = formatMapPlaytime(time, true);
-        // Text + spacing of same size of the ends of the background + timer width
-        var width = FontUtil.measureText(text) + BACKGROUND_PADDING * 4 + TIMER.width();
-
-        builder.pushShadowColor(ShadowColor.none());
-        builder.pos(-width / 2);
-        builder.append(BACKGROUND.build(width - BACKGROUND_PADDING * 2), width);
-        builder.offset(-width);
-        builder.offset(BACKGROUND_PADDING);
-        builder.drawInPlace(TIMER);
-        builder.offset(BACKGROUND_PADDING);
-        builder.append("bossbar_ascii_1", text);
-        builder.popShadowColor();
+        // Gap keeps the extra pixel the old drawInPlace advance (width + 1) put after the sprite.
+        return HudNode.hstack(
+                BACKGROUND_PADDING + 1,
+                HudNode.sprite(TIMER),
+                HudNode.text(formatMapPlaytime(time, true)).offset(0, TEXT_OFFSET_Y)
+            )
+            .background(BACKGROUND, BACKGROUND_PADDING)
+            .frame(0, HudNode.Align.CENTER)
+            .offset(0, OFFSET_Y)
+            .anchored(HudAnchor.BOTTOM);
     }
 
     @Override

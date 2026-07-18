@@ -1,15 +1,14 @@
-package net.hollowcube.mapmaker.misc;
+package net.hollowcube.common.hud;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.utils.validate.Check;
-import org.jetbrains.annotations.NotNull;
 
 public class BackgroundSpriteSet {
     private final BadSprite left, right;
     private final BadSprite[] widthSprites = new BadSprite[9];
 
-    public BackgroundSpriteSet(@NotNull String name) {
+    public BackgroundSpriteSet(String name) {
         left = BadSprite.require(name + "/left");
         right = BadSprite.require(name + "/right");
         for (int i = 0; i < widthSprites.length; i++) {
@@ -17,7 +16,7 @@ public class BackgroundSpriteSet {
         }
     }
 
-    public @NotNull String build(int contentWidth, boolean includeLeft, boolean includeRight) {
+    public String build(int contentWidth, boolean includeLeft, boolean includeRight) {
         var sb = new StringBuilder();
         Check.argCondition(contentWidth > 0b111111111, "Oof too big (round 3)!");
 
@@ -32,7 +31,16 @@ public class BackgroundSpriteSet {
         return sb.toString();
     }
 
-    public @NotNull String build(int contentWidth) {
+    public String build(int contentWidth) {
         return build(contentWidth, true, true);
+    }
+
+    /// The net advance of [#build]: glyph advances (width + 1 each) minus the -1 overlap offsets.
+    public int advance(int contentWidth) {
+        int total = left.width() + right.width() + 1;
+        for (int i = 0; i < widthSprites.length; i++) {
+            if ((contentWidth & (1 << i)) != 0) total += widthSprites[i].width();
+        }
+        return total;
     }
 }

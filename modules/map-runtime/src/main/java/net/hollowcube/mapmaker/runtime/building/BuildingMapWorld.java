@@ -1,20 +1,18 @@
 package net.hollowcube.mapmaker.runtime.building;
 
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.EventUtil;
-import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.RateMapItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ReturnToHubItem;
-import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerTickEvent;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.List;
 
 public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMapWorld> {
 
@@ -54,7 +52,7 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
     }
 
     @Override
-    protected @Nullable List<BossBar> createBossBars() {
-        return BossBars.createPlayingBossBar(server().api().players, map());
+    protected PlayerHud.@Nullable Module createTitleHud() {
+        return TitleHud.playing(server().api().players, map());
     }
 }

@@ -21,6 +21,7 @@ import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.dialogs.DialogButtons;
 import net.hollowcube.common.events.EventExtensions;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
@@ -71,7 +72,7 @@ import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.util.ACHook;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
-import net.hollowcube.mapmaker.map.util.ServerStatsHud;
+import net.hollowcube.mapmaker.map.util.ServerInfoHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerInviteService;
@@ -86,7 +87,6 @@ import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.*;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.hollowcube.mapmaker.util.nats.NatsConfig;
@@ -578,16 +578,18 @@ public abstract class AbstractMapServer implements MapServer {
         )));
 
         // Player init
-        player.setDisplayName(playerData.displayName2().build(DisplayName.Context.DEFAULT));
+        player.setDisplayName(playerData.displayName2().build());
         MiscFunctionality.assignTeam(player);
         ChatAutoCompleter.sendSuggestions(player);
 
         PlayerBackpack.fromPlayer(player).refresh();
 
-        var actionBar = ActionBar.forPlayer(player);
-        actionBar.addProvider(ChatChannelDisplay.INSTANCE);
-        actionBar.addProvider(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
-        actionBar.addProvider(new ExpBarRenderer());
+        // The hud bar carrier must be created (shown) before any other boss bar so the
+        // anchored text shader's first-bar origin assumption holds.
+        var hudBar = PlayerHud.forPlayer(player);
+        hudBar.addModule(ChatChannelDisplay.INSTANCE);
+        hudBar.addModule(MiscFunctionality.CurrencyDisplayHud.INSTANCE);
+        hudBar.addModule(new ExpBarRenderer());
 
         // Add the player to the world they are spawning into
         var world = MapWorld.forInstance(player.getInstance());
@@ -606,7 +608,7 @@ public abstract class AbstractMapServer implements MapServer {
         }
 
         if (CoreFeatureFlags.SERVER_STAT_OVERLAY.test(player)) {
-            actionBar.addProvider(new ServerStatsHud());
+            PlayerHud.forPlayer(player).addModule(new ServerInfoHud());
         }
 
         // Garbage below

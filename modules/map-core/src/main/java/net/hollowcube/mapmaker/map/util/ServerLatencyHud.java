@@ -1,52 +1,33 @@
 package net.hollowcube.mapmaker.map.util;
 
-import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudNode;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.map.MapPlayer;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
-import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
+import java.util.ArrayList;
 
-public class ServerLatencyHud implements ActionBar.Provider {
+public class ServerLatencyHud implements PlayerHud.Module {
 
-    private long lastUpdate = 0;
-
-    @Override
-    public int cacheKey(@NotNull Player player) {
-        long now = System.currentTimeMillis();
-        return Objects.hash(now - lastUpdate < 500);
-    }
+    private static final int OFFSET_X = -230;
+    private static final int OFFSET_Y = -60;
+    private static final int LINE_GAP = 3; // rows 12px apart
 
     @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        this.lastUpdate = System.currentTimeMillis();
-
-        builder.offset(250);
-
-        int y = -50;
+    public HudNode.Anchored render(@NotNull Player player) {
+        var lines = new ArrayList<HudNode>();
         for (var otherPlayer : player.getInstance().getPlayers()) {
             if (otherPlayer instanceof MapPlayer mp) {
-                int latency = mp.getLatency();
-                double avgLatency = mp.averageLatency();
-
-                var text = "%s: %dms (avg %.2fms)".formatted(mp.getUsername(), latency, avgLatency);
-                var textWidth = FontUtil.measureText(text);
-
-                builder.pushShadowColor(ShadowColor.none());
-                builder.pushColor(FontUtil.computeVerticalOffset(y));
-                builder.append(FontUtil.rewrite("anvil_title", text), textWidth);
-                builder.popShadowColor();
-                builder.popColor();
-
-                builder.tempReset();
-                builder.offset(250);
-
-                y += 12;
+                lines.add(HudNode.text("%s: %dms (avg %.2fms)".formatted(
+                    mp.getUsername(), mp.getLatency(), mp.averageLatency())));
             }
         }
+
+        return HudNode.vstack(LINE_GAP, HudNode.Align.LEFT, lines)
+            .offset(OFFSET_X, OFFSET_Y)
+            .anchored(HudAnchor.RIGHT);
     }
 
     @Override

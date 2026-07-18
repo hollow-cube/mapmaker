@@ -1,12 +1,14 @@
 package net.hollowcube.mapmaker.editor;
 
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;
 import net.hollowcube.mapmaker.editor.entity.SpawnMarkerEntity;
+import net.hollowcube.mapmaker.editor.entity.editor.EntityEditor;
 import net.hollowcube.mapmaker.editor.entity.editor.EntityEditorDialog;
 import net.hollowcube.mapmaker.editor.gui.LeaderboardEditorView;
 import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
@@ -21,7 +23,6 @@ import net.hollowcube.mapmaker.editor.scripting.ReloadingScriptSession;
 import net.hollowcube.mapmaker.editor.scripting.ScriptChangeSource;
 import net.hollowcube.mapmaker.editor.terraform.TerraformInstanceStorageImpl;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
-import net.hollowcube.mapmaker.editor.entity.editor.EntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
 import net.hollowcube.mapmaker.editor.vanilla.SignEditor;
 import net.hollowcube.mapmaker.map.*;
@@ -30,7 +31,7 @@ import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
-import net.hollowcube.mapmaker.misc.BossBars;
+import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -44,7 +45,6 @@ import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.hollowcube.terraform.storage.TerraformInstanceStorage;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.MinecraftServer;
@@ -64,7 +64,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
@@ -202,8 +205,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     @Override
-    protected @Nullable List<BossBar> createBossBars() {
-        return BossBars.createEditingBossBar(map());
+    protected PlayerHud.@Nullable Module createTitleHud() {
+        return TitleHud.editing(map());
     }
 
     @Override

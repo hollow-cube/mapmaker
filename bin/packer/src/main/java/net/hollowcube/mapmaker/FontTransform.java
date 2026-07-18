@@ -41,12 +41,6 @@ public class FontTransform {
             charmaps.put("ascii", charmap);
             ascents.put("ascii", 7);
             heights.put("ascii", 8);
-            charmaps.put("ascii_2x", charmap);
-            ascents.put("ascii_2x", 7);
-            heights.put("ascii_2x", 16);
-            charmaps.put("ascii_4x", charmap);
-            ascents.put("ascii_4x", 7);
-            heights.put("ascii_4x", 32);
         }
         try (InputStream is = getClass().getResourceAsStream("/currency.json")) {
             if (is == null) throw new IOException("Failed to load currency.json");
@@ -59,9 +53,6 @@ public class FontTransform {
             charmaps.put("currency", charmap);
             ascents.put("currency", 5);
             heights.put("currency", 6);
-            charmaps.put("currency_creative", charmap);
-            ascents.put("currency_creative", 5);
-            heights.put("currency_creative", 6);
         }
         try (InputStream is = getClass().getResourceAsStream("/small.json")) {
             if (is == null) throw new IOException("Failed to load small.json");
@@ -74,10 +65,6 @@ public class FontTransform {
             charmaps.put("small", charmap);
             ascents.put("small", 7);
             heights.put("small", 8);
-            ascents.put("addons_tab_line1", 7);
-            heights.put("addons_tab_line1", 8);
-            ascents.put("addons_tab_line2", 7);
-            heights.put("addons_tab_line2", 8);
         }
         try (InputStream is = getClass().getResourceAsStream("/small_tall.json")) {
             if (is == null) throw new IOException("Failed to load small_tall.json");

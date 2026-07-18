@@ -1,18 +1,24 @@
 package net.hollowcube.mapmaker.misc;
 
+import net.hollowcube.common.hud.HudAnchor;
+import net.hollowcube.common.hud.HudNode;
+import net.hollowcube.common.hud.HudText;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FontUIBuilder;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.text.format.ShadowColor;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static net.hollowcube.mapmaker.to_be_refactored.BadSprite.require;
 
-public class ExpBarRenderer implements ActionBar.Provider {
+public class ExpBarRenderer implements PlayerHud.Module {
     private static final int XP_BAR_WIDTH = 182;
+    private static final int BAR_Y = -36;
+    private static final int NUMS_Y = -43;
 
     private static final BadSprite[] XP_BAR_BACKGROUND = new BadSprite[]{
             require("hud/level/xp_bar_background_off"), require("hud/level/xp_bar_background_on"),
@@ -40,14 +46,12 @@ public class ExpBarRenderer implements ActionBar.Provider {
             require("hud/level/num_7"), require("hud/level/num_8"), require("hud/level/num_9")
     };
 
-    public ExpBarRenderer() {
-
-    }
-
     private long lastExp = -1;
+    private long lastBarKey = -1;
+    private HudNode.Anchored lastBar = null; // late init
 
     @Override
-    public int cacheKey(@NotNull Player player) {
+    public @Nullable HudNode.Anchored render(@NotNull Player player) {
         // Update the player experience bar if it has changed
         var playerData = PlayerData.fromPlayer(player);
         if (playerData.experience() != lastExp) {
@@ -56,22 +60,21 @@ public class ExpBarRenderer implements ActionBar.Provider {
             lastExp = playerData.experience();
         }
 
-        var showExpBar = player.getGameMode() == GameMode.CREATIVE;
-        return showExpBar ? (int) (player.getExp() * XP_BAR_WIDTH) : -1;
-    }
-
-    @Override
-    public void provide(@NotNull Player player, @NotNull FontUIBuilder builder) {
-        // Never show in spectator. It generally makes no sense, but also Axiom uses spectator when in editor mode,
-        // which should not show this ui for sure (it looks awful).
-        if (player.getGameMode() == GameMode.SPECTATOR) return;
-
-        var hasExperienceBar = player.getGameMode() == GameMode.SURVIVAL || player.getGameMode() == GameMode.ADVENTURE;
-        if (hasExperienceBar) return; // Use the builtin one for these.
-
-        builder.pushShadowColor(ShadowColor.none());
+        // Only creative uses the custom bar: survival/adventure use the builtin one, and spectator
+        // shows nothing (it generally makes no sense, but also Axiom uses spectator when in editor
+        // mode, which should not show this ui for sure - it looks awful).
+        if (player.getGameMode() != GameMode.CREATIVE) return null;
 
         int pixel = (int) (XP_BAR_WIDTH * player.getExp());
+        int level = player.getLevel();
+
+        // The bar assembly below is not cheap, so memoize on the visible state.
+        long barKey = (long) pixel << 32 | level;
+        if (lastBar != null && barKey == lastBarKey) return lastBar;
+
+        var builder = new FontUIBuilder();
+        builder.pushColor(HudText.COLOR_MARKER);
+        builder.pushShadowColor(HudText.buildAnchorShadowMarker(HudAnchor.BOTTOM, BAR_Y, NamedTextColor.WHITE));
 
         builder.pos(-(XP_BAR_WIDTH / 2));
         if (pixel < 1) {
@@ -159,17 +162,24 @@ public class ExpBarRenderer implements ActionBar.Provider {
             builder.drawInPlace(XP_BAR_EDGE[0]);
         }
 
-        int level = player.getLevel();
+        builder.popShadowColor();
+
         if (level > 0) {
+            builder.pushShadowColor(HudText.buildAnchorShadowMarker(HudAnchor.BOTTOM, NUMS_Y, NamedTextColor.WHITE));
             var levelChars = String.valueOf(level).toCharArray();
             builder.pos(-(6 * levelChars.length) / 2 + 1);
             for (char c : levelChars) {
                 var sprite = NUMS[c - '0'];
                 builder.offset(-1).drawInPlace(sprite);
             }
+            builder.popShadowColor();
         }
 
-        builder.popShadowColor();
+        builder.popColor();
+
+        lastBarKey = barKey;
+        return lastBar = HudNode.raw(builder.build(true))
+            .anchored(HudAnchor.BOTTOM);
     }
 
 }

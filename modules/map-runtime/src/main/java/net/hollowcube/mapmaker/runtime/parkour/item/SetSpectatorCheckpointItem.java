@@ -1,14 +1,14 @@
 package net.hollowcube.mapmaker.runtime.parkour.item;
 
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.TempEffectApplicator;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.mapmaker.util.GenericTempActionBarProvider;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -56,7 +56,7 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
             case null, default -> false;
         };
         if (added) {
-            ActionBar.forPlayer(player).addProvider(new GenericTempActionBarProvider("Added temporary checkpoint!", 1000));
+            PlayerHud.forPlayer(player).showMessage(Component.text("Added temporary checkpoint!"));
         }
     }
 

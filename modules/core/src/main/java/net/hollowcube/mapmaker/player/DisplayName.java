@@ -23,14 +23,7 @@ public record DisplayName(
     public record Part(@NotNull String type, @NotNull String text, @Nullable String color) {
     }
 
-    public enum Context {
-        DEFAULT,
-        PLAIN,
-        // Like DEFAULT, but uncolored becomes white instead of gray
-        NAME_TAG,
-        // Like DEFAULT, but uses offset characters vertically
-        BOSS_BAR
-    }
+    private static final TextColor DEFAULT_COLOR = TextColor.color(0xB0B0B0);
 
     public DisplayName {
         parts = List.copyOf(parts);
@@ -42,29 +35,24 @@ public record DisplayName(
     }
 
     public @NotNull Component build() {
-        return build(Context.DEFAULT);
+        return build(DEFAULT_COLOR);
     }
 
-    public @NotNull Component build(@NotNull Context context) {
+    /// `defaultColor` colors the username when the display name has no explicit color
+    /// (eg white on name tags instead of the usual gray).
+    public @NotNull Component build(@NotNull TextColor defaultColor) {
         var builder = Component.text();
         for (var part : parts) {
             switch (part.type) {
                 case "username" -> {
                     //todo get colors from placeholder file
-                    var color = context == Context.NAME_TAG ? NamedTextColor.WHITE : TextColor.color(0xB0B0B0);
+                    var color = defaultColor;
                     if (part.color != null && !part.color.isEmpty()) color = TextColor.fromCSSHexString(part.color);
 
-                    var text = part.text;
-                    if (context == Context.BOSS_BAR) text = FontUtil.rewrite("bossbar_ascii_1", text);
-                    builder.append(Component.text(text, color));
+                    builder.append(Component.text(part.text, color));
                 }
                 case "badge" -> {
-                    if (context == Context.PLAIN) continue;
-
-                    // FontUtil.rewrite("bossbar_ascii_1", ownerNamePlain)
-
                     var icon = part.text.contains("hypercube") ? "icon/" + part.text : "icon/staff/" + part.text;
-                    if (context == Context.BOSS_BAR) icon += "_bb";
                     builder.append(Component.text(BadSprite.require(icon).fontChar() + FontUtil.computeOffset(1), NamedTextColor.WHITE)
                         .hoverEvent(HoverEvent.showText(LanguageProviderV2.translate(Component.translatable("badge." + part.text + ".lore")))));
                 }

@@ -25,6 +25,7 @@ public final class PlayerSettings {
     // Playing (parkour) maps
 
     public static final PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
+    public static final PlayerSetting<Boolean> PARKOUR_DEBUG_HUD = PlayerSetting.Bool("parkour_debug_hud", false);
 
 
     // Moderation

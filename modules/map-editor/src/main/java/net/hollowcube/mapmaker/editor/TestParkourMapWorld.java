@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.editor;
 
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
@@ -9,12 +10,10 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.molang.MolangExpr;
-import net.kyori.adventure.bossbar.BossBar;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
@@ -96,7 +95,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     }
 
     @Override
-    protected @Nullable List<BossBar> createBossBars() {
+    protected PlayerHud.@Nullable Module createTitleHud() {
         return null; // Inherit from parent
     }
 

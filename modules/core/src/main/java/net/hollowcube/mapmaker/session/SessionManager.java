@@ -230,11 +230,11 @@ public class SessionManager {
         if (showJoinLeaveMessage(displayName)) {
             // only send to non-friends
             Audiences.players(lPlayer -> !friends.contains(lPlayer.getUuid().toString()))
-                .sendMessage(Component.translatable("chat.player.join", displayName.build(DisplayName.Context.DEFAULT)));
+                .sendMessage(Component.translatable("chat.player.join", displayName.build()));
         }
 
         Audiences.players(lPlayer -> friends.contains(lPlayer.getUuid().toString()))
-            .sendMessage(Component.translatable("chat.friend.join", displayName.build(DisplayName.Context.DEFAULT)));
+            .sendMessage(Component.translatable("chat.friend.join", displayName.build()));
     }
 
     private void broadcastLeaveMessage(@NotNull String playerId) {
@@ -245,11 +245,11 @@ public class SessionManager {
         if (showJoinLeaveMessage(displayName)) {
             // only send to non-friends
             Audiences.players(player -> !friends.contains(player.getUuid().toString()))
-                .sendMessage(Component.translatable("chat.player.leave", displayName.build(DisplayName.Context.DEFAULT)));
+                .sendMessage(Component.translatable("chat.player.leave", displayName.build()));
         }
 
         Audiences.players(player -> friends.contains(player.getUuid().toString()))
-            .sendMessage(Component.translatable("chat.friend.leave", displayName.build(DisplayName.Context.DEFAULT)));
+            .sendMessage(Component.translatable("chat.friend.leave", displayName.build()));
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
