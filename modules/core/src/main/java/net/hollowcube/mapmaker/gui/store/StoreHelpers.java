@@ -2,19 +2,24 @@ package net.hollowcube.mapmaker.gui.store;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.dialogs.DialogBuilder;
+import net.hollowcube.common.dialogs.DialogButtons;
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
+import net.minestom.server.dialog.Dialog;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -54,7 +59,10 @@ public final class StoreHelpers {
             }
 
             String finalUrl = url;
-            player.scheduleNextTick(_ -> player.openBook(buildCheckoutBook(packageName.ordinal(), finalUrl)));
+            player.scheduleNextTick(_ -> {
+                player.closeInventory();
+                player.sendPacket(new ShowDialogPacket(buildCheckoutDialog(packageName.ordinal(), finalUrl)));
+            });
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
             player.closeInventory();
@@ -102,11 +110,25 @@ public final class StoreHelpers {
         }
     }
 
-    private static @NotNull Book buildCheckoutBook(int productIndex, @NotNull String url) {
-        var sprite = Component.text(SPRITE_MAP[productIndex].fontChar(), TextColor.color(78, 92, 38))
-            .hoverEvent(HoverEvent.showText(LanguageProviderV2.translateMultiMerged("store.checkout.open_in_browser", List.of())))
-            .clickEvent(ClickEvent.openUrl(url));
+    private static final int CHECKOUT_WIDTH = 132;
+    // The 131px sprite hangs below line 1's baseline (ascent 0), but the dialog only reserves
+    // the body's text height: fill enough 9px lines to cover it, each carrying an invisible
+    // full-width run so the whole texture stays clickable.
+    private static final int CHECKOUT_LINES = 16;
 
-        return Book.builder().addPage(sprite).build();
+    private static @NotNull Dialog buildCheckoutDialog(int productIndex, @NotNull String url) {
+        var body = Component.text()
+            .hoverEvent(HoverEvent.showText(LanguageProviderV2.translateMultiMerged("store.checkout.open_in_browser", List.of())))
+            .clickEvent(ClickEvent.openUrl(url))
+            .append(Component.text(SPRITE_MAP[productIndex].fontChar(), NamedTextColor.WHITE)
+                .shadowColor(ShadowColor.none()))
+            .append(Component.text(("\n" + FontUtil.computeOffset(CHECKOUT_WIDTH)).repeat(CHECKOUT_LINES - 1)))
+            .build();
+
+        return DialogBuilder.create()
+            .title(Component.translatable("dialog.checkout.title"))
+            .closeOnEscape()
+            .body(it -> it.text(body, 150))
+            .buildNotice(DialogButtons.close(Component.translatable("dialog.generic.close"), 150));
     }
 }

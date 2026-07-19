@@ -77,6 +77,10 @@ public class DialogBuilder {
         );
     }
 
+    public Dialog buildNotice(@NotNull DialogActionButton action) {
+        return new Dialog.Notice(this.metadata(DialogAfterAction.CLOSE), action);
+    }
+
     public Dialog buildActions(List<DialogActionButton> buttons, int columns) {
         return new Dialog.MultiAction(
             this.metadata(DialogAfterAction.CLOSE),
