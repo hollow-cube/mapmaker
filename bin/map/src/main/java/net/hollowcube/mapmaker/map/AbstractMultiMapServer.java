@@ -54,6 +54,11 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     private final ReentrantLock worldLock = new ReentrantLock();
     private final Map<MapKey, Future<AbstractMapWorld<?, ?>>> worlds = new HashMap<>();
+    // Players which have selected a world during configuration, but have not reached PlayerSpawnEvent yet.
+    // These players are not visible through either Instance#getPlayers or MapWorld#players, so world teardown
+    // must account for them separately.
+    private final PendingPlayerTracker<AbstractMapWorld<?, ?>, Player> pendingPlayers = new PendingPlayerTracker<>();
+    private final Map<AbstractMapWorld<?, ?>, Component> deferredWorldDestructions = new IdentityHashMap<>();
 
     private static final String MAP_JOIN_STREAM = "MAP_JOINS";
     private static final ConsumerConfiguration MAP_JOIN_CONSUMER_CONFIG = ConsumerConfiguration.builder()
@@ -133,8 +138,10 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     protected void handleConfigPhase(@NotNull AsyncPlayerConfigurationEvent event) {
+        var player = event.getPlayer();
+        var pendingPlayerReserved = false;
+        var keepPendingPlayerReservation = false;
         try {
-            var player = event.getPlayer();
             if (config.get(VelocityConfig.class).secret().isEmpty()) {
                 ProtocolVersions.unsafeSetProtocolVersion(player, MinecraftServer.PROTOCOL_VERSION);
             } else {
@@ -170,25 +177,47 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 return;
             }
 
+            // Reserve the world before waiting for the resource pack. Once this succeeds, automatic cleanup
+            // treats the player as present even though Minestom has not added it to the instance yet.
+            pendingPlayerReserved = reservePendingPlayer(mapWorld, player);
+            if (!pendingPlayerReserved) {
+                logger.info("world closed while configuring player {}", player.getUuid());
+                player.kick(Component.text("The map closed while you were joining. Please try again."));
+                return;
+            }
+
             // Ensure resource pack was applied before allowing the player in
             FutureUtil.getUnchecked(resourcePackFuture);
             if (!player.isOnline()) return;
 
             // Setup the player in the world
             mapWorld.configurePlayer(event);
+            keepPendingPlayerReservation = true;
         } catch (Exception e) {
             logger.error("Error during config phase", e);
-            event.getPlayer().kick(Component.text("An unknown error has occurred. Please try again later."));
+            player.kick(Component.text("An unknown error has occurred. Please try again later."));
+        } finally {
+            if (pendingPlayerReserved && !keepPendingPlayerReservation)
+                releasePendingPlayer(player);
         }
     }
 
     protected void handleSpawn(@NotNull PlayerSpawnEvent event) {
         if (!event.isFirstSpawn()) return;
-        super.handleFirstSpawn(event.getPlayer());
+        try {
+            super.handleFirstSpawn(event.getPlayer());
+        } finally {
+            // The player is now visible through the normal world/instance ownership paths.
+            releasePendingPlayer(event.getPlayer());
+        }
     }
 
     protected void handleDisconnect(@NotNull PlayerDisconnectEvent event) {
-        handlePlayerDisconnect(event.getPlayer());
+        try {
+            releasePendingPlayer(event.getPlayer());
+        } finally {
+            handlePlayerDisconnect(event.getPlayer());
+        }
     }
 
     protected abstract @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo);
@@ -244,7 +273,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
                     // If there is nobody left at all, always destroy the world
                     if (event.getInstance().getPlayers().size() == 1) {
-                        FutureUtil.submitVirtual(() -> destroy(key, Component.translatable("map.closed")));
+                        FutureUtil.submitVirtual(() -> destroyIfNoPendingPlayers(key, Component.translatable("map.closed")));
                         return;
                     }
 
@@ -269,7 +298,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                         if (!leavingIsBuilder) return;
 
                         // None of the builders are present, destroy it.
-                        destroy(key, Component.translatable("map.kicked"));
+                        destroyIfNoPendingPlayers(key, Component.translatable("map.kicked"));
                     });
                 });
 
@@ -314,59 +343,113 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     private void destroy(@NotNull MapKey key, @NotNull Component reason) {
+        destroy(key, reason, true);
+    }
+
+    private void destroyIfNoPendingPlayers(@NotNull MapKey key, @NotNull Component reason) {
+        destroy(key, reason, false);
+    }
+
+    private void destroy(@NotNull MapKey key, @NotNull Component reason, boolean deferForPendingPlayers) {
         FutureUtil.assertThread();
-        var span = tracer.spanBuilder("destroyWorld").setSpanKind(SpanKind.CLIENT).startSpan();
+        final Future<AbstractMapWorld<?, ?>> worldFuture;
+        worldLock.lock();
         try {
-            final Future<AbstractMapWorld<?, ?>> worldFuture;
-            worldLock.lock();
-            try {
-                worldFuture = worlds.remove(key);
-            } finally {
-                worldLock.unlock();
-            }
+            worldFuture = worlds.get(key);
             if (worldFuture == null) return;
 
-            var world = FutureUtil.getUnchecked(worldFuture);
-            try {
-                closingWorlds.add(world);
+            if (worldFuture.state() == Future.State.SUCCESS) {
+                var world = worldFuture.resultNow();
+                if (pendingPlayers.hasPendingPlayers(world)) {
+                    if (!deferForPendingPlayers) return;
 
-                // Remove all players from the world.
-                var players = List.copyOf(world.players());
-                var futures = new CompletableFuture[players.size()];
-                for (int i = 0; i < players.size(); i++) {
-                    var player = players.get(i);
-                    player.sendMessage(reason);
-                    futures[i] = world.scheduleRemovePlayer(player)
-                        .thenRunAsync(() -> {
-                            if (!player.isOnline()) return;
-                            bridge().joinHub(player);
-                        }, FutureUtil.VIRUTAL_EXECUTOR)
-                        .exceptionally(e -> {
-                            ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
-                            player.kick(reason);
-                            return null;
-                        });
+                    // Explicit drains stop accepting new arrivals immediately, but keep ticking the world until
+                    // all already-admitted players either spawn or disconnect. The final release resumes teardown.
+                    worlds.remove(key);
+                    deferredWorldDestructions.putIfAbsent(world, reason);
+                    closingWorlds.add(world);
+                    return;
                 }
-                span.setAttribute("players", players.size());
-                try {
-                    CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
-                } catch (TimeoutException ignored) {
-                    logger.error("failed to drain players in 15s, exiting.");
-                } catch (RuntimeException | InterruptedException | ExecutionException e) {
-                    logger.error("failed to drain players", e);
-                }
-
-                // Close the world itself
-                MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> world.close().thenRunAsync(() -> {
-                    var destroyMessage = MapWorldMessage.destroyed(world.worldId());
-                    jetStream.publish(destroyMessage.subject(), destroyMessage);
-                }));
-            } finally {
-                closingWorlds.remove(world);
             }
+
+            worlds.remove(key);
         } finally {
+            worldLock.unlock();
+        }
+
+        var world = FutureUtil.getUnchecked(worldFuture);
+        if (world != null) destroyWorld(world, reason);
+    }
+
+    private void destroyWorld(@NotNull AbstractMapWorld<?, ?> world, @NotNull Component reason) {
+        var span = tracer.spanBuilder("destroyWorld").setSpanKind(SpanKind.CLIENT).startSpan();
+        try {
+            closingWorlds.add(world);
+
+            // Remove all players from the world.
+            var players = List.copyOf(world.players());
+            var futures = new CompletableFuture[players.size()];
+            for (int i = 0; i < players.size(); i++) {
+                var player = players.get(i);
+                player.sendMessage(reason);
+                futures[i] = world.scheduleRemovePlayer(player)
+                    .thenRunAsync(() -> {
+                        if (!player.isOnline()) return;
+                        bridge().joinHub(player);
+                    }, FutureUtil.VIRUTAL_EXECUTOR)
+                    .exceptionally(e -> {
+                        ExceptionReporter.reportException(new RuntimeException("failed to remove player", e), player);
+                        player.kick(reason);
+                        return null;
+                    });
+            }
+            span.setAttribute("players", players.size());
+            try {
+                CompletableFuture.allOf(futures).get(15, TimeUnit.SECONDS);
+            } catch (TimeoutException ignored) {
+                logger.error("failed to drain players in 15s, exiting.");
+            } catch (RuntimeException | InterruptedException | ExecutionException e) {
+                logger.error("failed to drain players", e);
+            }
+
+            // Close the world itself
+            MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> world.close().thenRunAsync(() -> {
+                var destroyMessage = MapWorldMessage.destroyed(world.worldId());
+                jetStream.publish(destroyMessage.subject(), destroyMessage);
+            }));
+        } finally {
+            closingWorlds.remove(world);
             span.end();
         }
+    }
+
+    private boolean reservePendingPlayer(@NotNull AbstractMapWorld<?, ?> world, @NotNull Player player) {
+        worldLock.lock();
+        try {
+            var worldIsActive = worlds.values().stream().anyMatch(future ->
+                future.state() == Future.State.SUCCESS && future.resultNow() == world);
+            if (!worldIsActive) return false;
+
+            return pendingPlayers.reserve(world, player);
+        } finally {
+            worldLock.unlock();
+        }
+    }
+
+    private void releasePendingPlayer(@NotNull Player player) {
+        final AbstractMapWorld<?, ?> world;
+        final Component deferredReason;
+        worldLock.lock();
+        try {
+            world = pendingPlayers.release(player);
+            if (world == null) return;
+            deferredReason = deferredWorldDestructions.remove(world);
+        } finally {
+            worldLock.unlock();
+        }
+
+        if (deferredReason != null)
+            FutureUtil.submitVirtual(() -> destroyWorld(world, deferredReason));
     }
 
     public void close() {
