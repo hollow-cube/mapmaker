@@ -15,8 +15,7 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
     private final Set<T> options = new HashSet<>();
 
     private T selected;
-    // TODO: should not be public, need to fix the cursed stuff in NewMapView
-    public int index = 0;
+    private int index = 0;
 
     public RadioSelect(int slotWidth, int slotHeight) {
         this(slotWidth, slotHeight, null);
@@ -41,12 +40,8 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
     }
 
     public Button addOption(T item, ButtonUpdater updater, Button.Constructor buttonCtor) {
+        var button = addNext(buttonCtor.construct(null, 1, 1));
         this.options.add(item);
-
-        int x = this.index % this.slotWidth;
-        int y = this.index / this.slotWidth;
-
-        var button = add(x, y, buttonCtor.construct(null, 1, 1));
         Runnable update = () -> updater.update(button, item.equals(this.selected));
         this.buttonUpdaters.add(update);
         button.onLeftClick(() -> {
@@ -56,9 +51,19 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
         });
         update.run();
 
-        this.index++;
-
         return button;
+    }
+
+    public Button addUnselectableOption(Button button) {
+        return addNext(button);
+    }
+
+    @Override
+    public void clear() {
+        super.clear();
+        this.buttonUpdaters.clear();
+        this.options.clear();
+        this.index = 0;
     }
 
     public void setSelected(T item) {
@@ -69,6 +74,18 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
                 this.onChange.forEach(consumer -> consumer.accept(item));
             }
         }
+    }
+
+    private Button addNext(Button button) {
+        if (this.index < 0 || this.index >= (long) this.slotWidth * this.slotHeight) {
+            throw new IllegalStateException(
+                "RadioSelect capacity exceeded: " + this.index + " >= " + this.slotWidth + "x" + this.slotHeight);
+        }
+
+        int x = this.index % this.slotWidth;
+        int y = this.index / this.slotWidth;
+        this.index++;
+        return add(x, y, button);
     }
 
     @FunctionalInterface

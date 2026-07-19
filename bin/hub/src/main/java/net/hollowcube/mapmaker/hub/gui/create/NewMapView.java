@@ -51,10 +51,11 @@ public class NewMapView extends Panel {
 
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
-        super.mount(host, isInitial);
+        sizeSelect.clear();
+        var maxMapSize = PlayerData.fromPlayer(host.player()).maxMapSize();
 
         for (var mapSize : MapSize.GUI_SIZES) {
-            boolean locked = isLocked(mapSize);
+            boolean locked = !maxMapSize.unlocks(mapSize);
             Button.Constructor makeButton = (tk, slotWidth, slotHeight) -> {
                 var button = locked
                     ? new LockedButton(tk, slotWidth, slotHeight)
@@ -75,11 +76,13 @@ public class NewMapView extends Panel {
                 var button = makeButton.construct(null, 1, 1)
                     .onLeftClick(this::handleOpenStore);
                 updateButton.update(button, false);
-                sizeSelect.add(sizeSelect.index++, 0, button);
+                sizeSelect.addUnselectableOption(button);
             } else {
                 sizeSelect.addOption(mapSize, updateButton, makeButton);
             }
         }
+
+        super.mount(host, isInitial);
     }
 
     private void handleSubmit() {
@@ -104,7 +107,4 @@ public class NewMapView extends Panel {
             Component.translatable(actualSizeKey));
     }
 
-    private boolean isLocked(MapSize size) {
-        return !PlayerData.fromPlayer(this.host.player()).maxMapSize().unlocks(size);
-    }
 }
