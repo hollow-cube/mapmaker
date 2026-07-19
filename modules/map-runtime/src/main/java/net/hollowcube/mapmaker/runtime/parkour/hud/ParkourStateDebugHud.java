@@ -87,13 +87,12 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
         var stats = Component.text();
         var progressIndex = state.get(Attachments.PROGRESS_INDEX);
         if (progressIndex != null)
-            stats.append(Component.text("PI: ", LABEL)).append(Component.text(progressIndex, VALUE));
-        var resetHeight = state.get(Attachments.RESET_HEIGHT);
-        if (resetHeight != null) {
-            if (progressIndex != null) stats.append(Component.text(" "));
-            stats.append(Component.text("R: ", LABEL)).append(Component.text(resetHeight, VALUE));
-        }
-        if (progressIndex != null || resetHeight != null) lines.add(HudNode.text(stats.build()));
+            stats.append(Component.text("PI: ", LABEL)).append(Component.text(progressIndex, VALUE))
+                .append(Component.text(" "));
+        // Always present so the hud is never fully empty.
+        int resetHeight = state.get(Attachments.RESET_HEIGHT, world.defaultResetHeight());
+        stats.append(Component.text("R: ", LABEL)).append(Component.text(resetHeight, VALUE));
+        lines.add(HudNode.text(stats.build()));
 
         var counts = Component.text();
         // Ghost blocks are often present for other reasons, only worth showing when non-empty.
