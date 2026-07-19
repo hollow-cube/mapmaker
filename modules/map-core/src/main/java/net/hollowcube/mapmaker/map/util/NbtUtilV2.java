@@ -7,6 +7,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
 import net.minestom.server.registry.Registries;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.RegistryKey;
@@ -38,9 +39,15 @@ public final class NbtUtilV2 {
     }
 
     public static @NotNull ItemStack readItemStack(@Nullable BinaryTag tag) {
-        if (tag instanceof CompoundBinaryTag compound && compound.size() > 0 && compound.get("id") instanceof StringBinaryTag) {
+        if (!(tag instanceof CompoundBinaryTag compound) || compound.isEmpty()) return ItemStack.AIR;
+        if (!(compound.get("id") instanceof StringBinaryTag idTag) || idTag.value().isBlank()) return ItemStack.AIR;
+
+        try {
+            if (Material.fromKey(idTag.value()) == null) return ItemStack.AIR;
             return ItemStack.fromItemNBT(compound);
-        } else return ItemStack.AIR;
+        } catch (InvalidKeyException | IllegalArgumentException ignored) {
+            return ItemStack.AIR;
+        }
     }
 
     public static @NotNull BinaryTag writeItemStack(@NotNull ItemStack itemStack) {
