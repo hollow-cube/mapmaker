@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -222,7 +221,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
 
         try {
             var senderDisplayName = api.players.getDisplayName(message.sender());
-            var senderName = senderDisplayName.build(DisplayName.Context.DEFAULT);
+            var senderName = senderDisplayName.build();
             var isColored = senderDisplayName.parts().size() > 1;
 
             for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {

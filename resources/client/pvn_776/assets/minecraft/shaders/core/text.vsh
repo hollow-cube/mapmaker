@@ -25,44 +25,9 @@ out vec4 vertexColor;
 out vec2 texCoord0;
 
 void main() {
-    #ifdef IS_GUI
-    // MapMaker: our text tricks only apply to GUI text. In the GUI the lightmap is full-bright
-    // (vanilla drops the sample_lightmap multiply entirely), so white here matches what
-    // sample_lightmap would have produced.
-    vec3 pos = vec3(Position.xyz);
-
-    // More book handling
-    if (Color == vec4(78 / 255., 92 / 255., 38 / 255., Color.a)) {
-        pos.x -= 9;
-    } else if (Color == vec4(78 / 255., 90 / 255., Color.b, Color.a)) {
-        // TODO: need to also offset the shadow
-        pos.y += (Color.b * 255) - 50;
-    }
-
-    gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
-
-    vertexColor = Color;
-    texCoord0 = UV0;
-
-    // More book handling
-    if (Color == vec4(78 / 255., 92 / 255., 38 / 255., Color.a)) {
-        vertexColor = vec4(1.0, 1.0, 1.0, vertexColor.a);
-        return;
-    }
-
-    // Remove the color from the vertical shift color so it only reflects the underlying texture.
-    if (Color == vec4(78 / 255., 90 / 255., Color.b, Color.a)) {
-        if (Color.a == (80. / 255.)) {
-            vertexColor = vec4(0, 0, 0, Color.a);
-        } else {
-            vertexColor = vec4(1.0, 1.0, 1.0, vertexColor.a);
-        }
-    }
-    // TODO: we need to also handle the shadow color here.
-    #else
     gl_Position = ProjMat * ModelViewMat * vec4(Position, 1.0);
 
-    #if !defined(IS_SEE_THROUGH)
+    #if !defined(IS_GUI) && !defined(IS_SEE_THROUGH)
     sphericalVertexDistance = fog_spherical_distance(Position);
     cylindricalVertexDistance = fog_cylindrical_distance(Position);
     vertexColor = Color * sample_lightmap(Sampler2, UV2);
@@ -70,5 +35,27 @@ void main() {
     vertexColor = Color;
     #endif
     texCoord0 = UV0;
+
+    // MAPMAKER START
+    #ifdef IS_GUI
+    ivec4 icol = ivec4(round(Color * 255.0));
+    if (icol.r == 0x4E && icol.g == 0xB0 && icol.b == 0x00) {
+        vertexColor = vec4(0.0);
+    } else if (icol.a == 0x4E && (icol.r >> 4) == 0xA) {
+        int anchor = icol.r & 15;
+        vec2 scrSize = ceil(2.0 / vec2(ProjMat[0][0], -ProjMat[1][1]) - 0.001);
+        vec2 target = vec2(float(anchor % 3), float(anchor / 3)) * 0.5 * scrSize;
+        vec2 origin = vec2(floor(scrSize.x * 0.5), 3.0);
+        vec3 pos = Position;
+        pos.xy += target - origin + vec2(-1.0, float(icol.g - 128) - 1.0);
+        gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
+        vertexColor = vec4(vec3(icol.b >> 5, (icol.b >> 2) & 7, icol.b & 3) / vec3(7.0, 7.0, 3.0), 1.0);
+    } else if (icol.a == 0x4E && (icol.r >> 4) == 0xB) {
+        vec3 pos = Position;
+        pos.xy += vec2(-1.0, float(((icol.r & 15) << 8 | icol.g) - 2048) - 1.0);
+        gl_Position = ProjMat * ModelViewMat * vec4(pos, 1.0);
+        vertexColor = vec4(vec3(icol.b >> 5, (icol.b >> 2) & 7, icol.b & 3) / vec3(7.0, 7.0, 3.0), 1.0);
+    }
     #endif
+    // MAPMAKER END
 }

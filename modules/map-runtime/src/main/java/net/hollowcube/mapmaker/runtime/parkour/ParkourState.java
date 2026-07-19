@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
@@ -15,13 +16,9 @@ import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
-import net.hollowcube.mapmaker.runtime.parkour.hud.FinishedModeHud;
-import net.hollowcube.mapmaker.runtime.parkour.hud.ParkourTimerHud;
-import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
-import net.hollowcube.mapmaker.runtime.parkour.hud.SpectatorModeHud;
+import net.hollowcube.mapmaker.runtime.parkour.hud.*;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -67,7 +64,9 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             noxesium.set(NoxesiumGameComponents.CLIENT_AUTHORITATIVE_ELYTRA, true);
 
             // Timer is only added for scorable playing states.
-            ActionBar.forPlayer(player).addProvider(ParkourTimerHud.INSTANCE);
+            PlayerHud.forPlayer(player).addModule(ParkourTimerHud.INSTANCE);
+            // Renders nothing unless PARKOUR_DEBUG_HUD is enabled (/debug parkour).
+            PlayerHud.forPlayer(player).addModule(ParkourStateDebugHud.INSTANCE);
 
             final var playState = saveState().state(PlayState.class);
 
@@ -97,10 +96,6 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 saveState().setPlayStartTime(System.nanoTime() / 1_000_000);
                 saveState().setStartLatency(mp.averageLatency());
             } else ((MapPlayer) player).resetTouchingState();
-
-//            if (lastState == null && MapFeatureFlags.DEBUG_PLAYING_OVERLAY.test(player)) {
-//                ActionBar.forPlayer(player).addProvider(ParkourDebugHud.INSTANCE);
-//            }
 
             var map = world.map();
             switch (map.getSetting(MapSettings.CAN_SEND_POSE)) {
@@ -145,7 +140,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             if (nextState instanceof AnyPlaying) return;
 
             player.getAttribute(Attribute.SAFE_FALL_DISTANCE).removeModifier(NO_FALL_DAMAGE_MODIFIER);
-            ActionBar.forPlayer(player).removeProvider(ParkourTimerHud.INSTANCE);
+            PlayerHud.forPlayer(player).removeModule(ParkourTimerHud.INSTANCE);
+            PlayerHud.forPlayer(player).removeModule(ParkourStateDebugHud.INSTANCE);
 
             if (nextState != null || player.isRemoved()) return;
 
@@ -245,7 +241,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
-            ActionBar.forPlayer(player).removeProvider(SpectatorModeHud.INSTANCE);
+            PlayerHud.forPlayer(player).removeModule(SpectatorModeHud.INSTANCE);
             MapWorldHelpers.resetPlayerOnTickThread(player, false);
             AnyPlaying.super.configurePlayer(world, player, lastState);
 
@@ -266,7 +262,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         @Override
         public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
             ParkourState.super.configurePlayer(world, player, lastState);
-            ActionBar.forPlayer(player).addProvider(SpectatorModeHud.INSTANCE);
+            PlayerHud.forPlayer(player).addModule(SpectatorModeHud.INSTANCE);
             player.setAllowFlying(gameState.get(SpectateHelper.SPECTATOR_FLIGHT, true));
 
             world.itemRegistry().setItemStack(player, ReturnToCheckpointItem.ID, 0);
@@ -300,7 +296,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
             // Don't remove the spectating hud if we are switching to a non-scorable play state
             if (nextState instanceof Playing2 || nextState == null) {
-                ActionBar.forPlayer(player).removeProvider(SpectatorModeHud.INSTANCE);
+                PlayerHud.forPlayer(player).removeModule(SpectatorModeHud.INSTANCE);
             }
         }
     }
@@ -310,7 +306,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         @Override
         public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
             ParkourState.super.configurePlayer(world, player, lastState);
-            ActionBar.forPlayer(player).addProvider(FinishedModeHud.INSTANCE);
+            PlayerHud.forPlayer(player).addModule(FinishedModeHud.INSTANCE);
             player.setAllowFlying(true);
 
             world.itemRegistry().setItemStack(player, RateMapItem.ID, 0);
@@ -339,7 +335,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
-            ActionBar.forPlayer(player).removeProvider(FinishedModeHud.INSTANCE);
+            PlayerHud.forPlayer(player).removeModule(FinishedModeHud.INSTANCE);
 
             // In case animation hasn't completed yet, cancel it.
             MapCompletionAnimation.cancel(player);

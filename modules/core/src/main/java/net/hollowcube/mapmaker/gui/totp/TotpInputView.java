@@ -1,16 +1,17 @@
 package net.hollowcube.mapmaker.gui.totp;
 
-import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.dialogs.DialogBuilder;
+import net.hollowcube.common.dialogs.DialogButtons;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.panels.AbstractAnvilView;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.ShadowColor;
+import net.minestom.server.dialog.Dialog;
 import org.jetbrains.annotations.NotNullByDefault;
 
 import java.util.function.BiFunction;
@@ -48,22 +49,33 @@ public class TotpInputView extends AbstractAnvilView {
         });
     }
 
-    public static Book backupCodesBook(String[] codes) {
+    // The 131px sprite hangs below line 1's baseline (ascent 0), but the dialog only reserves
+    // the body's text height: fill enough 9px lines to cover it. Codes overlay the sprite's
+    // box starting at line 5; the dialog centers each line so no x offsets are needed.
+    private static final int CODES_LINES = 16;
+    private static final int CODES_START_LINE = 5;
+
+    public static Dialog backupCodesDialog(String[] codes) {
         var component = Component.text();
 
-        component.append(Component.text(BadSprite.require("totp/codes").fontChar()).color(NamedTextColor.WHITE).shadowColor(ShadowColor.none()));
+        component.append(Component.text(BadSprite.require("totp/codes").fontChar(), NamedTextColor.WHITE)
+            .shadowColor(ShadowColor.none()));
+        component.append(Component.text("\n".repeat(CODES_START_LINE)));
 
-        component.appendNewline().appendNewline().appendNewline().appendNewline().appendNewline();
-
-        for (String code : codes) {
-            int offset = 22 + (90 - FontUtil.measureText(code)) / 2;
-            component.append(Component.text(FontUtil.computeOffset(offset))
-                .append(Component.text(code, NamedTextColor.WHITE))
+        var copyAll = ClickEvent.copyToClipboard(String.join("\n", codes));
+        for (int i = 0; i < codes.length; i++) {
+            if (i > 0) component.append(Component.text("\n"));
+            component.append(Component.text(codes[i], NamedTextColor.WHITE)
                 .hoverEvent(HoverEvent.showText(CLICK_TO_COPY))
-                .clickEvent(ClickEvent.copyToClipboard(String.join("\n", codes))));
-            component.appendNewline();
+                .clickEvent(copyAll));
         }
+        component.append(Component.text("\n".repeat(
+            Math.max(0, CODES_LINES - CODES_START_LINE - codes.length))));
 
-        return Book.builder().addPage(component.build()).build();
+        return DialogBuilder.create()
+            .title(Component.translatable("dialog.totp.codes.title"))
+            .closeOnEscape()
+            .body(it -> it.text(component.build(), 150))
+            .buildNotice(DialogButtons.close(Component.translatable("dialog.generic.close"), 150));
     }
 }

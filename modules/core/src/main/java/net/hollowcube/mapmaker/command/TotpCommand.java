@@ -9,6 +9,8 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.minestom.server.entity.Player;
+import net.minestom.server.network.packet.server.common.ShowDialogPacket;
+import net.minestom.server.network.packet.server.play.CloseWindowPacket;
 import org.jetbrains.annotations.NotNull;
 
 public class TotpCommand extends CommandDsl {
@@ -49,7 +51,10 @@ public class TotpCommand extends CommandDsl {
                             player.sendMessage("Two-factor authentication is already enabled.");
                             player.closeInventory();
                         }
-                        case SUCCESS -> player.openBook(TotpInputView.backupCodesBook(response.recoveryCodes()));
+                        case SUCCESS -> {
+                            player.sendPacket(new CloseWindowPacket(-1));
+                            player.sendPacket(new ShowDialogPacket(TotpInputView.backupCodesDialog(response.recoveryCodes())));
+                        }
                     }
                 }
             );

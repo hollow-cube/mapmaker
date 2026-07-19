@@ -34,6 +34,10 @@ public class AttributeMap {
         return this.data.getOrDefault(key, defaultValue);
     }
 
+    public Map<Attribute, Double> view() {
+        return Object2DoubleMaps.unmodifiable(this.data);
+    }
+
     @Override
     public int hashCode() {
         return this.data.hashCode();

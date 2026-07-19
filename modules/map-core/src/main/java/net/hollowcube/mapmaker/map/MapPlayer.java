@@ -30,10 +30,10 @@ import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.PhysicsResult;
@@ -1091,7 +1091,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     private void createNameTagEntity(Player player) {
         var playerData = PlayerData.fromPlayer(this);
-        var displayName = playerData.displayName2().build(DisplayName.Context.NAME_TAG);
+        var displayName = playerData.displayName2().build(NamedTextColor.WHITE);
         player.sendPackets(List.of(
             new BundlePacket(),
             new SpawnEntityPacket(nameTagEntityId, nameTagEntityUuid, EntityType.ARMOR_STAND,

@@ -6,11 +6,13 @@ import net.hollowcube.command.CommandExecutor;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
 import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.command.arg.MapArgument;
@@ -29,7 +31,6 @@ import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.to_be_refactored.ActionBar;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -76,6 +77,8 @@ public class DebugCommand extends CommandDsl {
             "Show information about yourself");
         createPermissionlessSubcommand("server", this::handleDebugServer,
             "Show information about the current server");
+        createPermissionlessSubcommand("parkour", this::handleParkourHud,
+            "toggle the parkour state debug hud");
         createPermissionedSubcommand("gc", (ignored1, ignored2) -> System.gc(),
             "Force a garbage collection");
 
@@ -299,7 +302,15 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
-        player.scheduleNextTick(_ -> ActionBar.forPlayer(player).toggleProvider(new ServerLatencyHud()));
+        player.scheduleNextTick(_ -> PlayerHud.forPlayer(player).toggleModule(new ServerLatencyHud()));
+    }
+
+    private void handleParkourHud(@NotNull Player player, @NotNull CommandContext context) {
+        // The hud module itself checks the setting each render, so flipping it is enough.
+        var playerData = PlayerData.fromPlayer(player);
+        boolean enabled = !playerData.getSetting(PlayerSettings.PARKOUR_DEBUG_HUD);
+        playerData.setSetting(PlayerSettings.PARKOUR_DEBUG_HUD, enabled);
+        player.sendMessage(Component.text("Parkour debug hud " + (enabled ? "enabled" : "disabled")));
     }
 
     private void handleMobs(@NotNull Player player, @NotNull CommandContext context) {

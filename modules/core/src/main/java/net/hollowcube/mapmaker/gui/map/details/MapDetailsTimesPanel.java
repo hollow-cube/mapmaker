@@ -116,7 +116,7 @@ public class MapDetailsTimesPanel extends Panel {
                 if (i >= entries.size()) continue;
 
                 var entry = entries.get(i);
-                var displayName = displayNames.get(i).build(DisplayName.Context.DEFAULT);
+                var displayName = displayNames.get(i).build();
                 this.entries[i].update(entry, displayName);
             }
         }
@@ -179,7 +179,7 @@ public class MapDetailsTimesPanel extends Panel {
                 if (index >= entries.size()) return;
 
                 var entry = entries.get(index);
-                var displayName = displayNames.get(index).build(DisplayName.Context.DEFAULT);
+                var displayName = displayNames.get(index).build();
                 this.entries[i].update(entry, displayName);
             }
         }
