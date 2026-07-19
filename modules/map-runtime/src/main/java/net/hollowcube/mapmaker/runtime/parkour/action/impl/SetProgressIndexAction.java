@@ -68,7 +68,7 @@ public record SetProgressIndexAction(
                 } catch (NumberFormatException _) {
                     host.player().sendMessage(Component.translatable("create_maps.checkpoint.progress_index.nan"));
                     host.player().closeInventory();
-                    return data.withValue(0);
+                    return data;
                 }
             }
         };

@@ -97,7 +97,7 @@ class AddonsPanel extends Panel {
             var firstLocked = firstNotOwned(player);
             Addon addon = Objects.requireNonNullElse(firstLocked, chain[chain.length - 1]);
 
-            delegate.translationKey(addon.translation + (firstLocked != null ? "" : ".unlocked"), countComponent());
+            delegate.translationKey(addon.translation + (firstLocked != null ? "" : ".unlocked"), countComponent(player));
             delegate.background(firstLocked == null ? "store/addons/slot_selected" : "store/addons/slot_default");
             delegate.sprite("icon2/1_1/" + addon.icon, 1, 1);
 
@@ -109,19 +109,25 @@ class AddonsPanel extends Panel {
         }
 
         private void handlePreBuyUpgrade() {
+            final var host = this.host;
             var addon = firstNotOwned(host.player());
             if (addon == null) return;
 
-            var name = LanguageProviderV2.translateToPlain(Component.translatable(addon.translation + ".name", countComponent()));
-            host.pushView(confirm("Buy " + name + "?", FutureUtil.wrapVirtual(this::handleBuyUpgrade)));
+            var name = LanguageProviderV2.translateToPlain(Component.translatable(
+                addon.translation + ".name", countComponent(host.player())));
+            host.pushView(confirm("Buy " + name + "?", confirmedPlayer ->
+                FutureUtil.submitVirtual(() -> handleBuyUpgrade(host, confirmedPlayer))));
         }
 
-        private void handleBuyUpgrade() {
-            var firstLocked = firstNotOwned(host.player());
+        private void handleBuyUpgrade(@NotNull InventoryHost host, @NotNull Player player) {
+            var firstLocked = firstNotOwned(player);
             if (firstLocked == null) return;
 
-            buyUpgrade(playerService, host.player(), firstLocked.id);
-            updateDisplay(host.player());
+            buyUpgrade(playerService, player, firstLocked.id);
+            player.scheduleNextTick(_ -> {
+                if (this.host != host) return;
+                updateDisplay(player);
+            });
         }
 
         private @Nullable Addon firstNotOwned(@NotNull Player player) {
@@ -133,8 +139,8 @@ class AddonsPanel extends Panel {
             return null;
         }
 
-        private Component countComponent() {
-            var playerData = PlayerData.fromPlayer(host.player());
+        private Component countComponent(@NotNull Player player) {
+            var playerData = PlayerData.fromPlayer(player);
             return Component.text(switch (chain[0].id) {
                 case MAP_SLOT -> {
                     int totalSlots = playerData.mapSlots();

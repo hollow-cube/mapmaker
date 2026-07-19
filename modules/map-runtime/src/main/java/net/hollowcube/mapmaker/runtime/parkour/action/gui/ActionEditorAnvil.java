@@ -35,21 +35,20 @@ public class ActionEditorAnvil<T extends Action> extends AbstractAnvilView {
 
     @Override
     protected void onSubmit(String text) {
+        final var submitHost = this.host;
+        if (submitHost == null) return;
+
         try {
             ref.<T>update(data -> {
                 var newValue = this.parse(data, text);
+                // Parsing may intentionally close the inventory to report invalid input.
+                // Do not validate or commit after that synchronously unmounts this editor.
+                if (this.host != submitHost) return data;
                 if (!validateResult(newValue)) return data;
                 return newValue;
             });
         } catch (Exception e) {
-            // player may not be available here if the ui was closed and then created an error.
-            // its kind of an error but masks the underlying error so not worth
-            if (host != null) {
-                ExceptionReporter.reportException(e, host.player());
-            } else {
-                ExceptionReporter.reportException(e);
-            }
-
+            ExceptionReporter.reportException(e, submitHost.player());
         }
         super.onSubmit(text); // Pop the view
     }

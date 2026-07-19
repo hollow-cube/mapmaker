@@ -73,7 +73,7 @@ public record ResetHeightAction(
                 } catch (NumberFormatException _) {
                     host.player().sendMessage(Component.translatable("create_maps.checkpoint.reset_height.nan"));
                     host.player().closeInventory();
-                    return data.withValue(NO_RESET_HEIGHT);
+                    return data;
                 }
             }
 
