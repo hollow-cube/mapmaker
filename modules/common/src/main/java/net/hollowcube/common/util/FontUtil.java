@@ -99,9 +99,10 @@ public final class FontUtil {
         for (int i = 0; i < FontSpacing.NEGATIVE_SPACE.size(); i++)
             customWidthLookup.put(FontSpacing.NEGATIVE_SPACE.get(i).charAt(0), -(1 << i));
 
+        // -1 is a real width (the negative spacing chars), so missing entries use MIN_VALUE.
         FONT_WIDTH_PROVIDER = codepoint -> {
-            int width = customWidthLookup.getOrDefault(codepoint, -1);
-            return width == -1 ? DEFAULT_FONT_WIDTHS.getOrDefault(codepoint, -1) : width;
+            int width = customWidthLookup.getOrDefault(codepoint, Integer.MIN_VALUE);
+            return width == Integer.MIN_VALUE ? DEFAULT_FONT_WIDTHS.getOrDefault(codepoint, Integer.MIN_VALUE) : width;
         };
     }
 
@@ -112,7 +113,7 @@ public final class FontUtil {
         for (int i = 0; i < text.length(); i++) {
             int codePoint = text.codePointAt(i);
             int glyphWidth = FONT_WIDTH_PROVIDER.get(codePoint);
-            if (glyphWidth == -1) {
+            if (glyphWidth == Integer.MIN_VALUE) {
                 throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
             }
             width += glyphWidth;
@@ -196,7 +197,7 @@ public final class FontUtil {
         for (int i = 0; i < text.length(); i++) {
             int codePoint = text.codePointAt(i);
             int glyphWidth = FONT_WIDTH_PROVIDER.get(codePoint);
-            if (glyphWidth == -1) glyphWidth = defaultCharWidth;
+            if (glyphWidth == Integer.MIN_VALUE) glyphWidth = defaultCharWidth;
             if (glyphWidth == -1) throw new RuntimeException("Unknown glyph: " + codePoint + " (" + (char) codePoint + ")");
             if (availableWidth - glyphWidth < 0) {
                 break;
