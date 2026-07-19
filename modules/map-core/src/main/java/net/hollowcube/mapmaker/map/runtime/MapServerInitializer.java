@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
-import java.time.Duration;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -116,7 +115,6 @@ public final class MapServerInitializer {
 
         var minestomConfig = config.get(MinestomConfig.class);
         minecraftServer.start(minestomConfig.host(), minestomConfig.port());
-        MinecraftServer.getBenchmarkManager().enable(Duration.ofSeconds(2));
         server.shutdowner().queue("minestom-kick", () -> {
             // todo why doesn't Minestom do this on its own?
             var connectionManager = MinecraftServer.getConnectionManager();

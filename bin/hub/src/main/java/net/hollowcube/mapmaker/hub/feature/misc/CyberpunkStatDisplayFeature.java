@@ -18,7 +18,6 @@ import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.TaskSchedule;
@@ -31,7 +30,6 @@ import java.util.concurrent.atomic.AtomicReference;
 @SuppressWarnings("UnstableApiUsage")
 public class CyberpunkStatDisplayFeature implements HubFeature {
     private static final GlobalEventHandler EVENT_HANDLER = MinecraftServer.getGlobalEventHandler();
-    private static final BenchmarkManager BENCHMARK_MANAGER = MinecraftServer.getBenchmarkManager();
 
     private static final double MAX_TICK_MS = 50;
     private static final double MAX_MEMORY_MB = 1024 * 3;
@@ -88,7 +86,8 @@ public class CyberpunkStatDisplayFeature implements HubFeature {
         if (tickMonitor == null) return TaskSchedule.tick(40); // sanity
 
         var tickTimeMs = tickMonitor.getTickTime();
-        var memoryUsageMb = BENCHMARK_MANAGER.getUsedMemory() / 1e6;
+        var runtime = Runtime.getRuntime();
+        var memoryUsageMb = (runtime.totalMemory() - runtime.freeMemory()) / 1e6;
 
         // Update text
         rightText.setText(Component.text()

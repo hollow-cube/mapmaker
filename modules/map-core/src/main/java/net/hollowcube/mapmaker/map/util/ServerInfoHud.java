@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.map.MapWorld;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
-import net.minestom.server.monitoring.BenchmarkManager;
 import net.minestom.server.monitoring.TickMonitor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,8 +17,6 @@ import java.util.Locale;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class ServerInfoHud implements PlayerHud.Module {
-    private static final BenchmarkManager BENCHMARK_MANAGER = MinecraftServer.getBenchmarkManager();
-
     private static final AtomicReference<TickMonitor> LAST_TICK = new AtomicReference<>();
 
     static {
@@ -44,7 +41,8 @@ public class ServerInfoHud implements PlayerHud.Module {
             var tickMonitor = LAST_TICK.get();
             if (tickMonitor == null) return null; // sanity
             lastTickTime = tickMonitor.getTickTime();
-            lastMemoryUsage = (int) (BENCHMARK_MANAGER.getUsedMemory() / 1e6);
+            var runtime = Runtime.getRuntime();
+            lastMemoryUsage = (int) ((runtime.totalMemory() - runtime.freeMemory()) / 1e6);
             lastUpdate = now;
         }
 
