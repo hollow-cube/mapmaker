@@ -16,7 +16,7 @@ public class SnbtArray {
             reader.read(SnbtMisc.WHITESPACE_PREDICATE);
             var type = getArrayType(reader);
             if (type == '\0') {
-                var output = ListBinaryTag.builder();
+                var output = ListBinaryTag.heterogeneousListBinaryTag();
                 parseArray(reader, () -> output.add(Snbt.parse(reader)));
                 return output.build();
             } else if (type == 'B' || type == 'b') {
