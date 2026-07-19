@@ -18,6 +18,7 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.item.component.TypedCustomData;
 import net.minestom.server.registry.RegistryKey;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -99,8 +100,12 @@ public class EntityEditor {
 
     @SuppressWarnings("unchecked")
     private static <T, E extends MapEntity<?>> Component getPropertyDisplay(MapEntityInfo.Property<T, E> property, MapEntity<?> entity) {
-        var value = property.type().get((E) entity);
+        return getValueDisplay(property.type().get((E) entity));
+    }
+
+    static Component getValueDisplay(@Nullable Object value) {
         return switch (value) {
+            case null -> Component.text("None", NamedTextColor.GRAY);
             case Enum<?> e -> Component.text(e.name(), NamedTextColor.AQUA);
             case Boolean b -> b ? Component.text("True", NamedTextColor.GREEN) : Component.text("False", NamedTextColor.RED);
             case Byte b -> Component.text(b, NamedTextColor.YELLOW);
