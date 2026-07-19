@@ -96,6 +96,12 @@ public final class TranscoderValue implements Transcoder<Value> {
     }
 
     @Override
+    public @NotNull Result<Number> getNumber(@NotNull Value value) {
+        var result = value.as(Number.class, null);
+        return result != null ? new Result.Ok<>(result) : new Result.Error<>("not a number");
+    }
+
+    @Override
     public @NotNull Result<String> getString(@NotNull Value value) {
         var result = value.as(String.class, null);
         return result != null ? new Result.Ok<>(result) : new Result.Error<>("not a string");

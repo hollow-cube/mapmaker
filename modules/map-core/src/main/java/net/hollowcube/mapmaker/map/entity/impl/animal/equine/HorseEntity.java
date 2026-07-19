@@ -23,15 +23,19 @@ public class HorseEntity extends AbstractHorseEntity<HorseMeta> {
     public void readData(CompoundBinaryTag tag) {
         super.readData(tag);
 
-        // Vanilla
-        this.getEntityMeta().setVariant(HorseMeta.getVariantFromID(tag.getInt(VARIANT_KEY)));
+        // Vanilla (variant = color | marking << 8)
+        var variantId = tag.getInt(VARIANT_KEY);
+        this.getEntityMeta().setVariantAndMarking(
+            HorseMeta.Variant.values()[variantId & 0xFF],
+            HorseMeta.Marking.values()[variantId >> 8]);
     }
 
     @Override
     public void writeData(CompoundBinaryTag.Builder tag) {
         super.writeData(tag);
 
-        // Vanilla
-        tag.putInt(VARIANT_KEY, HorseMeta.getVariantID(this.getEntityMeta().getVariant().getMarking(), this.getEntityMeta().getVariant().getColor()));
+        // Vanilla (variant = color | marking << 8)
+        var meta = this.getEntityMeta();
+        tag.putInt(VARIANT_KEY, (meta.getMarking().ordinal() << 8) + meta.getVariant().ordinal());
     }
 }
