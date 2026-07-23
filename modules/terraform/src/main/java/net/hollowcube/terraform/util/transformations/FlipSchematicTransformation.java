@@ -22,9 +22,9 @@ public record FlipSchematicTransformation(boolean x, boolean y, boolean z) imple
         int pz = pivot.blockZ();
 
         return new Vec(
-                this.x ? -point.blockX() + px : point.blockX(),
-                this.y ? -point.blockY() + py : point.blockY(),
-                this.z ? -point.blockZ() + pz : point.blockZ()
+                this.x ? 2 * px - point.blockX() : point.blockX(),
+                this.y ? 2 * py - point.blockY() : point.blockY(),
+                this.z ? 2 * pz - point.blockZ() : point.blockZ()
         );
     }
 }
