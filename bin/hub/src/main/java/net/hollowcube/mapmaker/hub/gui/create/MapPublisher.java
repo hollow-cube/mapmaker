@@ -152,7 +152,7 @@ final class MapPublisher {
 
     private static final int DEFAULT_MIN_PLAYTIME = ServerRuntime.getRuntime().isDevelopment()
         ? 1 // In development, we skip min playtime entirely
-        : (int) Duration.ofMinutes(5).toMillis();
+        : (int) Duration.ofMinutes(30).toMillis();
 
     private static int getMinPlaytime() {
         return System.getenv("MIN_PLAYTIME") == null ? DEFAULT_MIN_PLAYTIME : 0;
