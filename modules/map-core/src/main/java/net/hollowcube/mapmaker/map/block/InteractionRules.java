@@ -120,8 +120,9 @@ public class InteractionRules {
 
     private static void handleBlockBreak(@NotNull PlayerBlockBreakEvent event) {
         var block = event.getBlock();
-        if ("true".equals(block.getProperty("waterlogged")) || BlockTags.PRE_WATERLOGGED_BLOCKS.contains(block.key()))
+        if (net.hollowcube.common.util.BlockUtil.isWaterlogged(block)) {
             event.setResultBlock(Block.WATER);
+        }
     }
 
     private static void handleItemUse(@NotNull PlayerUseItemEvent event) {

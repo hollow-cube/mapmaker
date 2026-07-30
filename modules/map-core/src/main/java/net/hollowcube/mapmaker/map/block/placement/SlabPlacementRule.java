@@ -26,13 +26,19 @@ public class SlabPlacementRule extends WaterloggedPlacementRule {
         }
 
         var blockFace = placementState.blockFace();
-        if (blockFace == BlockFace.TOP) return block.withProperty(PROP_TYPE, "bottom");
-        if (blockFace == BlockFace.BOTTOM) return block.withProperty(PROP_TYPE, "top");
+        String type;
 
-        var type = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO).y() > 0.5 ? "top" : "bottom";
+        if (blockFace == BlockFace.TOP) {
+            type = "bottom";
+        } else if (blockFace == BlockFace.BOTTOM) {
+            type = "top";
+        } else {
+            type = Objects.requireNonNullElse(placementState.cursorPosition(), Vec.ZERO).y() > 0.5 ? "top" : "bottom";
+        }
+
         return block.withProperties(Map.of(
-                PROP_TYPE, type,
-                "waterlogged", waterlogged(existingBlock)
+            PROP_TYPE, type,
+            "waterlogged", waterlogged(existingBlock)
         ));
     }
 
