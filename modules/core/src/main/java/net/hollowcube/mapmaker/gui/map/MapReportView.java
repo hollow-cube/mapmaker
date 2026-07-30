@@ -62,6 +62,8 @@ public class MapReportView extends Panel {
         this.submitButton = add(2, 4, new Text("gui.report_map.submit.missing_categories", 5, 1, "Submit Report")
                 .align(Text.CENTER, Text.CENTER).background("generic2/btn/danger/5_1"))
                 .onLeftClickAsync(this::handleSubmit);
+
+        updateSubmitButton();
     }
 
     private void handleEditComment() {
