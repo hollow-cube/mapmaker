@@ -11,6 +11,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Supplier;
 
 /**
@@ -27,6 +28,10 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
             throw new RuntimeException("SHUTDOWN_MAX_WAIT_MILLIS must be a valid number", e);
         }
     }
+
+    /// The hard deadline for the whole sequence: the player drain gets [#SHUTDOWN_MAX_WAIT_MILLIS],
+    /// then the hooks get the same again, after which we halt no matter what.
+    private static final long SHUTDOWN_DEADLINE_MILLIS = 2 * SHUTDOWN_MAX_WAIT_MILLIS;
 
     @FunctionalInterface
     public interface HookFunction {
@@ -70,27 +75,50 @@ public class Shutdowner implements HttpServerWrapper.HealthCheck {
 
     public void performShutdown() {
         if (isShuttingDown) return;
+        isShuttingDown = true;
+
+        logger.info("Beginning graceful shutdown. The server will terminate in at most {} seconds.", SHUTDOWN_DEADLINE_MILLIS / 1000);
+
+        // The sequence runs on its own thread so that we can bound it. Anything it does may block
+        // indefinitely (world saves talk to the api, hooks close network resources, and submitVirtual
+        // runs inline once we have marked shutdown), and a wedged sequence keeps the jvm (and the
+        // server port) alive forever.
+        var sequence = new Thread(this::runShutdownSequence, "shutdown-sequence");
+        sequence.setDaemon(true);
+        sequence.start();
 
         try {
-            logger.info("Beginning graceful shutdown. The server will terminate in {} seconds.", SHUTDOWN_MAX_WAIT_MILLIS / 1000);
-            try {
-                quiescenceFunction.get().get();
-            } catch (ExecutionException e) {
-                logger.error("Error waiting for quiescence", e);
-            }
-
-            logger.info("Players have drained successfully, running shutdown hooks.");
-            FutureUtil.markShutdown(true);
-            for (var hook : shutdownHooks) {
-                try {
-                    hook.run();
-                } catch (Throwable e) {
-                    logger.error("Error running shutdown hook {}", hook.name(), e);
-                }
-            }
-
+            sequence.join(SHUTDOWN_DEADLINE_MILLIS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
+        }
+
+        if (sequence.isAlive()) {
+            logger.error("Shutdown did not complete within {}ms, halting.", SHUTDOWN_DEADLINE_MILLIS);
+            Runtime.getRuntime().halt(0);
+        }
+    }
+
+    private void runShutdownSequence() {
+        try {
+            quiescenceFunction.get().get(SHUTDOWN_MAX_WAIT_MILLIS, TimeUnit.MILLISECONDS);
+            logger.info("Players have drained successfully, running shutdown hooks.");
+        } catch (TimeoutException e) {
+            logger.error("Players did not drain within {}ms, running shutdown hooks anyway.", SHUTDOWN_MAX_WAIT_MILLIS);
+        } catch (ExecutionException e) {
+            logger.error("Error waiting for quiescence", e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return;
+        }
+
+        FutureUtil.markShutdown(true);
+        for (var hook : shutdownHooks) {
+            try {
+                hook.run();
+            } catch (Throwable e) {
+                logger.error("Error running shutdown hook {}", hook.name(), e);
+            }
         }
     }
 

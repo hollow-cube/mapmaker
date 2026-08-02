@@ -23,12 +23,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
+import static net.hollowcube.mapmaker.util.AbstractHttpService.CONNECT_TIMEOUT;
 import static net.hollowcube.mapmaker.util.AbstractHttpService.CONTEXT_PROPAGATOR;
 
 public class HttpClientWrapper {
     private static final Logger logger = LoggerFactory.getLogger(HttpClientWrapper.class);
     private final HttpClient httpClient = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.NORMAL)
+        .connectTimeout(CONNECT_TIMEOUT)
         .build();
 
     private final OpenTelemetry otel;

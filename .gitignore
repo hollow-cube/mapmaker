@@ -31,3 +31,5 @@ profile.jfr
 build
 
 workspace
+
+.mcp.json

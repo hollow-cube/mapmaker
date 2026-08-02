@@ -45,6 +45,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -97,7 +98,12 @@ public abstract class AbstractHttpService {
     public static final String hostname; //todo replace me with ServerRuntime call
     public static final String userAgent = "github.com/hollow-cube/mapmaker@" + ServerRuntime.getRuntime().shortCommit();
 
-    private final HttpClient httpClient = HttpClient.newBuilder().followRedirects(HttpClient.Redirect.NORMAL).build();
+    public static final Duration CONNECT_TIMEOUT = Duration.ofSeconds(10);
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+        .followRedirects(HttpClient.Redirect.NORMAL)
+        .connectTimeout(CONNECT_TIMEOUT)
+        .build();
     private final OpenTelemetry otel;
     protected final Tracer tracer;
 

@@ -48,6 +48,7 @@ import java.util.function.Function;
 
 public abstract class AbstractMultiMapServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMultiMapServer.class);
+    private static final long WORLD_CLOSE_TIMEOUT_SEC = 15;
 
     private record MapKey(String mapId, boolean editing) {
     }
@@ -412,11 +413,28 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 logger.error("failed to drain players", e);
             }
 
-            // Close the world itself
-            MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> world.close().thenRunAsync(() -> {
-                var destroyMessage = MapWorldMessage.destroyed(world.worldId());
-                jetStream.publish(destroyMessage.subject(), destroyMessage);
-            }));
+            // Close the world itself. We wait for it: during shutdown the save inside close() runs
+            // inline on the tick thread (see FutureUtil#createVirtual), and the next shutdown hook
+            // stops minestom out from under it.
+            var closed = new CompletableFuture<Void>();
+            MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> {
+                var future = world.close();
+                future.whenComplete((result, error) -> {
+                    if (error != null) closed.completeExceptionally(error);
+                    else closed.complete(result);
+                });
+                future.thenRunAsync(() -> {
+                    var destroyMessage = MapWorldMessage.destroyed(world.worldId());
+                    jetStream.publish(destroyMessage.subject(), destroyMessage);
+                });
+            });
+            try {
+                closed.get(WORLD_CLOSE_TIMEOUT_SEC, TimeUnit.SECONDS);
+            } catch (TimeoutException ignored) {
+                logger.error("failed to close world {} in {}s, continuing.", world.map().id(), WORLD_CLOSE_TIMEOUT_SEC);
+            } catch (RuntimeException | InterruptedException | ExecutionException e) {
+                logger.error("failed to close world {}", world.map().id(), e);
+            }
         } finally {
             closingWorlds.remove(world);
             span.end();
