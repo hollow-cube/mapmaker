@@ -7,6 +7,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.ShadowColor;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
@@ -53,6 +54,13 @@ public class MenuBuilder {
 
     public int availHeight() {
         return this.slotHeight - this.slotY;
+    }
+
+    public ShadowColor hoverIconMarker(int x, int y, int tooltipWidth, int tooltipLines) {
+        int imageHeight = 114 + this.containerSlotHeight * 18;
+        return HudText.buildHoverIconShadowMarker(
+            8 + computeAbsoluteX(x) - 176 / 2, 13 + computeAbsoluteY(y) - imageHeight / 2,
+            tooltipWidth, tooltipLines);
     }
 
 

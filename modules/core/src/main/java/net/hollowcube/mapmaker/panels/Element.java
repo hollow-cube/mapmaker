@@ -34,7 +34,7 @@ public class Element {
     }
 
     public Element background(@Nullable String sprite, int x, int y) {
-        return background(sprite == null ? null : new Sprite(sprite, BadSprite.require(sprite), x, y));
+        return background(sprite == null ? null : new Sprite(sprite, x, y));
     }
 
     public Element background(@Nullable Sprite sprite) {

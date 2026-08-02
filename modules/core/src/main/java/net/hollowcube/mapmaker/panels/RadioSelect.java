@@ -42,7 +42,12 @@ public class RadioSelect<T extends @UnknownNullability Object> extends Panel {
     public Button addOption(T item, ButtonUpdater updater, Button.Constructor buttonCtor) {
         var button = addNext(buttonCtor.construct(null, 1, 1));
         this.options.add(item);
-        Runnable update = () -> updater.update(button, item.equals(this.selected));
+        Runnable update = () -> {
+            boolean selected = item.equals(this.selected);
+            // The selected option already reads as picked, and clicking it again does nothing.
+            button.disableHoverSprite = selected;
+            updater.update(button, selected);
+        };
         this.buttonUpdaters.add(update);
         button.onLeftClick(() -> {
             this.selected = item;

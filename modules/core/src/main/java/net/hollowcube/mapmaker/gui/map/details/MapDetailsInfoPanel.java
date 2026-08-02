@@ -112,7 +112,10 @@ class MapDetailsInfoPanel extends Panel {
         ) {
             super(width + 1, 1);
 
-            add(0, 0, new Button(iconTranslationKey, 1, 1)
+            add(0, 0, new Button(iconTranslationKey, 1, 1) {{
+                // its not actually a button so no auto hover sprite
+                disableHoverSprite = true;
+            }}
                 .background("generic2/btn/default/1_1")
                 .sprite(iconSprite, iconSpriteX, iconSpriteY));
             add(1, 0, new Text(null, width, 1, text)

@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.util.JsonUtil;
 import net.hollowcube.mapmaker.util.ModelUtil;
 import net.hollowcube.mapmaker.util.Templates;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -33,6 +34,18 @@ public class SpriteTransform {
     private static final Json5 json5 = new Json5();
 
     private static final boolean debug = false;
+
+    /// Identity written into the first data pixel of a hover sprite, matched by the text shader.
+    /// Green and blue are both non zero so a grayscale (single channel) font sheet can never match.
+    private static final int HOVER_ICON_ID = 0xFE4E2A;
+
+    private static final int HOVER_OUTLINE_COLOR = 0xFFFFFFFF;
+    /// A button lives inside a container, so anything bigger than one is not button chrome.
+    private static final int MAX_BUTTON_WIDTH = 176, MAX_BUTTON_HEIGHT = 222;
+
+    /// Generated outlines are just rectangle borders, so the few hundred sprites that qualify
+    /// collapse into a few dozen distinct glyphs. Keyed by the encoded png.
+    private final Map<String, Character> outlinesByContent = new HashMap<>();
 
     private int nextChar = '\uE000';
 
@@ -196,6 +209,16 @@ public class SpriteTransform {
             ascent += origin.get(1).getAsInt();
         }
 
+        // Hover sprites are repositioned onto their button by the text shader, which needs to know how
+        // big they are before it can rebuild the quad. Bake it into the texture rather than spending
+        // marker colour bits on it.
+        if (name.endsWith("_hover")) {
+            image = addDataPixels(image);
+            height += 2;
+        } else {
+            emitHoverOutline(ctx, name, image, ascent, offX);
+        }
+
         // Check for empty pixels on the right side
         // Minecraft will slice off any empty rows on the right side of font characters (so that bitmaps work
         // correctly as fonts with variable width), but this is bad for us because we want the textures to
@@ -236,6 +259,111 @@ public class SpriteTransform {
         entries.put(name, fontChar);
 
         return new ServerSprite(name, rawFontChar, width, offX, right);
+    }
+
+    /// Emits `<name>_outline` for sprites that are a solid rectangle, ie a button face rather than an
+    /// icon, so any button using one as its background gets a hover effect without art being drawn.
+    ///
+    /// This is deliberately a different suffix from the hand drawn `_hover`: a generated outline is
+    /// only ever right for the button's background, and tracing a foreground icon would outline the
+    /// icon rather than the button.
+    private void emitHoverOutline(@NotNull PackContext ctx, @NotNull String name, @NotNull BufferedImage source,
+                                  int ascent, int offsetX) throws IOException {
+        BufferedImage outline = solidAreaBorder(source);
+        if (outline == null) return;
+
+        var baos = new ByteArrayOutputStream();
+        ImageIO.write(addDataPixels(outline), "png", baos);
+        String encoded = Base64.getEncoder().encodeToString(baos.toByteArray());
+
+        String outlineName = name + "_outline";
+        Character fontChar = outlinesByContent.get(encoded);
+        if (fontChar == null) {
+            String ref = ctx.writeTexture(null, outlineName, baos.toByteArray());
+            fontChar = (char) nextChar++;
+
+            var fontConf = new JsonObject();
+            fontConf.addProperty("type", "bitmap");
+            fontConf.addProperty("file", ref);
+            fontConf.addProperty("ascent", ascent);
+            fontConf.addProperty("height", outline.getHeight() + 2); // the data rows
+            var chars = new JsonArray();
+            chars.add(String.valueOf(fontChar));
+            fontConf.add("chars", chars);
+            ctx.addFontCharacter(fontConf);
+
+            outlinesByContent.put(encoded, fontChar);
+        }
+
+        entries.put(outlineName, String.valueOf(fontChar));
+        // The data pixels reach both edges, so nothing is ever trimmed off the right.
+        ctx.addServerSprite(new ServerSprite(outlineName, fontChar, outline.getWidth(), offsetX, 0));
+    }
+
+    /// The one pixel border of the sprite's opaque area, or null when that area has no unbroken
+    /// border of its own - an icon or artwork rather than a button face.
+    ///
+    /// Requiring a complete border rather than a filled rectangle lets hollow chrome (a frame with a
+    /// transparent middle) through while still rejecting icons, whose bounding box has gaps in it.
+    private static @Nullable BufferedImage solidAreaBorder(@NotNull BufferedImage source) {
+        int width = source.getWidth(), height = source.getHeight();
+        int minX = width, minY = height, maxX = -1, maxY = -1;
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                if (!isOpaque(source, x, y)) continue;
+                minX = Math.min(minX, x);
+                minY = Math.min(minY, y);
+                maxX = Math.max(maxX, x);
+                maxY = Math.max(maxY, y);
+            }
+        }
+        if (maxX < 0) return null;
+        if (width < 4) return null; // no room for the data pixels
+        if (maxX - minX + 1 > MAX_BUTTON_WIDTH || maxY - minY + 1 > MAX_BUTTON_HEIGHT) return null;
+
+        for (int y = minY; y <= maxY; y++)
+            if (!isOpaque(source, minX, y) || !isOpaque(source, maxX, y)) return null;
+        for (int x = minX; x <= maxX; x++)
+            if (!isOpaque(source, x, minY) || !isOpaque(source, x, maxY)) return null;
+
+        // Kept at the source's size so the outline lands wherever the sprite itself is drawn.
+        var result = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        for (int y = minY; y <= maxY; y++)
+            for (int x = minX; x <= maxX; x++)
+                if (x == minX || x == maxX || y == minY || y == maxY)
+                    result.setRGB(x, y, HOVER_OUTLINE_COLOR);
+        return result;
+    }
+
+    private static boolean isOpaque(@NotNull BufferedImage image, int x, int y) {
+        if (x < 0 || y < 0 || x >= image.getWidth() || y >= image.getHeight()) return false;
+        return (image.getRGB(x, y) >>> 24) != 0;
+    }
+
+    /// Adds a data row above and below the image, holding the sprite identity and its content size.
+    ///
+    /// Both rows carry the identity at the outermost pixel and the size one pixel further in, at both
+    /// ends, so a vertex can read them by stepping inward from whichever corner of the quad it is on.
+    /// The shader crops both rows back off before sampling, so they are never visible.
+    private static @NotNull BufferedImage addDataPixels(@NotNull BufferedImage image) {
+        int width = image.getWidth(), contentHeight = image.getHeight();
+        if (width < 4) throw new RuntimeException("Sprite must be at least 4px wide to hold data pixels");
+        if (width > 256 || contentHeight > 256) throw new RuntimeException("Sprite must be at most 256x256 to hold data pixels");
+
+        var result = new BufferedImage(width, contentHeight + 2, BufferedImage.TYPE_INT_ARGB);
+        var graphics = result.getGraphics();
+        graphics.drawImage(image, 0, 1, null);
+        graphics.dispose();
+
+        int identity = 0xFF000000 | HOVER_ICON_ID;
+        int size = 0xFF000000 | ((width - 1) << 16) | ((contentHeight - 1) << 8);
+        for (int y : new int[]{0, result.getHeight() - 1}) {
+            result.setRGB(0, y, identity);
+            result.setRGB(1, y, size);
+            result.setRGB(width - 2, y, size);
+            result.setRGB(width - 1, y, identity);
+        }
+        return result;
     }
 
     private static String[] setupNumberModels(@NotNull PackContext ctx) throws IOException {

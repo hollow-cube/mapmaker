@@ -17,6 +17,8 @@ import java.util.function.UnaryOperator;
 public final class HudText {
     public static final TextColor COLOR_MARKER = TextColor.color(0x4EB000);
 
+    public static final int MAX_HOVER_EFFECT_TOOLTIP_WIDTH = 2047;
+
     private static final int SENTINEL_ALPHA = 0x4E;
     private static final int FEATURE_ANCHOR = 0xA0;
     private static final int FEATURE_OFFSET = 0xB0;
@@ -72,6 +74,27 @@ public final class HudText {
                 | ((FEATURE_ANCHOR | anchor.ordinal()) << 16)
                 | ((yOffset + 128) << 8)
                 | rgb332(tint));
+    }
+
+    /// Positions a slot hover icon glyph over its button, and describes the tooltip it rode in on so
+    /// the shader can hide the part of the icon behind it.
+    ///
+    /// Unlike the other markers this one carries no sentinel: the glyph is identified by the data
+    /// pixels baked into its texture, so the entire shadow color is payload. `x`/`y` are the icon's
+    /// top left corner relative to the centre of the screen; the shader knows nothing about the
+    /// container. The tooltip width takes the three bits the line count does not need, since a single
+    /// line of lore easily runs past 255 pixels and a short width leaves the icon drawn over it.
+    public static ShadowColor buildHoverIconShadowMarker(int x, int y, int tooltipWidth, int tooltipLines) {
+        if (x < -128 || x > 127) throw new IllegalArgumentException("x out of range: " + x);
+        if (y < -128 || y > 127) throw new IllegalArgumentException("y out of range: " + y);
+        if (tooltipWidth < 0) throw new IllegalArgumentException("tooltipWidth out of range: " + tooltipWidth);
+        if (tooltipLines < 1 || tooltipLines > 31) throw new IllegalArgumentException("tooltipLines out of range: " + tooltipLines);
+
+        int width = Math.min(tooltipWidth, MAX_HOVER_EFFECT_TOOLTIP_WIDTH);
+        return ShadowColor.shadowColor(((tooltipLines | ((width >> 8) << 5)) << 24)
+                | ((x + 128) << 16)
+                | ((y + 128) << 8)
+                | (width & 0xFF));
     }
 
     public static ShadowColor buildRelativeShadowMarker(int yOffset, TextColor tint) {

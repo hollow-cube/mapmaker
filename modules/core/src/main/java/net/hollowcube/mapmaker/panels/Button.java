@@ -1,10 +1,13 @@
 package net.hollowcube.mapmaker.panels;
 
+import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.MessagesBase;
+import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.compat.noxesium.NoxesiumAPI;
+import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.OverlayItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
@@ -56,6 +59,7 @@ public class Button extends Element implements ButtonClickAliases {
     protected @Nullable ResolvableProfile itemProfile = null;
     protected @Nullable DataComponentMap extraComponents = null;
     protected @Nullable Sprite sprite;
+    protected boolean disableHoverSprite = false;
     protected boolean disableTooltip = false;
 
     private @Nullable OnClickTypeSlot onLeftClick;
@@ -268,13 +272,53 @@ public class Button extends Element implements ButtonClickAliases {
             )
         );
 
-        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_NAME, title);
         var lore = itemLore;
         if (itemLorePostfix != null) {
             lore = new ArrayList<>(itemLore);
             lore.addAll(itemLorePostfix);
         }
+
+        if (!disableTooltip && !disableHoverSprite)
+            title = withHoverSprite(builder, title, lore);
+
+        builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.CUSTOM_NAME, title);
         builder.editSlots(0, 0, slotWidth, slotHeight, DataComponents.LORE, lore);
+    }
+
+    /// Adds the hover icon with its positioning marker and negative space so
+    /// it has a net zero effect on the tooltip content. nothing else has to care about this
+    private Component withHoverSprite(MenuBuilder builder, Component title, List<Component> lore) {
+        BadSprite hover = null;
+        int offsetX = 0, offsetY = 0;
+        var background = background();
+        if (sprite != null && sprite.hoverSprite() != null) {
+            hover = sprite.hoverSprite();
+        } else if (background != null) {
+            hover = Objects.requireNonNullElse(background.hoverSprite(), background.outlineSprite());
+            offsetX = background.offsetX();
+            offsetY = background.offsetY();
+        }
+        if (hover == null) return title;
+
+        var hoverIcon = Component.text(hover.fontChar())
+            .shadowColor(builder.hoverIconMarker(offsetX, offsetY, measureTooltipWidth(title, lore), 1 + lore.size()))
+            .color(HudText.COLOR_MARKER) // delete the non-shadow version
+            .decoration(TextDecoration.ITALIC, false)
+            .append(Component.text(FontUtil.computeOffset(-hover.width() - 1)));
+        return Component.empty().append(hoverIcon).append(title);
+    }
+
+    /// kinda inaccurate because we just go to max if something goes wrong,
+    /// but in most cases max is fine anyway since you typically dont see
+    /// the other side of the button.
+    private static int measureTooltipWidth(Component title, List<Component> lore) {
+        try {
+            int width = FontUtil.measureText(title);
+            for (var line : lore) width = Math.max(width, FontUtil.measureText(line));
+            return width;
+        } catch (RuntimeException ignored) {
+            return HudText.MAX_HOVER_EFFECT_TOOLTIP_WIDTH;
+        }
     }
 
     @Override
