@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.runtime.parkour.setting.SavedMapSettings;
-import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
@@ -34,7 +33,8 @@ public record EnableSettingAction(
             MapSettings.RESET_IN_WATER, MapSettings.RESET_IN_LAVA,
             MapSettings.NO_TURN
     );
-    // These maps are pretty gross should revisit. They must match the list above
+    // TODO These maps are pretty gross should revisit. They must match the list above.
+    // NOTE FOR ABOVE: When revisited, make it match the display order of settings tags in create maps
     static final Map<MapSetting<Boolean>, String> SETTINGS_TRANSLATION_KEYS = Map.of(
             MapSettings.ONLY_SPRINT, "gui.create_maps.map_settings_tab.gameplay.only_sprint",
             MapSettings.NO_SPRINT, "gui.create_maps.map_settings_tab.gameplay.no_sprint",
@@ -45,14 +45,14 @@ public record EnableSettingAction(
             MapSettings.NO_TURN, "gui.create_maps.map_settings_tab.gameplay.no_turn"
     );
     static final Map<MapSetting<Boolean>, String> SETTINGS_ICONS = Map.of(
-            MapSettings.ONLY_SPRINT, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_onlysprint_icon").model(),
-            MapSettings.NO_SPRINT, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_nosprint_icon").model(),
-            MapSettings.NO_JUMP, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_nojump_icon").model(),
-            MapSettings.NO_SNEAK, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_nosneak_icon").model(),
-            MapSettings.RESET_IN_WATER, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_reset_water_icon").model(),
-            MapSettings.RESET_IN_LAVA, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_reset_lava_icon").model(),
-            MapSettings.NO_TURN, BadSprite.require("create_maps/tab_settings/tab_gameplay/setting_noturning_icon").model()
-    );
+            MapSettings.ONLY_SPRINT, "icon2/1_1/boot_move_right",
+            MapSettings.NO_SPRINT, "icon2/1_1/boot_slime",
+            MapSettings.NO_JUMP, "icon2/1_1/arrow_up_x",
+            MapSettings.NO_SNEAK, "icon2/1_1/steve_crouch_x",
+            MapSettings.RESET_IN_WATER, "icon2/1_1/settings/reset_in_water",
+            MapSettings.RESET_IN_LAVA, "icon2/1_1/settings/reset_in_lava",
+            MapSettings.NO_TURN, "icon2/1_1/mouse_x"
+    ); // TODO organize icon2/1_1 because what the hell man...
 
     private static final Sprite SPRITE = new Sprite("action/icon/setting_add", 2, 3);
 
@@ -78,6 +78,7 @@ public record EnableSettingAction(
         if (settings == null) settings = new SavedMapSettings();
         if (setting == null || !(setting.defaultValue() instanceof Boolean)) return;
         state.set(Attachments.SETTINGS, settings.with((MapSetting<Boolean>) setting, true));
+        //player.scheduler().scheduleNextTick(() -> player.sendMessage(Component.translatable("action.setting." + setting.key() + ".enable"))); //for testing purposes
     }
 
     private static TranslatableComponent makeThumbnail(@Nullable EnableSettingAction action) {
@@ -106,7 +107,7 @@ public record EnableSettingAction(
                 int x = i % 7, y = i / 7;
 
                 add(x + 1, y + 2, new Button(SETTINGS_TRANSLATION_KEYS.get(setting), 1, 1)
-                        .model(SETTINGS_ICONS.get(setting), null)
+                        .sprite(SETTINGS_ICONS.get(setting), 1, 1)
                         .onLeftClick(() -> updateFunc.accept(setting)));
             }
         }
@@ -116,5 +117,4 @@ public record EnableSettingAction(
             // Noop, we just pop the view when updating
         }
     }
-
 }

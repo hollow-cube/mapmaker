@@ -77,7 +77,7 @@ public record DisableSettingAction(
                 int x = i % 7, y = i / 7;
 
                 add(x + 1, y + 2, new Button(EnableSettingAction.SETTINGS_TRANSLATION_KEYS.get(setting), 1, 1)
-                        .model(EnableSettingAction.SETTINGS_ICONS.get(setting), null)
+                        .sprite(EnableSettingAction.SETTINGS_ICONS.get(setting), 1, 1)
                         .onLeftClick(() -> updateFunc.accept(setting)));
             }
         }
