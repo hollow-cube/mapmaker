@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableSto
 import net.hollowcube.mapmaker.runtime.parkour.action.util.MolangResolver;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointReachedEvent;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.hollowcube.molang.eval.MolangEvaluator;
 import net.hollowcube.molang.runtime.ContentError;
@@ -121,6 +122,11 @@ public class TempEffectApplicator {
 
         // Update the player based on the new state
         world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState, playState, false, false, false));
+
+        // A spectator checkpoint is a viewing convenience rather than progress through a run, so
+        // only a real one is recorded.
+        if (!isTemporary)
+            world.recordReplayEvent(player, new CheckpointReachedEvent(checkpointId, saveState.getRealPlaytime()));
 
         player.sendMessage(translatable(isTemporary ? "spec.checkpoint.set" : "play.checkpoint.reached"));
         player.playSound(CHECKPOINT_SOUND);

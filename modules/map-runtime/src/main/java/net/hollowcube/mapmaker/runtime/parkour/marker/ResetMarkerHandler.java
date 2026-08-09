@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.runtime.parkour.marker;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,6 +33,6 @@ public class ResetMarkerHandler extends ObjectEntityHandler {
         if (world == null) return;
 
         if (this.fullReset) world.hardResetPlayer(player);
-        else world.softResetPlayer(player);
+        else world.softResetPlayer(player, CheckpointResetEvent.Reason.FORCED);
     }
 }

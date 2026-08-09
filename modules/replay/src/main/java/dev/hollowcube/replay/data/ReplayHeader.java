@@ -1,0 +1,174 @@
+package dev.hollowcube.replay.data;
+
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.validate.Check;
+
+import java.nio.ByteBuffer;
+import java.util.UUID;
+
+public final class ReplayHeader {
+    public static final int HEADER_LENGTH = 256;
+    public static final int MAGIC = 0x48435250; // 'HCRP'
+
+    /// Any incompatible change to the header layout, or to anything laid out after it, bumps this.
+    ///
+    /// There is no back-compat: a replay written at any other version is refused outright, because
+    /// reading an old layout as if it were this one silently misparses every field after the point
+    /// the two diverge.
+    public static final short VERSION_LATEST = 3;
+
+    /// The world version is opaque to the format, so the cap is just a sanity bound: whatever is
+    /// large enough for the identity schemes a host might want. 32 bytes fits a SHA-256 digest (and
+    /// a UUID). Nothing is reserved for it, it is written as exactly its own length, and the header
+    /// padding absorbs the difference.
+    ///
+    /// On read the bound is a corruption guard, so a garbage length can never run off the end of
+    /// the fixed header.
+    public static final int WORLD_VERSION_MAX_LENGTH = 32;
+
+    public static final int RECORD_COMPRESSION_LEVEL = 3;
+    public static final int COMPACT_COMPRESSION_LEVEL = 19;
+
+    public static final short FLAGS_NONE = 0; // unused for now
+
+    private final short version; // format version
+    private final UUID worldId;
+    private final byte[] worldVersion;
+    private final long timestamp;
+    private final short dictionary;
+    private final int dataVersion;
+
+    private int metadataLength = 0;
+    private int indexLength = 0;
+    private int tickCount = 0;
+    private int chunkCount = 0;
+
+    public ReplayHeader(UUID worldId, byte[] worldVersion) {
+        Check.argCondition(worldVersion.length > WORLD_VERSION_MAX_LENGTH,
+            "world version is too long: {0}", worldVersion.length);
+
+        this.version = VERSION_LATEST;
+        this.worldId = worldId;
+        this.worldVersion = worldVersion.clone();
+        this.timestamp = System.currentTimeMillis();
+        this.dictionary = ReplayDictionary.VERSION_LATEST;
+        this.dataVersion = MinecraftServer.DATA_VERSION;
+    }
+
+    public ReplayHeader(NetworkBuffer buffer) {
+        long startIndex = buffer.readIndex();
+
+        int magic = buffer.read(NetworkBuffer.INT);
+        Check.argCondition(magic != MAGIC, "corrupt header");
+
+        this.version = buffer.read(NetworkBuffer.SHORT);
+        Check.argCondition(version != VERSION_LATEST,
+            "unsupported replay version: {0}, expected {1}", version, VERSION_LATEST);
+
+        buffer.read(NetworkBuffer.SHORT); // flags
+        this.worldId = buffer.read(NetworkBuffer.UUID);
+        // The cap keeps the whole header well inside HEADER_LENGTH, so a garbage length can only
+        // fail here rather than eat the fields after it.
+        int worldVersionLength = buffer.read(NetworkBuffer.BYTE);
+        Check.argCondition(worldVersionLength < 0 || worldVersionLength > WORLD_VERSION_MAX_LENGTH,
+            "corrupt world version length: {0}", worldVersionLength);
+        this.worldVersion = buffer.read(NetworkBuffer.FixedRawBytes(worldVersionLength));
+        this.timestamp = buffer.read(NetworkBuffer.LONG);
+        this.dictionary = buffer.read(NetworkBuffer.SHORT);
+        this.metadataLength = buffer.read(NetworkBuffer.INT);
+        this.indexLength = buffer.read(NetworkBuffer.INT);
+        this.tickCount = buffer.read(NetworkBuffer.INT);
+        this.chunkCount = buffer.read(NetworkBuffer.INT);
+        this.dataVersion = buffer.read(NetworkBuffer.INT);
+
+        // Skip the remaining fixed header length
+        buffer.advanceRead(HEADER_LENGTH - (buffer.readIndex() - startIndex));
+    }
+
+    public short version() {
+        return version;
+    }
+
+    public UUID worldId() {
+        return worldId;
+    }
+
+    /// An opaque identifier for the version of the world this replay was recorded against, at most
+    /// [#WORLD_VERSION_MAX_LENGTH] bytes. The format never interprets it, only compares it.
+    public byte[] worldVersion() {
+        return worldVersion.clone();
+    }
+
+    /// Encodes a UUID as a world version, for hosts whose world identity is already a UUID.
+    public static byte[] worldVersion(UUID uuid) {
+        return ByteBuffer.allocate(16)
+            .putLong(uuid.getMostSignificantBits())
+            .putLong(uuid.getLeastSignificantBits())
+            .array();
+    }
+
+    public long timestamp() {
+        return timestamp;
+    }
+
+    public short dictionary() {
+        return dictionary;
+    }
+
+    /// The Minecraft data version this replay was recorded against.
+    ///
+    /// Entity type IDs and item NBT are only meaningful against the game data they were written
+    /// with, so anything reading a replay from an older version has to fix it up first.
+    public int dataVersion() {
+        return dataVersion;
+    }
+
+    public int metadataLength() {
+        return metadataLength;
+    }
+
+    public int indexLength() {
+        return indexLength;
+    }
+
+    public int tickCount() {
+        return tickCount;
+    }
+
+    public int chunkCount() {
+        return chunkCount;
+    }
+
+    public long indexByteOffset() {
+        return HEADER_LENGTH + metadataLength;
+    }
+
+    public void update(int metadataLength, int indexLength, int tickCount, int chunkCount) {
+        this.metadataLength = metadataLength;
+        this.indexLength = indexLength;
+        this.tickCount = tickCount;
+        this.chunkCount = chunkCount;
+    }
+
+    public void write(NetworkBuffer buffer) {
+        long startIndex = buffer.writeIndex();
+
+        buffer.write(NetworkBuffer.INT, MAGIC);
+        buffer.write(NetworkBuffer.SHORT, version);
+        buffer.write(NetworkBuffer.SHORT, FLAGS_NONE);
+        buffer.write(NetworkBuffer.UUID, worldId);
+        buffer.write(NetworkBuffer.BYTE, (byte) worldVersion.length);
+        buffer.write(NetworkBuffer.RAW_BYTES, worldVersion);
+        buffer.write(NetworkBuffer.LONG, timestamp);
+        buffer.write(NetworkBuffer.SHORT, dictionary);
+        buffer.write(NetworkBuffer.INT, metadataLength);
+        buffer.write(NetworkBuffer.INT, indexLength);
+        buffer.write(NetworkBuffer.INT, tickCount);
+        buffer.write(NetworkBuffer.INT, chunkCount);
+        buffer.write(NetworkBuffer.INT, dataVersion);
+
+        // Pad to the remaining fixed header length
+        buffer.advanceWrite(HEADER_LENGTH - (buffer.writeIndex() - startIndex));
+    }
+}

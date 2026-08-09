@@ -9,6 +9,7 @@ dependencies {
     api(project(":modules:terraform")) //TODO: this exists for entity implementations, but it shouldn't.
     implementation(project(":modules:datafix"))
     implementation(project(":modules:compat"))
+    implementation(project(":modules:replay"))
 
     implementation(libs.minestom)
     implementation(libs.fastutil)

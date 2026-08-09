@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
+import dev.hollowcube.replay.event.ReplayEvent;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.OpUtils;
@@ -45,6 +46,9 @@ import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionE
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
 import net.hollowcube.mapmaker.runtime.parkour.marker.*;
+import net.hollowcube.mapmaker.runtime.parkour.replay.ReplayManager;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.RunStartEvent;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.molang.MolangExpr;
@@ -143,6 +147,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     }
 
     private final MolangExpr leaderboardScoreExpr;
+    private final ReplayManager replayManager;
 
     private final SaveStateType saveStateType;
 
@@ -194,6 +199,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         scheduler().submitTask(this::visibilityTick);
 
+        this.replayManager = new ReplayManager(this);
+
         // We throw on world creation if the expression is invalid. We parse when setting it, so this
         // should not happen. Not sure if theres any better recourse than failing to load.
         this.leaderboardScoreExpr = MolangOptimizer.optimizeAst(MolangExpr.parseOrThrow(map.settings().leaderboard().score()));
@@ -203,6 +210,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         return defaultResetHeight;
     }
 
+    public ReplayManager replayManager() {
+        return replayManager;
+    }
+
     // region Player Lifecycle
 
     /// Creates the expected playing state type for this map. Mostly exists for testing world.
@@ -210,15 +221,34 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         return new ParkourState.Playing2(saveState);
     }
 
+    void resumeReplayRecording(SaveState saveState, Player player) {
+        replayManager.resumeRecordingSession(saveState, player);
+    }
+
+    CompletableFuture<Void> applyReplaySessionTransition(SaveState saveState, @Nullable ParkourState nextState) {
+        return replayManager.applyTransition(saveState, nextState);
+    }
+
+    CompletableFuture<Void> replayFinalization(SaveState saveState) {
+        return replayManager.finalization(saveState.id());
+    }
+
+    /// Records a parkour-specific moment in the player's run, if it is being recorded.
+    void recordReplayEvent(Player player, ReplayEvent event) {
+        replayManager.submit(player, event);
+    }
+
     public void hardResetPlayer(Player player) {
         var newSaveState = new SaveState(UUID.randomUUID().toString(),
             map().id(), player.getUuid().toString(), saveStateType,
             PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+
         changePlayerState(player, createPlayingState(newSaveState));
     }
 
-    public void softResetPlayer(Player player) {
+    /// @param reason what sent the player back, recorded as-is on the replay
+    public void softResetPlayer(Player player, CheckpointResetEvent.Reason reason) {
         if (!(getPlayerState(player) instanceof ParkourState.AnyPlaying playing))
             return;
         var saveState = playing.saveState();
@@ -232,6 +262,9 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         var newPlayState = OpUtils.map(playState.lastState(), PlayState::copy);
         if (newPlayState == null || isOutOfLives) {
             if (isOutOfLives) {
+                // Whatever sent them here, spending the last life is the reason they went back.
+                recordReplayEvent(player, new CheckpointResetEvent(
+                    CheckpointResetEvent.Reason.LIVES, saveState.getRealPlaytime()));
                 player.playSound(PLAYER_DEATH_SOUND);
                 player.sendMessage(translatable("playing.lives.run_out"));
 
@@ -261,6 +294,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         // Create a copy so that we can reset to this checkpoint again
         newPlayState.setLastState(newPlayState.copy());
 
+        // Recorded before the state change, which only lands at the next safe point, so that the
+        // reset is written to the run it belongs to rather than the one after it.
+        recordReplayEvent(player, new CheckpointResetEvent(reason, saveState.getRealPlaytime()));
+
         // Resume playing from this state as a safe point action
         var newSaveState = saveState.copy(newPlayState);
         changePlayerState(player, playing.withSaveState(newSaveState));
@@ -273,6 +310,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         try {
             saveState = server().api().maps.getLatestSaveState(map().id(),
                 playerData.id(), saveStateType, PlayState.SERIALIZER);
+            replayManager.prepareRecordingSession(saveState, playerData);
+
         } catch (ApiClient.NotFoundError _) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
@@ -343,7 +382,11 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             mp.resetTouchingState();
             // Set starting latency
             saveState.setStartLatency(mp.averageLatency());
+
+            recordReplayEvent(player, new RunStartEvent());
         }
+
+        // TODO(replay): begin or resume recording if there is a replay for this run
 
         EventDispatcher.call(new ParkourMapPlayerTookActionEvent(this, player, saveState));
     }
@@ -361,7 +404,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         var playState = saveState.state(PlayState.class);
         int resetHeight = OpUtils.or(playState.get(Attachments.RESET_HEIGHT), this::defaultResetHeight);
         if (player.getPosition().y() < resetHeight) {
-            softResetPlayer(player);
+            softResetPlayer(player, CheckpointResetEvent.Reason.RESET_HEIGHT);
             return;
         }
     }
@@ -372,7 +415,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         var countdownEnd = player.getTag(EditTimerAction.COUNTDOWN_END);
         if (countdownEnd != -1 && countdownEnd < System.nanoTime() / 1_000_000) {
             player.sendMessage(translatable("playing.timer.run_out"));
-            softResetPlayer(player);
+            softResetPlayer(player, CheckpointResetEvent.Reason.TIMER);
         }
     }
 
@@ -482,6 +525,12 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
     //region World lifecycle
 
     @Override
+    public TaskSchedule safePointTick() {
+        replayManager.endTick();
+        return super.safePointTick();
+    }
+
+    @Override
     public void loadWorld() {
         super.loadWorld();
 
@@ -519,6 +568,13 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             world.map().getSetting(MapSettings.WEATHER_TYPE)
         );
         world.instance().setWeather(weather.weather(), 1);
+    }
+
+    @Override
+    public CompletableFuture<Void> close() {
+        var worldClose = super.close();
+        var replayClose = replayManager.close();
+        return CompletableFuture.allOf(worldClose, replayClose);
     }
 
     protected void computeDefaultResetHeight() {

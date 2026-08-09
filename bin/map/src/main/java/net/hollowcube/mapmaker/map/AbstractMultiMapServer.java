@@ -7,6 +7,7 @@ import io.nats.client.api.DeliverPolicy;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
@@ -22,6 +23,7 @@ import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.parkour.replay.ReplayDebugHud;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
@@ -572,6 +574,13 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 world.save(true); // pretend to be auto save to get message
             },
             "Immediately saves the current (editor) world"
+        );
+
+        cmd.createPermissionedSubcommand(
+            "replay",
+            (player, _) -> player.scheduleNextTick(
+                _ -> PlayerHud.forPlayer(player).toggleModule(new ReplayDebugHud())),
+            "Toggles the replay recording overlay"
         );
 
         return cmd;

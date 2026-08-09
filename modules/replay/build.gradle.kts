@@ -6,4 +6,5 @@ dependencies {
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
     implementation(libs.fastutil)
+    implementation(libs.zstd)
 }

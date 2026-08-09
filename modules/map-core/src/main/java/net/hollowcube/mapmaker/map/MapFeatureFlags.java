@@ -12,6 +12,7 @@ public final class MapFeatureFlags {
 
     // WIP Features
     public static final FeatureFlag MACE_ITEM = FeatureFlag.of("map.mace_item");
+    public static final FeatureFlag REPLAY_RECORDING = FeatureFlag.of("map.replay_recording");
 
     // Internal
     public static final FeatureFlag DEBUG_PLAYING_OVERLAY = FeatureFlag.of("debug.playing_overlay");
