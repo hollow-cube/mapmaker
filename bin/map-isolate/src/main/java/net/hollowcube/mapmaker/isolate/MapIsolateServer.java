@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
@@ -22,6 +23,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.timer.ExecutionType;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
@@ -72,6 +74,13 @@ public class MapIsolateServer extends AbstractMapServer {
 
     public String mapId() {
         return mapId;
+    }
+
+    @Override
+    protected @NotNull DebugCommand createDebugCommand() {
+        var cmd = super.createDebugCommand();
+        MapCommands.registerPlayingDebugSubcommands(cmd);
+        return cmd;
     }
 
     @Override

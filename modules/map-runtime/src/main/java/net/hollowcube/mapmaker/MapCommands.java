@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker;
 
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.HelpCommand;
+import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.TopTimesCommand;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
@@ -9,6 +10,7 @@ import net.hollowcube.mapmaker.map.command.*;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.runtime.parkour.command.ShowHeightCommand;
 import net.hollowcube.mapmaker.runtime.parkour.command.SpectateCommand;
+import net.hollowcube.mapmaker.runtime.parkour.replay.ReplayDebugHud;
 import org.jetbrains.annotations.NotNull;
 
 public final class MapCommands {
@@ -33,6 +35,18 @@ public final class MapCommands {
         commandManager.register(new FlyCommand());
         commandManager.register(new FlySpeedCommand());
         commandManager.register(new TeleportCommand());
+    }
+
+    /// Debug subcommands which need types from map-runtime, so [DebugCommand] itself (map-core)
+    /// cannot register them. Every server which can host a parkour world calls this from its
+    /// `createDebugCommand`.
+    public static void registerPlayingDebugSubcommands(@NotNull DebugCommand cmd) {
+        cmd.createPermissionedSubcommand(
+            "replay",
+            (player, _) -> player.scheduleNextTick(
+                _ -> PlayerHud.forPlayer(player).toggleModule(new ReplayDebugHud())),
+            "Toggles the replay recording overlay"
+        );
     }
 
 }
