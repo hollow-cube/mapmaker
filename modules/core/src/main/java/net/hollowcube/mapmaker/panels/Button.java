@@ -294,7 +294,7 @@ public class Button extends Element implements ButtonClickAliases {
         if (sprite != null && sprite.hoverSprite() != null) {
             hover = sprite.hoverSprite();
         } else if (background != null) {
-            hover = Objects.requireNonNullElse(background.hoverSprite(), background.outlineSprite());
+            hover = OpUtils.or(background.hoverSprite(), background::outlineSprite);
             offsetX = background.offsetX();
             offsetY = background.offsetY();
         }
