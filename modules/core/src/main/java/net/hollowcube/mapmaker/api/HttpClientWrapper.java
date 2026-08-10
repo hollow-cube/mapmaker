@@ -170,9 +170,11 @@ public class HttpClientWrapper {
 
     public <T> @UnknownNullability T maybeThrowResponse(HttpResponse<?> response) {
         return switch (response.statusCode()) {
-            case 200, 201, 204 -> null;
+            case 200, 201, 204, 206 -> null;
             case 400 -> throw new ApiClient.BadRequestError(response);
             case 404 -> throw new ApiClient.NotFoundError(response);
+            case 409 -> throw new ApiClient.ConflictError(response);
+            case 412 -> throw new ApiClient.PreconditionFailedError(response);
             case 500 -> throw new ApiClient.InternalServerError(response);
             // ... more specific handlers as needed
             default -> throw new ApiClient.Error(response);

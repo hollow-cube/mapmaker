@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdate
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.item.checkpoint.CheckpointItem;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EquipmentSlot;
@@ -70,7 +71,7 @@ public class LegacyActionStateManager {
         // Set the player health to the number of time they have (1 heart = 1 life)
         var lives = state.get(EditLivesAction.SAVE_DATA);
         if (lives != null && lives.value() <= 0) {
-            event.world().softResetPlayer(player);
+            event.world().softResetPlayer(player, CheckpointResetEvent.Reason.LIVES);
             return; // We should not continue as the reset will override other settings
         } else if (lives != null) {
             player.getAttribute(Attribute.MAX_HEALTH).setBaseValue(2 * lives.max());

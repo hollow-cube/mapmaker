@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdate
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.hud.*;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.RunEndEvent;
 import net.hollowcube.mapmaker.runtime.parkour.setting.OnlySprintSetting;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
@@ -200,6 +201,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         public void configurePlayer(ParkourMapWorld world, Player player, @Nullable ParkourState lastState) {
+            world.resumeReplayRecording(saveState, player);
+
             MapWorldHelpers.resetPlayerOnTickThread(player);
             AnyPlaying.super.configurePlayer(world, player, lastState);
 
@@ -219,13 +222,26 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         @Override
         public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
-            AnyPlaying.super.resetPlayer(world, player, nextState);
+            // Every way a run ends goes through this transition, and it has to be recorded before
+            // the transition below finishes the recording it belongs in.
+            if (nextState instanceof Finished(var finishState)) {
+                world.recordReplayEvent(player, new RunEndEvent(
+                    RunEndEvent.Reason.FINISH, finishState.getEffectivePlaytime()));
+            } else if (nextState instanceof Playing2(var nextSaveState)
+                && !nextSaveState.id().equals(saveState.id())) {
+                // A different save state is a hard reset; a checkpoint reset keeps this one.
+                world.recordReplayEvent(player, new RunEndEvent(
+                    RunEndEvent.Reason.RESET, saveState.getRealPlaytime()));
+            }
 
-            // Wdon't save if entering finished state, that state will handle saving the record.
+            AnyPlaying.super.resetPlayer(world, player, nextState);
+            var replayFinalization = world.applyReplaySessionTransition(saveState, nextState);
+
+            // Don't save if entering finished state, that state will handle saving the record.
             boolean shouldSave = !(nextState instanceof Finished)
                     // Save if exiting, entering spec, >10s playing, or completed
                     && (nextState == null || nextState instanceof Spectating || saveState.getRealPlaytime() > 10_000 || saveState.isCompleted());
-            if (shouldSave) FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
+            if (shouldSave) FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState, replayFinalization));
         }
 
     }
@@ -247,6 +263,13 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
             ((MapPlayer) player).resetTouchingState();
             ((MapPlayer) player).updateTouchingState(world, true);
+        }
+
+        @Override
+        public void resetPlayer(ParkourMapWorld world, Player player, @Nullable ParkourState nextState) {
+            AnyPlaying.super.resetPlayer(world, player, nextState);
+            if (parent != null)
+                world.applyReplaySessionTransition(parent.savedState(), nextState);
         }
     }
 
@@ -298,6 +321,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             if (nextState instanceof Playing2 || nextState == null) {
                 PlayerHud.forPlayer(player).removeModule(SpectatorModeHud.INSTANCE);
             }
+
+            world.applyReplaySessionTransition(savedState, nextState);
         }
     }
 
@@ -314,7 +339,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             world.itemRegistry().setItemStack(player, MapDetailsItem.ID, 8);
 
             saveState.setScore(world.computeScore(player, saveState));
-            FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState));
+            var replayFinalization = world.replayFinalization(saveState);
+            FutureUtil.submitVirtual(() -> writeSaveState(world, player, saveState, replayFinalization));
 
             // If this is a verification, immediately remove them from the world and send them back to the hub
             if (world.map().verification() == MapVerification.PENDING) {
@@ -359,9 +385,23 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         return other;
     }
 
-    private static void writeSaveState(ParkourMapWorld world, Player player, SaveState saveState) {
+    private static void writeSaveState(
+        ParkourMapWorld world,
+        Player player,
+        SaveState saveState,
+        CompletableFuture<Void> replayFinalization
+    ) {
         var update = saveState.createUpsertRequest();
         update.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+
+        // A finalized local replay is durable under the same ID as this save state. Replay upload
+        // is still a separate integration step, but never race the state write with local closure.
+        try {
+            FutureUtil.getUnchecked(replayFinalization);
+        } catch (Exception e) {
+            var wrappedException = new RuntimeException("failed to finalize replay", e);
+            ExceptionReporter.reportException(wrappedException, player);
+        }
 
         // Write the save state to the database
         try {

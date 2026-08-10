@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
@@ -54,7 +55,7 @@ public class OnlySprintSetting {
         if (world == null || canSprint(world, player)) return;
 
         player.removeTag(ONLY_SPRINT_START_POSITION);
-        world.softResetPlayer(player);
+        world.softResetPlayer(player, CheckpointResetEvent.Reason.SPRINT);
     }
 
     private static void onPlayerMove(PlayerMoveEvent event) {
@@ -71,6 +72,6 @@ public class OnlySprintSetting {
 
         // They moved >1 block before starting sprinting, reset them
         player.removeTag(ONLY_SPRINT_START_POSITION);
-        world.softResetPlayer(player);
+        world.softResetPlayer(player, CheckpointResetEvent.Reason.SPRINT);
     }
 }

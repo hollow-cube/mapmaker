@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
@@ -55,7 +56,7 @@ public class NoTurnSetting {
         var oldPos = event.getPlayer().getPosition();
         if (oldPos.sameView(newPos)) return;
 
-        world.softResetPlayer(player);
+        world.softResetPlayer(player, CheckpointResetEvent.Reason.TURN);
     }
 
 }

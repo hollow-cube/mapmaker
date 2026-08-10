@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerTickEvent;
@@ -53,7 +54,7 @@ public class ResetLiquidSetting {
         var playState = p.saveState().state(PlayState.class);
         boolean isWaterReset = !canGoInWater(world, playState) && player.isInWater();
         boolean isLavaReset = isWaterReset || !canGoInLava(world, playState) && player.isInLava();
-        if (isWaterReset || isLavaReset) world.softResetPlayer(player);
+        if (isWaterReset || isLavaReset) world.softResetPlayer(player, CheckpointResetEvent.Reason.LIQUID);
     }
 
 }

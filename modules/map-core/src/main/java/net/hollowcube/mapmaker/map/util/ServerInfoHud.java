@@ -25,9 +25,10 @@ public class ServerInfoHud implements PlayerHud.Module {
     }
 
     // Past the right edge of the hotbar (91px half-width), two rows stacked above the bottom edge.
-    private static final int OFFSET_X = 130;
-    private static final int OFFSET_Y = -35;
-    private static final int LINE_GAP = 1; // rows 10px apart
+    // Public so overlays that stack on top of this one can place themselves against it.
+    public static final int OFFSET_X = 130;
+    public static final int OFFSET_Y = -35;
+    public static final int LINE_GAP = 1; // rows 10px apart
 
     private long lastUpdate = 0;
 

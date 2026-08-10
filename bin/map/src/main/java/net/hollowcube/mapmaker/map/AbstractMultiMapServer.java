@@ -11,6 +11,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
@@ -573,6 +574,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             },
             "Immediately saves the current (editor) world"
         );
+
+        MapCommands.registerPlayingDebugSubcommands(cmd);
 
         return cmd;
     }

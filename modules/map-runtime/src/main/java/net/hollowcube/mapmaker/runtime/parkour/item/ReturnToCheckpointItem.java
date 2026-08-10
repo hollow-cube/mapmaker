@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
+import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
@@ -38,11 +39,11 @@ public class ReturnToCheckpointItem extends ItemHandler {
         switch (world.getPlayerState(player)) {
             case ParkourState.AnyPlaying p -> {
                 boolean needsConfirmation = p.isScorable() && p.saveState().state(PlayState.class).lastState() == null;
-                if (needsConfirmation && ResetSaveStateItem.tryConfirmation(player, p, CONFIRM_COOLDOWN, () -> world.softResetPlayer(player))) {
+                if (needsConfirmation && ResetSaveStateItem.tryConfirmation(player, p, CONFIRM_COOLDOWN, () -> world.softResetPlayer(player, CheckpointResetEvent.Reason.MANUAL))) {
                     return;
                 }
 
-                world.softResetPlayer(player);
+                world.softResetPlayer(player, CheckpointResetEvent.Reason.MANUAL);
             }
             case ParkourState.Spectating(var _, var gameState) -> {
                 if (gameState.pos() != null) {
