@@ -71,6 +71,7 @@ public final class ActionRegistry {
         register(EnableNoSpecAction.KEY, EnableNoSpecAction.CODEC, EnableNoSpecAction.EDITOR, Action.Type.SPAWN);
         register(SetTimeAction.KEY, SetTimeAction.CODEC, SetTimeAction.EDITOR);
         register(SetWeatherAction.KEY, SetWeatherAction.CODEC, SetWeatherAction.EDITOR);
+        register(ClearBlocksAction.KEY, ClearBlocksAction.CODEC, ClearBlocksAction.EDITOR);
     }
 
     private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor, Action.Type... types) {
