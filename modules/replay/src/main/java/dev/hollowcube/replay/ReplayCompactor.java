@@ -34,22 +34,18 @@ public final class ReplayCompactor {
     /// Compacts a recording, reading each referenced segment exactly once through `segments`.
     public static Result compact(ReplayPreamble preamble, IntFunction<byte[]> segments) {
         var header = preamble.header();
-        var index = new ArrayList<>(preamble.index());
-
-        var out = NetworkBuffer.resizableBuffer(2048); // TODO: smarter size
-        out.advanceWrite(ReplayHeader.HEADER_LENGTH); // patched once the chunks are laid out
-
         var metadata = NetworkBuffer.makeArray(NetworkBuffer.NBT_COMPOUND, preamble.metadata());
-        out.write(NetworkBuffer.RAW_BYTES, metadata);
-        out.advanceWrite(header.indexLength()); // patched below, the index keeps its encoded size
 
-        var preambleLength = (int) out.writeIndex();
+        // Chunks are laid out first, into a buffer of their own, because recompression is what
+        // decides their new lengths, the index cannot be encoded until it knows them, and the
+        // chunks cannot be placed until the index in front of them has its final size.
+        var chunks = NetworkBuffer.resizableBuffer(2048); // TODO: smarter size
+        var index = new ArrayList<ChunkIndex>(preamble.index().size());
 
         var loadedSegmentIndex = -1;
         byte[] loadedSegment = null;
 
-        for (var i = 0; i < index.size(); i++) {
-            var chunk = index.get(i);
+        for (var chunk : preamble.index()) {
             var segmentIndex = ReplayPreamble.segmentIndex(chunk);
             var segmentOffset = ReplayPreamble.segmentOffset(chunk);
 
@@ -62,7 +58,7 @@ public final class ReplayCompactor {
             if (segmentOffset + chunk.compressedLength() > loadedSegment.length)
                 throw new IllegalStateException("replay chunk lies outside segment " + segmentIndex);
 
-            var byteOffset = out.writeIndex();
+            var byteOffset = chunks.writeIndex();
             long recompressedLength;
             try (var arena = Arena.ofConfined()) {
                 var compressed = arena.allocate(chunk.compressedLength());
@@ -103,35 +99,48 @@ public final class ReplayCompactor {
                     throw new IllegalStateException("Replay compression failed: " + Zstd.getErrorName(recompressedLength));
                 }
 
-                out.ensureWritable(recompressedLength);
+                chunks.ensureWritable(recompressedLength);
                 NetworkBuffer.copy(
                     NetworkBuffer.wrap(recompressed, 0, recompressedLength),
                     0,
-                    out,
+                    chunks,
                     byteOffset,
                     recompressedLength
                 );
             }
 
-            // Offsets are absolute in a compacted replay rather than packed segment offsets.
-            index.set(i, chunk.withCompaction(byteOffset, (int) recompressedLength));
-            out.advanceWrite(recompressedLength);
+            // Offsets are still relative to the first chunk here; they become absolute below, once
+            // the preamble in front of them has a length.
+            index.add(chunk.withCompaction(byteOffset, (int) recompressedLength));
+            chunks.advanceWrite(recompressedLength);
 
             // todo should reuse the same zstd context here and for the initial write as a small optimization
         }
 
-        var length = out.writeIndex();
+        // A chunk index encodes its offset as a fixed-width long and everything else is final by
+        // now, so measuring the index on relative offsets gives the same length the absolute ones
+        // will take. Recompression can narrow a chunk's length past a varint boundary, so this
+        // cannot assume the index is as long as the segmented recording's was.
+        var indexLength = NetworkBuffer.makeArray(buffer -> {
+            for (var chunk : index) buffer.write(ChunkIndex.NETWORK_TYPE, chunk);
+        }).length;
+        var preambleLength = ReplayHeader.HEADER_LENGTH + metadata.length + indexLength;
+        header.update(metadata.length, indexLength, header.tickCount(), index.size());
 
-        out.writeIndex(0);
+        var chunkLength = chunks.readableBytes();
+        var out = NetworkBuffer.resizableBuffer((int) Math.min(preambleLength + chunkLength, Integer.MAX_VALUE));
         header.write(out);
-
-        out.writeIndex(header.indexByteOffset());
+        out.write(NetworkBuffer.RAW_BYTES, metadata);
         for (var chunk : index)
-            out.write(ChunkIndex.NETWORK_TYPE, chunk);
+            out.write(ChunkIndex.NETWORK_TYPE, chunk.withCompaction(
+                preambleLength + chunk.byteOffset(), chunk.compressedLength()));
         if (out.writeIndex() != preambleLength)
-            throw new IllegalStateException("compacted replay index does not match its declared length");
+            throw new IllegalStateException("compacted replay preamble does not match its declared length");
 
-        out.writeIndex(length);
+        out.ensureWritable(chunkLength);
+        NetworkBuffer.copy(chunks, 0, out, out.writeIndex(), chunkLength);
+        out.advanceWrite(chunkLength);
+
         return new Result(out.read(NetworkBuffer.RAW_BYTES), preambleLength);
     }
 }
