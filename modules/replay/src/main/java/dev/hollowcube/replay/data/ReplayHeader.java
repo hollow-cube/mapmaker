@@ -16,7 +16,7 @@ public final class ReplayHeader {
     /// There is no back-compat: a replay written at any other version is refused outright, because
     /// reading an old layout as if it were this one silently misparses every field after the point
     /// the two diverge.
-    public static final short VERSION_LATEST = 3;
+    public static final short VERSION_LATEST = 4;
 
     /// The world version is opaque to the format, so the cap is just a sanity bound: whatever is
     /// large enough for the identity schemes a host might want. 32 bytes fits a SHA-256 digest (and

@@ -15,6 +15,7 @@ import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.network.NetworkBuffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -86,8 +87,11 @@ final class ReplayRoundTripTest {
         var registry = ReplayEvents.builder().build();
         var storage = new SegmentedFileReplayStorage(temporaryDirectory);
 
+        // The delta's coordinates are whole 1/4096ths and its view whole 1/65536ths of a turn, so
+        // that this stays a test of the format rather than of how LP_POS rounds; that has its own
+        // test below.
         var expected = List.<ReplayEvent>of(
-            new DeltaMoveEvent(0, new Pos(1, 2, 3, 4, 5), new Vec(1, 0, -1)),
+            new DeltaMoveEvent(0, new Pos(1, 2, 3, 5.625f, -45f), new Vec(1, 0, -1)),
             new SetItemEvent(0, Map.of(4, ItemStack.of(Material.DIAMOND, 12))),
             new SetItemEvent(0, Map.of(
                 4, ItemStack.of(Material.DIAMOND, 12),
@@ -170,6 +174,78 @@ final class ReplayRoundTripTest {
         assertEquals(-0.12, delta.velocity().z(), 1e-4);
         // Zero is the one value it is exact about, which is what makes a still entity cost a byte.
         assertEquals(Vec.ZERO, assertInstanceOf(AbsoluteMoveEvent.class, played.getLast()).velocity());
+    }
+
+    @Test
+    void aDeltaSurvivesTheFormatToWithinItsPrecisionAndAnAnchorExactly(@TempDir Path temporaryDirectory) {
+        var registry = ReplayEvents.builder().build();
+        var storage = new SegmentedFileReplayStorage(temporaryDirectory);
+
+        var recorder = ReplayRecorder.create(
+            registry,
+            storage.writer("run", null),
+            UUID.randomUUID(),
+            ReplayHeader.worldVersion(UUID.randomUUID()),
+            () -> {
+            }
+        );
+        recorder.submit(new DeltaMoveEvent(0, new Pos(0.0731, -0.0784, 0.2, 137.4f, -22.9f), Vec.ZERO));
+        recorder.submit(new AbsoluteMoveEvent(0, new Pos(-3184.61, 71.9375, 902.03, -179.9f, 90f), Vec.ZERO));
+        recorder.advance();
+        recorder.finish().join();
+
+        var recording = storage.load("run");
+        assertNotNull(recording);
+        var compacted = ReplayCompactor.compact(
+            recording.requirePreamble(),
+            new SegmentedFileReplaySource(temporaryDirectory.resolve("run"))
+        );
+
+        var played = new ArrayList<ReplayEvent>();
+        try (var player = new ReplayPlayer(new CompactedReplayReader(compacted.data()), registry, played::add)) {
+            while (player.advance() == ReplayPlayer.Advance.ADVANCED) ;
+        }
+
+        // A delta's coordinate lands on the nearer 1/4096 of a block.
+        var delta = assertInstanceOf(DeltaMoveEvent.class, played.getFirst()).delta();
+        assertEquals(0.0731, delta.x(), 1.0 / 8192);
+        assertEquals(-0.0784, delta.y(), 1.0 / 8192);
+        assertEquals(0.2, delta.z(), 1.0 / 8192);
+        assertNotEquals(0.0731, delta.x(), "the delta should have been quantized at all");
+
+        // Its view lands on the nearer 1/65536 of a turn, 256 times finer than the angle byte
+        // watching a player live would have shown.
+        assertEquals(137.4f, delta.yaw(), 360f / 131072);
+        assertEquals(-22.9f, delta.pitch(), 360f / 131072);
+
+        // An anchor is exact, so the rounding above is corrected rather than accumulated.
+        assertEquals(
+            new Pos(-3184.61, 71.9375, 902.03, -179.9f, 90f),
+            assertInstanceOf(AbsoluteMoveEvent.class, played.getLast()).position()
+        );
+    }
+
+    @Test
+    void aViewSurvivesAYawNoClientEverNormalized() {
+        // A client reports the yaw it has accumulated, so a player who keeps turning sends one that
+        // grows without bound. It has to come back pointing the same way however far it has gone.
+        for (var turns = 0; turns < 400; turns++) {
+            var yaw = 137.4f + 360f * turns;
+            var written = NetworkBuffer.makeArray(ReplayTypes.LP_POS, new Pos(0, 0, 0, yaw, -22.9f));
+            var read = NetworkBuffer.wrap(written, 0, written.length).read(ReplayTypes.LP_POS);
+
+            // The tolerance grows with the yaw only because the float the client sent has itself
+            // run out of resolution by then. What this encodes stays half a step off, always.
+            var tolerance = 360f / 131072 + Math.ulp(yaw);
+            assertEquals(137.4f, Pos.fixYaw(read.yaw()), tolerance, "yaw after " + turns + " turns");
+            assertEquals(-22.9f, read.pitch(), 360f / 131072);
+        }
+
+        // Well past where a half float would have run out of exponent and become infinite.
+        var extreme = NetworkBuffer.makeArray(ReplayTypes.LP_POS, new Pos(0, 0, 0, 200_000f, 90f));
+        var read = NetworkBuffer.wrap(extreme, 0, extreme.length).read(ReplayTypes.LP_POS);
+        assertTrue(Float.isFinite(read.yaw()), "a yaw this large must still be an angle");
+        assertEquals(90f, read.pitch(), 360f / 131072);
     }
 
     @Test
