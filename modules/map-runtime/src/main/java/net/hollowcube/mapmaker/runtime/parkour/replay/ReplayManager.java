@@ -48,6 +48,15 @@ public final class ReplayManager {
     private static final int FIRST_RECORDED_SLOT = 3;
     private static final int LAST_RECORDED_SLOT = 5;
 
+    /// The shortest run worth a replay, one second of it.
+    ///
+    /// Half of every recording made is of a run that ended within three seconds of starting, and a
+    /// fifth within one: a hard reset, or a player who never really began. Those cost a stored
+    /// object and a row each to say nothing, so a run that ends this fast is dropped rather than
+    /// committed. It only applies to a run that is over; a player who leaves after half a second
+    /// may come back and make it a long one, so leaving keeps the recording as always.
+    private static final int MINIMUM_RECORDED_TICKS = 20;
+
     /// The built-in events, with the parkour-specific ones appended after them.
     ///
     /// WARNING: As with the built-ins, these are positional and baked into every replay recorded
@@ -330,7 +339,7 @@ public final class ReplayManager {
             return finalizations.getOrDefault(saveStateId, CompletableFuture.completedFuture(null));
         }
 
-        var finalization = finished ? session.finish() : session.stop();
+        var finalization = finished ? session.complete(MINIMUM_RECORDED_TICKS) : session.stop();
         finalizations.put(saveStateId, finalization);
         // Otherwise every run this world ever hosted stays pinned for its lifetime. Anything asking
         // after removal gets a completed future, which is the right answer once it has landed.

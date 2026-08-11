@@ -77,8 +77,62 @@ final class ReplaySessionTest {
         var finished = new TestWriter();
         var session = new ReplaySession(snapshot -> newRecorder(finished, snapshot));
         session.advance();
-        session.finish().join();
+        session.complete(0).join();
         assertTrue(finished.commits.getLast().finished());
+    }
+
+    @Test
+    void aRunTooShortToBeWorthKeepingIsNeverSent() {
+        var writer = new TestWriter();
+        var session = new ReplaySession(snapshot -> newRecorder(writer, snapshot));
+        for (var tick = 0; tick < 19; tick++) session.advance();
+
+        session.complete(20).join();
+
+        // Not an empty commit, and not a finished one: nothing about this run reaches storage at
+        // all, so nothing has to be cleaned up later either.
+        assertEquals(List.of("close"), writer.operations);
+    }
+
+    @Test
+    void aRunLongEnoughToKeepIsFinishedAsUsual() {
+        var writer = new TestWriter();
+        var session = new ReplaySession(snapshot -> newRecorder(writer, snapshot));
+        for (var tick = 0; tick < 20; tick++) session.advance();
+
+        session.complete(20).join();
+
+        assertTrue(writer.commits.getLast().finished());
+        assertEquals(20, headerOf(writer.commits.getLast()).tickCount());
+    }
+
+    @Test
+    void aShortRunThatAlreadyCommittedIsKeptRatherThanLost() {
+        var writer = new TestWriter();
+        var session = new ReplaySession(snapshot -> newRecorder(writer, snapshot));
+        session.advance();
+        // A pause commits, which is what a spectating or testing detour does to a live run.
+        session.pause().join();
+        session.resume();
+        session.advance();
+
+        session.complete(20).join();
+
+        // Those bytes are already in storage, so finishing is the only honest end for them.
+        assertTrue(writer.commits.getLast().finished());
+    }
+
+    @Test
+    void aShortRunThatIsOnlyStoppedIsStillKept() {
+        var writer = new TestWriter();
+        var session = new ReplaySession(snapshot -> newRecorder(writer, snapshot));
+        session.advance();
+
+        // The player left rather than finished; they may come back and make this a long run.
+        session.stop().join();
+
+        assertFalse(writer.commits.isEmpty());
+        assertTrue(writer.commits.stream().noneMatch(SegmentedReplayCommit::finished));
     }
 
     @Test
@@ -88,7 +142,7 @@ final class ReplaySessionTest {
         session.advance();
 
         var stop = session.stop();
-        assertSame(stop, session.finish());
+        assertSame(stop, session.complete(0));
         stop.join();
 
         assertTrue(writer.commits.stream().noneMatch(SegmentedReplayCommit::finished));
@@ -430,7 +484,7 @@ final class ReplaySessionTest {
         ));
 
         script.accept(session);
-        session.finish().join();
+        session.complete(0).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);

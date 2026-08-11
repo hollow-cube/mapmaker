@@ -322,19 +322,38 @@ final class ReplaySession {
 
     /// Stops recording but leaves the replay resumable, for when the run itself is not over.
     CompletableFuture<Void> stop() {
-        return terminate(false);
+        return terminate(Termination.STOPPED);
     }
 
-    /// Permanently completes the replay. Storage may start compacting it once this lands.
-    CompletableFuture<Void> finish() {
-        return terminate(true);
+    /// Permanently completes the replay, or throws it away if the run was too short to have caught
+    /// anything worth keeping. Storage may start compacting a completed one once this lands.
+    ///
+    /// Bytes that have reached storage cannot be recalled, so a recording that has already
+    /// committed is kept whatever its length. That only happens to a run that was resumed or
+    /// paused, which is not the kind of run this drops.
+    ///
+    /// @param minimumTicks the shortest run worth a replay, or 0 to keep every run
+    CompletableFuture<Void> complete(int minimumTicks) {
+        return terminate(recorder.tick() >= minimumTicks || recorder.committed()
+            ? Termination.FINISHED
+            : Termination.DISCARDED);
     }
 
-    private CompletableFuture<Void> terminate(boolean finished) {
+    private CompletableFuture<Void> terminate(Termination termination) {
         if (terminateFuture != null) return terminateFuture;
 
         state = State.TERMINATED;
-        terminateFuture = finished ? recorder.finish() : recorder.close();
+        terminateFuture = switch (termination) {
+            case STOPPED -> recorder.close();
+            case FINISHED -> recorder.finish();
+            case DISCARDED -> recorder.discard();
+        };
         return terminateFuture;
+    }
+
+    private enum Termination {
+        STOPPED,
+        FINISHED,
+        DISCARDED
     }
 }

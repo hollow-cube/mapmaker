@@ -64,6 +64,12 @@ public sealed interface ReplayRecorder permits ReplayRecorderImpl {
     record Stats(int tick, long bytes, int chunks, int events, int chunkEvents) {
     }
 
+    /// True once any part of this recording has been sent to storage.
+    ///
+    /// A recording that has not is still entirely local, so a host that decides it is not worth
+    /// keeping can [#discard()] it and leave nothing behind.
+    boolean committed();
+
     /// The failure that killed this recording, or null while it is still healthy.
     ///
     /// A write failure is terminal. The recorder stops accepting ticks and events rather than
@@ -92,5 +98,11 @@ public sealed interface ReplayRecorder permits ReplayRecorderImpl {
     ///
     /// The first of [#close()] or this call wins; the other returns the same future.
     CompletableFuture<Void> finish();
+
+    /// Closes the underlying writer without committing anything, abandoning the whole recording.
+    ///
+    /// Only valid while nothing has been [#committed()], since bytes that have reached storage
+    /// cannot be recalled. As with the others, the first termination wins.
+    CompletableFuture<Void> discard();
 
 }

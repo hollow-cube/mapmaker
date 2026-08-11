@@ -197,6 +197,11 @@ final class ReplayRecorderImpl implements ReplayRecorder {
     }
 
     @Override
+    public boolean committed() {
+        return committed;
+    }
+
+    @Override
     public @Nullable Throwable failure() {
         return failure;
     }
@@ -235,6 +240,16 @@ final class ReplayRecorderImpl implements ReplayRecorder {
         return terminate(true);
     }
 
+    @Override
+    public CompletableFuture<Void> discard() {
+        if (committed)
+            throw new IllegalStateException("a recording that has reached storage cannot be discarded");
+        if (closeFuture != null) return closeFuture;
+
+        closeFuture = closeWriter();
+        return closeFuture;
+    }
+
     private CompletableFuture<Void> terminate(boolean finished) {
         if (closeFuture != null) return closeFuture;
 
@@ -243,7 +258,12 @@ final class ReplayRecorderImpl implements ReplayRecorder {
         discardOpenTick();
         commit(finished);
 
-        closeFuture = writeChain.handleAsync((_, writeFailure) -> {
+        closeFuture = closeWriter();
+        return closeFuture;
+    }
+
+    private CompletableFuture<Void> closeWriter() {
+        return writeChain.handleAsync((_, writeFailure) -> {
             Throwable failure = unwrapCompletionException(writeFailure);
             try {
                 writer.close();
@@ -255,7 +275,6 @@ final class ReplayRecorderImpl implements ReplayRecorder {
             if (failure != null) throw new CompletionException(failure);
             return null;
         }, WRITE_EXECUTOR);
-        return closeFuture;
     }
 
     private void discardOpenTick() {
