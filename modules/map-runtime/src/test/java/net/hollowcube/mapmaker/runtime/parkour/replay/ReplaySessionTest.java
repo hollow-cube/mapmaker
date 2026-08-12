@@ -365,6 +365,34 @@ final class ReplaySessionTest {
     }
 
     @Test
+    void roundingIsCarriedIntoTheNextDeltaRatherThanAccumulating(@TempDir Path temporaryDirectory) {
+        // A step no whole number of 1/4096ths describes, so every tick leaves a remainder behind.
+        var step = 0.1 / 3;
+        var ticks = 100;
+        var recorded = record(temporaryDirectory, session -> {
+            for (var tick = 0; tick <= ticks; tick++) {
+                session.captureMovement(
+                    ReplaySession.SUBJECT_ENTITY_ID, new Pos(step * tick, 64, -step * tick), Vec.ZERO);
+                session.advance();
+            }
+        });
+
+        // Rebuild the position the way playback does, by adding up only what was written down.
+        var rebuilt = Pos.ZERO;
+        for (var event : recorded) {
+            if (event instanceof AbsoluteMoveEvent(var _, var position, var _)) rebuilt = position;
+            else if (event instanceof DeltaMoveEvent(var _, var delta, var _)) rebuilt = rebuilt.add(delta);
+        }
+
+        // Half a step off, after a hundred ticks of it. Diffing against the true position instead
+        // would have let the remainders pile up to roughly forty times this.
+        var expected = new Pos(step * ticks, 64, -step * ticks);
+        assertEquals(expected.x(), rebuilt.x(), 1 / 8192d);
+        assertEquals(expected.y(), rebuilt.y(), 1 / 8192d);
+        assertEquals(expected.z(), rebuilt.z(), 1 / 8192d);
+    }
+
+    @Test
     void everyVanillaVisibleFlagIsRecorded(@TempDir Path temporaryDirectory) {
         var entity = new LivingEntity(EntityType.ZOMBIE);
         var meta = (LivingEntityMeta) entity.getEntityMeta();

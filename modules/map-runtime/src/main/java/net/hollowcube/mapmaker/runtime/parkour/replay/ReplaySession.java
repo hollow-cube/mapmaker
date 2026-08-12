@@ -7,6 +7,7 @@ import dev.hollowcube.replay.event.DestroyEntityEvent;
 import dev.hollowcube.replay.event.EntityStateEvent;
 import dev.hollowcube.replay.event.ItemUseEvent;
 import dev.hollowcube.replay.event.ReplayEvent;
+import dev.hollowcube.replay.event.ReplayTypes;
 import dev.hollowcube.replay.event.SetBlockEvent;
 import dev.hollowcube.replay.event.SetItemEvent;
 import dev.hollowcube.replay.event.SpawnEntityEvent;
@@ -125,6 +126,11 @@ final class ReplaySession {
     ///
     /// The velocity rides along for later analysis rather than for playback, so a tick that only
     /// changed velocity is still worth an event.
+    ///
+    /// What is remembered is the position a reader will have rebuilt rather than the one the entity
+    /// really held, so that the next delta carries the rounding of this one instead of dropping it.
+    /// A move too small for the wire to describe is therefore not recorded at all, and is left to
+    /// accumulate until it is large enough to be worth a step.
     void captureMovement(int entityId, Pos position, Vec velocity) {
         if (state != State.RECORDING) return;
 
@@ -133,10 +139,16 @@ final class ReplaySession {
         var last = lastPositions.get(entityId);
         if (last == null) {
             recorder.submit(new AbsoluteMoveEvent(entityId, position, velocity));
-        } else if (!last.equals(position) || !velocity.equals(lastVelocities.get(entityId))) {
-            recorder.submit(new DeltaMoveEvent(entityId, position.sub(last).withView(position), velocity));
+            lastPositions.put(entityId, position);
+        } else {
+            var delta = ReplayTypes.quantizeCoordinates(position.sub(last));
+            var stillness = delta.isZero() && position.sameView(last)
+                && velocity.equals(lastVelocities.get(entityId));
+            if (!stillness) {
+                recorder.submit(new DeltaMoveEvent(entityId, delta.withView(position), velocity));
+                lastPositions.put(entityId, last.add(delta).withView(position));
+            }
         }
-        lastPositions.put(entityId, position);
         lastVelocities.put(entityId, velocity);
     }
 

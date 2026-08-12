@@ -56,6 +56,25 @@ public final class ReplayTypes {
         }
     };
 
+    /// The coordinates [#LP_POS] is going to decode from these, leaving the view alone.
+    ///
+    /// A recorder diffs one position against another, and a reader can only add up what it was
+    /// actually sent, so the two disagree by whatever the rounding dropped. Diffing against this
+    /// instead carries that remainder into the next delta rather than losing it, which holds a
+    /// reader to half a step for the life of a chunk; measured over a day of recordings, diffing
+    /// exact positions instead lets it reach forty times that before the next anchor.
+    public static Pos quantizeCoordinates(Pos position) {
+        return position.withCoord(
+            quantizeCoordinate(position.x()),
+            quantizeCoordinate(position.y()),
+            quantizeCoordinate(position.z())
+        );
+    }
+
+    private static double quantizeCoordinate(double value) {
+        return Math.round(value * COORDINATE_SCALE) / COORDINATE_SCALE;
+    }
+
     /// Zig-zag so that a delta of a few thousandths of a block, which is what most of these are,
     /// costs the same as a small positive number rather than the full width of a negative one.
     private static void writeCoordinate(NetworkBuffer buffer, double value) {
