@@ -275,7 +275,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
                     // If there is nobody left at all, always destroy the world
                     if (event.getInstance().getPlayers().size() == 1) {
-                        FutureUtil.submitVirtual(() -> destroyIfNoPendingPlayers(key, Component.translatable("map.closed")));
+                        FutureUtil.submitVirtual(() -> destroyIfNoPendingPlayers(key, Component.translatable("generic.map.closed")));
                         return;
                     }
 

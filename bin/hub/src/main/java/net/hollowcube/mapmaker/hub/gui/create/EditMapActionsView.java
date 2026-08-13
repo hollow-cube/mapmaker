@@ -56,10 +56,10 @@ public class EditMapActionsView extends Panel {
                 maps.delete(playerId, map.id(), null);
 
                 player.closeInventory();
-                player.sendMessage(Component.translatable("command.map.delete.success"));
+                player.sendMessage(Component.translatable("map.delete.success"));
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
-                player.sendMessage(Component.translatable("command.map.delete.failure"));
+                player.sendMessage(Component.translatable("map.delete.failure"));
                 player.closeInventory();
             }
         });

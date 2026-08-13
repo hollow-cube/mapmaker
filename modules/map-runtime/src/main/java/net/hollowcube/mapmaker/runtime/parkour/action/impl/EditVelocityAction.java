@@ -21,7 +21,7 @@ public record EditVelocityAction(
         EditVelocityAction::new
     );
 
-    private static final Sprite SPRITE = new Sprite("action/icon/velocity", 1, 1);
+    private static final Sprite SPRITE = new Sprite("action/icon/velocity", 1, 2);
 
     public static final Editor<EditVelocityAction> EDITOR = new Editor<>(
         it -> it.action() instanceof EditVelocityAction(VelocityModifier modifier) && modifier instanceof VelocityModifiers.DirectionPower ? new VelocityEditor(it) : null,

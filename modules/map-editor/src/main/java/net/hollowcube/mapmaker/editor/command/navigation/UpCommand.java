@@ -47,6 +47,6 @@ public class UpCommand extends CommandDsl {
         }
 
         player.teleport(target);
-        player.sendMessage(Component.translatable("command.jumpto.success", Component.text(target.blockY())));
+        player.sendMessage(Component.translatable("command.up.success", Component.text(target.blockY())));
     }
 }

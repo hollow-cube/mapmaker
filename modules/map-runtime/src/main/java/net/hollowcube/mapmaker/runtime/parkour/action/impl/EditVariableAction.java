@@ -39,7 +39,7 @@ public record EditVariableAction(
     );
 
     private static final Pattern VARIABLE_NAME_PATTERN = Pattern.compile("^[a-z_]{3,25}$");
-    private static final Sprite SPRITE = new Sprite("action/icon/variable", 1, 2);
+    private static final Sprite SPRITE = new Sprite("action/icon/variable", 1, 1);
 
     private static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
     private static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);

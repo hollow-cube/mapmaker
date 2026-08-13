@@ -11,6 +11,7 @@ import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnl
 
 public class JumpToCommand extends CommandDsl {
     private static final Component ERR_NO_SPACE = Component.translatable("command.jumpto.no_space");
+    private static final Component ERR_TOO_FAR = Component.translatable("command.jumpto.too_far");
     private static final double MAX_DISTANCE = 100;
 
     public JumpToCommand() {
@@ -26,7 +27,7 @@ public class JumpToCommand extends CommandDsl {
     private void handleJumpToTarget(Player player, CommandContext context) {
         var position = PlayerUtil.getTargetBlock(player, MAX_DISTANCE, true);
         if (position == null) {
-            player.sendMessage(ERR_NO_SPACE);
+            player.sendMessage(ERR_TOO_FAR);
             return;
         }
 
