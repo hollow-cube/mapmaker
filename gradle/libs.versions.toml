@@ -43,6 +43,8 @@ slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 slf4j-jul = { group = "org.slf4j", name = "jul-to-slf4j", version.ref = "slf4j" }
 logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 noxesium = { group = "com.noxcrew.noxesium", name = "api", version.ref = "noxesium" }
+feather = { group = "net.digitalingot.feather-server-api", name = "messaging", version = "0.0.5" }
+apollo = { group = "com.lunarclient", name = "apollo-protos", version = "0.0.6" }
 zstd = { group = "com.github.luben", name = "zstd-jni", version.ref = "zstd" }
 polar = { group = "dev.hollowcube", name = "polar", version.ref = "polar" }
 similarity = { group = "info.debatty", name = "java-string-similarity", version.ref = "similarity" }
