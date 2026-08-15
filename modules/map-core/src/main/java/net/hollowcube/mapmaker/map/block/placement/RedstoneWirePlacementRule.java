@@ -8,6 +8,7 @@ import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
+import net.minestom.server.utils.Direction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -109,7 +110,7 @@ public class RedstoneWirePlacementRule extends BaseBlockPlacementRule {
     }
 
     private static @NotNull BlockFace facing(@NotNull Block block) {
-        return BlockFace.valueOf(block.getProperty("facing").toUpperCase(Locale.ROOT));
+        return BlockFace.fromDirection(Direction.valueOf(block.getProperty("facing").toUpperCase(Locale.ROOT)));
     }
 
     // Below is the diagonal update propagation logic.
