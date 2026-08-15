@@ -243,6 +243,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             map().id(), player.getUuid().toString(), saveStateType,
             PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
+        // The state being replaced may never be written (short runs are skipped), so the
+        // attempt aggregate lives on the newest state in the lineage.
+        if (getPlayerState(player) instanceof ParkourState.Playing2(var previous))
+            newSaveState.inheritAttemptStats(previous);
 
         changePlayerState(player, createPlayingState(newSaveState));
     }

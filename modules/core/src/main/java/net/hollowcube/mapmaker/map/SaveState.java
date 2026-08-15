@@ -16,6 +16,10 @@ public class SaveState {
     private boolean completed;
     private long playtime;
     private long ticks;
+    // Carried across this player's save state lineage on the map: a hard reset starts a fresh
+    // save state (and the old one is often never written), so the newest one holds the aggregate.
+    private int resets;
+    private long totalPlaytime; // never zeroed, unlike playtime on only-sprint maps
     private transient long playStartTime;
     public int dataVersion;
     private int protocolVersion;
@@ -83,6 +87,28 @@ public class SaveState {
         return Math.max(playtime, ticks * 50);
     }
 
+    /// Hard resets that preceded this save state for this player on this map.
+    public int getResets() {
+        return resets;
+    }
+
+    /// Active playtime across this save state and every one before it in the lineage, at the last save.
+    /// States written before this existed report zero, so the current playtime is the floor.
+    public long getTotalPlaytime() {
+        return Math.max(totalPlaytime, playtime);
+    }
+
+    /// {@link #getTotalPlaytime()} to the millisecond at this moment.
+    public long getRealTotalPlaytime() {
+        return getPlayStartTime() != 0 ? getTotalPlaytime() + System.nanoTime() / 1_000_000 - getPlayStartTime() : getTotalPlaytime();
+    }
+
+    /// Seeds the lineage aggregate from the save state this one replaces on a hard reset.
+    public void inheritAttemptStats(@NotNull SaveState previous) {
+        this.resets = previous.resets + 1;
+        this.totalPlaytime = previous.getRealTotalPlaytime();
+    }
+
     /**
      * Returns the current playtime to the millisecond at this moment, as opposed to {@link #getPlaytime()}
      * which returns the playtime at the last save.
@@ -114,7 +140,9 @@ public class SaveState {
 
     public void updatePlaytime(long currentTime) {
         if (playStartTime == 0) return;
-        setPlaytime(playtime + currentTime - playStartTime);
+        var elapsed = currentTime - playStartTime;
+        setPlaytime(playtime + elapsed);
+        totalPlaytime = getTotalPlaytime() + elapsed;
         playStartTime = currentTime;
     }
 
@@ -178,6 +206,7 @@ public class SaveState {
             .setType(type)
             .setPlaytime(playtime)
             .setTicks(ticks)
+            .setAttemptStats(resets, getTotalPlaytime())
             .setLatency(startLatency, endLatency)
             .setCompleted(completed)
             .setProtocolVersion(protocolVersion)
@@ -200,6 +229,8 @@ public class SaveState {
         copy.completed = completed;
         copy.playtime = playtime;
         copy.ticks = ticks;
+        copy.resets = resets;
+        copy.totalPlaytime = totalPlaytime;
         copy.playStartTime = playStartTime;
         copy.dataVersion = dataVersion;
         copy.protocolVersion = protocolVersion;

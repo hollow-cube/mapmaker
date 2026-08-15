@@ -45,6 +45,12 @@ public class SaveStateUpdateRequest {
         return this;
     }
 
+    public @NotNull SaveStateUpdateRequest setAttemptStats(int resets, long totalPlaytime) {
+        updates.addProperty("resets", resets);
+        updates.addProperty("totalPlaytime", totalPlaytime);
+        return this;
+    }
+
     public @NotNull SaveStateUpdateRequest setProtocolVersion(int protocolVersion) {
         updates.addProperty("protocolVersion", protocolVersion);
         return this;
