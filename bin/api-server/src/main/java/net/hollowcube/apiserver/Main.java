@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import javax.sql.DataSource;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.Executors;
 
 /// The api server as a process: the pool, the port and the secrets they come from.
@@ -38,10 +39,13 @@ public final class Main {
         // threads are for.
         server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
 
-        server.createContext("/alive", new Health.Alive());
-        server.createContext("/ready", new Health.Ready(dataSource));
-        server.createContext(HeadDatabaseServer.PATH,
-            new HeadDatabaseServer(new PostgresHeadDatabase(db), gson));
+        var requestLog = new RequestLog();
+        for (var context : List.of(
+            server.createContext("/alive", new Health.Alive()),
+            server.createContext("/ready", new Health.Ready(dataSource)),
+            server.createContext(HeadDatabaseServer.PATH,
+                new HeadDatabaseServer(new PostgresHeadDatabase(db), gson))
+        )) context.getFilters().add(requestLog);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> server.stop(SHUTDOWN_SECONDS)));
         server.start();
