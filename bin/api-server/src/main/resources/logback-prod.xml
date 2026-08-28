@@ -1,0 +1,13 @@
+<!-- Selected by -Dlogback.configurationFile in the deploy Dockerfile; logback.xml is what a local
+     run gets. Same split the go api-server makes with zap.NewProduction/NewDevelopment. -->
+<configuration>
+    <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.hollowcube.apiserver.JsonLogEncoder"/>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="JSON"/>
+    </root>
+    <logger name="com.zaxxer.hikari" level="INFO"/>
+    <logger name="org.postgresql" level="WARN"/>
+</configuration>

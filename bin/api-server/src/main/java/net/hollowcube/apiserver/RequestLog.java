@@ -11,7 +11,8 @@ import java.io.OutputStream;
 import java.util.concurrent.TimeUnit;
 
 /// One line per request, carrying what the Go api-server's `ZapMiddleware` carries: proto, method,
-/// path, latency, status, response size, and the trace and user agent when there are any.
+/// path, latency, status, response size, and the trace and user agent when there are any. `lat` is
+/// milliseconds as a number, matching the go side's field name if not its unit (it logs seconds).
 ///
 /// A [Filter] rather than a wrapper around each handler, because the status and the response size
 /// are only known once the handler has written them, and this is where the jdk server lets us look.
@@ -50,21 +51,24 @@ public final class RequestLog extends Filter {
         // that fails is exactly what someone reading these logs is looking for.
         if (status == 200 && (path.endsWith("/alive") || path.endsWith("/ready"))) return;
 
-        var message = new StringBuilder("served ")
-            .append(exchange.getProtocol()).append(' ')
-            .append(exchange.getRequestMethod()).append(' ')
-            .append(path)
-            .append(" status=").append(status)
-            .append(" size=").append(size)
-            .append(" lat=").append(TimeUnit.NANOSECONDS.toMillis(elapsedNanos)).append("ms");
+        // Key values rather than a formatted string: under logback-prod.xml these come out as top
+        // level json fields, so `| json | status >= 500` works in Loki without a pattern to match.
+        var line = logger.atInfo()
+            .setMessage("served")
+            .addKeyValue("proto", exchange.getProtocol())
+            .addKeyValue("method", exchange.getRequestMethod())
+            .addKeyValue("path", path)
+            .addKeyValue("status", status)
+            .addKeyValue("size", size)
+            .addKeyValue("lat", TimeUnit.NANOSECONDS.toMicros(elapsedNanos) / 1000d);
 
         var trace = traceId(exchange);
-        if (trace != null) message.append(" trace=").append(trace);
+        if (trace != null) line = line.addKeyValue("trace", trace);
 
         var userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
-        if (userAgent != null && !userAgent.isBlank()) message.append(" ua=").append(userAgent);
+        if (userAgent != null && !userAgent.isBlank()) line = line.addKeyValue("ua", userAgent);
 
-        logger.info(message.toString());
+        line.log();
     }
 
     private static String traceId(HttpExchange exchange) {

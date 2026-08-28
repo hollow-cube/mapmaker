@@ -15,10 +15,17 @@
       "allDeclaredFields": true,
       "allDeclaredMethods": true,
       "allDeclaredConstructors": true
+    },
+    {
+      "comment": "logback instantiates the encoder named in logback-prod.xml by name, so nothing in the image graph reaches it",
+      "type": "net.hollowcube.apiserver.JsonLogEncoder",
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
     }
   ],
   "resources": [
     { "glob": "logback.xml" },
+    { "glob": "logback-prod.xml" },
     { "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator" },
     { "glob": "META-INF/services/com.sun.net.httpserver.spi.HttpServerProvider" },
     { "glob": "META-INF/services/java.net.spi.InetAddressResolverProvider" },
