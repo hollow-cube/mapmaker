@@ -10,4 +10,8 @@ dependencies {
     implementation(libs.posthog)
     implementation(libs.fastutil)
     implementation(libs.included.schem)
+
+    // `:modules:test` carries the packer output, which is where `BadSprite` reads `sprites.json`
+    // from. Without it the sprite map is empty and every `BadSprite.require` in a test NPEs.
+    testImplementation(project(":modules:test"))
 }
