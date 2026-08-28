@@ -42,6 +42,9 @@ include(
 
 include(
     "tools:native-image-helper",
+    "tools:sql-gen",
+    "tools:sql-gen:runtime",
+    "tools:sql-gen:testing",
 )
 
 include(
