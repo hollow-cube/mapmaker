@@ -1,0 +1,13 @@
+package net.hollowcube.mapmaker.config;
+
+import net.hollowcube.common.util.RuntimeGson;
+
+// Yes i know the underscore is gross, but i dont want to deal with changing the parser
+
+/// Where the java api-server serves its ipc endpoints. One url for all of them, not one per
+/// service, since they are all mounted on the same process.
+@RuntimeGson
+public record Ipc_ServiceConfig(
+        String url
+) {
+}

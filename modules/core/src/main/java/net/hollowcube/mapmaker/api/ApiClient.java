@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.api;
 
 import net.hollowcube.mapmaker.api.auth.AuthClient;
-import net.hollowcube.mapmaker.api.hdb.HeadDatabaseRest;
 import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -58,11 +57,13 @@ public final class ApiClient {
         this.auth = auth;
     }
 
-    public ApiClient(HttpClientWrapper http) {
+    /// Everything the Go api-server still serves comes off `http`; the head database is its own
+    /// service now and so is passed in rather than derived from that one base url.
+    public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase) {
         this.players = new PlayerClient.Http(http);
         this.maps = new MapClient.Http(http);
         this.replays = new ReplayClient.Http(http);
-        this.headDatabase = new HeadDatabaseRest(http);
+        this.headDatabase = headDatabase;
         this.interactions = new InteractionClient.Http(http);
         this.notifications = new NotificationClient.Http(http);
         this.auth = new AuthClient.Http(http);
