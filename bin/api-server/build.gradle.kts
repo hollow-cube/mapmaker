@@ -52,9 +52,12 @@ graalvmNative {
 
                     // A request-serving process wants G1's pauses over the serial collector's, and
                     // the heap it sizes itself against is the container memory limit the chart sets.
+                    // G1 also raises the glibc the binary needs to 2.38, which is what pins the
+                    // runtime image to distroless/base-debian13 rather than -12.
                     "--gc=G1".takeIf { linux },
 
-                    // Static except for libc, so the binary runs on distroless/base.
+                    // Static except for libc, which stays dynamic and so has to be no older in the
+                    // runtime image than in the build one.
                     "--static-nolibc".takeIf { linux },
                 )
             )

@@ -1,4 +1,7 @@
-FROM gcr.io/distroless/base-debian12
+# debian13, not 12: --static-nolibc leaves libc dynamic, and the G1 binary the build image
+# produces needs GLIBC_2.38, which is newer than bookworm's 2.36. Serial-GC images (map-isolate)
+# stay under that line, which is why they are fine on 12.
+FROM gcr.io/distroless/base-debian13
 
 USER 65532:65532
 
