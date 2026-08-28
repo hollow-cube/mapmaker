@@ -11,6 +11,7 @@ dependencies {
     implementation(project(":modules:compat"))
     implementation(project(":modules:common"))
     implementation(project(":modules:datafix"))
+    api(project(":modules:ipc"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.otel) {

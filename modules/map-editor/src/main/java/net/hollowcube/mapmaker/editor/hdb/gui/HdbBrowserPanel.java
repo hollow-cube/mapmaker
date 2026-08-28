@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.editor.hdb.gui;
 
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.PlayerUtil;
-import net.hollowcube.mapmaker.api.PaginatedList;
-import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
-import net.hollowcube.mapmaker.api.hdb.HeadInfo;
+import net.hollowcube.ipc.PaginatedList;
+import net.hollowcube.ipc.hdb.HeadDatabaseService;
+import net.hollowcube.ipc.hdb.HeadInfo;
+import net.hollowcube.mapmaker.editor.hdb.HeadItems;
 import net.hollowcube.mapmaker.panels.*;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
@@ -20,7 +21,7 @@ import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
 @NotNullByDefault
 public class HdbBrowserPanel extends Panel {
 
-    private final HeadDatabaseClient hdb;
+    private final HeadDatabaseService hdb;
     private final Pagination<SearchParams> pagination;
     private final Text searchTextElement;
     private final RadioSelect<String> categories;
@@ -28,11 +29,11 @@ public class HdbBrowserPanel extends Panel {
     private boolean initializing = true;
     private SearchParams params;
 
-    public HdbBrowserPanel(HeadDatabaseClient hdb) {
+    public HdbBrowserPanel(HeadDatabaseService hdb) {
         this(hdb, "");
     }
 
-    public HdbBrowserPanel(HeadDatabaseClient hdb, String initialQuery) {
+    public HdbBrowserPanel(HeadDatabaseService hdb, String initialQuery) {
         super(9, 9);
         this.hdb = hdb;
         this.params = new SearchParams(initialQuery, null);
@@ -86,10 +87,10 @@ public class HdbBrowserPanel extends Panel {
             .results()
             .stream()
             .map(head -> new Button(1, 1)
-                .from(head.createItemStack())
-                .onRightClick(() -> PlayerUtil.giveItem(this.host.player(), head.createItemStack()))
+                .from(HeadItems.createItemStack(head))
+                .onRightClick(() -> PlayerUtil.giveItem(this.host.player(), HeadItems.createItemStack(head)))
                 .onLeftClick(() -> {
-                    PlayerUtil.giveItem(host.player(), head.createItemStack());
+                    PlayerUtil.giveItem(host.player(), HeadItems.createItemStack(head));
                     this.host.close();
                 })
             )
@@ -114,7 +115,7 @@ public class HdbBrowserPanel extends Panel {
 
     public record SearchParams(String query, @Nullable String category) {
 
-        public PaginatedList<HeadInfo> search(HeadDatabaseClient hdb, int page, int pageSize) {
+        public PaginatedList<HeadInfo> search(HeadDatabaseService hdb, int page, int pageSize) {
             if (category != null) {
                 return hdb.getHeadsInCategory(category, page, pageSize);
             }

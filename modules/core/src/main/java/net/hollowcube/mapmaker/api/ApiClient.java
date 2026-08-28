@@ -1,7 +1,8 @@
 package net.hollowcube.mapmaker.api;
 
 import net.hollowcube.mapmaker.api.auth.AuthClient;
-import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
+import net.hollowcube.mapmaker.api.hdb.HeadDatabaseRest;
+import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.notifications.NotificationClient;
@@ -15,7 +16,7 @@ public final class ApiClient {
     public final PlayerClient players;
     public final MapClient maps;
     public final ReplayClient replays;
-    public final HeadDatabaseClient headDatabase;
+    public final HeadDatabaseService headDatabase;
     public final InteractionClient interactions;
     public final NotificationClient notifications;
     public final AuthClient auth;
@@ -23,7 +24,7 @@ public final class ApiClient {
     public ApiClient(
         PlayerClient players,
         MapClient maps,
-        HeadDatabaseClient headDatabase,
+        HeadDatabaseService headDatabase,
         InteractionClient interactions,
         NotificationClient notifications,
         AuthClient auth
@@ -43,7 +44,7 @@ public final class ApiClient {
         PlayerClient players,
         MapClient maps,
         ReplayClient replays,
-        HeadDatabaseClient headDatabase,
+        HeadDatabaseService headDatabase,
         InteractionClient interactions,
         NotificationClient notifications,
         AuthClient auth
@@ -61,7 +62,7 @@ public final class ApiClient {
         this.players = new PlayerClient.Http(http);
         this.maps = new MapClient.Http(http);
         this.replays = new ReplayClient.Http(http);
-        this.headDatabase = new HeadDatabaseClient.Http(http);
+        this.headDatabase = new HeadDatabaseRest(http);
         this.interactions = new InteractionClient.Http(http);
         this.notifications = new NotificationClient.Http(http);
         this.auth = new AuthClient.Http(http);

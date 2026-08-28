@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.editor.hdb.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
+import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.mapmaker.editor.hdb.gui.HdbBrowserPanel;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.minestom.server.entity.Player;
@@ -12,9 +12,9 @@ import static net.hollowcube.mapmaker.editor.command.EditorConditions.builderOnl
 
 public class HdbCommand extends CommandDsl {
 
-    private final HeadDatabaseClient hdb;
+    private final HeadDatabaseService hdb;
 
-    public HdbCommand(@NotNull HeadDatabaseClient hdb) {
+    public HdbCommand(@NotNull HeadDatabaseService hdb) {
         super("headdb", "hdb");
         this.hdb = hdb;
 

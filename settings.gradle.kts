@@ -27,6 +27,7 @@ include(
     "modules:compat",
     "modules:core",
     "modules:datafix",
+    "modules:ipc",
     "modules:map-core",
     "modules:map-editor",
     "modules:map-runtime",
@@ -41,6 +42,7 @@ include(
 )
 
 include(
+    "tools:ipc-gen",
     "tools:native-image-helper",
     "tools:sql-gen",
     "tools:sql-gen:runtime",

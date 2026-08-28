@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.editor.hdb.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
+import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.mapmaker.editor.hdb.gui.HdbBrowserPanel;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.minestom.server.entity.Player;
@@ -13,9 +13,9 @@ public class HdbSearchCommand extends CommandDsl {
     private final Argument<String> queryArg = Argument.GreedyString("query")
         .defaultValue("").description("The head to search for");
 
-    private final HeadDatabaseClient hdb;
+    private final HeadDatabaseService hdb;
 
-    public HdbSearchCommand(@NotNull HeadDatabaseClient hdb) {
+    public HdbSearchCommand(@NotNull HeadDatabaseService hdb) {
         super("search");
         this.hdb = hdb;
 

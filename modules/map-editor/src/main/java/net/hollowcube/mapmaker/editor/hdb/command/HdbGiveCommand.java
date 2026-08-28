@@ -4,8 +4,9 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.PlayerUtil;
-import net.hollowcube.mapmaker.api.hdb.HeadDatabaseClient;
+import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.mapmaker.editor.hdb.HdbMessages;
+import net.hollowcube.mapmaker.editor.hdb.HeadItems;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
@@ -17,9 +18,9 @@ public class HdbGiveCommand extends CommandDsl {
     private final Argument<String> queryArg = Argument.GreedyString("query")
         .defaultValue("").description("The head to search for");
 
-    private final HeadDatabaseClient hdb;
+    private final HeadDatabaseService hdb;
 
-    public HdbGiveCommand(@NotNull HeadDatabaseClient hdb) {
+    public HdbGiveCommand(@NotNull HeadDatabaseService hdb) {
         super("give");
         this.hdb = hdb;
 
@@ -36,7 +37,7 @@ public class HdbGiveCommand extends CommandDsl {
             return;
         }
 
-        var itemStack = results.first().createItemStack();
+        var itemStack = HeadItems.createItemStack(results.first());
         PlayerUtil.giveItem(player, itemStack);
         player.sendMessage(HdbMessages.COMMAND_GIVE_RESULT.with(
             Objects.requireNonNull(itemStack.get(DataComponents.CUSTOM_NAME, Component.empty())).hoverEvent(itemStack.asHoverEvent())));
