@@ -31,6 +31,7 @@ nats = "2.25.1"
 compile-testing = "0.21.0"
 pglite4j = "0.0.3"
 postgresql = "42.7.7"
+hikari = "7.1.0"
 included = "-INCLUDED"
 
 [libraries]
@@ -61,6 +62,7 @@ javapoet = { group = "com.palantir.javapoet", name = "javapoet", version.ref = "
 nats = { group = "io.nats", name = "jnats", version.ref = "nats" }
 pglite4j = { group = "io.roastedroot", name = "pglite4j-jdbc", version.ref = "pglite4j" }
 postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+hikari = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikari" }
 
 included-molang = { group = "dev.hollowcube", name = "molang", version.ref = "included" }
 included-schem = { group = "dev.hollowcube", name = "schem", version.ref = "included" }

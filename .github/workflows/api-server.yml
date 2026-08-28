@@ -1,0 +1,103 @@
+name: API Server Build & Deploy
+concurrency: api-server
+
+# Unlike the game servers, which ship on a tag, this deploys every push to main: it serves the
+# endpoints ported out of the Go api-server and has to track them.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'bin/api-server/**'
+      - 'modules/api/**'
+      - 'modules/ipc/**'
+      - 'tools/ipc-gen/**'
+      - 'tools/sql-gen/**'
+      - '.github/workflows/api-server.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'gradle'
+
+      # sqlGenCheck fails if the committed generated sources have drifted from the sql they are
+      # generated out of, which is the one thing a normal build would not notice.
+      - name: Test
+        run: ./gradlew :modules:api:sqlGenCheck :modules:api:test :bin:api-server:test --no-daemon
+
+  docker-build:
+    needs: [ test ]
+    runs-on: blacksmith-16vcpu-ubuntu-2404
+    steps:
+      - name: Import Secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: global/github
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      # --static-nolibc needs the static glibc that only the native-image image has.
+      - name: Build standalone binary
+        run: |
+          docker run --rm \
+            -v "${{ github.workspace }}:/work" \
+            -w /work \
+            --entrypoint /bin/bash \
+            container-registry.oracle.com/graalvm/native-image:25 \
+            -c "./gradlew :bin:api-server:nativeCompile --no-configuration-cache --no-daemon"
+      - name: Upload build report
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-image-build-report
+          path: bin/api-server/build/native/nativeCompile/api-server-build-report.html
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: mworzala
+          password: ${{ env.DOCKER_PASS }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: "bin/api-server/deploy/Dockerfile"
+          platforms: linux/amd64
+          push: true
+          tags: mworzala/api-server-java:${{ github.sha }}
+
+  helm-build:
+    needs: [ docker-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Helm build
+        uses: hollow-cube/actions/helm-build@main
+        with:
+          vault-token: ${{ secrets.VAULT_TOKEN }}
+          name: api-server-java
+          path: "bin/api-server/deploy/helm-chart"
+
+  helm-deploy:
+    name: Deploy API Server
+    needs: [ docker-build, helm-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Helm deploy
+        uses: hollow-cube/actions/helm-deploy@main
+        with:
+          vault-token: ${{ secrets.VAULT_TOKEN }}
+          name: api-server-java
+          cluster: prod-v3
+          values: "bin/api-server/deploy/values-prod.yaml"

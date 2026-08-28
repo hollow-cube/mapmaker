@@ -1,0 +1,29 @@
+{
+  "comment": [
+    "Gson reaches the wire records reflectively, through their record components and canonical",
+    "constructor, so nothing in the image graph points at them and native-image has to be told."
+  ],
+  "reflection": [
+    {
+      "type": "net.hollowcube.ipc.PaginatedList",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.hdb.HeadInfo",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    }
+  ],
+  "resources": [
+    { "glob": "logback.xml" },
+    { "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator" },
+    { "glob": "META-INF/services/com.sun.net.httpserver.spi.HttpServerProvider" },
+    { "glob": "META-INF/services/java.net.spi.InetAddressResolverProvider" },
+    { "glob": "META-INF/services/java.nio.channels.spi.SelectorProvider" },
+    { "glob": "META-INF/services/java.time.zone.ZoneRulesProvider" },
+    { "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider" }
+  ]
+}

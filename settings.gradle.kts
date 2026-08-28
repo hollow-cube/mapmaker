@@ -51,6 +51,7 @@ include(
 )
 
 include(
+    "bin:api-server",
     "bin:config",
     "bin:development",
     "bin:hub",

@@ -1,0 +1,15 @@
+global:
+  nameOverride: api-server-java
+  fullnameOverride: api-server-java
+
+base:
+  image:
+    repository: mworzala/api-server-java
+
+  # The vault role and the path the agent sidecar renders are both the service account's name, so
+  # running as the Go api-server's service account is what gets this the same database credentials
+  # without a second vault secret to keep in step. Nothing else is shared: the Deployment, the
+  # Service and everything else this chart names are its own.
+  serviceAccount:
+    create: false
+    name: api-server

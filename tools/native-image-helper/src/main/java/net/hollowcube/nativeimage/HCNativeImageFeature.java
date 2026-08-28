@@ -14,7 +14,7 @@ import java.lang.reflect.Constructor;
 
 /// Responsible for doing a bunch of dynamic registration required for native image.
 ///
-/// * Record classes in net.hollowcube.mapmaker are automatically registered for reflection (required for gson)
+/// * Record classes in net.hollowcube are automatically registered for reflection (required for gson)
 ///   This is a bit too broad most likely, should look into just using RuntimeGson.
 /// * @RuntimeGson classes are automatically registered for reflection.
 /// * Canvas View implementations have their xml files registered as resources and actions/signals/etc are
@@ -34,7 +34,7 @@ public class HCNativeImageFeature implements Feature {
             .ignoreClassVisibility()
             .ignoreMethodVisibility()
             .ignoreFieldVisibility()
-            .acceptPackages("net.hollowcube.mapmaker", "net.hollowcube.posthog")
+            .acceptPackages("net.hollowcube")
             .scan()) {
 
             scanResult.getSubclasses(Record.class)
@@ -88,6 +88,9 @@ public class HCNativeImageFeature implements Feature {
     private void processRecordClass(BeforeAnalysisAccess access, ClassInfo info) {
         if (info.getName().endsWith("Event")) return;
         var recordClass = access.findClassByName(info.getName());
+        // The scan covers every net.hollowcube package on the classpath, not just the ones this
+        // image is built out of, so a class it finds is not necessarily one the image has.
+        if (recordClass == null) return;
 
         RuntimeReflection.register(recordClass);
         for (var ctor : recordClass.getDeclaredConstructors())
@@ -98,6 +101,7 @@ public class HCNativeImageFeature implements Feature {
 
     private void processRuntimeGsonClass(BeforeAnalysisAccess access, ClassInfo info) {
         var gsonClass = access.findClassByName(info.getName());
+        if (gsonClass == null) return;
 
         RuntimeReflection.register(gsonClass);
         for (var ctor : gsonClass.getDeclaredConstructors())
@@ -111,6 +115,7 @@ public class HCNativeImageFeature implements Feature {
     private void processViewClass(@NotNull BeforeAnalysisAccess access, @NotNull CanvasClasses classes, @NotNull ClassInfo ci) {
         var unnamed = access.getApplicationClassLoader().getUnnamedModule();
         var viewClass = access.findClassByName(ci.getName());
+        if (viewClass == null) return;
 
         // 1. Add the relevant xml file as an included resource
         var resourcePath = String.format("%s.xml", viewClass.getName().replace(".", "/"));

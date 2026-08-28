@@ -1,0 +1,14 @@
+apiVersion: v2
+name: api-server-java
+# The -java suffix is temporary: it is here only so this can run alongside the Go api-server,
+# and goes away once the Go one is gone.
+description: Chart for the Java api-server, which serves the endpoints ported out of the Go one
+type: application
+
+version: 0.1.0
+appVersion: "1.16.0"
+
+dependencies:
+  - name: base
+    repository: "oci://registry-1.docker.io/mworzala"
+    version: 1.0.0
