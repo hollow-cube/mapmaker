@@ -109,7 +109,7 @@ public final class PlayerUtil {
         var result = CollisionUtils.handlePhysics(
                 player.getInstance(), player.getChunk(),
                 PLAYER_STANDING_BB, player.getPosition(),
-                Vec.fromPoint(position.sub(player.getPosition())),
+            position.sub(player.getPosition()).asVec(),
                 null, true
         );
         return !result.collisionX() && !result.collisionY() && !result.collisionZ();

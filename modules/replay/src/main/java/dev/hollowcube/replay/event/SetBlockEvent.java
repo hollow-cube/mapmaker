@@ -17,6 +17,6 @@ public record SetBlockEvent(BlockVec position, Block block) implements ReplayEve
     /// The wire only ever carries a block position, so any point is taken as one rather than
     /// leaving two events that mean the same thing unequal to each other.
     public SetBlockEvent(Point position, Block block) {
-        this(new BlockVec(position), block);
+        this(position.asBlockVec(), block);
     }
 }

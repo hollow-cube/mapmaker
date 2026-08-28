@@ -1,6 +1,7 @@
 package dev.hollowcube.replay.event;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
@@ -54,14 +55,14 @@ public record SetItemEvent(int entityId, Map<Integer, ItemStack> items) implemen
     private static Map<Integer, ItemStack> decodeItems(Map<Integer, CompoundBinaryTag> items) {
         var decoded = new LinkedHashMap<Integer, ItemStack>(items.size());
         for (var entry : items.entrySet())
-            decoded.put(entry.getKey(), ItemStack.fromItemNBT(entry.getValue()));
+            decoded.put(entry.getKey(), ItemStack.fromItemNBT(entry.getValue(), MinecraftServer.process()));
         return decoded;
     }
 
     private static Map<Integer, CompoundBinaryTag> encodeItems(Map<Integer, ItemStack> items) {
         var encoded = new LinkedHashMap<Integer, CompoundBinaryTag>(items.size());
         for (var entry : items.entrySet())
-            encoded.put(entry.getKey(), entry.getValue().toItemNBT());
+            encoded.put(entry.getKey(), entry.getValue().toItemNBT(MinecraftServer.process()));
         return encoded;
     }
 }

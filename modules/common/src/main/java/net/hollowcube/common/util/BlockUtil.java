@@ -5,7 +5,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.utils.Direction;
@@ -86,7 +85,7 @@ public final class BlockUtil {
     }
 
     public static @NotNull Block fromStringOld(@NotNull String blockState) {
-        return ArgumentBlockState.staticParse(blockState);
+        return Objects.requireNonNull(Block.fromState(blockState), blockState);
     }
 
     public static @NotNull Either<Block, BlockParseResult> fromString(@NotNull String input) {

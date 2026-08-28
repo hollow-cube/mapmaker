@@ -36,7 +36,7 @@ public final class ReplayEventRegistry {
     }
 
     public ReplayEvent read(NetworkBuffer buffer) {
-        var id = buffer.read(NetworkBuffer.VAR_INT);
+        int id = buffer.read(NetworkBuffer.VAR_INT);
         if (id < 0 || id >= idLookup.length)
             throw new IllegalArgumentException("invalid event id: " + id);
         var entry = idLookup[id];

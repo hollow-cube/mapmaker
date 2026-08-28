@@ -66,7 +66,7 @@ public final class PlayerHitBlockEvent implements PlayerInstanceEvent, BlockEven
     @ApiStatus.Internal
     public static void post(ClientPlayerActionPacket packet, Player player) {
         var block = player.getInstance().getBlock(packet.blockPosition());
-        var event = new PlayerHitBlockEvent(player, block, new BlockVec(packet.blockPosition()), packet.blockFace());
+        var event = new PlayerHitBlockEvent(player, block, packet.blockPosition().asBlockVec(), packet.blockFace());
         EventDispatcher.call(event);
 
         if (event.isCancelled()) return;
