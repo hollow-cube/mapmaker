@@ -1,5 +1,5 @@
 <!-- Selected by -Dlogback.configurationFile in the deploy Dockerfile; logback.xml is what a local
-     run gets. Same split the go api-server makes with zap.NewProduction/NewDevelopment. -->
+     run gets. The same flat json the api-server writes, so one Loki query spans both. -->
 <configuration>
     <appender name="JSON" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.hollowcube.apiserver.common.JsonLogEncoder"/>

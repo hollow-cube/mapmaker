@@ -25,7 +25,10 @@ record QueryFile(String group, List<Query> queries) {
         /// The `/* where */` and `/* order by */` markers, in the order they appeared.
         List<Hole> holes,
         /// Line the `-- name:` header sits on, for error messages.
-        int line
+        int line,
+        /// A `:one` whose select list is nothing but aggregates: there is always exactly one row,
+        /// so there is no "no row" for the result to be null over.
+        boolean alwaysOneRow
     ) {
 
         String where() {

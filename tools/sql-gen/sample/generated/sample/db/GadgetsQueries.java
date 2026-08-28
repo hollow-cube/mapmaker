@@ -18,8 +18,7 @@ public interface GadgetsQueries {
     @Nullable
     Gadget getGadget(UUID id);
 
-    @Nullable
-    Long countGadgets();
+    long countGadgets();
 
     List<String> listGadgetLabels();
 
@@ -86,9 +85,8 @@ public interface GadgetsQueries {
             throw new UnsupportedOperationException("GadgetsQueries.getGadget is not stubbed on this fake");
         }
 
-        @Nullable
         @Override
-        public Long countGadgets() {
+        public long countGadgets() {
             throw new UnsupportedOperationException("GadgetsQueries.countGadgets is not stubbed on this fake");
         }
 

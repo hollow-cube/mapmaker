@@ -1,0 +1,12 @@
+apiVersion: v2
+name: api-worker
+description: Chart for the api worker, which runs the api's background work off the request path
+type: application
+
+version: 0.1.0
+appVersion: "1.0.0"
+
+dependencies:
+  - name: base
+    repository: "oci://registry-1.docker.io/mworzala"
+    version: 1.0.0

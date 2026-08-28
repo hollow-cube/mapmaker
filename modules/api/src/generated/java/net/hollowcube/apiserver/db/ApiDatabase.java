@@ -16,15 +16,23 @@ public final class ApiDatabase {
 
     public final HeadsQueries heads;
 
+    public final JobsQueries jobs;
+
+    public final SessionsQueries sessions;
+
     public ApiDatabase(DataSource dataSource) {
         this.dataSource = dataSource;
         ConnectionSource source = ConnectionSource.pooled(dataSource);
         this.heads = new HeadsQueriesImpl(source);
+        this.jobs = new JobsQueriesImpl(source);
+        this.sessions = new SessionsQueriesImpl(source);
     }
 
     private ApiDatabase(Fake fake) {
         this.dataSource = null;
         this.heads = fake.heads;
+        this.jobs = fake.jobs;
+        this.sessions = fake.sessions;
     }
 
     /**
@@ -71,10 +79,16 @@ public final class ApiDatabase {
 
         public final HeadsQueries heads;
 
+        public final JobsQueries jobs;
+
+        public final SessionsQueries sessions;
+
         Tx(Connection conn) {
             this.conn = conn;
             ConnectionSource source = ConnectionSource.pinned(conn);
             this.heads = new HeadsQueriesImpl(source);
+            this.jobs = new JobsQueriesImpl(source);
+            this.sessions = new SessionsQueriesImpl(source);
         }
 
         /**
@@ -91,8 +105,22 @@ public final class ApiDatabase {
     public static final class Fake {
         private HeadsQueries heads = new HeadsQueries.Stub();
 
+        private JobsQueries jobs = new JobsQueries.Stub();
+
+        private SessionsQueries sessions = new SessionsQueries.Stub();
+
         public Fake heads(HeadsQueries heads) {
             this.heads = heads;
+            return this;
+        }
+
+        public Fake jobs(JobsQueries jobs) {
+            this.jobs = jobs;
+            return this;
+        }
+
+        public Fake sessions(SessionsQueries sessions) {
+            this.sessions = sessions;
             return this;
         }
 

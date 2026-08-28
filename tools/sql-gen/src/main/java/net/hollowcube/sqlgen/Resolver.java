@@ -87,7 +87,8 @@ final class Resolver {
             : null;
 
         return new Model.Query(query.name(), Names.constant(query.name()), query.sql(), query.tag(),
-            List.copyOf(params), query.binds(), query.holes(), paramsClass, result(group, query, described));
+            List.copyOf(params), query.binds(), query.holes(), paramsClass, result(group, query, described),
+            query.alwaysOneRow());
     }
 
     private Model.Result result(ClassName group, QueryFile.Query query, Describe.Result described) {

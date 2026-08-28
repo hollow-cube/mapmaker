@@ -42,7 +42,9 @@ final class Model {
         /// Set once a query takes more arguments than read well in a call: the parameters move into
         /// a record nested in the group interface, and the method takes one of those instead.
         @Nullable ClassName paramsClass,
-        Result result
+        Result result,
+        /// A `:one` that always finds its row, so it is returned as is rather than as null-or-row.
+        boolean exactlyOne
     ) {
     }
 

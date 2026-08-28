@@ -29,7 +29,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PostgresHeadDatabaseTest {
 
     @RegisterExtension
-    static final TestDb TEST_DB = TestDb.of("src/main/sql/migrations");
+    // The schema lives with the queries in modules/api; this is the service on top of it.
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
 
     private HttpServer server;
     private HeadDatabaseClient hdb;

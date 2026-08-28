@@ -118,7 +118,7 @@ class DatabaseErgonomicsTest {
     void aFakeUsesTheGroupsItWasGiven() {
         var gadgets = new GadgetsQueries.Stub() {
             @Override
-            public Long countGadgets() {
+            public long countGadgets() {
                 return 42L;
             }
         };

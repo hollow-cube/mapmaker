@@ -1,4 +1,4 @@
-package net.hollowcube.apiserver;
+package net.hollowcube.apiserver.common;
 
 import org.jetbrains.annotations.Nullable;
 

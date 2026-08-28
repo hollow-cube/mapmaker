@@ -135,14 +135,14 @@ final class GadgetsQueriesImpl implements GadgetsQueries {
         }
     }
 
-    @Nullable
     @Override
-    public Long countGadgets() {
+    public long countGadgets() {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(COUNT_GADGETS)) {
                 try (ResultSet rs = ps.executeQuery()) {
-                    return rs.next() ? rs.getLong(1) : null;
+                    if (!rs.next()) throw new SQLException("countGadgets returned no row");
+                    return rs.getLong(1);
                 }
             } finally {
                 source.release(conn);

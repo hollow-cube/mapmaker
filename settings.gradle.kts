@@ -52,6 +52,7 @@ include(
 
 include(
     "bin:api-server",
+    "bin:api-worker",
     "bin:config",
     "bin:development",
     "bin:hub",

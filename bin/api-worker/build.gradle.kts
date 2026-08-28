@@ -1,0 +1,33 @@
+plugins {
+    id("mapmaker.java-binary")
+}
+
+// A jar, not a native image: this is a long-running consumer, so startup time and memory floor
+// buy it nothing and the JIT is what its cpu-bound jobs want. It is also what keeps its build to a
+// minute on every push, when its inputs will eventually include most of the runtime.
+dependencies {
+    implementation(project(":modules:api"))
+
+    implementation(libs.gson)
+    implementation(libs.postgresql)
+    implementation(libs.posthog)
+    implementation(libs.slf4j)
+    implementation(libs.slf4j.jul)
+    implementation(libs.logback)
+
+    testImplementation(project(":tools:sql-gen:testing"))
+    testImplementation(libs.junit.api)
+    testImplementation(libs.junit.engine)
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+tasks.withType<Test> {
+    useJUnitPlatform()
+    // The runner tests run on pglite4j, which wants the room and one instance per JVM.
+    jvmArgs("-Xmx2g")
+    maxParallelForks = 1
+}
+
+application {
+    mainClass = "net.hollowcube.apiworker.Main"
+}

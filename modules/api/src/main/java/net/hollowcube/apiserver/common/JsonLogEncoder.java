@@ -1,4 +1,4 @@
-package net.hollowcube.apiserver;
+package net.hollowcube.apiserver.common;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;

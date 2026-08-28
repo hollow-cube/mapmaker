@@ -8,13 +8,17 @@ sourceSets.main {
 }
 
 dependencies {
-    // Everything here has to run embedded in another process, so the pool, the driver and the http
-    // server it is normally served behind all belong to `bin:api-server` rather than to this.
+    // The database and what every api process is made of — secrets, pools, probes, json logs.
+    // What is served, and how, belongs to `bin:api-server`; this has to run embedded in another
+    // process with none of that.
     api(project(":tools:sql-gen:runtime"))
     api(project(":modules:ipc"))
+    api(libs.hikari)
+
+    implementation(libs.gson)
+    implementation(libs.logback)
 
     testImplementation(project(":tools:sql-gen:testing"))
-    testImplementation(libs.gson)
 }
 
 val sqlGenTool: Configuration by configurations.creating {

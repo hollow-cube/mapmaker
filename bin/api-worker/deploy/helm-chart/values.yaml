@@ -1,0 +1,19 @@
+global:
+  nameOverride: api-worker
+  fullnameOverride: api-worker
+
+base:
+  image:
+    repository: mworzala/api-worker
+
+  # The vault role and the path the agent sidecar renders are both the service account's name, so
+  # running as the api-server's service account is what gets this the same secret — the same
+  # database uris under the same keys — without a second one to keep in step.
+  serviceAccount:
+    create: false
+    name: api-server
+
+  # It listens on nothing: work is rows in the jobs table, and a process that dies is restarted
+  # without a probe having to say so.
+  service:
+    probe: false

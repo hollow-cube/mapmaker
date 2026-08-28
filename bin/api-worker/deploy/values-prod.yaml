@@ -1,0 +1,20 @@
+base:
+  cluster: "prod"
+  imagePullSecrets:
+    - name: dockerio
+
+  # One is enough until there is work to share; more replicas share the nats queues and take the
+  # schedules over from each other, they do not run them twice.
+  replicaCount: 1
+
+  # -XX:MaxRAMPercentage sizes the heap against the limit, so this is also the heap setting.
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+  service:
+    monitor:
+      enabled: false

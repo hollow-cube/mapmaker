@@ -18,7 +18,7 @@
     },
     {
       "comment": "logback instantiates the encoder named in logback-prod.xml by name, so nothing in the image graph reaches it",
-      "type": "net.hollowcube.apiserver.JsonLogEncoder",
+      "type": "net.hollowcube.apiserver.common.JsonLogEncoder",
       "allDeclaredMethods": true,
       "allDeclaredConstructors": true
     }

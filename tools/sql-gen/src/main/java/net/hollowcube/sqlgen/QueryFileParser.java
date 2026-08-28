@@ -89,8 +89,111 @@ final class QueryFileParser {
 
             var rewrite = rewritePlaceholders(text, name);
             return new QueryFile.Query(name, tag, rewrite.sql(), rewrite.params(), rewrite.binds(),
-                Set.copyOf(nullable), Set.copyOf(notNull), rewrite.holes(), line);
+                Set.copyOf(nullable), Set.copyOf(notNull), rewrite.holes(), line,
+                tag == QueryFile.Tag.ONE && aggregateOnly(text));
         }
+    }
+
+    private static final Pattern AGGREGATE_CALL = Pattern.compile(
+        "^(count|sum|min|max|avg|every|bool_and|bool_or|string_agg|array_agg|json_agg|jsonb_agg)\\s*\\(");
+    private static final List<String> NOT_ONE_ROW = List.of(
+        "group by", "having", "union", "intersect", "except", "limit", "offset", "fetch", "over", "window");
+
+    /// Whether this is a plain `select` whose every top-level select-list item is an aggregate
+    /// call, with nothing that could make it more or fewer than one row: `select count(*) from t`
+    /// and its like. The server cannot say how many rows a statement returns, and this is the one
+    /// shape where the answer is known without asking: exactly one. Anything less obvious — a CTE,
+    /// a union, a window, a limit, a subquery in the list — is left alone rather than guessed at.
+    static boolean aggregateOnly(String sql) {
+        var text = normalise(sql);
+        if (!text.startsWith("select ")) return false;
+        for (var keyword : NOT_ONE_ROW) {
+            if (hasTopLevelKeyword(text, keyword)) return false;
+        }
+
+        // Walk the top level only: parentheses and string literals hide what is inside them.
+        var items = new ArrayList<String>();
+        var item = new StringBuilder();
+        int depth = 0;
+        boolean inString = false;
+        for (int i = "select ".length(); i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (inString) {
+                item.append(c);
+                if (c == '\'') inString = false;
+                continue;
+            }
+            if (c == '\'') inString = true;
+            else if (c == '(') depth++;
+            else if (c == ')') depth--;
+            else if (depth == 0 && c == ',') {
+                items.add(item.toString());
+                item.setLength(0);
+                continue;
+            } else if (depth == 0 && c == ' ' && atKeyword(text, i + 1, "from")) {
+                break;
+            }
+            item.append(c);
+        }
+        items.add(item.toString());
+
+        for (var candidate : items) {
+            if (!AGGREGATE_CALL.matcher(candidate.strip()).find()) return false;
+        }
+        return true;
+    }
+
+    /// Comments gone, string literals kept, one space for any run of whitespace and around every
+    /// parenthesis, lower case: enough for keywords to be found by looking for ` keyword `.
+    private static String normalise(String sql) {
+        var out = new StringBuilder();
+        boolean inString = false;
+        for (int i = 0; i < sql.length(); i++) {
+            char c = sql.charAt(i);
+            if (inString) {
+                out.append(c);
+                if (c == '\'') inString = false;
+            } else if (c == '\'') {
+                inString = true;
+                out.append(c);
+            } else if (sql.startsWith("--", i)) {
+                int end = sql.indexOf('\n', i);
+                i = end < 0 ? sql.length() : end;
+                out.append(' ');
+            } else if (sql.startsWith("/*", i)) {
+                int end = sql.indexOf("*/", i + 2);
+                i = end < 0 ? sql.length() : end + 1;
+                out.append(' ');
+            } else if (c == '(' || c == ')') {
+                out.append(' ').append(c).append(' ');
+            } else {
+                out.append(Character.isWhitespace(c) ? ' ' : Character.toLowerCase(c));
+            }
+        }
+        return out.toString().replaceAll(" +", " ").strip();
+    }
+
+    private static boolean atKeyword(String text, int at, String keyword) {
+        return text.startsWith(keyword, at)
+            && (at + keyword.length() == text.length() || !Character.isLetterOrDigit(text.charAt(at + keyword.length())));
+    }
+
+    private static boolean hasTopLevelKeyword(String text, String keyword) {
+        int depth = 0;
+        boolean inString = false;
+        for (int i = 0; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (inString) {
+                if (c == '\'') inString = false;
+                continue;
+            }
+            if (c == '\'') inString = true;
+            else if (c == '(') depth++;
+            else if (c == ')') depth--;
+            else if (depth == 0 && (i == 0 || text.charAt(i - 1) == ' ') && atKeyword(text, i, keyword))
+                return true;
+        }
+        return false;
     }
 
     private record Rewrite(String sql, List<String> params, List<Integer> binds, List<QueryFile.Hole> holes) {

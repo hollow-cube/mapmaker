@@ -7,12 +7,12 @@ dependencies {
     implementation(project(":modules:api"))
 
     implementation(libs.gson)
-    implementation(libs.hikari)
     implementation(libs.postgresql)
     implementation(libs.slf4j)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
 
+    testImplementation(project(":tools:sql-gen:testing"))
     testImplementation(libs.junit.api)
     testImplementation(libs.junit.engine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -20,6 +20,9 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    // The service tests run on pglite4j, which wants the room and one instance per JVM.
+    jvmArgs("-Xmx2g")
+    maxParallelForks = 1
 }
 
 application {

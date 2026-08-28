@@ -1,4 +1,4 @@
-package net.hollowcube.apiserver;
+package net.hollowcube.apiserver.common;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -23,7 +23,7 @@ public final class Health {
     }
 
     /// Ready while the pool can hand out a connection the driver still considers usable, which is
-    /// the only dependency this process has. A pool that is merely busy is not unready — waiting
+    /// the only dependency these processes have. A pool that is merely busy is not unready — waiting
     /// for a connection is normal — so what is bounded here is the driver's validation.
     public record Ready(DataSource dataSource) implements HttpHandler {
         private static final Logger logger = LoggerFactory.getLogger(Ready.class);

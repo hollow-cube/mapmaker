@@ -133,7 +133,8 @@ final class EmitGroup {
 
     private MethodSpec.Builder signature(Model.Query query) {
         var method = MethodSpec.methodBuilder(query.name()).returns(returnType(query));
-        if (query.tag() == QueryFile.Tag.ONE) method.addAnnotation(Emitter.NULLABLE);
+        if (query.tag() == QueryFile.Tag.ONE && (!query.exactlyOne() || nullableScalar(query)))
+            method.addAnnotation(Emitter.NULLABLE);
         if (query.paramsClass() != null) {
             method.addParameter(query.paramsClass(), "params");
         } else {
@@ -180,9 +181,16 @@ final class EmitGroup {
     private TypeName returnType(Model.Query query) {
         return switch (query.tag()) {
             case EXEC -> TypeName.LONG;
-            case ONE -> rowType(query).box();
+            // A row that is always there has no "no row" to box for; a scalar's own nullability is
+            // already in its type.
+            case ONE -> query.exactlyOne() ? rowType(query) : rowType(query).box();
             case MANY -> ParameterizedTypeName.get(LIST, rowType(query).box());
         };
+    }
+
+    private static boolean nullableScalar(Model.Query query) {
+        return query.result().shape() == Model.Shape.SCALAR
+            && ((Model.Value) query.result().components().getFirst()).nullable();
     }
 
     private TypeName rowType(Model.Query query) {
@@ -245,7 +253,10 @@ final class EmitGroup {
 
         var row = rowType(query).box();
         var body = CodeBlock.builder().beginControlFlow("try ($T rs = ps.executeQuery())", ResultSet.class);
-        if (query.tag() == QueryFile.Tag.ONE) {
+        if (query.tag() == QueryFile.Tag.ONE && query.exactlyOne()) {
+            body.addStatement("if (!rs.next()) throw new $T($S)", SQLException.class, query.name() + " returned no row")
+                .addStatement("return $L", map(query));
+        } else if (query.tag() == QueryFile.Tag.ONE) {
             body.addStatement("return rs.next() ? $L : null", map(query));
         } else {
             body.addStatement("$T<$T> rows = new $T<>()", LIST, row, ARRAY_LIST)

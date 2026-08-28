@@ -9,8 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 /// The placeholder rewrite, which is the one piece of the pipeline that reads SQL text rather than
 /// asking the server about it.
@@ -27,6 +26,33 @@ class QueryFileParserTest {
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+    }
+
+    @Test
+    void aOneThatIsOnlyAggregatesAlwaysHasItsRow() {
+        assertTrue(parse("-- name: q :one\nselect count(*) from t;").queries().getFirst().alwaysOneRow());
+        assertTrue(parse("-- name: q :one\nselect count(*) as total, max(id) from t where x = $x;").queries().getFirst().alwaysOneRow());
+        assertTrue(parse("-- name: q :one\n-- a comment\nselect sum(n)\nfrom t;").queries().getFirst().alwaysOneRow());
+
+        // One row per group, one row per matched id, a CTE, a union: not obviously one row.
+        assertFalse(parse("-- name: q :one\nselect count(*) from t group by x;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect * from t where id = (select max(id) from t);").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nwith c as (select 1) select count(*) from c;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*) from a union select count(*) from b;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*), id from t;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :many\nselect count(*) from t;").queries().getFirst().alwaysOneRow());
+
+        // Zero rows are as possible as one here: limits, windows, and a group by however spelled.
+        assertFalse(parse("-- name: q :one\nselect count(*) from t limit 0;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*) from t offset 1;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*) from t fetch first 0 rows only;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*) over () from t;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect max(x) over (partition by y) from t;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*)\nfrom t\ngroup\n  by x;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*)from t GROUP  BY x;").queries().getFirst().alwaysOneRow());
+        assertFalse(parse("-- name: q :one\nselect count(*) from t where s = 'a--b' group by x;").queries().getFirst().alwaysOneRow());
+        // And a literal that merely mentions one is not one.
+        assertTrue(parse("-- name: q :one\nselect count(*) from t where s = 'group by';").queries().getFirst().alwaysOneRow());
     }
 
     @Test
