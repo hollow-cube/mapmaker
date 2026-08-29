@@ -7,9 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VaultSecretsTest {
 
@@ -23,6 +21,7 @@ class VaultSecretsTest {
             """);
 
         var secrets = VaultSecrets.load(file);
+        assertTrue(secrets.present());
         assertEquals("postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service",
             secrets.get("postgres.maps_uri", "DATABASE_URL_NOT_SET"));
         assertEquals("phx_abc", secrets.get("posthog.personal_api_key", "NOT_SET"));
@@ -38,6 +37,7 @@ class VaultSecretsTest {
     @Test
     void testMissingFileIsNotAnError(@TempDir Path dir) {
         var secrets = VaultSecrets.load(dir.resolve("no-sidecar-here"));
+        assertFalse(secrets.present());
 
         assertNull(secrets.get("postgres.maps_uri", "NOT_SET"));
         assertEquals("9124", secrets.get("http.port", "NOT_SET", "9124"));

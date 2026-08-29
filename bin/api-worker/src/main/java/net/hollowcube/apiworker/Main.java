@@ -29,17 +29,22 @@ public final class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     /// Inside kubernetes' default 30s termination grace, with room for the pool to close after.
     private static final Duration STOP_GRACE = Duration.ofSeconds(20);
+    /// The Go api-server proxies PostHog, and the game servers go through it; so does this.
+    private static final String POSTHOG_PROXY = "http://api-server.mapmaker:9124/posthog";
 
     public static void main(String[] args) {
         var secrets = VaultSecrets.load();
         var dataSource = Pools.postgres(PostgresUri.parse(secrets.require("postgres.maps_uri", "DATABASE_URL")), "api-worker");
         var db = new ApiDatabase(dataSource);
 
-        // The uninitialised client drops everything, which is what a local run wants: the Go
-        // server likewise sends nothing under tilt.
-        var endpoint = secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT");
-        if (endpoint != null) PostHog.init(PostHogIds.PROJECT_KEY, config -> config.endpoint(endpoint));
-        else logger.info("posthog.endpoint is not set, events go nowhere");
+        // A process with no vault secret is a local one, and the uninitialised client drops
+        // everything, which is what a local run wants: the Go server likewise sends nothing under
+        // tilt. The endpoint is not a key the secret carries, so it is not what decides.
+        if (secrets.present() || System.getenv("POSTHOG_ENDPOINT") != null) {
+            PostHog.init(PostHogIds.PROJECT_KEY, config -> config.endpoint(secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT", POSTHOG_PROXY)));
+        } else {
+            logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");
+        }
 
         var slots = Integer.parseInt(secrets.get("worker.slots", "SLOTS", "4"));
         var worker = new Worker(db, hostName(), slots);

@@ -26,9 +26,11 @@ public final class VaultSecrets {
     private static final Path PATH = Path.of("/vault/secrets/service");
 
     private final Map<String, String> values;
+    private final boolean present;
 
-    private VaultSecrets(Map<String, String> values) {
+    private VaultSecrets(Map<String, String> values, boolean present) {
         this.values = values;
+        this.present = present;
     }
 
     public static VaultSecrets load() {
@@ -42,7 +44,7 @@ public final class VaultSecrets {
         } catch (NoSuchFileException e) {
             // Not an error: nothing outside the cluster has a sidecar to read.
             logger.info("no vault secrets at {}, reading the environment only", path);
-            return new VaultSecrets(Map.of());
+            return new VaultSecrets(Map.of(), false);
         } catch (IOException e) {
             throw new UncheckedIOException("failed to read vault secrets at " + path, e);
         }
@@ -56,7 +58,13 @@ public final class VaultSecrets {
             values.put(trimmed.substring(0, split).trim(), trimmed.substring(split + 1).trim());
         }
         logger.info("read {} vault secrets from {}", values.size(), path);
-        return new VaultSecrets(values);
+        return new VaultSecrets(values, true);
+    }
+
+    /// Whether a sidecar rendered anything at all, which is to say whether this is a process in
+    /// the cluster rather than on someone's machine.
+    public boolean present() {
+        return present;
     }
 
     public @Nullable String get(String key, String env) {
