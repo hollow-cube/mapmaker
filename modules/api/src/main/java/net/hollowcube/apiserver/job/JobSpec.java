@@ -22,6 +22,7 @@ public record JobSpec<D>(String name, Class<D> data, Function<D, String> instanc
     public static final String TIMED_INSTANCE = "-";
 
     public static final JobSpec<Void> PLAYER_COUNT = timed("player-count", "*/5 * * * *");
+    public static final JobSpec<IndexMap> INDEX_MAP = queued("index-map", IndexMap.class, IndexMap::mapId);
 
     public static JobSpec<Void> timed(String name, String cron) {
         return new JobSpec<>(name, Void.class, ignored -> TIMED_INSTANCE, Cron.parse(cron), DEFAULT_MAX_ATTEMPTS);

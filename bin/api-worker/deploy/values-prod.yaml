@@ -8,12 +8,15 @@ base:
   replicaCount: 1
 
   # -XX:MaxRAMPercentage sizes the heap against the limit, so this is also the heap setting.
+  # Indexing holds a whole decoded world, and the largest published maps run past a hundred
+  # million blocks, which is half a gigabyte of sections before the map is even walked; with
+  # four slots a backfill can have four of those in flight at once.
   resources:
     requests:
       cpu: 100m
       memory: 256Mi
     limits:
-      memory: 512Mi
+      memory: 4Gi
 
   service:
     monitor:

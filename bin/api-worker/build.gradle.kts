@@ -1,12 +1,29 @@
 plugins {
     id("mapmaker.java-binary")
+    // The actions build their editor sprites up front, against the packer's sprites.json, so a
+    // process that only ever decodes them still needs it on the classpath.
+    id("mapmaker.packer-data")
 }
 
 // A jar, not a native image: this is a long-running consumer, so startup time and memory floor
 // buy it nothing and the JIT is what its cpu-bound jobs want. It is also what keeps its build to a
-// minute on every push, when its inputs will eventually include most of the runtime.
+// minute on every push, now that its inputs include most of the runtime.
 dependencies {
     implementation(project(":modules:api"))
+
+    // Indexing decodes trigger data with the codecs the runtime uses, which reach into Minestom's
+    // registries, so the whole runtime comes along; none of it is ever ticked.
+    implementation(project(":modules:common"))
+    implementation(project(":modules:core"))
+    implementation(project(":modules:datafix"))
+    implementation(project(":modules:map-core"))
+    implementation(project(":modules:map-runtime"))
+
+    implementation(libs.minestom)
+    implementation(libs.polar)
+    implementation(libs.fastutil)
+    implementation(libs.adventure.nbt)
+    implementation(libs.otel.api)
 
     implementation(libs.gson)
     implementation(libs.postgresql)

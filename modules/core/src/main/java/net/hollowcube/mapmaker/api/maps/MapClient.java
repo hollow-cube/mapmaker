@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.channels.Channels;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 
@@ -170,6 +171,9 @@ public interface MapClient {
         private static final String POLAR_CONTENT_TYPE = "application/vnd.hollowcube.polar";
 
         private static final String V4_PREFIX = "/v4/internal/maps";
+        /// Worlds run to tens of megabytes, so this is generous; without it a download that
+        /// stalls mid-body holds the caller forever, since the client only bounds the connect.
+        private static final Duration WORLD_TIMEOUT = Duration.ofMinutes(2);
         private static final String V4_PLAYERS_PREFIX = "/v4/internal/players";
 
         private static final Logger logger = LoggerFactory.getLogger(MapClient.class);
@@ -213,6 +217,7 @@ public interface MapClient {
                 "getMapWorld",
                 HttpRequest.newBuilder()
                     .uri(http.url(V4_PREFIX + "/" + mapId + "/world"))
+                    .timeout(WORLD_TIMEOUT)
                     .GET(),
                 HttpResponse.BodyHandlers.ofByteArray());
             http.maybeThrowResponse(res);

@@ -18,6 +18,8 @@ public final class ApiDatabase {
 
     public final JobsQueries jobs;
 
+    public final MapFeaturesQueries mapFeatures;
+
     public final SessionsQueries sessions;
 
     public ApiDatabase(DataSource dataSource) {
@@ -25,6 +27,7 @@ public final class ApiDatabase {
         ConnectionSource source = ConnectionSource.pooled(dataSource);
         this.heads = new HeadsQueriesImpl(source);
         this.jobs = new JobsQueriesImpl(source);
+        this.mapFeatures = new MapFeaturesQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
     }
 
@@ -32,6 +35,7 @@ public final class ApiDatabase {
         this.dataSource = null;
         this.heads = fake.heads;
         this.jobs = fake.jobs;
+        this.mapFeatures = fake.mapFeatures;
         this.sessions = fake.sessions;
     }
 
@@ -81,6 +85,8 @@ public final class ApiDatabase {
 
         public final JobsQueries jobs;
 
+        public final MapFeaturesQueries mapFeatures;
+
         public final SessionsQueries sessions;
 
         Tx(Connection conn) {
@@ -88,6 +94,7 @@ public final class ApiDatabase {
             ConnectionSource source = ConnectionSource.pinned(conn);
             this.heads = new HeadsQueriesImpl(source);
             this.jobs = new JobsQueriesImpl(source);
+            this.mapFeatures = new MapFeaturesQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
         }
 
@@ -107,6 +114,8 @@ public final class ApiDatabase {
 
         private JobsQueries jobs = new JobsQueries.Stub();
 
+        private MapFeaturesQueries mapFeatures = new MapFeaturesQueries.Stub();
+
         private SessionsQueries sessions = new SessionsQueries.Stub();
 
         public Fake heads(HeadsQueries heads) {
@@ -116,6 +125,11 @@ public final class ApiDatabase {
 
         public Fake jobs(JobsQueries jobs) {
             this.jobs = jobs;
+            return this;
+        }
+
+        public Fake mapFeatures(MapFeaturesQueries mapFeatures) {
+            this.mapFeatures = mapFeatures;
             return this;
         }
 

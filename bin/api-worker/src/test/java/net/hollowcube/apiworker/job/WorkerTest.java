@@ -34,12 +34,14 @@ class WorkerTest {
         final List<D> seen = new ArrayList<>();
         int runs;
         @Nullable RuntimeException failure;
+        @Nullable Error death;
 
         @Override
         public void run(@Nullable D data) {
             runs++;
             seen.add(data);
             if (failure != null) throw failure;
+            if (death != null) throw death;
         }
     }
 
@@ -109,6 +111,22 @@ class WorkerTest {
     }
 
     @Test
+    void anError_isReportedOnTheRowAndStillPropagates() {
+        var runner = new Recording<IndexMap>();
+        runner.death = new OutOfMemoryError("no");
+        var worker = new Worker(db, "test", 1, Runnable::run);
+        worker.handle(INDEX, runner);
+        INDEX.enqueue(db.jobs, new IndexMap("map-1", null));
+
+        assertThrows(OutOfMemoryError.class, worker::pollOnce);
+        var row = row("index", "map-1");
+        assertNull(row.pickedBy(), "handed back, not left for the reaper");
+        assertEquals(1, row.attempts());
+        assertEquals("java.lang.OutOfMemoryError: no", row.lastError());
+        assertEquals(0, worker.pollOnce(), "backed off, and the slot came back");
+    }
+
+    @Test
     void undecodableData_isParkedAtOnce() {
         var runner = new Recording<IndexMap>();
         var worker = new Worker(db, "test", 1, Runnable::run);
@@ -120,6 +138,20 @@ class WorkerTest {
         var row = row("index", "bad");
         assertNotNull(row.parkedAt());
         assertTrue(row.lastError().startsWith("data is not a IndexMap"), row.lastError());
+    }
+
+    @Test
+    void missingData_isParkedAtOnce() {
+        var runner = new Recording<IndexMap>();
+        var worker = new Worker(db, "test", 1, Runnable::run);
+        worker.handle(INDEX, runner);
+        TEST_DB.seed("insert into jobs (job, instance) values ('index', 'bare')");
+
+        assertEquals(1, worker.pollOnce());
+        assertEquals(0, runner.runs);
+        var row = row("index", "bare");
+        assertNotNull(row.parkedAt());
+        assertTrue(row.lastError().startsWith("data is missing"), row.lastError());
     }
 
     @Test

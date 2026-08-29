@@ -8,8 +8,7 @@ on:
     branches: [ main ]
     paths:
       - 'bin/api-worker/**'
-      - 'modules/api/**'
-      - 'modules/ipc/**'
+      - 'modules/**'
       - 'tools/ipc-gen/**'
       - 'tools/sql-gen/**'
       - '.github/workflows/api-worker.yml'

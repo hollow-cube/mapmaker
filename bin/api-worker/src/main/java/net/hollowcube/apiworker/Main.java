@@ -1,5 +1,6 @@
 package net.hollowcube.apiworker;
 
+import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.apiserver.common.Pools;
 import net.hollowcube.apiserver.common.PostHogIds;
 import net.hollowcube.apiserver.common.PostgresUri;
@@ -7,7 +8,10 @@ import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiworker.job.Worker;
+import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
+import net.hollowcube.mapmaker.api.HttpClientWrapper;
+import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.posthog.PostHog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,8 +33,12 @@ public final class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     /// Inside kubernetes' default 30s termination grace, with room for the pool to close after.
     private static final Duration STOP_GRACE = Duration.ofSeconds(20);
+    /// The Go api-server in the cluster, which is where map worlds come from; and under tilt,
+    /// where a local run finds it.
+    private static final String API_SERVER = "http://api-server.mapmaker:9124";
+    private static final String LOCAL_API_SERVER = "http://localhost:9127";
     /// The Go api-server proxies PostHog, and the game servers go through it; so does this.
-    private static final String POSTHOG_PROXY = "http://api-server.mapmaker:9124/posthog";
+    private static final String POSTHOG_PROXY = API_SERVER + "/posthog";
 
     public static void main(String[] args) {
         var secrets = VaultSecrets.load();
@@ -46,9 +54,14 @@ public final class Main {
             logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");
         }
 
+        // Same rule as posthog: a process with no vault secret is a local one.
+        var apiUrl = secrets.get("api.url", "API_URL", secrets.present() ? API_SERVER : LOCAL_API_SERVER);
+        var maps = new MapClient.Http(new HttpClientWrapper(OpenTelemetry.noop(), apiUrl));
+
         var slots = Integer.parseInt(secrets.get("worker.slots", "SLOTS", "4"));
         var worker = new Worker(db, hostName(), slots);
         worker.handle(JobSpec.PLAYER_COUNT, new PlayerCountRunner(db, PostHog.getClient()));
+        worker.handle(JobSpec.INDEX_MAP, new IndexMapRunner(db, maps));
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             // Hand back what is running so the next replica picks it up now rather than when the

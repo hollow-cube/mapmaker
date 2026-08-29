@@ -233,6 +233,15 @@ public final class Worker implements AutoCloseable {
             logger.error("{}/{} failed on attempt {}", row.job(), row.instance(), attempt, e);
             report(row, () -> failed(bound.spec, row, attempt, e.toString()));
             return;
+        } catch (Error e) {
+            // Out of memory, a class that would not load: the row is reported like any failure,
+            // so a map that keeps doing this parks, and the error goes on to whatever it was
+            // going to do to the process.
+            running.inBody = false;
+            Thread.interrupted();
+            logger.error("{}/{} died on attempt {}", row.job(), row.instance(), attempt, e);
+            report(row, () -> failed(bound.spec, row, attempt, e.toString()));
+            throw e;
         }
         running.inBody = false;
         Thread.interrupted();
@@ -314,6 +323,9 @@ public final class Worker implements AutoCloseable {
             } catch (RuntimeException e) {
                 throw new Undecodable("data is not a " + spec.data().getSimpleName() + ": " + e.getMessage());
             }
+            // A row inserted by hand without its data will not grow any next time either.
+            if (data == null && spec.data() != Void.class)
+                throw new Undecodable("data is missing; " + spec.name() + " needs a " + spec.data().getSimpleName());
             runner.run(data);
         }
     }
