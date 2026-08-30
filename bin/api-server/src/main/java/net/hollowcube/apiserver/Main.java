@@ -1,6 +1,8 @@
 package net.hollowcube.apiserver;
 
 import com.sun.net.httpserver.HttpServer;
+import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
+import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
 import net.hollowcube.apiserver.common.Health;
 import net.hollowcube.apiserver.common.NatsPublisher;
@@ -11,6 +13,7 @@ import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
 import net.hollowcube.ipc.Wire;
+import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
 import net.hollowcube.ipc.session.SessionServer;
@@ -19,6 +22,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -32,6 +36,12 @@ import java.util.concurrent.Executors;
 public final class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
     private static final int SHUTDOWN_SECONDS = 5;
+
+    /// The trace volume (ReadWriteOnce, which is what holds this at one replica pinned to its
+    /// node), and the most one capture trace may be. The cap is a refusal rather than a
+    /// truncation: half a trace is not evidence, and the proxy that shipped it keeps its copy.
+    private static final String TRACE_DIR = "/data/anticheat";
+    private static final long MAX_TRACE_BYTES = 512L << 20;
 
     public static void main(String[] args) throws IOException {
         var secrets = VaultSecrets.load();
@@ -65,7 +75,11 @@ public final class Main {
             server.createContext(SessionServer.PATH,
                 new SessionServer(new SessionServiceImpl(db))),
             server.createContext(ChatServer.PATH,
-                new ChatServer(new ChatServiceImpl(db, nats)))
+                new ChatServer(new ChatServiceImpl(db, nats))),
+            server.createContext(AnticheatServer.PATH,
+                new AnticheatServer(new AnticheatServiceImpl(db, new AnticheatTraceStore(
+                    Path.of(secrets.get("anticheat.store_dir", "ANTICHEAT_STORE_DIR", TRACE_DIR)),
+                    MAX_TRACE_BYTES))))
         )) context.getFilters().add(requestLog);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

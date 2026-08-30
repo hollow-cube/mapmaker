@@ -22,3 +22,9 @@ base:
     PORT: "9124"
     # The same broker the game servers publish and consume on; chat fans out over it.
     NATS_SERVERS: "nats://nats:4222"
+
+  # The trace-store PVC is ReadWriteOnce, so the pod must come up on the node holding the volume
+  # attach; pinning it is what keeps a rolling replacement from deadlocking on another node. Remove
+  # when the store moves to RWX or off the filesystem — address it then.
+  nodeSelector:
+    kubernetes.io/hostname: wkr-01

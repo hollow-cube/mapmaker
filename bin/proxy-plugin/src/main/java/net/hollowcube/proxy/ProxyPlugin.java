@@ -33,7 +33,13 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.GameProfile;
+import io.prometheus.client.CollectorRegistry;
+import net.hollowcube.anticheat.capture.CaptureClock;
 import net.hollowcube.ipc.session.SessionClient;
+import net.hollowcube.proxy.anticheat.AnticheatConfig;
+import net.hollowcube.proxy.anticheat.AnticheatConnections;
+import net.hollowcube.proxy.anticheat.TraceShipper;
+import net.hollowcube.proxy.anticheat.VelocityInternals;
 import net.hollowcube.proxy.drain.DrainCookie;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -42,6 +48,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
@@ -64,6 +71,7 @@ public class ProxyPlugin {
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final ChannelIdentifier DISCONNECT_MESSAGE_ID = MinecraftChannelIdentifier.create("velocity", "disconnect");
+    private static final ChannelIdentifier ANTICHEAT_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "anticheat");
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
     private static final Key DRAIN_TRANSFER_COOKIE = Key.key("mapmaker", "drain_transfer");
 
@@ -76,6 +84,9 @@ public class ProxyPlugin {
     );
     private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_2;
     private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.2";
+    // Lands in every capture trace header and store row, so a trace can be tied back to the build
+    // that wrote it; the commit hash, stamped into the jar by the writeBuildStamp task.
+    private static final String PROXY_VERSION = readBuildStamp();
 
     // The port ProxyHttpServer serves the deployment on; 0 (the default) is no http side at all.
     private static final int HTTP_PORT = parsePort(System.getenv("PROXY_HTTP_PORT"));
@@ -83,6 +94,8 @@ public class ProxyPlugin {
     private static final String IPC_SERVICE_URL = Objects.requireNonNullElse(System.getenv("IPC_SERVICE_URL"), "http://api-server-java:9124");
     // How long a fetched player count answers pings for before one of them fetches again.
     private static final Duration ONLINE_PLAYERS_TTL = Duration.ofSeconds(2);
+    // How often the ring gauge and the ring-cap drop counter are read off the connections.
+    private static final Duration ANTICHEAT_SAMPLE_INTERVAL = Duration.ofSeconds(10);
 
     private static final String COOKIE_SECRET_FILE = System.getenv("PROXY_COOKIE_SECRET_FILE");
     private static final Duration DRAIN_COOKIE_TTL = Duration.ofSeconds(30);
@@ -106,6 +119,10 @@ public class ProxyPlugin {
     private final ReentrantLock onlinePlayersLock = new ReentrantLock();
     private volatile int onlinePlayers;
     private volatile long onlinePlayersExpiry = System.nanoTime();
+
+    private final AnticheatConfig anticheatConfig;
+    private final AnticheatConnections anticheatConnections;
+    private final TraceShipper anticheatShipper;
 
     private final RegisteredServer anyhubServer;
 
@@ -146,9 +163,19 @@ public class ProxyPlugin {
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
         proxy.getChannelRegistrar().register(PROTOCOL_VERSION_MESSAGE_ID);
         proxy.getChannelRegistrar().register(DISCONNECT_MESSAGE_ID);
+        proxy.getChannelRegistrar().register(ANTICHEAT_MESSAGE_ID);
 
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
         drainCookie = DrainCookie.load(logger, COOKIE_SECRET_FILE);
+
+        anticheatConfig = AnticheatConfig.fromEnv(logger);
+        anticheatShipper = new TraceShipper(IPC_SERVICE_URL, anticheatConfig);
+        // Velocity disconnects every player before it fires ProxyShutdownEvent, so a capture open
+        // at shutdown is closed by the channel going inactive; this is what tells that apart from
+        // the player leaving on their own.
+        anticheatConnections = new AnticheatConnections(anticheatConfig, CaptureClock.SYSTEM,
+            ProxySessionService.hostname, PROXY_VERSION, () -> VelocityInternals.isShuttingDown(proxy),
+            anticheatShipper);
 
         logger.info("hello, world!!!!");
     }
@@ -156,9 +183,18 @@ public class ProxyPlugin {
     @Subscribe
     public void handleInitialize(@NotNull ProxyInitializeEvent event) {
         http = ProxyHttpServer.start(logger, HTTP_PORT, this::drain,
-            () -> new ProxyHttpServer.Drain(proxy.getPlayerCount(), pendingTransfers.size()));
+            () -> new ProxyHttpServer.Drain(proxy.getPlayerCount(), pendingTransfers.size()),
+            CollectorRegistry.defaultRegistry);
         proxy.getScheduler().buildTask(this, this::sweepDrainState)
             .repeat(DRAIN_SWEEP_INTERVAL)
+            .schedule();
+
+        logger.info("anticheat: {}", anticheatConfig);
+        if (!anticheatConfig.enabled()) return;
+        // Also picks up whatever the last run of this proxy left on the spool volume.
+        anticheatShipper.start();
+        proxy.getScheduler().buildTask(this, anticheatConnections::sample)
+            .repeat(ANTICHEAT_SAMPLE_INTERVAL)
             .schedule();
     }
 
@@ -182,9 +218,15 @@ public class ProxyPlugin {
         }
     }
 
+    /// Every open capture is closed as `closedBy=shutdown` and given the configured grace to be
+    /// assembled and reach the store; whatever is still in flight when it runs out stays on the
+    /// spool volume for the next process to sweep up.
     @Subscribe
     public void handleShutdown(@NotNull ProxyShutdownEvent event) {
+        var deadline = System.nanoTime() + anticheatConfig.shutdownGrace().toNanos();
         if (http != null) http.close();
+        anticheatConnections.close();
+        anticheatShipper.close(Duration.ofNanos(Math.max(0, deadline - System.nanoTime())));
     }
 
     @Subscribe
@@ -193,11 +235,20 @@ public class ProxyPlugin {
         transferIntents.put(event.getConnection().getRemoteAddress(), System.nanoTime() + HANDSHAKE_INTENT_TTL.toNanos());
     }
 
-    /// Velocity awaits this event before choosing an initial server, so a cookie round trip started
-    /// here is finished by the time [#handleChooseInitialServer] needs it.
+    /// The first event with a channel behind the player and a settled protocol version — both
+    /// directions are in the configuration phase — which is why the anticheat tap goes in here.
+    /// Velocity also awaits this event before choosing an initial server, so a cookie round trip
+    /// started here is finished by the time [#handleChooseInitialServer] needs it.
     @Subscribe
     public @Nullable EventTask handlePostLogin(@NotNull PostLoginEvent event) {
         var player = event.getPlayer();
+        try {
+            anticheatConnections.join(player, player.getUniqueId(), player.getUsername(),
+                player.getProtocolVersion().getProtocol(), player::getClientBrand);
+        } catch (Exception e) {
+            logger.error("failed to install the anticheat tap for {}", player.getUsername(), e);
+        }
+
         if (drainCookie == null) return null;
         if (transferIntents.remove(player.getRemoteAddress()) == null) return null;
 
@@ -256,7 +307,7 @@ public class ProxyPlugin {
     @Subscribe
     public void handlePermissionSetup(@NotNull PermissionsSetupEvent event) {
         // Always deny all permissions
-        event.setProvider(s -> p -> Tristate.FALSE);
+        event.setProvider(_ -> _ -> Tristate.FALSE);
     }
 
     @Subscribe
@@ -315,6 +366,8 @@ public class ProxyPlugin {
             handleProtocolVersionRequest(event);
         } else if (DISCONNECT_MESSAGE_ID.equals(event.getIdentifier())) {
             handleDisconnectMessage(event);
+        } else if (ANTICHEAT_MESSAGE_ID.equals(event.getIdentifier())) {
+            handleAnticheatControl(event);
         }
     }
 
@@ -357,6 +410,16 @@ public class ProxyPlugin {
 //    public void handleConfigStart(@NotNull PlayerEnteredConfigurationEvent event) {
 //        event.player().transferToHost(new InetSocketAddress("ovh-02.hollowcube.dev", 30565));
 //    }
+
+    /// Capture control, from the backend the player is on. Never forwarded either way: what the
+    /// backend sends is for the proxy, and anything a client puts on this channel is dropped
+    /// without comment — the backend is the only thing that opens a capture.
+    private void handleAnticheatControl(@NotNull PluginMessageEvent event) {
+        event.setResult(PluginMessageEvent.ForwardResult.handled());
+        if (event.getSource() instanceof ServerConnection serverConn)
+            anticheatConnections.handleBackend(serverConn.getPlayer().getUniqueId(),
+                serverConn.getPlayer().getUsername(), event.getData());
+    }
 
     private void handleDisconnectMessage(@NotNull PluginMessageEvent event) {
         event.setResult(PluginMessageEvent.ForwardResult.handled());
@@ -463,6 +526,7 @@ public class ProxyPlugin {
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
         var playerId = event.getPlayer().getUniqueId();
+        anticheatConnections.quit(playerId);
         // Deleting the session of a player we transferred off would kick them off the backend they
         // are about to reach, so it is left to sweepDrainState.
         if (!pendingTransfers.containsKey(playerId)) deleteSession(playerId);
@@ -531,6 +595,16 @@ public class ProxyPlugin {
             event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
         }
 
+    }
+
+    private static String readBuildStamp() {
+        try (var in = ProxyPlugin.class.getResourceAsStream("/hc-proxy-build")) {
+            if (in == null) return "dev";
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8).trim();
+        } catch (IOException _) {
+            // A jar that cannot read its own resource still comes up; the header just says dev.
+            return "dev";
+        }
     }
 
     private static int parsePort(@Nullable String value) {

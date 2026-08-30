@@ -1,5 +1,47 @@
 {
   "services": {
+    "anticheat": {
+      "interface": "net.hollowcube.ipc.anticheat.AnticheatService",
+      "methods": {
+        "get-trace": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.Blob"
+          }
+        },
+        "list-traces": {
+          "params": [
+            {
+              "name": "captureId",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.anticheat.TraceRow\u003e"
+          }
+        },
+        "put-trace": {
+          "params": [
+            {
+              "name": "meta",
+              "type": "net.hollowcube.ipc.anticheat.TraceMeta"
+            },
+            {
+              "name": "body",
+              "type": "net.hollowcube.ipc.Blob"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.anticheat.PutResult"
+          }
+        }
+      }
+    },
     "chat": {
       "interface": "net.hollowcube.ipc.chat.ChatService",
       "methods": {
@@ -118,6 +160,113 @@
         {
           "name": "results",
           "type": "List\u003cT\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.anticheat.PutResult": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "path",
+          "type": "String"
+        },
+        {
+          "name": "bytes",
+          "type": "long"
+        },
+        {
+          "name": "replaced",
+          "type": "boolean"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.anticheat.TraceMeta": {
+      "kind": "record",
+      "used": [
+        "request",
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "captureId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "playerId",
+          "type": "String"
+        },
+        {
+          "name": "proxyVersion",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "proxy",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "clientPvn",
+          "type": "int"
+        },
+        {
+          "name": "reason",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "startedAt",
+          "type": "long"
+        },
+        {
+          "name": "endedAt",
+          "type": "Long",
+          "nullable": true
+        },
+        {
+          "name": "formatVersion",
+          "type": "int"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.anticheat.TraceRow": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "meta",
+          "type": "net.hollowcube.ipc.anticheat.TraceMeta"
+        },
+        {
+          "name": "bytes",
+          "type": "long"
+        },
+        {
+          "name": "path",
+          "type": "String"
+        },
+        {
+          "name": "pinned",
+          "type": "boolean"
+        },
+        {
+          "name": "expiresAt",
+          "type": "Long",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "long"
         }
       ]
     },

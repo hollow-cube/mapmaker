@@ -1,0 +1,16 @@
+# Scrapes the plugin's http side (ProxyHttpServer /metrics on the http container port); a
+# PodMonitor rather than a ServiceMonitor because the Service is the players' NodePort and the
+# metrics port has no business on it.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: {{ include "mapmaker-proxy.fullname" . }}
+  labels:
+    {{- include "mapmaker-proxy.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "mapmaker-proxy.selectorLabels" . | nindent 6 }}
+  podMetricsEndpoints:
+    - port: http
+      path: /metrics

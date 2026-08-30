@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.Executors;
 
 import static com.google.testing.compile.CompilationSubject.assertThat;
@@ -41,6 +42,7 @@ class IpcRoundTripTest {
         package test;
 
         import net.hollowcube.common.util.RuntimeGson;
+        import net.hollowcube.ipc.Blob;
         import net.hollowcube.ipc.util.Ipc;
         import org.jetbrains.annotations.Nullable;
         import java.util.List;
@@ -66,6 +68,10 @@ class IpcRoundTripTest {
             void record(String event);
 
             String fail();
+
+            String store(String name, Blob body);
+
+            Blob fetch(String name);
 
             @RuntimeGson
             record Point(int x, int y) {
@@ -101,6 +107,8 @@ class IpcRoundTripTest {
     private static Object client;
     private static List<String> recorded;
     private static List<Object> received;
+    private static Class<?> blob;
+    private static Map<String, byte[]> stored;
 
     @BeforeAll
     static void startServer() throws Exception {
@@ -113,8 +121,10 @@ class IpcRoundTripTest {
         color = loader.loadClass("test.EchoService$Color");
         shape = loader.loadClass("test.EchoService$Shape");
         circle = loader.loadClass("test.EchoService$Circle");
+        blob = loader.loadClass("net.hollowcube.ipc.Blob");
         recorded = new ArrayList<>();
         received = new ArrayList<>();
+        stored = new HashMap<>();
 
         var impl = Proxy.newProxyInstance(loader, new Class<?>[]{service}, (proxy, method, args) ->
             switch (method.getName()) {
@@ -138,8 +148,17 @@ class IpcRoundTripTest {
                     recorded.add((String) args[0]);
                     yield null;
                 }
-                case "fail" -> throw (RuntimeException) loader.loadClass("net.hollowcube.ipc.util.IpcException")
-                    .getConstructor(int.class, String.class).newInstance(409, "already exists");
+                case "fail" -> throw ipcException(409, "already exists");
+                case "store" -> {
+                    var bytes = (byte[]) blob.getMethod("readAllBytes").invoke(args[1]);
+                    stored.put((String) args[0], bytes);
+                    yield args[0] + ":" + bytes.length;
+                }
+                case "fetch" -> {
+                    var bytes = stored.get((String) args[0]);
+                    if (bytes == null) throw ipcException(404, "no blob " + args[0]);
+                    yield blob.getMethod("of", byte[].class).invoke(null, (Object) bytes);
+                }
                 default -> throw new UnsupportedOperationException(method.getName());
             });
 
@@ -285,6 +304,68 @@ class IpcRoundTripTest {
         assertEquals(405, response.statusCode());
     }
 
+
+    /// The bytes are the body and never a json value, so what arrives is what was sent, however big
+    /// it is: a megabyte is more than one read of the stream on either side.
+    @Test
+    void blobArgumentsArriveByteForByte() throws Exception {
+        var bytes = bytes(1 << 20);
+
+        assertEquals("big:" + bytes.length, call("store", new Class<?>[]{String.class, blob}, "big", blobOf(bytes)));
+        assertArrayEquals(bytes, stored.get("big"));
+    }
+
+    @Test
+    void blobReturnsArriveByteForByte() throws Exception {
+        var bytes = bytes(1 << 20);
+        call("store", new Class<?>[]{String.class, blob}, "back", blobOf(bytes));
+
+        var answer = call("fetch", new Class<?>[]{String.class}, "back");
+
+        assertEquals((long) bytes.length, blob.getMethod("length").invoke(answer));
+        assertArrayEquals(bytes, (byte[]) blob.getMethod("readAllBytes").invoke(answer));
+    }
+
+    /// The arguments of a blob call travel in a header, which is bytes; a name written outside
+    /// ascii still has to come back out as itself.
+    @Test
+    void blobArgumentsOutsideAsciiSurviveTheirHeader() throws Exception {
+        var name = "na\u00efve \u2014 \u2705";
+
+        assertEquals(name + ":3", call("store", new Class<?>[]{String.class, blob}, name, blobOf(new byte[]{1, 2, 3})));
+        assertArrayEquals(new byte[]{1, 2, 3}, stored.get(name));
+    }
+
+    /// The wire shape itself: the body is the blob, the arguments are `x-ipc-args`, and the answer
+    /// to a blob method announces its length rather than being chunked.
+    @Test
+    void blobCallsAreOctetStreamsWithTheirArgumentsInAHeader() throws Exception {
+        var upload = HttpClient.newHttpClient().send(
+            HttpRequest.newBuilder(URI.create(baseUrl() + "/echo/store"))
+                .header("Content-Type", "application/octet-stream")
+                .header("x-ipc-args", "{\"name\":\"raw\"}")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(new byte[]{7, 7, 7, 7}))
+                .build(),
+            HttpResponse.BodyHandlers.ofString());
+
+        assertEquals(200, upload.statusCode());
+        assertEquals("\"raw:4\"", upload.body());
+
+        var download = post("/echo/fetch", "{\"name\":\"raw\"}");
+        assertEquals(200, download.statusCode());
+        assertEquals("application/octet-stream", download.headers().firstValue("Content-Type").orElseThrow());
+        assertEquals(4, download.headers().firstValueAsLong("Content-Length").orElseThrow());
+    }
+
+    @Test
+    void blobFailuresKeepTheirStatus() throws Exception {
+        var thrown = assertThrows(InvocationTargetException.class,
+            () -> call("fetch", new Class<?>[]{String.class}, "nothing-here")).getCause();
+
+        assertEquals("net.hollowcube.ipc.util.IpcException", thrown.getClass().getName());
+        assertEquals(404, thrown.getClass().getMethod("status").invoke(thrown));
+    }
+
     // ----- plumbing -----
 
     private static Compilation compile() {
@@ -309,6 +390,22 @@ class IpcRoundTripTest {
 
     private static int y(Object p) throws Exception {
         return (int) point.getMethod("y").invoke(p);
+    }
+
+    private static Object blobOf(byte[] bytes) throws Exception {
+        return blob.getMethod("of", byte[].class).invoke(null, (Object) bytes);
+    }
+
+    /// Enough of them that neither side reads the body in one go.
+    private static byte[] bytes(int length) {
+        var bytes = new byte[length];
+        new Random(7).nextBytes(bytes);
+        return bytes;
+    }
+
+    private static RuntimeException ipcException(int status, String message) throws Exception {
+        return (RuntimeException) loader.loadClass("net.hollowcube.ipc.util.IpcException")
+            .getConstructor(int.class, String.class).newInstance(status, message);
     }
 
     private static String baseUrl() {

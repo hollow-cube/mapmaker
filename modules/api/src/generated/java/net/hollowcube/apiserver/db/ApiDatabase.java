@@ -14,6 +14,8 @@ import net.hollowcube.sqlgen.runtime.Transaction;
 public final class ApiDatabase {
     private final DataSource dataSource;
 
+    public final AnticheatQueries anticheat;
+
     public final ChatQueries chat;
 
     public final CommandLogQueries commandLog;
@@ -33,6 +35,7 @@ public final class ApiDatabase {
     public ApiDatabase(DataSource dataSource) {
         this.dataSource = dataSource;
         ConnectionSource source = ConnectionSource.pooled(dataSource);
+        this.anticheat = new AnticheatQueriesImpl(source);
         this.chat = new ChatQueriesImpl(source);
         this.commandLog = new CommandLogQueriesImpl(source);
         this.heads = new HeadsQueriesImpl(source);
@@ -45,6 +48,7 @@ public final class ApiDatabase {
 
     private ApiDatabase(Fake fake) {
         this.dataSource = null;
+        this.anticheat = fake.anticheat;
         this.chat = fake.chat;
         this.commandLog = fake.commandLog;
         this.heads = fake.heads;
@@ -97,6 +101,8 @@ public final class ApiDatabase {
     public static final class Tx {
         private final Connection conn;
 
+        public final AnticheatQueries anticheat;
+
         public final ChatQueries chat;
 
         public final CommandLogQueries commandLog;
@@ -116,6 +122,7 @@ public final class ApiDatabase {
         Tx(Connection conn) {
             this.conn = conn;
             ConnectionSource source = ConnectionSource.pinned(conn);
+            this.anticheat = new AnticheatQueriesImpl(source);
             this.chat = new ChatQueriesImpl(source);
             this.commandLog = new CommandLogQueriesImpl(source);
             this.heads = new HeadsQueriesImpl(source);
@@ -138,6 +145,8 @@ public final class ApiDatabase {
      * Builds a ApiDatabase out of stand-in groups.
      */
     public static final class Fake {
+        private AnticheatQueries anticheat = new AnticheatQueries.Stub();
+
         private ChatQueries chat = new ChatQueries.Stub();
 
         private CommandLogQueries commandLog = new CommandLogQueries.Stub();
@@ -153,6 +162,11 @@ public final class ApiDatabase {
         private PlayersQueries players = new PlayersQueries.Stub();
 
         private SessionsQueries sessions = new SessionsQueries.Stub();
+
+        public Fake anticheat(AnticheatQueries anticheat) {
+            this.anticheat = anticheat;
+            return this;
+        }
 
         public Fake chat(ChatQueries chat) {
             this.chat = chat;

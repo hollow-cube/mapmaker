@@ -24,6 +24,8 @@ json5 = "2.0.0"
 graalvm = "25.0.0"
 blossom = "2.1.0"
 velocity = "3.5.0-SNAPSHOT"
+# Matches the netty velocity 3.5.0 ships, so the proxy plugin compiles against what it runs on.
+netty = "4.2.15.Final"
 classgraph = "4.8.179"
 javapoet = "0.7.0"
 luau = "1.1.0"
@@ -54,6 +56,9 @@ jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }
 velocity-api = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+netty-transport = { group = "io.netty", name = "netty-transport", version.ref = "netty" }
+netty-codec = { group = "io.netty", name = "netty-codec", version.ref = "netty" }
+netty-handler = { group = "io.netty", name = "netty-handler", version.ref = "netty" }
 luau-core = { group = "dev.hollowcube", name = "luau", version.ref = "luau" }
 luau-natives-macos-arm64 = { group = "dev.hollowcube", name = "luau-natives-macos-arm64", version.ref = "luau" }
 luau-natives-linux-x64 = { group = "dev.hollowcube", name = "luau-natives-linux-x64", version.ref = "luau" }

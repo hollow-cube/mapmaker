@@ -3,8 +3,9 @@ import java.security.MessageDigest
 
 plugins {
     id("mapmaker.java-library")
-    // Version pinned here as in bin/api-server; the shared one lives in build-src/build.gradle.kts.
-    id("com.gradleup.shadow") version "9.0.0-beta12"
+    // Newer than bin/api-server's pin on purpose: relocation remaps every class through ASM, and
+    // only 9.3+ bundles an ASM that reads Java 25 class files.
+    id("com.gradleup.shadow") version "9.3.1"
 }
 
 repositories {
@@ -13,14 +14,66 @@ repositories {
 
 dependencies {
     // Velocity is on the proxy's own classpath, so it must never be shaded into the plugin jar.
+    // velocity-proxy (needed for ConnectedPlayer#getConnection) is not published to the papermc
+    // repo, only velocity-api/-annotation-processor/-brigadier/-native, and the only copy of it is
+    // the fat jar a local velocity run drops in scratch/proxy/ - absent in CI, and a second copy of the
+    // velocity-api classes on the compile classpath if present. So it is never on the classpath:
+    // VelocityInternals reaches ConnectedPlayer#getConnection()#getChannel() through MethodHandles.
     annotationProcessor(libs.velocity.api)
     compileOnly(libs.velocity.api)
 
-    // The session count on the server list ping is an ipc call, so the generated SessionClient
-    // rides along. It drags in gson (which velocity ships its own copy of; the shaded one is never
-    // loaded) and opentelemetry-api, which is only ever OpenTelemetry.noop() here.
+    // The session count on the server list ping and the trace store the shipper puts to are ipc
+    // services, so the generated SessionClient and AnticheatClient ride along. They drag in
+    // gson (which velocity ships its own copy of; the shaded one is never loaded) and
+    // opentelemetry-api/-semconv, which is only ever OpenTelemetry.noop() here, since the proxy has
+    // no sdk and nothing on the proxy reads a span.
     implementation(project(":modules:ipc"))
+    // The control channel's messages are gson too, like the trace meta the ipc client encodes.
     implementation(libs.gson)
+
+    // Netty is the proxy's, same as velocity: compileOnly for the tap, never shaded.
+    compileOnly(libs.netty.transport)
+    compileOnly(libs.netty.codec)
+    compileOnly(libs.netty.handler)
+
+    implementation(project(":modules:anticheat"))
+
+    // The same simpleclient the backend servers use; ProxyHttpServer serves it on /metrics.
+    implementation(libs.prometheus)
+    implementation(libs.prometheus.httpserver)
+
+    // Tap tests drive an EmbeddedChannel; velocity-api brings no netty of its own.
+    testImplementation(libs.netty.transport)
+    testImplementation(libs.netty.codec)
+    testImplementation(libs.netty.handler)
+
+    // Reading the real-client capture fixtures the tap tests replay.
+    testImplementation(libs.gson)
+    testImplementation(libs.zstd)
+}
+
+// The commit the plugin was built from, stamped into the jar as a resource: ProxyPlugin reads it
+// into PROXY_VERSION and it lands in every trace header and store row.
+val gitCommit = providers.exec { commandLine("git", "rev-parse", "--short=10", "HEAD") }
+    .standardOutput.asText.map(String::trim)
+val buildStamp = layout.buildDirectory.file("generated/build-stamp/hc-proxy-build")
+val writeBuildStamp = tasks.register("writeBuildStamp") {
+    inputs.property("commit", gitCommit)
+    outputs.file(buildStamp)
+    val file = buildStamp
+    val commit = gitCommit
+    doLast { file.get().asFile.writeText(commit.get()) }
+}
+tasks.processResources {
+    from(writeBuildStamp)
+}
+
+// The tap replays the very same real-client 776 captures the engine tests do. They live with the
+// module that owns their format, so they are read from there rather than checked in twice.
+tasks.processTestResources {
+    from(rootDir.resolve("modules/anticheat/src/test/resources/fixtures")) {
+        into("fixtures")
+    }
 }
 
 // The proxy loads a single jar, so the plugin ships fat; the plain jar keeps a classifier so both
@@ -34,6 +87,11 @@ tasks.shadowJar {
 
     mergeServiceFiles()
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Velocity bundles a minimized fastutil (only the classes it uses) and plugin loading is
+    // parent-first, so an unrelocated fastutil call resolves against velocity's cut and dies on
+    // any class it stripped (ObjectArraySet, from Int2ObjectMaps.EmptyMap, was the first).
+    relocate("it.unimi.dsi.fastutil", "net.hollowcube.proxy.shaded.fastutil")
 
     // Velocity injects its own org.slf4j.Logger; a second copy in the plugin jar would be a
     // different class if the plugin loader ever stopped delegating parent-first.
@@ -154,8 +212,28 @@ tasks.register<JavaExec>("runProxy") {
     environment("PROXY_HTTP_PORT", providers.gradleProperty("proxyHttpPort").getOrElse("9125"))
     // Where the ipc services are served from: a local api-server, or DevServer embedding them.
     environment("IPC_SERVICE_URL", providers.gradleProperty("proxyIpcUrl").getOrElse("http://127.0.0.1:9124"))
-    // Velocity's own /server, hidden in production, is how a backend switch is driven from a client.
-    environment("PROXY_DEV_SERVER_COMMAND", "true")
+    // The go api-server the compose stack publishes on 9127; logins need it for session rows.
+    environment("SESSION_SERVICE_URL", providers.gradleProperty("proxySessionUrl").getOrElse("http://127.0.0.1:9127"))
+    environment("ANTICHEAT_ENABLED", "true")
     environment("PROXY_COOKIE_SECRET_FILE", proxyRunDir.get().asFile.resolve("cookie.secret").path)
     standardInput = System.`in`
+}
+
+// The trace store for dev and for the e2e harness: the generated ipc server over a directory, so
+// a proxy can ship somewhere real without an api-server. StubStore lives in the test source set
+// because it is the very store TraceShipperTest ships to.
+//
+//   ./gradlew :bin:proxy-plugin:runStubStore -Pport=9126 -Pdir=scratch/proxy/store
+tasks.register<JavaExec>("runStubStore") {
+    group = "anticheat"
+    description = "Serves AnticheatService out of a directory, for dev and the e2e harness."
+    classpath = sourceSets.test.get().runtimeClasspath
+    mainClass = "net.hollowcube.proxy.anticheat.StubStore"
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    // So -Pdir= takes the path as typed, from wherever the build was invoked.
+    workingDir = rootDir
+    args(
+        providers.gradleProperty("port").getOrElse("9126"),
+        providers.gradleProperty("dir").getOrElse("scratch/proxy/store"),
+    )
 }

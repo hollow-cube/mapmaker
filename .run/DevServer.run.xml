@@ -4,6 +4,7 @@
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <envs>
       <env name="MAPMAKER_RESOURCE_PACK_HASH" value="dev" />
+      <env name=" MAPMAKER_DEV_OFFLINE_AUTH" value="true" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="net.hollowcube.mapmaker.dev.DevMain" />
     <module name="mapmaker.bin.development.main" />

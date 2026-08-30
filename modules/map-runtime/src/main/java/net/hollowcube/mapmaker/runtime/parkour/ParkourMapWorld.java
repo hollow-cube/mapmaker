@@ -6,6 +6,8 @@ import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
+import net.hollowcube.anticheat.log.TraceHeader;
+import net.hollowcube.mapmaker.anticheat.AnticheatCapture;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
@@ -388,6 +390,10 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             saveState.setStartLatency(mp.averageLatency());
 
             recordReplayEvent(player, new RunStartEvent());
+
+            // A compete run is the unit a capture is keyed on, so the run id is the capture id.
+            if (getPlayerState(player) instanceof ParkourState.Playing2)
+                AnticheatCapture.startSampled(player, saveState.id(), TraceHeader.Reason.RUN);
         }
 
         // TODO(replay): begin or resume recording if there is a replay for this run

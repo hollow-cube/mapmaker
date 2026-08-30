@@ -2,6 +2,8 @@ package net.hollowcube.proxy;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.exporter.HTTPServer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -23,6 +25,7 @@ import java.util.function.Supplier;
 ///   polls it until 200, and only then does kubernetes send the SIGTERM velocity answers by
 ///   disconnecting everyone. Transfers count because the players behind them are mid-reconnect to
 ///   another proxy and this one still owes their session row a delete.
+/// - `/metrics` serves `registry` the same way the backend servers do (`MapServerInitializer`).
 public final class ProxyHttpServer implements AutoCloseable {
 
     public record Drain(int players, int pendingTransfers) {
@@ -41,7 +44,8 @@ public final class ProxyHttpServer implements AutoCloseable {
     /// proxy must come up whether or not it has an http side, which is how a dev run without one
     /// behaves; in the cluster a missing `/ready` keeps the pod out of the rollout, which is right.
     public static @Nullable ProxyHttpServer start(@NotNull Logger logger, int port,
-                                                 @NotNull Runnable startDrain, @NotNull Supplier<Drain> drain) {
+                                                 @NotNull Runnable startDrain, @NotNull Supplier<Drain> drain,
+                                                 @NotNull CollectorRegistry registry) {
         if (port == 0) {
             logger.info("proxy http disabled (PROXY_HTTP_PORT=0)");
             return null;
@@ -57,8 +61,9 @@ public final class ProxyHttpServer implements AutoCloseable {
                 else reply(exchange, 503, "draining, " + state.players() + " players connected, "
                     + state.pendingTransfers() + " transfers in flight");
             });
+            server.createContext("/metrics", new HTTPServer.HTTPMetricHandler(registry));
             server.start();
-            logger.info("proxy http on :{} (/ready, /drain)", server.getAddress().getPort());
+            logger.info("proxy http on :{} (/ready, /drain, /metrics)", server.getAddress().getPort());
             return new ProxyHttpServer(server);
         } catch (IOException e) {
             logger.error("proxy http failed to bind :{}", port, e);

@@ -1,5 +1,7 @@
 package net.hollowcube.proxy;
 
+import io.prometheus.client.CollectorRegistry;
+import io.prometheus.client.Counter;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +20,8 @@ class ProxyHttpServerTest {
 
     @Test
     void testDisabledOnPortZero() {
-        assertNull(ProxyHttpServer.start(logger, 0, () -> {}, () -> new ProxyHttpServer.Drain(0, 0)));
+        assertNull(ProxyHttpServer.start(logger, 0, () -> {}, () -> new ProxyHttpServer.Drain(0, 0),
+            new CollectorRegistry()));
     }
 
     @Test
@@ -27,13 +30,17 @@ class ProxyHttpServerTest {
         var players = new AtomicInteger(2);
         var pending = new AtomicInteger();
 
+        var registry = new CollectorRegistry();
+        Counter.build().name("proxy_test_total").help("test").register(registry).inc();
+
         var server = ProxyHttpServer.start(logger, freePort(), () -> draining.set(true),
-            () -> new ProxyHttpServer.Drain(players.get(), pending.get()));
+            () -> new ProxyHttpServer.Drain(players.get(), pending.get()), registry);
         assertNotNull(server);
         try (server) {
             var base = "http://localhost:" + server.port();
 
             assertEquals(200, get(base + "/ready").statusCode());
+            assertTrue(get(base + "/metrics").body().contains("proxy_test_total"));
             assertFalse(draining.get());
 
             var drain = get(base + "/drain");
@@ -57,7 +64,7 @@ class ProxyHttpServerTest {
         var pending = new AtomicInteger(1);
 
         var server = ProxyHttpServer.start(logger, freePort(), () -> {},
-            () -> new ProxyHttpServer.Drain(players.get(), pending.get()));
+            () -> new ProxyHttpServer.Drain(players.get(), pending.get()), new CollectorRegistry());
         assertNotNull(server);
         try (server) {
             var base = "http://localhost:" + server.port();

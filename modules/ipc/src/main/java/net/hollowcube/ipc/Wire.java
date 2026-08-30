@@ -2,6 +2,7 @@ package net.hollowcube.ipc;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
@@ -22,6 +23,10 @@ public final class Wire {
 
     /// Header a generated client sends its [#clientVersion] in, and the server records on its span.
     public static final String CLIENT_HEADER = "x-ipc-client";
+
+    /// Header the arguments of a call whose body is a [Blob] travel in, since the body is the blob.
+    /// Everything else about such a call is a call like any other.
+    public static final String ARGS_HEADER = "x-ipc-args";
 
     private static final Gson GSON = new GsonBuilder()
         .registerTypeAdapterFactory(new WireAdapters())
@@ -44,6 +49,23 @@ public final class Wire {
 
     public static void setClientVersion(String version) {
         clientVersion = version;
+    }
+
+    /// One call's arguments as an [#ARGS_HEADER] value: the json object they would have been the
+    /// body of, escaped to ascii.
+    ///
+    /// A header field is bytes, and a name or a reason written outside latin-1 would not survive
+    /// being one. `\\uXXXX` is json's own escape, so the value stays the same json — and stays
+    /// readable in a log for the arguments that are ascii already, which is nearly all of them.
+    public static String args(JsonElement args) {
+        var json = args.toString();
+        var out = new StringBuilder(json.length());
+        for (int i = 0; i < json.length(); i++) {
+            var c = json.charAt(i);
+            if (c < ' ' || c > '~') out.append(String.format("\\u%04x", (int) c));
+            else out.append(c);
+        }
+        return out.toString();
     }
 
     private static String defaultClientVersion() {

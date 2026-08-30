@@ -4,14 +4,18 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.*;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
+import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
+import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
 import net.hollowcube.apiserver.common.NatsPublisher;
+import net.hollowcube.apiserver.session.SessionServiceImpl;
 import net.hollowcube.apiserver.common.Pools;
 import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.db.ApiDatabase;
@@ -22,6 +26,11 @@ import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.posthog.PostHog;
 import net.hollowcube.ipc.Wire;
+import net.hollowcube.ipc.anticheat.AnticheatServer;
+import net.hollowcube.ipc.chat.ChatServer;
+import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.session.SessionServer;
+import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.nats.NatsConfig;
 import net.hollowcube.mapmaker.map.runtime.IpcServices;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -44,8 +53,10 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Base64;
+import java.util.Objects;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
@@ -58,6 +69,7 @@ public class DevServer extends AbstractMultiMapServer {
     /// Fewer than the real worker's four: one developer is not going to queue enough to need them,
     /// and the threads are shared with a game server here.
     private static final int WORKER_SLOTS = 2;
+    private static final long MAX_TRACE_BYTES = 512L << 20;
     private static final Duration WORKER_STOP_GRACE = Duration.ofSeconds(5);
 
     // Hub stuff
@@ -70,6 +82,7 @@ public class DevServer extends AbstractMultiMapServer {
     /// [#createIpcServices] during the superclass constructor, so it must not have an initializer —
     /// one would run afterwards and null it back out.
     private ApiDatabase db;
+    private IpcServices ipc;
 
     // Common stuff
     private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
@@ -125,9 +138,23 @@ public class DevServer extends AbstractMultiMapServer {
         var nats = NatsPublisher.connect(config.get(NatsConfig.class).servers(), Wire.gson());
         shutdowner().queue("dev-ipc-nats", nats::close);
 
-        return new IpcServices(
+        this.ipc = new IpcServices(
             new HeadDatabaseServiceImpl(db),
             new ChatServiceImpl(db, nats));
+        return ipc;
+    }
+
+    /// The same implementations, on the http side too, so a local `runProxy` has the whole
+    /// api-server to talk to — sessions for the ping count, the trace store for the shipper.
+    @Override
+    public void registerHttpRoutes(@NotNull HttpServerWrapper http) {
+        var store = new AnticheatTraceStore(
+            Path.of(Objects.requireNonNullElse(System.getenv("ANTICHEAT_STORE_DIR"), "scratch/anticheat-store")),
+            MAX_TRACE_BYTES);
+        http.addRoute(HeadDatabaseServer.PATH, new HeadDatabaseServer(ipc.headDatabase()));
+        http.addRoute(ChatServer.PATH, new ChatServer(ipc.chat()));
+        http.addRoute(SessionServer.PATH, new SessionServer(new SessionServiceImpl(db)));
+        http.addRoute(AnticheatServer.PATH, new AnticheatServer(new AnticheatServiceImpl(db, store)));
     }
 
     @Override
@@ -167,6 +194,8 @@ public class DevServer extends AbstractMultiMapServer {
 
         performMapInit(); // Map first so placements are registered
         performHubInit();
+
+        AcDevCommand.installAutoFire();
     }
 
     private void performHubInit() {
@@ -175,6 +204,7 @@ public class DevServer extends AbstractMultiMapServer {
 
         HubServer.registerCommands(this, hubCommandManager, hubWorld, MinecraftServer.getSchedulerManager());
         hubCommandManager.register(PlayNbsCommand.INSTANCE);
+        hubCommandManager.register(AcDevCommand.INSTANCE);
         HubServer.loadHubFeatures(this, hubWorld);
     }
 
@@ -194,6 +224,7 @@ public class DevServer extends AbstractMultiMapServer {
         MinecraftServer.getGlobalEventHandler().addChild(terraformEvents).addChild(interactionEvents);
 
         mapCommandManager.register(PlayNbsCommand.INSTANCE);
+        mapCommandManager.register(AcDevCommand.INSTANCE);
         MapMapServer.registerCommands(this, mapCommandManager);
     }
 

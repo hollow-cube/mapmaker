@@ -6,6 +6,7 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
 import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
 import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.anticheat.AnticheatCapture;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
@@ -233,6 +234,12 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 world.recordReplayEvent(player, new RunEndEvent(
                     RunEndEvent.Reason.RESET, saveState.getRealPlaytime()));
             }
+
+            // The capture follows the run: a checkpoint reset keeps this save state and so keeps
+            // the capture, anything else (finish, hard reset, spectate, leaving) closes it. Only
+            // ever sent for a capture that was actually started.
+            if (!(nextState instanceof Playing2(var nextSaveState) && nextSaveState.id().equals(saveState.id())))
+                AnticheatCapture.stop(player, saveState.id());
 
             AnyPlaying.super.resetPlayer(world, player, nextState);
             var replayFinalization = world.applyReplaySessionTransition(saveState, nextState);

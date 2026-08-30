@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 /// Emits `<Name>Server`: a [com.sun.net.httpserver.HttpHandler] over any implementation of the
 /// interface.
@@ -20,12 +21,18 @@ import java.nio.charset.StandardCharsets;
 ///
 /// A request missing a parameter the method does not mark `@Nullable` is answered 400 naming it,
 /// rather than reaching the implementation as a null it was promised never to see.
+///
+/// A method that takes a [net.hollowcube.ipc.Blob] is handed the request body as it arrives and
+/// reads its arguments out of `x-ipc-args`, since the body is the blob; one that answers with a
+/// blob writes it straight onto the response and does not reach the json tail. Nothing else about
+/// the handler changes, and a service without a blob generates exactly what it did.
 final class ServerEmitter {
 
     private static final ClassName GSON = ClassName.get("com.google.gson", "Gson");
     private static final ClassName HTTP_EXCHANGE = ClassName.get("com.sun.net.httpserver", "HttpExchange");
     private static final ClassName HTTP_HANDLER = ClassName.get("com.sun.net.httpserver", "HttpHandler");
     private static final ClassName JSON_ELEMENT = ClassName.get("com.google.gson", "JsonElement");
+    private static final ClassName JSON_NULL = ClassName.get("com.google.gson", "JsonNull");
     private static final ClassName JSON_OBJECT = ClassName.get("com.google.gson", "JsonObject");
     private static final ClassName JSON_PARSER = ClassName.get("com.google.gson", "JsonParser");
     private static final ClassName JSON_PARSE_EXCEPTION = ClassName.get("com.google.gson", "JsonParseException");
@@ -74,10 +81,8 @@ final class ServerEmitter {
         for (var method : model.methods()) {
             dispatch.beginControlFlow("case $S ->", method.route());
 
-            var arguments = CodeBlock.builder();
             if (!method.parameters().isEmpty()) dispatch.addStatement("$T ipcArgument", JSON_ELEMENT);
-            for (int i = 0; i < method.parameters().size(); i++) {
-                var parameter = method.parameters().get(i);
+            for (var parameter : method.parameters()) {
                 var parameterType = GsonTypes.runtimeType(messager, parameter, parameter.asType());
                 if (parameterType == null) return null;
                 if (GsonTypes.isParameterized(parameter.asType())) {
@@ -96,11 +101,26 @@ final class ServerEmitter {
                 }
                 dispatch.addStatement("$T $N = GSON.fromJson(ipcArgument, $L)",
                     TypeName.get(parameter.asType()), parameter.getSimpleName(), parameterType);
-                if (i > 0) arguments.add(", ");
-                arguments.add("$N", parameter.getSimpleName());
+            }
+            if (method.blob() != null) {
+                dispatch.addStatement("$T $N = new $T(length(exchange), exchange.getRequestBody())",
+                    IpcNames.BLOB, method.blob().getSimpleName(), IpcNames.BLOB);
             }
 
-            if (method.isVoid()) {
+            // Every parameter is now a local of its own name, so the call is made in the order the
+            // interface declares rather than the order the two kinds were read in.
+            var arguments = CodeBlock.builder();
+            for (int i = 0; i < method.element().getParameters().size(); i++) {
+                if (i > 0) arguments.add(", ");
+                arguments.add("$N", method.element().getParameters().get(i).getSimpleName());
+            }
+
+            if (method.returnsBlob()) {
+                // Written out here rather than through `respond`, and the case leaves with it: the
+                // body is bytes off a stream, so there is no JsonElement for the tail to send.
+                dispatch.addStatement("respondBlob(exchange, span, impl.$N($L))", method.name(), arguments.build());
+                dispatch.addStatement("return");
+            } else if (method.isVoid()) {
                 dispatch.addStatement("impl.$N($L)", method.name(), arguments.build());
                 dispatch.addStatement("ipcResponse = null");
             } else {
@@ -124,15 +144,30 @@ final class ServerEmitter {
             .endControlFlow()
             .endControlFlow();
 
-        return type
-            .addMethod(handleMethod(dispatch.build()))
+        if (model.uploads()) {
+            var routes = CodeBlock.join(model.methods().stream()
+                .filter(method -> method.blob() != null)
+                .map(method -> CodeBlock.of("$S", method.route()))
+                .toList(), ", ");
+            type.addField(FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class), ClassName.get(String.class)),
+                    "BLOB_REQUESTS", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .addJavadoc("Methods whose request body is a blob, and whose arguments are a header.\n")
+                .initializer("$T.of($L)", Set.class, routes)
+                .build());
+        }
+
+        // A service whose every method answers with a blob never reaches the json tail, and writing
+        // one would be an unreachable statement.
+        type.addMethod(handleMethod(dispatch.build(), model.uploads(), model.jsonAnswers()))
             .addMethod(respondMethod())
-            .addMethod(respondErrorMethod())
-            .build();
+            .addMethod(respondErrorMethod());
+        if (model.uploads()) type.addMethod(lengthMethod());
+        if (model.downloads()) type.addMethod(respondBlobMethod());
+        return type.build();
     }
 
-    private static MethodSpec handleMethod(CodeBlock dispatch) {
-        return MethodSpec.methodBuilder("handle")
+    private static MethodSpec handleMethod(CodeBlock dispatch, boolean uploads, boolean jsonResponses) {
+        var handle = MethodSpec.methodBuilder("handle")
             .addAnnotation(Override.class)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(HTTP_EXCHANGE, "exchange")
@@ -145,15 +180,30 @@ final class ServerEmitter {
             .addStatement("respondError(exchange, span, 405, $S)", "ipc calls are POST")
             .addStatement("return")
             .endControlFlow()
-            .addStatement("$T ipcRequest", JSON_OBJECT)
-            .beginControlFlow("try ($T ipcReader = new $T(exchange.getRequestBody(), $T.UTF_8))",
+            .addStatement("$T ipcRequest", JSON_OBJECT);
+
+        // The request body of a blob method is the blob, so its arguments arrive in a header
+        // instead; every other method reads the body it always did.
+        if (uploads) {
+            handle.beginControlFlow("if (BLOB_REQUESTS.contains(ipcMethod))")
+                .addStatement("String ipcArgs = exchange.getRequestHeaders().getFirst($T.ARGS_HEADER)", IpcNames.WIRE)
+                .addStatement("$T ipcBody = ipcArgs == null || ipcArgs.isBlank() ? $T.INSTANCE : $T.parseString(ipcArgs)",
+                    JSON_ELEMENT, JSON_NULL, JSON_PARSER)
+                .addStatement("ipcRequest = ipcBody.isJsonObject() ? ipcBody.getAsJsonObject() : new $T()", JSON_OBJECT)
+                .nextControlFlow("else");
+        }
+        handle.beginControlFlow("try ($T ipcReader = new $T(exchange.getRequestBody(), $T.UTF_8))",
                 Reader.class, InputStreamReader.class, StandardCharsets.class)
             .addStatement("$T ipcBody = $T.parseReader(ipcReader)", JSON_ELEMENT, JSON_PARSER)
             .addStatement("ipcRequest = ipcBody.isJsonObject() ? ipcBody.getAsJsonObject() : new $T()", JSON_OBJECT)
-            .endControlFlow()
-            .addStatement("$T ipcResponse", JSON_ELEMENT)
-            .addCode(dispatch)
-            .addStatement("respond(exchange, span, ipcResponse == null ? 204 : 200, ipcResponse)")
+            .endControlFlow();
+        if (uploads) handle.endControlFlow();
+
+        if (jsonResponses) handle.addStatement("$T ipcResponse", JSON_ELEMENT);
+        handle.addCode(dispatch);
+        if (jsonResponses) handle.addStatement("respond(exchange, span, ipcResponse == null ? 204 : 200, ipcResponse)");
+
+        return handle
             .nextControlFlow("catch ($T e)", IpcNames.IPC_EXCEPTION)
             .addStatement("respondError(exchange, span, e.status() >= 400 && e.status() < 600 ? e.status() : 500, String.valueOf(e.getMessage()))")
             // A body that is not json, or an argument that is not what the method takes, is the
@@ -206,6 +256,43 @@ final class ServerEmitter {
             .addStatement("$T error = new $T()", JSON_OBJECT, JSON_OBJECT)
             .addStatement("error.addProperty($S, message)", "error")
             .addStatement("respond(exchange, span, status, error)")
+            .build();
+    }
+
+    /// What the request announced its body as, or negative for one that did not say — a chunked
+    /// upload is read to its end either way, and the implementation is what caps it.
+    private static MethodSpec lengthMethod() {
+        return MethodSpec.methodBuilder("length")
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .returns(TypeName.LONG)
+            .addParameter(HTTP_EXCHANGE, "exchange")
+            .addStatement("String value = exchange.getRequestHeaders().getFirst($S)", "Content-Length")
+            .beginControlFlow("try")
+            .addStatement("return value == null ? -1 : Long.parseLong(value)")
+            .nextControlFlow("catch ($T e)", NumberFormatException.class)
+            .addStatement("return -1")
+            .endControlFlow()
+            .build();
+    }
+
+    /// Streams a blob answer out, closing it: an announced length when the implementation knew one
+    /// so the caller can size what it is reading, and chunked when it did not.
+    private static MethodSpec respondBlobMethod() {
+        return MethodSpec.methodBuilder("respondBlob")
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .addParameter(HTTP_EXCHANGE, "exchange")
+            .addParameter(IpcNames.IPC_SPAN, "span")
+            .addParameter(IpcNames.BLOB, "blob")
+            .addException(IOException.class)
+            .addStatement("span.status(200)")
+            .addStatement("exchange.getResponseHeaders().set($S, $S)", "Content-Type", "application/octet-stream")
+            .beginControlFlow("try (blob)")
+            .addStatement("long length = blob.length()")
+            // sendResponseHeaders reads its length as -1 for no body, 0 for chunked, and anything
+            // above as the exact length to announce.
+            .addStatement("exchange.sendResponseHeaders(200, length > 0 ? length : length == 0 ? -1 : 0)")
+            .addStatement("blob.stream().transferTo(exchange.getResponseBody())")
+            .endControlFlow()
             .build();
     }
 

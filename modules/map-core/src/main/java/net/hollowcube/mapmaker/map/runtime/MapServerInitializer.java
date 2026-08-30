@@ -97,6 +97,7 @@ public final class MapServerInitializer {
         httpServer.addRoute("/alive", new HttpServerWrapper.AliveHttpHandler());
         httpServer.addRoute("/ready", new HttpServerWrapper.ReadyHttpHandler(server.healthChecks()));
         httpServer.addRoute("/players", new HttpServerWrapper.PlayerStatusHandler());
+        server.registerHttpRoutes(httpServer);
         httpServer.start();
 
         logger.info("Web server is running at {}:{}", httpConfig.host(), httpServer.port());

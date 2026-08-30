@@ -17,8 +17,10 @@ final class DescriptorBuilder {
         for (var model : models) {
             var methods = new TreeMap<String, WireDescriptor.Method>();
             for (var method : model.methods()) {
+                // Every parameter as declared, the blob included: the descriptor is what says a
+                // method's body went from json to bytes, and the model has taken the blob out.
                 var params = new ArrayList<WireDescriptor.Field>();
-                for (var parameter : method.parameters()) {
+                for (var parameter : method.element().getParameters()) {
                     params.add(new WireDescriptor.Field(parameter.getSimpleName().toString(),
                         WireTypeName.render(parameter.asType()), Nullability.isNullable(parameter, parameter.asType())));
                 }

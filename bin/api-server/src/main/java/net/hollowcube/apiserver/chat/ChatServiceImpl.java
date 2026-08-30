@@ -19,6 +19,8 @@ import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
+import static net.hollowcube.ipc.util.IpcArgs.uuid;
+
 /// Everything that happens to a chat message, in one place.
 ///
 /// It used to be spread across the sending server, a NATS work queue and the Go handler that drained
@@ -242,14 +244,5 @@ public final class ChatServiceImpl implements ChatService {
             if (row.id().equals(id)) return row;
         }
         return null;
-    }
-
-    private static UUID uuid(@Nullable String value, String what) {
-        if (value == null) throw new IpcException(400, "missing parameter '" + what + "'");
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException e) {
-            throw new IpcException(400, what + " is not a uuid: " + value);
-        }
     }
 }

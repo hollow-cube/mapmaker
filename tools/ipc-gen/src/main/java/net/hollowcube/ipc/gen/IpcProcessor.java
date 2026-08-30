@@ -12,6 +12,9 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.StandardLocation;
 import java.io.IOException;
@@ -81,7 +84,7 @@ public final class IpcProcessor extends AbstractProcessor {
                     walker.root(parameter, parameter.asType(), Use.REQUEST,
                         call + "(" + parameter.getSimpleName() + ")");
                 }
-                if (!method.isVoid()) {
+                if (!method.isVoid() && !method.returnsBlob()) {
                     walker.root(method.element(), method.returnType(), Use.RESPONSE, call + "() returns");
                 }
             }
@@ -170,8 +173,37 @@ public final class IpcProcessor extends AbstractProcessor {
                 messager.printError("ipc methods cannot be overloaded: '" + name + "' is declared twice", method);
                 ok = false;
             }
-            methods.add(new IpcModel.Method(method, name, IpcNames.methodPath(name), method.getParameters(),
-                method.getReturnType(), method.getReturnType().getKind() == javax.lang.model.type.TypeKind.VOID));
+
+            // A blob is the body, so it is taken out of the arguments the request object holds.
+            var parameters = new ArrayList<VariableElement>();
+            VariableElement blob = null;
+            for (var parameter : method.getParameters()) {
+                if (!isBlob(parameter.asType())) {
+                    parameters.add(parameter);
+                    continue;
+                }
+                if (blob != null) {
+                    messager.printError("ipc methods take at most one blob: the request body is the blob", parameter);
+                    ok = false;
+                }
+                if (Nullability.isNullable(parameter, parameter.asType())) {
+                    messager.printError("a blob is the request body itself, so it cannot be null; "
+                        + "a call that may have no body is two methods", parameter);
+                    ok = false;
+                }
+                blob = parameter;
+            }
+
+            var returnsBlob = isBlob(method.getReturnType());
+            if (returnsBlob && Nullability.isNullable(method, method.getReturnType())) {
+                messager.printError("a blob is the response body itself, so it cannot be null; throw "
+                    + "an IpcException(404) for one that is not there", method);
+                ok = false;
+            }
+
+            methods.add(new IpcModel.Method(method, name, IpcNames.methodPath(name), List.copyOf(parameters), blob,
+                method.getReturnType(), method.getReturnType().getKind() == TypeKind.VOID,
+                returnsBlob));
         }
         if (!ok) return null;
 
@@ -181,6 +213,12 @@ public final class IpcProcessor extends AbstractProcessor {
             interfaceName.peerClass(base + IpcNames.CLIENT_SUFFIX),
             interfaceName.peerClass(base + IpcNames.SERVER_SUFFIX),
             IpcNames.servicePath(base), List.copyOf(methods));
+    }
+
+    /// Whether a position holds the body itself rather than a value the wire encodes.
+    private static boolean isBlob(TypeMirror type) {
+        return type.getKind() == TypeKind.DECLARED
+            && ((TypeElement) ((DeclaredType) type).asElement()).getQualifiedName().contentEquals(IpcNames.BLOB_TYPE);
     }
 
     /// Every method the generated client has to implement — including inherited ones, since leaving

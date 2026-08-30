@@ -12,8 +12,14 @@ import net.hollowcube.mapmaker.util.ServiceContext;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
+import net.hollowcube.mapmaker.util.HttpServerWrapper;
 
 public interface MapServer {
+
+    /// Extra routes on the server's http side, next to /metrics and the health checks. The dev
+    /// server serves its embedded ipc implementations here, so a local proxy has a real store.
+    default void registerHttpRoutes(@NotNull HttpServerWrapper http) {
+    }
 
     @NotNull ApiClient api();
 

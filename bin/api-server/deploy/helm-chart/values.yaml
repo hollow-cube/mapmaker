@@ -2,6 +2,13 @@ global:
   nameOverride: api-server-java
   fullnameOverride: api-server-java
 
+# The anticheat trace store volume (templates/trace-store-pvc.yaml), mounted where
+# ANTICHEAT_STORE_DIR defaults to. ReadWriteOnce, which ties the deployment to one replica: a
+# second api-server pod on another node cannot attach it. Scaling out means RWX (none in the
+# cluster today) or moving the blobs off the filesystem — decide then, not now.
+traceStore:
+  size: 300Gi
+
 base:
   image:
     repository: mworzala/api-server-java
@@ -13,3 +20,11 @@ base:
   serviceAccount:
     create: false
     name: api-server
+
+  volumes:
+    - name: traces
+      persistentVolumeClaim:
+        claimName: api-server-java-traces
+  volumeMounts:
+    - name: traces
+      mountPath: /data/anticheat

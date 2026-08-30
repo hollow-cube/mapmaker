@@ -21,6 +21,7 @@ class IpcProcessorTest {
             package test;
 
             import net.hollowcube.common.util.RuntimeGson;
+            import net.hollowcube.ipc.Blob;
             import net.hollowcube.ipc.util.Ipc;
             import org.jetbrains.annotations.Nullable;
             import java.util.List;
@@ -268,5 +269,105 @@ class IpcProcessorTest {
 
         assertThat(compilation).failed();
         assertThat(compilation).hadErrorContaining("cannot serialize");
+    }
+
+    /// A blob is the request body, so the arguments it would have shared that body with move into a
+    /// header. Everything else about the call — the route, the version, the span — is unchanged.
+    @Test
+    void blobParametersAreTheRequestBodyAndPushTheArgumentsIntoAHeader() {
+        var compilation = compile(service("    String store(String name, Blob body);"));
+        assertThat(compilation).succeededWithoutWarnings();
+
+        var client = assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String();
+        client.contains("ipcRequest.add(\"name\", GSON.toJsonTree(name, String.class))");
+        client.contains("return GSON.fromJson(json(callStream(\"store\", ipcRequest, body)), String.class)");
+        client.contains(".header(Wire.ARGS_HEADER, Wire.args(request))");
+        client.contains("HttpRequest.BodyPublishers.ofInputStream(body::stream)");
+        client.contains("HttpRequest.BodyPublishers.fromPublisher(ipcBody, body.length())");
+        // The one method is a blob call, so the json plumbing it never reaches is not written.
+        client.doesNotContain("private JsonElement call(");
+
+        var server = assertThat(compilation).generatedSourceFile("test.EchoServer").contentsAsUtf8String();
+        server.contains("BLOB_REQUESTS = Set.of(\"store\")");
+        server.contains("if (BLOB_REQUESTS.contains(ipcMethod))");
+        server.contains("String ipcArgs = exchange.getRequestHeaders().getFirst(Wire.ARGS_HEADER)");
+        server.contains("Blob body = new Blob(length(exchange), exchange.getRequestBody())");
+        server.contains("ipcResponse = GSON.toJsonTree(impl.store(name, body), String.class)");
+    }
+
+    /// A blob answer is the response body, written as it is read and never held.
+    @Test
+    void blobReturnsAreTheResponseBody() {
+        var compilation = compile(service("    Blob fetch(String name);"));
+        assertThat(compilation).succeededWithoutWarnings();
+
+        var client = assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String();
+        client.contains("return blob(callStream(\"fetch\", ipcRequest, null))");
+        client.contains("response.headers().firstValueAsLong(\"content-length\").orElse(-1)");
+        // Nothing about the request changed, so it is the json body every other call sends.
+        client.contains("callStream(\"fetch\", ipcRequest, null)");
+        client.contains("HttpRequest.BodyPublishers.ofString(request.toString(), StandardCharsets.UTF_8)");
+
+        var server = assertThat(compilation).generatedSourceFile("test.EchoServer").contentsAsUtf8String();
+        server.contains("respondBlob(exchange, span, impl.fetch(name))");
+        server.contains("exchange.getResponseHeaders().set(\"Content-Type\", \"application/octet-stream\")");
+        server.doesNotContain("BLOB_REQUESTS");
+    }
+
+    /// The parameters are read in two passes — json arguments, then the body — and the call is
+    /// still made in the order the interface declares.
+    @Test
+    void blobParametersKeepTheirPlaceInTheCall() {
+        var compilation = compile(service("    String store(Blob body, String name);"));
+        assertThat(compilation).succeededWithoutWarnings();
+
+        assertThat(compilation).generatedSourceFile("test.EchoServer").contentsAsUtf8String()
+            .contains("impl.store(body, name)");
+    }
+
+    /// A service with both kinds of method keeps the json plumbing for the methods that use it.
+    @Test
+    void aServiceWithOneBlobMethodStillPostsJsonForTheRest() {
+        var compilation = compile(service("""
+                String echo(String message);
+
+                Blob fetch(String name);
+            """));
+        assertThat(compilation).succeededWithoutWarnings();
+
+        var client = assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String();
+        client.contains("return GSON.fromJson(call(\"echo\", ipcRequest), String.class)");
+        client.contains("return blob(callStream(\"fetch\", ipcRequest, null))");
+    }
+
+    @Test
+    void rejectsTwoBlobParameters() {
+        var compilation = compile(service("    String store(Blob first, Blob second);"));
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("at most one blob");
+    }
+
+    @Test
+    void rejectsANullableBlob() {
+        var compilation = compile(service("    String store(@Nullable Blob body);"));
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("cannot be null");
+    }
+
+    /// A blob is a whole body, so there is nowhere in a json value to put one.
+    @Test
+    void rejectsABlobInsideARecord() {
+        var compilation = compile(service("""
+                Upload upload(Upload upload);
+
+                @RuntimeGson
+                record Upload(String name, Blob body) {
+                }
+            """));
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("cannot be a field of one");
     }
 }

@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.annotation.processing.Messager;
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -23,6 +24,12 @@ import java.nio.charset.StandardCharsets;
 /// Values are encoded with `Wire.gson()`, never a gson of the caller's, and every request carries
 /// `Wire.clientVersion()` in the `x-ipc-client` header so the server can tell how old its callers
 /// are.
+///
+/// A method that takes or answers with a [net.hollowcube.ipc.Blob] is the one exception, and it is
+/// the same call with the body given over to the bytes: the arguments move into the `x-ipc-args`
+/// header when the request body is the blob, and the response is read as a stream rather than a
+/// string when it is the blob. Everything else — the route, the version header, the span — is what
+/// it is for every other method, and a service without a blob generates exactly what it did.
 final class ClientEmitter {
 
     private static final ClassName GSON = ClassName.get("com.google.gson", "Gson");
@@ -80,9 +87,17 @@ final class ClientEmitter {
                 body.addStatement("ipcRequest.add($S, GSON.toJsonTree($N, $L))",
                     parameter.getSimpleName(), parameter.getSimpleName(), parameterType);
             }
+            // The call, as the plumbing below spells it: a json body, or the blob as the body with
+            // the arguments in a header.
+            var blobBody = method.blob() == null ? CodeBlock.of("null") : CodeBlock.of("$N", method.blob().getSimpleName());
+            var call = method.isBlobCall()
+                ? CodeBlock.of("callStream($S, ipcRequest, $L)", method.route(), blobBody)
+                : CodeBlock.of("call($S, ipcRequest)", method.route());
 
-            if (method.isVoid()) {
-                body.addStatement("call($S, ipcRequest)", method.route());
+            if (method.returnsBlob()) {
+                body.addStatement("return blob($L)", call);
+            } else if (method.isVoid()) {
+                body.addStatement(method.isBlobCall() ? CodeBlock.of("json($L)", call) : call);
             } else {
                 var returnType = GsonTypes.runtimeType(messager, method.element(), method.returnType());
                 if (returnType == null) return null;
@@ -92,13 +107,18 @@ final class ClientEmitter {
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(returnType).build());
                     returnType = CodeBlock.of("$N", constant);
                 }
-                body.addStatement("return GSON.fromJson(call($S, ipcRequest), $L)", method.route(), returnType);
+                body.addStatement("return GSON.fromJson($L, $L)",
+                    method.isBlobCall() ? CodeBlock.of("json($L)", call) : call, returnType);
             }
 
             type.addMethod(MethodSpec.overriding(method.element()).addCode(body.build()).build());
         }
 
-        return type.addMethod(callMethod()).build();
+        if (model.jsonCalls()) type.addMethod(callMethod());
+        if (model.blobCalls()) type.addMethod(callStreamMethod()).addMethod(textMethod());
+        if (model.blobCallsWithJsonAnswer()) type.addMethod(jsonMethod());
+        if (model.downloads()) type.addMethod(blobMethod());
+        return type.build();
     }
 
     /// The one piece of plumbing, shared by every method of the client.
@@ -143,6 +163,100 @@ final class ClientEmitter {
             .addStatement("String body = response.body()")
             .addStatement("return body == null || body.isBlank() ? $T.INSTANCE : $T.parseString(body)",
                 JSON_NULL, JSON_PARSER)
+            .build();
+    }
+
+    /// The same call for a method either half of which is bytes, answering the response unread.
+    ///
+    /// A blob argument is the request body, so the arguments that are not it travel in
+    /// `x-ipc-args`; a method that only answers with one sends the json body every other call
+    /// sends. The body is streamed either way — a segment or a replay is far too big to hold — and
+    /// a known length is announced rather than chunked so the far side can size what it is about
+    /// to write.
+    private static MethodSpec callStreamMethod() {
+        return MethodSpec.methodBuilder("callStream")
+            .addModifiers(Modifier.PRIVATE)
+            .returns(ParameterizedTypeName.get(ClassName.get(HttpResponse.class), ClassName.get(InputStream.class)))
+            .addParameter(String.class, "method")
+            .addParameter(JSON_OBJECT, "request")
+            .addParameter(ParameterSpec.builder(IpcNames.BLOB, "body")
+                .addAnnotation(ClassName.get("org.jetbrains.annotations", "Nullable")).build())
+            .addStatement("String url = baseUrl + PATH + $S + method", "/")
+            .addStatement("$T.Builder httpRequest = $T.newBuilder($T.create(url))\n"
+                    + "    .header($T.CLIENT_HEADER, $T.clientVersion())",
+                HttpRequest.class, HttpRequest.class, URI.class, IpcNames.WIRE, IpcNames.WIRE)
+            .beginControlFlow("if (body == null)")
+            .addStatement("httpRequest.header($S, $S)\n"
+                    + "    .POST($T.BodyPublishers.ofString(request.toString(), $T.UTF_8))",
+                "Content-Type", "application/json", HttpRequest.class, StandardCharsets.class)
+            .nextControlFlow("else")
+            .addStatement("$T.BodyPublisher ipcBody = $T.BodyPublishers.ofInputStream(body::stream)",
+                HttpRequest.class, HttpRequest.class)
+            .beginControlFlow("if (body.length() >= 0)")
+            .addStatement("ipcBody = $T.BodyPublishers.fromPublisher(ipcBody, body.length())", HttpRequest.class)
+            .endControlFlow()
+            .addStatement("httpRequest.header($S, $S)\n"
+                    + "    .header($T.ARGS_HEADER, $T.args(request))\n"
+                    + "    .POST(ipcBody)",
+                "Content-Type", "application/octet-stream", IpcNames.WIRE, IpcNames.WIRE)
+            .endControlFlow()
+            .addStatement("$T<$T> response", HttpResponse.class, InputStream.class)
+            .beginControlFlow("try ($T span = tracing.client(method, httpRequest, url))", IpcNames.IPC_SPAN)
+            .beginControlFlow("try")
+            .addStatement("response = httpClient.send(httpRequest.build(), $T.BodyHandlers.ofInputStream())",
+                HttpResponse.class)
+            .nextControlFlow("catch ($T e)", IOException.class)
+            .addStatement("span.failed(e)")
+            .addStatement("throw new $T(0, url + $S + e, e)", IpcNames.IPC_EXCEPTION, " failed: ")
+            .nextControlFlow("catch ($T e)", InterruptedException.class)
+            .addStatement("$T.currentThread().interrupt()", Thread.class)
+            .addStatement("span.failed(e)")
+            .addStatement("throw new $T(0, url + $S, e)", IpcNames.IPC_EXCEPTION, " interrupted")
+            .endControlFlow()
+            .addStatement("span.status(response.statusCode())")
+            .endControlFlow()
+            .beginControlFlow("if (response.statusCode() < 200 || response.statusCode() >= 300)")
+            .addStatement("throw new $T(response.statusCode(), url + $S + response.statusCode() + $S + text(response))",
+                IpcNames.IPC_EXCEPTION, " answered ", ": ")
+            .endControlFlow()
+            .addStatement("return response")
+            .build();
+    }
+
+    /// The response body as a string, which is what a failure and a small json answer both are.
+    private static MethodSpec textMethod() {
+        return MethodSpec.methodBuilder("text")
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .returns(String.class)
+            .addParameter(ParameterizedTypeName.get(ClassName.get(HttpResponse.class), ClassName.get(InputStream.class)), "response")
+            .beginControlFlow("try ($T ipcBody = response.body())", InputStream.class)
+            .addStatement("return new String(ipcBody.readAllBytes(), $T.UTF_8)", StandardCharsets.class)
+            .nextControlFlow("catch ($T e)", IOException.class)
+            .addStatement("throw new $T(response.statusCode(), $S + e, e)",
+                IpcNames.IPC_EXCEPTION, "reading the response failed: ")
+            .endControlFlow()
+            .build();
+    }
+
+    /// The response body as json, reading the empty body a void method answers with as a json null.
+    private static MethodSpec jsonMethod() {
+        return MethodSpec.methodBuilder("json")
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .returns(JSON_ELEMENT)
+            .addParameter(ParameterizedTypeName.get(ClassName.get(HttpResponse.class), ClassName.get(InputStream.class)), "response")
+            .addStatement("String body = text(response)")
+            .addStatement("return body.isBlank() ? $T.INSTANCE : $T.parseString(body)", JSON_NULL, JSON_PARSER)
+            .build();
+    }
+
+    /// The response itself, still open: the caller reads the bytes off the socket and closes them.
+    private static MethodSpec blobMethod() {
+        return MethodSpec.methodBuilder("blob")
+            .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+            .returns(IpcNames.BLOB)
+            .addParameter(ParameterizedTypeName.get(ClassName.get(HttpResponse.class), ClassName.get(InputStream.class)), "response")
+            .addStatement("return new $T(response.headers().firstValueAsLong($S).orElse(-1), response.body())",
+                IpcNames.BLOB, "content-length")
             .build();
     }
 

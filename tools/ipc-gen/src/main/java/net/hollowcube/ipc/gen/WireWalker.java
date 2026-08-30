@@ -135,6 +135,11 @@ final class WireWalker {
             visit(site, arguments.get(1), use, path, typeVariables);
             return;
         }
+        if (name.equals(IpcNames.BLOB_TYPE)) {
+            error(site, "a blob is a whole request or response body; it cannot be a field of one, "
+                + "and json is what the rest of the wire is", path);
+            return;
+        }
         if (name.startsWith(IpcNames.DB_PACKAGE + ".")) {
             error(site, name + " is a sql-gen type, and the schema and the wire are versioned apart; "
                 + "map it to a @RuntimeGson record in modules/ipc", path);

@@ -22,6 +22,7 @@ includeBuild("modules/molang")
 includeBuild("modules/schem")
 
 include(
+    "modules:anticheat",
     "modules:api",
     "modules:command",
     "modules:common",

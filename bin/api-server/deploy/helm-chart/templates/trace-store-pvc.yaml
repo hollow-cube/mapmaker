@@ -1,0 +1,11 @@
+# The anticheat trace store. ReadWriteOnce on purpose: only the api-server mounts it — the proxy
+# ships traces over the ipc put, so nothing else ever needs the filesystem.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: api-server-java-traces
+spec:
+  accessModes: [ ReadWriteOnce ]
+  resources:
+    requests:
+      storage: {{ .Values.traceStore.size }}

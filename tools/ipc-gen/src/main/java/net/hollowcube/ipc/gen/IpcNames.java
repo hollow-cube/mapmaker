@@ -18,6 +18,9 @@ final class IpcNames {
     /// allowed at a wire position.
     static final String DB_PACKAGE = "net.hollowcube.apiserver.db";
 
+    /// A whole request or response body, and the only thing on the wire that is not json.
+    static final String BLOB_TYPE = "net.hollowcube.ipc.Blob";
+    static final ClassName BLOB = ClassName.get("net.hollowcube.ipc", "Blob");
     static final ClassName WIRE = ClassName.get("net.hollowcube.ipc", "Wire");
     /// The one generated `TypeAdapterFactory`, which `Wire` registers on its gson.
     static final ClassName WIRE_ADAPTERS = ClassName.get("net.hollowcube.ipc", "WireAdapters");

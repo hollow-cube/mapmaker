@@ -6,6 +6,11 @@ plugins {
 
 dependencies {
     api(project(":modules:map-core"))
+    // api: AnticheatCapture hands out the trace header's enums and the capture trim policy; the
+    // sampling flag payload is read straight off posthog.
+    api(project(":modules:anticheat"))
+    implementation(libs.gson)
+    implementation(libs.posthog)
     api(project(":modules:terraform")) //TODO: this exists for entity implementations, but it shouldn't.
     implementation(project(":modules:datafix"))
     implementation(project(":modules:compat"))
