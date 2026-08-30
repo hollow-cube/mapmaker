@@ -20,8 +20,11 @@ class IpcProcessorTest {
         return JavaFileObjects.forSourceString("test.EchoService", """
             package test;
 
+            import net.hollowcube.common.util.RuntimeGson;
             import net.hollowcube.ipc.util.Ipc;
+            import org.jetbrains.annotations.Nullable;
             import java.util.List;
+            import java.util.Map;
 
             @Ipc
             public interface EchoService {
@@ -46,9 +49,10 @@ class IpcProcessorTest {
 
         var client = assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String();
         client.contains("PATH = \"/echo\"");
-        client.contains("ipcRequest.add(\"message\", gson.toJsonTree(message, String.class))");
-        client.contains("ipcRequest.add(\"count\", gson.toJsonTree(count, Integer.class))");
-        client.contains("return gson.fromJson(call(\"echo\", ipcRequest), String.class)");
+        client.contains("private static final Gson GSON = Wire.gson()");
+        client.contains("ipcRequest.add(\"message\", GSON.toJsonTree(message, String.class))");
+        client.contains("ipcRequest.add(\"count\", GSON.toJsonTree(count, Integer.class))");
+        client.contains("return GSON.fromJson(call(\"echo\", ipcRequest), String.class)");
         client.contains("String url = baseUrl + PATH + \"/\" + method");
     }
 
@@ -61,9 +65,33 @@ class IpcProcessorTest {
         server.contains("PATH = \"/echo\"");
         server.contains("String ipcMethod = ipcPath.substring(ipcPath.lastIndexOf('/') + 1)");
         server.contains("case \"echo\" ->");
-        server.contains("String message = gson.fromJson(ipcRequest.get(\"message\"), String.class)");
-        server.contains("int count = gson.fromJson(ipcRequest.get(\"count\"), Integer.class)");
-        server.contains("ipcResponse = gson.toJsonTree(impl.echo(message, count), String.class)");
+        server.contains("String message = GSON.fromJson(ipcArgument, String.class)");
+        server.contains("int count = GSON.fromJson(ipcArgument, Integer.class)");
+        server.contains("ipcResponse = GSON.toJsonTree(impl.echo(message, count), String.class)");
+    }
+
+    /// A parameter the method does not mark `@Nullable` is one the implementation was promised;
+    /// the server keeps that promise with a 400 rather than handing over a null.
+    @Test
+    void serverRejectsMissingNonNullParametersAndPassesNullableOnes() {
+        var compilation = compile(service("    String echo(String message, @Nullable String suffix);"));
+        assertThat(compilation).succeededWithoutWarnings();
+
+        var server = assertThat(compilation).generatedSourceFile("test.EchoServer").contentsAsUtf8String();
+        server.contains("respondError(exchange, span, 400, \"missing parameter 'message'\")");
+        server.doesNotContain("missing parameter 'suffix'");
+        server.contains("String suffix = GSON.fromJson(ipcArgument, String.class)");
+    }
+
+    /// The client says what it is on every call, which is how the server side learns how old its
+    /// callers are before `wire-baseline` moves.
+    @Test
+    void clientSendsItsVersion() {
+        var compilation = compile(service("    String echo(String message);"));
+        assertThat(compilation).succeededWithoutWarnings();
+
+        assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String()
+            .contains(".header(Wire.CLIENT_HEADER, Wire.clientVersion())");
     }
 
     /// A generic type has to survive erasure to be read back, and `TypeToken.getParameterized` is

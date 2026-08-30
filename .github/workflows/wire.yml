@@ -1,0 +1,29 @@
+name: Wire Compatibility
+
+# The api-server deploys from main and game servers ship on tags, so everything in modules/ipc is
+# a contract with clients that are still running. api-server.yml checks it on every push to main;
+# this checks it on the pull request first, so the break is caught before it is merged.
+on:
+  pull_request:
+    paths:
+      - 'modules/ipc/**'
+      - 'tools/ipc-gen/**'
+      - '.github/workflows/wire.yml'
+
+jobs:
+  wire:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          # wireCompat reads modules/ipc/wire.json out of every release tag from wire-baseline up.
+          fetch-tags: true
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'gradle'
+
+      - name: Check
+        run: ./gradlew :tools:ipc-gen:test :modules:ipc:wireCheck :modules:ipc:wireCompat --no-daemon

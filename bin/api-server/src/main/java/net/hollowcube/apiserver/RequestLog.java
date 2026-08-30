@@ -2,6 +2,7 @@ package net.hollowcube.apiserver;
 
 import com.sun.net.httpserver.Filter;
 import com.sun.net.httpserver.HttpExchange;
+import net.hollowcube.ipc.Wire;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,6 +68,11 @@ public final class RequestLog extends Filter {
 
         var userAgent = exchange.getRequestHeaders().getFirst("User-Agent");
         if (userAgent != null && !userAgent.isBlank()) line = line.addKeyValue("ua", userAgent);
+
+        // The caller's release, which is what says how far back `modules/ipc/wire-baseline` has to
+        // reach: `| json | client != ""` grouped by client is the floor.
+        var client = exchange.getRequestHeaders().getFirst(Wire.CLIENT_HEADER);
+        if (client != null && !client.isBlank()) line = line.addKeyValue("client", client);
 
         line.log();
     }

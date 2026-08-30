@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.runtime;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.nats.client.Nats;
 import io.nats.client.Options;
@@ -30,6 +29,7 @@ import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.hdb.HeadDatabaseClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -166,13 +166,13 @@ public abstract class AbstractMapServer implements MapServer {
         var http = new HttpClientWrapper(otel, apiUrl);
 
         // Everything ipc is served by the java api-server off one base url, so this is the url
-        // every future ipc client here gets built against too. A plain Gson on purpose: the ipc
-        // wire records are plain, and this is the same one the server side encodes them with.
+        // every future ipc client here gets built against too. The version is what the api-server
+        // sees in `x-ipc-client`, and so how old its oldest caller is known to be.
+        Wire.setClientVersion(ServerRuntime.getRuntime().version());
         var ipcUrl = config.get(Ipc_ServiceConfig.class).url();
         if (ipcUrl.isEmpty()) ipcUrl = "http://localhost:9124";
         var ipcHttp = HttpClient.newHttpClient();
-        var ipcGson = new Gson();
-        var headDatabase = new HeadDatabaseClient(ipcHttp, ipcGson, ipcUrl, otel);
+        var headDatabase = new HeadDatabaseClient(ipcHttp, ipcUrl, otel);
 
         this.api = new ApiClient(http, headDatabase);
 

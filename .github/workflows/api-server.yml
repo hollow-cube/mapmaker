@@ -22,16 +22,20 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
+          # wireCompat reads modules/ipc/wire.json out of every release tag from wire-baseline up.
+          fetch-tags: true
       - uses: actions/setup-java@v5
         with:
           java-version: '25'
           distribution: 'graalvm'
           cache: 'gradle'
 
-      # sqlGenCheck fails if the committed generated sources have drifted from the sql they are
-      # generated out of, which is the one thing a normal build would not notice.
+      # sqlGenCheck and wireCheck fail if the committed generated sources have drifted from what
+      # they are generated out of, which is the one thing a normal build would not notice.
+      # wireCompat fails if a game server still running one of the release tags could not survive
+      # what this deploys — game servers ship on tags and outlive every push here.
       - name: Test
-        run: ./gradlew :modules:api:sqlGenCheck :modules:api:test :bin:api-server:test --no-daemon
+        run: ./gradlew :modules:api:sqlGenCheck :modules:ipc:wireCheck :modules:ipc:wireCompat :modules:api:test :bin:api-server:test --no-daemon
 
   docker-build:
     needs: [ test ]

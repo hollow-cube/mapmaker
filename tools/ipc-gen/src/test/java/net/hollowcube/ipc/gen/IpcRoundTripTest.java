@@ -1,6 +1,5 @@
 package net.hollowcube.ipc.gen;
 
-import com.google.gson.Gson;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import com.sun.net.httpserver.HttpHandler;
@@ -28,21 +27,22 @@ import java.util.concurrent.Executors;
 import static com.google.testing.compile.CompilationSubject.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-/// Compiles a service, loads the two generated classes, and drives one against the other over a
+/// Compiles a service, loads the generated classes, and drives one half against the other over a
 /// real [HttpServer].
 ///
 /// The source assertions in [IpcProcessorTest] say what the emitters wrote; this says the two
 /// halves agree — which is the only property that matters and the one a string route cannot give
 /// you. Serialization is where a generated client and a hand-written server drift, so it is checked
-/// end to end rather than per side.
+/// end to end rather than per side, and so is what the generated adapters do with a constant or a
+/// variant one side does not know.
 class IpcRoundTripTest {
-
-    private static final Gson GSON = new Gson();
 
     private static final JavaFileObject SERVICE = JavaFileObjects.forSourceString("test.EchoService", """
         package test;
 
+        import net.hollowcube.common.util.RuntimeGson;
         import net.hollowcube.ipc.util.Ipc;
+        import org.jetbrains.annotations.Nullable;
         import java.util.List;
         import java.util.Map;
 
@@ -51,17 +51,39 @@ class IpcRoundTripTest {
 
             String echo(String message, int count);
 
+            String suffix(String message, @Nullable String suffix);
+
             List<String> split(String value, String separator);
 
             Map<String, List<Point>> group(List<Point> points);
 
             Point move(Point point, int dx);
 
+            Color paint(Color color);
+
+            Shape grow(Shape shape);
+
             void record(String event);
 
             String fail();
 
+            @RuntimeGson
             record Point(int x, int y) {
+            }
+
+            enum Color {
+                RED, GREEN, UNKNOWN
+            }
+
+            sealed interface Shape permits Circle, Square, EchoServiceShapeUnknown {
+            }
+
+            @RuntimeGson
+            record Circle(int radius) implements Shape {
+            }
+
+            @RuntimeGson
+            record Square(int side) implements Shape {
             }
         }
         """);
@@ -69,9 +91,13 @@ class IpcRoundTripTest {
     private static ClassLoader loader;
     private static Class<?> service;
     private static Class<?> point;
+    private static Class<?> color;
+    private static Class<?> shape;
+    private static Class<?> circle;
     private static HttpServer server;
     private static Object client;
     private static List<String> recorded;
+    private static List<Object> received;
 
     @BeforeAll
     static void startServer() throws Exception {
@@ -81,15 +107,30 @@ class IpcRoundTripTest {
         loader = classesOf(compilation);
         service = loader.loadClass("test.EchoService");
         point = loader.loadClass("test.EchoService$Point");
+        color = loader.loadClass("test.EchoService$Color");
+        shape = loader.loadClass("test.EchoService$Shape");
+        circle = loader.loadClass("test.EchoService$Circle");
         recorded = new ArrayList<>();
+        received = new ArrayList<>();
 
         var impl = Proxy.newProxyInstance(loader, new Class<?>[]{service}, (proxy, method, args) ->
             switch (method.getName()) {
                 case "echo" -> args[0] + ":" + args[1];
+                case "suffix" -> (String) args[0] + (args[1] == null ? "" : args[1]);
                 case "split" -> List.of(((String) args[0]).split((String) args[1]));
                 case "group" -> Map.of("all", (List<?>) args[0]);
                 case "move" -> point.getConstructor(int.class, int.class)
                     .newInstance(x(args[0]) + (int) args[1], y(args[0]));
+                case "paint" -> {
+                    received.add(args[0]);
+                    yield args[0];
+                }
+                case "grow" -> {
+                    received.add(args[0]);
+                    yield circle.isInstance(args[0])
+                        ? circle.getConstructor(int.class).newInstance((int) circle.getMethod("radius").invoke(args[0]) + 1)
+                        : args[0];
+                }
                 case "record" -> {
                     recorded.add((String) args[0]);
                     yield null;
@@ -100,7 +141,7 @@ class IpcRoundTripTest {
             });
 
         var serverClass = loader.loadClass("test.EchoServer");
-        var handler = (HttpHandler) serverClass.getConstructor(service, Gson.class).newInstance(impl, GSON);
+        var handler = (HttpHandler) serverClass.getConstructor(service).newInstance(impl);
 
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
@@ -108,8 +149,8 @@ class IpcRoundTripTest {
         server.start();
 
         var clientClass = loader.loadClass("test.EchoClient");
-        client = clientClass.getConstructor(HttpClient.class, Gson.class, String.class)
-            .newInstance(HttpClient.newHttpClient(), GSON, baseUrl() + "/");
+        client = clientClass.getConstructor(HttpClient.class, String.class)
+            .newInstance(HttpClient.newHttpClient(), baseUrl() + "/");
     }
 
     @AfterAll
@@ -120,6 +161,28 @@ class IpcRoundTripTest {
     @Test
     void callsCarryEveryArgumentByName() throws Exception {
         assertEquals("hi:3", call("echo", new Class<?>[]{String.class, int.class}, "hi", 3));
+    }
+
+    @Test
+    void nullableArgumentsArriveAsNull() throws Exception {
+        assertEquals("hi", call("suffix", new Class<?>[]{String.class, String.class}, "hi", null));
+        assertEquals("hi!", call("suffix", new Class<?>[]{String.class, String.class}, "hi", "!"));
+    }
+
+    @Test
+    void missingNonNullArgumentsAre400() throws Exception {
+        var response = post("/echo/echo", "{\"message\":\"hi\"}");
+
+        assertEquals(400, response.statusCode());
+        assertTrue(response.body().contains("missing parameter 'count'"), response.body());
+    }
+
+    @Test
+    void malformedBodiesAre400() throws Exception {
+        var response = post("/echo/echo", "{\"message\":\"hi\",\"count\":\"three\"}");
+
+        assertEquals(400, response.statusCode());
+        assertTrue(response.body().contains("malformed request"), response.body());
     }
 
     @Test
@@ -138,6 +201,48 @@ class IpcRoundTripTest {
     @Test
     void recordsRoundTripInBothDirections() throws Exception {
         assertEquals(newPoint(6, 2), call("move", new Class<?>[]{point, int.class}, newPoint(1, 2), 5));
+    }
+
+    @Test
+    void enumsRoundTripByName() throws Exception {
+        var red = constant("RED");
+        assertEquals(red, call("paint", new Class<?>[]{color}, red));
+
+        var raw = post("/echo/paint", "{\"color\":\"GREEN\"}");
+        assertEquals(200, raw.statusCode());
+        assertEquals("\"GREEN\"", raw.body());
+    }
+
+    /// A constant this build does not know arrives as UNKNOWN rather than as an exception; the
+    /// implementation that tries to send it back is the one that fails, so it never leaks.
+    @Test
+    void unknownEnumConstantsReadAsUnknownAndCannotBeWritten() throws Exception {
+        var response = post("/echo/paint", "{\"color\":\"PURPLE\"}");
+
+        assertEquals(500, response.statusCode());
+        assertTrue(response.body().contains("Color.UNKNOWN"), response.body());
+        assertEquals(constant("UNKNOWN"), received.getLast());
+    }
+
+    @Test
+    void sealedVariantsRoundTripUnderTheirDiscriminator() throws Exception {
+        var grown = call("grow", new Class<?>[]{shape}, circle.getConstructor(int.class).newInstance(2));
+        assertEquals(circle.getConstructor(int.class).newInstance(3), grown);
+
+        var raw = post("/echo/grow", "{\"shape\":{\"type\":\"square\",\"side\":4}}");
+        assertEquals(200, raw.statusCode());
+        assertEquals("{\"type\":\"square\",\"side\":4}", raw.body());
+    }
+
+    @Test
+    void unknownSealedVariantsReadAsTheUnknownRecordAndCannotBeWritten() throws Exception {
+        var response = post("/echo/grow", "{\"shape\":{\"type\":\"hexagon\",\"sides\":6}}");
+
+        assertEquals(500, response.statusCode());
+        assertTrue(response.body().contains("EchoServiceShapeUnknown(hexagon)"), response.body());
+        var unknown = received.getLast();
+        assertEquals("test.EchoServiceShapeUnknown", unknown.getClass().getName());
+        assertEquals("hexagon", unknown.getClass().getMethod("type").invoke(unknown));
     }
 
     @Test
@@ -191,6 +296,10 @@ class IpcRoundTripTest {
         return point.getConstructor(int.class, int.class).newInstance(x, y);
     }
 
+    private static Object constant(String name) throws Exception {
+        return color.getField(name).get(null);
+    }
+
     private static int x(Object p) throws Exception {
         return (int) point.getMethod("x").invoke(p);
     }
@@ -213,7 +322,9 @@ class IpcRoundTripTest {
 
     /// Everything the in-memory compilation produced, as a loadable classpath. Gson,
     /// `com.sun.net.httpserver` and the JDK come from the parent so the generated classes share
-    /// this test's copies of them.
+    /// this test's copies of them; `net.hollowcube.ipc` is re-defined here from the parent's bytes
+    /// so that its `Wire` resolves the generated `WireAdapters` of this compilation rather than
+    /// the real module's.
     private static ClassLoader classesOf(Compilation compilation) throws IOException {
         var classes = new HashMap<String, byte[]>();
         for (var file : compilation.generatedFiles()) {
@@ -225,11 +336,28 @@ class IpcRoundTripTest {
                 classes.put(name, in.readAllBytes());
             }
         }
-        return new ClassLoader(IpcRoundTripTest.class.getClassLoader()) {
+        var parent = IpcRoundTripTest.class.getClassLoader();
+        return new ClassLoader(parent) {
+            @Override
+            protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
+                if (!classes.containsKey(name) && !name.startsWith("net.hollowcube.ipc.")) {
+                    return super.loadClass(name, resolve);
+                }
+                var loaded = findLoadedClass(name);
+                return loaded != null ? loaded : findClass(name);
+            }
+
             @Override
             protected Class<?> findClass(String name) throws ClassNotFoundException {
                 var bytes = classes.get(name);
-                if (bytes == null) throw new ClassNotFoundException(name);
+                if (bytes == null) {
+                    try (var in = parent.getResourceAsStream(name.replace('.', '/') + ".class")) {
+                        if (in == null) throw new ClassNotFoundException(name);
+                        bytes = in.readAllBytes();
+                    } catch (IOException e) {
+                        throw new ClassNotFoundException(name, e);
+                    }
+                }
                 return defineClass(name, bytes, 0, bytes.length);
             }
         };

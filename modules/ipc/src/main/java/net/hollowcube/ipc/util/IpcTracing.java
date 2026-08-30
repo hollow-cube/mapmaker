@@ -2,12 +2,14 @@ package net.hollowcube.ipc.util;
 
 import com.sun.net.httpserver.HttpExchange;
 import io.opentelemetry.api.OpenTelemetry;
+import io.opentelemetry.api.common.AttributeKey;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.semconv.SemanticAttributes;
+import net.hollowcube.ipc.Wire;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.http.HttpRequest;
@@ -20,6 +22,9 @@ import java.net.http.HttpRequest;
 /// [OpenTelemetry#noop] — which is what a caller that passes nothing gets — every one of these is a
 /// no-op that allocates nothing worth caring about.
 public final class IpcTracing {
+
+    /// The caller's [Wire#clientVersion], as the server span records it.
+    public static final AttributeKey<String> CLIENT_VERSION = AttributeKey.stringKey("ipc.client.version");
 
     private static final TextMapSetter<HttpRequest.Builder> SETTER = (carrier, key, value) -> {
         if (carrier != null) carrier.header(key, value);
@@ -72,6 +77,8 @@ public final class IpcTracing {
             .startSpan();
         span.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, exchange.getRequestMethod());
         span.setAttribute(SemanticAttributes.URL_PATH, exchange.getRequestURI().getPath());
+        var client = exchange.getRequestHeaders().getFirst(Wire.CLIENT_HEADER);
+        if (client != null) span.setAttribute(CLIENT_VERSION, client);
         return new IpcSpan(span, span.makeCurrent());
     }
 }

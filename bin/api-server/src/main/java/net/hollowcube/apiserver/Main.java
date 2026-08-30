@@ -1,6 +1,5 @@
 package net.hollowcube.apiserver;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.common.Health;
 import net.hollowcube.apiserver.common.Pools;
@@ -36,7 +35,6 @@ public final class Main {
         // the same vault key, that the Go api-server opens its `mapdb` pool on.
         var dataSource = Pools.postgres(PostgresUri.parse(secrets.require("postgres.maps_uri", "DATABASE_URL")), "api-server");
         var db = new ApiDatabase(dataSource);
-        var gson = new Gson();
 
         var port = Integer.parseInt(secrets.get("http.port", "PORT", "9124"));
         var server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -49,7 +47,7 @@ public final class Main {
             server.createContext("/alive", new Health.Alive()),
             server.createContext("/ready", new Health.Ready(dataSource)),
             server.createContext(HeadDatabaseServer.PATH,
-                new HeadDatabaseServer(new PostgresHeadDatabase(db), gson)),
+                new HeadDatabaseServer(new PostgresHeadDatabase(db))),
             server.createContext(SessionServer.PATH,
                 new SessionServer(new PostgresSessions(db), gson))
         )) context.getFilters().add(requestLog);

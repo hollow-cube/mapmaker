@@ -1,0 +1,5 @@
+# The oldest release tag still running in production. `wireCompat` diffs the current wire
+# descriptor against the wire.json committed at this tag and every release tag after it, so
+# moving this forward is what retires an old wire shape; do it in its own reviewed commit once
+# the `x-ipc-client` header on the api-server's spans shows nothing older is calling.
+1.58.3

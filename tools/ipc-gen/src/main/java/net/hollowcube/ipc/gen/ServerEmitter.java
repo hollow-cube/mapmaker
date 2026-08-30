@@ -14,9 +14,12 @@ import java.nio.charset.StandardCharsets;
 /// Emits `<Name>Server`: a [com.sun.net.httpserver.HttpHandler] over any implementation of the
 /// interface.
 ///
-/// Mount it at [IpcModel#path] — `server.createContext(FooServer.PATH, new FooServer(impl, gson))`
-/// — and the trailing path segment selects the method. Routing is a `switch` over string literals
-/// the processor also wrote into the client, so the two cannot drift.
+/// Mount it at [IpcModel#path] — `server.createContext(FooServer.PATH, new FooServer(impl))` — and
+/// the trailing path segment selects the method. Routing is a `switch` over string literals the
+/// processor also wrote into the client, so the two cannot drift.
+///
+/// A request missing a parameter the method does not mark `@Nullable` is answered 400 naming it,
+/// rather than reaching the implementation as a null it was promised never to see.
 final class ServerEmitter {
 
     private static final ClassName GSON = ClassName.get("com.google.gson", "Gson");
@@ -25,6 +28,7 @@ final class ServerEmitter {
     private static final ClassName JSON_ELEMENT = ClassName.get("com.google.gson", "JsonElement");
     private static final ClassName JSON_OBJECT = ClassName.get("com.google.gson", "JsonObject");
     private static final ClassName JSON_PARSER = ClassName.get("com.google.gson", "JsonParser");
+    private static final ClassName JSON_PARSE_EXCEPTION = ClassName.get("com.google.gson", "JsonParseException");
     private static final ClassName OPEN_TELEMETRY = ClassName.get("io.opentelemetry.api", "OpenTelemetry");
 
     static @Nullable TypeSpec emit(Messager messager, IpcModel model) {
@@ -40,25 +44,24 @@ final class ServerEmitter {
                 .addJavadoc("Path to mount this handler at.\n")
                 .initializer("$S", model.path())
                 .build())
+            .addField(FieldSpec.builder(GSON, "GSON", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.gson()", IpcNames.WIRE)
+                .build())
             .addField(model.interfaceName(), "impl", Modifier.PRIVATE, Modifier.FINAL)
-            .addField(GSON, "gson", Modifier.PRIVATE, Modifier.FINAL)
             .addField(IpcNames.IPC_TRACING, "tracing", Modifier.PRIVATE, Modifier.FINAL);
 
         type.addMethod(MethodSpec.constructorBuilder()
             .addJavadoc("An untraced server, for a process that has no {@link $T}.\n", OPEN_TELEMETRY)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(model.interfaceName(), "impl")
-            .addParameter(GSON, "gson")
-            .addStatement("this(impl, gson, $T.noop())", OPEN_TELEMETRY)
+            .addStatement("this(impl, $T.noop())", OPEN_TELEMETRY)
             .build());
 
         type.addMethod(MethodSpec.constructorBuilder()
             .addModifiers(Modifier.PUBLIC)
             .addParameter(model.interfaceName(), "impl")
-            .addParameter(GSON, "gson")
             .addParameter(OPEN_TELEMETRY, "otel")
             .addStatement("this.impl = impl")
-            .addStatement("this.gson = gson")
             .addStatement("this.tracing = new $T(otel, $S)", IpcNames.IPC_TRACING, model.serviceName())
             .build());
 
@@ -67,6 +70,7 @@ final class ServerEmitter {
             dispatch.beginControlFlow("case $S ->", method.route());
 
             var arguments = CodeBlock.builder();
+            if (!method.parameters().isEmpty()) dispatch.addStatement("$T ipcArgument", JSON_ELEMENT);
             for (int i = 0; i < method.parameters().size(); i++) {
                 var parameter = method.parameters().get(i);
                 var parameterType = GsonTypes.runtimeType(messager, parameter, parameter.asType());
@@ -77,9 +81,16 @@ final class ServerEmitter {
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(parameterType).build());
                     parameterType = CodeBlock.of("$N", constant);
                 }
-                dispatch.addStatement("$T $N = gson.fromJson(ipcRequest.get($S), $L)",
-                    TypeName.get(parameter.asType()), parameter.getSimpleName(),
-                    parameter.getSimpleName(), parameterType);
+                dispatch.addStatement("ipcArgument = ipcRequest.get($S)", parameter.getSimpleName());
+                if (!Nullability.isNullable(parameter, parameter.asType())) {
+                    dispatch.beginControlFlow("if (ipcArgument == null || ipcArgument.isJsonNull())")
+                        .addStatement("respondError(exchange, span, 400, $S)",
+                            "missing parameter '" + parameter.getSimpleName() + "'")
+                        .addStatement("return")
+                        .endControlFlow();
+                }
+                dispatch.addStatement("$T $N = GSON.fromJson(ipcArgument, $L)",
+                    TypeName.get(parameter.asType()), parameter.getSimpleName(), parameterType);
                 if (i > 0) arguments.add(", ");
                 arguments.add("$N", parameter.getSimpleName());
             }
@@ -96,7 +107,7 @@ final class ServerEmitter {
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(returnType).build());
                     returnType = CodeBlock.of("$N", constant);
                 }
-                dispatch.addStatement("ipcResponse = gson.toJsonTree(impl.$N($L), $L)",
+                dispatch.addStatement("ipcResponse = GSON.toJsonTree(impl.$N($L), $L)",
                     method.name(), arguments.build(), returnType);
             }
 
@@ -140,6 +151,10 @@ final class ServerEmitter {
             .addStatement("respond(exchange, span, ipcResponse == null ? 204 : 200, ipcResponse)")
             .nextControlFlow("catch ($T e)", IpcNames.IPC_EXCEPTION)
             .addStatement("respondError(exchange, span, e.status() >= 400 && e.status() < 600 ? e.status() : 500, String.valueOf(e.getMessage()))")
+            // A body that is not json, or an argument that is not what the method takes, is the
+            // caller's fault and says so; a failure to encode the answer is not and stays a 500.
+            .nextControlFlow("catch ($T e)", JSON_PARSE_EXCEPTION)
+            .addStatement("respondError(exchange, span, 400, $S + e.getMessage())", "malformed request: ")
             // Exception rather than RuntimeException: a service that reaches sql-gen reaches its
             // sneaky-thrown SQLException too, and letting that escape `handle` drops the connection
             // without a response instead of answering 500.

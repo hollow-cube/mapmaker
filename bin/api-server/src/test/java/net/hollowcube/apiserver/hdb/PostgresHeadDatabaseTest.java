@@ -1,6 +1,5 @@
 package net.hollowcube.apiserver.hdb;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.ipc.hdb.HeadDatabaseClient;
@@ -45,10 +44,10 @@ class PostgresHeadDatabaseTest {
 
         var service = new PostgresHeadDatabase(TEST_DB.database(ApiDatabase::new));
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext(HeadDatabaseServer.PATH, new HeadDatabaseServer(service, new Gson()));
+        server.createContext(HeadDatabaseServer.PATH, new HeadDatabaseServer(service));
         server.start();
 
-        hdb = new HeadDatabaseClient(HttpClient.newHttpClient(), new Gson(),
+        hdb = new HeadDatabaseClient(HttpClient.newHttpClient(),
             "http://127.0.0.1:" + server.getAddress().getPort());
     }
 

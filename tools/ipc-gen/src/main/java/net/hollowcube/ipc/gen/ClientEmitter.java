@@ -13,12 +13,16 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
-/// Emits `<Interface>Http`: the interface, implemented by posting one JSON request per method.
+/// Emits `<Name>Client`: the interface, implemented by posting one JSON request per method.
 ///
 /// The generated class talks to `java.net.http` directly rather than through a transport
 /// abstraction. There is nothing for a transport to vary — every method is `POST
 /// /<service>/<method-name>` with a JSON object in and a JSON value out — and keeping it concrete
-/// means the only non-JDK types the output touches are Gson and [IpcNames#IPC_EXCEPTION].
+/// means the only non-JDK types the output touches are Gson and the `ipc.util` runtime.
+///
+/// Values are encoded with `Wire.gson()`, never a gson of the caller's, and every request carries
+/// `Wire.clientVersion()` in the `x-ipc-client` header so the server can tell how old its callers
+/// are.
 final class ClientEmitter {
 
     private static final ClassName GSON = ClassName.get("com.google.gson", "Gson");
@@ -41,8 +45,10 @@ final class ClientEmitter {
                 .addJavadoc("Path prefix every method of this client posts to.\n")
                 .initializer("$S", model.path())
                 .build())
+            .addField(FieldSpec.builder(GSON, "GSON", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.gson()", IpcNames.WIRE)
+                .build())
             .addField(HttpClient.class, "httpClient", Modifier.PRIVATE, Modifier.FINAL)
-            .addField(GSON, "gson", Modifier.PRIVATE, Modifier.FINAL)
             .addField(String.class, "baseUrl", Modifier.PRIVATE, Modifier.FINAL)
             .addField(IpcNames.IPC_TRACING, "tracing", Modifier.PRIVATE, Modifier.FINAL);
 
@@ -50,20 +56,17 @@ final class ClientEmitter {
             .addJavadoc("An untraced client, for a caller that has no {@link $T}.\n", OPEN_TELEMETRY)
             .addModifiers(Modifier.PUBLIC)
             .addParameter(HttpClient.class, "httpClient")
-            .addParameter(GSON, "gson")
             .addParameter(String.class, "baseUrl")
-            .addStatement("this(httpClient, gson, baseUrl, $T.noop())", OPEN_TELEMETRY)
+            .addStatement("this(httpClient, baseUrl, $T.noop())", OPEN_TELEMETRY)
             .build());
 
         type.addMethod(MethodSpec.constructorBuilder()
             .addJavadoc("@param baseUrl root the service is served under; a trailing slash is ignored.\n")
             .addModifiers(Modifier.PUBLIC)
             .addParameter(HttpClient.class, "httpClient")
-            .addParameter(GSON, "gson")
             .addParameter(String.class, "baseUrl")
             .addParameter(OPEN_TELEMETRY, "otel")
             .addStatement("this.httpClient = httpClient")
-            .addStatement("this.gson = gson")
             .addStatement("this.baseUrl = baseUrl.endsWith($S) ? baseUrl.substring(0, baseUrl.length() - 1) : baseUrl", "/")
             .addStatement("this.tracing = new $T(otel, $S)", IpcNames.IPC_TRACING, model.serviceName())
             .build());
@@ -74,7 +77,7 @@ final class ClientEmitter {
             for (var parameter : method.parameters()) {
                 var parameterType = GsonTypes.runtimeType(messager, parameter, parameter.asType());
                 if (parameterType == null) return null;
-                body.addStatement("ipcRequest.add($S, gson.toJsonTree($N, $L))",
+                body.addStatement("ipcRequest.add($S, GSON.toJsonTree($N, $L))",
                     parameter.getSimpleName(), parameter.getSimpleName(), parameterType);
             }
 
@@ -89,7 +92,7 @@ final class ClientEmitter {
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(returnType).build());
                     returnType = CodeBlock.of("$N", constant);
                 }
-                body.addStatement("return gson.fromJson(call($S, ipcRequest), $L)", method.route(), returnType);
+                body.addStatement("return GSON.fromJson(call($S, ipcRequest), $L)", method.route(), returnType);
             }
 
             type.addMethod(MethodSpec.overriding(method.element()).addCode(body.build()).build());
@@ -112,9 +115,11 @@ final class ClientEmitter {
             .addStatement("String url = baseUrl + PATH + $S + method", "/")
             .addStatement("$T.Builder httpRequest = $T.newBuilder($T.create(url))\n"
                     + "    .header($S, $S)\n"
+                    + "    .header($T.CLIENT_HEADER, $T.clientVersion())\n"
                     + "    .POST($T.BodyPublishers.ofString(request.toString(), $T.UTF_8))",
                 HttpRequest.class, HttpRequest.class, URI.class,
                 "Content-Type", "application/json",
+                IpcNames.WIRE, IpcNames.WIRE,
                 HttpRequest.class, StandardCharsets.class)
             .addStatement("$T<String> response", HttpResponse.class)
             .beginControlFlow("try ($T span = tracing.client(method, httpRequest, url))", IpcNames.IPC_SPAN)

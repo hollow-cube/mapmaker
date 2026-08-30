@@ -1,0 +1,98 @@
+{
+  "services": {
+    "head-database": {
+      "interface": "net.hollowcube.ipc.hdb.HeadDatabaseService",
+      "methods": {
+        "get-heads": {
+          "params": [
+            {
+              "name": "query",
+              "type": "String"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.hdb.HeadInfo\u003e"
+          }
+        },
+        "get-heads-in-category": {
+          "params": [
+            {
+              "name": "category",
+              "type": "String"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.hdb.HeadInfo\u003e"
+          }
+        }
+      }
+    }
+  },
+  "types": {
+    "net.hollowcube.ipc.PaginatedList": {
+      "kind": "record",
+      "typeParameters": [
+        "T"
+      ],
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "count",
+          "type": "int"
+        },
+        {
+          "name": "results",
+          "type": "List\u003cT\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.hdb.HeadInfo": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "category",
+          "type": "String"
+        },
+        {
+          "name": "texture",
+          "type": "String"
+        },
+        {
+          "name": "tags",
+          "type": "List\u003cString\u003e"
+        }
+      ]
+    }
+  },
+  "subjects": {},
+  "notifications": {}
+}

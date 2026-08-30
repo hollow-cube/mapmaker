@@ -4,6 +4,7 @@ import com.google.auto.service.AutoService;
 import com.palantir.javapoet.ClassName;
 import com.palantir.javapoet.JavaFile;
 import com.palantir.javapoet.TypeSpec;
+import net.hollowcube.ipc.gen.wire.WireDescriptor.Use;
 import org.jetbrains.annotations.Nullable;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -12,41 +13,128 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.util.ElementFilter;
+import javax.tools.StandardLocation;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.io.Writer;
+import java.util.*;
 
-/// Generates the two halves of an ipc service from the one interface that defines it.
+/// Generates everything the wire module needs from the types that define it.
 ///
-/// For `@IpcClient interface FooClient`, in `FooClient`'s own package:
-/// - `FooClientHttp implements FooClient` — every method becomes `POST /foo/<method-name>` with the
+/// For `@Ipc interface FooService`, in its own package:
+/// - `FooClient implements FooService` — every method becomes `POST /foo/<method-name>` with the
 ///   arguments as named fields of a JSON object and the return value as the whole response body.
-///   The route drops a trailing `Client` from the interface name and kebab-cases both halves.
-/// - `FooClientHandler implements HttpHandler` — the same routing read backwards, over any
-///   implementation of `FooClient`.
+/// - `FooServer implements HttpHandler` — the same routing read backwards, over any implementation.
+///
+/// Then, for the wire as a whole — every method signature, every `@NatsMessage` and
+/// `@NotificationBody` record, and every type reachable from one:
+/// - `net.hollowcube.ipc.WireAdapters`, the gson adapters `Wire.gson()` carries, one per enum
+///   and sealed interface, plus a `<Name>Unknown` record per sealed interface.
+/// - `wire.json`, the descriptor `wireCheck` and `wireCompat` hold this build to.
 ///
 /// Neither side names a route or a field as a string anyone writes: both are derived from the same
 /// [ExecutableElement], so adding, renaming or retyping a method moves the client and the server
-/// together or fails to compile.
+/// together or fails to compile. The wire descriptor is what catches the change that compiles fine
+/// here but not against the client that is still running.
 @AutoService(Processor.class)
 public final class IpcProcessor extends AbstractProcessor {
 
+    /// Where the descriptor lands in the class output, and so in the jar.
+    static final String DESCRIPTOR_RESOURCE = "wire.json";
+
+    private boolean emitted;
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        var annotation = processingEnv.getElementUtils().getTypeElement(IpcNames.IPC_ANNOTATION);
-        if (annotation == null) return false;
+        var elements = processingEnv.getElementUtils();
+        var services = annotated(roundEnv, elements.getTypeElement(IpcNames.IPC_ANNOTATION));
+        var messages = annotated(roundEnv, elements.getTypeElement(IpcNames.NATS_MESSAGE_ANNOTATION));
+        var bodies = annotated(roundEnv, elements.getTypeElement(IpcNames.NOTIFICATION_BODY_ANNOTATION));
+        if (services.isEmpty() && messages.isEmpty() && bodies.isEmpty()) return false;
 
-        for (var element : roundEnv.getElementsAnnotatedWith(annotation)) {
+        var messager = processingEnv.getMessager();
+        if (emitted) {
+            // Every hand-written root is in the first round; one that appears later was generated,
+            // and the descriptor already written does not know it.
+            for (var element : services) messager.printError("ipc: wire roots cannot be generated", element);
+            return false;
+        }
+        emitted = true;
+
+        var walker = new WireWalker(messager);
+        var models = new ArrayList<IpcModel>();
+        for (var element : services) {
             var model = model((TypeElement) element);
             if (model == null) continue;
+            models.add(model);
 
-            write(model.clientName(), ClientEmitter.emit(processingEnv.getMessager(), model));
-            write(model.serverName(), ServerEmitter.emit(processingEnv.getMessager(), model));
+            write(model.clientName(), ClientEmitter.emit(messager, model));
+            write(model.serverName(), ServerEmitter.emit(messager, model));
+            for (var method : model.methods()) {
+                var call = element.getSimpleName() + "." + method.name();
+                for (var parameter : method.parameters()) {
+                    walker.root(parameter, parameter.asType(), Use.REQUEST,
+                        call + "(" + parameter.getSimpleName() + ")");
+                }
+                if (!method.isVoid()) {
+                    walker.root(method.element(), method.returnType(), Use.RESPONSE, call + "() returns");
+                }
+            }
         }
+        models.sort(Comparator.comparing(IpcModel::path));
+
+        var subjects = keyed(walker, messages, IpcNames.NATS_MESSAGE_ANNOTATION, "subject", Use.MESSAGE);
+        var notifications = keyed(walker, bodies, IpcNames.NOTIFICATION_BODY_ANNOTATION, "type", Use.BODY);
+        if (!walker.ok() || subjects == null || notifications == null) return false;
+
+        write(IpcNames.WIRE_ADAPTERS, AdaptersEmitter.factory(walker));
+        for (var sealed : walker.sealeds()) write(sealed.unknown(), AdaptersEmitter.unknownVariant(sealed));
+        writeDescriptor(DescriptorBuilder.build(models, walker, subjects, notifications).toJson());
         return false;
+    }
+
+    private static List<? extends Element> annotated(RoundEnvironment roundEnv, @Nullable TypeElement annotation) {
+        if (annotation == null) return List.of();
+        var out = new ArrayList<>(roundEnv.getElementsAnnotatedWith(annotation));
+        out.sort(Comparator.comparing(element -> element.asType().toString()));
+        return out;
+    }
+
+    /// Walks the records marked with one keyed root annotation, answering key to record — or null
+    /// having reported a problem.
+    private @Nullable SortedMap<String, String> keyed(WireWalker walker, List<? extends Element> roots,
+                                                      String annotation, String member, Use use) {
+        var messager = processingEnv.getMessager();
+        var out = new TreeMap<String, String>();
+        var ok = true;
+        for (var root : roots) {
+            var element = (TypeElement) root;
+            var key = annotationValue(element, annotation, member);
+            var path = "@" + annotation.substring(annotation.lastIndexOf('.') + 1) + "(\"" + key + "\") " + element.getSimpleName();
+            if (key.isBlank()) {
+                messager.printError("ipc: " + member + " cannot be blank", element);
+                ok = false;
+            }
+            var previous = out.put(key, element.getQualifiedName().toString());
+            if (previous != null) {
+                messager.printError("ipc: " + member + " '" + key + "' is claimed by both " + previous + " and "
+                    + element.getQualifiedName(), element);
+                ok = false;
+            }
+            if (!walker.rootRecord(element, use, path)) ok = false;
+        }
+        return ok ? out : null;
+    }
+
+    private static String annotationValue(TypeElement element, String annotation, String member) {
+        for (var mirror : element.getAnnotationMirrors()) {
+            var type = (TypeElement) mirror.getAnnotationType().asElement();
+            if (!type.getQualifiedName().contentEquals(annotation)) continue;
+            for (var entry : mirror.getElementValues().entrySet()) {
+                if (entry.getKey().getSimpleName().contentEquals(member)) return String.valueOf(entry.getValue().getValue());
+            }
+        }
+        return "";
     }
 
     /// Validates one annotated element, reporting every problem it finds rather than the first, and
@@ -116,9 +204,20 @@ public final class IpcProcessor extends AbstractProcessor {
         }
     }
 
+    private void writeDescriptor(String json) {
+        try {
+            var file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", DESCRIPTOR_RESOURCE);
+            try (Writer writer = file.openWriter()) {
+                writer.write(json);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException("failed to write " + DESCRIPTOR_RESOURCE, e);
+        }
+    }
+
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Set.of(IpcNames.IPC_ANNOTATION);
+        return Set.of(IpcNames.IPC_ANNOTATION, IpcNames.NATS_MESSAGE_ANNOTATION, IpcNames.NOTIFICATION_BODY_ANNOTATION);
     }
 
     @Override
