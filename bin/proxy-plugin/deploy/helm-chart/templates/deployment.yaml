@@ -50,7 +50,7 @@ spec:
               containerPort: {{ .Values.httpPort }}
               protocol: TCP
           env:
-            - name: METRICS_PORT
+            - name: PROXY_HTTP_PORT
               value: {{ .Values.httpPort | quote }}
           {{- range $key, $value := .Values.env }}
             - name: {{ $key }}

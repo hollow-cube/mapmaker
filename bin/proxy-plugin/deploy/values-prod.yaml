@@ -16,6 +16,3 @@ nodeSelector:
 
 env:
   SESSION_SERVICE_URL: "http://api-server:9124"
-
-podMonitor:
-  enabled: true

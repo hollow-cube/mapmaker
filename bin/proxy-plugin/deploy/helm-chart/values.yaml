@@ -13,7 +13,7 @@ service:
   # Players connect to this port on whichever node the pod is pinned to (see nodeSelector).
   nodePort: 30566
 
-# The plugin's http side: /ready for the rollout, /drain for the preStop hook, /metrics.
+# The plugin's http side: /ready for the rollout, /drain for the preStop hook.
 httpPort: 9124
 
 # Velocity's modern-forwarding secret, shared with every backend; mounted at /app/forwarding.secret.
@@ -35,6 +35,3 @@ resources:
 nodeSelector: {}
 
 env: {}
-
-podMonitor:
-  enabled: false
