@@ -19,6 +19,9 @@ httpPort: 9124
 # Velocity's modern-forwarding secret, shared with every backend; mounted at /app/forwarding.secret.
 forwardingSecret: ""
 
+# Seals drain cookies; any text, it is hashed to a key. Mounted at /app/cookie.secret.
+cookieSecret: ""
+
 drain:
   # How long a replaced proxy is left to empty out. It takes no new logins from the moment it is
   # replaced, and is only stopped (disconnecting whoever is left) once this runs out.

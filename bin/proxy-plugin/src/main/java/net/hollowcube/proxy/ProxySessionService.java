@@ -6,15 +6,18 @@ import com.google.gson.JsonObject;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 
 public class ProxySessionService {
     private static final Gson GSON = new GsonBuilder().disableJdkUnsafe().create();
@@ -53,16 +56,20 @@ public class ProxySessionService {
         }
     }
 
-    public void deleteSession(@NotNull String id) {
-        logger.info("deleting session for {}", id);
+    /// `proxy` fences the delete on the proxy that still holds the session: a player who has
+    /// reconnected elsewhere already has a row naming another proxy, and deleting it would kick
+    /// them off the backend they just reached. Pass null only where no proxy owns the delete.
+    public void deleteSession(@NotNull String id, @Nullable String proxy) {
+        logger.info("deleting session for {} (proxy {})", id, proxy);
+        var query = proxy == null ? "" : "?proxy=" + URLEncoder.encode(proxy, StandardCharsets.UTF_8);
         var req = HttpRequest.newBuilder()
                 .method("DELETE", HttpRequest.BodyPublishers.noBody())
-                .uri(URI.create(url + "/" + id))
+                .uri(URI.create(url + "/" + id + query))
                 .build();
         try {
             var res = CLIENT.send(req, HttpResponse.BodyHandlers.ofString());
             if (res.statusCode() == 404) {
-                // Its fine if not found. Means the player was removed externally.
+                // Removed externally, or the session is another proxy's now.
                 return;
             }
             if (res.statusCode() != 200)

@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Executors;
-import java.util.function.IntSupplier;
+import java.util.function.Supplier;
 
 /// The proxy's http side, which is what the deployment talks to rather than a player:
 ///
@@ -18,10 +18,19 @@ import java.util.function.IntSupplier;
 ///   the process, drain included. Cilium only keeps established connections flowing to a pod
 ///   that is terminating *and* still serving; a readiness that fails during a drain would take
 ///   the backend out of the load balancer map and reset every player still on it.
-/// - `/drain` tells the plugin to stop taking logins and answers 200 once nobody is connected,
-///   503 while somebody still is. The pod's preStop hook polls it until 200, and only then does
-///   kubernetes send the SIGTERM velocity answers by disconnecting everyone.
+/// - `/drain` tells the plugin to stop taking logins and answers 200 once nobody is connected and
+///   no optimistic transfer is still in flight, 503 while either is true. The pod's preStop hook
+///   polls it until 200, and only then does kubernetes send the SIGTERM velocity answers by
+///   disconnecting everyone. Transfers count because the players behind them are mid-reconnect to
+///   another proxy and this one still owes their session row a delete.
 public final class ProxyHttpServer implements AutoCloseable {
+
+    public record Drain(int players, int pendingTransfers) {
+        public boolean done() {
+            return players == 0 && pendingTransfers == 0;
+        }
+    }
+
     private final HttpServer server;
 
     private ProxyHttpServer(HttpServer server) {
@@ -32,7 +41,7 @@ public final class ProxyHttpServer implements AutoCloseable {
     /// proxy must come up whether or not it has an http side, which is how a dev run without one
     /// behaves; in the cluster a missing `/ready` keeps the pod out of the rollout, which is right.
     public static @Nullable ProxyHttpServer start(@NotNull Logger logger, int port,
-                                                 @NotNull Runnable startDrain, @NotNull IntSupplier playerCount) {
+                                                 @NotNull Runnable startDrain, @NotNull Supplier<Drain> drain) {
         if (port == 0) {
             logger.info("proxy http disabled (PROXY_HTTP_PORT=0)");
             return null;
@@ -43,9 +52,10 @@ public final class ProxyHttpServer implements AutoCloseable {
             server.createContext("/ready", exchange -> reply(exchange, 200, "ok"));
             server.createContext("/drain", exchange -> {
                 startDrain.run();
-                int players = playerCount.getAsInt();
-                if (players == 0) reply(exchange, 200, "drained");
-                else reply(exchange, 503, "draining, " + players + " players connected");
+                var state = drain.get();
+                if (state.done()) reply(exchange, 200, "drained");
+                else reply(exchange, 503, "draining, " + state.players() + " players connected, "
+                    + state.pendingTransfers() + " transfers in flight");
             });
             server.start();
             logger.info("proxy http on :{} (/ready, /drain)", server.getAddress().getPort());

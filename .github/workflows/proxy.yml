@@ -100,13 +100,13 @@ jobs:
           version: v3.10.2
       - uses: actions/checkout@v4
 
-      # Not the common helm-deploy action: values-prod.yaml needs the forwarding secret substituted
-      # in, which lives with the map-isolate secrets as MAPMAKER_VELOCITY_SECRET.
-      - name: Import Server Secrets
+      # Not the common helm-deploy action: values-prod.yaml needs the drain cookie key substituted
+      # in, which lives in the proxy's own vault path as MAPMAKER_PROXY_COOKIE_SECRET.
+      - name: Import Proxy Secrets
         uses: hollow-cube/actions/secrets@main
         with:
           token: ${{ secrets.VAULT_TOKEN }}
-          path: prod/map-isolate
+          path: prod/proxy
       - name: Upgrade/install helm chart
         run: |
           tailscale configure kubeconfig prod-v3

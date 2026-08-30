@@ -124,9 +124,11 @@ val prepareProxyRun = tasks.register<Sync>("prepareProxyRun") {
     val hub = providers.gradleProperty("proxyHub").getOrElse("127.0.0.1:25565")
     val bind = providers.gradleProperty("proxyBind").getOrElse("0.0.0.0:25577")
     val secret = providers.gradleProperty("proxySecret").getOrElse("abcdef")
+    val cookieSecret = providers.gradleProperty("proxyCookieSecret").getOrElse("local dev")
     inputs.property("hub", hub)
     inputs.property("bind", bind)
     inputs.property("secret", secret)
+    inputs.property("cookieSecret", cookieSecret)
     val runDir = proxyRunDir
     doLast {
         val dir = runDir.get().asFile
@@ -135,6 +137,7 @@ val prepareProxyRun = tasks.register<Sync>("prepareProxyRun") {
             .replace(Regex("(?m)^bind = \".*\"$"), "bind = \"$bind\"")
             .replace(Regex("(?m)^anyhub = \".*\"$"), "anyhub = \"$hub\""))
         dir.resolve("forwarding.secret").writeText(secret)
+        dir.resolve("cookie.secret").writeText(cookieSecret)
     }
 }
 
@@ -153,5 +156,6 @@ tasks.register<JavaExec>("runProxy") {
     environment("IPC_SERVICE_URL", providers.gradleProperty("proxyIpcUrl").getOrElse("http://127.0.0.1:9124"))
     // Velocity's own /server, hidden in production, is how a backend switch is driven from a client.
     environment("PROXY_DEV_SERVER_COMMAND", "true")
+    environment("PROXY_COOKIE_SECRET_FILE", proxyRunDir.get().asFile.resolve("cookie.secret").path)
     standardInput = System.`in`
 }

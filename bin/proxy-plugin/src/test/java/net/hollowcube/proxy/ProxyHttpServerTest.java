@@ -18,15 +18,17 @@ class ProxyHttpServerTest {
 
     @Test
     void testDisabledOnPortZero() {
-        assertNull(ProxyHttpServer.start(logger, 0, () -> {}, () -> 0));
+        assertNull(ProxyHttpServer.start(logger, 0, () -> {}, () -> new ProxyHttpServer.Drain(0, 0)));
     }
 
     @Test
     void testReadyStaysUpWhileDraining() throws Exception {
         var draining = new AtomicBoolean();
         var players = new AtomicInteger(2);
+        var pending = new AtomicInteger();
 
-        var server = ProxyHttpServer.start(logger, freePort(), () -> draining.set(true), players::get);
+        var server = ProxyHttpServer.start(logger, freePort(), () -> draining.set(true),
+            () -> new ProxyHttpServer.Drain(players.get(), pending.get()));
         assertNotNull(server);
         try (server) {
             var base = "http://localhost:" + server.port();
@@ -42,6 +44,29 @@ class ProxyHttpServerTest {
             assertEquals(200, get(base + "/ready").statusCode());
 
             players.set(0);
+            assertEquals(200, get(base + "/drain").statusCode());
+        }
+    }
+
+    /// The last player leaving is not the end of a drain: whoever this proxy transferred off is
+    /// mid-reconnect elsewhere and still owes their session row a delete, so stopping the pod here
+    /// would strand them.
+    @Test
+    void testDrainWaitsOnTransfersInFlight() throws Exception {
+        var players = new AtomicInteger();
+        var pending = new AtomicInteger(1);
+
+        var server = ProxyHttpServer.start(logger, freePort(), () -> {},
+            () -> new ProxyHttpServer.Drain(players.get(), pending.get()));
+        assertNotNull(server);
+        try (server) {
+            var base = "http://localhost:" + server.port();
+
+            var drain = get(base + "/drain");
+            assertEquals(503, drain.statusCode());
+            assertTrue(drain.body().contains("1 transfers in flight"));
+
+            pending.set(0);
             assertEquals(200, get(base + "/drain").statusCode());
         }
     }

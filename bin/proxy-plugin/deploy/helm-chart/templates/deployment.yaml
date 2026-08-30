@@ -35,7 +35,7 @@ spec:
       # The drain, plus a minute for velocity to disconnect whoever is left and stop.
       terminationGracePeriodSeconds: {{ add .Values.drain.seconds 60 }}
       volumes:
-        - name: forwarding-secret
+        - name: proxy-secrets
           secret:
             secretName: {{ include "mapmaker-proxy.fullname" . }}
       containers:
@@ -52,6 +52,8 @@ spec:
           env:
             - name: PROXY_HTTP_PORT
               value: {{ .Values.httpPort | quote }}
+            - name: PROXY_COOKIE_SECRET_FILE
+              value: /app/cookie.secret
           {{- range $key, $value := .Values.env }}
             - name: {{ $key }}
               value: {{ $value | quote }}
@@ -74,9 +76,13 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - name: forwarding-secret
+            - name: proxy-secrets
               mountPath: /app/forwarding.secret
               subPath: forwarding.secret
+              readOnly: true
+            - name: proxy-secrets
+              mountPath: /app/cookie.secret
+              subPath: cookie.secret
               readOnly: true
       {{- with .Values.nodeSelector }}
       nodeSelector:

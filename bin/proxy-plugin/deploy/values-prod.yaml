@@ -2,9 +2,11 @@ image:
   pullSecrets:
     - name: dockerio
 
-# Rendered by envsubst in the workflow, from vault prod/map-isolate: the same secret every backend
-# is given as MAPMAKER_VELOCITY_SECRET.
-forwardingSecret: "${MAPMAKER_VELOCITY_SECRET}"
+# Not a secret, backends are never exposed publicly.
+forwardingSecret: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
+
+# envsubst'd by the workflow, from vault prod/proxy.
+cookieSecret: "${MAPMAKER_PROXY_COOKIE_SECRET}"
 
 service:
   nodePort: 30566

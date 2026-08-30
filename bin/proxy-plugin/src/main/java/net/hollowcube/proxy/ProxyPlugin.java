@@ -1,24 +1,30 @@
 package net.hollowcube.proxy;
 
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.EventTask;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
+import com.velocitypowered.api.event.connection.ConnectionHandshakeEvent;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.event.player.CookieReceiveEvent;
 import com.velocitypowered.api.event.player.CookieStoreEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyPingEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
+import com.velocitypowered.api.network.HandshakeIntent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
@@ -28,6 +34,7 @@ import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.GameProfile;
 import net.hollowcube.ipc.session.SessionClient;
+import net.hollowcube.proxy.drain.DrainCookie;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -39,12 +46,15 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -55,6 +65,7 @@ public class ProxyPlugin {
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final ChannelIdentifier DISCONNECT_MESSAGE_ID = MinecraftChannelIdentifier.create("velocity", "disconnect");
     private static final Key TRANSFER_DATA_COOKIE = Key.key("mapmaker", "transfer_data");
+    private static final Key DRAIN_TRANSFER_COOKIE = Key.key("mapmaker", "drain_transfer");
 
     private static final Set<ProtocolVersion> SUPPORTED_VERSIONS = Set.of(
         ProtocolVersion.MINECRAFT_1_21_7,
@@ -72,6 +83,17 @@ public class ProxyPlugin {
     private static final String IPC_SERVICE_URL = Objects.requireNonNullElse(System.getenv("IPC_SERVICE_URL"), "http://api-server-java:9124");
     // How long a fetched player count answers pings for before one of them fetches again.
     private static final Duration ONLINE_PLAYERS_TTL = Duration.ofSeconds(2);
+
+    private static final String COOKIE_SECRET_FILE = System.getenv("PROXY_COOKIE_SECRET_FILE");
+    private static final Duration DRAIN_COOKIE_TTL = Duration.ofSeconds(30);
+    // Bounded because the initial server connect waits on the answer.
+    private static final Duration DRAIN_COOKIE_WAIT = Duration.ofSeconds(3);
+    // storeCookie and transferToHost each write their packet from their own event continuation, so
+    // called back to back they are not ordered. This gap keeps the cookie in front of the transfer.
+    private static final Duration DRAIN_TRANSFER_SETTLE = Duration.ofMillis(250);
+    private static final Duration DRAIN_PENDING_WINDOW = Duration.ofSeconds(30);
+    private static final Duration DRAIN_SWEEP_INTERVAL = Duration.ofSeconds(1);
+    private static final Duration HANDSHAKE_INTENT_TTL = Duration.ofSeconds(60);
 
     private final Logger logger;
     private final ProxyServer proxy;
@@ -96,6 +118,16 @@ public class ProxyPlugin {
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
     private final Map<UUID, byte[]> transferData = new ConcurrentHashMap<>();
 
+    private final @Nullable DrainCookie drainCookie;
+
+    // Player to the nanoTime deadline their session row is left alone until. See optimisticTransfer.
+    private final Map<UUID, Long> pendingTransfers = new ConcurrentHashMap<>();
+    // Keyed by remote address because it is the only thing ConnectionHandshakeEvent and
+    // PostLoginEvent share, and an ip:port is exactly one tcp connection.
+    private final Map<InetSocketAddress, Long> transferIntents = new ConcurrentHashMap<>();
+    private final Map<UUID, CompletableFuture<byte[]>> drainCookieWaiters = new ConcurrentHashMap<>();
+    private final Map<UUID, String> drainTargets = new ConcurrentHashMap<>();
+
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
     private final Map<UUID, Integer> playerConnectAttempts = new ConcurrentHashMap<>();
 
@@ -116,13 +148,18 @@ public class ProxyPlugin {
         proxy.getChannelRegistrar().register(DISCONNECT_MESSAGE_ID);
 
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
+        drainCookie = DrainCookie.load(logger, COOKIE_SECRET_FILE);
 
         logger.info("hello, world!!!!");
     }
 
     @Subscribe
     public void handleInitialize(@NotNull ProxyInitializeEvent event) {
-        http = ProxyHttpServer.start(logger, HTTP_PORT, this::drain, proxy::getPlayerCount);
+        http = ProxyHttpServer.start(logger, HTTP_PORT, this::drain,
+            () -> new ProxyHttpServer.Drain(proxy.getPlayerCount(), pendingTransfers.size()));
+        proxy.getScheduler().buildTask(this, this::sweepDrainState)
+            .repeat(DRAIN_SWEEP_INTERVAL)
+            .schedule();
     }
 
     /// Fetched by the ping that finds it expired and held for [#ONLINE_PLAYERS_TTL]: a ping can
@@ -148,6 +185,58 @@ public class ProxyPlugin {
     @Subscribe
     public void handleShutdown(@NotNull ProxyShutdownEvent event) {
         if (http != null) http.close();
+    }
+
+    @Subscribe
+    public void handleHandshake(@NotNull ConnectionHandshakeEvent event) {
+        if (event.getIntent() != HandshakeIntent.TRANSFER) return;
+        transferIntents.put(event.getConnection().getRemoteAddress(), System.nanoTime() + HANDSHAKE_INTENT_TTL.toNanos());
+    }
+
+    /// Velocity awaits this event before choosing an initial server, so a cookie round trip started
+    /// here is finished by the time [#handleChooseInitialServer] needs it.
+    @Subscribe
+    public @Nullable EventTask handlePostLogin(@NotNull PostLoginEvent event) {
+        var player = event.getPlayer();
+        if (drainCookie == null) return null;
+        if (transferIntents.remove(player.getRemoteAddress()) == null) return null;
+
+        var playerId = player.getUniqueId();
+        var answer = new CompletableFuture<byte[]>();
+        drainCookieWaiters.put(playerId, answer);
+        try {
+            player.requestCookie(DRAIN_TRANSFER_COOKIE);
+        } catch (IllegalArgumentException e) {
+            drainCookieWaiters.remove(playerId);
+            return null; // Pre-1.20.5, so it cannot have been transferred here in the first place.
+        }
+        return EventTask.resumeWhenComplete(answer
+            .orTimeout(DRAIN_COOKIE_WAIT.toMillis(), TimeUnit.MILLISECONDS)
+            .handle((data, error) -> {
+                drainCookieWaiters.remove(playerId);
+                openDrainCookie(player, error == null ? data : null);
+                return null;
+            }));
+    }
+
+    private void openDrainCookie(@NotNull Player player, byte @Nullable [] data) {
+        if (drainCookie == null) return;
+        var playerId = player.getUniqueId();
+        var transfer = drainCookie.open(playerId, Instant.now(), data);
+        if (transfer == null) return;
+
+        logger.info("drain: {} arrived carrying a transfer to {}", player.getUsername(), transfer.address());
+        drainTargets.put(playerId, transfer.address());
+        if (transfer.transferData().length > 0) transferData.put(playerId, transfer.transferData());
+        player.storeCookie(DRAIN_TRANSFER_COOKIE, new byte[0]);
+    }
+
+    @Subscribe
+    public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
+        var target = drainTargets.remove(event.getPlayer().getUniqueId());
+        if (target == null) return;
+        var si = new ServerInfo("map-server", new InetSocketAddress(target, 25565));
+        event.setInitialServer(proxy.createRawRegisteredServer(si));
     }
 
     private void drain() {
@@ -245,6 +334,13 @@ public class ProxyPlugin {
     // AWESOME JOB GUYS YOU ARE DOING GREAT!!!
     @Subscribe
     public void handleCookieResponse(@NotNull CookieReceiveEvent event) {
+        if (event.getOriginalKey().equals(DRAIN_TRANSFER_COOKIE)) {
+            event.setResult(CookieReceiveEvent.ForwardResult.handled());
+            var waiter = drainCookieWaiters.remove(event.getPlayer().getUniqueId());
+            if (waiter != null) waiter.complete(event.getOriginalData());
+            return;
+        }
+
         if (!event.getOriginalKey().equals(TRANSFER_DATA_COOKIE))
             return;
 
@@ -294,6 +390,8 @@ public class ProxyPlugin {
         var serverName = new String(event.getData());
         logger.info("transfering {} to {}", player.getUsername(), serverName);
 
+        if (draining.get() && optimisticTransfer(player, serverName)) return;
+
         var si = new ServerInfo("map-server", new InetSocketAddress(serverName, 25565));
         player.createConnectionRequest(proxy.createRawRegisteredServer(si)).connect().thenAccept(result -> {
             switch (result.getStatus()) {
@@ -305,6 +403,40 @@ public class ProxyPlugin {
                 }
             }
         });
+    }
+
+    /// A backend switch on a draining proxy, answered by moving the player off this proxy instead
+    /// of connecting them to the backend from it: they are sent back to the address they arrived
+    /// on, which now resolves to the proxy replacing this one, carrying the transfer in a cookie
+    /// for that proxy to finish. One reconnect rather than two, and this pod stops being pinned
+    /// open by a player who never logs off.
+    ///
+    /// False when the transfer has to happen the ordinary way, and the caller falls through to it.
+    private boolean optimisticTransfer(@NotNull Player player, @NotNull String address) {
+        if (drainCookie == null) return false;
+        // Vanilla puts the srv-resolved target in the handshake, so this is directly connectable.
+        var host = player.getVirtualHost().orElse(null);
+        if (host == null) return false;
+        if (player.getProtocolVersion().compareTo(ProtocolVersion.MINECRAFT_1_20_5) < 0) return false;
+
+        var playerId = player.getUniqueId();
+        var pendingData = transferData.getOrDefault(playerId, new byte[0]);
+        var cookie = drainCookie.seal(playerId, Instant.now().plus(DRAIN_COOKIE_TTL), address, pendingData);
+        if (cookie.length > DrainCookie.MAX_COOKIE_BYTES) {
+            logger.warn("drain: {} bytes of transfer data will not fit a cookie, transferring {} in place",
+                pendingData.length, player.getUsername());
+            return false;
+        }
+
+        transferData.remove(playerId);
+        pendingTransfers.put(playerId, System.nanoTime() + DRAIN_PENDING_WINDOW.toNanos());
+
+        player.storeCookie(DRAIN_TRANSFER_COOKIE, cookie);
+        proxy.getScheduler().buildTask(this, () -> player.transferToHost(host))
+            .delay(DRAIN_TRANSFER_SETTLE)
+            .schedule();
+        logger.info("drain: transferring {} off this proxy, to {} via {}", player.getUsername(), address, host);
+        return true;
     }
 
     private void handleProtocolVersionRequest(@NotNull PluginMessageEvent event) {
@@ -331,23 +463,59 @@ public class ProxyPlugin {
     @Subscribe
     public void handleDisconnect(@NotNull DisconnectEvent event) {
         var playerId = event.getPlayer().getUniqueId();
+        // Deleting the session of a player we transferred off would kick them off the backend they
+        // are about to reach, so it is left to sweepDrainState.
+        if (!pendingTransfers.containsKey(playerId)) deleteSession(playerId);
+        resourcePacks.remove(playerId);
+        playersJustJoined.remove(playerId);
+        playerConnectAttempts.remove(playerId);
+        drainCookieWaiters.remove(playerId);
+        drainTargets.remove(playerId);
+    }
+
+    /// Fenced on this proxy: the row may belong to another one by now, and every backend kicks the
+    /// player it names when a session is deleted.
+    private void deleteSession(@NotNull UUID playerId) {
         try {
-            sessionService.deleteSession(playerId.toString());
+            sessionService.deleteSession(playerId.toString(), ProxySessionService.hostname);
         } catch (Exception e) {
             logger.error("failed to delete session (v2) for {}", playerId, e);
-        } finally {
-            resourcePacks.remove(playerId);
-            playersJustJoined.remove(playerId);
-            playerConnectAttempts.remove(playerId);
         }
+    }
+
+    /// A transferred player who never turned up anywhere else gets their session row released here,
+    /// which is also what the drain is waiting on.
+    private void sweepDrainState() {
+        long now = System.nanoTime();
+        for (var entry : pendingTransfers.entrySet()) {
+            if (now - entry.getValue() < 0) continue;
+            if (!pendingTransfers.remove(entry.getKey(), entry.getValue())) continue;
+            // Still here, so the transfer never took and their session is live and theirs.
+            if (proxy.getPlayer(entry.getKey()).isPresent()) {
+                logger.warn("drain: {} is still on this proxy a window after being transferred off", entry.getKey());
+                continue;
+            }
+            logger.info("drain: transfer of {} never settled, releasing their session", entry.getKey());
+            deleteSession(entry.getKey());
+        }
+        transferIntents.values().removeIf(deadline -> now - deadline >= 0);
     }
 
     @Subscribe
     public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
-        if (event.kickedDuringServerConnect()) return;
+        var serverName = event.getServer().getServerInfo().getName();
 
         // If they were leaving the limbo, they should be disconnected completely no redirect.
-        var serverName = event.getServer().getServerInfo().getName();
+        if (event.kickedDuringServerConnect()) {
+            // A drain cookie sent them straight at a backend that is not there any more, and they
+            // have no server to be put back on.
+            if (event.getPlayer().getCurrentServer().isEmpty() && !"anyhub".equals(serverName)) {
+                logger.info("drain: {} could not reach {}, sending them to the hub",
+                    event.getPlayer().getUsername(), serverName);
+                event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
+            }
+            return;
+        }
 
         // 'anyhub' points to the clusterip service for all the hub instances, so if you are kicked from it
         // velocity assumes it cannot immediately reconnect to it. In reality, reconnecting will point to another
