@@ -42,7 +42,13 @@ public final class Main {
         var db = new ApiDatabase(pool);
 
         // The same vault key the Go api-server reads, so the two publish onto one cluster.
-        var nats = NatsPublisher.connect(secrets.get("nats.servers", "NATS_SERVERS", "nats://localhost:4222"), Wire.gson());
+        // Defaulted only where there is no vault secret, which is what says this is a local run.
+        // In the cluster a missing broker has to be a startup failure: the client reconnects for
+        // ever, so a wrong default is an api that looks up and silently publishes into nothing.
+        var natsServers = secrets.present()
+            ? secrets.require("nats.servers", "NATS_SERVERS")
+            : secrets.get("nats.servers", "NATS_SERVERS", "nats://localhost:4222");
+        var nats = NatsPublisher.connect(natsServers, Wire.gson());
 
         var port = Integer.parseInt(secrets.get("http.port", "PORT", "9124"));
         var server = HttpServer.create(new InetSocketAddress(port), 0);

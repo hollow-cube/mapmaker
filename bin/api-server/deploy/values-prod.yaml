@@ -20,3 +20,5 @@ base:
 
   env:
     PORT: "9124"
+    # The same broker the game servers publish and consume on; chat fans out over it.
+    NATS_SERVERS: "nats://nats:4222"
