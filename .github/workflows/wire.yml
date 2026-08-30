@@ -17,8 +17,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-          # wireCompat reads modules/ipc/wire.json out of every release tag from wire-baseline up.
-          fetch-tags: true
+          # wireCompat runs `git show <tag>:modules/ipc/wire.json` for every release tag from
+          # wire-baseline up, so it needs those tags' objects and not just their refs — which is
+          # what fetch-tags alone gives you on top of a shallow clone.
+          fetch-depth: 0
       - uses: actions/setup-java@v5
         with:
           java-version: '25'
