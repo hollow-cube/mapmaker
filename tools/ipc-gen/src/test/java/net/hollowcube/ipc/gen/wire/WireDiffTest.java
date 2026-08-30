@@ -23,10 +23,10 @@ class WireDiffTest {
             }
           },
           "types": {
-            "test.Reply": {"kind": "record", "used": ["response"], "fields": [{"name": "text", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
-            "test.Event": {"kind": "record", "used": ["request"], "fields": [{"name": "name", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
-            "test.Color": {"kind": "enum", "constants": ["RED", "GREEN"]},
-            "test.Shape": {"kind": "sealed", "discriminator": "type", "variants": {"circle": "test.Circle"}}
+            "test.Reply": {"status": "record", "used": ["response"], "fields": [{"name": "text", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
+            "test.Event": {"status": "record", "used": ["request"], "fields": [{"name": "name", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
+            "test.Color": {"status": "enum", "constants": ["RED", "GREEN"]},
+            "test.Shape": {"status": "sealed", "discriminator": "type", "variants": {"circle": "test.Circle"}}
           },
           "subjects": {"point.moved": "test.PointMoved"},
           "notifications": {"invite": "test.Invite"}
@@ -156,19 +156,19 @@ class WireDiffTest {
     void sealedVariantsMayBeAddedButNotRemovedOrRenamed() {
         assertEquals(List.of(), breaks(edited("{\"circle\": \"test.Circle\"}", "{\"circle\": \"test.Circle\", \"square\": \"test.Square\"}")));
         assertEquals(List.of("sealed test.Shape / variant circle: removed"), breaks(edited("{\"circle\": \"test.Circle\"}", "{\"round\": \"test.Circle\"}")));
-        assertEquals(List.of("sealed test.Shape: discriminator type -> kind"), breaks(edited("\"discriminator\": \"type\"", "\"discriminator\": \"kind\"")));
+        assertEquals(List.of("sealed test.Shape: discriminator type -> status"), breaks(edited("\"discriminator\": \"type\"", "\"discriminator\": \"status\"")));
     }
 
     @Test
     void changingATypesKindBreaks() {
         assertEquals(List.of("enum test.Color: became a record"),
-            breaks(edited("\"test.Color\": {\"kind\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]}",
-                "\"test.Color\": {\"kind\": \"record\", \"fields\": []}")));
+            breaks(edited("\"test.Color\": {\"status\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]}",
+                "\"test.Color\": {\"status\": \"record\", \"fields\": []}")));
     }
 
     @Test
     void removedTypesNothingReachesAreNotBreaks() {
-        assertEquals(List.of(), breaks(edited("\"test.Color\": {\"kind\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]},", "")));
+        assertEquals(List.of(), breaks(edited("\"test.Color\": {\"status\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]},", "")));
     }
 
     @Test

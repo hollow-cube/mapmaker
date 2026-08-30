@@ -1,30 +1,27 @@
 package net.hollowcube.mapmaker.chat;
 
-import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
-import com.github.benmanes.caffeine.cache.Caffeine;
 import io.nats.client.Message;
 import io.nats.client.MessageConsumer;
 import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.ipc.Wire;
+import net.hollowcube.ipc.chat.ChatChannel;
+import net.hollowcube.ipc.chat.ChatMessage;
+import net.hollowcube.ipc.chat.ChatResult;
+import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
-import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.punishments.PunishmentService;
-import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
-import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
-import net.hollowcube.mapmaker.punishments.types.Punishment;
-import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
-import net.hollowcube.mapmaker.temp.ChatMessageData;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.util.NumberUtil;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -39,25 +36,35 @@ import net.minestom.server.network.packet.client.play.ClientChatMessagePacket;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Blocking;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
+/// Both ends of chat on a game server: what a player types goes to the api, and what the api
+/// publishes is rendered for whoever here should see it.
+///
+/// Everything between those two — stripping, mutes, direct message settings, the filter, the log,
+/// splitting the message into parts — happens in the api now, and the answer comes back as a
+/// [ChatResult] this renders. Nothing is published from here.
 public class ChatMessageListener implements Closeable, PacketPlayListenerConsumer<ClientChatMessagePacket> {
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 
-    private static final String CHAT_STREAM = "CHAT_PROCESSED";
-    private static final ConsumerConfiguration CHAT_CONSUMER_CONFIG = ConsumerConfiguration.builder()
+    /// The stream the Go handler published on, consumed alongside [ChatMessage#SUBJECT] until no
+    /// server old enough to send its chat that way is running.
+    private static final String LEGACY_STREAM = "CHAT_PROCESSED";
+    private static final ConsumerConfiguration LEGACY_CONSUMER_CONFIG = ConsumerConfiguration.builder()
         .filterSubjects("chat.processed.>")
         .deliverPolicy(DeliverPolicy.New)
         .ackPolicy(AckPolicy.None)
@@ -75,43 +82,38 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
 
     private final SessionManager sessionManager;
     private final ApiClient api;
-    private final PunishmentService punishmentService;
-    private final JetStreamWrapper jetStream;
+    /// The map a player is in, or null outside one. Supplied because the worlds live above this
+    /// module; it is what both the sender's map and each recipient's is read from.
+    private final Function<Player, @Nullable String> mapOf;
 
-    private final AsyncLoadingCache<String, Optional<Punishment>> playerMuteCache;
     private final MessageComponents components;
 
-    private final MessageConsumer consumer;
+    private final Closeable consumer;
+    private final MessageConsumer legacyConsumer;
 
     public ChatMessageListener(
-        SessionManager sessionManager, ApiClient api,
-        PunishmentService punishmentService, JetStreamWrapper jetStream
+        SessionManager sessionManager, ApiClient api, JetStreamWrapper jetStream,
+        Function<Player, @Nullable String> mapOf
     ) {
         this.sessionManager = sessionManager;
         this.api = api;
-        this.punishmentService = punishmentService;
-        this.jetStream = jetStream;
-
-        this.playerMuteCache = Caffeine.newBuilder()
-            .expireAfterWrite(10, TimeUnit.MINUTES)
-            .executor(FutureUtil.VIRTUAL)
-            .buildAsync(this::fetchActiveMute);
-
+        this.mapOf = mapOf;
         this.components = new MessageComponents(api);
 
-        MinecraftServer.getGlobalEventHandler()
-            .addListener(PunishmentCreatedEvent.class, this::handlePunishmentCreated)
-            .addListener(PunishmentRevokedEvent.class, this::handlePunishmentRevoked);
-
-        this.consumer = jetStream.subscribe(CHAT_STREAM, CHAT_CONSUMER_CONFIG, ChatMessageData.class, this::handleChatMessage);
+        this.consumer = jetStream.subscribe(ChatMessage.SUBJECT, Wire.gson(), ChatMessage.class,
+            (_, message) -> FutureUtil.submitVirtual(() -> deliver(message)));
+        this.legacyConsumer = jetStream.subscribe(LEGACY_STREAM, LEGACY_CONSUMER_CONFIG, LegacyChatMessage.class,
+            this::handleLegacyChatMessage);
     }
 
     @Override
-    public void close() {
-        try {
-            consumer.close();
+    public void close() throws IOException {
+        // Both, whatever the first one does: leaving the legacy consumer open because the new one
+        // objected would keep this server reading chat after it stopped serving it.
+        try (consumer; legacyConsumer) {
+            logger.debug("closing chat consumers");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new IOException(e);
         }
     }
 
@@ -124,37 +126,22 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         }
 
         var playerData = PlayerData.fromPlayer(player);
-        String channel = playerData.getSetting(PlayerSettings.CHAT_CHANNEL);
+        var channel = ChatChannels.of(playerData.getSetting(PlayerSettings.CHAT_CHANNEL));
 
-        if (!ClientChatMessageData.CHANNEL_STAFF.equals(channel) && sessionManager.isHidden(playerData.id())) {
+        if (channel != ChatChannel.STAFF && sessionManager.isHidden(playerData.id())) {
             player.sendMessage(Component.text("you cannot chat while vanished"));
             return;
         }
 
-        long messageSeed = ThreadLocalRandom.current().nextLong();
-        FutureUtil.submitVirtual(() -> {
-            String currentMapId = null;
-            if (message.contains("[map]")) {
-                var currentMap = MiscFunctionality.getCurrentMap(sessionManager, api.maps, player);
-                if (currentMap == null || !currentMap.isPublished()) {
-                    player.sendMessage(Component.translatable("chat.map.invalid"));
-                    return;
-                }
-                currentMapId = currentMap.id();
-            }
-
-            trySendChatMessage(
-                player,
-                new ClientChatMessageData(ClientChatMessageData.Type.CHAT_UNSIGNED, playerData.id(), message, channel, currentMapId, messageSeed)
-            );
-        });
+        FutureUtil.submitVirtual(() -> trySendChatMessage(player, channel, null, message));
     }
 
+    /// Sends one message and tells the sender what became of it.
+    ///
+    /// @param targetId who a [ChatChannel#DIRECT] is for; the api resolves a reply itself
     @Blocking
-    public void trySendChatMessage(Player sender, ClientChatMessageData message) {
-        // Do not do anything if the player is muted
-        if (testMuteState(sender)) return;
-
+    public void trySendChatMessage(Player sender, ChatChannel channel, @Nullable String targetId,
+                                   String message) {
         long now = System.currentTimeMillis();
         if (now - sender.getTag(LAST_CHAT_MESSAGE) < CHAT_COOLDOWN) {
             sender.sendMessage(Component.translatable("chat.cooldown"));
@@ -162,75 +149,105 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         }
         sender.setTag(LAST_CHAT_MESSAGE, now);
 
-        // For now stick everything in .global, may split it up in the future but would have
-        // to resolve reply targets in order to do it properly.
-        this.jetStream.publish("chat.raw.global", message);
-    }
-
-    // True if muted but message has already been sent
-    @Blocking
-    private boolean testMuteState(Player player) {
+        ChatResult result;
         try {
-            var playerId = PlayerData.fromPlayer(player).id();
-            var mute = playerMuteCache.get(playerId).get(3, TimeUnit.SECONDS);
-            if (mute.isPresent()) {
-                player.sendMessage(Component.translatable("punishment.muted"));
-                return true;
-            }
+            // The map goes whether or not they wrote `[map]`: it is what places a local message, and
+            // the api is what decides whether the map is one anyone else could open.
+            result = api.chat.send(PlayerData.fromPlayer(sender).id(), ServerRuntime.getRuntime().hostname(),
+                channel, targetId, message, mapOf.apply(sender));
+        } catch (IpcException e) {
+            ExceptionReporter.reportException(e, sender);
+            sender.sendMessage(Component.translatable("generic.unknown_error"));
+            return;
+        }
 
-            return false;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        switch (result) {
+            // It went out, or there was nothing left to send; neither is worth a message.
+            case ChatResult.Sent _ -> {
+            }
+            case ChatResult.Muted muted -> sender.sendMessage(muted.expiresAt() == null
+                ? Component.translatable("punishment.muted")
+                : Component.translatable("punishment.muted.until",
+                    Component.text(NumberUtil.formatTimeUntil(muted.expiresAt()))));
+            case ChatResult.Censored _ -> sender.sendMessage(Component.translatable("chat.censored"));
+            // No target to name means there was nobody to reply to in the first place.
+            case ChatResult.TargetOffline offline -> sender.sendMessage(offline.targetId() == null
+                ? Component.translatable("chat.msg.no_reply")
+                : Component.translatable("generic.player.offline", displayName(offline.targetId())));
+            case ChatResult.DmDisabled disabled -> sender.sendMessage(disabled.targetId() == null
+                ? Component.translatable("chat.channel.dm.disabled.self")
+                : Component.translatable("chat.channel.dm.disabled", displayName(disabled.targetId())));
+            case ChatResult.MapNotPublished _ ->
+                sender.sendMessage(Component.translatable("generic.map.chat.usage"));
+            case ChatResult.Unknown unknown -> {
+                // An api that knows a reason this build does not. Saying nothing would look like the
+                // message went out.
+                logger.warn("unknown chat result from the api: {}", unknown.type());
+                sender.sendMessage(Component.translatable("generic.unknown_error"));
+            }
         }
     }
 
-    private void handleChatMessage(Message msg, ChatMessageData message) {
-        switch (message.type()) {
-            case CHAT_UNSIGNED -> FutureUtil.submitVirtual(() -> {
-                switch (message.channel()) {
-                    case ClientChatMessageData.CHANNEL_GLOBAL -> handleUnsignedChat(
-                        message, "chat.channel.global",
-                        _ -> true
-                    );
-                    case ClientChatMessageData.CHANNEL_LOCAL -> {
-                        var senderMap = OpUtils.map(sessionManager.getPresence(message.sender()), Presence::mapId);
-                        if (senderMap == null) return; // Can't find the sender's map
-                        handleUnsignedChat(message, "chat.channel.local", recipient -> {
-                            var recipientMap = OpUtils.map(sessionManager.getPresence(recipient.getUuid().toString()), Presence::mapId);
-                            return Objects.equals(senderMap, recipientMap);
-                        });
-                    }
-                    case ClientChatMessageData.CHANNEL_STAFF -> handleUnsignedChat(
-                        message, "chat.channel.staff",
-                        recipient -> {
-                            var playerData = PlayerData.fromPlayer(recipient);
-                            var isStaffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
-                            return isStaffMode && playerData.has(Permission.GENERIC_STAFF);
-                        }
-                    );
-                    default -> handleDirectMessage(message);
-                }
+    private Component displayName(String playerId) {
+        return api.players.getDisplayName(playerId).build();
+    }
+
+    private void handleLegacyChatMessage(Message msg, LegacyChatMessage legacy) {
+        var message = legacy.toChatMessage();
+        if (message == null) return;
+        FutureUtil.submitVirtual(() -> deliver(message));
+    }
+
+    @Blocking
+    private void deliver(ChatMessage message) {
+        switch (message.channel()) {
+            case GLOBAL -> handleUnsignedChat(message, "chat.channel.global", _ -> true);
+            case LOCAL -> handleLocalChat(message);
+            case STAFF -> handleUnsignedChat(message, "chat.channel.staff", recipient -> {
+                var playerData = PlayerData.fromPlayer(recipient);
+                return playerData.getSetting(PlayerSettings.STAFF_MODE) && playerData.has(Permission.GENERIC_STAFF);
             });
-            case CHAT_SYSTEM -> handleChatSystem(message);
+            // A reply is resolved to a direct message before it is published; this is only here
+            // because the compiler is right to ask.
+            case DIRECT, REPLY -> handleDirectMessage(message);
+            case UNKNOWN -> logger.warn("dropped a chat message on a channel this build does not know");
         }
     }
 
     @Blocking
-    protected void handleUnsignedChat(ChatMessageData message, String key, Predicate<Player> filter) {
+    private void handleLocalChat(ChatMessage message) {
+        var senderMap = message.mapId();
+        if (senderMap != null) {
+            handleUnsignedChat(message, "chat.channel.local",
+                recipient -> senderMap.equals(mapOf.apply(recipient)));
+            return;
+        }
+
+        // From a server old enough to publish through the go path, which carried no map with it. The
+        // session service's view of where everyone is, as those servers do it. Delete with the
+        // legacy consumer.
+        var presenceMap = OpUtils.map(sessionManager.getPresence(message.senderId()), Presence::mapId);
+        if (presenceMap == null) return;
+        handleUnsignedChat(message, "chat.channel.local", recipient -> Objects.equals(presenceMap,
+            OpUtils.map(sessionManager.getPresence(recipient.getUuid().toString()), Presence::mapId)));
+    }
+
+    @Blocking
+    protected void handleUnsignedChat(ChatMessage message, String key, Predicate<Player> filter) {
         logger.info("Received chat message: {}", message);
 
         try {
-            var senderDisplayName = api.players.getDisplayName(message.sender());
+            var senderDisplayName = api.players.getDisplayName(message.senderId());
             var senderName = senderDisplayName.build();
             var isColored = senderDisplayName.parts().size() > 1;
 
-            for (var recipient : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            for (var recipient : CONNECTION_MANAGER.getOnlinePlayers()) {
                 if (recipient.getSettings().chatMessageType() != ChatMessageType.FULL) {
                     // Recipient has disabled chat messages - they only want system messages
                     continue;
                 }
 
-                var isSender = recipient.getUuid().toString().equals(message.sender());
+                var isSender = recipient.getUuid().toString().equals(message.senderId());
                 if (!filter.test(recipient)) continue;
 
                 var data = this.components.createGlobalMessage(recipient, message);
@@ -245,27 +262,28 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
                     data.extra().values().forEach(recipient::sendMessage);
                 }
             }
-
-            // If there is an extra message, handle it
-            if (message.extra() != null && message.extra().type() == ClientChatMessageData.Type.CHAT_SYSTEM) {
-                handleChatSystem(message.extra());
-            }
         } catch (Exception e) {
             ExceptionReporter.reportException(e);
         }
     }
 
     @Blocking
-    private void handleDirectMessage(ChatMessageData message) {
+    private void handleDirectMessage(ChatMessage message) {
+        var targetId = message.targetId();
+        if (targetId == null) {
+            logger.warn("dropped a direct message with no target");
+            return;
+        }
+
         try {
-            var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.sender()));
-            var target = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.channel()));
+            var sender = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(message.senderId()));
+            var target = CONNECTION_MANAGER.getOnlinePlayerByUuid(UUID.fromString(targetId));
             var spies = new ArrayList<Player>(); // People spying todo
 
             if (sender == null && target == null && spies.isEmpty()) return; // Not relevant to this server
 
-            var targetDisplayName = api.players.getDisplayName(message.channel()).build();
-            var senderDisplayName = api.players.getDisplayName(message.sender()).build();
+            var targetDisplayName = api.players.getDisplayName(targetId).build();
+            var senderDisplayName = api.players.getDisplayName(message.senderId()).build();
 
             if (target != null) {
                 var data = this.components.createDirectMessage(target, message);
@@ -291,46 +309,4 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
             ExceptionReporter.reportException(e);
         }
     }
-
-    @Blocking
-    protected void handleChatSystem(ChatMessageData message) {
-        var player = MinecraftServer.getConnectionManager()
-            .getOnlinePlayerByUuid(UUID.fromString(message.target()));
-        if (player == null) return; // Not relevant to this server
-        if (message.respectClientSettings() && player.getSettings().chatMessageType() != ChatMessageType.FULL) {
-            // Recipient has disabled chat messages and this message is sent only on FULL
-            return;
-        }
-
-        try {
-            var args = new ArrayList<Component>();
-            for (var rawArg : message.argsSafe()) {
-                // Hacky way to send display name in arg, we should properly support a type field on arg to resolve it.
-                if (rawArg.startsWith("pdn::")) {
-                    var displayName = api.players.getDisplayName(rawArg.substring(5));
-                    args.add(displayName.build());
-                    continue;
-                }
-                args.add(Component.text(rawArg));
-            }
-            player.sendMessage(Component.translatable(message.key(), args));
-        } catch (Exception e) {
-            ExceptionReporter.reportException(e, player);
-        }
-    }
-
-    private CompletableFuture<Optional<Punishment>> fetchActiveMute(String playerId, Executor executor) {
-        return CompletableFuture.supplyAsync(() -> Optional.ofNullable(punishmentService.getActivePunishment(playerId, PunishmentType.MUTE)), executor);
-    }
-
-    private void handlePunishmentCreated(PunishmentCreatedEvent event) {
-        if (event.punishment().type() != PunishmentType.MUTE) return;
-        this.playerMuteCache.put(event.punishment().playerId(), CompletableFuture.completedFuture(Optional.of(event.punishment())));
-    }
-
-    private void handlePunishmentRevoked(PunishmentRevokedEvent event) {
-        if (event.punishment().type() != PunishmentType.MUTE) return;
-        this.playerMuteCache.put(event.punishment().playerId(), CompletableFuture.completedFuture(Optional.empty()));
-    }
-
 }

@@ -190,7 +190,7 @@ class LibraryModelBuilderTest {
             @LuaLibrary(name = "@t/prop")
             public final class LibProp {
                 @LuaExport
-                @LuaUnion(discriminator = "kind")
+                @LuaUnion(discriminator = "status")
                 public static abstract sealed class Prop permits Block, Item {
                     /// @luaReturn string
                     @LuaProperty public int getId(LuaState s) { return 1; }
@@ -214,10 +214,10 @@ class LibraryModelBuilderTest {
         var prop = findExport(library, "Prop");
         var block = findExport(library, "Block");
         var item = findExport(library, "Item");
-        assertEquals(Model.Export.Kind.UNION_ALIAS, prop.kind());
-        assertEquals(Model.Export.Kind.UNION_VARIANT, block.kind());
-        assertEquals(Model.Export.Kind.UNION_VARIANT, item.kind());
-        assertEquals("kind", prop.discriminator());
+        assertEquals(Model.Export.Kind.UNION_ALIAS, prop.status());
+        assertEquals(Model.Export.Kind.UNION_VARIANT, block.status());
+        assertEquals(Model.Export.Kind.UNION_VARIANT, item.status());
+        assertEquals("status", prop.discriminator());
         assertEquals(2, prop.unionVariants().size());
         assertEquals(ClassName.get("fixtures", "LibProp", "Block"), prop.unionVariants().get(0));
         assertEquals(ClassName.get("fixtures", "LibProp", "Item"), prop.unionVariants().get(1));
@@ -239,7 +239,7 @@ class LibraryModelBuilderTest {
             }
             """);
         var shape = findExport(library, "Shape");
-        assertEquals(Model.Export.Kind.UNION_ALIAS, shape.kind());
+        assertEquals(Model.Export.Kind.UNION_ALIAS, shape.status());
         assertNull(shape.discriminator());
         assertEquals(2, shape.unionVariants().size());
     }
@@ -330,7 +330,7 @@ class LibraryModelBuilderTest {
             import net.hollowcube.scripting.gen.LuaUnion;
             @LuaLibrary(name = "@t/missd")
             public final class LibMissD {
-                @LuaExport @LuaUnion(discriminator = "kind")
+                @LuaExport @LuaUnion(discriminator = "status")
                 public static abstract sealed class Prop permits LibMissD.Block {}
                 @LuaExport
                 public static final class Block extends Prop {
@@ -340,7 +340,7 @@ class LibraryModelBuilderTest {
             }
             """);
         assertThat(compilation).hadErrorContaining(
-            "to declare a @LuaProperty getter named 'kind'");
+            "to declare a @LuaProperty getter named 'status'");
     }
 
     @Test
@@ -354,7 +354,7 @@ class LibraryModelBuilderTest {
             import net.hollowcube.scripting.gen.LuaUnion;
             @LuaLibrary(name = "@t/nonlit")
             public final class LibNonLit {
-                @LuaExport @LuaUnion(discriminator = "kind")
+                @LuaExport @LuaUnion(discriminator = "status")
                 public static abstract sealed class Prop permits LibNonLit.Block {}
                 @LuaExport
                 public static final class Block extends Prop {
@@ -377,7 +377,7 @@ class LibraryModelBuilderTest {
             import net.hollowcube.scripting.gen.LuaUnion;
             @LuaLibrary(name = "@t/dup")
             public final class LibDup {
-                @LuaExport @LuaUnion(discriminator = "kind")
+                @LuaExport @LuaUnion(discriminator = "status")
                 public static abstract sealed class Prop permits LibDup.A, LibDup.B {}
                 @LuaExport
                 public static final class A extends Prop {

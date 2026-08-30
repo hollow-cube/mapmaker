@@ -1,6 +1,5 @@
 package net.hollowcube.apiserver.session;
 
-import com.google.gson.Gson;
 import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.ipc.session.SessionClient;
@@ -19,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /// Sessions end to end, the same way as the head database: a real Postgres under the service, the
 /// generated server over it, and the generated client talking to that over a real socket.
-class PostgresSessionsTest {
+class SessionServiceImplTest {
 
     @RegisterExtension
     static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
@@ -29,12 +28,12 @@ class PostgresSessionsTest {
 
     @BeforeEach
     void start() throws IOException {
-        var service = new PostgresSessions(TEST_DB.database(ApiDatabase::new));
+        var service = new SessionServiceImpl(TEST_DB.database(ApiDatabase::new));
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext(SessionServer.PATH, new SessionServer(service, new Gson()));
+        server.createContext(SessionServer.PATH, new SessionServer(service));
         server.start();
 
-        sessions = new SessionClient(HttpClient.newHttpClient(), new Gson(),
+        sessions = new SessionClient(HttpClient.newHttpClient(),
             "http://127.0.0.1:" + server.getAddress().getPort());
     }
 

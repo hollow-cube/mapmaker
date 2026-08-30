@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker;
 import net.hollowcube.mapmaker.chat.components.ChatLanguage;
 import net.hollowcube.mapmaker.map.VisibilityRule;
 import net.hollowcube.mapmaker.player.PlayerSetting;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.chat.ChatChannels;
 
 public final class PlayerSettings {
     // Note that unlike it claims, this actually is not all declarations of player settings.
@@ -11,7 +11,7 @@ public final class PlayerSettings {
 
     // General Settings
 
-    public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ClientChatMessageData.CHANNEL_GLOBAL);
+    public static final PlayerSetting<String> CHAT_CHANNEL = PlayerSetting.String("chat_channel", ChatChannels.GLOBAL);
     public static final PlayerSetting<Boolean> COSMETICS_SHOW_LOCKED = PlayerSetting.Bool("cosmetics.show_locked", true);
     public static final PlayerSetting<ChatLanguage> CHAT_LANGUAGE = PlayerSetting.Enum("chat_language", ChatLanguage.ORIGINAL);
 

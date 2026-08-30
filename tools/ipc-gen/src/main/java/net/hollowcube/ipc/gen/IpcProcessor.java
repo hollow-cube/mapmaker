@@ -29,7 +29,7 @@ import java.util.*;
 /// Then, for the wire as a whole — every method signature, every `@NatsMessage` and
 /// `@NotificationBody` record, and every type reachable from one:
 /// - `net.hollowcube.ipc.WireAdapters`, the gson adapters `Wire.gson()` carries, one per enum
-///   and sealed interface, plus a `<Name>Unknown` record per sealed interface.
+///   and sealed interface.
 /// - `wire.json`, the descriptor `wireCheck` and `wireCompat` hold this build to.
 ///
 /// Neither side names a route or a field as a string anyone writes: both are derived from the same
@@ -88,7 +88,6 @@ public final class IpcProcessor extends AbstractProcessor {
         if (!walker.ok() || subjects == null || notifications == null) return false;
 
         write(IpcNames.WIRE_ADAPTERS, AdaptersEmitter.factory(walker));
-        for (var sealed : walker.sealeds()) write(sealed.unknown(), AdaptersEmitter.unknownVariant(sealed));
         writeDescriptor(DescriptorBuilder.build(models, walker, subjects, notifications).toJson());
         return false;
     }

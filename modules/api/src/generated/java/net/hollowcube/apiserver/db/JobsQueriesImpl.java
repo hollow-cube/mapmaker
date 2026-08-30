@@ -15,6 +15,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 /**
  * Runs JobsQueries against a connection borrowed per statement.
  */
+@SuppressWarnings("UnusedReturnValue")
 final class JobsQueriesImpl implements JobsQueries {
     private static final String SCHEDULE_JOB = """
         -- One row per recurring job, created once; a row that already exists keeps its own run_at.

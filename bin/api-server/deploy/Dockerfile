@@ -9,5 +9,5 @@ WORKDIR /app
 COPY ./bin/api-server/build/native/nativeCompile/api-server /app/api-server
 
 EXPOSE 9124
-# Structured logs in the cluster; logback.xml (plain text) is what a local run picks up.
+# Structured logs in the cluster; logback-local.xml (plain text) is what a local run picks up.
 ENTRYPOINT ["/app/api-server", "-Dlogback.configurationFile=logback-prod.xml"]

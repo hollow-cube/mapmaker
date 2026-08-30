@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The queries in `gadgets.sql`.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface GadgetsQueries {
     long insertGadget(InsertGadgetParams params);
 

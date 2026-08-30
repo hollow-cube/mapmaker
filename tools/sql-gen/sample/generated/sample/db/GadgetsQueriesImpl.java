@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Runs GadgetsQueries against a connection borrowed per statement.
  */
+@SuppressWarnings("UnusedReturnValue")
 final class GadgetsQueriesImpl implements GadgetsQueries {
     private static final String INSERT_GADGET = """
         insert into gadget (id, status, label, quantity, weight, price, payload, metadata, created_at,

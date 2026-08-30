@@ -16,6 +16,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
 import io.opentelemetry.semconv.ResourceAttributes;
+import net.hollowcube.command.CommandExecutedEvent;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
@@ -30,6 +31,7 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.ipc.Wire;
+import net.hollowcube.ipc.chat.ChatClient;
 import net.hollowcube.ipc.hdb.HeadDatabaseClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -70,6 +72,7 @@ import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.BugReportCommand;
+import net.hollowcube.mapmaker.map.command.CommandLogReporter;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.util.ACHook;
@@ -108,6 +111,7 @@ import net.minestom.server.network.packet.server.common.ServerLinksPacket;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,6 +122,7 @@ import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ServiceLoader;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
@@ -154,6 +159,9 @@ public abstract class AbstractMapServer implements MapServer {
     private final Shutdowner shutdowner = new Shutdowner(this::awaitQuiescence);
 
     private final List<String> remoteCommandNames = new ArrayList<>();
+    /// The same names as an immutable snapshot, for whoever reads them off another thread. Replaced
+    /// whole whenever the remote commands are reloaded, never mutated.
+    private volatile Set<String> remoteCommands = Set.of();
 
     protected AbstractMapServer(@NotNull ConfigLoaderV3 config) {
         this.config = config;
@@ -165,16 +173,12 @@ public abstract class AbstractMapServer implements MapServer {
         if (apiUrl.isEmpty()) apiUrl = "http://localhost:9127";
         var http = new HttpClientWrapper(otel, apiUrl);
 
-        // Everything ipc is served by the java api-server off one base url, so this is the url
-        // every future ipc client here gets built against too. The version is what the api-server
-        // sees in `x-ipc-client`, and so how old its oldest caller is known to be.
+        // What the api-server sees in `x-ipc-client`, and so how old its oldest caller is known
+        // to be. Set whether or not the services below turn out to be remote.
         Wire.setClientVersion(ServerRuntime.getRuntime().version());
-        var ipcUrl = config.get(Ipc_ServiceConfig.class).url();
-        if (ipcUrl.isEmpty()) ipcUrl = "http://localhost:9124";
-        var ipcHttp = HttpClient.newHttpClient();
-        var headDatabase = new HeadDatabaseClient(ipcHttp, ipcUrl, otel);
+        var ipc = createIpcServices(config, otel);
 
-        this.api = new ApiClient(http, headDatabase);
+        this.api = new ApiClient(http, ipc.headDatabase(), ipc.chat());
 
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
@@ -195,6 +199,13 @@ public abstract class AbstractMapServer implements MapServer {
         else sessionService = new SessionServiceImpl(otel, "http://localhost:9127"); // tilt
 
         this.acHook = ServiceLoader.load(ACHook.class).findFirst().orElse(null);
+    }
+
+    protected @NotNull IpcServices createIpcServices(@NotNull ConfigLoaderV3 config, @NotNull OpenTelemetry otel) {
+        var ipcUrl = config.get(Ipc_ServiceConfig.class).url();
+        if (ipcUrl.isEmpty()) ipcUrl = "http://localhost:9124";
+        var http = HttpClient.newHttpClient();
+        return new IpcServices(new HeadDatabaseClient(http, ipcUrl, otel), new ChatClient(http, ipcUrl, otel));
     }
 
     protected abstract @NotNull String name();
@@ -273,7 +284,7 @@ public abstract class AbstractMapServer implements MapServer {
             var punishmentCreatedListener = new PunishmentManagementListener(api.players, jetStream);
             shutdowner.queue("punishment-listener", punishmentCreatedListener::close);
 
-            chatMessageListener = new ChatMessageListener(sessionManager, api, punishmentService, jetStream);
+            chatMessageListener = new ChatMessageListener(sessionManager, api, jetStream, AbstractMapServer::mapOf);
             shutdowner.queue("chat-message-listener", chatMessageListener::close);
             MinecraftServer.getPacketListenerManager().setPlayListener(ClientChatMessagePacket.class, chatMessageListener);
 
@@ -282,6 +293,10 @@ public abstract class AbstractMapServer implements MapServer {
 
             var notificationsConsumer = new NotificationsConsumer(services, jetStream);
             shutdowner.queue("notifications-consumer", notificationsConsumer::close);
+
+            var commandLogReporter = new CommandLogReporter(api.chat, () -> remoteCommands);
+            MinecraftServer.getGlobalEventHandler()
+                .addListener(CommandExecutedEvent.class, commandLogReporter::onCommandExecuted);
         }
 
         ChatAnnouncer.setupAnnouncements(config, sessionManager(), shutdowner);
@@ -292,6 +307,16 @@ public abstract class AbstractMapServer implements MapServer {
 
         // Finally, mark the service as ready for Kubernetes
         isReady = true;
+    }
+
+    /// The map a player is in, or null outside one — the hub, or a world that is not a map.
+    ///
+    /// Chat is in `modules:core`, which cannot see a [MapWorld], so it reads this instead. It is the
+    /// player's own world rather than the session service's view of it, which is how a local message
+    /// is placed exactly on both ends.
+    private static @Nullable String mapOf(@NotNull Player player) {
+        var world = MapWorld.forPlayer(player);
+        return world == null ? null : world.map().id();
     }
 
     @Override
@@ -391,11 +416,11 @@ public abstract class AbstractMapServer implements MapServer {
             commandManager.register(new PlayCommand(api(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(api(), sessionManager()));
             commandManager.register(new ListCommand(sessionManager(), api().players));
-            commandManager.register(new MsgCommand(sessionManager(), api().maps, chatMessageListener, playerService()));
-            commandManager.register(new ChannelCommand.Global(sessionManager(), api().maps, chatMessageListener));
-            commandManager.register(new ChannelCommand.Local(sessionManager(), api().maps, chatMessageListener));
-            commandManager.register(new ChannelCommand.Reply(sessionManager(), api().maps, chatMessageListener));
-            commandManager.register(new ChannelCommand.Staff(sessionManager(), api().maps, chatMessageListener));
+            commandManager.register(new MsgCommand(sessionManager(), chatMessageListener, playerService()));
+            commandManager.register(new ChannelCommand.Global(chatMessageListener));
+            commandManager.register(new ChannelCommand.Local(chatMessageListener));
+            commandManager.register(new ChannelCommand.Reply(chatMessageListener));
+            commandManager.register(new ChannelCommand.Staff(chatMessageListener));
             commandManager.register(new ChatCommand(playerService()));
         }
 
@@ -447,6 +472,7 @@ public abstract class AbstractMapServer implements MapServer {
             remoteCommandNames.add(cmd.name());
             commandManager.register(cmd);
         }
+        remoteCommands = Set.copyOf(remoteCommandNames);
     }
 
     public @NotNull List<HttpServerWrapper.HealthCheck> healthChecks() {

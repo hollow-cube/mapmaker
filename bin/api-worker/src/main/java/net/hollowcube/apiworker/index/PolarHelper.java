@@ -25,10 +25,7 @@ import java.util.Set;
 /// up itself.
 final class PolarHelper {
     static {
-        // Trigger data is stored with the same codecs the runtime uses, and those reach into the
-        // registries for attributes, potions and the like, so the server has to be far enough up
-        // for MinecraftServer#process to exist. Nothing is bound or ticked by this.
-        MinecraftServer.init();
+        ensureServer();
         DataFixer.buildModel();
 
         // These classes populate registries from their static initialisers, and a codec that
@@ -96,6 +93,22 @@ final class PolarHelper {
     interface SectionVisitor {
         /// @param sectionY absolute section index, so world bottom is [PolarWorld#minSection] rather than 0
         void visit(int sectionX, int sectionY, int sectionZ, PolarSection section);
+    }
+
+    /// Enough of a server for the codecs below to resolve against.
+    ///
+    /// Trigger data is stored with the same codecs the runtime uses, and those reach into the
+    /// registries for attributes, potions and the like, so the server has to be far enough up for
+    /// [MinecraftServer#process] to exist. Nothing is bound or ticked by this.
+    ///
+    /// Only when there is not one already: [MinecraftServer#init] builds a whole new `ServerProcess`
+    /// and installs it, so in a process that is also running a game server — the development server
+    /// hosts this indexer rather than running the worker beside it — this threw the live process
+    /// away, taking every event node registered on it, and dropped the server to offline mode,
+    /// which is what the no-argument `init` defaults to. The registries are what this needs, and a
+    /// process that already exists has them.
+    static void ensureServer() {
+        if (MinecraftServer.process() == null) MinecraftServer.init();
     }
 
     private PolarHelper() {

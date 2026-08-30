@@ -24,8 +24,9 @@ final class IpcNames {
 
     /// What every wire enum has to declare, and what a constant this build does not know reads as.
     static final String UNKNOWN_CONSTANT = "UNKNOWN";
-    /// Suffix of the generated record a sealed wire type's unknown discriminator reads as.
-    static final String UNKNOWN_SUFFIX = "Unknown";
+    /// Simple name of the variant a sealed wire type's unrecognised discriminator reads as. Written
+    /// by hand, like every other variant, and checked for.
+    static final String UNKNOWN_VARIANT = "Unknown";
     /// Field a sealed wire type's variant is named in.
     static final String DISCRIMINATOR = "type";
     static final ClassName IPC_EXCEPTION = ClassName.get("net.hollowcube.ipc.util", "IpcException");
@@ -62,12 +63,6 @@ final class IpcNames {
     /// case, the way a class name becomes a route.
     static String variantName(String simpleName) {
         return kebab(simpleName);
-    }
-
-    /// The generated unknown variant of a sealed wire type: a top-level record in the interface's
-    /// package, named after every enclosing type so that `Foo.Body` gives `FooBodyUnknown`.
-    static ClassName unknownVariant(ClassName sealed) {
-        return ClassName.get(sealed.packageName(), String.join("", sealed.simpleNames()) + UNKNOWN_SUFFIX);
     }
 
     /// Lower-kebab of a Java identifier, breaking before each capital that starts a word. A run of

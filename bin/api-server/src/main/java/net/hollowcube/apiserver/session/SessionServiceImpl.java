@@ -4,11 +4,11 @@ import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.ipc.session.SessionService;
 
 /// Player sessions, served out of the `player_sessions` table the Go api-server writes.
-public final class PostgresSessions implements SessionService {
+public final class SessionServiceImpl implements SessionService {
 
     private final ApiDatabase db;
 
-    public PostgresSessions(ApiDatabase db) {
+    public SessionServiceImpl(ApiDatabase db) {
         this.db = db;
     }
 

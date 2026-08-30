@@ -17,6 +17,8 @@ dependencies {
 
     implementation(libs.gson)
     implementation(libs.logback)
+    // What the api processes publish their events on. Core NATS only; nothing here needs a stream.
+    implementation(libs.nats)
 
     testImplementation(project(":tools:sql-gen:testing"))
 }

@@ -47,4 +47,8 @@ tasks.withType<Test> {
 
 application {
     mainClass = "net.hollowcube.apiworker.Main"
+    // Named rather than `logback.xml`, so that a process which puts this on its classpath alongside
+    // its own — the development server hosts both of these — does not end up with several and a
+    // warning about which one won. The image passes logback-prod.xml the same way.
+    applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-local.xml")
 }

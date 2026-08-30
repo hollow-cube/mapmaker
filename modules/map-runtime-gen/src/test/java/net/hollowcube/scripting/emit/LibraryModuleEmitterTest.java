@@ -123,16 +123,16 @@ class LibraryModuleEmitterTest {
             propType, "Prop", null, /*isFinal=*/false, List.of(),
             List.of(roProp("id", t("string"))),
             List.of(), List.of(), 1, /*hasSubtypes=*/true,
-            Model.Export.Kind.UNION_ALIAS, List.of(blockType, itemType), "kind", "");
+            Model.Export.Kind.UNION_ALIAS, List.of(blockType, itemType), "status", "");
         var block = new Model.Export(
             blockType, "Block", propType, true, List.of(),
-            List.of(roProp("kind", new LuauType.StringLiteral("block")),
+            List.of(roProp("status", new LuauType.StringLiteral("block")),
                 roProp("block", t("string"))),
             List.of(), List.of(), 2, false,
             Model.Export.Kind.UNION_VARIANT, List.of(), null, "");
         var item = new Model.Export(
             itemType, "Item", propType, true, List.of(),
-            List.of(roProp("kind", new LuauType.StringLiteral("item")),
+            List.of(roProp("status", new LuauType.StringLiteral("item")),
                 roProp("item", t("string"))),
             List.of(), List.of(), 3, false,
             Model.Export.Kind.UNION_VARIANT, List.of(), null, "");
@@ -147,13 +147,13 @@ class LibraryModuleEmitterTest {
             """), out);
         assertTrue(out.contains("""
             export type Block = Prop_Fields & {
-            \tread kind: "block",
+            \tread status: "block",
             \tread block: string,
             }
             """), out);
         assertTrue(out.contains("""
             export type Item = Prop_Fields & {
-            \tread kind: "item",
+            \tread status: "item",
             \tread item: string,
             }
             """), out);

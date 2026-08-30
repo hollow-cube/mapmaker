@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * The queries in `mapFeatures.sql`.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface MapFeaturesQueries {
     long upsertMapFeatures(UpsertMapFeaturesParams params);
 

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.api;
 
 import net.hollowcube.mapmaker.api.auth.AuthClient;
+import net.hollowcube.ipc.chat.ChatService;
 import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -16,6 +17,7 @@ public final class ApiClient {
     public final MapClient maps;
     public final ReplayClient replays;
     public final HeadDatabaseService headDatabase;
+    public final ChatService chat;
     public final InteractionClient interactions;
     public final NotificationClient notifications;
     public final AuthClient auth;
@@ -24,6 +26,7 @@ public final class ApiClient {
         PlayerClient players,
         MapClient maps,
         HeadDatabaseService headDatabase,
+        ChatService chat,
         InteractionClient interactions,
         NotificationClient notifications,
         AuthClient auth
@@ -33,6 +36,7 @@ public final class ApiClient {
             maps,
             new ReplayClient.Noop(),
             headDatabase,
+            chat,
             interactions,
             notifications,
             auth
@@ -44,6 +48,7 @@ public final class ApiClient {
         MapClient maps,
         ReplayClient replays,
         HeadDatabaseService headDatabase,
+        ChatService chat,
         InteractionClient interactions,
         NotificationClient notifications,
         AuthClient auth
@@ -52,18 +57,20 @@ public final class ApiClient {
         this.maps = maps;
         this.replays = replays;
         this.headDatabase = headDatabase;
+        this.chat = chat;
         this.interactions = interactions;
         this.notifications = notifications;
         this.auth = auth;
     }
 
-    /// Everything the Go api-server still serves comes off `http`; the head database is its own
-    /// service now and so is passed in rather than derived from that one base url.
-    public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase) {
+    /// Everything the Go api-server still serves comes off `http`; everything the java api-server
+    /// serves is an ipc client built against its own base url, and so is passed in.
+    public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat) {
         this.players = new PlayerClient.Http(http);
         this.maps = new MapClient.Http(http);
         this.replays = new ReplayClient.Http(http);
         this.headDatabase = headDatabase;
+        this.chat = chat;
         this.interactions = new InteractionClient.Http(http);
         this.notifications = new NotificationClient.Http(http);
         this.auth = new AuthClient.Http(http);

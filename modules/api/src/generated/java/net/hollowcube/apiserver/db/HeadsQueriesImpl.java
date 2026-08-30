@@ -13,6 +13,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 /**
  * Runs HeadsQueries against a connection borrowed per statement.
  */
+@SuppressWarnings("UnusedReturnValue")
 final class HeadsQueriesImpl implements HeadsQueries {
     private static final String GET_RANDOM_HEADS = """
         select head_db.*,

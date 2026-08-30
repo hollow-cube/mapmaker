@@ -26,8 +26,6 @@ import net.hollowcube.mapmaker.player.RewardType;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
 import net.hollowcube.mapmaker.punishments.types.PunishmentUpdateMessage;
 import net.hollowcube.mapmaker.session.SessionUpdateMessage;
-import net.hollowcube.mapmaker.temp.ChatMessageData;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.util.gson.*;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -70,8 +68,6 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))
         .registerTypeAdapter(MapRole.class, new LenientEnumTypeAdapter<>(MapRole.class))
         .registerTypeAdapter(PlayerMapProgress.Progress.class, new EnumTypeAdapter<>(PlayerMapProgress.Progress.class))
-        .registerTypeAdapter(ClientChatMessageData.Type.class, new EnumOrdinalTypeAdapter<>(ClientChatMessageData.Type.class))
-        .registerTypeAdapter(ChatMessageData.Part.Type.class, new EnumOrdinalTypeAdapter<>(ChatMessageData.Part.Type.class))
         .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
         .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
         .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))

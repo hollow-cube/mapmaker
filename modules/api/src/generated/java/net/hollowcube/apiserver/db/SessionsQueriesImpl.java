@@ -11,6 +11,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 /**
  * Runs SessionsQueries against a connection borrowed per statement.
  */
+@SuppressWarnings("UnusedReturnValue")
 final class SessionsQueriesImpl implements SessionsQueries {
     private static final String COUNT_PLAYER_SESSIONS = """
         select count(*) as count

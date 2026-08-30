@@ -1,6 +1,7 @@
 -- The Go api-server's player sessions, as its `internal/db` migrations 000002, 000005, 000008 and
 -- 000009 leave the table. Go owns the schema; this is what the queries here are described against,
--- and has to be kept in step with it by hand.
+-- and has to be kept in step with it by hand. `reply_target` in 0008 is the one column that is
+-- ours rather than Go's.
 create table if not exists player_sessions
 (
     player_id        uuid        not null primary key,

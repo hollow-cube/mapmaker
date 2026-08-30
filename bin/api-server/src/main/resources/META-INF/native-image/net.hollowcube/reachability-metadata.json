@@ -17,6 +17,54 @@
       "allDeclaredConstructors": true
     },
     {
+      "type": "net.hollowcube.ipc.chat.ChatOutcome",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.ChatMessage",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.MessagePart$Raw",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.MessagePart$Url",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.MessagePart$Emoji",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.MessagePart$Map",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.MessagePartUnknown",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
+      "type": "net.hollowcube.ipc.chat.CommandExecution",
+      "allDeclaredFields": true,
+      "allDeclaredMethods": true,
+      "allDeclaredConstructors": true
+    },
+    {
       "comment": "logback instantiates the encoder named in logback-prod.xml by name, so nothing in the image graph reaches it",
       "type": "net.hollowcube.apiserver.common.JsonLogEncoder",
       "allDeclaredMethods": true,

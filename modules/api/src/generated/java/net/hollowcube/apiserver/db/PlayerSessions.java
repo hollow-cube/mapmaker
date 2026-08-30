@@ -15,7 +15,7 @@ public record PlayerSessions(UUID playerId, Instant createdAt, String proxyId,
         @Nullable String serverId, boolean hidden, @Nullable String username, String skinTexture,
         String skinSignature, @Nullable String pType, @Nullable String pState,
         @Nullable String pInstanceId, @Nullable String pMapId, @Nullable Instant pStartTime,
-        @Nullable Instant lastSeen, int protocolVersion) {
+        @Nullable Instant lastSeen, int protocolVersion, @Nullable UUID replyTarget) {
     /**
      * Reads one `player_sessions` row, its first column at `col`.
      */
@@ -35,6 +35,7 @@ public record PlayerSessions(UUID playerId, Instant createdAt, String proxyId,
                 rs.getString(col + 11),
                 Jdbc.getInstant(rs, col + 12),
                 Jdbc.getInstant(rs, col + 13),
-                rs.getInt(col + 14));
+                rs.getInt(col + 14),
+                rs.getObject(col + 15, UUID.class));
     }
 }

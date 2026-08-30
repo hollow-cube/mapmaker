@@ -13,6 +13,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 /**
  * Runs WidgetsQueries against a connection borrowed per statement.
  */
+@SuppressWarnings("UnusedReturnValue")
 final class WidgetsQueriesImpl implements WidgetsQueries {
     private static final String LIST_WIDGETS = """
         select widget.*

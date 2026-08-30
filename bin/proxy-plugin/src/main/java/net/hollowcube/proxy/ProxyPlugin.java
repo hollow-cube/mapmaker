@@ -1,6 +1,5 @@
 package net.hollowcube.proxy;
 
-import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
@@ -109,7 +108,7 @@ public class ProxyPlugin {
         if (sessionServiceUrl != null) sessionService = new ProxySessionService(logger, sessionServiceUrl);
         else sessionService = new ProxySessionService(logger, "http://api-server:9124"); // tilt
         sessions = new SessionClient(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build(),
-            new Gson(), IPC_SERVICE_URL);
+            IPC_SERVICE_URL);
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);

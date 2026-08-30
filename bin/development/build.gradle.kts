@@ -4,6 +4,9 @@ plugins {
 }
 
 dependencies {
+    implementation(project(":bin:api-server"))
+    implementation(project(":bin:api-worker"))
+    implementation(project(":modules:api"))
     implementation(project(":bin:config"))
     implementation(project(":bin:hub"))
     implementation(project(":bin:map"))
@@ -26,6 +29,7 @@ dependencies {
     }
     implementation(libs.bundles.prometheus)
     implementation(libs.fastutil)
+    implementation(libs.posthog)
 }
 
 application {

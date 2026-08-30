@@ -75,7 +75,10 @@ class IpcRoundTripTest {
                 RED, GREEN, UNKNOWN
             }
 
-            sealed interface Shape permits Circle, Square, EchoServiceShapeUnknown {
+            sealed interface Shape permits Circle, Square, Shape.Unknown {
+                @RuntimeGson
+                record Unknown(@Nullable String type) implements Shape {
+                }
             }
 
             @RuntimeGson
@@ -239,9 +242,9 @@ class IpcRoundTripTest {
         var response = post("/echo/grow", "{\"shape\":{\"type\":\"hexagon\",\"sides\":6}}");
 
         assertEquals(500, response.statusCode());
-        assertTrue(response.body().contains("EchoServiceShapeUnknown(hexagon)"), response.body());
+        assertTrue(response.body().contains("Unknown(hexagon)"), response.body());
         var unknown = received.getLast();
-        assertEquals("test.EchoServiceShapeUnknown", unknown.getClass().getName());
+        assertEquals("test.EchoService$Shape$Unknown", unknown.getClass().getName());
         assertEquals("hexagon", unknown.getClass().getMethod("type").invoke(unknown));
     }
 

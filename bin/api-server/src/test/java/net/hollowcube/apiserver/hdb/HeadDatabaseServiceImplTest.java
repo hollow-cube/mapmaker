@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 ///
 /// Going through the wire rather than calling the service directly is the point — it is the only
 /// way the route names, the JSON field names and the [HeadInfo] round trip are actually exercised.
-class PostgresHeadDatabaseTest {
+class HeadDatabaseServiceImplTest {
 
     @RegisterExtension
     // The schema lives with the queries in modules/api; this is the service on top of it.
@@ -42,7 +42,7 @@ class PostgresHeadDatabaseTest {
                 (2, 'mob', 'Zombie Head', array['green'], 'tex-zombie'),
                 (3, 'block', 'Stone Block', array[]::varchar[], 'tex-stone')""");
 
-        var service = new PostgresHeadDatabase(TEST_DB.database(ApiDatabase::new));
+        var service = new HeadDatabaseServiceImpl(TEST_DB.database(ApiDatabase::new));
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext(HeadDatabaseServer.PATH, new HeadDatabaseServer(service));
         server.start();

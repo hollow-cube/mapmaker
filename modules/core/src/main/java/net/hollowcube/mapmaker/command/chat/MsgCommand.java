@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.command.chat;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.ipc.chat.ChatChannel;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
@@ -21,8 +21,8 @@ public class MsgCommand extends AbstractChatCommand {
 
     private final @NotNull PlayerService playerService;
 
-    public MsgCommand(@NotNull SessionManager sessions, @NotNull MapClient maps, @NotNull ChatMessageListener messages, @NotNull PlayerService playerService) {
-        super(sessions, maps, messages, "msg");
+    public MsgCommand(@NotNull SessionManager sessions, @NotNull ChatMessageListener messages, @NotNull PlayerService playerService) {
+        super(messages, "msg");
 
         this.targetArg = CoreArgument.AnyOnlinePlayer("player", sessions)
                 .description("The player to send the message to");
@@ -50,6 +50,6 @@ public class MsgCommand extends AbstractChatCommand {
 
         if (this.playerService.failIfBlocked(player, targetId, context.getRaw(this.targetArg), true)) return;
 
-        this.handle(player, targetId, message);
+        this.handle(player, ChatChannel.DIRECT, targetId, message);
     }
 }

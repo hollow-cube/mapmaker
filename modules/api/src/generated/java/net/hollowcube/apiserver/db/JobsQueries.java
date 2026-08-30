@@ -7,6 +7,7 @@ import java.util.List;
 /**
  * The queries in `jobs.sql`.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface JobsQueries {
     long scheduleJob(String job, String instance, Instant runAt);
 

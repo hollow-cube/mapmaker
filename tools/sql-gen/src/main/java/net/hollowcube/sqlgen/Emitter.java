@@ -78,6 +78,15 @@ final class Emitter {
 
     /// A record whose components come straight from a parameter list. javapoet models records by
     /// their canonical constructor, so this is the one place that shape is built.
+    /// Every `:exec` returns its update count, and almost nothing wants it: a statement written to
+    /// change one row is checked by the query, not by counting rows afterwards. Saying so once on the
+    /// generated type beats a suppression at every call site in hand-written code.
+    static AnnotationSpec unusedReturnValue() {
+        return AnnotationSpec.builder(SuppressWarnings.class)
+            .addMember("value", "$S", "UnusedReturnValue")
+            .build();
+    }
+
     static TypeSpec record(String name, String javadoc, Iterable<ParameterSpec> components,
         Modifier... extra) {
         return record(name, javadoc, components, List.of(), extra);

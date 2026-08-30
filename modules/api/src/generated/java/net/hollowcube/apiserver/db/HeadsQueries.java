@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * The queries in `heads.sql`.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface HeadsQueries {
     List<GetRandomHeadsRow> getRandomHeads(long limit);
 

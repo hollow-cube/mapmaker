@@ -1,5 +1,51 @@
 {
   "services": {
+    "chat": {
+      "interface": "net.hollowcube.ipc.chat.ChatService",
+      "methods": {
+        "log-command": {
+          "params": [
+            {
+              "name": "execution",
+              "type": "net.hollowcube.ipc.chat.CommandExecution"
+            }
+          ]
+        },
+        "send": {
+          "params": [
+            {
+              "name": "senderId",
+              "type": "String"
+            },
+            {
+              "name": "serverId",
+              "type": "String"
+            },
+            {
+              "name": "channel",
+              "type": "net.hollowcube.ipc.chat.ChatChannel"
+            },
+            {
+              "name": "targetId",
+              "type": "String",
+              "nullable": true
+            },
+            {
+              "name": "message",
+              "type": "String"
+            },
+            {
+              "name": "currentMapId",
+              "type": "String",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.chat.ChatResult"
+          }
+        }
+      }
+    },
     "head-database": {
       "interface": "net.hollowcube.ipc.hdb.HeadDatabaseService",
       "methods": {
@@ -42,6 +88,17 @@
           }
         }
       }
+    },
+    "session": {
+      "interface": "net.hollowcube.ipc.session.SessionService",
+      "methods": {
+        "online-players": {
+          "params": [],
+          "returns": {
+            "type": "int"
+          }
+        }
+      }
     }
   },
   "types": {
@@ -61,6 +118,257 @@
         {
           "name": "results",
           "type": "List\u003cT\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.ChatChannel": {
+      "kind": "enum",
+      "constants": [
+        "GLOBAL",
+        "LOCAL",
+        "STAFF",
+        "DIRECT",
+        "REPLY"
+      ]
+    },
+    "net.hollowcube.ipc.chat.ChatMessage": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "senderId",
+          "type": "String"
+        },
+        {
+          "name": "channel",
+          "type": "net.hollowcube.ipc.chat.ChatChannel"
+        },
+        {
+          "name": "targetId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "mapId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "parts",
+          "type": "List\u003cnet.hollowcube.ipc.chat.MessagePart\u003e"
+        },
+        {
+          "name": "seed",
+          "type": "long"
+        },
+        {
+          "name": "senderHasHypercube",
+          "type": "boolean"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.ChatResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "censored": "net.hollowcube.ipc.chat.ChatResult.Censored",
+        "dm-disabled": "net.hollowcube.ipc.chat.ChatResult.DmDisabled",
+        "map-not-published": "net.hollowcube.ipc.chat.ChatResult.MapNotPublished",
+        "muted": "net.hollowcube.ipc.chat.ChatResult.Muted",
+        "sent": "net.hollowcube.ipc.chat.ChatResult.Sent",
+        "target-offline": "net.hollowcube.ipc.chat.ChatResult.TargetOffline"
+      }
+    },
+    "net.hollowcube.ipc.chat.ChatResult.Censored": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.chat.ChatResult.DmDisabled": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "targetId",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.ChatResult.MapNotPublished": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.chat.ChatResult.Muted": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "expiresAt",
+          "type": "java.time.Instant",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.ChatResult.Sent": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.chat.ChatResult.TargetOffline": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "targetId",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.CommandExecution": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "timestamp",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "playerId",
+          "type": "String"
+        },
+        {
+          "name": "serverId",
+          "type": "String"
+        },
+        {
+          "name": "mapId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "instanceId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "command",
+          "type": "String"
+        },
+        {
+          "name": "remote",
+          "type": "boolean"
+        },
+        {
+          "name": "outcome",
+          "type": "net.hollowcube.ipc.chat.CommandOutcome"
+        },
+        {
+          "name": "error",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "durationMs",
+          "type": "int"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.CommandOutcome": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "status",
+          "type": "net.hollowcube.ipc.chat.CommandOutcome.Status"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.CommandOutcome.Status": {
+      "kind": "enum",
+      "constants": [
+        "SUCCESS",
+        "DENIED",
+        "NOT_FOUND",
+        "SYNTAX_ERROR",
+        "EXECUTION_ERROR"
+      ]
+    },
+    "net.hollowcube.ipc.chat.MessagePart": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "emoji": "net.hollowcube.ipc.chat.MessagePart.Emoji",
+        "map": "net.hollowcube.ipc.chat.MessagePart.Map",
+        "raw": "net.hollowcube.ipc.chat.MessagePart.Raw",
+        "url": "net.hollowcube.ipc.chat.MessagePart.Url"
+      }
+    },
+    "net.hollowcube.ipc.chat.MessagePart.Emoji": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.MessagePart.Map": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "mapId",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.MessagePart.Raw": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "text",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.chat.MessagePart.Url": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "text",
+          "type": "String"
         }
       ]
     },
@@ -93,6 +401,8 @@
       ]
     }
   },
-  "subjects": {},
+  "subjects": {
+    "chat.message": "net.hollowcube.ipc.chat.ChatMessage"
+  },
   "notifications": {}
 }

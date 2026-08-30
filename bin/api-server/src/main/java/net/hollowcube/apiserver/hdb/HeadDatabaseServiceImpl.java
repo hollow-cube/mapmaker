@@ -13,11 +13,11 @@ import net.hollowcube.sqlgen.runtime.TsQuery;
 ///
 /// A query with no words in it is a browse rather than a search, and answers a random page of the
 /// whole table — which is what the head picker opens on.
-public final class PostgresHeadDatabase implements HeadDatabaseService {
+public final class HeadDatabaseServiceImpl implements HeadDatabaseService {
 
     private final ApiDatabase db;
 
-    public PostgresHeadDatabase(ApiDatabase db) {
+    public HeadDatabaseServiceImpl(ApiDatabase db) {
         this.db = db;
     }
 

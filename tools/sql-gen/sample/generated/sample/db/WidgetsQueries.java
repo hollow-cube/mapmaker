@@ -6,6 +6,7 @@ import java.util.List;
 /**
  * The queries in `widgets.sql`.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface WidgetsQueries {
     List<Widget> listWidgets(long limit);
 

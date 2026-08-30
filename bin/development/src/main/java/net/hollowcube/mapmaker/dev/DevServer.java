@@ -10,6 +10,20 @@ import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.apiserver.chat.ChatServiceImpl;
+import net.hollowcube.apiserver.common.NatsPublisher;
+import net.hollowcube.apiserver.common.Pools;
+import net.hollowcube.apiserver.common.PostgresUri;
+import net.hollowcube.apiserver.db.ApiDatabase;
+import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
+import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.apiworker.job.Worker;
+import net.hollowcube.apiworker.jobs.IndexMapRunner;
+import net.hollowcube.apiworker.jobs.PlayerCountRunner;
+import net.hollowcube.posthog.PostHog;
+import net.hollowcube.ipc.Wire;
+import net.hollowcube.mapmaker.util.nats.NatsConfig;
+import net.hollowcube.mapmaker.map.runtime.IpcServices;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionService;
@@ -18,6 +32,7 @@ import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import io.opentelemetry.api.OpenTelemetry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -29,17 +44,32 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.Base64;
 import java.util.concurrent.Future;
 import java.util.function.Predicate;
 
 public class DevServer extends AbstractMultiMapServer {
 
+    /// What `docker-compose.yml` publishes on the host, and the same database all three of the go
+    /// api-server's postgres uris point at in dev.
+    private static final String COMPOSE_POSTGRES = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable";
+
+    /// Fewer than the real worker's four: one developer is not going to queue enough to need them,
+    /// and the threads are shared with a game server here.
+    private static final int WORKER_SLOTS = 2;
+    private static final Duration WORKER_STOP_GRACE = Duration.ofSeconds(5);
+
     // Hub stuff
     private HubMapWorld hubWorld;
 
     // Map stuff
     private Terraform terraform;
+
+    /// The database the ipc implementations and the worker share. Assigned from
+    /// [#createIpcServices] during the superclass constructor, so it must not have an initializer —
+    /// one would run afterwards and null it back out.
+    private ApiDatabase db;
 
     // Common stuff
     private final CommandManager hubCommandManager = new CommandManagerImpl(super.commandManager());
@@ -51,11 +81,53 @@ public class DevServer extends AbstractMultiMapServer {
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("dev-init")
             .addListener(AsyncPlayerPreLoginEvent.class, this::handlePreLogin)
             .addListener(ServerListPingEvent.class, this::handleServerListPing));
+
+        startApiWorker();
+    }
+
+    /// The api worker, in this process rather than beside it.
+    ///
+    /// Its jobs are how a map gets indexed after it is published, so a development server without
+    /// one silently never indexes anything. It picks rows out of the same `jobs` table as the real
+    /// worker, under a name that says which this is.
+    private void startApiWorker() {
+        var worker = new Worker(db, "dev-server", WORKER_SLOTS);
+        worker.handle(JobSpec.PLAYER_COUNT, new PlayerCountRunner(db, PostHog.getClient()));
+        worker.handle(JobSpec.INDEX_MAP, new IndexMapRunner(db, api().maps));
+        shutdowner().queue("api-worker", () -> worker.close(WORKER_STOP_GRACE));
+        worker.start();
     }
 
     @Override
     protected @NotNull String name() {
         return "mapmaker-dev";
+    }
+
+    /// The api's own implementations, called directly.
+    ///
+    /// There is no java api-server in the compose stack — only the go one, on 9127 — so there is
+    /// nothing listening on the ipc port to talk to, and running a second process to answer
+    /// yourself is not worth it for a development server. It opens the same postgres compose
+    /// brings up and answers its own calls; chat still fans out over NATS, because the consumer
+    /// on the other side of that is the thing being developed.
+    ///
+    /// Called from the superclass constructor, so this reads its arguments and the shutdowner and
+    /// nothing else.
+    @Override
+    protected @NotNull IpcServices createIpcServices(@NotNull ConfigLoaderV3 config, @NotNull OpenTelemetry otel) {
+        var url = System.getenv("DATABASE_URL");
+        if (url == null || url.isBlank()) url = COMPOSE_POSTGRES;
+        var pool = Pools.postgres(PostgresUri.parse(url), "dev");
+        shutdowner().queue("dev-ipc-pool", pool::close);
+
+        this.db = new ApiDatabase(pool);
+
+        var nats = NatsPublisher.connect(config.get(NatsConfig.class).servers(), Wire.gson());
+        shutdowner().queue("dev-ipc-nats", nats::close);
+
+        return new IpcServices(
+            new HeadDatabaseServiceImpl(db),
+            new ChatServiceImpl(db, nats));
     }
 
     @Override

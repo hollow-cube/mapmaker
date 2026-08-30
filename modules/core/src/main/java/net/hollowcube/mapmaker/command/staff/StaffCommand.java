@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.chat.ChatChannels;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,8 +35,8 @@ public class StaffCommand extends CommandDsl {
         playerData.setSetting(PlayerSettings.STAFF_MODE, nextStaffMode);
 
         // If in staff chat and disabling staff mode, switch to global
-        if (!nextStaffMode && ClientChatMessageData.CHANNEL_STAFF.equals(playerData.getSetting(PlayerSettings.CHAT_CHANNEL))) {
-            playerData.setSetting(PlayerSettings.CHAT_CHANNEL, ClientChatMessageData.CHANNEL_GLOBAL);
+        if (!nextStaffMode && ChatChannels.STAFF.equals(playerData.getSetting(PlayerSettings.CHAT_CHANNEL))) {
+            playerData.setSetting(PlayerSettings.CHAT_CHANNEL, ChatChannels.GLOBAL);
         }
 
         player.refreshCommands();

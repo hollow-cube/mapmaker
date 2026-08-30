@@ -10,7 +10,8 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.misc.Emoji;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.temp.ChatMessageData;
+import net.hollowcube.ipc.chat.ChatMessage;
+import net.hollowcube.ipc.chat.MessagePart;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -116,20 +117,20 @@ public class MessageComponents {
 
     // endregion
 
-    public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessageData message) {
+    public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessage message) {
         Random random = new Random(message.seed());
         var shouldUwuify = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
 
         var builder = MessageComponent.builder();
 
         for (var part : message.parts()) {
-            switch (part.type()) {
-                case RAW -> {
-                    Component component = Component.text(shouldUwuify ? uwuify(part.text(), random) : part.text());
+            switch (part) {
+                case MessagePart.Raw raw -> {
+                    Component component = Component.text(shouldUwuify ? uwuify(raw.text(), random) : raw.text());
 
                     var namePattern = Pattern.compile(String.format("(?:^|\\s)(%s)", player.getUsername()), Pattern.CASE_INSENSITIVE);
-                    if (namePattern.matcher(part.text()).find()) {
-                        builder.ping(!player.getUuid().toString().equals(message.sender()));
+                    if (namePattern.matcher(raw.text()).find()) {
+                        builder.ping(!player.getUuid().toString().equals(message.senderId()));
 
                         if (!shouldUwuify) {
                             component = component.replaceText(
@@ -142,27 +143,33 @@ public class MessageComponents {
 
                     builder.append(component);
                 }
-                case EMOJI -> this.emoji(builder, message.senderHasHypercube(), part.name(), random);
-                case MAP -> this.map(builder, part.mapId(), player);
-                case URL -> this.link(builder, part.text());
+                case MessagePart.Emoji emoji -> this.emoji(builder, message.senderHasHypercube(), emoji.name(), random);
+                case MessagePart.Map map -> this.map(builder, map.mapId(), player);
+                case MessagePart.Url url -> this.link(builder, url.text());
+                // A part written by an api newer than this build. Rendering nothing is the only
+                // honest thing to do with it.
+                case MessagePart.Unknown _ -> {
+                }
             }
         }
 
         return builder.build();
     }
 
-    public @NotNull MessageComponent createDirectMessage(@NotNull Player player, @NotNull ChatMessageData message) {
+    public @NotNull MessageComponent createDirectMessage(@NotNull Player player, @NotNull ChatMessage message) {
         Random random = new Random(message.seed());
         var shouldUwuify = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
 
         var builder = MessageComponent.builder();
 
         for (var part : message.parts()) {
-            switch (part.type()) {
-                case RAW  -> builder.append(Component.text(shouldUwuify ? uwuify(part.text(), random) : part.text()));
-                case EMOJI -> this.emoji(builder, message.senderHasHypercube(), part.name(), random);
-                case MAP -> this.map(builder, part.mapId(), player);
-                case URL -> this.link(builder, part.text());
+            switch (part) {
+                case MessagePart.Raw raw -> builder.append(Component.text(shouldUwuify ? uwuify(raw.text(), random) : raw.text()));
+                case MessagePart.Emoji emoji -> this.emoji(builder, message.senderHasHypercube(), emoji.name(), random);
+                case MessagePart.Map map -> this.map(builder, map.mapId(), player);
+                case MessagePart.Url url -> this.link(builder, url.text());
+                case MessagePart.Unknown _ -> {
+                }
             }
         }
 

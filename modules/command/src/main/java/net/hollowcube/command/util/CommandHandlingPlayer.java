@@ -1,5 +1,6 @@
 package net.hollowcube.command.util;
 
+import net.hollowcube.command.CommandExecutedEvent;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandResult;
 import net.hollowcube.common.extensions.ExtendedPlayer;
@@ -72,20 +73,24 @@ public abstract class CommandHandlingPlayer extends ExtendedPlayer {
             try {
                 var manager = CommandHandlingPlayer.asHandled(player).getCommandManager();
 
-                switch (manager.execute(player, command)) {
+                long start = System.nanoTime();
+                var result = manager.execute(player, command);
+                long duration = System.nanoTime() - start;
+
+                switch (result) {
                     case CommandResult.Success ignored -> {
                     }
                     case CommandResult.Denied ignored ->
                         player.sendMessage(Component.translatable("command.not_found"));
                     case CommandResult.NotFound ignored ->
                         player.sendMessage(Component.translatable("command.not_found"));
-                    case CommandResult.SyntaxError result -> {
-                        var errorMessage = result.message();
+                    case CommandResult.SyntaxError syntaxError -> {
+                        var errorMessage = syntaxError.message();
                         var builder = Component.text()
                             .append(Component.text("Syntax error:", NamedTextColor.RED))
                             .appendNewline()
-                            .append(Component.text(command.substring(0, result.start()), NamedTextColor.GRAY))
-                            .append(Component.text(command.substring(result.start()), NamedTextColor.RED,
+                            .append(Component.text(command.substring(0, syntaxError.start()), NamedTextColor.GRAY))
+                            .append(Component.text(command.substring(syntaxError.start()), NamedTextColor.RED,
                                                    TextDecoration.UNDERLINED))
                             .append(Component.text("<--[HERE] ", NamedTextColor.RED));
                         if (errorMessage != null) {
@@ -93,14 +98,23 @@ public abstract class CommandHandlingPlayer extends ExtendedPlayer {
                         }
                         player.sendMessage(builder.build());
                     }
-                    case CommandResult.ExecutionError result -> {
+                    case CommandResult.ExecutionError executionError -> {
                         player.sendMessage(Component.translatable("generic.unknown_error"));
                         var syntheticException = new RuntimeException(
                             "An unhandled exception occurred while executing the command '" + command + "'",
-                            result.cause());
+                            executionError.cause());
                         PostHog.captureException(syntheticException, player.getUuid().toString());
                         log.error("command eval failure", syntheticException);
                     }
+                }
+
+                // After the player has been answered, and never at their expense: a listener that
+                // throws is a bug in the listener, not something the command should fail over.
+                try {
+                    MinecraftServer.getGlobalEventHandler()
+                        .call(new CommandExecutedEvent(player, command, result, duration));
+                } catch (Exception e) {
+                    log.error("command executed listener failure", e);
                 }
             } catch (Exception e) {
                 PostHog.captureException(e, player.getUuid().toString());

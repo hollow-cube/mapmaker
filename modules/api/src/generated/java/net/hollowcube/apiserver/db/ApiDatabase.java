@@ -14,28 +14,44 @@ import net.hollowcube.sqlgen.runtime.Transaction;
 public final class ApiDatabase {
     private final DataSource dataSource;
 
+    public final ChatQueries chat;
+
+    public final CommandLogQueries commandLog;
+
     public final HeadsQueries heads;
 
     public final JobsQueries jobs;
 
     public final MapFeaturesQueries mapFeatures;
 
+    public final MapsQueries maps;
+
+    public final PlayersQueries players;
+
     public final SessionsQueries sessions;
 
     public ApiDatabase(DataSource dataSource) {
         this.dataSource = dataSource;
         ConnectionSource source = ConnectionSource.pooled(dataSource);
+        this.chat = new ChatQueriesImpl(source);
+        this.commandLog = new CommandLogQueriesImpl(source);
         this.heads = new HeadsQueriesImpl(source);
         this.jobs = new JobsQueriesImpl(source);
         this.mapFeatures = new MapFeaturesQueriesImpl(source);
+        this.maps = new MapsQueriesImpl(source);
+        this.players = new PlayersQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
     }
 
     private ApiDatabase(Fake fake) {
         this.dataSource = null;
+        this.chat = fake.chat;
+        this.commandLog = fake.commandLog;
         this.heads = fake.heads;
         this.jobs = fake.jobs;
         this.mapFeatures = fake.mapFeatures;
+        this.maps = fake.maps;
+        this.players = fake.players;
         this.sessions = fake.sessions;
     }
 
@@ -81,20 +97,32 @@ public final class ApiDatabase {
     public static final class Tx {
         private final Connection conn;
 
+        public final ChatQueries chat;
+
+        public final CommandLogQueries commandLog;
+
         public final HeadsQueries heads;
 
         public final JobsQueries jobs;
 
         public final MapFeaturesQueries mapFeatures;
 
+        public final MapsQueries maps;
+
+        public final PlayersQueries players;
+
         public final SessionsQueries sessions;
 
         Tx(Connection conn) {
             this.conn = conn;
             ConnectionSource source = ConnectionSource.pinned(conn);
+            this.chat = new ChatQueriesImpl(source);
+            this.commandLog = new CommandLogQueriesImpl(source);
             this.heads = new HeadsQueriesImpl(source);
             this.jobs = new JobsQueriesImpl(source);
             this.mapFeatures = new MapFeaturesQueriesImpl(source);
+            this.maps = new MapsQueriesImpl(source);
+            this.players = new PlayersQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
         }
 
@@ -110,13 +138,31 @@ public final class ApiDatabase {
      * Builds a ApiDatabase out of stand-in groups.
      */
     public static final class Fake {
+        private ChatQueries chat = new ChatQueries.Stub();
+
+        private CommandLogQueries commandLog = new CommandLogQueries.Stub();
+
         private HeadsQueries heads = new HeadsQueries.Stub();
 
         private JobsQueries jobs = new JobsQueries.Stub();
 
         private MapFeaturesQueries mapFeatures = new MapFeaturesQueries.Stub();
 
+        private MapsQueries maps = new MapsQueries.Stub();
+
+        private PlayersQueries players = new PlayersQueries.Stub();
+
         private SessionsQueries sessions = new SessionsQueries.Stub();
+
+        public Fake chat(ChatQueries chat) {
+            this.chat = chat;
+            return this;
+        }
+
+        public Fake commandLog(CommandLogQueries commandLog) {
+            this.commandLog = commandLog;
+            return this;
+        }
 
         public Fake heads(HeadsQueries heads) {
             this.heads = heads;
@@ -130,6 +176,16 @@ public final class ApiDatabase {
 
         public Fake mapFeatures(MapFeaturesQueries mapFeatures) {
             this.mapFeatures = mapFeatures;
+            return this;
+        }
+
+        public Fake maps(MapsQueries maps) {
+            this.maps = maps;
+            return this;
+        }
+
+        public Fake players(PlayersQueries players) {
+            this.players = players;
             return this;
         }
 

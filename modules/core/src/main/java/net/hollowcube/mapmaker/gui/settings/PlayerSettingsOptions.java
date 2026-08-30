@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.gui.settings;
 
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.VisibilityRule;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
+import net.hollowcube.mapmaker.chat.ChatChannels;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 
@@ -21,7 +21,7 @@ public class PlayerSettingsOptions {
         PlayerSettingsOption.forSelect(
             PlayerSettings.CHAT_CHANNEL,
             Component.translatable("dialog.settings.option.chat"),
-            ClientChatMessageData.CHANNEL_GLOBAL, ClientChatMessageData.CHANNEL_LOCAL
+            ChatChannels.GLOBAL, ChatChannels.LOCAL
         ),
         PlayerSettingsOption.forEnum(
             PlayerSettings.NEARBY_PLAYER_VISIBILITY,

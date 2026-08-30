@@ -44,6 +44,7 @@ final class EmitGroup {
     TypeSpec groupInterface() {
         var type = TypeSpec.interfaceBuilder(group.interfaceName().simpleName())
             .addJavadoc("The queries in `$L.sql`.\n", group.fieldName())
+            .addAnnotation(Emitter.unusedReturnValue())
             .addModifiers(Modifier.PUBLIC);
         for (var query : group.queries()) {
             type.addMethod(signature(query).addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT).build());
@@ -75,6 +76,7 @@ final class EmitGroup {
     TypeSpec groupImpl() {
         var type = TypeSpec.classBuilder(group.implName().simpleName())
             .addJavadoc("Runs $T against a connection borrowed per statement.\n", group.interfaceName())
+            .addAnnotation(Emitter.unusedReturnValue())
             .addModifiers(Modifier.FINAL)
             .addSuperinterface(group.interfaceName())
             .addField(Emitter.CONNECTION_SOURCE, "source", Modifier.PRIVATE, Modifier.FINAL)

@@ -4,6 +4,7 @@ package net.hollowcube.apiserver.db;
 /**
  * The queries in `sessions.sql`.
  */
+@SuppressWarnings("UnusedReturnValue")
 public interface SessionsQueries {
     long countPlayerSessions();
 

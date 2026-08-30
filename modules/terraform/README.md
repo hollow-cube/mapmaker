@@ -112,7 +112,7 @@ Structure:
     - COMPUTE SHOULD BE CANCELLABLE, no blocks will have been placed at this point
 - Apply Phase: Applies the changes to the world. This should be locking per world, even if the relevant thread pool is
   shared per server.
-    - APPLY MAY NOT BE CANCELED, and terraform needs to provide some kind of "await quiescence" method to wait for all
+    - APPLY MAY NOT BE CANCELED, and terraform needs to provide some status of "await quiescence" method to wait for all
       pending operations to complete before closing or saving.
     - Basically, externally it must be possible to lock applies to an instance to allow a save to occur at a safe point.
       Eg `terraform.requestSafePoint(instance)` or something.

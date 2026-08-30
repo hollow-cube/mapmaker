@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * Runs MapFeaturesQueries against a connection borrowed per statement.
  */
+@SuppressWarnings("UnusedReturnValue")
 final class MapFeaturesQueriesImpl implements MapFeaturesQueries {
     private static final String UPSERT_MAP_FEATURES = """
         -- The whole row, replaced: a map's features are a function of its world, so there is nothing in

@@ -8,7 +8,6 @@ import javax.annotation.processing.Messager;
 import javax.lang.model.element.*;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.*;
@@ -45,7 +44,10 @@ final class WireWalker {
     private static final Set<String> SCALARS = Set.of(
         "java.lang.Boolean", "java.lang.Byte", "java.lang.Short", "java.lang.Integer", "java.lang.Long",
         "java.lang.Character", "java.lang.Float", "java.lang.Double", "java.lang.String",
-        "java.util.UUID", "java.math.BigDecimal", "java.math.BigInteger");
+        "java.util.UUID", "java.math.BigDecimal", "java.math.BigInteger",
+        // Written as an ISO-8601 string by the adapter Wire registers, so that a time on the wire
+        // is a time on both sides rather than a number whose unit each end has to agree on.
+        "java.time.Instant");
     private static final Set<String> COLLECTIONS = Set.of("java.util.List", "java.util.Set", "java.util.Collection");
     private static final String MAP = "java.util.Map";
 
@@ -229,32 +231,22 @@ final class WireWalker {
             return;
         }
 
-        var unknown = IpcNames.unknownVariant(ClassName.get(element));
         requirePublic(site, element, path);
         for (var method : ElementFilter.methodsIn(element.getEnclosedElements())) {
             if (method.getModifiers().contains(Modifier.ABSTRACT)) {
-                error(method, name + " cannot declare abstract methods; the generated " + unknown.simpleName()
-                    + " would have to implement them", path);
+                error(method, name + " cannot declare abstract methods; its " + IpcNames.UNKNOWN_VARIANT
+                    + " variant would have to implement them", path);
             }
         }
 
         var variants = new LinkedHashMap<String, TypeElement>();
-        var permitsUnknown = false;
+        TypeElement unknown = null;
         for (var permitted : element.getPermittedSubclasses()) {
-            if (permitted.getKind() == TypeKind.ERROR) {
-                // Not resolved yet: this is the round before the unknown variant is generated,
-                // and the name it was written under is all there is to go on.
-                var written = permitted.toString();
-                if (written.equals(unknown.simpleName()) || written.equals(unknown.canonicalName())) {
-                    permitsUnknown = true;
-                } else {
-                    error(element, "cannot resolve permitted type '" + written + "'", path);
-                }
-                continue;
-            }
             var variant = (TypeElement) ((DeclaredType) permitted).asElement();
-            if (variant.getQualifiedName().contentEquals(unknown.canonicalName())) {
-                permitsUnknown = true;
+            if (variant.getSimpleName().contentEquals(IpcNames.UNKNOWN_VARIANT)) {
+                unknown = variant;
+                requireUnknownShape(variant, path);
+                requirePublic(site, variant, path);
                 continue;
             }
             if (variant.getKind() != ElementKind.RECORD || !variant.getTypeParameters().isEmpty()) {
@@ -275,11 +267,39 @@ final class WireWalker {
             requirePublic(site, variant, variantPath);
             record(site, variant, use, variantPath);
         }
-        if (!permitsUnknown) {
-            error(element, name + " must permit its generated unknown variant, which a discriminator this build "
-                + "does not know decodes to: `permits ..., " + unknown.simpleName() + "`", path);
+        if (unknown == null) {
+            error(element, name + " is on the wire, so it must permit an " + IpcNames.UNKNOWN_VARIANT
+                + " variant: a build that predates a new variant decodes it as " + IpcNames.UNKNOWN_VARIANT
+                + ", and an exhaustive switch is what makes that handled. Write "
+                + "`record " + IpcNames.UNKNOWN_VARIANT + "(@Nullable String " + IpcNames.DISCRIMINATOR + ") "
+                + "implements " + element.getSimpleName() + " {}` and add it to the permits clause", path);
+            return;
         }
-        sealeds.put(name, new WireSealed(element, unknown, variants));
+        sealeds.put(name, new WireSealed(element, ClassName.get(unknown), variants));
+    }
+
+    /// The unknown variant is the one place a variant may be named in the discriminator field, and
+    /// it must be exactly that: the adapter builds it from a name it did not recognise and nothing
+    /// else, so anything more would have nowhere to come from.
+    private void requireUnknownShape(TypeElement variant, String path) {
+        if (variant.getKind() != ElementKind.RECORD || !variant.getTypeParameters().isEmpty()) {
+            error(variant, IpcNames.UNKNOWN_VARIANT + " must be a non-generic record", path);
+            return;
+        }
+        var components = variant.getRecordComponents();
+        // Not toString(): a @Nullable component's type prints with the annotation on it.
+        if (components.size() != 1
+            || !components.getFirst().getSimpleName().contentEquals(IpcNames.DISCRIMINATOR)
+            || !isString(components.getFirst().asType())) {
+            error(variant, IpcNames.UNKNOWN_VARIANT + " must be `record " + IpcNames.UNKNOWN_VARIANT
+                + "(@Nullable String " + IpcNames.DISCRIMINATOR + ")`: the discriminator it did not "
+                + "recognise is all there is to carry", path);
+        }
+    }
+
+    private static boolean isString(TypeMirror type) {
+        return type instanceof DeclaredType declared
+            && ((TypeElement) declared.asElement()).getQualifiedName().contentEquals(String.class.getName());
     }
 
     /// The generated adapters live in `net.hollowcube.ipc`, so what they name has to be visible from there.

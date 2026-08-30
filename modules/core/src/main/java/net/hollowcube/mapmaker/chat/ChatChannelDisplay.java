@@ -5,7 +5,6 @@ import net.hollowcube.common.hud.HudNode;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.player.PlayerData;
-import net.hollowcube.mapmaker.temp.ClientChatMessageData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.entity.Player;
 
@@ -27,8 +26,8 @@ public class ChatChannelDisplay implements PlayerHud.Module {
     public HudNode.Anchored render(Player player) {
         var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
         var sprite = switch (channel) {
-            case ClientChatMessageData.CHANNEL_LOCAL -> LOCAL;
-            case ClientChatMessageData.CHANNEL_STAFF -> STAFF;
+            case ChatChannels.LOCAL -> LOCAL;
+            case ChatChannels.STAFF -> STAFF;
             default -> GLOBAL;
         };
         var offset = player.getItemInOffHand().isAir() ? NORMAL_OFFSET : OFF_HAND_OFFSET;

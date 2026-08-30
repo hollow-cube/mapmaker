@@ -127,7 +127,7 @@ class WireWalkerTest {
     }
 
     @Test
-    void rejectsSealedTypesThatDoNotPermitTheirUnknownVariant() {
+    void rejectsSealedTypesWithoutAnUnknownVariant() {
         var compilation = compile("""
             @Ipc
             public interface EchoService {
@@ -143,7 +143,30 @@ class WireWalkerTest {
             """);
 
         assertThat(compilation).failed();
-        assertThat(compilation).hadErrorContaining("test.Shape must permit its generated unknown variant");
+        assertThat(compilation).hadErrorContaining("test.Shape is on the wire, so it must permit an Unknown variant");
+    }
+
+    @Test
+    void rejectsAnUnknownVariantThatCarriesAnythingButTheDiscriminator() {
+        var compilation = compile("""
+            @Ipc
+            public interface EchoService {
+                Shape shape(String id);
+            }
+            """, """
+            public sealed interface Shape permits Circle, Shape.Unknown {
+                @RuntimeGson
+                record Unknown(@Nullable String type, int sides) implements Shape {
+                }
+            }
+            """, """
+            @RuntimeGson
+            public record Circle(int radius) implements Shape {
+            }
+            """);
+
+        assertThat(compilation).failed();
+        assertThat(compilation).hadErrorContaining("Unknown must be `record Unknown(@Nullable String type)`");
     }
 
     @Test
@@ -183,7 +206,10 @@ class WireWalkerTest {
             """, """
             public enum Color { RED, GREEN, UNKNOWN }
             """, """
-            public sealed interface Shape permits Circle, ShapeUnknown {
+            public sealed interface Shape permits Circle, Shape.Unknown {
+                @RuntimeGson
+                record Unknown(@Nullable String type) implements Shape {
+                }
             }
             """, """
             @RuntimeGson
