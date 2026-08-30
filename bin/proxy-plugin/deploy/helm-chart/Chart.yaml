@@ -1,0 +1,7 @@
+apiVersion: v2
+name: mapmaker-proxy
+description: The velocity proxy in front of the mapmaker servers, replaced without dropping anyone
+type: application
+
+version: 0.1.0
+appVersion: "1.16.0"

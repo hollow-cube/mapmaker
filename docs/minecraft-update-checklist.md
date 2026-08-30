@@ -13,15 +13,19 @@ A guide on how to update the server to a new Minecraft version.
   or add a new overlay if any relevant shaders have changed.
 * Update the `SUPPORTED_VERSIONS` constant in ProxyPlugin.
 
-### In `hollow-cube/velocity-proxy`
+### The proxy (`bin/proxy-plugin`)
 
-* Update [velocity](https://papermc.io/downloads/velocity)
-* Update the proxy plugin (`./gradlew :bin:proxy-plugin:build` in `hollow-cube/mapmaker`)
-* Update [viaversion](https://hangar.papermc.io/ViaVersion/ViaVersion)
-* Update [viabackwards](https://hangar.papermc.io/ViaVersion/ViaBackwards)
-* Set the `velocity-servers.default` config option in viaversion config to the latest protocol version.
+* Bump velocity: the pinned build, url and sha256 at the bottom of `bin/proxy-plugin/build.gradle.kts`
+  (from https://fill.papermc.io/v3/projects/velocity/versions/<version>/builds/latest), and
+  `velocity` in `gradle/libs.versions.toml` if the version line changed. `config-version` in
+  `bin/proxy-plugin/proxy/velocity.toml` has to match what the new jar expects.
+* Update [viaversion](https://hangar.papermc.io/ViaVersion/ViaVersion) and
+  [viabackwards](https://hangar.papermc.io/ViaVersion/ViaBackwards) in `bin/proxy-plugin/proxy/plugins`.
+* Set `velocity-servers.default` in `bin/proxy-plugin/proxy/plugins/viaversion/config.yml` to the
+  latest protocol version.
+* `./gradlew :bin:proxy-plugin:runProxy` runs exactly what ships, in front of a local dev server.
 
-**When you commit these changes, the proxy will deploy automatically, making it impossible
-to join.** You should time the proxy deployment with the server delpoyment. In the future
-we may have a better way to handle version bumps (by keeping old servers and doing phased
-rollout of proxies).
+The proxy deploys on every push to `main` that touches it (`.github/workflows/proxy.yml`), and the
+rollout is graceful: the new proxy takes new logins and the old one stays up until its last player
+leaves, so a version bump only needs the servers deployed first (or at the same time) for the
+players who reconnect to have somewhere to go.

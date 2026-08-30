@@ -1,0 +1,124 @@
+name: Proxy Build & Deploy
+concurrency: proxy
+
+# Deploys every push to main that touches the proxy. The rollout is graceful (see the chart's
+# deployment.yaml): the new proxy takes over new logins and the old one lives on until its last
+# player leaves, so this can run whenever without dropping anyone.
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'bin/proxy-plugin/**'
+      - 'modules/anticheat/**'
+      - 'modules/ipc/**'
+      - '.github/workflows/proxy.yml'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'gradle'
+      - name: Test
+        run: ./gradlew :bin:proxy-plugin:test --no-daemon
+
+  docker-build:
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import Secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: global/github
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'gradle'
+
+      # proxy/, the pinned velocity jar and the plugin, into build/proxy/stage for the Dockerfile.
+      - name: Stage proxy
+        run: ./gradlew :bin:proxy-plugin:stageProxy --no-daemon
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: mworzala
+          password: ${{ env.DOCKER_PASS }}
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: "bin/proxy-plugin/deploy/Dockerfile"
+          platforms: linux/amd64
+          push: true
+          tags: mworzala/mapmaker-proxy:${{ github.sha }}
+
+  helm-build:
+    needs: [ docker-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Helm build
+        uses: hollow-cube/actions/helm-build@main
+        with:
+          vault-token: ${{ secrets.VAULT_TOKEN }}
+          name: mapmaker-proxy
+          path: "bin/proxy-plugin/deploy/helm-chart"
+
+  helm-deploy:
+    name: Deploy Proxy
+    needs: [ docker-build, helm-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import Secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: global/github
+      - name: Tailscale
+        uses: tailscale/github-action@main
+        with:
+          oauth-client-id: ${{ env.TAILSCALE_OAUTH_KEY }}
+          oauth-secret: ${{ env.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
+          version: 1.74.0
+      - uses: azure/setup-helm@v3
+        with:
+          version: v3.10.2
+      - uses: actions/checkout@v4
+
+      # Not the common helm-deploy action: values-prod.yaml needs the forwarding secret substituted
+      # in, which lives with the map-isolate secrets as MAPMAKER_VELOCITY_SECRET.
+      - name: Import Server Secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: prod/map-isolate
+      - name: Upgrade/install helm chart
+        run: |
+          tailscale configure kubeconfig prod-v3
+          kubectl cluster-info
+
+          helm registry login registry-1.docker.io --username mworzala --password ${{ env.DOCKER_PASS }}
+          helm pull oci://registry-1.docker.io/mworzala/mapmaker-proxy --version "1.0.0-${{ github.sha }}"
+
+          cat bin/proxy-plugin/deploy/values-prod.yaml | envsubst > ./values-override-proxy.yaml
+
+          helm upgrade mapmaker-proxy mapmaker-proxy-1.0.0-${{ github.sha }}.tgz \
+               --install --create-namespace --namespace mapmaker \
+               --reset-values -f ./values-override-proxy.yaml \
+               --set image.tag="${{ github.sha }}"

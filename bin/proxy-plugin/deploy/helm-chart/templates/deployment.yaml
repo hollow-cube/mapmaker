@@ -1,0 +1,84 @@
+# A rollout starts the new proxy, waits for its /ready, and only then terminates the old one - whose
+# preStop hook holds it in Terminating until /drain says nobody is left (or drain.seconds runs
+# out). Cilium sends new connections only to ready, non-terminating pods and keeps the established
+# ones flowing to a terminating pod for as long as it is still serving, so the old proxy's players
+# stay where they are while every new player lands on the new proxy. Do not add a liveness probe,
+# and do not make readiness depend on anything a drain changes: a pod that stops serving is dropped
+# from the load balancer map and every connection on it is reset.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mapmaker-proxy.fullname" . }}
+  labels:
+    {{- include "mapmaker-proxy.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  minReadySeconds: 10
+  selector:
+    matchLabels:
+      {{- include "mapmaker-proxy.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "mapmaker-proxy.selectorLabels" . | nindent 8 }}
+        mapmaker.hollowcube.net/role: proxy
+    spec:
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      # The drain, plus a minute for velocity to disconnect whoever is left and stop.
+      terminationGracePeriodSeconds: {{ add .Values.drain.seconds 60 }}
+      volumes:
+        - name: forwarding-secret
+          secret:
+            secretName: {{ include "mapmaker-proxy.fullname" . }}
+      containers:
+        - name: proxy
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: minecraft
+              containerPort: 25565
+              protocol: TCP
+            - name: http
+              containerPort: {{ .Values.httpPort }}
+              protocol: TCP
+          env:
+            - name: METRICS_PORT
+              value: {{ .Values.httpPort | quote }}
+          {{- range $key, $value := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+          {{- end }}
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: http
+            periodSeconds: 5
+          lifecycle:
+            preStop:
+              exec:
+                # Runs before the SIGTERM velocity answers by disconnecting everyone: /drain stops
+                # new logins and is 503 until the last player leaves. Kubelet cuts this off at
+                # terminationGracePeriodSeconds, which is the drain cap.
+                command:
+                  - sh
+                  - -c
+                  - until wget -q -O - -T 5 http://127.0.0.1:{{ .Values.httpPort }}/drain; do sleep 5; done
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: forwarding-secret
+              mountPath: /app/forwarding.secret
+              subPath: forwarding.secret
+              readOnly: true
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

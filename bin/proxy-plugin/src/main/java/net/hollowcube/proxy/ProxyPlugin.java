@@ -6,13 +6,16 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.LoginEvent;
 import com.velocitypowered.api.event.connection.PluginMessageEvent;
+import com.velocitypowered.api.event.connection.PreLoginEvent;
 import com.velocitypowered.api.event.permission.PermissionsSetupEvent;
 import com.velocitypowered.api.event.player.CookieReceiveEvent;
 import com.velocitypowered.api.event.player.CookieStoreEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.player.configuration.PlayerFinishedConfigurationEvent;
+import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyPingEvent;
+import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
 import com.velocitypowered.api.plugin.Plugin;
@@ -38,6 +41,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -57,12 +61,20 @@ public class ProxyPlugin {
     private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_2;
     private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.2";
 
+    // The port ProxyHttpServer serves the deployment on; 0 (the default) is no http side at all.
+    private static final int HTTP_PORT = parsePort(System.getenv("PROXY_HTTP_PORT"));
+
     private final Logger logger;
     private final ProxyServer proxy;
 
     private ProxySessionService sessionService;
 
     private final RegisteredServer anyhubServer;
+
+    private @Nullable ProxyHttpServer http;
+    // Set by /drain and never cleared: a draining proxy is one being replaced, and it takes no
+    // new logins so it can empty out and be stopped. See ProxyHttpServer.
+    private final AtomicBoolean draining = new AtomicBoolean();
 
     // Map of player uuid to the resource pack hash they currently have applied
     private final Map<UUID, String> resourcePacks = new ConcurrentHashMap<>();
@@ -88,6 +100,30 @@ public class ProxyPlugin {
         anyhubServer = proxy.getServer("anyhub").orElseThrow();
 
         logger.info("hello, world!!!!");
+    }
+
+    @Subscribe
+    public void handleInitialize(@NotNull ProxyInitializeEvent event) {
+        http = ProxyHttpServer.start(logger, HTTP_PORT, this::drain, proxy::getPlayerCount);
+    }
+
+    @Subscribe
+    public void handleShutdown(@NotNull ProxyShutdownEvent event) {
+        if (http != null) http.close();
+    }
+
+    private void drain() {
+        if (draining.compareAndSet(false, true))
+            logger.info("draining: no new logins, {} players still connected", proxy.getPlayerCount());
+    }
+
+    /// Before mojang auth, so a login a draining proxy turns away costs it nothing. The player
+    /// reconnects and lands on whichever proxy is ready, which is the one replacing this.
+    @Subscribe
+    public void handlePreLogin(@NotNull PreLoginEvent event) {
+        if (!draining.get()) return;
+        event.setResult(PreLoginEvent.PreLoginComponentResult.denied(
+            Component.text("This proxy is restarting, please reconnect.")));
     }
 
     @Subscribe
@@ -288,6 +324,18 @@ public class ProxyPlugin {
             event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
         }
 
+    }
+
+    private static int parsePort(@Nullable String value) {
+        if (value == null || value.isBlank()) return 0;
+        try {
+            int port = Integer.parseInt(value.trim());
+            if (port >= 0 && port <= 65535) return port;
+        } catch (NumberFormatException ignored) {
+        }
+        // Logged from the constructor would be nicer, but a static is read before there is one.
+        System.err.println("PROXY_HTTP_PORT is not a port: " + value + ", http side disabled");
+        return 0;
     }
 
     private @Nullable GameProfile.Property getGPProperty(@NotNull GameProfile gp, @NotNull String name) {

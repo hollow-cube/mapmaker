@@ -1,0 +1,21 @@
+image:
+  pullSecrets:
+    - name: dockerio
+
+# Rendered by envsubst in the workflow, from vault prod/map-isolate: the same secret every backend
+# is given as MAPMAKER_VELOCITY_SECRET.
+forwardingSecret: "${MAPMAKER_VELOCITY_SECRET}"
+
+service:
+  nodePort: 30566
+
+nodeSelector:
+  # Required: the service is externalTrafficPolicy Local, so only this node's nodePort answers, and
+  # it is the node the SRV record points at.
+  kubernetes.io/hostname: wkr-01
+
+env:
+  SESSION_SERVICE_URL: "http://api-server:9124"
+
+podMonitor:
+  enabled: true

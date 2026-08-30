@@ -1,0 +1,40 @@
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: mworzala/mapmaker-proxy
+  tag: latest
+  pullPolicy: IfNotPresent
+  pullSecrets: []
+
+replicaCount: 1
+
+service:
+  # Players connect to this port on whichever node the pod is pinned to (see nodeSelector).
+  nodePort: 30566
+
+# The plugin's http side: /ready for the rollout, /drain for the preStop hook, /metrics.
+httpPort: 9124
+
+# Velocity's modern-forwarding secret, shared with every backend; mounted at /app/forwarding.secret.
+forwardingSecret: ""
+
+drain:
+  # How long a replaced proxy is left to empty out. It takes no new logins from the moment it is
+  # replaced, and is only stopped (disconnecting whoever is left) once this runs out.
+  seconds: 21600
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 2Gi
+  requests:
+    cpu: 300m
+    memory: 1Gi
+
+nodeSelector: {}
+
+env: {}
+
+podMonitor:
+  enabled: false
