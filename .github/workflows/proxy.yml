@@ -9,6 +9,7 @@ on:
     branches: [ main ]
     paths:
       - 'bin/proxy-plugin/**'
+      - 'modules/ipc/**'
       - '.github/workflows/proxy.yml'
   workflow_dispatch:
 

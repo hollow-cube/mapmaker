@@ -10,7 +10,7 @@ motd = "                    <color:#dbdbdb>Hollow Cube</color> <color:#696969>|<
 
 # What should we display for the maximum number of players? (Velocity does not support a cap
 # on the number of players online.)
-show-max-players = 500
+show-max-players = 0
 
 # Should we authenticate players with Mojang? By default, this is on.
 online-mode = true

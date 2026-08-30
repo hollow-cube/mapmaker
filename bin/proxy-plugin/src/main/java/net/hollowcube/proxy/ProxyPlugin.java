@@ -1,5 +1,6 @@
 package net.hollowcube.proxy;
 
+import com.google.gson.Gson;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.ResultedEvent;
 import com.velocitypowered.api.event.Subscribe;
@@ -27,6 +28,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.GameProfile;
+import net.hollowcube.ipc.session.SessionClient;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -35,13 +37,17 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.net.InetSocketAddress;
+import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.ReentrantLock;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -63,11 +69,22 @@ public class ProxyPlugin {
 
     // The port ProxyHttpServer serves the deployment on; 0 (the default) is no http side at all.
     private static final int HTTP_PORT = parsePort(System.getenv("PROXY_HTTP_PORT"));
+    // The root the ipc services are served under, the same one every other ipc client is built on.
+    private static final String IPC_SERVICE_URL = Objects.requireNonNullElse(System.getenv("IPC_SERVICE_URL"), "http://api-server-java:9124");
+    // How long a fetched player count answers pings for before one of them fetches again.
+    private static final Duration ONLINE_PLAYERS_TTL = Duration.ofSeconds(2);
 
     private final Logger logger;
     private final ProxyServer proxy;
 
     private ProxySessionService sessionService;
+    private final SessionClient sessions;
+
+    // What a ping answers with: the whole network's count off the session table, since this proxy
+    // only sees its own players. See onlinePlayers().
+    private final ReentrantLock onlinePlayersLock = new ReentrantLock();
+    private volatile int onlinePlayers;
+    private volatile long onlinePlayersExpiry = System.nanoTime();
 
     private final RegisteredServer anyhubServer;
 
@@ -91,6 +108,8 @@ public class ProxyPlugin {
         var sessionServiceUrl = System.getenv("SESSION_SERVICE_URL");
         if (sessionServiceUrl != null) sessionService = new ProxySessionService(logger, sessionServiceUrl);
         else sessionService = new ProxySessionService(logger, "http://api-server:9124"); // tilt
+        sessions = new SessionClient(HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(2)).build(),
+            new Gson(), IPC_SERVICE_URL);
 
         proxy.getChannelRegistrar().register(TRANSFER_MESSAGE_ID);
         proxy.getChannelRegistrar().register(RESOURCE_PACK_MESSAGE_ID);
@@ -105,6 +124,26 @@ public class ProxyPlugin {
     @Subscribe
     public void handleInitialize(@NotNull ProxyInitializeEvent event) {
         http = ProxyHttpServer.start(logger, HTTP_PORT, this::drain, proxy::getPlayerCount);
+    }
+
+    /// Fetched by the ping that finds it expired and held for [#ONLINE_PLAYERS_TTL]: a ping can
+    /// afford the call, and a timer would be one per proxy for nobody looking. Pings arriving
+    /// while another is fetching answer with the count that stands, as do the ones after a failed
+    /// fetch until the ttl passes again, since a stale number beats a zero.
+    private int onlinePlayers() {
+        if (System.nanoTime() - onlinePlayersExpiry < 0 || !onlinePlayersLock.tryLock()) return onlinePlayers;
+        try {
+            if (System.nanoTime() - onlinePlayersExpiry < 0) return onlinePlayers;
+            try {
+                onlinePlayers = sessions.onlinePlayers();
+            } catch (Exception e) {
+                logger.warn("failed to read the online player count: {}", e.toString());
+            }
+            onlinePlayersExpiry = System.nanoTime() + ONLINE_PLAYERS_TTL.toNanos();
+            return onlinePlayers;
+        } finally {
+            onlinePlayersLock.unlock();
+        }
     }
 
     @Subscribe
@@ -173,6 +212,7 @@ public class ProxyPlugin {
         var protocol = SUPPORTED_VERSIONS.contains(version) ? version : RECOMMEND_VERSION;
 
         builder.version(new ServerPing.Version(protocol.getProtocol(), PROTOCOL_VERSION_STRING));
+        builder.onlinePlayers(onlinePlayers());
         event.setPing(builder.build());
     }
 

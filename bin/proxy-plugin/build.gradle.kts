@@ -3,6 +3,8 @@ import java.security.MessageDigest
 
 plugins {
     id("mapmaker.java-library")
+    // Version pinned here as in bin/api-server; the shared one lives in build-src/build.gradle.kts.
+    id("com.gradleup.shadow") version "9.0.0-beta12"
 }
 
 repositories {
@@ -10,8 +12,38 @@ repositories {
 }
 
 dependencies {
+    // Velocity is on the proxy's own classpath, so it must never be shaded into the plugin jar.
     annotationProcessor(libs.velocity.api)
-    implementation(libs.velocity.api)
+    compileOnly(libs.velocity.api)
+
+    // The session count on the server list ping is an ipc call, so the generated SessionClient
+    // rides along. It drags in gson (which velocity ships its own copy of; the shaded one is never
+    // loaded) and opentelemetry-api, which is only ever OpenTelemetry.noop() here.
+    implementation(project(":modules:ipc"))
+    implementation(libs.gson)
+}
+
+// The proxy loads a single jar, so the plugin ships fat; the plain jar keeps a classifier so both
+// can live in build/libs and the shaded one keeps the name stageProxy copies.
+tasks.jar {
+    archiveClassifier = "thin"
+}
+
+tasks.shadowJar {
+    archiveClassifier = ""
+
+    mergeServiceFiles()
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    // Velocity injects its own org.slf4j.Logger; a second copy in the plugin jar would be a
+    // different class if the plugin loader ever stopped delegating parent-first.
+    dependencies {
+        exclude(dependency("org.slf4j:slf4j-api"))
+    }
+}
+
+tasks.assemble {
+    dependsOn(tasks.shadowJar)
 }
 
 // The velocity build the proxy image runs, pinned by the sha256 fill.papermc.io publishes for it
@@ -70,7 +102,7 @@ val stageProxy = tasks.register<Sync>("stageProxy") {
     into(layout.buildDirectory.dir("proxy/stage"))
     from(layout.projectDirectory.dir("proxy"))
     from(downloadProxy) { rename { "velocity.jar" } }
-    from(tasks.jar) { into("plugins") }
+    from(tasks.shadowJar) { into("plugins") }
 }
 
 // A local run of the very thing that ships, differing only in what has to differ: the hub to
@@ -117,6 +149,8 @@ tasks.register<JavaExec>("runProxy") {
     jvmArgs("-Xms512M", "-Xmx512M", "-Dvelocity.max-plugin-message-payload-size=1048576")
     // The same http side the deployment drives, on 9125 so a dev server's 9124 is free.
     environment("PROXY_HTTP_PORT", providers.gradleProperty("proxyHttpPort").getOrElse("9125"))
+    // Where the ipc services are served from: a local api-server, or DevServer embedding them.
+    environment("IPC_SERVICE_URL", providers.gradleProperty("proxyIpcUrl").getOrElse("http://127.0.0.1:9124"))
     // Velocity's own /server, hidden in production, is how a backend switch is driven from a client.
     environment("PROXY_DEV_SERVER_COMMAND", "true")
     standardInput = System.`in`

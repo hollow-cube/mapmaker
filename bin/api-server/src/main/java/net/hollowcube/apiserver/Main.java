@@ -8,7 +8,9 @@ import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.PostgresHeadDatabase;
+import net.hollowcube.apiserver.session.PostgresSessions;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.session.SessionServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +49,9 @@ public final class Main {
             server.createContext("/alive", new Health.Alive()),
             server.createContext("/ready", new Health.Ready(dataSource)),
             server.createContext(HeadDatabaseServer.PATH,
-                new HeadDatabaseServer(new PostgresHeadDatabase(db), gson))
+                new HeadDatabaseServer(new PostgresHeadDatabase(db), gson)),
+            server.createContext(SessionServer.PATH,
+                new SessionServer(new PostgresSessions(db), gson))
         )) context.getFilters().add(requestLog);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> server.stop(SHUTDOWN_SECONDS)));
