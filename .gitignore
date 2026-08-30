@@ -30,6 +30,13 @@ profile.jfr
 # Ignore Gradle build output directory
 build
 
+# IntelliJ writes its own output beside every module's gradle one
+out/
+
+# Local scratch space: experiments, one-off scripts, a checkout of someone else's pr
+scratch/
+build-pr/
+
 workspace
 
 .mcp.json
