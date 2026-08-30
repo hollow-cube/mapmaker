@@ -11,6 +11,8 @@ dependencies {
     // Gson and the JDK http client are what the generated `*Client`/`*Server` classes run on, and
     // otel is how a call on either side of the wire shows up as one trace.
     implementation(libs.gson)
+    // A generated server logs what it answered 500 with; the caller only ever sees the message.
+    implementation(libs.slf4j)
     api(libs.otel.api)
     api(libs.otel.semconv)
 }

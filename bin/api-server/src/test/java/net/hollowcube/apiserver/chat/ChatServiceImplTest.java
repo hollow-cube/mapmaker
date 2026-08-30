@@ -416,7 +416,16 @@ class ChatServiceImplTest {
 
         var json = publishedLegacy().getFirst().getAsJsonObject();
         assertEquals("local", json.get("channel").getAsString());
-        assertEquals(6, json.size());
+        assertEquals(7, json.size());
+    }
+
+    /// The copy is only there for a server that cannot hear [ChatMessage#SUBJECT]; one that can
+    /// reads both subjects and would otherwise render the message twice.
+    @Test
+    void send_marksTheLegacyCopyAsOne() {
+        chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null);
+
+        assertTrue(publishedLegacy().getFirst().getAsJsonObject().get("mirrored").getAsBoolean());
     }
 
     @Test

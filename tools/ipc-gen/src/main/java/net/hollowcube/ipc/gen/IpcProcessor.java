@@ -31,6 +31,8 @@ import java.util.*;
 /// - `net.hollowcube.ipc.WireAdapters`, the gson adapters `Wire.gson()` carries, one per enum
 ///   and sealed interface.
 /// - `wire.json`, the descriptor `wireCheck` and `wireCompat` hold this build to.
+/// - the native-image reachability metadata for every wire record, since gson reaches them
+///   reflectively and a native image cannot see that.
 ///
 /// Neither side names a route or a field as a string anyone writes: both are derived from the same
 /// [ExecutableElement], so adding, renaming or retyping a method moves the client and the server
@@ -41,6 +43,9 @@ public final class IpcProcessor extends AbstractProcessor {
 
     /// Where the descriptor lands in the class output, and so in the jar.
     static final String DESCRIPTOR_RESOURCE = "wire.json";
+    /// Where native-image reads reachability metadata from a jar. Under `ipc/` so that a binary
+    /// with hand-written metadata of its own keeps both files rather than one shadowing the other.
+    static final String METADATA_RESOURCE = "META-INF/native-image/net.hollowcube/ipc/reachability-metadata.json";
 
     private boolean emitted;
 
@@ -88,7 +93,8 @@ public final class IpcProcessor extends AbstractProcessor {
         if (!walker.ok() || subjects == null || notifications == null) return false;
 
         write(IpcNames.WIRE_ADAPTERS, AdaptersEmitter.factory(walker));
-        writeDescriptor(DescriptorBuilder.build(models, walker, subjects, notifications).toJson());
+        writeResource(DESCRIPTOR_RESOURCE, DescriptorBuilder.build(models, walker, subjects, notifications).toJson());
+        writeResource(METADATA_RESOURCE, MetadataEmitter.json(elements, walker));
         return false;
     }
 
@@ -203,14 +209,14 @@ public final class IpcProcessor extends AbstractProcessor {
         }
     }
 
-    private void writeDescriptor(String json) {
+    private void writeResource(String path, String json) {
         try {
-            var file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", DESCRIPTOR_RESOURCE);
+            var file = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, "", path);
             try (Writer writer = file.openWriter()) {
                 writer.write(json);
             }
         } catch (IOException e) {
-            throw new UncheckedIOException("failed to write " + DESCRIPTOR_RESOURCE, e);
+            throw new UncheckedIOException("failed to write " + path, e);
         }
     }
 

@@ -23,10 +23,10 @@ class WireDiffTest {
             }
           },
           "types": {
-            "test.Reply": {"status": "record", "used": ["response"], "fields": [{"name": "text", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
-            "test.Event": {"status": "record", "used": ["request"], "fields": [{"name": "name", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
-            "test.Color": {"status": "enum", "constants": ["RED", "GREEN"]},
-            "test.Shape": {"status": "sealed", "discriminator": "type", "variants": {"circle": "test.Circle"}}
+            "test.Reply": {"kind": "record", "used": ["response"], "fields": [{"name": "text", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
+            "test.Event": {"kind": "record", "used": ["request"], "fields": [{"name": "name", "type": "String"}, {"name": "note", "type": "String", "nullable": true}]},
+            "test.Color": {"kind": "enum", "constants": ["RED", "GREEN"]},
+            "test.Shape": {"kind": "sealed", "discriminator": "type", "variants": {"circle": "test.Circle"}}
           },
           "subjects": {"point.moved": "test.PointMoved"},
           "notifications": {"invite": "test.Invite"}
@@ -162,13 +162,13 @@ class WireDiffTest {
     @Test
     void changingATypesKindBreaks() {
         assertEquals(List.of("enum test.Color: became a record"),
-            breaks(edited("\"test.Color\": {\"status\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]}",
-                "\"test.Color\": {\"status\": \"record\", \"fields\": []}")));
+            breaks(edited("\"test.Color\": {\"kind\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]}",
+                "\"test.Color\": {\"kind\": \"record\", \"fields\": []}")));
     }
 
     @Test
     void removedTypesNothingReachesAreNotBreaks() {
-        assertEquals(List.of(), breaks(edited("\"test.Color\": {\"status\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]},", "")));
+        assertEquals(List.of(), breaks(edited("\"test.Color\": {\"kind\": \"enum\", \"constants\": [\"RED\", \"GREEN\"]},", "")));
     }
 
     @Test

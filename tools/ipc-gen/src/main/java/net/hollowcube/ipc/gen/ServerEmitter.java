@@ -30,6 +30,8 @@ final class ServerEmitter {
     private static final ClassName JSON_PARSER = ClassName.get("com.google.gson", "JsonParser");
     private static final ClassName JSON_PARSE_EXCEPTION = ClassName.get("com.google.gson", "JsonParseException");
     private static final ClassName OPEN_TELEMETRY = ClassName.get("io.opentelemetry.api", "OpenTelemetry");
+    private static final ClassName LOGGER = ClassName.get("org.slf4j", "Logger");
+    private static final ClassName LOGGER_FACTORY = ClassName.get("org.slf4j", "LoggerFactory");
 
     static @Nullable TypeSpec emit(Messager messager, IpcModel model) {
         var type = TypeSpec.classBuilder(model.serverName())
@@ -43,6 +45,9 @@ final class ServerEmitter {
             .addField(FieldSpec.builder(String.class, "PATH", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                 .addJavadoc("Path to mount this handler at.\n")
                 .initializer("$S", model.path())
+                .build())
+            .addField(FieldSpec.builder(LOGGER, "logger", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$T.getLogger($T.class)", LOGGER_FACTORY, model.serverName())
                 .build())
             .addField(FieldSpec.builder(GSON, "GSON", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL)
                 .initializer("$T.gson()", IpcNames.WIRE)
@@ -160,6 +165,9 @@ final class ServerEmitter {
             // without a response instead of answering 500.
             .nextControlFlow("catch ($T e)", Exception.class)
             .addStatement("span.failed(e)")
+            // The caller only ever sees `e.toString()`, and a stack trace is what says which line
+            // of the implementation threw; without this a 500 is a sentence in someone else's log.
+            .addStatement("logger.error($S, ipcPath, e)", "ipc {} failed")
             .addStatement("respondError(exchange, span, 500, e.toString())")
             .nextControlFlow("finally")
             .addStatement("exchange.close()")

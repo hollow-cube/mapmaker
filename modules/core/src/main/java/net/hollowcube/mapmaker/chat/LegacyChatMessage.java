@@ -24,7 +24,11 @@ record LegacyChatMessage(
     @Nullable String sender,
     @Nullable List<Part> parts,
     long seed,
-    boolean senderHasHypercube
+    boolean senderHasHypercube,
+    /// Set by the api on the copy it publishes here of a message it already published on
+    /// [ChatMessage#SUBJECT], which this server is also reading. Absent on a message from a server
+    /// that really is too old to send it any other way.
+    boolean mirrored
 ) {
     /// `model.ChatUnsigned`. The other one was a system message, which nothing sends here now.
     private static final int TYPE_UNSIGNED = 0;
@@ -43,7 +47,7 @@ record LegacyChatMessage(
     /// No map comes with it — that server did not have one to send — so a local message falls back
     /// to the session service's view of where its sender is, which is what that server is doing too.
     @Nullable ChatMessage toChatMessage() {
-        if (type != TYPE_UNSIGNED || channel == null || sender == null) return null;
+        if (mirrored || type != TYPE_UNSIGNED || channel == null || sender == null) return null;
 
         var converted = new ArrayList<MessagePart>(parts == null ? 0 : parts.size());
         if (parts != null) {
