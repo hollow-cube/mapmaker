@@ -70,7 +70,7 @@ val stageProxy = tasks.register<Sync>("stageProxy") {
     into(layout.buildDirectory.dir("proxy/stage"))
     from(layout.projectDirectory.dir("proxy"))
     from(downloadProxy) { rename { "velocity.jar" } }
-    from(tasks.shadowJar) { into("plugins") }
+    from(tasks.jar) { into("plugins") }
 }
 
 // A local run of the very thing that ships, differing only in what has to differ: the hub to
@@ -116,7 +116,7 @@ tasks.register<JavaExec>("runProxy") {
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     jvmArgs("-Xms512M", "-Xmx512M", "-Dvelocity.max-plugin-message-payload-size=1048576")
     // The same http side the deployment drives, on 9125 so a dev server's 9124 is free.
-    environment("METRICS_PORT", providers.gradleProperty("proxyHttpPort").getOrElse("9125"))
+    environment("PROXY_HTTP_PORT", providers.gradleProperty("proxyHttpPort").getOrElse("9125"))
     // Velocity's own /server, hidden in production, is how a backend switch is driven from a client.
     environment("PROXY_DEV_SERVER_COMMAND", "true")
     standardInput = System.`in`
