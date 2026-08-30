@@ -1,10 +1,5 @@
 package net.hollowcube.mapmaker.chat;
 
-import io.nats.client.Message;
-import io.nats.client.MessageConsumer;
-import io.nats.client.api.AckPolicy;
-import io.nats.client.api.ConsumerConfiguration;
-import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
@@ -42,7 +37,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -60,16 +54,6 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     private static final Logger logger = LoggerFactory.getLogger(ChatMessageListener.class);
 
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
-
-    /// The stream the Go handler published on, consumed alongside [ChatMessage#SUBJECT] until no
-    /// server old enough to send its chat that way is running.
-    private static final String LEGACY_STREAM = "CHAT_PROCESSED";
-    private static final ConsumerConfiguration LEGACY_CONSUMER_CONFIG = ConsumerConfiguration.builder()
-        .filterSubjects("chat.processed.>")
-        .deliverPolicy(DeliverPolicy.New)
-        .ackPolicy(AckPolicy.None)
-        .inactiveThreshold(Duration.ofMinutes(5))
-        .build();
 
     private static final Sound TAG_DING = Sound.sound()
         .type(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP)
@@ -89,7 +73,6 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     private final MessageComponents components;
 
     private final Closeable consumer;
-    private final MessageConsumer legacyConsumer;
 
     public ChatMessageListener(
         SessionManager sessionManager, ApiClient api, JetStreamWrapper jetStream,
@@ -102,19 +85,11 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
 
         this.consumer = jetStream.subscribe(ChatMessage.SUBJECT, Wire.gson(), ChatMessage.class,
             (_, message) -> FutureUtil.submitVirtual(() -> deliver(message)));
-        this.legacyConsumer = jetStream.subscribe(LEGACY_STREAM, LEGACY_CONSUMER_CONFIG, LegacyChatMessage.class,
-            this::handleLegacyChatMessage);
     }
 
     @Override
     public void close() throws IOException {
-        // Both, whatever the first one does: leaving the legacy consumer open because the new one
-        // objected would keep this server reading chat after it stopped serving it.
-        try (consumer; legacyConsumer) {
-            logger.debug("closing chat consumers");
-        } catch (Exception e) {
-            throw new IOException(e);
-        }
+        consumer.close();
     }
 
     @Override
@@ -192,12 +167,6 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         return api.players.getDisplayName(playerId).build();
     }
 
-    private void handleLegacyChatMessage(Message msg, LegacyChatMessage legacy) {
-        var message = legacy.toChatMessage();
-        if (message == null) return;
-        FutureUtil.submitVirtual(() -> deliver(message));
-    }
-
     @Blocking
     private void deliver(ChatMessage message) {
         switch (message.channel()) {
@@ -223,9 +192,8 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
             return;
         }
 
-        // From a server old enough to publish through the go path, which carried no map with it. The
-        // session service's view of where everyone is, as those servers do it. Delete with the
-        // legacy consumer.
+        // A sender who was in no map when they said it. Nothing here can name their audience, so
+        // it falls back to the session service's view of where everyone is.
         var presenceMap = OpUtils.map(sessionManager.getPresence(message.senderId()), Presence::mapId);
         if (presenceMap == null) return;
         handleUnsignedChat(message, "chat.channel.local", recipient -> Objects.equals(presenceMap,

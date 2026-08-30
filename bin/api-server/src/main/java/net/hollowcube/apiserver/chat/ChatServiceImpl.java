@@ -33,10 +33,6 @@ public final class ChatServiceImpl implements ChatService {
     /// Delete this and everything named `legacy` below, plus the `CHAT_RAW`/`CHAT_PROCESSED`
     /// streams, once no tag that old is live.
     private static final String LEGACY_SUBJECT = "chat.processed.global";
-    /// Marks the legacy copy as one, so that a server which also hears [ChatMessage#SUBJECT] drops
-    /// it rather than rendering the message twice. Go never wrote the field and old servers ignore
-    /// what they cannot decode, so only new ones see it.
-    private static final String LEGACY_MIRROR = "mirrored";
     /// `model.ChatUnsigned`.
     private static final int TYPE_UNSIGNED = 0;
     /// `model.PartTypeRaw`, `PartTypeEmoji`, `PartTypeMap`, `PartTypeUrl`, in that order. Every enum
@@ -156,8 +152,8 @@ public final class ChatServiceImpl implements ChatService {
     /// as long as one is running that only knows `chat.processed.global` it has to keep hearing
     /// what players on newer servers say. JetStream captures a core publish onto any stream whose
     /// subjects match, so the second one lands in `CHAT_PROCESSED` and reaches them exactly as
-    /// before. A new server hears both subjects — it needs the legacy one for whatever an old
-    /// server still says — so the copy is marked and dropped there.
+    /// before. Only servers that old read it: a server that knows the new subject reads that one
+    /// alone, which is what keeps it from rendering the message twice.
     private void publish(ChatMessage message) {
         nats.publish(ChatMessage.SUBJECT, message);
         nats.publish(LEGACY_SUBJECT, encodeLegacyChat(message));
@@ -172,7 +168,6 @@ public final class ChatServiceImpl implements ChatService {
         json.add("parts", legacyParts(message));
         json.addProperty("seed", message.seed());
         json.addProperty("senderHasHypercube", message.senderHasHypercube());
-        json.addProperty(LEGACY_MIRROR, true);
         return json;
     }
 
