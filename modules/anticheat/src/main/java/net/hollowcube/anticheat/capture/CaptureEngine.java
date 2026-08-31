@@ -15,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -146,7 +147,9 @@ public final class CaptureEngine implements FrameSink {
             note(tNs, packet);
         }
 
-        var frame = new Frame(tNs, direction, protocolState, packetId, pingId, body);
+        var frameBody = packet instanceof S2CLevelChunkWithLight.V776 chunk
+            ? withoutBlockEntitiesAndLight(chunk, body) : body;
+        var frame = new Frame(tNs, direction, protocolState, packetId, pingId, frameBody);
         ring.frame(frame);
 
         boolean fence = entry.pingWhen() != null && packet != null
@@ -261,6 +264,19 @@ public final class CaptureEngine implements FrameSink {
                 body.length, e);
             return null;
         }
+    }
+
+    /// A chunk packet without its trailing block-entity and light blob, which measures 99% of one
+    /// on a real connection (49KB of a 49.4KB packet, all of it uniform light) and which nothing
+    /// above [S2CLevelChunkWithLight] ever reads — the world model takes the sections and drops the
+    /// rest. Storing it was what filled the ring with chunks on every join.
+    ///
+    /// The blob is the tail of `body` rather than a copy, so this is the packet up to where it
+    /// starts; a decoder that handed back a slice of something else gets the body untouched.
+    private static byte[] withoutBlockEntitiesAndLight(S2CLevelChunkWithLight.V776 chunk, byte[] body) {
+        var blob = chunk.blockEntitiesAndLight();
+        if (blob.length() == 0 || blob.array() != body) return body;
+        return Arrays.copyOf(body, blob.offset());
     }
 
     /// Notes what the trim region is built from: where the player is, and where an entity close

@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -92,6 +93,40 @@ class CaptureEngineTest {
         assertEquals(9, header.counters().chunks());
         assertEquals(new TraceHeader.Trim(1, 8), header.trim());
         assertTrue(header.counters().preludeFrames() > 0, "the login and the player position are the least of it");
+
+        engine.close();
+    }
+
+    @Test
+    void testChunkFramesAreStoredWithoutTheirBlockEntitiesAndLight() throws Exception {
+        var clock = new TestCapture.ManualClock();
+        var traces = new TestCapture.Traces();
+        var engine = engine(clock, traces);
+
+        join(engine, clock, 0);
+        engine.start("run-light", TraceHeader.Reason.RUN, null, TrimPolicy.EVERYTHING);
+        var sent = chunk(0, 0);
+        feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "level_chunk_with_light", sent);
+        clock.set(2 * SECOND);
+        engine.stop(TraceHeader.ClosedBy.STOP);
+
+        var trace = TraceReader.read(traces.take().path());
+        var stored = trace.frames().stream()
+            .filter(frame -> frame.packetId() == Protocol776.packetId(ProtocolState.PLAY, Direction.S2C,
+                "level_chunk_with_light"))
+            .findFirst()
+            .orElseThrow();
+
+        var body = sent.toByteArray();
+        assertArrayEquals(Arrays.copyOf(body, body.length - sent.blockEntitiesAndLight().length()), stored.bytes());
+
+        var read = S2CLevelChunkWithLight.V776.decode(new ByteReader(stored.bytes()));
+        assertEquals(0, read.blockEntitiesAndLight().length());
+        assertEquals(sent.chunkX(), read.chunkX());
+        assertEquals(sent.chunkZ(), read.chunkZ());
+        // The sections are the whole point of keeping the frame, so they survive intact. Section
+        // holds arrays, so they compare as the bytes they were read out of.
+        assertArrayEquals(sections(sent), sections(read));
 
         engine.close();
     }
@@ -419,6 +454,12 @@ class CaptureEngineTest {
         assertEquals("vanilla", traces.take().header().brand());
 
         engine.close();
+    }
+
+    private static byte[] sections(S2CLevelChunkWithLight.V776 chunk) {
+        var writer = new ByteWriter();
+        for (var section : chunk.sections()) section.encode(writer);
+        return writer.toByteArray();
     }
 
     private CaptureEngine engine(TestCapture.ManualClock clock, TestCapture.Traces traces) {
