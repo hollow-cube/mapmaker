@@ -40,6 +40,13 @@ public sealed abstract class DisplayEntity<M extends AbstractDisplayMeta> extend
     protected DisplayEntity(@NotNull EntityType entityType, @NotNull UUID uuid) {
         super(entityType, uuid);
 
+        // Entity#tick resends a full position and velocity for every entity every second whether it
+        // moved or not, which on a display-heavy map is most of what the server sends; a display
+        // only ever moves through refreshPosition, which broadcasts on its own. Not Long.MAX_VALUE:
+        // a teleport past 8 blocks sets nextSynchronizationTick to synchronizationTicks + 1, which
+        // would overflow negative and sync every tick rather than never.
+        setSynchronizationTicks(Integer.MAX_VALUE);
+
         setNoGravity(true);
         hasPhysics = false;
         collidesWithEntities = false;

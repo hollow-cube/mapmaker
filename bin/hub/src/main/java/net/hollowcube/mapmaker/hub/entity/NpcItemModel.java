@@ -27,8 +27,10 @@ public class NpcItemModel extends BaseNpcEntity {
     public NpcItemModel(@NotNull UUID uuid) {
         super(EntityType.ITEM_DISPLAY, uuid);
 
-        // Minestom doesnt handle entity sync correctly for display entities, it resets interpolation
-        setSynchronizationTicks(Long.MAX_VALUE);
+        // Minestom doesnt handle entity sync correctly for display entities, it resets interpolation.
+        // Integer, not Long: a teleport past 8 blocks sets nextSynchronizationTick to
+        // synchronizationTicks + 1, which overflows negative and syncs every tick instead of never.
+        setSynchronizationTicks(Integer.MAX_VALUE);
 
         hasPhysics = false;
         setNoGravity(true);

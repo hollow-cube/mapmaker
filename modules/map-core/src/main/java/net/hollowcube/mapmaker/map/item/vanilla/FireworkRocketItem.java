@@ -88,7 +88,9 @@ public class FireworkRocketItem extends VanillaItemHandler {
             this.ridingPlayer = ridingPlayer;
             this.lifetime = lifetime;
 
-            setSynchronizationTicks(Long.MAX_VALUE);
+            // Integer, not Long: a teleport past 8 blocks sets nextSynchronizationTick to
+            // synchronizationTicks + 1, which overflows negative and syncs every tick instead of never.
+            setSynchronizationTicks(Integer.MAX_VALUE);
             setNoGravity(true);
             hasPhysics = false;
 
