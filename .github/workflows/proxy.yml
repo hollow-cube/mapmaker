@@ -5,14 +5,19 @@ concurrency: proxy
 # deployment.yaml): the new proxy takes over new logins and the old one lives on until its last
 # player leaves, so this can run whenever without dropping anyone.
 #
-# modules/ipc and modules/anticheat are deliberately not triggers, even though the plugin compiles
-# against both: an unrelated change there would churn a proxy that does not care, and one the proxy
-# does care about fails the next proxy-touching push's compile instead.
+# modules/anticheat is a trigger because the tap, the capture engine and the trace format all live
+# there and the proxy is the only thing that runs them, so a change there is a proxy change that
+# reaches nothing until the proxy rolls.
+#
+# modules/ipc is deliberately not one, even though the plugin compiles against it: an unrelated
+# change there would churn a proxy that does not care, and one the proxy does care about fails the
+# next proxy-touching push's compile instead.
 on:
   push:
     branches: [ main ]
     paths:
       - 'bin/proxy-plugin/**'
+      - 'modules/anticheat/**'
       - '.github/workflows/proxy.yml'
   workflow_dispatch:
 
