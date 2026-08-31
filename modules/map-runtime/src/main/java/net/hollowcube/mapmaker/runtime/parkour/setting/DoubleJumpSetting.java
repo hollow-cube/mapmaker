@@ -68,7 +68,10 @@ public class DoubleJumpSetting {
 
         int doubleJumpCount = getDoubleJumpCount(world, player);
         player.setTag(DOUBLE_JUMP_COUNT, doubleJumpCount);
-        player.setAllowFlying(doubleJumpCount > 0);
+        // Player#setAllowFlying always writes an abilities packet, and this runs on every on-ground
+        // move, so setting it unconditionally cost ~7 packets a second per player to say nothing.
+        boolean allowFlying = doubleJumpCount > 0;
+        if (player.isAllowFlying() != allowFlying) player.setAllowFlying(allowFlying);
     }
 
     private static void handleStartFlying(PlayerStartFlyingEvent event) {
