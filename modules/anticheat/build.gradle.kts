@@ -3,6 +3,10 @@ plugins {
 }
 
 dependencies {
+    // Only for `@RuntimeGson`, which is read off the class file rather than loaded, so the proxy
+    // plugin does not shade a module it never calls.
+    compileOnly(project(":modules:common"))
+
     // api: WorldView hands out its chunk map as a Long2ObjectMap.
     api(libs.fastutil)
     implementation(libs.gson)

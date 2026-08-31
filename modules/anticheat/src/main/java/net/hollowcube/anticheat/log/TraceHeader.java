@@ -6,6 +6,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -60,6 +61,7 @@ public record TraceHeader(
     }
 
     /// Why the capture exists. Sampling and flags are both routine; `manual` is a staff request.
+    @RuntimeGson
     public enum Reason {
         @SerializedName("run") RUN,
         @SerializedName("sample") SAMPLE,
@@ -78,6 +80,7 @@ public record TraceHeader(
     }
 
     /// Sampling cohort. A prior for the grader, never ground truth.
+    @RuntimeGson
     public enum Cohort {
         @SerializedName("trusted") TRUSTED,
         @SerializedName("random") RANDOM

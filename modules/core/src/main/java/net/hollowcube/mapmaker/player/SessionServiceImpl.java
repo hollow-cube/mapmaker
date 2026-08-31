@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.player;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
+import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -167,6 +168,7 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
         };
     }
 
+    @RuntimeGson
     private record IsolateOverride(
             @NotNull String id,
             @NotNull Instant lastUpdated

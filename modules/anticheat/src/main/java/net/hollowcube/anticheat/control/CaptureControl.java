@@ -2,6 +2,7 @@ package net.hollowcube.anticheat.control;
 
 import net.hollowcube.anticheat.capture.TrimPolicy;
 import net.hollowcube.anticheat.log.TraceHeader;
+import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.charset.StandardCharsets;
@@ -29,6 +30,7 @@ public sealed interface CaptureControl {
     ///
     /// @param captureId what the trace is filed under; the run id for a compete run
     /// @param cohort    null unless this is a sample, where it labels how much the grader trusts it
+    @RuntimeGson
     record Start(@Nullable String captureId, @Nullable TraceHeader.Reason reason,
                  @Nullable TraceHeader.Cohort cohort, @Nullable TrimPolicy trim) implements CaptureControl {
 
@@ -39,6 +41,7 @@ public sealed interface CaptureControl {
     }
 
     /// Closes the capture with this id, if it is the one the proxy has open.
+    @RuntimeGson
     record Stop(@Nullable String captureId) implements CaptureControl {
 
         @Override
@@ -49,6 +52,7 @@ public sealed interface CaptureControl {
 
     /// Ships the ring buffer without disturbing an active capture. The capture id is whatever
     /// capture is open at the time, and null when there is none.
+    @RuntimeGson
     record Flush(@Nullable String captureId, @Nullable TraceHeader.Reason reason) implements CaptureControl {
 
         @Override

@@ -1,6 +1,7 @@
 package net.hollowcube.anticheat.capture;
 
 import net.hollowcube.anticheat.log.TraceHeader;
+import net.hollowcube.common.util.RuntimeGson;
 
 /// How much of the world a trace carries: every chunk within `chunkRadius` of a chunk the player
 /// was in, or that an entity came within `entityRange` blocks of the player in.
@@ -8,6 +9,7 @@ import net.hollowcube.anticheat.log.TraceHeader;
 /// A radius of -1 keeps the whole chunk map, for modes that would rather pay the bytes. Trimming is
 /// by chunk, never by section, and applies to the world alone — the state cache and the entity
 /// table are small and always complete.
+@RuntimeGson
 public record TrimPolicy(int chunkRadius, int entityRange) {
 
     /// The plan's default: two chunks around the path, entities within eight blocks.

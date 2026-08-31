@@ -35,6 +35,7 @@ public interface PlayerService {
 
     void buyUpgrade(@NotNull String playerId, @NotNull String upgradeId, int cubits, @NotNull JsonObject meta);
 
+    @RuntimeGson
     record CreateCheckoutLinkResponse(@NotNull String url) {
     }
 
