@@ -143,21 +143,45 @@ class CaptureFixtureTest {
         }
     }
 
+    /// What the engine will store from `from` on: the table says the packet is kept, and it is not
+    /// a frame for a display entity, which the engine leaves out the way the model, the trim and
+    /// the prelude already do. The whole fixture is replayed either way, because whether an entity
+    /// is a display is only known from the `add_entity` that may precede `from`.
     private static long kept(List<FixtureReader.Frame> frames, int from) {
+        var state = new StateCache();
         long kept = 0;
-        for (FixtureReader.Frame frame : frames.subList(from, frames.size()))
-            if (Protocol776.lookup(frame.state(), frame.direction(), frame.packetId()).kept()) kept++;
+        for (int i = 0; i < frames.size(); i++) {
+            var frame = frames.get(i);
+            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            if (!entry.kept()) continue;
+
+            var decoder = entry.decoder();
+            var packet = decoder == null ? null : decoder.decode(new ByteReader(frame.body()));
+            state.apply(frame.state(), frame.direction(), frame.packetId(), frame.body(), packet);
+            if (i < from) continue;
+            if (packet instanceof EntityKeyed keyed && state.entities().isDropped(keyed.entityId())) continue;
+            kept++;
+        }
         return kept;
     }
 
     /// What the capture should have carried, from the model alone: the trimmed chunk count and how
     /// many chunks were loaded at the point the capture opened.
     private static long lastKeptNs(List<FixtureReader.Frame> frames) {
-        for (int i = frames.size() - 1; i >= 0; i--) {
-            var frame = frames.get(i);
-            if (Protocol776.lookup(frame.state(), frame.direction(), frame.packetId()).kept()) return frame.tNs();
+        var state = new StateCache();
+        long last = Long.MIN_VALUE;
+        for (var frame : frames) {
+            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            if (!entry.kept()) continue;
+
+            var decoder = entry.decoder();
+            var packet = decoder == null ? null : decoder.decode(new ByteReader(frame.body()));
+            state.apply(frame.state(), frame.direction(), frame.packetId(), frame.body(), packet);
+            if (packet instanceof EntityKeyed keyed && state.entities().isDropped(keyed.entityId())) continue;
+            last = frame.tNs();
         }
-        throw new IllegalStateException("the fixture kept no frames at all");
+        if (last == Long.MIN_VALUE) throw new IllegalStateException("the fixture kept no frames at all");
+        return last;
     }
 
     private record Replay(int chunks, int loaded) {

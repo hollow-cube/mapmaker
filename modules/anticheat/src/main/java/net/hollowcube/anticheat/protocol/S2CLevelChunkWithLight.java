@@ -19,8 +19,8 @@ public sealed interface S2CLevelChunkWithLight extends Packet permits S2CLevelCh
     /// The heightmaps are kept as the exact bytes of the `Heightmap.Types -> long[]` map, and the
     /// block entities and the whole light payload as one trailing blob, so a decoded packet
     /// re-encodes byte for byte — the round trip is what proves the decoder read the sections
-    /// correctly. The capture drops that blob before the frame is stored, so one read back out of
-    /// a trace has it empty.
+    /// correctly. The capture keeps only the sections, so one read back out of a trace has an empty
+    /// heightmap map and an empty blob.
     ///
     /// Both blobs are [ByteSlice] windows into the frame body rather than copies: the decoded
     /// record is dropped as soon as the world model has taken the sections out of it, and the

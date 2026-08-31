@@ -63,6 +63,17 @@ final class TestCapture {
         return new S2CSetChunkCacheRadius.V776(radius);
     }
 
+    /// `entityTypeId` is a 776 id: 132 is a text display, 69 a pig.
+    static S2CAddEntity.V776 addEntity(int entityId, int entityTypeId) {
+        return new S2CAddEntity.V776(entityId, new UUID(0, entityId), entityTypeId, 8, 64, 8,
+            LpVec3.ZERO, (byte) 0, (byte) 0, (byte) 0, 0);
+    }
+
+    static S2CEntityPositionSync.V776 positionSync(int entityId) {
+        return new S2CEntityPositionSync.V776(entityId,
+            new PositionMoveRotation(8, 64, 8, 0, 0, 0, 0, 0), true);
+    }
+
     /// A chunk of single-value air sections, the smallest legal shape.
     static S2CLevelChunkWithLight.V776 chunk(int chunkX, int chunkZ) {
         var sections = new ArrayList<Section>(4);

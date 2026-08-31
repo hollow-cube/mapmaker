@@ -3,7 +3,9 @@ package net.hollowcube.anticheat.capture;
 import net.hollowcube.anticheat.log.Trace;
 import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.anticheat.log.TraceReader;
+import net.hollowcube.anticheat.log.Frame;
 import net.hollowcube.anticheat.protocol.*;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
@@ -98,7 +100,7 @@ class CaptureEngineTest {
     }
 
     @Test
-    void testChunkFramesAreStoredWithoutTheirBlockEntitiesAndLight() throws Exception {
+    void testChunkFramesAreStoredAsTheirBlockSectionsAlone() throws Exception {
         var clock = new TestCapture.ManualClock();
         var traces = new TestCapture.Traces();
         var engine = engine(clock, traces);
@@ -117,11 +119,12 @@ class CaptureEngineTest {
             .findFirst()
             .orElseThrow();
 
-        var body = sent.toByteArray();
-        assertArrayEquals(Arrays.copyOf(body, body.length - sent.blockEntitiesAndLight().length()), stored.bytes());
+        assertTrue(stored.bytes().length < sent.toByteArray().length);
 
         var read = S2CLevelChunkWithLight.V776.decode(new ByteReader(stored.bytes()));
         assertEquals(0, read.blockEntitiesAndLight().length());
+        // A varint zero, which is an empty Heightmap.Types -> long[] map.
+        assertArrayEquals(new byte[]{0}, read.heightmaps().toByteArray());
         assertEquals(sent.chunkX(), read.chunkX());
         assertEquals(sent.chunkZ(), read.chunkZ());
         // The sections are the whole point of keeping the frame, so they survive intact. Section
@@ -454,6 +457,43 @@ class CaptureEngineTest {
         assertEquals("vanilla", traces.take().header().brand());
 
         engine.close();
+    }
+
+    @Test
+    void testFramesForDisplayEntitiesAreNotStored() throws Exception {
+        var clock = new TestCapture.ManualClock();
+        var traces = new TestCapture.Traces();
+        var engine = engine(clock, traces);
+
+        join(engine, clock, 0);
+        engine.start("run-display", TraceHeader.Reason.RUN, null, TrimPolicy.EVERYTHING);
+
+        // One text display and one pig, then a position sync each.
+        feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "add_entity", addEntity(900, 132));
+        feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "add_entity", addEntity(901, 69));
+        feed(engine, 2 * SECOND, ProtocolState.PLAY, Direction.S2C, "entity_position_sync", positionSync(900));
+        feed(engine, 2 * SECOND, ProtocolState.PLAY, Direction.S2C, "entity_position_sync", positionSync(901));
+        clock.set(3 * SECOND);
+        engine.stop(TraceHeader.ClosedBy.STOP);
+
+        var trace = TraceReader.read(traces.take().path());
+        var ids = trace.frames().stream()
+            .map(frame -> entityIdOf(trace.header(), frame))
+            .filter(id -> id != null)
+            .toList();
+        assertEquals(List.of(901, 901), ids, "the display entity's add and sync are both left out");
+
+        engine.close();
+    }
+
+    /// The entity a frame is keyed on, for the entity packets this test feeds; null for the rest.
+    private static @Nullable Integer entityIdOf(TraceHeader header, Frame frame) {
+        var name = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId()).name();
+        return switch (name) {
+            case "add_entity" -> S2CAddEntity.V776.decode(new ByteReader(frame.bytes())).entityId();
+            case "entity_position_sync" -> S2CEntityPositionSync.V776.decode(new ByteReader(frame.bytes())).entityId();
+            default -> null;
+        };
     }
 
     private static byte[] sections(S2CLevelChunkWithLight.V776 chunk) {

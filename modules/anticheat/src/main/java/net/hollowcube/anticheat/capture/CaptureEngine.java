@@ -147,13 +147,18 @@ public final class CaptureEngine implements FrameSink {
             note(tNs, packet);
         }
 
-        var frameBody = packet instanceof S2CLevelChunkWithLight.V776 chunk
-            ? withoutBlockEntitiesAndLight(chunk, body) : body;
-        var frame = new Frame(tNs, direction, protocolState, packetId, pingId, frameBody);
-        ring.frame(frame);
-
         boolean fence = entry.pingWhen() != null && packet != null
             && entry.pingWhen().fence(packet, state.entities().player().entityId());
+
+        // A display entity is absent from the model, from the trim and from the prelude, so its
+        // frames are the only place it leaks in — and on a display-heavy map they are most of the
+        // trace. Decided after `state.apply`, so a promotion has already un-dropped its subject.
+        if (packet instanceof EntityKeyed keyed && state.entities().isDropped(keyed.entityId())) return fence;
+
+        var frameBody = packet instanceof S2CLevelChunkWithLight.V776 chunk
+            ? sectionsOnly(chunk, body) : body;
+        var frame = new Frame(tNs, direction, protocolState, packetId, pingId, frameBody);
+        ring.frame(frame);
 
         var capture = this.capture;
         if (capture == null) return fence;
@@ -268,15 +273,25 @@ public final class CaptureEngine implements FrameSink {
 
     /// A chunk packet without its trailing block-entity and light blob, which measures 99% of one
     /// on a real connection (49KB of a 49.4KB packet, all of it uniform light) and which nothing
-    /// above [S2CLevelChunkWithLight] ever reads — the world model takes the sections and drops the
-    /// rest. Storing it was what filled the ring with chunks on every join.
+    /// A chunk packet cut down to the block sections, which are the only part of it anything above
+    /// [S2CLevelChunkWithLight] reads. On a real map the heightmaps and the block-entity/light tail
+    /// measured 11% and 99% of a packet respectively — storing them was what filled the ring with
+    /// chunks on every join.
     ///
-    /// The blob is the tail of `body` rather than a copy, so this is the packet up to where it
-    /// starts; a decoder that handed back a slice of something else gets the body untouched.
-    private static byte[] withoutBlockEntitiesAndLight(S2CLevelChunkWithLight.V776 chunk, byte[] body) {
-        var blob = chunk.blockEntitiesAndLight();
-        if (blob.length() == 0 || blob.array() != body) return body;
-        return Arrays.copyOf(body, blob.offset());
+    /// Both are windows into `body`, so this splices rather than re-encodes: everything up to the
+    /// heightmaps, an empty heightmap map in their place, then the section data up to where the
+    /// tail starts. A decoder that handed back a slice of something else gets the body untouched.
+    private static byte[] sectionsOnly(S2CLevelChunkWithLight.V776 chunk, byte[] body) {
+        var heightmaps = chunk.heightmaps();
+        var tail = chunk.blockEntitiesAndLight();
+        if (heightmaps.array() != body || tail.array() != body) return body;
+
+        int sections = heightmaps.offset() + heightmaps.length();
+        var stripped = new byte[heightmaps.offset() + 1 + tail.offset() - sections];
+        System.arraycopy(body, 0, stripped, 0, heightmaps.offset());
+        stripped[heightmaps.offset()] = 0; // a varint zero: no heightmaps
+        System.arraycopy(body, sections, stripped, heightmaps.offset() + 1, tail.offset() - sections);
+        return stripped;
     }
 
     /// Notes what the trim region is built from: where the player is, and where an entity close
