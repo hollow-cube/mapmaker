@@ -28,3 +28,10 @@ base:
   volumeMounts:
     - name: traces
       mountPath: /data/anticheat
+
+  # The image is distroless and runs as 65532, while a freshly provisioned volume comes up
+  # root:root, so without this the store cannot create its first directory. OnRootMismatch because
+  # the default policy chowns the whole volume on every start, which 300Gi cannot afford.
+  podSecurityContext:
+    fsGroup: 65532
+    fsGroupChangePolicy: OnRootMismatch
