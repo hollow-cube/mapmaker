@@ -212,6 +212,20 @@ public final class AnticheatConnections {
         });
     }
 
+    /// Closes whatever capture is open, because the player moved to another backend.
+    ///
+    /// The backend does send a stop of its own when the player leaves the map, but it is written to
+    /// a connection already being torn down for the switch and never arrives, so a run used to stay
+    /// open until the player quit the game entirely and swept up whatever they did in between. The
+    /// proxy sees the switch first hand and owns the engine, so it closes the trace here.
+    public boolean switchedServer(UUID playerId) {
+        return onEngine(playerId, (connection, engine) -> {
+            if (engine.captureId() == null) return;
+            engine.stop(TraceHeader.ClosedBy.SWITCHED);
+            if (connection.capturing().compareAndSet(true, false)) AnticheatMetrics.capturesActive.dec();
+        });
+    }
+
     /// Ships the ring, which does not disturb whatever capture is open.
     public boolean flush(UUID playerId, @Nullable String captureId, TraceHeader.Reason reason) {
         return onEngine(playerId, (connection, engine) -> engine.flush(captureId, reason));

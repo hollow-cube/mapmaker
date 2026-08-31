@@ -20,6 +20,7 @@ import java.util.UUID;
 import java.util.function.BooleanSupplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /// The backend driving a capture over the control channel, end to end on a real engine: what a
@@ -142,6 +143,39 @@ class CaptureControlFlowTest {
         assertEquals(TraceHeader.ClosedBy.DISCONNECT, stored(store.puts().getFirst().meta().id()).closedBy());
         assertEquals(0, AnticheatMetrics.capturesActive.get());
         await(() -> isEmpty(directory.resolve("traces")));
+    }
+
+    /// Leaving the map is a server switch, and the backend's own stop never survives the teardown,
+    /// so the proxy closes the trace itself. The client connection lives on, so the tail is fenced.
+    @Test
+    void testAServerSwitchClosesTheOpenCapture() {
+        installer.join(player(), PLAYER, "Tester", 776, () -> null);
+
+        installer.handleBackend(PLAYER, "Tester", new CaptureControl.Start("run-5", TraceHeader.Reason.RUN, null,
+            TrimPolicy.DEFAULT).encode());
+        channel.runPendingTasks();
+        assertEquals(1, AnticheatMetrics.capturesActive.get());
+
+        installer.switchedServer(PLAYER);
+        channel.runPendingTasks();
+
+        await(() -> !store.puts().isEmpty());
+        var header = stored(store.puts().getFirst().meta().id());
+        assertEquals(TraceHeader.ClosedBy.SWITCHED, header.closedBy());
+        assertFalse(header.flags().tailUnfenced(), "the client connection outlives a backend switch");
+        assertEquals(0, AnticheatMetrics.capturesActive.get());
+    }
+
+    /// Nothing open is nothing to close, so a switch on an idle connection ships no trace.
+    @Test
+    void testAServerSwitchWithNoCaptureShipsNothing() {
+        installer.join(player(), PLAYER, "Tester", 776, () -> null);
+
+        installer.switchedServer(PLAYER);
+        channel.runPendingTasks();
+
+        assertTrue(store.puts().isEmpty());
+        assertEquals(0, AnticheatMetrics.capturesActive.get());
     }
 
     /// Proxy shutdown, from the tap's side: the open capture is closed as `shutdown` and shipped

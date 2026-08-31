@@ -334,7 +334,7 @@ public final class CaptureEngine implements FrameSink {
     private static boolean tailUnfenced(TraceHeader.ClosedBy closedBy) {
         return switch (closedBy) {
             case DISCONNECT, SHUTDOWN -> true;
-            case STOP, SUPERSEDED, FLUSH -> false;
+            case STOP, SUPERSEDED, SWITCHED, FLUSH -> false;
         };
     }
 

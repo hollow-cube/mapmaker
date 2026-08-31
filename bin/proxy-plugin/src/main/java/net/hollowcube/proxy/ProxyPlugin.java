@@ -517,6 +517,10 @@ public class ProxyPlugin {
     @Subscribe
     public void handlePostConnect(@NotNull ServerPostConnectEvent event) {
         var playerId = event.getPlayer().getUniqueId();
+        // A previous server means a switch, which ends the run whatever capture is open was opened
+        // for. Null is the first connect of the session, where there is nothing to close.
+        if (event.getPreviousServer() != null) anticheatConnections.switchedServer(playerId);
+
         if (!playersJustJoined.contains(playerId)) return;
 
         playersJustJoined.remove(playerId);

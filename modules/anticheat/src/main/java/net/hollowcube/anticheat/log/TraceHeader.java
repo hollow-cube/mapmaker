@@ -70,12 +70,15 @@ public record TraceHeader(
     }
 
     /// What ended the capture. `superseded` means a second `start` arrived while this one was open;
-    /// `flush` is the ring buffer being shipped, which ends nothing — the connection carries on.
+    /// `flush` is the ring buffer being shipped, which ends nothing — the connection carries on;
+    /// `switched` is the player moving to another backend, which ends the run the capture was
+    /// opened for while leaving the client connection, and so the ping fence, intact.
     public enum ClosedBy {
         @SerializedName("stop") STOP,
         @SerializedName("disconnect") DISCONNECT,
         @SerializedName("shutdown") SHUTDOWN,
         @SerializedName("superseded") SUPERSEDED,
+        @SerializedName("switched") SWITCHED,
         @SerializedName("flush") FLUSH
     }
 
