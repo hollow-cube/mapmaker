@@ -189,6 +189,22 @@ final class ReplayRecorderTest {
     }
 
     @Test
+    void terminatingKeepsEventsSubmittedAfterTheLastAdvance() {
+        var writer = new TestWriter();
+        var recorder = newRecorder(writer);
+
+        recorder.advance();
+        // A run-ending event is submitted into the open tick and terminated on, never advanced.
+        recorder.submit(new DestroyEntityEvent(1));
+        recorder.finish().join();
+
+        var commit = writer.commits.getLast();
+        assertTrue(commit.finished());
+        assertEquals(2, headerOf(commit).tickCount());
+        assertEquals(1, recorder.stats().events());
+    }
+
+    @Test
     void statsCountEventsForTheWholeRecordingAndForTheOpenChunk() {
         var recorder = newRecorder(new TestWriter());
 

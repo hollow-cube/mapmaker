@@ -55,11 +55,11 @@ final class ReplayRoundTripTest {
             expected.add(event);
             recorder.advance();
         }
+        // Submitted with no advance() after them, the way run-ending events reach a recorder.
         recorder.submit(new SpawnEntityEvent(1, EntityType.ARMOR_STAND, new Pos(5, 64, 5)));
         recorder.submit(new DestroyEntityEvent(1));
         expected.add(new SpawnEntityEvent(1, EntityType.ARMOR_STAND, new Pos(5, 64, 5)));
         expected.add(new DestroyEntityEvent(1));
-        recorder.advance();
         recorder.finish().join();
 
         var recording = storage.load("run");

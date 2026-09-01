@@ -253,9 +253,12 @@ final class ReplayRecorderImpl implements ReplayRecorder {
     private CompletableFuture<Void> terminate(boolean finished) {
         if (closeFuture != null) return closeFuture;
 
-        // advance() begins the next tick immediately. That tick is intentionally incomplete and
-        // must not appear in the finished replay.
-        discardOpenTick();
+        // advance() begins the next tick immediately, so an open tick with no events is empty
+        // scaffolding and is dropped. One that carries events is sealed as a final short tick
+        // instead: the events that end a run are submitted after its last advance(), and
+        // discarding them meant no replay ever contained its RunEnd.
+        if (eventCount > 0) endTick();
+        else discardOpenTick();
         commit(finished);
 
         closeFuture = closeWriter();
