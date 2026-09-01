@@ -48,14 +48,16 @@ public final class ReplayManager {
     private static final int FIRST_RECORDED_SLOT = 3;
     private static final int LAST_RECORDED_SLOT = 5;
 
-    /// The shortest run worth a replay, one second of it.
+    /// The shortest reset run worth a replay, two seconds of it.
     ///
-    /// Half of every recording made is of a run that ended within three seconds of starting, and a
-    /// fifth within one: a hard reset, or a player who never really began. Those cost a stored
-    /// object and a row each to say nothing, so a run that ends this fast is dropped rather than
-    /// committed. It only applies to a run that is over; a player who leaves after half a second
-    /// may come back and make it a long one, so leaving keeps the recording as always.
-    private static final int MINIMUM_RECORDED_TICKS = 20;
+    /// Half of every recording made is of a run that ended within three seconds of starting: a
+    /// hard reset, or a player who never really began. Those cost a stored object and a row each
+    /// to say nothing, so a reset this fast is dropped rather than committed. Completed runs are
+    /// exempt, because a finish is worth keeping at any length and the shortest maps are finished
+    /// at a pace this would throw away. It only applies to a run that is over; a player who
+    /// leaves after half a second may come back and make it a long one, so leaving keeps the
+    /// recording as always.
+    private static final int MINIMUM_RECORDED_TICKS = 40;
 
     /// The built-in events, with the parkour-specific ones appended after them.
     ///
@@ -214,11 +216,12 @@ public final class ReplayManager {
         if (nextState == null) {
             // The player left, but the run itself is not over. They may rejoin and resume this
             // exact recording, so stop without finalizing it.
-            return endSession(saveState.id(), false);
+            return endSession(saveState.id(), false, 0);
         } else if (nextState instanceof ParkourState.Playing2 || nextState instanceof ParkourState.Finished) {
             // Either the run completed, or a hard reset abandoned it in favour of a new save
             // state. Neither will ever be appended to again.
-            return endSession(saveState.id(), true);
+            return endSession(saveState.id(), true,
+                nextState instanceof ParkourState.Finished ? 0 : MINIMUM_RECORDED_TICKS);
         } else {
             // Spectating and testing may resume this run while the world remains alive.
             var session = sessions.get(saveState.id());
@@ -238,7 +241,7 @@ public final class ReplayManager {
 
         // The world is going away, but these runs are not over; leave them resumable.
         for (var saveStateId : new ArrayList<>(sessions.keySet()))
-            endSession(saveStateId, false);
+            endSession(saveStateId, false, 0);
         recordings.clear();
 
         closeFuture = CompletableFuture.allOf(
@@ -320,7 +323,7 @@ public final class ReplayManager {
         // Nothing may start recording this save state again until it is prepared, because only
         // preparation finds the committed recording to append to; a fresh one would replace it.
         recordings.disable(saveState.id());
-        endSession(saveState.id(), false);
+        endSession(saveState.id(), false, 0);
     }
 
     private void dropFailedSession(Player player, Throwable failure) {
@@ -333,13 +336,13 @@ public final class ReplayManager {
         );
     }
 
-    private CompletableFuture<Void> endSession(String saveStateId, boolean finished) {
+    private CompletableFuture<Void> endSession(String saveStateId, boolean finished, int minimumTicks) {
         var session = sessions.remove(saveStateId);
         if (session == null) {
             return finalizations.getOrDefault(saveStateId, CompletableFuture.completedFuture(null));
         }
 
-        var finalization = finished ? session.complete(MINIMUM_RECORDED_TICKS) : session.stop();
+        var finalization = finished ? session.complete(minimumTicks) : session.stop();
         finalizations.put(saveStateId, finalization);
         // Otherwise every run this world ever hosted stays pinned for its lifetime. Anything asking
         // after removal gets a completed future, which is the right answer once it has landed.
