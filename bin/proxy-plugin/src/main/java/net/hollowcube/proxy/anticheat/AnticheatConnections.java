@@ -14,6 +14,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
@@ -270,10 +272,22 @@ public final class AnticheatConnections {
     /// handed to the shipper, which owns it (and the spool file) from now on.
     private void trace(Path path, TraceHeader header) {
         AnticheatMetrics.traces.labels(String.valueOf(header.reason()), String.valueOf(header.closedBy()), "spooled").inc();
-        AnticheatMetrics.traceBytes.observe(header.counters().bytes());
+        // The assembled file, not the counters' frame bytes: the prelude and the trimmed world are
+        // most of a trace, so counting frames alone reads about a third of what is stored.
+        AnticheatMetrics.traceBytes.observe(size(path));
         logger.info("anticheat: trace {} ({} frames, {} bytes) awaiting shipping", path,
             header.counters().frames(), header.counters().bytes());
         ship.trace(path, header);
+    }
+
+    /// Zero for a trace we cannot stat, which only skews a histogram the shipper's own counters
+    /// can be read against.
+    private static long size(Path path) {
+        try {
+            return Files.size(path);
+        } catch (IOException e) {
+            return 0;
+        }
     }
 
     private CaptureEngineConfig engineConfig(String connectionId) {
