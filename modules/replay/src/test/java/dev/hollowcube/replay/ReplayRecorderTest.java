@@ -135,7 +135,7 @@ final class ReplayRecorderTest {
         var recorder = holder.get();
 
         // Enough ticks to cross the recorder's chunk length several times.
-        for (var tick = 0; tick < 250; tick++) {
+        for (var tick = 0; tick < 450; tick++) {
             recorder.submit(new DestroyEntityEvent(1));
             recorder.advance();
         }
@@ -209,15 +209,15 @@ final class ReplayRecorderTest {
         var recorder = newRecorder(new TestWriter());
 
         // Past the chunk tick limit, so one chunk is closed and the rest are still open.
-        for (var tick = 0; tick < 150; tick++) {
+        for (var tick = 0; tick < 250; tick++) {
             recorder.submit(new DestroyEntityEvent(tick));
             recorder.advance();
         }
 
         var stats = recorder.stats();
-        assertEquals(150, stats.tick());
+        assertEquals(250, stats.tick());
         assertEquals(1, stats.chunks());
-        assertEquals(150, stats.events());
+        assertEquals(250, stats.events());
         assertEquals(50, stats.chunkEvents());
         assertTrue(stats.bytes() > 0);
     }

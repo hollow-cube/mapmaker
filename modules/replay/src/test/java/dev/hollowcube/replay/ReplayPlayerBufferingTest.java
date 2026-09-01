@@ -29,12 +29,12 @@ import static org.junit.jupiter.api.Assertions.*;
 /// Covers playback over a reader that does not have every chunk yet, which is what a replay read
 /// over the network in ranges looks like from here.
 final class ReplayPlayerBufferingTest {
-    // Matches the recorder's chunk tick limit, so chunk N starts at tick N * 100.
-    private static final int CHUNK_TICKS = 100;
+    // Matches the recorder's chunk tick limit, so chunk N starts at tick N * 200.
+    private static final int CHUNK_TICKS = 200;
 
     @Test
     void advanceStallsUntilTheChunkArrives(@TempDir Path temporaryDirectory) {
-        var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory, 250)));
+        var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory, 500)));
         var played = new ArrayList<ReplayEvent>();
 
         try (var player = new ReplayPlayer(reader, ReplayEvents.builder().build(), played::add)) {
@@ -52,7 +52,7 @@ final class ReplayPlayerBufferingTest {
 
     @Test
     void enteringAChunkPrefetchesTheNextOne(@TempDir Path temporaryDirectory) {
-        var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory, 250)));
+        var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory, 500)));
         reader.admit(0);
         reader.admit(CHUNK_TICKS);
 
@@ -73,24 +73,24 @@ final class ReplayPlayerBufferingTest {
 
     @Test
     void seekingStallsUntilTheAnchorChunkArrives(@TempDir Path temporaryDirectory) {
-        var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory, 250)));
+        var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory, 500)));
         var played = new ArrayList<ReplayEvent>();
 
         try (var player = new ReplayPlayer(reader, ReplayEvents.builder().build(), played::add)) {
-            player.seek(180);
-            assertEquals(180, player.tick());
+            player.seek(380);
+            assertEquals(380, player.tick());
             assertEquals(List.of(CHUNK_TICKS), reader.prefetched);
 
             assertEquals(ReplayPlayer.Advance.STALLED, player.advance());
-            assertEquals(180, player.tick());
+            assertEquals(380, player.tick());
             assertEquals(List.of(), played);
 
             reader.admit(CHUNK_TICKS);
             assertEquals(ReplayPlayer.Advance.ADVANCED, player.advance());
-            assertEquals(181, player.tick());
+            assertEquals(381, player.tick());
             // Rebuilding was deferred to advance(), so the anchor chunk replayed there first.
-            assertEquals(move(100), played.getFirst());
-            assertEquals(move(180), played.getLast());
+            assertEquals(move(200), played.getFirst());
+            assertEquals(move(380), played.getLast());
         }
     }
 

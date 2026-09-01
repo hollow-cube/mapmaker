@@ -207,7 +207,7 @@ final class ReplaySessionTest {
 
         var replay = compact(temporaryDirectory, session -> {
             var entityId = session.trackEntity(entity);
-            for (var tick = 0; tick < 150; tick++) {
+            for (var tick = 0; tick < 300; tick++) {
                 session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, new Pos(tick, 64, 0), Vec.ZERO);
                 session.captureMovement(entityId, new Pos(0, 64, tick), Vec.ZERO);
                 session.advance();
@@ -427,7 +427,7 @@ final class ReplaySessionTest {
         equipment.setHelmet(ItemStack.of(Material.DIAMOND_HELMET));
 
         var replay = compact(temporaryDirectory, session -> {
-            for (var tick = 0; tick < 150; tick++) {
+            for (var tick = 0; tick < 300; tick++) {
                 // Only the opening tick says any of this, so only a snapshot can put it back.
                 session.captureState(ReplaySession.SUBJECT_ENTITY_ID, entity);
                 session.captureEquipment(ReplaySession.SUBJECT_ENTITY_ID, equipment);
