@@ -9,7 +9,7 @@ forwardingSecret: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcT
 cookieSecret: "${MAPMAKER_PROXY_COOKIE_SECRET}"
 
 service:
-  nodePort: 30566
+  nodePort: 30565
 
 nodeSelector:
   # Required: the service is externalTrafficPolicy Local, so only this node's nodePort answers, and
