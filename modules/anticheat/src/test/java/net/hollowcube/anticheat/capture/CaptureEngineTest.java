@@ -259,7 +259,7 @@ class CaptureEngineTest {
         var clock = new TestCapture.ManualClock();
         var traces = new TestCapture.Traces();
         CaptureEngineConfig config = new CaptureEngineConfig(directory.resolve("spool"),
-            directory.resolve("out"), 60 * SECOND, 30 * SECOND, 1 << 20, 1 << 20, 5 * SECOND, 1024,
+            directory.resolve("out"), 60 * SECOND, 30 * SECOND, 1 << 20, 1 << 20, 5 * SECOND, 0, 1024,
             TrimPolicy.DEFAULT, Duration.ofSeconds(5));
         var engine = new CaptureEngine(config, TestCapture.identity(), () -> null, clock, traces);
 
@@ -280,12 +280,49 @@ class CaptureEngineTest {
     }
 
     @Test
+    void testACaptureBelowTheFloorIsDiscarded() throws Exception {
+        var clock = new TestCapture.ManualClock();
+        var traces = new TestCapture.Traces();
+        CaptureEngineConfig config = new CaptureEngineConfig(directory.resolve("spool"),
+            directory.resolve("out"), 60 * SECOND, 30 * SECOND, 1 << 20, 1 << 20, 600 * SECOND,
+            3 * SECOND, 1024, TrimPolicy.DEFAULT, Duration.ofSeconds(5));
+        var engine = new CaptureEngine(config, TestCapture.identity(), () -> null, clock, traces);
+
+        join(engine, clock, 0);
+        engine.start("run-short", TraceHeader.Reason.RUN, null, TrimPolicy.DEFAULT);
+        clock.set(SECOND);
+        move(engine, SECOND, 1, 64, 0);
+        engine.stop(TraceHeader.ClosedBy.STOP);
+
+        assertEquals(CaptureEngine.Status.IDLE, engine.status());
+        assertEquals(1, engine.discardedCaptures());
+
+        // The next capture still works, and is the only one that reaches the writer.
+        engine.start("run-long", TraceHeader.Reason.RUN, null, TrimPolicy.DEFAULT);
+        for (int second = 2; second <= 8; second++) {
+            clock.set(second * SECOND);
+            move(engine, second * SECOND, second, 64, 0);
+        }
+        engine.stop(TraceHeader.ClosedBy.STOP);
+
+        var header = traces.take().header();
+        assertEquals("run-long", header.captureId());
+        assertEquals(1, engine.discardedCaptures());
+
+        // close() waits for the writer, so by here every spool either assembled or was deleted.
+        engine.close();
+        try (var spools = Files.list(directory.resolve("spool"))) {
+            assertEquals(List.of(), spools.toList(), "a spool was left behind");
+        }
+    }
+
+    @Test
     void testTheRingCapTruncatesAFlushAndSaysSo() throws Exception {
         var clock = new TestCapture.ManualClock();
         var traces = new TestCapture.Traces();
         // Four kilobytes of ring, which a hundred moves is well past.
         var config = new CaptureEngineConfig(directory.resolve("spool"), directory.resolve("out"),
-            60 * SECOND, 30 * SECOND, 4096, 1 << 20, 600 * SECOND, 1 << 20, TrimPolicy.DEFAULT,
+            60 * SECOND, 30 * SECOND, 4096, 1 << 20, 600 * SECOND, 0, 1 << 20, TrimPolicy.DEFAULT,
             Duration.ofSeconds(5));
         var engine = new CaptureEngine(config, TestCapture.identity(), () -> null, clock, traces);
 
@@ -317,7 +354,7 @@ class CaptureEngineTest {
         var traces = new TestCapture.Traces();
         // Half a kilobyte of spool: twenty moves of twenty-five bytes and then no more.
         var config = new CaptureEngineConfig(directory.resolve("spool"), directory.resolve("out"),
-            60 * SECOND, 30 * SECOND, 1 << 20, 512, 600 * SECOND, 1 << 20, TrimPolicy.DEFAULT,
+            60 * SECOND, 30 * SECOND, 1 << 20, 512, 600 * SECOND, 0, 1 << 20, TrimPolicy.DEFAULT,
             Duration.ofSeconds(5));
         var engine = new CaptureEngine(config, TestCapture.identity(), () -> null, clock, traces);
 
@@ -352,7 +389,7 @@ class CaptureEngineTest {
         var traces = new TestCapture.Traces();
         var writer = new TestCapture.Deferred();
         CaptureEngineConfig config = new CaptureEngineConfig(directory.resolve("spool"),
-            directory.resolve("out"), 60 * SECOND, 30 * SECOND, 1 << 20, 1 << 20, 600 * SECOND, 2,
+            directory.resolve("out"), 60 * SECOND, 30 * SECOND, 1 << 20, 1 << 20, 600 * SECOND, 0, 2,
             TrimPolicy.DEFAULT, Duration.ofSeconds(5));
         var engine = new CaptureEngine(config, TestCapture.identity(), () -> null, clock, traces, writer);
 

@@ -180,7 +180,7 @@ class TraceShipperTest {
 
     private TraceShipper shipper(long spoolMaxBytes) {
         var config = new AnticheatConfig(true, directory, Duration.ofSeconds(60), 1 << 20,
-            spoolMaxBytes, Duration.ofSeconds(1));
+            spoolMaxBytes, Duration.ZERO, Duration.ofSeconds(1));
         return new TraceShipper(store.url(), config, Duration.ofSeconds(2), Duration.ofMillis(20),
             Duration.ofMillis(50));
     }

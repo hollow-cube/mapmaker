@@ -24,6 +24,7 @@ class AnticheatConfigTest {
         assertEquals(Duration.ofSeconds(60), config.ringWindow());
         assertEquals(8 * 1024 * 1024, config.ringMaxBytes());
         assertEquals(256L * 1024 * 1024, config.spoolMaxBytes());
+        assertEquals(Duration.ofSeconds(3), config.minCapture());
     }
 
     @Test
@@ -33,7 +34,8 @@ class AnticheatConfigTest {
                 "ANTICHEAT_SPOOL_DIR", "/var/anticheat",
                 "ANTICHEAT_RING_SECONDS", "90",
                 "ANTICHEAT_RING_MAX_BYTES", "1024",
-                "ANTICHEAT_SPOOL_MAX_BYTES", "2048"
+                "ANTICHEAT_SPOOL_MAX_BYTES", "2048",
+                "ANTICHEAT_MIN_CAPTURE_SECONDS", "10"
         ), logger);
 
         assertTrue(config.enabled());
@@ -41,6 +43,7 @@ class AnticheatConfigTest {
         assertEquals(Duration.ofSeconds(90), config.ringWindow());
         assertEquals(1024, config.ringMaxBytes());
         assertEquals(2048, config.spoolMaxBytes());
+        assertEquals(Duration.ofSeconds(10), config.minCapture());
     }
 
     @Test

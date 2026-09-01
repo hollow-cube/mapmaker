@@ -19,6 +19,9 @@ public record CaptureEngineConfig(
     long maxSpoolBytes,
     /// How long a capture may run before it is stopped and marked truncated.
     long maxCaptureNs,
+    /// Below this, a capture is discarded rather than assembled. A run the player reset within a
+    /// second is a trace of the start snapshot and nothing else, and half of them are that.
+    long minCaptureNs,
     /// Frames that may be waiting on the writer thread before new ones are dropped and counted.
     int queueSize,
     /// The trim used for ring flushes, and the range entity proximity is noted at while idle.
@@ -32,6 +35,7 @@ public record CaptureEngineConfig(
     public static final long RING_MAX_BYTES = 8L << 20;
     public static final long MAX_SPOOL_BYTES = 256L << 20;
     public static final long MAX_CAPTURE_NS = TimeUnit.SECONDS.toNanos(600);
+    public static final long MIN_CAPTURE_NS = TimeUnit.SECONDS.toNanos(3);
     public static final int QUEUE_SIZE = 8192;
     public static final Duration CLOSE_TIMEOUT = Duration.ofSeconds(15);
 
@@ -42,11 +46,13 @@ public record CaptureEngineConfig(
         if (ringMaxBytes <= 0) throw new IllegalArgumentException("ring cap must be positive: " + ringMaxBytes);
         if (maxSpoolBytes <= 0) throw new IllegalArgumentException("spool cap must be positive: " + maxSpoolBytes);
         if (maxCaptureNs <= 0) throw new IllegalArgumentException("capture cap must be positive: " + maxCaptureNs);
+        if (minCaptureNs < 0) throw new IllegalArgumentException("capture floor must not be negative: " + minCaptureNs);
+        if (minCaptureNs >= maxCaptureNs) throw new IllegalArgumentException("capture floor must be below the cap: " + minCaptureNs + " >= " + maxCaptureNs);
         if (queueSize <= 0) throw new IllegalArgumentException("queue size must be positive: " + queueSize);
     }
 
     public static CaptureEngineConfig of(Path spoolDir, Path outputDir) {
         return new CaptureEngineConfig(spoolDir, outputDir, RING_WINDOW_NS, RING_SNAPSHOT_INTERVAL_NS, RING_MAX_BYTES,
-            MAX_SPOOL_BYTES, MAX_CAPTURE_NS, QUEUE_SIZE, TrimPolicy.DEFAULT, CLOSE_TIMEOUT);
+            MAX_SPOOL_BYTES, MAX_CAPTURE_NS, MIN_CAPTURE_NS, QUEUE_SIZE, TrimPolicy.DEFAULT, CLOSE_TIMEOUT);
     }
 }

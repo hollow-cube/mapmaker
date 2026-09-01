@@ -31,7 +31,9 @@ public final class AnticheatMetrics {
         /// Per-connection ring cap hit, so the oldest frames were dropped.
         RING_CAP,
         /// Tap installed mid-state, so frames are discarded until the next state boundary.
-        UNKNOWN_STATE;
+        UNKNOWN_STATE,
+        /// Capture shorter than the floor, thrown away rather than assembled.
+        TOO_SHORT;
 
         public final String label = name().toLowerCase(Locale.ROOT);
     }

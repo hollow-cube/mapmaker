@@ -82,6 +82,8 @@ public final class CaptureEngine implements FrameSink {
     private int currentPingId = Frame.NO_PING;
     private @Nullable Capture capture;
     private boolean closed;
+    /// Written on the event loop, read by whoever samples metrics.
+    private volatile long discardedCaptures;
 
     // Writer thread only, from here down.
     private @Nullable Path spoolPath;
@@ -124,6 +126,11 @@ public final class CaptureEngine implements FrameSink {
 
     public RingBuffer ring() {
         return ring;
+    }
+
+    /// Captures thrown away for being shorter than the floor, which is what the metric samples.
+    public long discardedCaptures() {
+        return discardedCaptures;
     }
 
     @Override
@@ -190,13 +197,27 @@ public final class CaptureEngine implements FrameSink {
     }
 
     /// Closes the active capture and hands it to the writer. A no-op when nothing is open.
+    ///
+    /// A capture shorter than [CaptureEngineConfig#minCaptureNs] is thrown away instead: it is the
+    /// start snapshot and almost no frames, which costs the same to store as a real run and says
+    /// nothing about how the player moved.
     public void stop(TraceHeader.ClosedBy closedBy) {
         var capture = this.capture;
         if (capture == null) return;
         advance(clock.nanoTime());
-        status = Status.CLOSING;
         this.capture = null;
 
+        // Straight back to IDLE: nothing is handed to the writer to assemble, so there is no
+        // CLOSING to pass through.
+        if (nowNs - capture.snapshot.tNs() < config.minCaptureNs()) {
+            discardedCaptures++;
+            status = Status.IDLE;
+            queue.add(Task.Discard.INSTANCE);
+            trim.prune(earliestStartNs());
+            return;
+        }
+
+        status = Status.CLOSING;
         var header = header(capture.captureId, capture.reason, capture.cohort, capture.policy, closedBy,
             capture.startedAt, clock.instant(), capture.pingIds(),
             flags(false, capture.timeCapped, tailUnfenced(closedBy)), capture.dropped);
@@ -454,6 +475,12 @@ public final class CaptureEngine implements FrameSink {
         record Flush(Job job, List<Frame> frames) implements Task {
         }
 
+        /// Close and delete the spool without assembling anything.
+        record Discard() implements Task {
+
+            public static final Discard INSTANCE = new Discard();
+        }
+
         record Shutdown() implements Task {
 
             public static final Shutdown INSTANCE = new Shutdown();
@@ -477,6 +504,7 @@ public final class CaptureEngine implements FrameSink {
                         }
                     }
                     case Task.Close(Job job) -> close(job);
+                    case Task.Discard _ -> discardSpool();
                     case Task.Flush(Job job, List<Frame> frames) -> flush(job, frames);
                     case Task.Shutdown _ -> {
                         return;

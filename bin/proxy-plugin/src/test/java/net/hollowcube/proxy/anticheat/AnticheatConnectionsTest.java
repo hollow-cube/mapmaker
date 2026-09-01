@@ -3,6 +3,8 @@ package net.hollowcube.proxy.anticheat;
 import io.netty.channel.Channel;
 import io.netty.channel.embedded.EmbeddedChannel;
 import net.hollowcube.anticheat.capture.CaptureClock;
+import net.hollowcube.anticheat.capture.TrimPolicy;
+import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.anticheat.protocol.Direction;
 import net.hollowcube.anticheat.protocol.Protocol776;
 import net.hollowcube.anticheat.protocol.ProtocolState;
@@ -160,13 +162,42 @@ class AnticheatConnectionsTest {
         return Protocol776.packetId(state, direction, name);
     }
 
+    /// The other half of what only the connections know: captures their floor threw away, charged
+    /// once each however often the timer looks.
+    @Test
+    void testSampleReportsWhatTheCaptureFloorDiscarded() {
+        var installer = installer(true, 1 << 20, Duration.ofMinutes(1));
+        var channel = TapPipeline.channel(null, false);
+        double before = AnticheatMetrics.dropped.labels("too_short").get();
+
+        assertNotNull(installer.join(player(channel), PLAYER, "Tester", 776, () -> null));
+        play(channel);
+        installer.start(PLAYER, "run-short", TraceHeader.Reason.RUN, null, TrimPolicy.DEFAULT);
+        installer.stop(PLAYER, "run-short");
+        channel.runPendingTasks();
+
+        installer.sample();
+        assertEquals(before + 1, AnticheatMetrics.dropped.labels("too_short").get());
+
+        // A second look with nothing new charges nothing twice.
+        installer.sample();
+        assertEquals(before + 1, AnticheatMetrics.dropped.labels("too_short").get());
+
+        installer.quit(PLAYER);
+        assertFalse(channel.finishAndReleaseAll());
+    }
+
     private AnticheatConnections installer(boolean enabled) {
         return installer(enabled, 1 << 20);
     }
 
     private AnticheatConnections installer(boolean enabled, long ringMaxBytes) {
+        return installer(enabled, ringMaxBytes, Duration.ZERO);
+    }
+
+    private AnticheatConnections installer(boolean enabled, long ringMaxBytes, Duration minCapture) {
         var config = new AnticheatConfig(enabled, directory, Duration.ofSeconds(60),
-                ringMaxBytes, 1 << 20, Duration.ofSeconds(1));
+                ringMaxBytes, 1 << 20, minCapture, Duration.ofSeconds(1));
         return new AnticheatConnections(config, CaptureClock.SYSTEM, "proxy-test", "test", () -> false,
             (path, header) -> {
             });

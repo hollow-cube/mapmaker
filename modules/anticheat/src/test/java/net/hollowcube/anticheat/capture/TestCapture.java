@@ -32,8 +32,8 @@ final class TestCapture {
 
     static CaptureEngineConfig config(Path directory) {
         return new CaptureEngineConfig(directory.resolve("spool"), directory.resolve("out"),
-            60 * SECOND, 30 * SECOND, 64L << 20, 64L << 20, 600 * SECOND, 1 << 20, TrimPolicy.DEFAULT,
-            Duration.ofSeconds(5));
+            60 * SECOND, 30 * SECOND, 64L << 20, 64L << 20, 600 * SECOND, 0, 1 << 20,
+            TrimPolicy.DEFAULT, Duration.ofSeconds(5));
     }
 
     /// The connection fields every trace of one connection carries.

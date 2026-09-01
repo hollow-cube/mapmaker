@@ -22,6 +22,8 @@ import java.util.function.Function;
 /// @param ringMaxBytes  `ANTICHEAT_RING_MAX_BYTES`, per-connection cap on ring frames.
 /// @param spoolMaxBytes `ANTICHEAT_SPOOL_MAX_BYTES`, cap on the whole spool dir; new captures are
 ///                      refused (and counted) once it is hit.
+/// @param minCapture    `ANTICHEAT_MIN_CAPTURE_SECONDS`, captures shorter than this are discarded
+///                      instead of assembled.
 /// @param shutdownGrace `ANTICHEAT_SHUTDOWN_SECONDS`, how long a proxy shutdown waits for the last
 ///                      traces to reach the store before it stops waiting.
 public record AnticheatConfig(
@@ -30,6 +32,7 @@ public record AnticheatConfig(
     Duration ringWindow,
     long ringMaxBytes,
     long spoolMaxBytes,
+    Duration minCapture,
     Duration shutdownGrace
 ) {
     /// The ring, spool and shutdown defaults are the engine's own, since every one of them is
@@ -40,6 +43,7 @@ public record AnticheatConfig(
         Duration.ofNanos(CaptureEngineConfig.RING_WINDOW_NS),
         CaptureEngineConfig.RING_MAX_BYTES,
         CaptureEngineConfig.MAX_SPOOL_BYTES,
+        Duration.ofNanos(CaptureEngineConfig.MIN_CAPTURE_NS),
         CaptureEngineConfig.CLOSE_TIMEOUT
     );
 
@@ -55,6 +59,7 @@ public record AnticheatConfig(
             reader.read("ANTICHEAT_RING_SECONDS", DEFAULT.ringWindow, AnticheatConfig::parseSeconds),
             reader.read("ANTICHEAT_RING_MAX_BYTES", DEFAULT.ringMaxBytes, AnticheatConfig::parsePositiveLong),
             reader.read("ANTICHEAT_SPOOL_MAX_BYTES", DEFAULT.spoolMaxBytes, AnticheatConfig::parsePositiveLong),
+            reader.read("ANTICHEAT_MIN_CAPTURE_SECONDS", DEFAULT.minCapture, AnticheatConfig::parseCaptureFloor),
             reader.read("ANTICHEAT_SHUTDOWN_SECONDS", DEFAULT.shutdownGrace, AnticheatConfig::parseSeconds)
         );
     }
@@ -94,6 +99,15 @@ public record AnticheatConfig(
 
     private static Duration parseSeconds(String value) {
         return Duration.ofSeconds(parsePositiveLong(value));
+    }
+
+    /// Range-checked here rather than left to [CaptureEngineConfig], whose constructor would throw
+    /// once per join instead of once at startup.
+    private static Duration parseCaptureFloor(String value) {
+        var parsed = parseSeconds(value);
+        if (parsed.toNanos() >= CaptureEngineConfig.MAX_CAPTURE_NS)
+            throw new IllegalArgumentException("must be below the capture cap");
+        return parsed;
     }
 
     private static long parsePositiveLong(String value) {

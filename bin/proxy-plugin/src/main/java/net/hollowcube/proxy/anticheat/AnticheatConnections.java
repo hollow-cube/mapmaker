@@ -79,11 +79,11 @@ public final class AnticheatConnections {
         /// set on the event loop by [AnticheatConnections#start] and [AnticheatConnections#stop]
         /// and cleared by [AnticheatConnections#quit] — a capture the engine ends by itself (the
         /// ten minute cap) leaves it set until the player goes.
-        /// `ringDropsSeen` is the eviction count [AnticheatConnections#sample()] last charged to
-        /// `anticheat_dropped_total`, kept per connection so a connection leaving cannot make the
-        /// total go backwards.
+        /// `ringDropsSeen` and `shortDropsSeen` are the eviction and short-capture counts
+        /// [AnticheatConnections#sample()] last charged to `anticheat_dropped_total`, kept per
+        /// connection so a connection leaving cannot make the total go backwards.
         record Tapped(CaptureEngine engine, EventLoop eventLoop, AtomicBoolean capturing,
-                      AtomicLong ringDropsSeen, String pvn) implements Connection {
+                      AtomicLong ringDropsSeen, AtomicLong shortDropsSeen, String pvn) implements Connection {
 
             @Override
             public boolean tapped() {
@@ -144,7 +144,7 @@ public final class AnticheatConnections {
 
         AnticheatMetrics.connections.labels(pvn, "true").inc();
         connections.put(playerId, new Connection.Tapped(engine, channel.eventLoop(), new AtomicBoolean(),
-            new AtomicLong(), pvn));
+            new AtomicLong(), new AtomicLong(), pvn));
         logger.debug("anticheat: tapped {} ({}), connection {}", playerName, pvn, connectionId);
         return tap;
     }
@@ -239,9 +239,10 @@ public final class AnticheatConnections {
         return true;
     }
 
-    /// The metrics only the connections know: the ring bytes they are holding, and the frames their
-    /// ring caps have cost since the last look. Sampled on a timer rather than published per frame,
-    /// because the event loop has better things to do than maintain a gauge.
+    /// The metrics only the connections know: the ring bytes they are holding, the frames their
+    /// ring caps have cost and the captures their floor has thrown away since the last look.
+    /// Sampled on a timer rather than published per frame, because the event loop has better
+    /// things to do than maintain a gauge.
     public void sample() {
         long bytes = 0;
         for (var connection : connections.values()) {
@@ -251,6 +252,10 @@ public final class AnticheatConnections {
             long evicted = ring.evictedFrames();
             long seen = tapped.ringDropsSeen().getAndSet(evicted);
             if (evicted > seen) AnticheatMetrics.dropped(AnticheatMetrics.Drop.RING_CAP, evicted - seen);
+
+            long discarded = tapped.engine().discardedCaptures();
+            long shortSeen = tapped.shortDropsSeen().getAndSet(discarded);
+            if (discarded > shortSeen) AnticheatMetrics.dropped(AnticheatMetrics.Drop.TOO_SHORT, discarded - shortSeen);
         }
         AnticheatMetrics.ringBytes.set(bytes);
     }
@@ -278,7 +283,8 @@ public final class AnticheatConnections {
         return new CaptureEngineConfig(spool, config.tracesDir(),
             config.ringWindow().toNanos(), CaptureEngineConfig.RING_SNAPSHOT_INTERVAL_NS,
             config.ringMaxBytes(), config.spoolMaxBytes(), CaptureEngineConfig.MAX_CAPTURE_NS,
-            CaptureEngineConfig.QUEUE_SIZE, TrimPolicy.DEFAULT, config.shutdownGrace());
+            config.minCapture().toNanos(), CaptureEngineConfig.QUEUE_SIZE, TrimPolicy.DEFAULT,
+            config.shutdownGrace());
     }
 
     /// The connection fields every trace of this connection carries. The session service keys a

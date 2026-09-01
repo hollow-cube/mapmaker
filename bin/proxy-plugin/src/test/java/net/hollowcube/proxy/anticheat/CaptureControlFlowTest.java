@@ -48,7 +48,7 @@ class CaptureControlFlowTest {
         AnticheatMetrics.capturesActive.clear();
         store = StubStore.start(storeDirectory, 0);
         var config = new AnticheatConfig(true, directory, Duration.ofSeconds(60), 1 << 20, 1 << 20,
-            Duration.ofSeconds(5));
+            Duration.ZERO, Duration.ofSeconds(5));
         shipper = new TraceShipper(store.url(), config, Duration.ofSeconds(2), Duration.ofMillis(20),
             Duration.ofMillis(50));
         installer = new AnticheatConnections(config,
