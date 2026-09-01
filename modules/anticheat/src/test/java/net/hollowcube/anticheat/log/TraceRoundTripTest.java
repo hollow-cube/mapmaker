@@ -132,20 +132,21 @@ class TraceRoundTripTest {
 
     @Test
     void testUnknownFormatVersionIsRefused() throws IOException {
-        var path = directory.resolve("v3.trace");
+        var path = directory.resolve("from-the-future.trace");
         TraceFixture.write(path);
+        int newer = TraceFormat.VERSION_LATEST + 1;
         byte[] whole = Files.readAllBytes(path);
-        whole[4] = 0;
-        whole[5] = 3;
+        whole[4] = (byte) (newer >> 8);
+        whole[5] = (byte) newer;
         Files.write(path, whole);
 
         var error = assertThrows(TraceFormatException.class, () -> TraceReader.read(path));
-        assertTrue(error.getMessage().contains("unsupported trace format version 3"), error.getMessage());
+        assertTrue(error.getMessage().contains("unsupported trace format version " + newer), error.getMessage());
     }
 
     @Test
     void testWriterRefusesAHeaderFromAnotherVersion() {
-        var header = TraceHeader.fromJson("{\"formatVersion\":3}");
+        var header = TraceHeader.fromJson("{\"formatVersion\":" + (TraceFormat.VERSION_LATEST - 1) + "}");
 
         assertThrows(IllegalArgumentException.class, () -> TraceWriter.open(
             directory.resolve("wrong-version.trace"), header, List.of(), TraceWorld.EMPTY));
@@ -186,7 +187,7 @@ class TraceRoundTripTest {
     private static TraceHeader bloated() {
         var filler = new StringBuilder();
         while (filler.length() < TraceFormat.HEADER_SLACK * 2) filler.append("filler");
-        return new TraceHeader(TraceFormat.VERSION_LATEST, 776, filler.toString(), null, null, null, null, null,
+        return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, 776, filler.toString(), null, null, null, null, null,
             null, null, null, null, null, null, null, null, null, null, null);
     }
 }

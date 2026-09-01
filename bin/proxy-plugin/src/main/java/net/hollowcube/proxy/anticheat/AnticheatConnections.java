@@ -8,6 +8,7 @@ import net.hollowcube.anticheat.capture.CaptureEngineConfig;
 import net.hollowcube.anticheat.capture.TrimPolicy;
 import net.hollowcube.anticheat.control.CaptureControl;
 import net.hollowcube.anticheat.log.TraceFormat;
+import net.hollowcube.anticheat.log.TraceDictionary;
 import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.anticheat.protocol.ProtocolState;
 import org.jetbrains.annotations.Nullable;
@@ -305,7 +306,7 @@ public final class AnticheatConnections {
     /// session by the player's uuid, so that is the session id.
     private TraceHeader identity(int protocolVersion, UUID playerId, String playerName,
                                    String connectionId) {
-        return new TraceHeader(TraceFormat.VERSION_LATEST, protocolVersion, null, playerId, playerName,
+        return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, protocolVersion, null, playerId, playerName,
             connectionId, null, null, null, null, null, proxy, proxyVersion, null, null, null,
             TraceHeader.Flags.NONE, TraceHeader.Counters.EMPTY, Map.of());
     }

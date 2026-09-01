@@ -2,6 +2,7 @@ package net.hollowcube.anticheat.capture;
 
 import net.hollowcube.anticheat.log.Frame;
 import net.hollowcube.anticheat.log.TraceFormat;
+import net.hollowcube.anticheat.log.TraceDictionary;
 import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.anticheat.protocol.*;
 import org.jetbrains.annotations.Nullable;
@@ -38,7 +39,7 @@ final class TestCapture {
 
     /// The connection fields every trace of one connection carries.
     static TraceHeader identity() {
-        return new TraceHeader(TraceFormat.VERSION_LATEST, Protocol776.PROTOCOL_VERSION, null,
+        return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, Protocol776.PROTOCOL_VERSION, null,
             UUID.fromString("00000000-0000-0000-0000-0000000000aa"), "Tester", "connection-1",
             null, null, null, null, null, "proxy-1", "test", null, null, null,
             TraceHeader.Flags.NONE, TraceHeader.Counters.EMPTY, Map.of());

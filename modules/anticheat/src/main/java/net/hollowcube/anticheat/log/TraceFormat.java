@@ -10,7 +10,8 @@ import java.io.IOException;
 /// The on-disk shape of a capture trace, and the primitives [TraceWriter] and [TraceReader]
 /// share.
 ///
-/// A file is a fixed head, a reserved header region and a zstd stream:
+/// A file is a fixed head, a reserved header region and a zstd stream, the last compressed against
+/// the [TraceDictionary] the header names:
 /// ```
 /// "HCTR" | u16 formatVersion | u32 headerCapacity | u32 headerLength
 /// headerCapacity bytes: headerLength bytes of UTF-8 JSON ([TraceHeader]), then zero padding
@@ -32,7 +33,12 @@ public final class TraceFormat {
     /// expected to keep handling every version they ever wrote (see the replay data version
     /// discipline); version 1 is the one exception phase 0 allows itself, because its world section
     /// also carried heightmaps and a block-entity/light tail that nothing replays.
-    public static final int VERSION_LATEST = 2;
+    public static final int VERSION_LATEST = 3;
+
+    /// The oldest version [TraceReader] still reads. Versions 2 and 3 share a body layout — 3 only
+    /// compresses it against a [TraceDictionary] — so the reader needs nothing per-version beyond
+    /// honouring the header's dictionary id.
+    public static final int VERSION_OLDEST_READABLE = 2;
 
     /// Level 3, the same trade the replay recorder makes on its hot path: traces are written on
     /// a proxy under a live connection, not offline.

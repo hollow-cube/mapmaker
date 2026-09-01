@@ -24,6 +24,9 @@ import java.util.UUID;
 /// and missing ones null.
 public record TraceHeader(
     int formatVersion,
+    /// Which [TraceDictionary] the body was compressed against; 0 for none, which is what every
+    /// header written before dictionaries existed parses as.
+    int dictionaryId,
     int clientPvn,
     @Nullable String brand,
     @Nullable UUID playerId,
@@ -126,21 +129,28 @@ public record TraceHeader(
     }
 
     public TraceHeader withCounters(Counters counters) {
-        return new TraceHeader(formatVersion, clientPvn, brand, playerId, playerName,
+        return new TraceHeader(formatVersion, dictionaryId, clientPvn, brand, playerId, playerName,
             connectionId, captureId, reason, closedBy, cohort, trim,
             proxy, proxyVersion, startedAt, endedAt, pingIds, flags, counters,
             extras);
     }
 
     public TraceHeader withFlags(Flags flags) {
-        return new TraceHeader(formatVersion, clientPvn, brand, playerId, playerName,
+        return new TraceHeader(formatVersion, dictionaryId, clientPvn, brand, playerId, playerName,
             connectionId, captureId, reason, closedBy, cohort, trim,
             proxy, proxyVersion, startedAt, endedAt, pingIds, flags, counters,
             extras);
     }
 
     public TraceHeader withClose(ClosedBy closedBy, Instant endedAt) {
-        return new TraceHeader(formatVersion, clientPvn, brand, playerId, playerName,
+        return new TraceHeader(formatVersion, dictionaryId, clientPvn, brand, playerId, playerName,
+            connectionId, captureId, reason, closedBy, cohort, trim,
+            proxy, proxyVersion, startedAt, endedAt, pingIds, flags, counters,
+            extras);
+    }
+
+    public TraceHeader withDictionary(int dictionaryId) {
+        return new TraceHeader(formatVersion, dictionaryId, clientPvn, brand, playerId, playerName,
             connectionId, captureId, reason, closedBy, cohort, trim,
             proxy, proxyVersion, startedAt, endedAt, pingIds, flags, counters,
             extras);

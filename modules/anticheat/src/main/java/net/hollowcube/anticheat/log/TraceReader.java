@@ -66,7 +66,10 @@ public final class TraceReader implements AutoCloseable {
     private TraceReader(InputStream file) throws IOException {
         this.file = file;
         this.header = readHeader(new DataInputStream(file));
-        this.stream = new PushbackInputStream(new ZstdInputStreamNoFinalizer(file), 1);
+        var zstd = new ZstdInputStreamNoFinalizer(file);
+        var dictionary = TraceDictionary.decompress(this.header.dictionaryId());
+        if (dictionary != null) zstd.setDict(dictionary);
+        this.stream = new PushbackInputStream(zstd, 1);
         this.body = new DataInputStream(this.stream);
 
         var prelude = new ArrayList<Frame>();
@@ -140,9 +143,10 @@ public final class TraceReader implements AutoCloseable {
             throw new TraceFormatException("not a trace file: magic " + Integer.toHexString(magic));
 
         int version = in.readUnsignedShort();
-        if (version != TraceFormat.VERSION_LATEST) {
+        if (version < TraceFormat.VERSION_OLDEST_READABLE || version > TraceFormat.VERSION_LATEST) {
             throw new TraceFormatException("unsupported trace format version " + version
-                + ", this build reads " + TraceFormat.VERSION_LATEST);
+                + ", this build reads " + TraceFormat.VERSION_OLDEST_READABLE + ".."
+                + TraceFormat.VERSION_LATEST);
         }
 
         int capacity = in.readInt();

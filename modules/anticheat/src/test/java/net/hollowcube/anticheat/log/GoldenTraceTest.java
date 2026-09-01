@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Objects;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -18,14 +19,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /// output between versions, and what the format promises is what comes back out.
 class GoldenTraceTest {
 
-    private static final Path FIXTURE = Path.of("src/test/resources/traces/v2/basic.trace");
+    /// Derived from the version so a bump only means running the writer below, not editing paths.
+    private static final Path FIXTURE = Path.of(
+        "src/test/resources/traces/v" + TraceFormat.VERSION_LATEST + "/basic.trace");
 
     @Test
     void testReadsTheV2Fixture() {
         var trace = TraceReader.read(resource("/traces/v2/basic.trace"));
 
         assertFalse(trace.truncated());
+        TraceFixture.assertMatches(trace, 2, TraceDictionary.NONE);
+    }
+
+    /// The current version read back by the current reader, dictionary and all.
+    @Test
+    void testReadsTheLatestFixture() {
+        var trace = TraceReader.read(resource("/traces/v" + TraceFormat.VERSION_LATEST + "/basic.trace"));
+
+        assertFalse(trace.truncated());
         TraceFixture.assertMatches(trace);
+        assertEquals(TraceDictionary.LATEST, trace.header().dictionaryId());
     }
 
     @Test

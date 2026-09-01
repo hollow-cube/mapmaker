@@ -44,14 +44,18 @@ public final class TraceWriter implements AutoCloseable {
 
     private TraceWriter(FileChannel channel, TraceHeader header, List<Frame> prelude, TraceWorld world) throws IOException {
         this.channel = channel;
-        this.header = header;
+        // Stamped here rather than by the caller: which dictionary a body is compressed against is
+        // this writer's business, and the header has to name it before the stream starts.
+        this.header = header.withDictionary(TraceDictionary.LATEST);
 
-        var json = header.toJson().getBytes(StandardCharsets.UTF_8);
+        var json = this.header.toJson().getBytes(StandardCharsets.UTF_8);
         this.headerCapacity = json.length + TraceFormat.HEADER_SLACK;
         writeHead(json);
 
         var out = new BufferedOutputStream(new KeepOpen(Channels.newOutputStream(channel)), 1 << 16);
         this.compressor = new ZstdOutputStreamNoFinalizer(out, TraceFormat.COMPRESSION_LEVEL);
+        var dictionary = TraceDictionary.compress(this.header.dictionaryId());
+        if (dictionary != null) this.compressor.setDict(dictionary);
         this.body = new DataOutputStream(this.compressor);
 
         TraceFormat.writeVarInt(this.body, prelude.size());

@@ -380,7 +380,7 @@ public final class CaptureEngine implements FrameSink {
                                  @Nullable TraceHeader.Cohort cohort, TrimPolicy policy,
                                  TraceHeader.ClosedBy closedBy, Instant startedAt, Instant endedAt,
                                  @Nullable TraceHeader.PingIdRange pingIds, TraceHeader.Flags flags, long dropped) {
-        return new TraceHeader(TraceFormat.VERSION_LATEST, identity.clientPvn(), brand(),
+        return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, identity.clientPvn(), brand(),
             identity.playerId(), identity.playerName(),
             identity.connectionId(), captureId, reason, closedBy, cohort, policy.toHeader(),
             identity.proxy(), identity.proxyVersion(), startedAt, endedAt, pingIds, flags,

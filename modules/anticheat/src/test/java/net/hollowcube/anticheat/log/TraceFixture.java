@@ -28,8 +28,15 @@ final class TraceFixture {
     }
 
     static TraceHeader header() {
+        return header(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST);
+    }
+
+    /// The same trace as an older writer would have stamped it, which is what a golden fixture
+    /// from that version has to compare equal to.
+    static TraceHeader header(int formatVersion, int dictionaryId) {
         return new TraceHeader(
-            TraceFormat.VERSION_LATEST,
+            formatVersion,
+            dictionaryId,
             Protocol776.PROTOCOL_VERSION,
             "vanilla",
             PLAYER_ID,
@@ -118,7 +125,11 @@ final class TraceFixture {
     }
 
     static void assertMatches(Trace trace) {
-        assertEquals(header()
+        assertMatches(trace, TraceFormat.VERSION_LATEST, TraceDictionary.LATEST);
+    }
+
+    static void assertMatches(Trace trace, int formatVersion, int dictionaryId) {
+        assertEquals(header(formatVersion, dictionaryId)
             .withCounters(new TraceHeader.Counters(10, totalFrameBytes(), 2, 2, 17)), trace.header());
         assertFramesEqual(prelude(), trace.prelude());
         assertFramesEqual(frames(), trace.frames());

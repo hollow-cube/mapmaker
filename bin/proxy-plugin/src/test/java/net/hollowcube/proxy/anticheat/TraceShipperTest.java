@@ -2,6 +2,7 @@ package net.hollowcube.proxy.anticheat;
 
 import net.hollowcube.anticheat.log.FrameSource;
 import net.hollowcube.anticheat.log.TraceFormat;
+import net.hollowcube.anticheat.log.TraceDictionary;
 import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.anticheat.log.TraceWorld;
 import net.hollowcube.anticheat.log.TraceWriter;
@@ -198,7 +199,7 @@ class TraceShipperTest {
             throw new UncheckedIOException(e);
         }
         var path = traces.resolve(id + ".trace");
-        var header = new TraceHeader(TraceFormat.VERSION_LATEST, 776, "vanilla", playerId, "Tester",
+        var header = new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, 776, "vanilla", playerId, "Tester",
             "connection-1", captureId, TraceHeader.Reason.RUN, TraceHeader.ClosedBy.STOP, null,
             null, "proxy-test", "test", STARTED, ENDED, null, TraceHeader.Flags.NONE,
             TraceHeader.Counters.EMPTY, Map.of());

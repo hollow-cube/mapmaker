@@ -38,6 +38,7 @@ public final class Dump {
             var header = reader.header();
             line(out, "file            " + path);
             line(out, "formatVersion   " + header.formatVersion());
+            line(out, "dictionary      " + header.dictionaryId());
             line(out, "clientPvn        " + header.clientPvn());
             line(out, "brand           " + header.brand());
             line(out, "player          " + header.playerName() + " " + header.playerId());
