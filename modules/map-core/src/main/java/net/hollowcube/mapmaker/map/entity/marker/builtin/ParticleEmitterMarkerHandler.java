@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
@@ -166,7 +167,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         var keys = data.keySet();
 
         // Particle
-        var particleName = data.getString("particle");
+        var particleName = data.getString("particle").toLowerCase(Locale.ROOT);
         Check.argCondition(particleName.isEmpty(), "Missing particle name");
         var rawParticle = Particle.fromKey(particleName);
         Check.argCondition(rawParticle == null, "Unknown particle: " + particleName);
