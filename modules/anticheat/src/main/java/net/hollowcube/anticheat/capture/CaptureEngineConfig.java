@@ -29,7 +29,7 @@ public record CaptureEngineConfig(
 
     public static final long RING_WINDOW_NS = TimeUnit.SECONDS.toNanos(60);
     public static final long RING_SNAPSHOT_INTERVAL_NS = TimeUnit.SECONDS.toNanos(30);
-    public static final long RING_MAX_BYTES = 16L << 20;
+    public static final long RING_MAX_BYTES = 8L << 20;
     public static final long MAX_SPOOL_BYTES = 256L << 20;
     public static final long MAX_CAPTURE_NS = TimeUnit.SECONDS.toNanos(600);
     public static final int QUEUE_SIZE = 8192;

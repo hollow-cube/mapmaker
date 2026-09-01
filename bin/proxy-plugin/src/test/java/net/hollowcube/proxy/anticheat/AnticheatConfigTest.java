@@ -22,7 +22,7 @@ class AnticheatConfigTest {
         assertFalse(config.enabled());
         assertEquals(Path.of("/tmp/anticheat"), config.spoolDir());
         assertEquals(Duration.ofSeconds(60), config.ringWindow());
-        assertEquals(16 * 1024 * 1024, config.ringMaxBytes());
+        assertEquals(8 * 1024 * 1024, config.ringMaxBytes());
         assertEquals(256L * 1024 * 1024, config.spoolMaxBytes());
     }
 

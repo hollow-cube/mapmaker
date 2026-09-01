@@ -7,4 +7,4 @@ WORKDIR /app
 COPY ./bin/proxy-plugin/build/proxy/stage /app
 
 EXPOSE 25565 9124
-CMD ["java", "-XX:+UseG1GC", "-XX:G1HeapRegionSize=4M", "-XX:+UnlockExperimentalVMOptions", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-XX:MaxInlineLevel=15", "-Xmx768m", "-Dvelocity.max-plugin-message-payload-size=1048576", "-jar", "velocity.jar"]
+CMD ["java", "-XX:+UseG1GC", "-XX:G1HeapRegionSize=4M", "-XX:+UnlockExperimentalVMOptions", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-XX:MaxInlineLevel=15", "-Xms3g", "-Xmx3g", "-Dvelocity.max-plugin-message-payload-size=1048576", "-jar", "velocity.jar"]
