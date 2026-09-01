@@ -16,18 +16,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.URI;
 import java.net.URLEncoder;
 import java.net.http.HttpClient;
+import java.net.http.HttpConnectTimeoutException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 
 import static net.hollowcube.mapmaker.util.AbstractHttpService.CONNECT_TIMEOUT;
 import static net.hollowcube.mapmaker.util.AbstractHttpService.CONTEXT_PROPAGATOR;
 
 public class HttpClientWrapper {
     private static final Logger logger = LoggerFactory.getLogger(HttpClientWrapper.class);
+    private static final int MAX_ATTEMPTS = 3;
+    private static final Duration RETRY_BACKOFF = Duration.ofMillis(200);
     private final HttpClient httpClient = HttpClient.newBuilder()
         .followRedirects(HttpClient.Redirect.NORMAL)
         .connectTimeout(CONNECT_TIMEOUT)
@@ -146,7 +151,7 @@ public class HttpClientWrapper {
             span.setAttribute(UrlAttributes.URL_FULL, req.uri().toString());
 
             long start = System.nanoTime();
-            var response = httpClient.send(req, handler);
+            var response = sendWithRetry(req, handler);
             logger.info("{} {} ({} in {}ms)", req.method(), req.uri(), response.statusCode(), (System.nanoTime() - start) / 1_000_000d);
             return response;
         } catch (InterruptedException e) {
@@ -158,6 +163,20 @@ public class HttpClientWrapper {
             throw new RuntimeException("http request failed", e);
         } finally {
             span.end();
+        }
+    }
+
+    // Only connect-phase failures are retried. The request never reached the server, so replaying it
+    // cannot duplicate a non-idempotent write the way retrying a timeout or a 5xx could.
+    private <T> HttpResponse<T> sendWithRetry(HttpRequest req, HttpResponse.BodyHandler<T> handler) throws IOException, InterruptedException {
+        for (int attempt = 1; ; attempt++) {
+            try {
+                return httpClient.send(req, handler);
+            } catch (ConnectException | HttpConnectTimeoutException e) {
+                if (attempt == MAX_ATTEMPTS) throw e;
+                logger.warn("{} {} could not connect (attempt {}/{}), retrying", req.method(), req.uri(), attempt, MAX_ATTEMPTS);
+                Thread.sleep(RETRY_BACKOFF.multipliedBy(attempt));
+            }
         }
     }
 
