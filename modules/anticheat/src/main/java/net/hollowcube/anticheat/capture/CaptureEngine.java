@@ -23,6 +23,10 @@ import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /// One connection's capture: the world model, the state cache, the ring, and the traces that come
 /// out of them.
@@ -57,6 +61,7 @@ public final class CaptureEngine implements FrameSink {
     private final CaptureEngineConfig config;
     private final TraceHeader identity;
     private final Supplier<@Nullable String> clientBrand;
+    private final Supplier<? extends Collection<String>> clientChannels;
     private final CaptureClock clock;
     private final Completion completion;
 
@@ -100,16 +105,29 @@ public final class CaptureEngine implements FrameSink {
     /// payload can pass before the tap is even installed (see [#brand()]).
     public CaptureEngine(CaptureEngineConfig config, TraceHeader identity, Supplier<@Nullable String> clientBrand,
                          CaptureClock clock, Completion completion) {
-        this(config, identity, clientBrand, clock, completion,
+        this(config, identity, clientBrand, List::of, clock, completion);
+    }
+
+    /// `clientChannels` is likewise what the connection's owner knows of the plugin channels the
+    /// client registered, which go by in the configuration phase ahead of the tap as the brand does.
+    public CaptureEngine(CaptureEngineConfig config, TraceHeader identity, Supplier<@Nullable String> clientBrand,
+                         Supplier<? extends Collection<String>> clientChannels, CaptureClock clock, Completion completion) {
+        this(config, identity, clientBrand, clientChannels, clock, completion,
             task -> Thread.ofVirtual().name("anticheat-capture-writer").start(task));
     }
 
     @TestOnly
     CaptureEngine(CaptureEngineConfig config, TraceHeader identity, Supplier<@Nullable String> clientBrand,
                   CaptureClock clock, Completion completion, Executor writer) {
+        this(config, identity, clientBrand, List::of, clock, completion, writer);
+    }
+
+    CaptureEngine(CaptureEngineConfig config, TraceHeader identity, Supplier<@Nullable String> clientBrand,
+                  Supplier<? extends Collection<String>> clientChannels, CaptureClock clock, Completion completion, Executor writer) {
         this.config = config;
         this.identity = identity;
         this.clientBrand = clientBrand;
+        this.clientChannels = clientChannels;
         this.clock = clock;
         this.completion = completion;
         this.ring = new RingBuffer(config.ringWindowNs(), config.ringSnapshotIntervalNs(), config.ringMaxBytes());
@@ -380,11 +398,29 @@ public final class CaptureEngine implements FrameSink {
                                  @Nullable TraceHeader.Cohort cohort, TrimPolicy policy,
                                  TraceHeader.ClosedBy closedBy, Instant startedAt, Instant endedAt,
                                  @Nullable TraceHeader.PingIdRange pingIds, TraceHeader.Flags flags, long dropped) {
+        var extras = identity.extras();
+        var channels = channels();
+        if (!channels.isEmpty()) {
+            extras = new HashMap<>(extras);
+            extras.put(CHANNELS_EXTRA, String.join(",", channels));
+        }
         return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, identity.clientPvn(), brand(),
             identity.playerId(), identity.playerName(),
             identity.connectionId(), captureId, reason, closedBy, cohort, policy.toHeader(),
             identity.proxy(), identity.proxyVersion(), startedAt, endedAt, pingIds, flags,
-            new TraceHeader.Counters(0, 0, 0, 0, dropped), identity.extras());
+            new TraceHeader.Counters(0, 0, 0, 0, dropped), extras);
+    }
+
+    /// The header extra naming the plugin channels the client registered, comma-separated and
+    /// sorted: the mods behind them are the nearest thing the stream has to a mod list.
+    public static final String CHANNELS_EXTRA = "channels";
+
+    /// The `minecraft:register` payloads this connection sent, plus what the proxy knew before the
+    /// tap went in.
+    private SortedSet<String> channels() {
+        var channels = new TreeSet<>(state.channels());
+        channels.addAll(clientChannels.get());
+        return channels;
     }
 
     /// The client brand a trace carries: the `minecraft:brand` payload this connection sent,

@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Set;
 
 class StateCacheTest {
 
@@ -282,6 +284,22 @@ class StateCacheTest {
             frames.stream().map(StateFrame::packetId).toList());
         for (int i = 1; i < frames.size(); i++)
             assertTrue(frames.get(i - 1).sequence() < frames.get(i).sequence());
+    }
+
+    @Test
+    void testRegisteredChannelsAccumulateUntilUnregistered() {
+        var cache = new StateCache();
+        int customPayload = Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "custom_payload");
+        cache.apply(ProtocolState.PLAY, Direction.C2S, customPayload, new byte[0],
+            new C2SCustomPayload.V776(CustomPayload.REGISTER_CHANNEL, "noxesium-v3:client_settings\0fabric:registry/sync".getBytes(StandardCharsets.UTF_8)));
+        cache.apply(ProtocolState.PLAY, Direction.C2S, customPayload, new byte[0],
+            new C2SCustomPayload.V776(CustomPayload.REGISTER_CHANNEL, "fabric:registry/sync".getBytes(StandardCharsets.UTF_8)));
+        assertEquals(Set.of("noxesium-v3:client_settings", "fabric:registry/sync"), cache.channels());
+
+        cache.apply(ProtocolState.PLAY, Direction.C2S, customPayload, new byte[0],
+            new C2SCustomPayload.V776(CustomPayload.UNREGISTER_CHANNEL, "fabric:registry/sync".getBytes(StandardCharsets.UTF_8)));
+        feed(cache, new S2CStartConfiguration.V776());
+        assertEquals(Set.of("noxesium-v3:client_settings"), cache.channels(), "the connection's, not the level's");
     }
 
     @Test

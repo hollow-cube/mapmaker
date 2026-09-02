@@ -5,6 +5,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Predicate;
+import java.util.Set;
+import java.util.TreeSet;
 
 /// The connection's player-state cache: the raw frames that, replayed in arrival order, put a
 /// reader's client in the state the real client was in at the snapshot.
@@ -64,6 +66,9 @@ public final class StateCache {
     private long sequence;
     private String level = "";
     private @Nullable String brand;
+    /// The plugin channels the client has registered: the connection's, not the level's, so no
+    /// boundary clears them, and an `unregister` takes them out.
+    private final TreeSet<String> channels = new TreeSet<>();
 
     public EntityTable entities() {
         return entities;
@@ -71,6 +76,10 @@ public final class StateCache {
 
     public @Nullable String brand() {
         return brand;
+    }
+
+    public Set<String> channels() {
+        return Collections.unmodifiableSet(channels);
     }
 
     public int keyCount() {
@@ -117,6 +126,8 @@ public final class StateCache {
             case CustomPayload payload -> {
                 var payloadBrand = payload.brand();
                 if (payloadBrand != null) brand = payloadBrand;
+                if (CustomPayload.REGISTER_CHANNEL.equals(payload.channel())) channels.addAll(payload.channels());
+                else if (CustomPayload.UNREGISTER_CHANNEL.equals(payload.channel())) channels.removeAll(payload.channels());
             }
             // The rest of the C2S stream is recorded, but none of it is state a reader has to be
             // put into before the frames start.

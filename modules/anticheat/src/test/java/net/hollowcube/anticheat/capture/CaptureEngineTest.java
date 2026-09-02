@@ -19,6 +19,7 @@ import java.util.stream.Stream;
 
 import static net.hollowcube.anticheat.capture.TestCapture.*;
 import static org.junit.jupiter.api.Assertions.*;
+import java.nio.charset.StandardCharsets;
 
 /// The engine end to end, on frames the test builds itself: the state machine, what reaches the
 /// spool and the file, and what happens when the writer cannot keep up.
@@ -469,6 +470,26 @@ class CaptureEngineTest {
             new S2CAnimate.V776(99, S2CAnimate.WAKE_UP)), "anyone waking up writes the bed block");
         assertFalse(feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "animate",
             new S2CAnimate.V776(99, 0)), "a swing");
+
+        engine.close();
+    }
+
+    @Test
+    void testTheHeaderNamesTheChannelsTheClientRegisteredAndTheProxyKnew() throws Exception {
+        var clock = new TestCapture.ManualClock();
+        var traces = new TestCapture.Traces();
+        var engine = new CaptureEngine(TestCapture.config(directory), TestCapture.identity(), () -> "fabric",
+            () -> List.of("minecraft:brand", "fabric:registry/sync/direct"), clock, traces);
+
+        join(engine, clock, 0);
+        engine.start("run-12", TraceHeader.Reason.RUN, null, TrimPolicy.EVERYTHING);
+        feed(engine, SECOND, ProtocolState.PLAY, Direction.C2S, "custom_payload",
+            new C2SCustomPayload.V776(CustomPayload.REGISTER_CHANNEL, "noxesium-v3:client_settings".getBytes(StandardCharsets.UTF_8)));
+        move(engine, SECOND, 1, 64, 0);
+        clock.set(2 * SECOND);
+        engine.stop(TraceHeader.ClosedBy.STOP);
+        assertEquals("fabric:registry/sync/direct,minecraft:brand,noxesium-v3:client_settings",
+            traces.take().header().extras().get(CaptureEngine.CHANNELS_EXTRA));
 
         engine.close();
     }
