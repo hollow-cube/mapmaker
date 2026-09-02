@@ -112,6 +112,13 @@ public final class AnticheatConnections {
     /// Returns the tap that went in, or null when the connection was left alone.
     public @Nullable AnticheatTap join(Object player, UUID playerId, String playerName,
                                        int protocolVersion, Supplier<@Nullable String> clientBrand) {
+        return join(player, playerId, playerName, protocolVersion, clientBrand, Map.of());
+    }
+
+    /// [#join] with `extras` for the trace header: what the proxy knows of the client that the
+    /// stream will not say again, such as the mod list a forge client hands over at login.
+    public @Nullable AnticheatTap join(Object player, UUID playerId, String playerName, int protocolVersion,
+                                       Supplier<@Nullable String> clientBrand, Map<String, String> extras) {
         if (!config.enabled()) return null;
 
         var pvn = Integer.toString(protocolVersion);
@@ -134,7 +141,8 @@ public final class AnticheatConnections {
 
         var connectionId = UUID.randomUUID().toString();
         var engine = new CaptureEngine(engineConfig(connectionId),
-            identity(protocolVersion, playerId, playerName, connectionId), clientBrand, clock, this::trace);
+            identity(protocolVersion, playerId, playerName, connectionId, extras), clientBrand,
+            () -> VelocityInternals.knownChannelsOf(player), clock, this::trace);
         // PostLoginEvent fires on the login acknowledgement, so both directions are in configuration.
         var tap = new AnticheatTap(engine, clock, shuttingDown,
             ProtocolState.CONFIGURATION, ProtocolState.CONFIGURATION);
@@ -305,9 +313,9 @@ public final class AnticheatConnections {
     /// The connection fields every trace of this connection carries. The session service keys a
     /// session by the player's uuid, so that is the session id.
     private TraceHeader identity(int protocolVersion, UUID playerId, String playerName,
-                                   String connectionId) {
+                                   String connectionId, Map<String, String> extras) {
         return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, protocolVersion, null, playerId, playerName,
             connectionId, null, null, null, null, null, proxy, proxyVersion, null, null, null,
-            TraceHeader.Flags.NONE, TraceHeader.Counters.EMPTY, Map.of());
+            TraceHeader.Flags.NONE, TraceHeader.Counters.EMPTY, extras);
     }
 }

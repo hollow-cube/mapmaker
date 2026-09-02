@@ -5,6 +5,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /// The anticheat tap needs the player's netty channel, which the velocity api does not expose:
 /// only `ConnectedPlayer#getConnection()#getChannel()` on velocity-proxy has it, and velocity-proxy
@@ -18,6 +21,7 @@ public final class VelocityInternals {
     private static final Getter GET_CONNECTION = new Getter("getConnection");
     private static final Getter GET_CHANNEL = new Getter("getChannel");
     private static final Getter IS_SHUTTING_DOWN = new Getter("isShuttingDown");
+    private static final Getter GET_KNOWN_CHANNELS = new Getter("getKnownChannels");
 
     /// The netty channel behind `player` (a `com.velocitypowered.api.proxy.Player`, taken as an
     /// `Object` so this is testable without a proxy), or null if this build of velocity does not
@@ -26,6 +30,16 @@ public final class VelocityInternals {
         var connection = GET_CONNECTION.invoke(player);
         if (connection == null) return null;
         return GET_CHANNEL.invoke(connection) instanceof Channel channel ? channel : null;
+    }
+
+    /// The plugin channels the client has registered so far — `ConnectedPlayer#getKnownChannels()`,
+    /// which the api does not expose — or nothing on a build without it. Registration goes by in
+    /// the configuration phase, before the tap is on the pipeline to see it.
+    public static Collection<String> knownChannelsOf(Object player) {
+        if (!(GET_KNOWN_CHANNELS.invoke(player) instanceof Collection<?> channels)) return List.of();
+        var names = new ArrayList<String>(channels.size());
+        for (var channel : channels) names.add(String.valueOf(channel));
+        return names;
     }
 
     /// Whether the proxy has begun shutting down. `VelocityServer#shutdown` flips its

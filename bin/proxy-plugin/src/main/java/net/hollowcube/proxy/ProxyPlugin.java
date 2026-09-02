@@ -64,6 +64,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.ReentrantLock;
+import com.velocitypowered.api.util.ModInfo;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
 public class ProxyPlugin {
@@ -244,7 +248,7 @@ public class ProxyPlugin {
         var player = event.getPlayer();
         try {
             anticheatConnections.join(player, player.getUniqueId(), player.getUsername(),
-                player.getProtocolVersion().getProtocol(), player::getClientBrand);
+                player.getProtocolVersion().getProtocol(), player::getClientBrand, anticheatExtras(player));
         } catch (Exception e) {
             logger.error("failed to install the anticheat tap for {}", player.getUsername(), e);
         }
@@ -268,6 +272,17 @@ public class ProxyPlugin {
                 openDrainCookie(player, error == null ? data : null);
                 return null;
             }));
+    }
+
+    /// The forge mod list the client hands over at login, when there is one: the only mod list the
+    /// proxy ever sees, and a header extra so a trace says which mods were behind its movement.
+    private static Map<String, String> anticheatExtras(Player player) {
+        var mods = player.getModInfo().map(ModInfo::getMods).orElse(List.of());
+        if (mods.isEmpty()) return Map.of();
+        var names = new ArrayList<String>(mods.size());
+        for (var mod : mods) names.add(mod.getId() + ":" + mod.getVersion());
+        Collections.sort(names);
+        return Map.of("mods", String.join(",", names));
     }
 
     private void openDrainCookie(@NotNull Player player, byte @Nullable [] data) {
