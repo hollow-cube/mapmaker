@@ -360,9 +360,11 @@ class CaptureEngineTest {
 
         join(engine, clock, 0);
         engine.start("run-9", TraceHeader.Reason.RUN, null, TrimPolicy.EVERYTHING);
+        int tickEnd = Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "client_tick_end");
         for (int frame = 1; frame <= 100; frame++) {
             clock.set(frame * SECOND / 10);
             move(engine, frame * SECOND / 10, frame, 64, 0);
+            engine.frame(frame * SECOND / 10 + 1, Direction.C2S, ProtocolState.PLAY, tickEnd, Frame.NO_PING, new byte[0]);
         }
         clock.set(11 * SECOND);
         engine.stop(TraceHeader.ClosedBy.STOP);
@@ -373,11 +375,14 @@ class CaptureEngineTest {
         assertTrue(header.flags().spoolTruncated(), "a capture cut short by the spool cap is truncated");
         assertFalse(header.flags().ringTruncated());
         long frames = header.counters().frames();
-        assertTrue(frames > 0 && frames < 100, "the spool cap kept " + frames + " of 100 frames");
+        assertTrue(frames > 0 && frames < 200, "the spool cap kept " + frames + " of 200 frames");
 
         var trace = TraceReader.read(written.path());
         assertFalse(trace.truncated(), "the trace stops where the spool stopped, cleanly");
         assertEquals(frames, trace.frames().size());
+        assertEquals(tickEnd, trace.frames().getLast().packetId(),
+            "the spool stops at the first frame over the cap; the zero-byte tick ends after it do not still fit");
+        assertEquals(trace.frames().size() / 2, trace.frames().stream().filter(f -> f.packetId() == tickEnd).count());
         assertSpoolEmpty();
 
         engine.close();

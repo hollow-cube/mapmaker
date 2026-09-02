@@ -540,8 +540,11 @@ public final class CaptureEngine implements FrameSink {
 
     private void spool(Frame frame) {
         var out = spool;
-        if (out == null) return;
+        if (out == null || spoolTruncated) return;
         if (spoolBytes + frame.bytes().length > config.maxSpoolBytes()) {
+            // The cap ends the spool rather than filtering it: the frames that would still fit are
+            // the zero-byte tick ends, which would record a client that keeps ticking but never
+            // moves.
             spoolTruncated = true;
             return;
         }
