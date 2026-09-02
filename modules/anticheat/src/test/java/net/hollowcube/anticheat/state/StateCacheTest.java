@@ -204,6 +204,38 @@ class StateCacheTest {
     }
 
     @Test
+    void testRespawnIntoAnotherDimensionKeepsThePlayersAttributesAsTheClientDoes() {
+        var cache = new StateCache();
+        feed(cache, login("minecraft:overworld"));
+        feed(cache, add(7, ZOMBIE));
+        int updateAttributes = playId("update_attributes");
+        var sprinting = new S2CUpdateAttributes.Modifier("minecraft:sprinting", 0.3, 2);
+        var speed = new S2CUpdateAttributes.Snapshot(26, 0.1, List.of(sprinting));
+        var waterWalker = new S2CUpdateAttributes.Snapshot(37, 1.0 / 3.0, List.of());
+        feed(cache, new S2CUpdateAttributes.V776(42, List.of(speed, waterWalker)), updateAttributes);
+        feed(cache, new S2CUpdateAttributes.V776(7, List.of(speed)), updateAttributes);
+        feed(cache, new S2CSetEntityData.V776(42, new byte[]{1}));
+
+        feed(cache, new S2CRespawn.V776(spawnInfo("mapmaker:map/a"), (byte) 0));
+        assertNull(cache.frame(new StateKey.EntityAttribute(7, 26)), "the other entities go with the level");
+        var kept = cache.frame(new StateKey.EntityAttribute(42, 26));
+        assertNotNull(kept, "assignBaseValues carries the player's bases into the new player");
+        var base = new S2CUpdateAttributes.Snapshot(26, 0.1, List.of());
+        assertArrayEquals(new S2CUpdateAttributes.V776(42, List.of(base)).toByteArray(), kept.body(), "without its modifiers");
+        assertNotNull(cache.frame(new StateKey.EntityAttribute(42, 37)));
+        assertTrue(cache.frames(new StateKey.Entity(42, SET_ENTITY_DATA)).isEmpty(), "a new LocalPlayer's data is fresh without KEEP_ENTITY_DATA");
+        assertNotNull(cache.frame(new StateKey.Login(playId("respawn"))));
+
+        feed(cache, new S2CUpdateAttributes.V776(42, List.of(speed)), updateAttributes);
+        feed(cache, new S2CSetEntityData.V776(42, new byte[]{2}));
+        feed(cache, new S2CRespawn.V776(spawnInfo("mapmaker:map/b"),
+            (byte) (S2CRespawn.KEEP_ATTRIBUTE_MODIFIERS | S2CRespawn.KEEP_ENTITY_DATA)));
+        assertArrayEquals(new S2CUpdateAttributes.V776(42, List.of(speed)).toByteArray(),
+            cache.frame(new StateKey.EntityAttribute(42, 26)).body(), "assignAllValues keeps the modifiers");
+        assertEquals(1, cache.frames(new StateKey.Entity(42, SET_ENTITY_DATA)).size());
+    }
+
+    @Test
     void testStartConfigurationResetsEverything() {
         var cache = new StateCache();
         cache.apply(ProtocolState.CONFIGURATION, Direction.S2C,
@@ -260,6 +292,28 @@ class StateCacheTest {
             new byte[0], new C2SCustomPayload.V776("minecraft:brand", payload));
 
         assertEquals("vanilla", cache.brand());
+    }
+
+    @Test
+    void testAttributesAreKeptOneByOneAcrossPackets() {
+        var cache = new StateCache();
+        feed(cache, add(7, ZOMBIE));
+        var speed = new S2CUpdateAttributes.Snapshot(26, 0.1, List.of());
+        var gravity = new S2CUpdateAttributes.Snapshot(14, 0.08, List.of());
+        var scale = new S2CUpdateAttributes.Snapshot(28, 2.0, List.of());
+        int updateAttributes = playId("update_attributes");
+        feed(cache, new S2CUpdateAttributes.V776(7, List.of(speed, gravity)), updateAttributes);
+        feed(cache, new S2CUpdateAttributes.V776(7, List.of(scale)), updateAttributes);
+
+        var kept = cache.frame(new StateKey.EntityAttribute(7, 26));
+        assertNotNull(kept, "the speed set by the first packet survives the second");
+        assertArrayEquals(new S2CUpdateAttributes.V776(7, List.of(speed)).toByteArray(), kept.body());
+        assertNotNull(cache.frame(new StateKey.EntityAttribute(7, 14)));
+        assertNotNull(cache.frame(new StateKey.EntityAttribute(7, 28)));
+        assertNull(cache.frame(new StateKey.Entity(7, updateAttributes)));
+
+        feed(cache, new S2CRemoveEntities.V776(new int[]{7}));
+        assertNull(cache.frame(new StateKey.EntityAttribute(7, 26)));
     }
 
     private static void feed(StateCache cache, Packet packet) {

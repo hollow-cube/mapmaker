@@ -29,6 +29,7 @@ public final class StateCache {
     private static final int PLAY_GAME_EVENT = playId("game_event");
     private static final int PLAY_PLAYER_INFO_REMOVE = playId("player_info_remove");
     private static final int PLAY_PLAYER_INFO_UPDATE = playId("player_info_update");
+    private static final int PLAY_SET_ENTITY_DATA = playId("set_entity_data");
     private static final int PLAY_SET_PLAYER_TEAM = playId("set_player_team");
 
     /// The plan's singleton-state row: one frame per packet id, last one wins.
@@ -165,7 +166,13 @@ public final class StateCache {
                 appendEntity(data.entityId(), packetId, body);
             }
             case S2CSetEquipment equipment -> appendEntity(equipment.entityId(), packetId, body);
-            case S2CUpdateAttributes attributes -> putEntity(attributes.entityId(), packetId, body);
+            case S2CUpdateAttributes attributes -> {
+                if (entities.isDropped(attributes.entityId())) break;
+                for (var snapshot : attributes.attributes()) {
+                    put(new StateKey.EntityAttribute(attributes.entityId(), snapshot.attribute()), frame(ProtocolState.PLAY, packetId,
+                        new S2CUpdateAttributes.V776(attributes.entityId(), List.of(snapshot)).toByteArray()));
+                }
+            }
             case S2CSetEntityLink link -> putEntity(link.entityId(), packetId, body);
             case S2CContainerSetContent content -> {
                 removeKeys(key -> key instanceof StateKey.ContainerSlot slot
@@ -224,15 +231,39 @@ public final class StateCache {
     }
 
     /// `handleRespawn` only rebuilds the level when the dimension changes, so entities and their
-    /// effects only go then; the open container is closed either way.
+    /// effects only go then; the open container is closed either way. The player is rebuilt with
+    /// them, but the new one is given the old one's attribute bases — every value with
+    /// `KEEP_ATTRIBUTE_MODIFIERS`, its metadata with `KEEP_ENTITY_DATA` — so those keys stay: a
+    /// base the server set once, in an earlier level, is what the client still moves by.
     private void applyRespawn(S2CRespawn packet, int packetId, byte[] body) {
         if (!packet.spawnInfo().dimension().equals(level)) {
+            int playerId = entities.player().entityId();
+            boolean keepModifiers = (packet.dataToKeep() & S2CRespawn.KEEP_ATTRIBUTE_MODIFIERS) != 0;
+            boolean keepEntityData = (packet.dataToKeep() & S2CRespawn.KEEP_ENTITY_DATA) != 0;
             entities.clear();
-            removeKeys(key -> key instanceof StateKey.Entity || key instanceof StateKey.Effect);
+            removeKeys(key -> switch (key) {
+                case StateKey.Entity entity -> entity.entityId() != playerId || entity.packetId() != PLAY_SET_ENTITY_DATA || !keepEntityData;
+                case StateKey.EntityAttribute attribute -> attribute.entityId() != playerId;
+                case StateKey.Effect _ -> true;
+                default -> false;
+            });
+            if (!keepModifiers) stripModifiers(playerId);
         }
         removeKeys(key -> key instanceof StateKey.Container || key instanceof StateKey.ContainerSlot);
         level = packet.spawnInfo().dimension();
         put(new StateKey.Login(packetId), frame(ProtocolState.PLAY, packetId, body));
+    }
+
+    /// `AttributeMap#assignBaseValues`: the bases without the modifiers.
+    private void stripModifiers(int playerId) {
+        for (var entry : List.copyOf(lastWins.entrySet())) {
+            if (!(entry.getKey() instanceof StateKey.EntityAttribute attribute) || attribute.entityId() != playerId) continue;
+            var snapshot = S2CUpdateAttributes.V776.decode(new ByteReader(entry.getValue().body())).attributes().getFirst();
+            if (snapshot.modifiers().isEmpty()) continue;
+            var stripped = new S2CUpdateAttributes.V776(playerId,
+                List.of(new S2CUpdateAttributes.Snapshot(snapshot.attribute(), snapshot.base(), List.of())));
+            put(attribute, frame(ProtocolState.PLAY, entry.getValue().packetId(), stripped.toByteArray()));
+        }
     }
 
     /// The promotion guard: a dropped display entity that is the vehicle of anything still kept
@@ -308,6 +339,7 @@ public final class StateCache {
         for (int entityId : entityIds) removed.add(entityId);
         removeKeys(key -> switch (key) {
             case StateKey.Entity entity -> removed.contains(entity.entityId());
+            case StateKey.EntityAttribute attribute -> removed.contains(attribute.entityId());
             case StateKey.Effect effect -> removed.contains(effect.entityId());
             default -> false;
         });

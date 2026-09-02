@@ -34,6 +34,11 @@ public sealed interface StateKey {
     record Entity(int entityId, int packetId) implements StateKey {
     }
 
+    /// One attribute of one entity: `update_attributes` carries whichever instances changed, so a
+    /// later packet naming one attribute must not evict the earlier one that set the rest.
+    record EntityAttribute(int entityId, int attribute) implements StateKey {
+    }
+
     record Effect(int entityId, int effectId) implements StateKey {
     }
 
