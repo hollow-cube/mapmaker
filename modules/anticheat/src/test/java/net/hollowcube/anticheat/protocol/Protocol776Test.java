@@ -160,7 +160,7 @@ class Protocol776Test {
         assertFence(false, "entity_event", new S2CEntityEvent.V776(local, (byte) 3), local);
         assertFence(false, "entity_event", new S2CEntityEvent.V776(9, S2CEntityEvent.SWAP_HANDS), local);
         assertFence(true, "set_entity_data", new S2CSetEntityData.V776(local, new byte[0]), local);
-        assertFence(false, "update_attributes", new S2CUpdateAttributes.V776(9, new byte[0]), local);
+        assertFence(false, "update_attributes", new S2CUpdateAttributes.V776(9, List.of()), local);
     }
 
     @Test

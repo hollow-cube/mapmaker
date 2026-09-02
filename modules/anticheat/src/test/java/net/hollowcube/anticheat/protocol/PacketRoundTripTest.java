@@ -2,6 +2,7 @@ package net.hollowcube.anticheat.protocol;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
 
@@ -314,8 +315,13 @@ class PacketRoundTripTest {
         byte[] equipment = new ByteWriter().varInt(31).bytes(new byte[]{0, 0}).toByteArray();
         assertEquals(31, roundTrip(equipment, S2CSetEquipment.V776::decode).entityId());
 
-        byte[] attributes = new ByteWriter().varInt(31).bytes(new byte[]{0}).toByteArray();
-        assertEquals(31, roundTrip(attributes, S2CUpdateAttributes.V776::decode).entityId());
+        byte[] attributes = new ByteWriter().varInt(31).varInt(1)
+            .varInt(26).f64(0.10000000149011612).varInt(1).utf("minecraft:sprinting").f64(0.3).varInt(2)
+            .toByteArray();
+        var update = roundTrip(attributes, S2CUpdateAttributes.V776::decode);
+        assertEquals(31, update.entityId());
+        assertEquals(List.of(new S2CUpdateAttributes.Snapshot(26, 0.10000000149011612,
+            List.of(new S2CUpdateAttributes.Modifier("minecraft:sprinting", 0.3, S2CUpdateAttributes.ADD_MULTIPLIED_TOTAL)))), update.attributes());
 
         byte[] link = new ByteWriter().i32(31).i32(-1).toByteArray();
         assertEquals(31, roundTrip(link, S2CSetEntityLink.V776::decode).entityId());
