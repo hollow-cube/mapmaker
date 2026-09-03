@@ -1,6 +1,7 @@
 package net.hollowcube.compat.api.packet;
 
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.utils.ThrowingFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Function;
@@ -15,7 +16,7 @@ public interface ServerboundModPacket<T extends ServerboundModPacket<T>>  {
             return new Type<>("%s:%s".formatted(namespace, path), codec);
         }
 
-        public static <T extends ServerboundModPacket<T>> ServerboundModPacket.Type<T> of(String namespace, String path, Function<NetworkBuffer, T> reader) {
+        public static <T extends ServerboundModPacket<T>> ServerboundModPacket.Type<T> of(String namespace, String path, ThrowingFunction<NetworkBuffer, T> reader) {
             var type = new NetworkBuffer.Type<T>() {
                 @Override
                 public void write(@NotNull NetworkBuffer buffer, T value) {
@@ -24,7 +25,11 @@ public interface ServerboundModPacket<T extends ServerboundModPacket<T>>  {
 
                 @Override
                 public T read(@NotNull NetworkBuffer buffer) {
-                    return reader.apply(buffer);
+                    try {
+                        return reader.apply(buffer);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             };
             return new ServerboundModPacket.Type<>("%s:%s".formatted(namespace, path), type);
