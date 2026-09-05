@@ -11,12 +11,16 @@ import java.util.UUID;
 ///
 /// The idempotency key is stable for the life of the commit, so a writer may retry the exact same
 /// bytes after an ambiguous failure without risking a duplicate segment.
+///
+/// @param outcome why the recording is being finished, on the commit that finishes it and nowhere
+///                else. Storage cannot work it out for itself and cannot recover it later.
 public record SegmentedReplayCommit(
     UUID idempotencyKey,
     byte[] preamble,
     @Nullable Integer segmentIndex,
     byte[] segment,
-    boolean finished
+    boolean finished,
+    @Nullable RunOutcome outcome
 ) {
 
     public SegmentedReplayCommit {
@@ -30,6 +34,8 @@ public record SegmentedReplayCommit(
             throw new IllegalArgumentException("segment bytes are required when a segment index is present");
         if (segmentIndex == null && !finished)
             throw new IllegalArgumentException("a commit without a segment must finalize the recording");
+        if (finished == (outcome == null))
+            throw new IllegalArgumentException("an outcome belongs to the commit that finalizes the recording, and only to it");
     }
 
     public boolean hasSegment() {

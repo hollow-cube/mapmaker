@@ -4,6 +4,7 @@ import net.minestom.server.network.NetworkBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public final class ReplayEventRegistry {
 
@@ -43,6 +44,14 @@ public final class ReplayEventRegistry {
         return buffer.read(entry.networkType());
     }
 
+    /// Advances over an event; a custom skipper can avoid resolving host game state.
+    public void skip(NetworkBuffer buffer) {
+        int id = buffer.read(NetworkBuffer.VAR_INT);
+        if (id < 0 || id >= idLookup.length)
+            throw new IllegalArgumentException("invalid event id: " + id);
+        idLookup[id].skip().accept(buffer);
+    }
+
     public static final class Builder {
         private final List<Entry<?>> events = new ArrayList<>();
 
@@ -50,7 +59,12 @@ public final class ReplayEventRegistry {
         }
 
         public <T extends ReplayEvent> Builder register(Class<T> eventClass, NetworkBuffer.Type<T> networkType) {
-            events.add(new Entry<>(eventClass, events.size(), networkType));
+            return register(eventClass, networkType, networkType::read);
+        }
+
+        public <T extends ReplayEvent> Builder register(Class<T> eventClass, NetworkBuffer.Type<T> networkType,
+                                                        Consumer<NetworkBuffer> skip) {
+            events.add(new Entry<>(eventClass, events.size(), networkType, skip));
             return this;
         }
 
@@ -59,6 +73,7 @@ public final class ReplayEventRegistry {
         }
     }
 
-    record Entry<T extends ReplayEvent>(Class<T> eventClass, int id, NetworkBuffer.Type<T> networkType) {}
+    record Entry<T extends ReplayEvent>(Class<T> eventClass, int id, NetworkBuffer.Type<T> networkType,
+                                        Consumer<NetworkBuffer> skip) {}
 
 }

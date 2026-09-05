@@ -15,6 +15,7 @@ dependencies {
     testImplementation(project(":tools:sql-gen:testing"))
     testImplementation(libs.nats)
     testImplementation(libs.junit.api)
+    testImplementation(libs.junit.params)
     testImplementation(libs.junit.engine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }

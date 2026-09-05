@@ -9,6 +9,7 @@ import dev.hollowcube.replay.event.AbsoluteMoveEvent;
 import dev.hollowcube.replay.event.ReplayEvent;
 import dev.hollowcube.replay.event.ReplayEvents;
 import dev.hollowcube.replay.io.CompactedReplayReader;
+import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedFileReplaySource;
 import dev.hollowcube.replay.io.ReplayReader;
 import dev.hollowcube.replay.io.SegmentedFileReplayStorage;
@@ -188,7 +189,7 @@ final class ReplayPlaybackTest {
             recorder.submit(move(tick));
             recorder.advance();
         }
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);

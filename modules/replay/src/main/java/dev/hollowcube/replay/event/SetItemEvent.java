@@ -19,8 +19,9 @@ import java.util.Map;
 /// hand. Worn equipment is therefore just another slot, and [#slotOf(EquipmentSlot)] maps one
 /// across. The main hand is whatever the held slot points at, so it never has a slot of its own.
 public record SetItemEvent(int entityId, Map<Integer, ItemStack> items) implements ReplayEvent {
-    private static final NetworkBuffer.Type<Map<Integer, ItemStack>> ITEMS_TYPE = NetworkBuffer.VAR_INT
-        .mapValue(NetworkBuffer.NBT_COMPOUND)
+    private static final NetworkBuffer.Type<Map<Integer, CompoundBinaryTag>> RAW_ITEMS_TYPE = NetworkBuffer.VAR_INT
+        .mapValue(NetworkBuffer.NBT_COMPOUND);
+    private static final NetworkBuffer.Type<Map<Integer, ItemStack>> ITEMS_TYPE = RAW_ITEMS_TYPE
         .transform(SetItemEvent::decodeItems, SetItemEvent::encodeItems);
 
     public static final NetworkBuffer.Type<SetItemEvent> NETWORK_TYPE = NetworkBufferTemplate.template(
@@ -50,6 +51,12 @@ public record SetItemEvent(int entityId, Map<Integer, ItemStack> items) implemen
             case PlayerInventoryUtils.BOOTS_SLOT -> EquipmentSlot.BOOTS;
             default -> null;
         };
+    }
+
+    // Compaction needs the NBT boundary, not item decoding against the worker's game registries.
+    static void skip(NetworkBuffer buffer) {
+        buffer.read(NetworkBuffer.VAR_INT);
+        buffer.read(RAW_ITEMS_TYPE);
     }
 
     private static Map<Integer, ItemStack> decodeItems(Map<Integer, CompoundBinaryTag> items) {

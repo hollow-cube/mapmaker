@@ -23,7 +23,7 @@ public final class ReplayEvents {
             .register(EntityStateEvent.class, EntityStateEvent.NETWORK_TYPE)
             .register(HandAnimationEvent.class, HandAnimationEvent.NETWORK_TYPE)
             .register(ItemUseEvent.class, ItemUseEvent.NETWORK_TYPE)
-            .register(SetItemEvent.class, SetItemEvent.NETWORK_TYPE)
+            .register(SetItemEvent.class, SetItemEvent.NETWORK_TYPE, SetItemEvent::skip)
             .register(ChangeHeldSlotEvent.class, ChangeHeldSlotEvent.NETWORK_TYPE)
             .register(SetBlockEvent.class, SetBlockEvent.NETWORK_TYPE)
             .register(SpawnEntityEvent.class, SpawnEntityEvent.NETWORK_TYPE)

@@ -11,17 +11,21 @@ import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
+import net.hollowcube.apiserver.s3.HttpS3Client;
+import net.hollowcube.apiserver.replay.ReplayServiceImpl;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.session.SessionServer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -43,6 +47,9 @@ public final class Main {
     private static final String TRACE_DIR = "/data/anticheat";
     private static final long MAX_TRACE_BYTES = 512L << 20;
 
+    /// Hardcoded in the Go api-server too; both write the same objects into it.
+    private static final String REPLAY_BUCKET = "mapmaker-replays";
+
     public static void main(String[] args) throws IOException {
         var secrets = VaultSecrets.load();
         // One pool for what Go opens three on: `postgres.uri`, `postgres.maps_uri` and
@@ -59,6 +66,14 @@ public final class Main {
             ? secrets.require("nats.servers", "NATS_SERVERS")
             : secrets.get("nats.servers", "NATS_SERVERS", "nats://localhost:4222");
         var nats = NatsPublisher.connect(natsServers, Wire.gson());
+
+        // The same `s3.*` keys Go's config reads out of the vault secret. Required rather than
+        // defaulted: the development server builds its own client against local minio.
+        var s3 = new HttpS3Client(HttpClient.newHttpClient(),
+            secrets.require("s3.endpoint", "S3_ENDPOINT"), REPLAY_BUCKET,
+            secrets.get("s3.region", "S3_REGION", "auto"),
+            secrets.require("s3.access_key", "S3_ACCESS_KEY"),
+            secrets.require("s3.secret_key", "S3_SECRET_KEY"));
 
         var port = Integer.parseInt(secrets.get("http.port", "PORT", "9124"));
         var server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -79,7 +94,9 @@ public final class Main {
             server.createContext(AnticheatServer.PATH,
                 new AnticheatServer(new AnticheatServiceImpl(db, new AnticheatTraceStore(
                     Path.of(secrets.get("anticheat.store_dir", "ANTICHEAT_STORE_DIR", TRACE_DIR)),
-                    MAX_TRACE_BYTES))))
+                    MAX_TRACE_BYTES)))),
+            server.createContext(ReplayServer.PATH,
+                new ReplayServer(new ReplayServiceImpl(db, s3)))
         )) context.getFilters().add(requestLog);
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {

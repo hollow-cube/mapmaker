@@ -11,6 +11,7 @@ import dev.hollowcube.replay.event.ReplayTypes;
 import dev.hollowcube.replay.event.SetBlockEvent;
 import dev.hollowcube.replay.event.SetItemEvent;
 import dev.hollowcube.replay.event.SpawnEntityEvent;
+import dev.hollowcube.replay.io.RunOutcome;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Function;
@@ -334,7 +336,7 @@ final class ReplaySession {
 
     /// Stops recording but leaves the replay resumable, for when the run itself is not over.
     CompletableFuture<Void> stop() {
-        return terminate(Termination.STOPPED);
+        return terminate(Termination.STOPPED, null);
     }
 
     /// Permanently completes the replay, or throws it away if the run was too short to have caught
@@ -344,20 +346,21 @@ final class ReplaySession {
     /// committed is kept whatever its length. That only happens to a run that was resumed or
     /// paused, which is not the kind of run this drops.
     ///
+    /// @param outcome      why the run is over, which storage cannot work out for itself
     /// @param minimumTicks the shortest run worth a replay, or 0 to keep every run
-    CompletableFuture<Void> complete(int minimumTicks) {
+    CompletableFuture<Void> complete(RunOutcome outcome, int minimumTicks) {
         return terminate(recorder.tick() >= minimumTicks || recorder.committed()
             ? Termination.FINISHED
-            : Termination.DISCARDED);
+            : Termination.DISCARDED, outcome);
     }
 
-    private CompletableFuture<Void> terminate(Termination termination) {
+    private CompletableFuture<Void> terminate(Termination termination, @Nullable RunOutcome outcome) {
         if (terminateFuture != null) return terminateFuture;
 
         state = State.TERMINATED;
         terminateFuture = switch (termination) {
             case STOPPED -> recorder.close();
-            case FINISHED -> recorder.finish();
+            case FINISHED -> recorder.finish(Objects.requireNonNull(outcome, "outcome"));
             case DISCARDED -> recorder.discard();
         };
         return terminateFuture;

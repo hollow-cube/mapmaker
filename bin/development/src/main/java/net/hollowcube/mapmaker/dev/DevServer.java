@@ -14,6 +14,8 @@ import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
 import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
+import net.hollowcube.apiserver.replay.ReplayServiceImpl;
+import net.hollowcube.apiserver.s3.HttpS3Client;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
 import net.hollowcube.apiserver.common.Pools;
@@ -28,6 +30,7 @@ import net.hollowcube.posthog.PostHog;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
+import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
@@ -53,6 +56,7 @@ import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.Base64;
@@ -65,6 +69,12 @@ public class DevServer extends AbstractMultiMapServer {
     /// What `docker-compose.yml` publishes on the host, and the same database all three of the go
     /// api-server's postgres uris point at in dev.
     private static final String COMPOSE_POSTGRES = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable";
+
+    /// The minio `docker-compose.yml` publishes, and the credentials it comes up with. A fresh
+    /// volume has no bucket, so one is made on startup as the Go api-server does.
+    private static final String COMPOSE_MINIO = "http://localhost:9000";
+    private static final String COMPOSE_MINIO_KEY = "mapmaker";
+    private static final String REPLAY_BUCKET = "mapmaker-replays";
 
     /// Fewer than the real worker's four: one developer is not going to queue enough to need them,
     /// and the threads are shared with a game server here.
@@ -138,9 +148,14 @@ public class DevServer extends AbstractMultiMapServer {
         var nats = NatsPublisher.connect(config.get(NatsConfig.class).servers(), Wire.gson());
         shutdowner().queue("dev-ipc-nats", nats::close);
 
+        var s3 = new HttpS3Client(HttpClient.newHttpClient(), otel, COMPOSE_MINIO, REPLAY_BUCKET,
+            "us-east-1", COMPOSE_MINIO_KEY, COMPOSE_MINIO_KEY);
+        s3.createBucketIfAbsent();
+
         this.ipc = new IpcServices(
             new HeadDatabaseServiceImpl(db),
-            new ChatServiceImpl(db, nats));
+            new ChatServiceImpl(db, nats),
+            new ReplayServiceImpl(db, s3));
         return ipc;
     }
 
@@ -155,6 +170,7 @@ public class DevServer extends AbstractMultiMapServer {
         http.addRoute(ChatServer.PATH, new ChatServer(ipc.chat()));
         http.addRoute(SessionServer.PATH, new SessionServer(new SessionServiceImpl(db)));
         http.addRoute(AnticheatServer.PATH, new AnticheatServer(new AnticheatServiceImpl(db, store)));
+        http.addRoute(ReplayServer.PATH, new ReplayServer(ipc.replays()));
     }
 
     @Override

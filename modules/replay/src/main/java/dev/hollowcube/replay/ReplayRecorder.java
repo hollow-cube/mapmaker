@@ -3,6 +3,7 @@ package dev.hollowcube.replay;
 import dev.hollowcube.replay.data.ReplayPreamble;
 import dev.hollowcube.replay.event.ReplayEvent;
 import dev.hollowcube.replay.event.ReplayEventRegistry;
+import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedReplayWriter;
 import org.jetbrains.annotations.Nullable;
 
@@ -97,7 +98,7 @@ public sealed interface ReplayRecorder permits ReplayRecorderImpl {
     /// emits a commit carrying only the preamble, so that the finished transition is durable.
     ///
     /// The first of [#close()] or this call wins; the other returns the same future.
-    CompletableFuture<Void> finish();
+    CompletableFuture<Void> finish(RunOutcome outcome);
 
     /// Closes the underlying writer without committing anything, abandoning the whole recording.
     ///

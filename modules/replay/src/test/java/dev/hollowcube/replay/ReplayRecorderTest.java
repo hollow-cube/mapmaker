@@ -5,6 +5,7 @@ import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.data.ReplayPreamble;
 import dev.hollowcube.replay.event.DestroyEntityEvent;
 import dev.hollowcube.replay.event.ReplayEvents;
+import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedReplayCommit;
 import dev.hollowcube.replay.io.SegmentedReplayWriter;
 import net.minestom.server.network.NetworkBuffer;
@@ -65,7 +66,7 @@ final class ReplayRecorderTest {
         var recorder = newRecorder(writer);
 
         recorder.advance();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         assertEquals(List.of("commit:0", "close"), writer.operations);
         assertTrue(writer.commits.getFirst().finished());
@@ -78,7 +79,7 @@ final class ReplayRecorderTest {
 
         recorder.advance();
         recorder.flush().join();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         assertEquals(List.of("commit:0", "commit", "close"), writer.operations);
 
@@ -93,7 +94,7 @@ final class ReplayRecorderTest {
         var writer = new TestWriter();
         var recorder = newRecorder(writer);
 
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         assertEquals(List.of("close"), writer.operations);
     }
@@ -139,7 +140,7 @@ final class ReplayRecorderTest {
             recorder.submit(new DestroyEntityEvent(1));
             recorder.advance();
         }
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var index = ReplayPreamble.read(writer.commits.getLast().preamble()).index();
         assertEquals(3, index.size());
@@ -161,7 +162,7 @@ final class ReplayRecorderTest {
                 recorder.submit(new DestroyEntityEvent(i));
             recorder.advance();
         }
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var index = ReplayPreamble.read(writer.commits.getLast().preamble()).index();
         assertTrue(index.size() > 1, "expected the byte limit to close a chunk early");
@@ -181,7 +182,7 @@ final class ReplayRecorderTest {
         recorder.advance();
         recorder.flush().join();
         recorder.advance();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         assertEquals(List.of(0, 1), snapshots);
         assertTrue(ReplayPreamble.read(writer.commits.getLast().preamble()).index()
@@ -196,7 +197,7 @@ final class ReplayRecorderTest {
         recorder.advance();
         // A run-ending event is submitted into the open tick and terminated on, never advanced.
         recorder.submit(new DestroyEntityEvent(1));
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var commit = writer.commits.getLast();
         assertTrue(commit.finished());

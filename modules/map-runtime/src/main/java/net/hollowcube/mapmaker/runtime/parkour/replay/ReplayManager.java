@@ -3,11 +3,10 @@ package net.hollowcube.mapmaker.runtime.parkour.replay;
 import dev.hollowcube.replay.ReplayRecorder;
 import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.event.*;
-import dev.hollowcube.replay.io.SegmentedFileReplayStorage;
+import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedReplay;
 import dev.hollowcube.replay.io.SegmentedReplayStorage;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.replays.ReplayClient;
 import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
@@ -29,7 +28,6 @@ import net.minestom.server.inventory.PlayerInventory;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,7 +38,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class ReplayManager {
-    private static final Path LOCAL_REPLAY_DIR = Path.of("workspace/replay-test");
     private static final byte[] WORLD_VERSION = ReplayHeader.worldVersion(new UUID(0, 0));
 
     /// The hotbar slots parkour puts run items in. Nothing else is visible on a replay, so nothing
@@ -86,12 +83,7 @@ public final class ReplayManager {
     }
 
     private static SegmentedReplayStorage defaultStorage(ParkourMapWorld world) {
-        var replays = world.server().api().replays;
-        // Dev servers run without the replay backend. Keep those recordings on disk so they stay
-        // testable rather than failing every commit.
-        return replays instanceof ReplayClient.Noop
-            ? new SegmentedFileReplayStorage(LOCAL_REPLAY_DIR)
-            : new ApiSegmentedReplayStorage(replays);
+        return new ApiSegmentedReplayStorage(world.server().api().replays);
     }
 
     ReplayManager(ParkourMapWorld world, SegmentedReplayStorage storage) {
@@ -216,12 +208,13 @@ public final class ReplayManager {
         if (nextState == null) {
             // The player left, but the run itself is not over. They may rejoin and resume this
             // exact recording, so stop without finalizing it.
-            return endSession(saveState.id(), false, 0);
+            return endSession(saveState.id(), null, 0);
         } else if (nextState instanceof ParkourState.Playing2 || nextState instanceof ParkourState.Finished) {
-            // Either the run completed, or a hard reset abandoned it in favour of a new save
-            // state. Neither will ever be appended to again.
-            return endSession(saveState.id(), true,
-                nextState instanceof ParkourState.Finished ? 0 : MINIMUM_RECORDED_TICKS);
+            // Either the run completed or a hard reset abandoned it; neither is appended to again.
+            // This is the only place the difference between the two is known.
+            var completed = nextState instanceof ParkourState.Finished;
+            return endSession(saveState.id(), completed ? RunOutcome.COMPLETED : RunOutcome.RESET,
+                completed ? 0 : MINIMUM_RECORDED_TICKS);
         } else {
             // Spectating and testing may resume this run while the world remains alive.
             var session = sessions.get(saveState.id());
@@ -241,7 +234,7 @@ public final class ReplayManager {
 
         // The world is going away, but these runs are not over; leave them resumable.
         for (var saveStateId : new ArrayList<>(sessions.keySet()))
-            endSession(saveStateId, false, 0);
+            endSession(saveStateId, null, 0);
         recordings.clear();
 
         closeFuture = CompletableFuture.allOf(
@@ -323,7 +316,7 @@ public final class ReplayManager {
         // Nothing may start recording this save state again until it is prepared, because only
         // preparation finds the committed recording to append to; a fresh one would replace it.
         recordings.disable(saveState.id());
-        endSession(saveState.id(), false, 0);
+        endSession(saveState.id(), null, 0);
     }
 
     private void dropFailedSession(Player player, Throwable failure) {
@@ -336,13 +329,14 @@ public final class ReplayManager {
         );
     }
 
-    private CompletableFuture<Void> endSession(String saveStateId, boolean finished, int minimumTicks) {
+    /// @param outcome null to stop a recording that is not over, which stays resumable
+    private CompletableFuture<Void> endSession(String saveStateId, @Nullable RunOutcome outcome, int minimumTicks) {
         var session = sessions.remove(saveStateId);
         if (session == null) {
             return finalizations.getOrDefault(saveStateId, CompletableFuture.completedFuture(null));
         }
 
-        var finalization = finished ? session.complete(minimumTicks) : session.stop();
+        var finalization = outcome != null ? session.complete(outcome, minimumTicks) : session.stop();
         finalizations.put(saveStateId, finalization);
         // Otherwise every run this world ever hosted stays pinned for its lifetime. Anything asking
         // after removal gets a completed future, which is the right answer once it has landed.

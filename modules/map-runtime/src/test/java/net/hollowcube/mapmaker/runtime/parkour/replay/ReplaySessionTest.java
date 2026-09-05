@@ -77,7 +77,7 @@ final class ReplaySessionTest {
         var finished = new TestWriter();
         var session = new ReplaySession(snapshot -> newRecorder(finished, snapshot));
         session.advance();
-        session.complete(0).join();
+        session.complete(RunOutcome.COMPLETED, 0).join();
         assertTrue(finished.commits.getLast().finished());
     }
 
@@ -87,7 +87,7 @@ final class ReplaySessionTest {
         var session = new ReplaySession(snapshot -> newRecorder(writer, snapshot));
         for (var tick = 0; tick < 19; tick++) session.advance();
 
-        session.complete(20).join();
+        session.complete(RunOutcome.COMPLETED, 20).join();
 
         // Not an empty commit, and not a finished one: nothing about this run reaches storage at
         // all, so nothing has to be cleaned up later either.
@@ -100,7 +100,7 @@ final class ReplaySessionTest {
         var session = new ReplaySession(snapshot -> newRecorder(writer, snapshot));
         for (var tick = 0; tick < 20; tick++) session.advance();
 
-        session.complete(20).join();
+        session.complete(RunOutcome.COMPLETED, 20).join();
 
         assertTrue(writer.commits.getLast().finished());
         assertEquals(20, headerOf(writer.commits.getLast()).tickCount());
@@ -116,7 +116,7 @@ final class ReplaySessionTest {
         session.resume();
         session.advance();
 
-        session.complete(20).join();
+        session.complete(RunOutcome.COMPLETED, 20).join();
 
         // Those bytes are already in storage, so finishing is the only honest end for them.
         assertTrue(writer.commits.getLast().finished());
@@ -142,7 +142,7 @@ final class ReplaySessionTest {
         session.advance();
 
         var stop = session.stop();
-        assertSame(stop, session.complete(0));
+        assertSame(stop, session.complete(RunOutcome.COMPLETED, 0));
         stop.join();
 
         assertTrue(writer.commits.stream().noneMatch(SegmentedReplayCommit::finished));
@@ -512,13 +512,17 @@ final class ReplaySessionTest {
         ));
 
         script.accept(session);
-        session.complete(0).join();
+        session.complete(RunOutcome.COMPLETED, 0).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);
+        // Keep the source snapshots as seek anchors instead of merging the whole short recording.
         return ReplayCompactor.compact(
             recording.requirePreamble(),
-            new SegmentedFileReplaySource(root.resolve("run"))
+            new SegmentedFileReplaySource(root.resolve("run")),
+            null,
+            recording.requirePreamble().index().stream().mapToInt(chunk -> chunk.uncompressedLength()).max().orElse(1),
+            ReplayManager.REGISTRY
         ).data();
     }
 

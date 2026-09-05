@@ -3,6 +3,7 @@ package dev.hollowcube.replay;
 import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.event.*;
 import dev.hollowcube.replay.io.CompactedReplayReader;
+import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedFileReplaySource;
 import dev.hollowcube.replay.io.SegmentedFileReplayStorage;
 import net.minestom.server.coordinate.BlockVec;
@@ -60,7 +61,7 @@ final class ReplayRoundTripTest {
         recorder.submit(new DestroyEntityEvent(1));
         expected.add(new SpawnEntityEvent(1, EntityType.ARMOR_STAND, new Pos(5, 64, 5)));
         expected.add(new DestroyEntityEvent(1));
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);
@@ -120,7 +121,7 @@ final class ReplayRoundTripTest {
         );
         for (var event : expected) recorder.submit(event);
         recorder.advance();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);
@@ -153,7 +154,7 @@ final class ReplayRoundTripTest {
         recorder.submit(new DeltaMoveEvent(0, new Pos(0.1, 0, 0.2), new Vec(0.31, -0.0784, -0.12)));
         recorder.submit(new AbsoluteMoveEvent(0, new Pos(4, 64, 4), Vec.ZERO));
         recorder.advance();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);
@@ -192,7 +193,7 @@ final class ReplayRoundTripTest {
         recorder.submit(new DeltaMoveEvent(0, new Pos(0.0731, -0.0784, 0.2, 137.4f, -22.9f), Vec.ZERO));
         recorder.submit(new AbsoluteMoveEvent(0, new Pos(-3184.61, 71.9375, 902.03, -179.9f, 90f), Vec.ZERO));
         recorder.advance();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);
@@ -265,7 +266,7 @@ final class ReplayRoundTripTest {
             recorder.submit(new AbsoluteMoveEvent(0, new Pos(tick, 64, 0), Vec.ZERO));
             recorder.advance();
         }
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var recording = storage.load("run");
         assertNotNull(recording);

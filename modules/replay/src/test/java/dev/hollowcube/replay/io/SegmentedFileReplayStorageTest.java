@@ -72,7 +72,7 @@ final class SegmentedFileReplayStorageTest {
             }
         );
         recorder.advance();
-        recorder.finish().join();
+        recorder.finish(RunOutcome.COMPLETED).join();
 
         var replay = storage.load("run");
         assertNotNull(replay);

@@ -23,6 +23,15 @@ public record JobSpec<D>(String name, Class<D> data, Function<D, String> instanc
 
     public static final JobSpec<Void> PLAYER_COUNT = timed("player-count", "*/5 * * * *");
     public static final JobSpec<IndexMap> INDEX_MAP = queued("index-map", IndexMap.class, IndexMap::mapId);
+    public static final JobSpec<CompactReplay> COMPACT_REPLAY =
+        queued("compact-replay", CompactReplay.class, CompactReplay::replayId);
+    /// The backstop for a [#COMPACT_REPLAY] row that was never enqueued — a replay the Go server
+    /// finished during the overlap, or one whose row was parked — and the way the corpus that
+    /// predates compaction is worked through.
+    public static final JobSpec<Void> RECONCILE_REPLAYS = timed("reconcile-replays", "*/15 * * * *");
+    /// Drops the source segments of replays that have been compacted long enough, which is where
+    /// compaction's storage win is actually realised.
+    public static final JobSpec<Void> SWEEP_REPLAY_SOURCES = timed("sweep-replay-sources", "17 * * * *");
 
     public static JobSpec<Void> timed(String name, String cron) {
         return new JobSpec<>(name, Void.class, ignored -> TIMED_INSTANCE, Cron.parse(cron), DEFAULT_MAX_ATTEMPTS);

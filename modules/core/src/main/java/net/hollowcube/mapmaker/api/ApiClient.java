@@ -3,11 +3,11 @@ package net.hollowcube.mapmaker.api;
 import net.hollowcube.mapmaker.api.auth.AuthClient;
 import net.hollowcube.ipc.chat.ChatService;
 import net.hollowcube.ipc.hdb.HeadDatabaseService;
+import net.hollowcube.ipc.replay.ReplayService;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.notifications.NotificationClient;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
-import net.hollowcube.mapmaker.api.replays.ReplayClient;
 
 import java.net.http.HttpResponse;
 
@@ -15,7 +15,7 @@ public final class ApiClient {
 
     public final PlayerClient players;
     public final MapClient maps;
-    public final ReplayClient replays;
+    public final ReplayService replays;
     public final HeadDatabaseService headDatabase;
     public final ChatService chat;
     public final InteractionClient interactions;
@@ -25,28 +25,7 @@ public final class ApiClient {
     public ApiClient(
         PlayerClient players,
         MapClient maps,
-        HeadDatabaseService headDatabase,
-        ChatService chat,
-        InteractionClient interactions,
-        NotificationClient notifications,
-        AuthClient auth
-    ) {
-        this(
-            players,
-            maps,
-            new ReplayClient.Noop(),
-            headDatabase,
-            chat,
-            interactions,
-            notifications,
-            auth
-        );
-    }
-
-    public ApiClient(
-        PlayerClient players,
-        MapClient maps,
-        ReplayClient replays,
+        ReplayService replays,
         HeadDatabaseService headDatabase,
         ChatService chat,
         InteractionClient interactions,
@@ -65,10 +44,11 @@ public final class ApiClient {
 
     /// Everything the Go api-server still serves comes off `http`; everything the java api-server
     /// serves is an ipc client built against its own base url, and so is passed in.
-    public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat) {
+    public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat,
+                     ReplayService replays) {
         this.players = new PlayerClient.Http(http);
         this.maps = new MapClient.Http(http);
-        this.replays = new ReplayClient.Http(http);
+        this.replays = replays;
         this.headDatabase = headDatabase;
         this.chat = chat;
         this.interactions = new InteractionClient.Http(http);

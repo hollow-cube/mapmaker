@@ -18,6 +18,8 @@ dependencies {
     implementation(project(":modules:datafix"))
     implementation(project(":modules:map-core"))
     implementation(project(":modules:map-runtime"))
+    // Compaction is the replay module's, and the runner drives it.
+    implementation(project(":modules:replay"))
 
     implementation(libs.minestom)
     implementation(libs.polar)

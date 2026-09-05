@@ -1,3 +1,13 @@
 /gradlew        text eol=lf
 *.bat           text eol=crlf
 *.jar           binary
+
+# Generator output, committed so the build has no generate step and CI can prove it has not
+# drifted. Nobody reads these: `:modules:api:sqlGenCheck` and sql-gen's own GoldenTest fail when
+# they disagree with their inputs, so the inputs are what a review looks at.
+modules/api/src/generated/**   linguist-generated=true
+tools/sql-gen/sample/generated/**   linguist-generated=true
+
+# Deliberately NOT marked: `modules/ipc/wire.json` and `modules/map-runtime/luau-api/**` are
+# generated too, but both are committed precisely so their diffs are read — one is the wire
+# contract older game servers are held to, the other is the scripting API surface.

@@ -6,6 +6,7 @@ import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.data.ReplayPreamble;
 import dev.hollowcube.replay.event.ReplayEvent;
 import dev.hollowcube.replay.event.ReplayEventRegistry;
+import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedReplayCommit;
 import dev.hollowcube.replay.io.SegmentedReplayWriter;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -169,7 +170,7 @@ final class ReplayRecorderImpl implements ReplayRecorder {
         if (tick - lastChunkTick >= CHUNK_TICK_LIMIT || scratchBuffer.readableBytes() >= CHUNK_BYTE_LIMIT)
             flushChunk();
         if (segmentBuffer.writeIndex() >= SEGMENT_BYTE_LIMIT)
-            commit(false);
+            commit(null);
 
         beginTick();
         captureSnapshot();
@@ -216,7 +217,7 @@ final class ReplayRecorderImpl implements ReplayRecorder {
     public CompletableFuture<Void> flush() {
         ensureOpen();
         discardOpenTick();
-        commit(false);
+        commit(null);
         beginTick();
         captureSnapshot();
         return writeChain;
@@ -238,12 +239,12 @@ final class ReplayRecorderImpl implements ReplayRecorder {
 
     @Override
     public CompletableFuture<Void> close() {
-        return terminate(false);
+        return terminate(null);
     }
 
     @Override
-    public CompletableFuture<Void> finish() {
-        return terminate(true);
+    public CompletableFuture<Void> finish(RunOutcome outcome) {
+        return terminate(outcome);
     }
 
     @Override
@@ -256,7 +257,7 @@ final class ReplayRecorderImpl implements ReplayRecorder {
         return closeFuture;
     }
 
-    private CompletableFuture<Void> terminate(boolean finished) {
+    private CompletableFuture<Void> terminate(@Nullable RunOutcome outcome) {
         if (closeFuture != null) return closeFuture;
 
         // advance() begins the next tick immediately, so an open tick with no events is empty
@@ -265,7 +266,7 @@ final class ReplayRecorderImpl implements ReplayRecorder {
         // discarding them meant no replay ever contained its RunEnd.
         if (eventCount > 0) endTick();
         else discardOpenTick();
-        commit(finished);
+        commit(outcome);
 
         closeFuture = closeWriter();
         return closeFuture;
@@ -298,8 +299,9 @@ final class ReplayRecorderImpl implements ReplayRecorder {
     /// Builds and dispatches one atomic commit carrying the complete preamble plus at most one new
     /// segment. Everything here runs on the caller's thread, so the commit is an immutable snapshot
     /// by the time it reaches the write chain.
-    private void commit(boolean finished) {
+    private void commit(@Nullable RunOutcome outcome) {
         if (failure != null) return;
+        var finished = outcome != null;
         if (tick > lastChunkTick) flushChunk();
 
         var hasSegment = segmentBuffer.writeIndex() > 0;
@@ -320,7 +322,8 @@ final class ReplayRecorderImpl implements ReplayRecorder {
             buildPreamble(),
             commitSegmentIndex,
             segment,
-            finished
+            finished,
+            outcome
         );
         committed = true;
 

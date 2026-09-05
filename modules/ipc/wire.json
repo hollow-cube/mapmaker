@@ -131,6 +131,116 @@
         }
       }
     },
+    "replay": {
+      "interface": "net.hollowcube.ipc.replay.ReplayService",
+      "methods": {
+        "commit": {
+          "params": [
+            {
+              "name": "meta",
+              "type": "net.hollowcube.ipc.replay.ReplayCommit"
+            },
+            {
+              "name": "body",
+              "type": "net.hollowcube.ipc.Blob"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.replay.ReplayInfo"
+          }
+        },
+        "drop-segments": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "int"
+          }
+        },
+        "get-compacted": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            },
+            {
+              "name": "start",
+              "type": "Long",
+              "nullable": true
+            },
+            {
+              "name": "endInclusive",
+              "type": "Long",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.Blob"
+          }
+        },
+        "get-preamble": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            },
+            {
+              "name": "expectedRevision",
+              "type": "Long",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.Blob"
+          }
+        },
+        "get-replay": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.replay.ReplayInfo",
+            "nullable": true
+          }
+        },
+        "get-segment": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            },
+            {
+              "name": "segmentIndex",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.Blob"
+          }
+        },
+        "publish-compacted": {
+          "params": [
+            {
+              "name": "meta",
+              "type": "net.hollowcube.ipc.replay.ReplayCompaction"
+            },
+            {
+              "name": "body",
+              "type": "net.hollowcube.ipc.Blob"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.replay.ReplayInfo"
+          }
+        }
+      }
+    },
     "session": {
       "interface": "net.hollowcube.ipc.session.SessionService",
       "methods": {
@@ -547,6 +657,140 @@
           "name": "tags",
           "type": "List\u003cString\u003e"
         }
+      ]
+    },
+    "net.hollowcube.ipc.replay.ReplayCommit": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "expectedRevision",
+          "type": "Long",
+          "nullable": true
+        },
+        {
+          "name": "idempotencyKey",
+          "type": "String"
+        },
+        {
+          "name": "preambleLength",
+          "type": "int"
+        },
+        {
+          "name": "segmentIndex",
+          "type": "Integer",
+          "nullable": true
+        },
+        {
+          "name": "finished",
+          "type": "boolean"
+        },
+        {
+          "name": "outcome",
+          "type": "net.hollowcube.ipc.replay.ReplayOutcome",
+          "nullable": true
+        },
+        {
+          "name": "contentDigest",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.replay.ReplayCompaction": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "expectedRevision",
+          "type": "long"
+        },
+        {
+          "name": "idempotencyKey",
+          "type": "String"
+        },
+        {
+          "name": "preambleLength",
+          "type": "int"
+        },
+        {
+          "name": "contentDigest",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.replay.ReplayInfo": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "revision",
+          "type": "long"
+        },
+        {
+          "name": "state",
+          "type": "net.hollowcube.ipc.replay.ReplayState"
+        },
+        {
+          "name": "representation",
+          "type": "net.hollowcube.ipc.replay.ReplayRepresentation"
+        },
+        {
+          "name": "nextSegmentIndex",
+          "type": "Integer",
+          "nullable": true
+        },
+        {
+          "name": "preambleLength",
+          "type": "int"
+        },
+        {
+          "name": "outcome",
+          "type": "net.hollowcube.ipc.replay.ReplayOutcome",
+          "nullable": true
+        },
+        {
+          "name": "updatedAt",
+          "type": "long"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.replay.ReplayOutcome": {
+      "kind": "enum",
+      "constants": [
+        "FINISHED",
+        "RESET"
+      ]
+    },
+    "net.hollowcube.ipc.replay.ReplayRepresentation": {
+      "kind": "enum",
+      "constants": [
+        "SEGMENTED",
+        "COMPACTED"
+      ]
+    },
+    "net.hollowcube.ipc.replay.ReplayState": {
+      "kind": "enum",
+      "constants": [
+        "RECORDING",
+        "FINISHED"
       ]
     }
   },

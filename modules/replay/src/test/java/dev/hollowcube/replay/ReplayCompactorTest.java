@@ -54,6 +54,34 @@ final class ReplayCompactorTest {
         }
     }
 
+    @Test
+    void oversizedItemChunksDoNotResolveItemsAgainstTheWorkersRegistries() {
+        var item = CompoundBinaryTag.builder().putString("id", "old:unknown_item")
+            .putString("payload", "x".repeat(4096)).build();
+        var payload = NetworkBuffer.makeArray(buffer -> {
+            for (var tick = 0; tick < 100; tick++) {
+                buffer.write(NetworkBuffer.VAR_INT, tick);
+                buffer.write(NetworkBuffer.SHORT, (short) 1);
+                buffer.write(NetworkBuffer.VAR_INT, 5); // SetItemEvent
+                buffer.write(NetworkBuffer.VAR_INT, 0); // entity
+                buffer.write(NetworkBuffer.VAR_INT, 1); // slots
+                buffer.write(NetworkBuffer.VAR_INT, 0);
+                buffer.write(NetworkBuffer.NBT_COMPOUND, item);
+            }
+        });
+        var compressed = Zstd.compress(payload);
+        var result = ReplayCompactor.compact(segmentedPreamble(compressed.length, payload.length, 100),
+            ignored -> compressed);
+        try (var reader = new CompactedReplayReader(result.data())) {
+            var decoded = NetworkBuffer.resizableBuffer();
+            for (var frame : reader.index()) {
+                assertTrue(frame.uncompressedLength() <= ReplayCompactor.FRAME_BYTE_LIMIT);
+                decoded.write(NetworkBuffer.RAW_BYTES, reader.chunk(frame).read(NetworkBuffer.RAW_BYTES));
+            }
+            assertArrayEquals(payload, decoded.read(NetworkBuffer.RAW_BYTES));
+        }
+    }
+
     /// Records of a small counter and a mostly-constant blob, which is roughly the shape of a tick
     /// stream and compresses the way one does.
     private static byte[] structuredPayload(int records) {
@@ -68,15 +96,19 @@ final class ReplayCompactorTest {
     }
 
     private static ReplayPreamble segmentedPreamble(int compressedLength, int uncompressedLength) {
+        return segmentedPreamble(compressedLength, uncompressedLength, 1);
+    }
+
+    private static ReplayPreamble segmentedPreamble(int compressedLength, int uncompressedLength, int ticks) {
         var header = new ReplayHeader(UUID.randomUUID(), ReplayHeader.worldVersion(UUID.randomUUID()));
         var index = List.of(new ChunkIndex(
-            0, 1, ChunkIndex.FLAG_HAS_SNAPSHOT, 0, compressedLength, uncompressedLength));
+            0, ticks, ChunkIndex.FLAG_HAS_SNAPSHOT, 0, compressedLength, uncompressedLength));
 
         var metadata = NetworkBuffer.makeArray(NetworkBuffer.NBT_COMPOUND, CompoundBinaryTag.empty());
         var indexLength = NetworkBuffer.makeArray(buffer -> {
             for (var chunk : index) buffer.write(ChunkIndex.NETWORK_TYPE, chunk);
         }).length;
-        header.update(metadata.length, indexLength, 1, index.size());
+        header.update(metadata.length, indexLength, ticks, index.size());
 
         return new ReplayPreamble(header, CompoundBinaryTag.empty(), index);
     }

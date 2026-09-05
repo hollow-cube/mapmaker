@@ -30,6 +30,8 @@ public final class ApiDatabase {
 
     public final PlayersQueries players;
 
+    public final ReplaysQueries replays;
+
     public final SessionsQueries sessions;
 
     public ApiDatabase(DataSource dataSource) {
@@ -43,6 +45,7 @@ public final class ApiDatabase {
         this.mapFeatures = new MapFeaturesQueriesImpl(source);
         this.maps = new MapsQueriesImpl(source);
         this.players = new PlayersQueriesImpl(source);
+        this.replays = new ReplaysQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
     }
 
@@ -56,6 +59,7 @@ public final class ApiDatabase {
         this.mapFeatures = fake.mapFeatures;
         this.maps = fake.maps;
         this.players = fake.players;
+        this.replays = fake.replays;
         this.sessions = fake.sessions;
     }
 
@@ -117,6 +121,8 @@ public final class ApiDatabase {
 
         public final PlayersQueries players;
 
+        public final ReplaysQueries replays;
+
         public final SessionsQueries sessions;
 
         Tx(Connection conn) {
@@ -130,6 +136,7 @@ public final class ApiDatabase {
             this.mapFeatures = new MapFeaturesQueriesImpl(source);
             this.maps = new MapsQueriesImpl(source);
             this.players = new PlayersQueriesImpl(source);
+            this.replays = new ReplaysQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
         }
 
@@ -160,6 +167,8 @@ public final class ApiDatabase {
         private MapsQueries maps = new MapsQueries.Stub();
 
         private PlayersQueries players = new PlayersQueries.Stub();
+
+        private ReplaysQueries replays = new ReplaysQueries.Stub();
 
         private SessionsQueries sessions = new SessionsQueries.Stub();
 
@@ -200,6 +209,11 @@ public final class ApiDatabase {
 
         public Fake players(PlayersQueries players) {
             this.players = players;
+            return this;
+        }
+
+        public Fake replays(ReplaysQueries replays) {
+            this.replays = replays;
             return this;
         }
 
