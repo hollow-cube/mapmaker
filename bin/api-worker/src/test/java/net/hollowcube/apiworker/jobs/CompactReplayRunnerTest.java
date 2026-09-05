@@ -90,6 +90,22 @@ class CompactReplayRunnerTest {
         assertEquals(List.of(), storage.published);
     }
 
+    /// ~1.6% of the recorded corpus is format version 3, which nothing can read. The reconciler
+    /// keeps offering them because they stay finished and segmented, so the runner has to leave them
+    /// alone quietly rather than burn five attempts and a parked row every tick.
+    @Test
+    void run_leavesAReplayWrittenAtAnUnreadableFormatVersionAlone(@TempDir Path directory) throws Exception {
+        var storage = new FakeStorage();
+        record(directory, storage);
+        // Byte 4..5 of the preamble is the format version.
+        storage.preamble[4] = 0;
+        storage.preamble[5] = 3;
+
+        new CompactReplayRunner(storage).run(new CompactReplay(ID, "reconcile"));
+
+        assertEquals(List.of(), storage.published);
+    }
+
     /// A commit that landed while the runner was compacting. There is a fresh row for it already.
     @Test
     void run_returnsQuietlyWhenThePublicationLosesItsPrecondition(@TempDir Path directory) throws Exception {

@@ -27,3 +27,8 @@ base:
     # the same reason every other consumer names it: the chart is what says which cluster service
     # this talks to.
     IPC_SERVICE_URL: "http://api-server-java:9124"
+
+    # How many replays the reconciler asks to compact per tick. Measured at ~830/min on four slots,
+    # so this drains in about twelve of the fifteen minutes between ticks — the headroom is what
+    # keeps index-map, which sorts behind compact-replay among queued rows, from being starved.
+    REPLAY_BATCH: "10000"

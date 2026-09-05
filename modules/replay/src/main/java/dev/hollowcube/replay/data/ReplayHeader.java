@@ -27,6 +27,18 @@ public final class ReplayHeader {
     /// the fixed header.
     public static final int WORLD_VERSION_MAX_LENGTH = 32;
 
+    /// The format version a preamble was written at, read without parsing the rest of it, so a
+    /// caller can decide what to do about a version it cannot read rather than be handed an
+    /// exception from the middle of a constructor.
+    public static short versionOf(byte[] preamble) {
+        if (preamble.length < 6)
+            throw new IllegalArgumentException("truncated replay preamble: " + preamble.length + " bytes");
+        var magic = (preamble[0] & 0xFF) << 24 | (preamble[1] & 0xFF) << 16
+            | (preamble[2] & 0xFF) << 8 | preamble[3] & 0xFF;
+        Check.argCondition(magic != MAGIC, "corrupt header");
+        return (short) ((preamble[4] & 0xFF) << 8 | preamble[5] & 0xFF);
+    }
+
     public static final int RECORD_COMPRESSION_LEVEL = 3;
     public static final int COMPACT_COMPRESSION_LEVEL = 19;
 

@@ -1,6 +1,7 @@
 package net.hollowcube.apiworker.jobs;
 
 import dev.hollowcube.replay.ReplayCompactor;
+import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.data.ReplayPreamble;
 import net.hollowcube.apiserver.common.Digest;
 import net.hollowcube.apiserver.job.CompactReplay;
@@ -55,6 +56,16 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
         final byte[] preamble;
         try (var blob = replays.getPreamble(id, info.revision())) {
             preamble = blob.readAllBytes();
+        }
+
+        // Nothing can read an older format, and the reconciler keeps offering these because they
+        // stay finished and segmented — so returning rather than throwing costs one attempt a tick
+        // instead of five and a parked row. They compact when something can convert them.
+        var version = ReplayHeader.versionOf(preamble);
+        if (version != ReplayHeader.VERSION_LATEST) {
+            logger.info("replay {} is format version {}, which this build cannot read; leaving it segmented",
+                id, version);
+            return;
         }
 
         var start = System.nanoTime();
