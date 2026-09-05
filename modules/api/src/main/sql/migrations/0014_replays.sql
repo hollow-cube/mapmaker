@@ -56,12 +56,15 @@ create table if not exists replays
 -- `data` and `object_reference` are exactly-one: a segment under the inline threshold is a column
 -- of this row, and anything larger is an object. The read path branches on which is populated and
 -- never on the current threshold, so moving the threshold cannot misroute an older segment.
+--
+-- Written as Go's two migrations rather than as the table they add up to. `data` was added by the
+-- second, and Postgres appends an added column: flattening this would put `data` in the middle here
+-- and at the end in production, and `select replay_segments.*` is read by column position.
 create table if not exists replay_segments
 (
     replay_id        text   not null references replays (id) on delete cascade,
     segment_index    bigint not null,
-    object_reference text,
-    data             bytea,
+    object_reference text   not null,
     length           bigint not null,
     digest           bytea  not null,
     commit_revision  bigint not null,
@@ -71,9 +74,17 @@ create table if not exists replay_segments
     constraint replay_segment_index_nonnegative check (segment_index >= 0),
     constraint replay_segment_length_nonnegative check (length >= 0),
     constraint replay_segment_digest_is_sha256 check (octet_length(digest) = 32),
-    constraint replay_segment_commit_revision_positive check (commit_revision > 0),
-    constraint replay_segment_storage_exclusive check ((data is null) <> (object_reference is null))
+    constraint replay_segment_commit_revision_positive check (commit_revision > 0)
 );
+
+alter table replay_segments
+    add column if not exists data bytea;
+alter table replay_segments
+    alter column object_reference drop not null;
+alter table replay_segments
+    drop constraint if exists replay_segment_storage_exclusive;
+alter table replay_segments
+    add constraint replay_segment_storage_exclusive check ((data is null) <> (object_reference is null));
 
 -- One row per successful write, so a recorder that lost the response can send the same request
 -- again and be told what it was told the first time.

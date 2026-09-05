@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
  * A row of the `replay_segments` table.
  */
 public record ReplaySegments(String replayId, long segmentIndex, @Nullable String objectReference,
-        @Nullable byte[] data, long length, byte[] digest, long commitRevision) {
+        long length, byte[] digest, long commitRevision, @Nullable byte[] data) {
     /**
      * Reads one `replay_segments` row, its first column at `col`.
      */
@@ -18,9 +18,9 @@ public record ReplaySegments(String replayId, long segmentIndex, @Nullable Strin
                 rs.getString(col),
                 rs.getLong(col + 1),
                 rs.getString(col + 2),
-                rs.getBytes(col + 3),
-                rs.getLong(col + 4),
-                rs.getBytes(col + 5),
-                rs.getLong(col + 6));
+                rs.getLong(col + 3),
+                rs.getBytes(col + 4),
+                rs.getLong(col + 5),
+                rs.getBytes(col + 6));
     }
 }

@@ -31,7 +31,9 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
+import java.sql.SQLException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
@@ -95,6 +97,39 @@ class ReplayServiceImplTest {
     @Test
     void migration_leavesTheTablesTheQueriesWereDescribedAgainst() {
         assertNull(db.replays.getReplay(ID));
+    }
+
+    /// `select replay_segments.*` is read by column position, so the mirror has to leave the columns
+    /// in the order production has them — Go's `000034` followed by the `data` its `000035` appends,
+    /// not the tidier order the same columns take when declared in one statement. Flattening the two
+    /// put `data` in the middle here and at the end in production, so every segment read answered
+    /// 500 against a real database while every test here passed.
+    @Test
+    void migration_ordersReplaySegmentsAsProductionHasThem() {
+        assertEquals(
+            List.of("replay_id", "segment_index", "object_reference", "length", "digest",
+                "commit_revision", "data"),
+            columnsOf("replay_segments"));
+    }
+
+    /// `pg_attribute` rather than `information_schema`, which pglite does not serve.
+    private static List<String> columnsOf(String table) {
+        var sql = """
+            select a.attname
+            from pg_attribute a
+                     join pg_class c on c.oid = a.attrelid
+                     join pg_namespace n on n.oid = c.relnamespace
+            where n.nspname = 'public' and c.relname = '%s'
+              and a.attnum > 0 and not a.attisdropped
+            order by a.attnum""".formatted(table);
+        try (var statement = TEST_DB.conn().createStatement();
+             var rows = statement.executeQuery(sql)) {
+            var columns = new ArrayList<String>();
+            while (rows.next()) columns.add(rows.getString(1));
+            return columns;
+        } catch (SQLException e) {
+            throw new IllegalStateException("could not read the columns of " + table, e);
+        }
     }
 
     @Test
