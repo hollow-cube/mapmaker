@@ -62,14 +62,14 @@ public abstract class AbstractLine extends Entity implements DefaultClientRender
     public void updateNewViewer(@NotNull Player player) {
         super.updateNewViewer(player);
 
-        AxiomPlayer.updateIgnoredEntities(player, it -> it.add(this.getUuid()));
+        AxiomPlayer.get(player).updateIgnoredEntities(it -> it.add(this.getUuid()));
     }
 
     @Override
     public void updateOldViewer(@NotNull Player player) {
         super.updateOldViewer(player);
 
-        AxiomPlayer.updateIgnoredEntities(player, it -> it.remove(this.getUuid()));
+        AxiomPlayer.get(player).updateIgnoredEntities(it -> it.remove(this.getUuid()));
     }
 
     public void recolor(RGBLike color) {

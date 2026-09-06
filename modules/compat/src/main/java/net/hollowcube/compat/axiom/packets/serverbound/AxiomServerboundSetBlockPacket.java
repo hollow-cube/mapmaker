@@ -26,6 +26,7 @@ public record AxiomServerboundSetBlockPacket(
         @NotNull BlockFace face,
         @NotNull Point cursor,
         boolean inside,
+        boolean hitWorldBorder,
 
         @NotNull PlayerHand hand,
         int sequence
@@ -43,6 +44,7 @@ public record AxiomServerboundSetBlockPacket(
                     NetworkBuffer.Enum(BlockFace.class), AxiomServerboundSetBlockPacket::face,
                     NetworkBuffer.VECTOR3, AxiomServerboundSetBlockPacket::cursor,
                     NetworkBuffer.BOOLEAN, AxiomServerboundSetBlockPacket::inside,
+                    NetworkBuffer.BOOLEAN, AxiomServerboundSetBlockPacket::hitWorldBorder,
 
                     NetworkBuffer.Enum(PlayerHand.class), AxiomServerboundSetBlockPacket::hand,
                     NetworkBuffer.VAR_INT, AxiomServerboundSetBlockPacket::sequence,

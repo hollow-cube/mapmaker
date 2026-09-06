@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.compat.axiom;
 
 import net.hollowcube.compat.axiom.data.annotations.actions.AnnotationAction;
+import net.hollowcube.compat.axiom.data.buffers.AxiomBiomeBuffer;
 import net.hollowcube.compat.axiom.data.buffers.AxiomBlockBuffer;
 import net.hollowcube.compat.axiom.events.*;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundAnnotationUpdatePacket;
@@ -10,6 +11,8 @@ import net.hollowcube.terraform.compat.axiom.util.AxiomAnnotationStorage;
 import net.hollowcube.terraform.compat.axiom.util.AxiomTerraformBuffer;
 import net.hollowcube.terraform.compat.axiom.util.NbtUtil;
 import net.hollowcube.terraform.entity.TerraformEntity;
+import net.hollowcube.terraform.instance.TerraformBiomeChunk;
+import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
 import net.hollowcube.terraform.event.TerraformModifyEntityEvent;
 import net.hollowcube.terraform.event.TerraformMoveEntityEvent;
 import net.hollowcube.terraform.session.LocalSession;
@@ -26,10 +29,13 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.utils.UUIDUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -149,8 +155,14 @@ public class AxiomModule implements TerraformModule {
 
     private void handleBufferApplication(@NotNull AxiomApplyBufferEvent event) {
         if (event.isHandled()) return;
-        if (!(event.buffer() instanceof AxiomBlockBuffer buffer)) return;
+        switch (event.buffer()) {
+            case AxiomBlockBuffer buffer -> applyBlocks(event, buffer);
+            case AxiomBiomeBuffer buffer -> applyBiomes(event, buffer);
+            default -> {}
+        }
+    }
 
+    private void applyBlocks(@NotNull AxiomApplyBufferEvent event, @NotNull AxiomBlockBuffer buffer) {
         var session = LocalSession.forPlayer(event.player());
         var task = session.buildTask("axiom-" + event.id())
                 .metadata()
@@ -160,6 +172,24 @@ public class AxiomModule implements TerraformModule {
         if (task == null) {
             event.getPlayer().sendMessage(Messages.GENERIC_QUEUE_FULL);
         }
+        event.setHandled(true);
+    }
+
+    /// Mirrors //setbiome: written straight into the biome palettes, outside the task/history system.
+    private void applyBiomes(@NotNull AxiomApplyBufferEvent event, @NotNull AxiomBiomeBuffer buffer) {
+        var instance = event.getInstance();
+        var biomes = TerraformInstanceBiomes.forInstance(instance);
+        if (biomes == null) return;
+
+        var changed = new LinkedHashSet<Chunk>();
+        buffer.forEach((quartX, quartY, quartZ, key) -> {
+            int x = quartX << 2, y = quartY << 2, z = quartZ << 2;
+            var chunk = instance.getChunk(x >> 4, z >> 4);
+            if (chunk == null || y < chunk.getMinSection() * 16 || y >= chunk.getMaxSection() * 16) return;
+            if (TerraformBiomeChunk.setBiome(chunk, x, y, z, RegistryKey.unsafeOf(key))) changed.add(chunk);
+        });
+        TerraformBiomeChunk.sendBiomeUpdates(biomes, new ArrayList<>(changed));
+
         event.setHandled(true);
     }
 

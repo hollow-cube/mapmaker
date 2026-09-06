@@ -40,7 +40,7 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             if (lastState == null)
                 saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
 
-            AxiomPlayer.setEnabled(player, true);
+            AxiomPlayer.get(player).setEnabled(true);
 
             var editState = saveState.state(EditState.class);
             editState.inventory().forEach((slot, stack) -> player.getInventory().setItemStack(
@@ -67,7 +67,7 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
         public void resetPlayer(EditorMapWorld world, Player player, @Nullable EditorState nextState) {
             DisplayEntityEditor.clear(player);
 
-            AxiomPlayer.setEnabled(player, false);
+            AxiomPlayer.get(player).setEnabled(false);
 
             var editState = saveState.state(EditState.class);
             editState.setPos(player.getPosition());

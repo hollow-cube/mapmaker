@@ -23,6 +23,8 @@ import net.minestom.server.network.packet.server.play.ChangeGameStatePacket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,30 +34,40 @@ import java.util.function.BiConsumer;
 @ApiStatus.Internal
 final class AxiomPacketHandler {
 
+    private static final Logger logger = LoggerFactory.getLogger(AxiomPacketHandler.class);
     private static final long MAX_ENTITY_PACKET_SIZE = 0x100000L;
 
     static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> handle(BiConsumer<@NotNull Player, @NotNull T> handler) {
         return (player, packet) -> {
-            if (AxiomPlayer.isEnabled(player)) handler.accept(player, packet);
-        };
-    }
-
-    static <T extends ServerboundModPacket<T>> BiConsumer<@NotNull Player, @NotNull T> disabled(@Nullable String message) {
-        return (player, _) -> {
-            if (AxiomPlayer.isEnabled(player) && message != null) player.sendMessage(message);
+            if (AxiomPlayer.get(player).isEnabled()) handler.accept(player, packet);
         };
     }
 
     static void onHello(@NotNull Player player, @NotNull AxiomServerboundHelloPacket packet) {
-        if (packet.apiVersion() < AxiomAPI.MIN_API_VERSION) {
-            player.sendMessage("Incompatible Axiom API version. Please update your mod.");
-        } else if (packet.apiVersion() > AxiomAPI.MAX_API_VERSION) {
-            player.sendMessage("Axiom API version is too new. Please be patient while we update the server. For now, you can use an older version of the mod.");
-        } else {
-            AxiomPlayer.setVersion(player, packet.apiVersion());
-        }
+        // The connection's Minecraft protocol is the authority (it gates the whole axiom namespace in
+        // ModChannelRegisterEvent); the client's self-reported protocolVersion is its own SharedConstants
+        // number and is not comparable to Minestom's PROTOCOL_VERSION constant.
+        boolean compatible = AxiomPlayer.isProtocolCompatible(player);
+        AxiomPlayer.get(player).onHello(packet.apiVersion(), packet.handshakeId(), compatible);
+    }
 
-        AxiomPlayer.handlePendingEnable(player);
+    static void onTunnel(@NotNull Player player, @NotNull AxiomServerboundTunnelPacket packet) {
+        var axiom = AxiomPlayer.get(player);
+        if (axiom.api() != AxiomAPI.API_10 || !axiom.isEnabled()) return;
+
+        try {
+            var assembled = axiom.tunnel().accept(packet.fragment());
+            if (assembled == null) return;
+
+            var message = AxiomTunnel.decode(assembled);
+            var definition = AxiomPackets.byTunnelChannel(message.channel());
+            if (definition == null)
+                throw new AxiomTunnel.MalformedException("channel " + message.channel() + " may not be tunneled");
+            definition.handleTunneled(player, message.payload());
+        } catch (AxiomTunnel.MalformedException e) {
+            PostHog.captureException(e, player.getUuid().toString());
+            logger.warn("failed to decode tunneled axiom packet for {}", player.getUsername(), e);
+        }
     }
 
     // Player Operations
@@ -145,6 +157,7 @@ final class AxiomPacketHandler {
 
     static void onSetBlock(@NotNull Player player, @NotNull AxiomServerboundSetBlockPacket packet) {
         try {
+            if (packet.hitWorldBorder()) return;
             var instance = player.getInstance();
             var heldItem = player.getItemInHand(packet.hand());
 

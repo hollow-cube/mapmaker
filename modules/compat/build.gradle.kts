@@ -10,4 +10,6 @@ dependencies {
     implementation(libs.fastutil)
     implementation(libs.posthog)
     implementation(libs.zstd)
+
+    testImplementation(project(":modules:test"))
 }
