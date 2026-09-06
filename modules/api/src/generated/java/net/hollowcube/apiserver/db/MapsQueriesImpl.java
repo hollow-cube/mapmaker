@@ -5,9 +5,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
+import net.hollowcube.sqlgen.runtime.Jdbc;
 import net.hollowcube.sqlgen.runtime.Sneaky;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Runs MapsQueries against a connection borrowed per statement.
@@ -21,6 +25,265 @@ final class MapsQueriesImpl implements MapsQueries {
         from maps
         where id = ?
           and published_id is not null""";
+
+    private static final String GET_MAP = """
+        select maps.*
+        from maps
+        where id = ?
+          and deleted_at is null""";
+
+    private static final String GET_MAP_FOR_UPDATE = """
+        -- The lock every map write takes first. Preconditions are checked in Java against the locked row.
+        select maps.*
+        from maps
+        where id = ?
+          and deleted_at is null
+            for update""";
+
+    private static final String GET_MAP_INCLUDING_DELETED = """
+        select maps.*
+        from maps
+        where id = ?""";
+
+    private static final String GET_MAP_BY_PUBLISHED_ID = """
+        select maps.*
+        from maps
+        where published_id = ?
+          and published_at is not null
+          and deleted_at is null""";
+
+    private static final String GET_TAGS = """
+        select tag::text as tag
+        from map_tags
+        where map_id = ?
+        order by index""";
+
+    private static final String GET_STATS = """
+        select map_stats.*
+        from map_stats
+        where map_id = ?""";
+
+    private static final String GET_PLAYER_FOR_UPDATE = """
+        -- The row lock is what makes "count the slots, then take one" atomic: two creates, or a create and
+        -- an accepted invitation, for the same player queue here instead of both seeing the last free slot.
+        -- Go read the count unlocked and could hand out one more than the limit.
+        select id, role, hypercube_end, extra_map_slots, max_map_size, map_builders, settings
+        from player_data
+        where id = ?
+            for update""";
+
+    private static final String GET_PLAYERS_FOR_UPDATE = """
+        -- As getPlayerForUpdate, for the owner and the invitee together; ordered so that two invitations
+        -- between the same pair cannot deadlock.
+        select id, role, hypercube_end, extra_map_slots, max_map_size, map_builders, settings
+        from player_data
+        where id = any(?::uuid[])
+        order by id
+            for update""";
+
+    private static final String CREATE_MAP = """
+        -- The columns Go's `CreateDefaultMap` fills, with its values: `m_type`, `authz_key`, `file_id` and
+        -- `legacy_map_id` are dead but not null.
+        insert into maps (id, owner, m_type, created_at, updated_at, authz_key, file_id, legacy_map_id,
+                          opt_name, opt_icon, opt_variant, opt_spawn_point, size, protocol_version)
+        values (?, ?, 'default', now(), now(), '', '', '', '', '', 'parkour',
+                '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', ?, ?)
+        returning maps.*""";
+
+    private static final String INSERT_OWNER_SLOT = """
+        -- The owner's own slot has index -1; bought slots count up from 0.
+        insert into map_slots (player_id, map_id, index)
+        values (?, ?, -1)""";
+
+    private static final String COUNT_SLOTS = """
+        -- Slots in use: every unpublished map the player owns or has accepted an invitation to.
+        select count(*)::int as count
+        from map_slots s
+                 join maps m on m.id = s.map_id
+        where s.player_id = ?
+          and not s.is_pending
+          and m.deleted_at is null
+          and m.published_at is null""";
+
+    private static final String UPDATE_MAP = """
+        update maps
+        set opt_name         = ?,
+            opt_icon         = ?,
+            size             = ?,
+            opt_variant      = ?,
+            opt_subvariant   = ?,
+            opt_spawn_point  = ?,
+            leaderboard      = ?,
+            opt_extra        = ?,
+            opt_only_sprint  = ?,
+            opt_no_sprint    = ?,
+            opt_no_jump      = ?,
+            opt_no_sneak     = ?,
+            opt_boat         = ?,
+            listed           = ?,
+            quality_override = ?,
+            protocol_version = ?,
+            updated_at       = now()
+        where id = ?""";
+
+    private static final String DELETE_TAGS = """
+        delete
+        from map_tags
+        where map_id = ?""";
+
+    private static final String INSERT_TAGS = """
+        insert into map_tags (map_id, tag, index)
+        select ?, tag::map_tag, ordinality - 1
+        from unnest(?::text[]) with ordinality as tags(tag, ordinality)""";
+
+    private static final String LIST_KNOWN_TAGS = "select unnest(enum_range(null::map_tag))::text as tag";
+
+    private static final String DELETE_IN_PROGRESS_STATES = """
+        -- A completed run is somebody's record and stays.
+        update save_states
+        set deleted = now()
+        where map_id = ?
+          and deleted is null
+          and not completed
+          and type in ('playing', 'verifying')""";
+
+    private static final String DELETE_ALL_STATES = """
+        update save_states
+        set deleted = now()
+        where map_id = ?
+          and deleted is null""";
+
+    private static final String DELETE_VERIFYING_STATES = """
+        update save_states
+        set deleted = now()
+        where map_id = ?
+          and type = 'verifying'
+          and deleted is null""";
+
+    private static final String DELETE_MAP = """
+        update maps
+        set deleted_at     = now(),
+            deleted_by     = ?,
+            deleted_reason = ?
+        where id = ?""";
+
+    private static final String REMOVE_SLOTS = """
+        delete
+        from map_slots
+        where map_id = ?""";
+
+    private static final String REMOVE_LEGACY_BUILDERS = """
+        delete
+        from map_builders
+        where map_id = ?""";
+
+    private static final String PUBLISH_MAP = """
+        update maps
+        set published_id = ?,
+            published_at = now(),
+            updated_at   = now()
+        where id = ?
+        returning maps.*""";
+
+    private static final String UPDATE_VERIFICATION = """
+        update maps
+        set verification = ?
+        where id = ?""";
+
+    private static final String GET_LATEST_EDITING_TIME = """
+        select playtime
+        from save_states
+        where map_id = ?
+          and player_id = ?
+          and type = 'editing'
+          and deleted is null
+        order by updated desc
+        limit 1""";
+
+    private static final String COUNT_WORLDS = """
+        -- Editors still registered for the map; zero once a drain has completed.
+        select count(*)::int as count
+        from map_worlds
+        where map_id = ?""";
+
+    private static final String LIST_BUILDERS = """
+        select map_slots.*
+        from map_slots
+        where map_id = ?
+        order by created_at, player_id""";
+
+    private static final String LIST_PLAYER_SLOTS = """
+        select s.*
+        from map_slots s
+                 join maps m on m.id = s.map_id
+        where s.player_id = ?
+          and not s.is_pending
+          and m.deleted_at is null
+          and m.published_at is null
+        order by s.created_at desc""";
+
+    private static final String LIST_PLAYER_PUBLISHED_MAPS = """
+        select maps.*
+        from maps
+        where owner = ?
+          and published_at is not null
+          and deleted_at is null
+          and listed
+          and opt_variant in ('parkour', 'building')
+        order by published_at desc""";
+
+    private static final String GET_BUILDER_SLOT = """
+        select map_slots.*
+        from map_slots
+        where map_id = ?
+          and player_id = ?""";
+
+    private static final String INVITE_BUILDER = """
+        insert into map_slots (map_id, player_id, is_pending)
+        values (?, ?, true)""";
+
+    private static final String ACCEPT_BUILDER = """
+        update map_slots
+        set is_pending = false
+        where map_id = ?
+          and player_id = ?""";
+
+    private static final String REMOVE_BUILDER = """
+        delete
+        from map_slots
+        where map_id = ?
+          and player_id = ?""";
+
+    private static final String DELETE_NOTIFICATIONS = """
+        -- Every notification of one type under a key, or one player's when `playerId` is given; the rows
+        -- come back so their deletion can be published.
+        update player_notifications
+        set deleted_at = now()
+        where type = ?
+          and key = ?
+          and deleted_at is null
+          and (?::uuid is null or player_id = ?::uuid)
+        returning player_notifications.*""";
+
+    private static final String INSERT_NOTIFICATION = """
+        insert into player_notifications (id, player_id, type, key, data)
+        values (?, ?, ?, ?, ?)""";
+
+    private static final String GET_RATING = """
+        select rating
+        from map_ratings
+        where map_id = ?
+          and player_id = ?""";
+
+    private static final String SET_RATING = """
+        insert into map_ratings (map_id, player_id, rating)
+        values (?, ?, ?)
+        on conflict (map_id, player_id) do update
+            set rating = excluded.rating""";
+
+    private static final String INSERT_REPORT = """
+        insert into map_reports (map_id, player_id, time, categories, comment)
+        values (?, ?, now(), ?, ?)""";
 
     private final ConnectionSource source;
 
@@ -38,6 +301,670 @@ final class MapsQueriesImpl implements MapsQueries {
                     if (!rs.next()) throw new SQLException("isMapPublished returned no row");
                     return rs.getBoolean(1);
                 }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Maps getMap(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_MAP)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? Maps.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Maps getMapForUpdate(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_MAP_FOR_UPDATE)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? Maps.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Maps getMapIncludingDeleted(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_MAP_INCLUDING_DELETED)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? Maps.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Maps getMapByPublishedId(long publishedId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_MAP_BY_PUBLISHED_ID)) {
+                ps.setLong(1, publishedId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? Maps.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<String> getTags(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_TAGS)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<String> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(rs.getString(1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public MapStats getStats(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_STATS)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? MapStats.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public MapsQueries.GetPlayerForUpdateRow getPlayerForUpdate(UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_PLAYER_FOR_UPDATE)) {
+                ps.setObject(1, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? new MapsQueries.GetPlayerForUpdateRow(rs.getObject(1, UUID.class), RoleType.fromPg(rs.getString(2)), Jdbc.getInstant(rs, 3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getString(7)) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapsQueries.GetPlayersForUpdateRow> getPlayersForUpdate(List<UUID> ids) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_PLAYERS_FOR_UPDATE)) {
+                Jdbc.setList(ps, 1, "uuid", ids);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapsQueries.GetPlayersForUpdateRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new MapsQueries.GetPlayersForUpdateRow(rs.getObject(1, UUID.class), RoleType.fromPg(rs.getString(2)), Jdbc.getInstant(rs, 3), rs.getInt(4), rs.getInt(5), rs.getInt(6), rs.getString(7)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Maps createMap(UUID mapId, UUID owner, long size, int protocolVersion) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(CREATE_MAP)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, owner);
+                ps.setLong(3, size);
+                ps.setInt(4, protocolVersion);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? Maps.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long insertOwnerSlot(UUID playerId, UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(INSERT_OWNER_SLOT)) {
+                ps.setObject(1, playerId);
+                ps.setObject(2, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public int countSlots(UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(COUNT_SLOTS)) {
+                ps.setObject(1, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new SQLException("countSlots returned no row");
+                    return rs.getInt(1);
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long updateMap(MapsQueries.UpdateMapParams params) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(UPDATE_MAP)) {
+                ps.setString(1, params.name());
+                ps.setString(2, params.icon());
+                ps.setLong(3, params.size());
+                ps.setString(4, params.variant());
+                ps.setString(5, params.subvariant());
+                Jdbc.setInferred(ps, 6, params.spawnPoint());
+                Jdbc.setInferred(ps, 7, params.leaderboard());
+                ps.setBytes(8, params.extra());
+                ps.setBoolean(9, params.onlySprint());
+                ps.setBoolean(10, params.noSprint());
+                ps.setBoolean(11, params.noJump());
+                ps.setBoolean(12, params.noSneak());
+                ps.setBoolean(13, params.boat());
+                ps.setBoolean(14, params.listed());
+                ps.setLong(15, params.quality());
+                ps.setInt(16, params.protocolVersion());
+                ps.setObject(17, params.mapId());
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long deleteTags(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_TAGS)) {
+                ps.setObject(1, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long insertTags(UUID mapId, List<String> tags) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(INSERT_TAGS)) {
+                ps.setObject(1, mapId);
+                Jdbc.setList(ps, 2, "text", tags);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<String> listKnownTags() {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_KNOWN_TAGS)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<String> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(rs.getString(1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long deleteInProgressStates(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_IN_PROGRESS_STATES)) {
+                ps.setObject(1, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long deleteAllStates(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_ALL_STATES)) {
+                ps.setObject(1, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long deleteVerifyingStates(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_VERIFYING_STATES)) {
+                ps.setObject(1, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long deleteMap(UUID actorId, String reason, UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_MAP)) {
+                ps.setObject(1, actorId);
+                ps.setString(2, reason);
+                ps.setObject(3, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long removeSlots(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(REMOVE_SLOTS)) {
+                ps.setObject(1, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long removeLegacyBuilders(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(REMOVE_LEGACY_BUILDERS)) {
+                ps.setObject(1, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Maps publishMap(long publishedId, UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(PUBLISH_MAP)) {
+                ps.setLong(1, publishedId);
+                ps.setObject(2, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? Maps.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long updateVerification(long verification, UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(UPDATE_VERIFICATION)) {
+                ps.setLong(1, verification);
+                ps.setObject(2, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Long getLatestEditingTime(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_LATEST_EDITING_TIME)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getLong(1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public int countWorlds(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(COUNT_WORLDS)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new SQLException("countWorlds returned no row");
+                    return rs.getInt(1);
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapSlots> listBuilders(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_BUILDERS)) {
+                ps.setObject(1, mapId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapSlots> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(MapSlots.read(rs, 1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapSlots> listPlayerSlots(UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_PLAYER_SLOTS)) {
+                ps.setObject(1, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapSlots> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(MapSlots.read(rs, 1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<Maps> listPlayerPublishedMaps(UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_PLAYER_PUBLISHED_MAPS)) {
+                ps.setObject(1, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Maps> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(Maps.read(rs, 1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public MapSlots getBuilderSlot(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_BUILDER_SLOT)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? MapSlots.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long inviteBuilder(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(INVITE_BUILDER)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long acceptBuilder(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(ACCEPT_BUILDER)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long removeBuilder(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(REMOVE_BUILDER)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<PlayerNotifications> deleteNotifications(String type, String key, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_NOTIFICATIONS)) {
+                ps.setString(1, type);
+                ps.setString(2, key);
+                ps.setObject(3, playerId);
+                ps.setObject(4, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<PlayerNotifications> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(PlayerNotifications.read(rs, 1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long insertNotification(UUID id, UUID playerId, String type, String key, String data) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(INSERT_NOTIFICATION)) {
+                ps.setObject(1, id);
+                ps.setObject(2, playerId);
+                ps.setString(3, type);
+                ps.setString(4, key);
+                Jdbc.setInferred(ps, 5, data);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Integer getRating(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_RATING)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getInt(1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long setRating(UUID mapId, UUID playerId, int rating) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(SET_RATING)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                ps.setInt(3, rating);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long insertReport(UUID mapId, UUID playerId, List<Integer> categories, String comment) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(INSERT_REPORT)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                Jdbc.setList(ps, 3, "int4", categories);
+                ps.setString(4, comment);
+                return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
             }

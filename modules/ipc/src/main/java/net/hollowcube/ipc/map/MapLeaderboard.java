@@ -1,8 +1,5 @@
 package net.hollowcube.ipc.map;
 
-import net.hollowcube.common.util.RuntimeGson;
-
-@RuntimeGson
 public record MapLeaderboard(boolean asc, Format format, String score) {
     public enum Format {
         TIME,

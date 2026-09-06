@@ -1,13 +1,14 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.ipc.map.BeginVerificationResult;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapPatch;
-import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.map.MapStatus;
+import net.hollowcube.ipc.map.PublishMapResult;
+import net.hollowcube.ipc.map.PublishRequirement;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -17,13 +18,14 @@ import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNullByDefault;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Duration;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @NotNullByDefault
 final class MapPublisher {
 
+    private final AtomicBoolean submitting = new AtomicBoolean();
     private final ApiClient api;
     private final ServerBridge bridge;
     private final MapPatch.Builder editor;
@@ -49,26 +51,25 @@ final class MapPublisher {
 
     @Blocking
     void updateStage() {
-        var currentStage = this.getCurrentStage();
+        var currentStage = this.currentStage();
         this.button.translationKey(currentStage.translationKey).background(currentStage.background);
     }
 
     @Blocking
     private void onVerifyPublish(InventoryHost host, Consumer<MapData> onPublish) {
-        var currentStage = this.getCurrentStage();
-        if (currentStage == PublishStage.VERIFICATION_READY) {
-            this.verifyMap(host);
-        }
-        if (currentStage == PublishStage.PUBLISH_READY) {
-            this.publishMap(host.player(), onPublish);
+        if (!submitting.compareAndSet(false, true)) return;
+        try {
+            var stage = this.currentStage();
+            if (stage == PublishStage.VERIFICATION_READY) this.verifyMap(host);
+            if (stage == PublishStage.PUBLISH_READY) this.publishMap(host.player(), onPublish);
+        } finally {
+            submitting.set(false);
         }
     }
 
     @Blocking
     private void verifyMap(InventoryHost host) {
-        if (editor.map().verification() == MapVerification.UNVERIFIED) {
-            this.tryBeginVerification(host);
-        }
+        if (!this.tryBeginVerification(host)) return;
 
         try {
             host.close();
@@ -80,14 +81,18 @@ final class MapPublisher {
     }
 
     @Blocking
-    private void tryBeginVerification(InventoryHost host) {
-        var player = host.player();
+    private boolean tryBeginVerification(InventoryHost host) {
         try {
-            api.maps.beginVerification(editor.map().id().toString());
+            var result = api.maps.beginVerification(editor.map().id().toString());
+            if (result != BeginVerificationResult.READY) {
+                host.player().sendMessage(MapWriteMessages.verification(result));
+                return false;
+            }
+            return true;
         } catch (Exception exception) {
-            host.close();
             host.player().sendMessage(Component.translatable("edit.map.failure"));
-            ExceptionReporter.reportException(exception, player);
+            ExceptionReporter.reportException(exception, host.player());
+            return false;
         }
     }
 
@@ -113,10 +118,12 @@ final class MapPublisher {
                 return editor.map();
             });
 
-            api.maps.publish(editor.map().id().toString());
-
-            // TODO(v4 api): we refetch the map so it includes leaderboard info
-            result = api.maps.get(editor.map().id().toString());
+            var outcome = api.maps.publish(editor.map().id().toString());
+            if (outcome instanceof PublishMapResult.Success(var published)) {
+                result = published;
+            } else {
+                player.sendMessage(MapWriteMessages.failure(outcome));
+            }
         } catch (Exception exception) {
             player.sendMessage(Component.translatable("publish.map.failure"));
             ExceptionReporter.reportException(exception, player);
@@ -124,40 +131,33 @@ final class MapPublisher {
         return result;
     }
 
+    /// Unsaved edits are saved first, so that the api judges the map the player is looking at.
     @Blocking
-    private PublishStage getCurrentStage() {
-        long currentPlaytime;
-        try {
-            var saveState = api.maps.getLatestSaveState(editor.map().id().toString(), editor.map().owner().toString(), SaveStateType.EDITING, null);
-            currentPlaytime = saveState.getPlaytime();
-        } catch (ApiClient.NotFoundError _) {
-            return PublishStage.ERROR_BUILD_AMOUNT;
-        }
-
-        if (!editor.map().isVerified()) return PublishStage.VERIFICATION_READY;
-
-        if (editor.map().settings().name().isEmpty()) return PublishStage.ERROR_NO_NAME;
-        if (MapSettings.getIcon(editor.map().settings()) == null) return PublishStage.ERROR_NO_ICON;
-        // TODO: Not sure if this is right or not - must check. Surely they need to set at least one **gameplay**
-        //  tag, not just one of any tag, right?
-        if (editor.map().settings().tags().isEmpty()) return PublishStage.ERROR_NO_TAG;
-
-        // Check playtime down here so we don't get a rogue publish error show up because they haven't built in
-        // it for long enough
-        var minPlaytime = getMinPlaytime();
-        if (currentPlaytime < minPlaytime) {
-            return PublishStage.ERROR_BUILD_TIME;
-        }
-
+    private PublishStage currentStage() {
+        editor.save(patch -> {
+            api.maps.update(editor.map().id().toString(), patch);
+            return editor.map();
+        });
+        var readiness = switch (api.maps.getStatus(editor.map().id().toString())) {
+            case MapStatus.Draft(var draft) -> draft;
+            case MapStatus.Verifying(var verifying) -> verifying;
+            // A map that is gone, or a status this build does not know, is left to the publish
+            // call itself to explain.
+            case MapStatus.ReadyToPublish _, MapStatus.Published _, MapStatus.NotFound _,
+                 MapStatus.Unknown _ -> null;
+        };
+        if (readiness == null) return PublishStage.PUBLISH_READY;
+        // Build time last, so that a map missing a name is told that rather than to keep building;
+        // a requirement this build does not know reads as the vaguest of them.
+        var missing = readiness.missing();
+        if (missing.contains(PublishRequirement.WORLD)) return PublishStage.ERROR_BUILD_AMOUNT;
+        if (missing.contains(PublishRequirement.VERIFICATION)) return PublishStage.VERIFICATION_READY;
+        if (missing.contains(PublishRequirement.NAME)) return PublishStage.ERROR_NO_NAME;
+        if (missing.contains(PublishRequirement.ICON)) return PublishStage.ERROR_NO_ICON;
+        if (missing.contains(PublishRequirement.TAGS)) return PublishStage.ERROR_NO_TAG;
+        if (missing.contains(PublishRequirement.BUILD_TIME)) return PublishStage.ERROR_BUILD_TIME;
+        if (!missing.isEmpty()) return PublishStage.ERROR_BUILD_AMOUNT;
         return PublishStage.PUBLISH_READY;
-    }
-
-    private static final int DEFAULT_MIN_PLAYTIME = ServerRuntime.getRuntime().isDevelopment()
-        ? 1 // In development, we skip min playtime entirely
-        : (int) Duration.ofMinutes(30).toMillis();
-
-    private static int getMinPlaytime() {
-        return System.getenv("MIN_PLAYTIME") == null ? DEFAULT_MIN_PLAYTIME : 0;
     }
 
     private enum PublishStage {

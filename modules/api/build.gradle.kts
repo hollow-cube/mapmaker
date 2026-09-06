@@ -22,6 +22,7 @@ dependencies {
     api(project(":tools:sql-gen:runtime"))
     api(project(":modules:ipc"))
     api(libs.hikari)
+    api(libs.jedis)
 
     implementation(libs.gson)
     implementation(libs.logback)

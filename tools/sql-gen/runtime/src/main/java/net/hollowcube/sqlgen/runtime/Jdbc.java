@@ -20,6 +20,18 @@ import java.util.List;
 /// is emitted as-is and has no helper here.
 public final class Jdbc {
 
+    /// Postgres' `unique_violation`.
+    public static final String UNIQUE_VIOLATION = "23505";
+
+    /// Whether `error`, or anything it wraps, is a [SQLException] in `state`; what a caller that
+    /// means to retry on one specific failure looks for, since [Transaction#run] rethrows them
+    /// unwrapped but pgjdbc and the generated code do not always.
+    public static boolean hasState(Throwable error, String state) {
+        for (var cause = error; cause != null; cause = cause.getCause())
+            if (cause instanceof SQLException sql && state.equals(sql.getSQLState())) return true;
+        return false;
+    }
+
     /// Reads a Postgres array as a list. Returns null only for a SQL NULL array; a NULL *element*
     /// stays a null entry in the list.
     @SuppressWarnings("unchecked")

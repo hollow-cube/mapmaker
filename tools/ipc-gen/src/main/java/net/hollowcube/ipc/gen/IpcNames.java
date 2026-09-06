@@ -11,8 +11,6 @@ final class IpcNames {
     static final String IPC_ANNOTATION = "net.hollowcube.ipc.util.Ipc";
     static final String NATS_MESSAGE_ANNOTATION = "net.hollowcube.ipc.util.NatsMessage";
     static final String NOTIFICATION_BODY_ANNOTATION = "net.hollowcube.ipc.util.NotificationBody";
-    /// Lives in `modules:common`, which is `compileOnly` to `ipc`; read by name off the mirror.
-    static final String RUNTIME_GSON_ANNOTATION = "net.hollowcube.common.util.RuntimeGson";
     static final String SERIALIZED_NAME_ANNOTATION = "com.google.gson.annotations.SerializedName";
     /// Where sql-gen writes. The schema and the wire are versioned apart, so nothing from here is
     /// allowed at a wire position.

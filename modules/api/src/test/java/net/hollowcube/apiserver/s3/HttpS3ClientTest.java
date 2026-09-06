@@ -128,6 +128,18 @@ class HttpS3ClientTest {
     }
 
     @Test
+    void stat_answersTheLengthWithoutTheBody() {
+        fake.objects.put("world", new byte[123]);
+        assertEquals(123, s3.stat("world"));
+        assertEquals("HEAD", fake.requests.getFirst().method());
+    }
+
+    @Test
+    void stat_ofAKeyNothingIsUnderIsNotFound() {
+        assertThrows(S3Client.NotFoundError.class, () -> s3.stat("missing"));
+    }
+
+    @Test
     void get_readsTheObjectBackWithItsLength() throws IOException {
         fake.objects.put(
             "replays/ab/compacted/cd",
@@ -217,6 +229,15 @@ class HttpS3ClientTest {
                     case "DELETE" -> {
                         objects.remove(key);
                         exchange.sendResponseHeaders(204, -1);
+                    }
+                    case "HEAD" -> {
+                        var object = objects.get(key);
+                        if (object != null)
+                            exchange.getResponseHeaders().set(
+                                "Content-Length",
+                                Integer.toString(object.length)
+                            );
+                        exchange.sendResponseHeaders(object == null ? 404 : 200, -1);
                     }
                     case "GET" -> get(exchange, key, headers.get("Range"));
                     default -> exchange.sendResponseHeaders(405, -1);

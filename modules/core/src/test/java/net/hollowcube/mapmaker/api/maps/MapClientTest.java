@@ -1,104 +1,94 @@
 package net.hollowcube.mapmaker.api.maps;
 
-import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import io.opentelemetry.api.OpenTelemetry;
-import net.hollowcube.ipc.map.MapLeaderboard;
-import net.hollowcube.ipc.map.MapPatch;
-import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.map.*;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapTags;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
+import java.net.http.HttpClient;
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class MapClientTest {
-    private static final String MAP = """
-        {"id":"00000000-0000-0000-0000-000000000001",
-        "owner":"00000000-0000-0000-0000-000000000002",
-        "publishedId":123,"settings":{"name":"A map","size":"normal","variant":"parkour"}}
-        """;
-    private final LinkedBlockingQueue<Request> requests = new LinkedBlockingQueue<>();
-    private volatile String response = MAP;
+    private final MapData map = MapData.draft(UUID.randomUUID(), UUID.randomUUID());
+    private final AtomicReference<Object[]> invocation = new AtomicReference<>();
     private HttpServer server;
     private MapClient client;
 
     @BeforeEach
     void start() throws Exception {
+        var service = (MapService) Proxy.newProxyInstance(MapService.class.getClassLoader(),
+            new Class<?>[]{MapService.class}, (_, method, args) -> {
+                invocation.set(args);
+                return switch (method.getName()) {
+                    case "create" -> new CreateMapResult.Success(map);
+                    case "get" -> "missing".equals(args[0]) ? null : map;
+                    case "getPlayerSlots" -> List.of(new MapSlot(map, Instant.EPOCH, true,
+                        List.of(new MapBuilder(UUID.randomUUID(), Instant.EPOCH, true))));
+                    case "update" -> null;
+                    default -> throw new UnsupportedOperationException(method.getName());
+                };
+            });
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        server.createContext("/", exchange -> {
-            requests.add(new Request(exchange.getRequestMethod(), exchange.getRequestURI().getPath(),
-                new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8)));
-            var bytes = response.getBytes(StandardCharsets.UTF_8);
-            exchange.sendResponseHeaders(200, bytes.length);
-            try (var output = exchange.getResponseBody()) { output.write(bytes); }
-        });
+        server.createContext(MapServer.PATH, new MapServer(service));
         server.start();
-        client = new MapClient.Http(new HttpClientWrapper(OpenTelemetry.noop(),
-            "http://127.0.0.1:" + server.getAddress().getPort()));
+        var url = "http://127.0.0.1:" + server.getAddress().getPort();
+        client = new MapClient.Http(new HttpClientWrapper(OpenTelemetry.noop(), url),
+            new net.hollowcube.ipc.map.MapClient(HttpClient.newHttpClient(), url));
     }
 
     @AfterEach
-    void stop() { server.stop(0); }
-
-    @Test
-    void creationKeepsTheGoRequestAndReturnsSharedMapData() throws Exception {
-        var map = client.create("owner", MapSize.LARGE);
-        assertEquals("000-000-123", map.publishedId());
-        assertEquals("A map", map.name());
-        var request = requests.poll(5, TimeUnit.SECONDS);
-        assertNotNull(request);
-        assertEquals("POST", request.method());
-        assertEquals("/v4/internal/maps", request.path());
-        assertEquals("large", JsonParser.parseString(request.body()).getAsJsonObject().get("size").getAsString());
+    void stop() {
+        server.stop(0);
     }
 
     @Test
-    void slotsDecodeLegacyRolesAndNullableBuilderLists() {
-        response = "{\"results\":[{\"map\":" + MAP + ",\"createdAt\":\"2026-09-06T00:00:00Z\",\"role\":\"owner\",\"builders\":null},"
-            + "{\"map\":" + MAP + ",\"createdAt\":\"2026-09-06T00:00:00Z\",\"role\":\"builder\",\"builders\":[{\"id\":\"00000000-0000-0000-0000-000000000003\",\"createdAt\":\"2026-09-06T00:00:00Z\",\"pending\":true}]}]}";
-        var slots = client.getPlayerSlots("player").results();
+    void creationPassesTheProtocolVersionAndReturnsTheTypedResult() {
+        var result = assertInstanceOf(CreateMapResult.Success.class,
+            client.create(map.owner().toString(), MapSize.LARGE));
+        assertEquals(map, result.map());
+        assertArrayEquals(new Object[]{map.owner(), MapSize.LARGE, MinecraftServer.PROTOCOL_VERSION},
+            invocation.get());
+    }
+
+    @Test
+    void readsReturnSharedSlotsAndPreserveTheMissingMapException() {
+        var slots = client.getPlayerSlots(map.owner().toString()).results();
         assertTrue(slots.getFirst().owner());
-        assertTrue(slots.getFirst().builders().isEmpty());
-        assertFalse(slots.getLast().owner());
-        assertEquals("00000000-0000-0000-0000-000000000003", slots.getLast().builders().getFirst().id().toString());
-        assertTrue(slots.getLast().builders().getFirst().pending());
-        assertEquals("000-000-123", slots.getFirst().map().publishedId());
+        assertEquals(map, slots.getFirst().map());
+        assertTrue(slots.getFirst().builders().getFirst().pending());
+        assertThrows(ApiClient.NotFoundError.class, () -> client.get("missing"));
     }
 
     @Test
-    void editsStillUseTheGoPatchShape() throws Exception {
-        var editor = new MapPatch.Builder(client.get("map"));
-        requests.clear();
-        editor.setSize(MapSize.LARGE);
-        editor.setSpawnPoint(MapSettings.position(new Pos(1, 2, 3, 90, 45)));
-        editor.setLeaderboard(new MapLeaderboard(false, MapLeaderboard.Format.NUMBER, "q.score"));
-        MapSettings.addTag(editor, MapTags.Tag.TERRAIN);
-        MapSettings.set(editor, MapSettings.NO_JUMP, true);
-        editor.save(request -> {
-            client.update(editor.map().id().toString(), request);
-            return editor.map();
+    void builderSavesSendThePatchOverIpc() {
+        var builder = new MapPatch.Builder(client.get(map.id().toString()));
+        builder.setSize(MapSize.LARGE);
+        builder.setSpawnPoint(MapSettings.position(new Pos(1, 2, 3, 90, 45)));
+        builder.setLeaderboard(new MapLeaderboard(false, MapLeaderboard.Format.NUMBER, "q.score"));
+        MapSettings.addTag(builder, MapTags.Tag.TERRAIN);
+        MapSettings.set(builder, MapSettings.NO_JUMP, true);
+        var expected = builder.build();
+        builder.save(patch -> {
+            client.update(builder.map().id().toString(), patch);
+            return builder.map();
         });
-        var request = requests.poll(5, TimeUnit.SECONDS);
-        assertNotNull(request);
-        assertEquals("PATCH", request.method());
-        assertEquals("/v4/internal/maps/00000000-0000-0000-0000-000000000001", request.path());
-        var body = JsonParser.parseString(request.body()).getAsJsonObject();
-        assertEquals("large", body.get("size").getAsString());
-        assertEquals(90, body.getAsJsonObject("spawnPoint").get("yaw").getAsInt());
-        assertEquals("number", body.getAsJsonObject("leaderboard").get("format").getAsString());
-        assertEquals("terrain", body.getAsJsonArray("tags").get(0).getAsString());
-        assertTrue(body.getAsJsonObject("extra").get("no_jump").getAsBoolean());
+        assertEquals(map.id(), invocation.get()[0]);
+        assertEquals(expected, invocation.get()[1]);
+        assertTrue(builder.build().isEmpty());
     }
-
-    private record Request(String method, String path, String body) {}
 }

@@ -16,7 +16,6 @@ class WireWalkerTest {
     private static final String IMPORTS = """
         package test;
 
-        import net.hollowcube.common.util.RuntimeGson;
         import net.hollowcube.ipc.util.Ipc;
         import net.hollowcube.ipc.util.NatsMessage;
         import net.hollowcube.ipc.util.NotificationBody;
@@ -36,19 +35,29 @@ class WireWalkerTest {
     }
 
     @Test
-    void rejectsRecordsThatAreNotRuntimeGson() {
+    void discoversUnannotatedRecordsAndSealedPayloadsForNativeGson() {
         var compilation = compile("""
             @Ipc
             public interface EchoService {
-                Point move(Point point);
+                Outcome move(Point point);
             }
             """, """
-            public record Point(int x, int y) {
+            public record Point(int x, int y) {}
+            """, """
+            public sealed interface Outcome {
+                record Moved(Point point) implements Outcome {}
+                record Unknown(@Nullable String type) implements Outcome {}
             }
+            """, """
+            public record LocalDetails(String value) {}
             """);
-
-        assertThat(compilation).failed();
-        assertThat(compilation).hadErrorContaining("test.Point is on the wire, so it must be @RuntimeGson");
+        assertThat(compilation).succeeded();
+        var metadata = assertThat(compilation)
+            .generatedFile(StandardLocation.CLASS_OUTPUT, IpcProcessor.METADATA_RESOURCE)
+            .contentsAsUtf8String();
+        metadata.contains("test.Point");
+        metadata.contains("test.Outcome$Moved");
+        metadata.doesNotContain("test.LocalDetails");
     }
 
     /// The diagnostic names the whole path, because the offending type is usually a few records
@@ -61,11 +70,9 @@ class WireWalkerTest {
                 Outer get(String id);
             }
             """, """
-            @RuntimeGson
             public record Outer(List<Inner> inners) {
             }
             """, """
-            @RuntimeGson
             public record Inner(Object payload) {
             }
             """);
@@ -110,13 +117,13 @@ class WireWalkerTest {
     }
 
     @Test
-    void rejectsRawJson() {
+    void acceptsJsonTreesButRejectsUnstructuredObjects() {
         assertThat(compile("""
             @Ipc
             public interface EchoService {
                 com.google.gson.JsonObject raw(String id);
             }
-            """)).hadErrorContaining("com.google.gson.JsonObject is raw json");
+            """)).succeeded();
 
         assertThat(compile("""
             @Ipc
@@ -137,7 +144,6 @@ class WireWalkerTest {
             public sealed interface Shape permits Circle {
             }
             """, """
-            @RuntimeGson
             public record Circle(int radius) implements Shape {
             }
             """);
@@ -155,12 +161,10 @@ class WireWalkerTest {
             }
             """, """
             public sealed interface Shape permits Circle, Shape.Unknown {
-                @RuntimeGson
                 record Unknown(@Nullable String type, int sides) implements Shape {
                 }
             }
             """, """
-            @RuntimeGson
             public record Circle(int radius) implements Shape {
             }
             """);
@@ -172,12 +176,11 @@ class WireWalkerTest {
     @Test
     void rejectsDuplicateSubjects() {
         var compilation = compile("""
-            @RuntimeGson
+
             @NatsMessage(subject = "invite.rejected")
             public record Rejected(String id) {
             }
             """, """
-            @RuntimeGson
             @NatsMessage(subject = "invite.rejected")
             public record Declined(String id) {
             }
@@ -200,28 +203,23 @@ class WireWalkerTest {
                 void shape(Shape shape);
             }
             """, """
-            @RuntimeGson
             public record Point(int x, @Nullable Integer y) {
             }
             """, """
             public enum Color { RED, GREEN, UNKNOWN }
             """, """
             public sealed interface Shape permits Circle, Shape.Unknown {
-                @RuntimeGson
                 record Unknown(@Nullable String type) implements Shape {
                 }
             }
             """, """
-            @RuntimeGson
             public record Circle(int radius) implements Shape {
             }
             """, """
-            @RuntimeGson
             @NatsMessage(subject = "point.moved")
             public record PointMoved(Point point) {
             }
             """, """
-            @RuntimeGson
             @NotificationBody(type = "invite")
             public record Invite(String from) {
             }

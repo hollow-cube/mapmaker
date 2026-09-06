@@ -12,6 +12,7 @@ import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
+import net.hollowcube.apiserver.map.MapServiceImpl;
 import net.hollowcube.apiserver.replay.ReplayServiceImpl;
 import net.hollowcube.apiserver.s3.HttpS3Client;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
@@ -19,6 +20,7 @@ import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.map.MapServer;
 import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.ipc.util.IpcFailures;
@@ -30,6 +32,7 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -53,6 +56,7 @@ public final class Main {
 
     /// Hardcoded in the Go api-server too; both write the same objects into it.
     private static final String REPLAY_BUCKET = "mapmaker-replays";
+    private static final String MAP_BUCKET = "mapmaker";
 
     /// The Go api-server proxies PostHog, and the game servers go through it; so does this.
     private static final String POSTHOG_PROXY = "http://api-server.mapmaker:9124/posthog";
@@ -108,6 +112,29 @@ public final class Main {
             secrets.require("s3.secret_key", "S3_SECRET_KEY")
         );
 
+        var mapWorlds = new HttpS3Client(
+            HttpClient.newHttpClient(),
+            secrets.require("s3.endpoint", "S3_ENDPOINT"),
+            MAP_BUCKET,
+            secrets.get("s3.region", "S3_REGION", "auto"),
+            secrets.require("s3.access_key", "S3_ACCESS_KEY"),
+            secrets.require("s3.secret_key", "S3_SECRET_KEY")
+        );
+        var redis = Pools.redis(secrets.require("redis.address", "REDIS_ADDRESS"));
+        var minimumBuild = secrets.get(
+            "maps.minimum_build_seconds",
+            "MAP_MIN_BUILD_SECONDS",
+            "1800"
+        );
+        var maps = new MapServiceImpl(
+            db,
+            mapWorlds,
+            nats,
+            redis,
+            PostHog.getClient(),
+            Duration.ofSeconds(Long.parseLong(minimumBuild))
+        );
+
         var port = Integer.parseInt(secrets.get("http.port", "PORT", "9124"));
         var server = HttpServer.create(new InetSocketAddress(port), 0);
         // Every handler is a database call or two deep and blocks for all of it, which is what
@@ -138,6 +165,7 @@ public final class Main {
                     )
                 )
             ),
+            server.createContext(MapServer.PATH, new MapServer(maps)),
             server.createContext(ReplayServer.PATH, new ReplayServer(new ReplayServiceImpl(db, s3)))
         ))
             context.getFilters().add(requestLog);
@@ -146,6 +174,7 @@ public final class Main {
             new Thread(
                 () -> {
                     server.stop(SHUTDOWN_SECONDS);
+                    redis.close();
                     nats.close();
                     PostHog.shutdown();
                 }

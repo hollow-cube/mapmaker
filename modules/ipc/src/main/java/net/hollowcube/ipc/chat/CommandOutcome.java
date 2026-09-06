@@ -1,13 +1,10 @@
 package net.hollowcube.ipc.chat;
 
-import net.hollowcube.common.util.RuntimeGson;
-
 /// How a command ended, as the sending server's dispatch saw it.
 ///
 /// A record around the status rather than the bare enum, so that what an outcome carries can grow:
 /// a new nullable field here is a wire-compatible change, while replacing an enum on the wire with
 /// anything else is not.
-@RuntimeGson
 public record CommandOutcome(Status status) {
 
     public static final CommandOutcome SUCCESS = new CommandOutcome(Status.SUCCESS);

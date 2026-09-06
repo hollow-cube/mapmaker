@@ -8,6 +8,7 @@ import net.hollowcube.mapmaker.editor.scripting.ScriptSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,8 @@ public final class BundlerMain {
 
     private static MapClient httpMapClient(String apiUrl) {
         var http = new HttpClientWrapper(OpenTelemetry.noop(), apiUrl);
-        return new MapClient.Http(http);
+        var ipcUrl = System.getenv().getOrDefault("IPC_SERVICE_URL", "http://localhost:9124");
+        return new MapClient.Http(http, new net.hollowcube.ipc.map.MapClient(HttpClient.newHttpClient(), ipcUrl));
     }
 
     private record Args(Path out, Path sourceDir, String mapId, String apiUrl) {

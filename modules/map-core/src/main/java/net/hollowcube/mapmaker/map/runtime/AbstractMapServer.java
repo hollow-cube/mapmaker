@@ -33,6 +33,7 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.chat.ChatClient;
 import net.hollowcube.ipc.hdb.HeadDatabaseClient;
+import net.hollowcube.ipc.map.MapClient;
 import net.hollowcube.ipc.replay.ReplayClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
@@ -179,7 +180,7 @@ public abstract class AbstractMapServer implements MapServer {
         Wire.setClientVersion(ServerRuntime.getRuntime().version());
         var ipc = createIpcServices(config, otel);
 
-        this.api = new ApiClient(http, ipc.headDatabase(), ipc.chat(), ipc.replays());
+        this.api = new ApiClient(http, ipc.headDatabase(), ipc.chat(), ipc.replays(), ipc.maps());
 
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
@@ -207,7 +208,7 @@ public abstract class AbstractMapServer implements MapServer {
         if (ipcUrl.isEmpty()) ipcUrl = "http://localhost:9124";
         var http = HttpClient.newHttpClient();
         return new IpcServices(new HeadDatabaseClient(http, ipcUrl, otel), new ChatClient(http, ipcUrl, otel),
-            new ReplayClient(http, ipcUrl, otel));
+            new ReplayClient(http, ipcUrl, otel), new MapClient(http, ipcUrl, otel));
     }
 
     protected abstract @NotNull String name();

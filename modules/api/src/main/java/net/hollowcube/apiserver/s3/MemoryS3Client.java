@@ -64,6 +64,13 @@ public final class MemoryS3Client implements S3Client {
     }
 
     @Override
+    public long stat(String key) {
+        var object = objects.get(key);
+        if (object == null) throw new NotFoundError(key);
+        return object.length;
+    }
+
+    @Override
     public Blob getRange(String key, long start, long endInclusive) {
         var object = objects.get(key);
         if (object == null) throw new NotFoundError(key);

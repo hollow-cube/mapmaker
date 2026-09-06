@@ -1,15 +1,14 @@
 package net.hollowcube.ipc.map;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.ipc.util.Position;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
-@RuntimeGson
 public record MapData(
     UUID id,
     UUID owner,
@@ -32,6 +31,17 @@ public record MapData(
     public static final int MAX_NAME_LENGTH = 20;
     public static final int MIN_PLAYS_FOR_DIFFICULTY = 10;
     public static final String SPAWN_MAP_ID = "b210fa07-d64c-4100-a2db-1426c35b7533";
+
+    /// The `000-000-000` spelling of the number Postgres stores.
+    public static String formatPublishedId(long id) {
+        return String.format(
+            Locale.ROOT,
+            "%03d-%03d-%03d",
+            id / 1_000_000,
+            (id / 1_000) % 1_000,
+            id % 1_000
+        );
+    }
 
     public static MapData draft(UUID id, UUID owner) {
         return new MapData(
@@ -95,7 +105,6 @@ public record MapData(
         );
     }
 
-    @RuntimeGson
     public record Settings(
         String name,
         String icon,

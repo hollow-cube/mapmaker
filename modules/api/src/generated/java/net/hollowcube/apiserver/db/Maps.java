@@ -19,9 +19,9 @@ public record Maps(UUID id, UUID owner, String mType, Instant createdAt, Instant
         long size, String optVariant, @Nullable String optSubvariant, String optSpawnPoint,
         @Nullable Boolean optOnlySprint, @Nullable Boolean optNoSprint, @Nullable Boolean optNoJump,
         @Nullable Boolean optNoSneak, @Nullable Boolean optBoat, @Nullable byte[] optExtra,
-        @Nullable List<String> optTags, String ext, @Nullable Integer protocolVersion,
-        @Nullable UUID contest, boolean listed, int totalLikes, @Nullable String leaderboard,
-        @Nullable Instant deletedAt, @Nullable UUID deletedBy, @Nullable String deletedReason) {
+        @Nullable List<String> optTags, String ext, @Nullable Instant deletedAt,
+        @Nullable UUID deletedBy, @Nullable String deletedReason, @Nullable Integer protocolVersion,
+        @Nullable UUID contest, boolean listed, int totalLikes, @Nullable String leaderboard) {
     /**
      * Reads one `maps` row, its first column at `col`.
      */
@@ -53,13 +53,13 @@ public record Maps(UUID id, UUID owner, String mType, Instant createdAt, Instant
                 rs.getBytes(col + 23),
                 Jdbc.getList(rs, col + 24, String.class),
                 rs.getString(col + 25),
-                rs.getObject(col + 26, Integer.class),
+                Jdbc.getInstant(rs, col + 26),
                 rs.getObject(col + 27, UUID.class),
-                rs.getBoolean(col + 28),
-                rs.getInt(col + 29),
-                rs.getString(col + 30),
-                Jdbc.getInstant(rs, col + 31),
-                rs.getObject(col + 32, UUID.class),
+                rs.getString(col + 28),
+                rs.getObject(col + 29, Integer.class),
+                rs.getObject(col + 30, UUID.class),
+                rs.getBoolean(col + 31),
+                rs.getInt(col + 32),
                 rs.getString(col + 33));
     }
 }

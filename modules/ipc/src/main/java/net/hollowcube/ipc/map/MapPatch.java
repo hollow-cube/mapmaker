@@ -2,17 +2,18 @@ package net.hollowcube.ipc.map;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.ipc.util.Position;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-@RuntimeGson
+import static net.hollowcube.ipc.util.IpcException.badRequest;
+
 public record MapPatch(
     @Nullable String name,
     @Nullable String icon,
@@ -45,6 +46,34 @@ public record MapPatch(
             && listed == null
             && qualityOverride == null
             && protocolVersion == null;
+    }
+
+    /// Refuses, as a bad request, what no map may be patched to.
+    public void validate() {
+        if (size == MapSize.UNKNOWN
+            || variant == MapVariant.UNKNOWN
+            || qualityOverride == MapQuality.UNKNOWN)
+            throw badRequest("unknown map setting");
+        if (variant == MapVariant.ADVENTURE) throw badRequest("unsupported map variant");
+        if (name != null && name.length() > MapData.MAX_NAME_LENGTH)
+            throw badRequest("map name is too long");
+        if (protocolVersion != null && protocolVersion <= 0)
+            throw badRequest("invalid protocol version");
+        if (tags != null
+            && (tags.stream().anyMatch(Objects::isNull)
+                || new HashSet<>(tags).size() != tags.size()))
+            throw badRequest("duplicate or null tags");
+        if (leaderboard != null
+            && (leaderboard.format() == MapLeaderboard.Format.UNKNOWN
+                || leaderboard.score().isBlank()))
+            throw badRequest("invalid leaderboard");
+        if (spawnPoint != null
+            && !(Double.isFinite(spawnPoint.x())
+                && Double.isFinite(spawnPoint.y())
+                && Double.isFinite(spawnPoint.z())
+                && Float.isFinite(spawnPoint.yaw())
+                && Float.isFinite(spawnPoint.pitch())))
+            throw badRequest("invalid spawn point");
     }
 
     public MapData apply(MapData map) {

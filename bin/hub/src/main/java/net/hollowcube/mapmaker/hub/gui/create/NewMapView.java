@@ -1,16 +1,20 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.api.maps.MapClient;
-import net.hollowcube.mapmaker.gui.store.StoreView;
+import net.hollowcube.ipc.map.CreateMapResult;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
+import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.LockedButton;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
@@ -21,6 +25,8 @@ public class NewMapView extends Panel {
     private final MapClient maps;
     private final PlayerService playerService;
     private final Consumer<MapData> onNewMap;
+
+    private final AtomicBoolean submitting = new AtomicBoolean();
 
     private final RadioSelect<MapSize> sizeSelect;
     private final Button confirmButton;
@@ -86,13 +92,24 @@ public class NewMapView extends Panel {
     }
 
     private void handleSubmit() {
-        var playerId = PlayerData.fromPlayer(host.player()).id();
-        var map = maps.create(playerId, sizeSelect.selected());
-        sync(() -> {
-            var host = this.host;
-            onNewMap.accept(map);
-            if (host.canPopView()) host.popView();
-        });
+        if (!submitting.compareAndSet(false, true)) return;
+        var player = host.player();
+        try {
+            var result = maps.create(PlayerData.fromPlayer(player).id(), sizeSelect.selected());
+            if (!(result instanceof CreateMapResult.Success(var map))) {
+                player.sendMessage(MapWriteMessages.failure(result));
+                return;
+            }
+            sync(() -> {
+                onNewMap.accept(map);
+                if (host.canPopView()) host.popView();
+            });
+        } catch (RuntimeException e) {
+            player.sendMessage(Component.translatable("map.write.create_failed"));
+            ExceptionReporter.reportException(e, player);
+        } finally {
+            submitting.set(false);
+        }
     }
 
     private void handleOpenStore() {

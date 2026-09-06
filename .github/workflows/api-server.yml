@@ -18,6 +18,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      MAP_WRITE_TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/postgres?user=postgres&password=postgres
     steps:
       - uses: actions/checkout@v4
         with:

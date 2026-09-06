@@ -4,7 +4,7 @@ import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.ipc.map.MapBuilder;
+import net.hollowcube.ipc.map.DeleteVerificationResult;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapPatch;
 import net.hollowcube.ipc.map.MapSlot;
@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
 import net.hollowcube.mapmaker.api.players.PlayerDataStub;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
@@ -33,10 +34,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -335,19 +333,24 @@ public class EditMapView extends Panel {
         if (isPlayerInvited(pds.id()) || !pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES))
             return false;
 
-        api.maps.inviteMapBuilder(editor.map().id().toString(), pds.id());
-        var builders = new ArrayList<>(slot.builders());
-        builders.add(new MapBuilder(UUID.fromString(pds.id()), Instant.now(), true));
-        slot = new MapSlot(editor.map(), slot.createdAt(), slot.owner(), builders);
+        var result = api.maps.inviteMapBuilder(editor.map().id().toString(), pds.id());
+        if (!result.succeeded()) {
+            host.player().sendMessage(MapWriteMessages.failure(result));
+            return false;
+        }
+        slot = new MapSlot(editor.map(), slot.createdAt(), slot.owner(), result.builders());
         return true;
     }
 
     @Blocking
     private void removeMapBuilder(String builderId) {
-        api.maps.removeMapBuilder(editor.map().id().toString(), builderId);
+        var result = api.maps.removeMapBuilder(editor.map().id().toString(), builderId);
+        if (!result.succeeded()) {
+            host.player().sendMessage(MapWriteMessages.failure(result));
+            return;
+        }
         sync(() -> {
-            slot = new MapSlot(editor.map(), slot.createdAt(), slot.owner(), slot.builders().stream()
-                .filter(builder -> !builder.id().toString().equals(builderId)).toList());
+            slot = new MapSlot(editor.map(), slot.createdAt(), slot.owner(), result.builders());
             drawBuilderButtons();
         });
     }
@@ -364,8 +367,12 @@ public class EditMapView extends Panel {
 
     @Blocking
     private static void buildMapAfterVerify(MapClient maps, ServerBridge bridge, MapData map, Player player) {
+        var result = maps.deleteVerification(map.id().toString());
+        if (result != DeleteVerificationResult.RESET) {
+            player.sendMessage(MapWriteMessages.verification(result));
+            return;
+        }
         player.sendMessage(Component.translatable("progress.verification.lost"));
-        maps.deleteVerification(map.id().toString());
         beginBuildingMap(bridge, map, player);
     }
 

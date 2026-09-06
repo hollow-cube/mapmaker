@@ -20,7 +20,6 @@ class IpcProcessorTest {
         return JavaFileObjects.forSourceString("test.EchoService", """
             package test;
 
-            import net.hollowcube.common.util.RuntimeGson;
             import net.hollowcube.ipc.Blob;
             import net.hollowcube.ipc.util.Ipc;
             import org.jetbrains.annotations.Nullable;
@@ -362,7 +361,6 @@ class IpcProcessorTest {
         var compilation = compile(service("""
                 Upload upload(Upload upload);
 
-                @RuntimeGson
                 record Upload(String name, Blob body) {
                 }
             """));

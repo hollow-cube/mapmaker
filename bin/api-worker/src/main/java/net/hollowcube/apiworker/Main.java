@@ -80,11 +80,14 @@ public final class Main {
             "API_URL",
             secrets.present() ? API_SERVER : LOCAL_API_SERVER
         );
-        var maps = new MapClient.Http(new HttpClientWrapper(OpenTelemetry.noop(), apiUrl));
 
         var ipcUrl = secrets.get(
             "ipc.url", "IPC_SERVICE_URL",
             secrets.present() ? IPC_SERVICE_URL : LOCAL_IPC_SERVICE_URL
+        );
+        var maps = new MapClient.Http(
+            new HttpClientWrapper(OpenTelemetry.noop(), apiUrl),
+            new net.hollowcube.ipc.map.MapClient(HttpClient.newHttpClient(), ipcUrl)
         );
         var replays = new ReplayClient(HttpClient.newHttpClient(), ipcUrl);
 

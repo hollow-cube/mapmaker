@@ -23,6 +23,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -54,6 +55,11 @@ public final class HttpS3Client implements S3Client {
         .withZone(ZoneOffset.UTC);
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("yyyyMMdd")
         .withZone(ZoneOffset.UTC);
+
+    /// Until the response headers arrive; the client only bounds the connect on its own, so
+    /// without this a request that stalls holds its caller forever. Generous because a PUT's
+    /// upload counts against it, and worlds run to tens of megabytes.
+    private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(4);
 
     private static final AttributeKey<String> BUCKET = AttributeKey.stringKey("aws.s3.bucket");
     private static final AttributeKey<String> KEY = AttributeKey.stringKey("aws.s3.key");
@@ -140,6 +146,22 @@ public final class HttpS3Client implements S3Client {
     @Override
     public Blob get(String key) {
         return download(key, null);
+    }
+
+    @Override
+    public long stat(String key) {
+        var request = request(
+            "HEAD",
+            key,
+            Map.of(),
+            EMPTY_PAYLOAD
+        ).method("HEAD", HttpRequest.BodyPublishers.noBody());
+        var response = send("stat", key, request, HttpResponse.BodyHandlers.discarding());
+        if (response.statusCode() == 404) throw new NotFoundError(key);
+        require(response, "HEAD", key, "");
+        return response.headers()
+            .firstValueAsLong("content-length")
+            .orElseThrow(() -> new RequestFailedError("HEAD has no content-length: " + key));
     }
 
     @Override
@@ -275,6 +297,7 @@ public final class HttpS3Client implements S3Client {
         var signature = signature(canonicalRequest, stamp, scope, day);
 
         return HttpRequest.newBuilder(URI.create(url))
+            .timeout(REQUEST_TIMEOUT)
             .header("x-amz-date", stamp)
             .header("x-amz-content-sha256", payloadHash)
             .header(

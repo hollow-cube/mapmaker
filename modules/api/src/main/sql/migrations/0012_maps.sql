@@ -1,9 +1,4 @@
--- The Go api-server's maps, as its `internal/mapdb` migrations leave the table. Go owns the
--- schema; this is what the queries here are described against, and has to be kept in step with it
--- by hand. Nothing to apply.
---
--- Chat reads `published_id` off it, to answer whether the `[map]` someone typed is a map anyone
--- else can open. The rest is here so that the maps port has the table already described.
+-- Describe-time mirror of Go migrations, preserving physical column order. Nothing to apply.
 create table if not exists maps
 (
     id               uuid primary key,
@@ -26,7 +21,7 @@ create table if not exists maps
     size             int8        not null default 0,
     opt_variant      varchar     not null,
     opt_subvariant   varchar              default null,
-    opt_spawn_point  jsonb       not null,
+    opt_spawn_point  varchar     not null,
 
     opt_only_sprint  bool                 default false,
     opt_no_sprint    bool                 default false,
@@ -37,16 +32,20 @@ create table if not exists maps
 
     opt_tags         varchar[]            default null,
 
-    ext              jsonb       not null default '{}',
-
-    protocol_version int                  default 769,
-    contest          uuid                 default null,
-    listed           boolean     not null default true,
-    total_likes      int         not null default 0,
-    leaderboard      jsonb                default null,
+    ext              bytea       not null default '{}', -- holds the extended map data
 
     -- the following are only set if the map is soft deleted
     deleted_at       timestamptz          default null,
     deleted_by       uuid                 default null,
     deleted_reason   varchar              default null
 );
+
+alter table maps add column protocol_version int default 769;
+alter table maps add column contest uuid default null;
+alter table maps add column listed boolean not null default true;
+alter table maps alter column opt_spawn_point type jsonb using opt_spawn_point::jsonb;
+alter table maps alter column ext drop default;
+alter table maps alter column ext type jsonb using convert_from(ext, 'UTF8')::jsonb;
+alter table maps alter column ext set default '{}'::jsonb;
+alter table maps add column total_likes int not null default 0;
+alter table maps add column leaderboard jsonb default null;

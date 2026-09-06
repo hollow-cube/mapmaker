@@ -5,7 +5,7 @@ import net.hollowcube.ipc.Blob;
 import java.io.InputStream;
 import java.util.List;
 
-/// One bucket, as the five operations the api needs of it.
+/// One bucket, as the six operations the api needs of it.
 ///
 /// Named for the protocol rather than the vendor: this speaks the S3 API, and what answers it is R2
 /// in the cluster and MinIO on a laptop.
@@ -15,6 +15,9 @@ public interface S3Client {
     void put(String key, InputStream body, long length);
 
     Blob get(String key);
+
+    /// The object's length, without the object.
+    long stat(String key);
 
     /// The inclusive range, whose [Blob#length] is the range's rather than the object's.
     Blob getRange(String key, long start, long endInclusive);
@@ -26,7 +29,7 @@ public interface S3Client {
     /// Every key under `prefix`, following the continuation tokens.
     List<String> list(String prefix);
 
-    /// Raised only by [#get] and [#getRange]; whether a missing object is a 404 or a corruption is
+    /// Raised only by [#get], [#getRange] and [#stat]; whether a missing object is a 404 or a corruption is
     /// the caller's to decide.
     final class NotFoundError extends RuntimeException {
 

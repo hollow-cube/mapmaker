@@ -5,6 +5,7 @@ import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -93,7 +94,11 @@ public class MapSlotEntry extends Panel {
         var playerId = PlayerData.fromPlayer(player).id();
         host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
-                api.maps.removeMapBuilder(slot.map().id().toString(), playerId);
+                var result = api.maps.removeMapBuilder(slot.map().id().toString(), playerId);
+                if (!result.succeeded()) {
+                    player.sendMessage(MapWriteMessages.failure(result));
+                    return;
+                }
                 player.closeInventory();
                 player.sendMessage(Component.translatable("leave.other.map"));
             } catch (RuntimeException e) {

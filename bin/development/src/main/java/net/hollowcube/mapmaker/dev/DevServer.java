@@ -24,6 +24,7 @@ import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
 import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.apiserver.map.MapServiceImpl;
 import net.hollowcube.apiworker.job.Worker;
 import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
@@ -33,6 +34,7 @@ import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.map.MapServer;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.nats.NatsConfig;
@@ -76,6 +78,7 @@ public class DevServer extends AbstractMultiMapServer {
     private static final String COMPOSE_MINIO = "http://localhost:9000";
     private static final String COMPOSE_MINIO_KEY = "mapmaker";
     private static final String REPLAY_BUCKET = "mapmaker-replays";
+    private static final String MAP_BUCKET = "mapmaker";
 
     /// Fewer than the real worker's four: one developer is not going to queue enough to need them,
     /// and the threads are shared with a game server here.
@@ -153,10 +156,17 @@ public class DevServer extends AbstractMultiMapServer {
             "us-east-1", COMPOSE_MINIO_KEY, COMPOSE_MINIO_KEY);
         s3.createBucketIfAbsent();
 
+        var mapWorlds = new HttpS3Client(HttpClient.newHttpClient(), otel, COMPOSE_MINIO, MAP_BUCKET,
+            "us-east-1", COMPOSE_MINIO_KEY, COMPOSE_MINIO_KEY);
+        mapWorlds.createBucketIfAbsent();
+        var redis = Pools.redis(System.getenv().getOrDefault("REDIS_ADDRESS", "localhost:6379"));
+        shutdowner().queue("dev-ipc-map-redis", redis::close);
+
         this.ipc = new IpcServices(
             new HeadDatabaseServiceImpl(db),
             new ChatServiceImpl(db, nats),
-            new ReplayServiceImpl(db, s3));
+            new ReplayServiceImpl(db, s3),
+            new MapServiceImpl(db, mapWorlds, nats, redis, PostHog.getClient(), Duration.ZERO));
         return ipc;
     }
 
@@ -171,6 +181,7 @@ public class DevServer extends AbstractMultiMapServer {
         http.addRoute(ChatServer.PATH, new ChatServer(ipc.chat()));
         http.addRoute(SessionServer.PATH, new SessionServer(new SessionServiceImpl(db)));
         http.addRoute(AnticheatServer.PATH, new AnticheatServer(new AnticheatServiceImpl(db, store)));
+        http.addRoute(MapServer.PATH, new MapServer(ipc.maps()));
         http.addRoute(ReplayServer.PATH, new ReplayServer(ipc.replays()));
     }
 

@@ -2,6 +2,7 @@ package net.hollowcube.apiserver.common;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import redis.clients.jedis.JedisPooled;
 
 /// The connection pools these processes open, all configured the same way.
 public final class Pools {
@@ -19,6 +20,11 @@ public final class Pools {
         // not to crash over, so the pool fills lazily rather than failing construction.
         config.setInitializationFailTimeout(-1);
         return new HikariDataSource(config);
+    }
+
+    /// `address` is `host:port` as the go services store it, or a full `redis://` uri.
+    public static JedisPooled redis(String address) {
+        return new JedisPooled(address.contains("://") ? address : "redis://" + address);
     }
 
     private Pools() {}

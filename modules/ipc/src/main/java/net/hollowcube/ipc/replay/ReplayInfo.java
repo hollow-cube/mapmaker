@@ -1,6 +1,5 @@
 package net.hollowcube.ipc.replay;
 
-import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.Nullable;
 
 /// What storage knows about a replay, minus its bytes.
@@ -13,7 +12,6 @@ import org.jetbrains.annotations.Nullable;
 /// @param outcome          null on every replay the Go server wrote and on anything a client older
 ///                         than the field finished
 /// @param updatedAt        epoch milliseconds
-@RuntimeGson
 public record ReplayInfo(
     String id,
     long revision,

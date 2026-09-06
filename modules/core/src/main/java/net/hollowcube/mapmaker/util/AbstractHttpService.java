@@ -14,7 +14,6 @@ import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapLeaderboard;
 import net.hollowcube.ipc.map.MapQuality;
 import net.hollowcube.ipc.map.MapSize;
-import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.api.interaction.Command;
@@ -61,7 +60,6 @@ public abstract class AbstractHttpService {
 
     public static final Gson GSON = new GsonBuilder()
         .registerTypeAdapter(MapData.class, new LegacyMapDataDeserializer())
-        .registerTypeAdapter(MapSlot.class, new LegacyMapSlotDeserializer())
         .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
         .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
         .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))

@@ -12,7 +12,5 @@ dependencies {
     // the real thing rather than copies that can drift. Not a cycle: `ipc` applies this processor's
     // main output, which never depends on these tests.
     testImplementation(project(":modules:ipc"))
-    // `@RuntimeGson` is what marks a record as a wire type, and it lives in `common`, which `ipc`
-    // only sees at compile time.
-    testImplementation(project(":modules:common"))
+
 }

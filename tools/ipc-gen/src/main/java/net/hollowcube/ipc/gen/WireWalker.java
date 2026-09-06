@@ -14,9 +14,9 @@ import java.util.*;
 
 /// Walks every type reachable from a wire root and decides whether it is allowed there.
 ///
-/// A wire position may hold a jdk scalar, a `List`/`Set`/`Map<String, _>` of wire types, a
-/// `@RuntimeGson` record, an enum that declares `UNKNOWN`, or a sealed interface of such records
-/// that permits its generated `Unknown` variant. Anything else is refused with the path it was
+/// A wire position may hold a jdk scalar, a `List`/`Set`/`Map<String, _>` of wire types, a record
+/// of wire types, an enum that declares `UNKNOWN`, or a sealed interface of such records that
+/// permits its generated `Unknown` variant. Anything else is refused with the path it was
 /// reached by, because the offending type is usually three records away from the method that
 /// dragged it onto the wire. Nothing from the sql-gen package is allowed: the schema and the wire
 /// are versioned apart, and sharing an enum between them would let a column change a client.
@@ -47,7 +47,7 @@ final class WireWalker {
         "java.util.UUID", "java.math.BigDecimal", "java.math.BigInteger",
         // Written as an ISO-8601 string by the adapter Wire registers, so that a time on the wire
         // is a time on both sides rather than a number whose unit each end has to agree on.
-        "java.time.Instant");
+        "java.time.Instant", "com.google.gson.JsonObject", "com.google.gson.JsonElement");
     private static final Set<String> COLLECTIONS = Set.of("java.util.List", "java.util.Set", "java.util.Collection");
     private static final String MAP = "java.util.Map";
 
@@ -87,8 +87,8 @@ final class WireWalker {
         visit(site, type, use, path, Set.of());
     }
 
-    /// Walks a record that is a wire root in its own right, which has to be a `@RuntimeGson` record
-    /// like any other; answers false having reported why if it is not.
+    /// Walks a record that is a wire root in its own right, held to the same rules as one reached
+    /// through a method; answers false having reported why if it is not.
     boolean rootRecord(TypeElement element, Use use, String path) {
         if (element.getKind() != ElementKind.RECORD) {
             error(element, element.getQualifiedName() + " must be a record", path);
@@ -142,12 +142,12 @@ final class WireWalker {
         }
         if (name.startsWith(IpcNames.DB_PACKAGE + ".")) {
             error(site, name + " is a sql-gen type, and the schema and the wire are versioned apart; "
-                + "map it to a @RuntimeGson record in modules/ipc", path);
+                + "map it to a record in modules/ipc", path);
             return;
         }
         if (name.equals("java.lang.Object") || name.startsWith("com.google.gson.")) {
             error(site, name + " is raw json, which nothing can check for compatibility; "
-                + "give it a @RuntimeGson record", path);
+                + "give it a record", path);
             return;
         }
 
@@ -163,7 +163,7 @@ final class WireWalker {
                     + "that every variant is known", path);
             }
             default -> error(site, name + " is not a wire type; a wire position holds jdk scalars and "
-                + "collections, @RuntimeGson records, enums that declare UNKNOWN, and sealed interfaces "
+                + "collections, records, enums that declare UNKNOWN, and sealed interfaces "
                 + "of those", path);
         }
     }
@@ -172,10 +172,6 @@ final class WireWalker {
         var name = element.getQualifiedName().toString();
         var record = records.get(name);
         if (record == null) {
-            if (!hasAnnotation(element, IpcNames.RUNTIME_GSON_ANNOTATION)) {
-                error(site, name + " is on the wire, so it must be @RuntimeGson", path);
-                return false;
-            }
             var fields = new ArrayList<Field>();
             for (var component : element.getRecordComponents()) {
                 if (hasAnnotation(component, IpcNames.SERIALIZED_NAME_ANNOTATION)

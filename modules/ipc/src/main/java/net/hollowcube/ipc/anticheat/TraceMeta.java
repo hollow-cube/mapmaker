@@ -1,6 +1,5 @@
 package net.hollowcube.ipc.anticheat;
 
-import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.Nullable;
 
 /// What the store files a capture trace under: the trace's own header, cut to the fields a row
@@ -22,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 /// @param endedAt       when it was closed, null for one cut short before it was
 /// @param formatVersion what the proxy says the container is. The store reads the real one off the
 ///                      bytes and keeps that; this is only ever the claim.
-@RuntimeGson
 public record TraceMeta(
     String id,
     @Nullable String captureId,

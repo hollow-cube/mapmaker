@@ -47,16 +47,7 @@ public final class LegacyMapDataDeserializer implements JsonDeserializer<MapData
         if (id != null && !id.isJsonNull()) {
             var numeric = Long.parseLong(id.getAsString().replace("-", ""));
             if (numeric == 0) defaults.remove("publishedId");
-            else defaults.addProperty(
-                "publishedId",
-                String.format(
-                    Locale.ROOT,
-                    "%03d-%03d-%03d",
-                    numeric / 1_000_000,
-                    (numeric / 1_000) % 1_000,
-                    numeric % 1_000
-                )
-            );
+            else defaults.addProperty("publishedId", MapData.formatPublishedId(numeric));
         }
         return Wire.gson().fromJson(defaults, MapData.class);
     }

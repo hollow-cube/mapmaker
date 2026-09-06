@@ -81,7 +81,7 @@ public final class ApiDatabase {
      * It is a separate name rather than an overload because `tx(tx -> tx.things.insert(...))` would otherwise be ambiguous between the two.
      */
     public <R> R txResult(Function<Tx, R> work) {
-        return Transaction.run(dataSource(), conn -> work.apply(new Tx(conn)));
+        return Transaction.run(dataSource(), transaction -> work.apply(new Tx(transaction)));
     }
 
     /**
@@ -103,7 +103,7 @@ public final class ApiDatabase {
      * One transaction's worth of the same queries, all on the same connection.
      */
     public static final class Tx {
-        private final Connection conn;
+        private final Transaction transaction;
 
         public final AnticheatQueries anticheat;
 
@@ -125,9 +125,9 @@ public final class ApiDatabase {
 
         public final SessionsQueries sessions;
 
-        Tx(Connection conn) {
-            this.conn = conn;
-            ConnectionSource source = ConnectionSource.pinned(conn);
+        Tx(Transaction transaction) {
+            this.transaction = transaction;
+            ConnectionSource source = ConnectionSource.pinned(transaction.conn());
             this.anticheat = new AnticheatQueriesImpl(source);
             this.chat = new ChatQueriesImpl(source);
             this.commandLog = new CommandLogQueriesImpl(source);
@@ -144,7 +144,14 @@ public final class ApiDatabase {
          * The connection this transaction holds, for the statements that have no generated query. Do not commit or close it.
          */
         public Connection conn() {
-            return conn;
+            return transaction.conn();
+        }
+
+        /**
+         * See {@link Transaction#afterCommit(Runnable)} for ordering and failure semantics.
+         */
+        public void afterCommit(Runnable callback) {
+            transaction.afterCommit(callback);
         }
     }
 

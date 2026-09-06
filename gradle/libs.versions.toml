@@ -37,6 +37,7 @@ hikari = "7.1.0"
 included = "-INCLUDED"
 
 [libraries]
+jedis = { module = "redis.clients:jedis", version = "6.2.0" }
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 autoservice = { group = "com.google.auto.service", name = "auto-service", version.ref = "autoservice" }
 autoservice-annotations = { group = "com.google.auto.service", name = "auto-service-annotations", version.ref = "autoservice" }

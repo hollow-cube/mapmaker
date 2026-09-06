@@ -1,6 +1,5 @@
 package net.hollowcube.ipc.chat;
 
-import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
@@ -13,7 +12,6 @@ import java.time.Instant;
 /// @param instanceId the world within that map, from the same place
 /// @param remote     whether it was one of the commands the api executes rather than the server
 /// @param durationMs how long dispatch took, the remote round trip included
-@RuntimeGson
 public record CommandExecution(
     Instant timestamp,
     String playerId,

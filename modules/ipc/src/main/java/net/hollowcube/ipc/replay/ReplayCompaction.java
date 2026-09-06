@@ -1,7 +1,5 @@
 package net.hollowcube.ipc.replay;
 
-import net.hollowcube.common.util.RuntimeGson;
-
 /// Everything about one compacted publication except its bytes, which are the body — the whole
 /// compacted replay, preamble included.
 ///
@@ -12,7 +10,6 @@ import net.hollowcube.common.util.RuntimeGson;
 ///                       uploading a second object and orphaning the first
 /// @param preambleLength the prefix of the body storage keeps as the replay's preamble
 /// @param contentDigest  base64 of the SHA-256 of the whole body
-@RuntimeGson
 public record ReplayCompaction(
     String id,
     long expectedRevision,

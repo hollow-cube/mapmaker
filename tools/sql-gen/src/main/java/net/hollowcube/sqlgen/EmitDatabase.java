@@ -75,7 +75,7 @@ final class EmitDatabase {
                 .addTypeVariable(result)
                 .returns(result)
                 .addParameter(ParameterizedTypeName.get(ClassName.get(Function.class), tx, result), "work")
-                .addStatement("return $T.run(dataSource(), conn -> work.apply(new $T(conn)))", TRANSACTION, tx)
+                .addStatement("return $T.run(dataSource(), transaction -> work.apply(new $T(transaction)))", TRANSACTION, tx)
                 .build())
             .addMethod(MethodSpec.methodBuilder("dataSource")
                 .addJavadoc("The pool every query here runs on.\n")
@@ -104,12 +104,12 @@ final class EmitDatabase {
         var type = TypeSpec.classBuilder(tx.simpleName())
             .addJavadoc("One transaction's worth of the same queries, all on the same connection.\n")
             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
-            .addField(Connection.class, "conn", Modifier.PRIVATE, Modifier.FINAL);
+            .addField(TRANSACTION, "transaction", Modifier.PRIVATE, Modifier.FINAL);
 
         var constructor = MethodSpec.constructorBuilder()
-            .addParameter(Connection.class, "conn")
-            .addStatement("this.conn = conn")
-            .addStatement("$T source = $T.pinned(conn)", Emitter.CONNECTION_SOURCE, Emitter.CONNECTION_SOURCE);
+            .addParameter(TRANSACTION, "transaction")
+            .addStatement("this.transaction = transaction")
+            .addStatement("$T source = $T.pinned(transaction.conn())", Emitter.CONNECTION_SOURCE, Emitter.CONNECTION_SOURCE);
 
         for (var group : database.groups()) {
             type.addField(group.interfaceName(), group.fieldName(), Modifier.PUBLIC, Modifier.FINAL);
@@ -123,7 +123,13 @@ final class EmitDatabase {
                     + "generated query. Do not commit or close it.\n")
                 .addModifiers(Modifier.PUBLIC)
                 .returns(Connection.class)
-                .addStatement("return conn")
+                .addStatement("return transaction.conn()")
+                .build())
+            .addMethod(MethodSpec.methodBuilder("afterCommit")
+                .addJavadoc("See {@link $T#afterCommit(Runnable)} for ordering and failure semantics.\n", TRANSACTION)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(Runnable.class, "callback")
+                .addStatement("transaction.afterCommit(callback)")
                 .build())
             .build();
     }

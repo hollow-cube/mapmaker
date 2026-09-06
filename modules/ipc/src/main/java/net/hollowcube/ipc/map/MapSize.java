@@ -20,6 +20,13 @@ public enum MapSize {
         this.size = size;
     }
 
+    /// The size a stored id means; anything unrecognised, which nothing should have written, is
+    /// read as the smallest so that the map still opens.
+    public static MapSize fromId(long id) {
+        for (var size : values()) if (size != UNKNOWN && size.id == id) return size;
+        return NORMAL;
+    }
+
     public int id() {
         return id;
     }

@@ -131,6 +131,280 @@
         }
       }
     },
+    "map": {
+      "interface": "net.hollowcube.ipc.map.MapService",
+      "methods": {
+        "accept-builder-invite": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.BuilderResult"
+          }
+        },
+        "begin-verification": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.BeginVerificationResult"
+          }
+        },
+        "create": {
+          "params": [
+            {
+              "name": "owner",
+              "type": "UUID"
+            },
+            {
+              "name": "size",
+              "type": "net.hollowcube.ipc.map.MapSize"
+            },
+            {
+              "name": "protocolVersion",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.CreateMapResult"
+          }
+        },
+        "delete": {
+          "params": [
+            {
+              "name": "actorId",
+              "type": "UUID"
+            },
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "reason",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        "delete-verification": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.DeleteVerificationResult"
+          }
+        },
+        "get": {
+          "params": [
+            {
+              "name": "idOrPublishedId",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.MapData",
+            "nullable": true
+          }
+        },
+        "get-builders": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "onlyActive",
+              "type": "boolean"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.map.MapBuilder\u003e"
+          }
+        },
+        "get-player-rating": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.MapRating"
+          }
+        },
+        "get-player-slots": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.map.MapSlot\u003e"
+          }
+        },
+        "get-status": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.MapStatus"
+          }
+        },
+        "get-world": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.Blob"
+          }
+        },
+        "invite-builder": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.BuilderResult"
+          }
+        },
+        "publish": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.PublishMapResult"
+          }
+        },
+        "reject-builder-invite": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.BuilderResult"
+          }
+        },
+        "remove-builder": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.BuilderResult"
+          }
+        },
+        "report": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "reporter",
+              "type": "UUID"
+            },
+            {
+              "name": "categories",
+              "type": "List\u003cnet.hollowcube.ipc.map.MapReportCategory\u003e"
+            },
+            {
+              "name": "comment",
+              "type": "String",
+              "nullable": true
+            }
+          ]
+        },
+        "set-player-rating": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "rating",
+              "type": "net.hollowcube.ipc.map.MapRating"
+            }
+          ]
+        },
+        "update": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "patch",
+              "type": "net.hollowcube.ipc.map.MapPatch"
+            }
+          ]
+        },
+        "update-world": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "loadTime",
+              "type": "long"
+            },
+            {
+              "name": "world",
+              "type": "net.hollowcube.ipc.Blob"
+            }
+          ]
+        }
+      }
+    },
     "replay": {
       "interface": "net.hollowcube.ipc.replay.ReplayService",
       "methods": {
@@ -659,6 +933,651 @@
         }
       ]
     },
+    "net.hollowcube.ipc.map.BeginVerificationResult": {
+      "kind": "enum",
+      "constants": [
+        "READY",
+        "MAP_NOT_FOUND",
+        "MAP_PUBLISHED",
+        "NOT_VERIFIABLE",
+        "DRAIN_TIMEOUT"
+      ]
+    },
+    "net.hollowcube.ipc.map.BuilderResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "already-builder": "net.hollowcube.ipc.map.BuilderResult.AlreadyBuilder",
+        "already-done": "net.hollowcube.ipc.map.BuilderResult.AlreadyDone",
+        "capacity-reached": "net.hollowcube.ipc.map.BuilderResult.CapacityReached",
+        "invite-gone": "net.hollowcube.ipc.map.BuilderResult.InviteGone",
+        "invites-disabled": "net.hollowcube.ipc.map.BuilderResult.InvitesDisabled",
+        "map-not-found": "net.hollowcube.ipc.map.BuilderResult.MapNotFound",
+        "map-published": "net.hollowcube.ipc.map.BuilderResult.MapPublished",
+        "no-slots": "net.hollowcube.ipc.map.BuilderResult.NoSlots",
+        "owner": "net.hollowcube.ipc.map.BuilderResult.Owner",
+        "player-not-found": "net.hollowcube.ipc.map.BuilderResult.PlayerNotFound",
+        "success": "net.hollowcube.ipc.map.BuilderResult.Success"
+      }
+    },
+    "net.hollowcube.ipc.map.BuilderResult.AlreadyBuilder": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.AlreadyDone": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "builders",
+          "type": "List\u003cnet.hollowcube.ipc.map.MapBuilder\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.BuilderResult.CapacityReached": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.BuilderResult.InviteGone": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.InvitesDisabled": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.MapNotFound": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.MapPublished": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.NoSlots": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.BuilderResult.Owner": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.PlayerNotFound": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.BuilderResult.Success": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "builders",
+          "type": "List\u003cnet.hollowcube.ipc.map.MapBuilder\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.CreateMapResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "no-slots": "net.hollowcube.ipc.map.CreateMapResult.NoSlots",
+        "not-found": "net.hollowcube.ipc.map.CreateMapResult.NotFound",
+        "size-locked": "net.hollowcube.ipc.map.CreateMapResult.SizeLocked",
+        "success": "net.hollowcube.ipc.map.CreateMapResult.Success"
+      }
+    },
+    "net.hollowcube.ipc.map.CreateMapResult.NoSlots": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "limit",
+          "type": "int"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.CreateMapResult.NotFound": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.CreateMapResult.SizeLocked": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.CreateMapResult.Success": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "map",
+          "type": "net.hollowcube.ipc.map.MapData"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.DeleteVerificationResult": {
+      "kind": "enum",
+      "constants": [
+        "RESET",
+        "MAP_NOT_FOUND",
+        "MAP_PUBLISHED"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapBuilder": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID"
+        },
+        {
+          "name": "createdAt",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "pending",
+          "type": "boolean"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapData": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID"
+        },
+        {
+          "name": "owner",
+          "type": "UUID"
+        },
+        {
+          "name": "protocolVersion",
+          "type": "int"
+        },
+        {
+          "name": "settings",
+          "type": "net.hollowcube.ipc.map.MapData.Settings"
+        },
+        {
+          "name": "verification",
+          "type": "net.hollowcube.ipc.map.MapVerification"
+        },
+        {
+          "name": "publishedId",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "publishedAt",
+          "type": "java.time.Instant",
+          "nullable": true
+        },
+        {
+          "name": "listed",
+          "type": "boolean"
+        },
+        {
+          "name": "quality",
+          "type": "net.hollowcube.ipc.map.MapQuality"
+        },
+        {
+          "name": "difficulty",
+          "type": "net.hollowcube.ipc.map.MapDifficulty"
+        },
+        {
+          "name": "uniquePlays",
+          "type": "long"
+        },
+        {
+          "name": "clearRate",
+          "type": "double"
+        },
+        {
+          "name": "likes",
+          "type": "int"
+        },
+        {
+          "name": "contest",
+          "type": "UUID",
+          "nullable": true
+        },
+        {
+          "name": "createdAt",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "lastModified",
+          "type": "java.time.Instant"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapData.Settings": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "String"
+        },
+        {
+          "name": "icon",
+          "type": "String"
+        },
+        {
+          "name": "size",
+          "type": "net.hollowcube.ipc.map.MapSize"
+        },
+        {
+          "name": "variant",
+          "type": "net.hollowcube.ipc.map.MapVariant"
+        },
+        {
+          "name": "subvariant",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "spawnPoint",
+          "type": "net.hollowcube.ipc.util.Position"
+        },
+        {
+          "name": "tags",
+          "type": "List\u003cString\u003e"
+        },
+        {
+          "name": "leaderboard",
+          "type": "net.hollowcube.ipc.map.MapLeaderboard"
+        },
+        {
+          "name": "extra",
+          "type": "com.google.gson.JsonObject"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapDifficulty": {
+      "kind": "enum",
+      "constants": [
+        "UNRATED",
+        "EASY",
+        "MEDIUM",
+        "HARD",
+        "EXPERT",
+        "NIGHTMARE"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapLeaderboard": {
+      "kind": "record",
+      "used": [
+        "request",
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "asc",
+          "type": "boolean"
+        },
+        {
+          "name": "format",
+          "type": "net.hollowcube.ipc.map.MapLeaderboard.Format"
+        },
+        {
+          "name": "score",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapLeaderboard.Format": {
+      "kind": "enum",
+      "constants": [
+        "TIME",
+        "PERCENT",
+        "NUMBER"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapPatch": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "icon",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "size",
+          "type": "net.hollowcube.ipc.map.MapSize",
+          "nullable": true
+        },
+        {
+          "name": "variant",
+          "type": "net.hollowcube.ipc.map.MapVariant",
+          "nullable": true
+        },
+        {
+          "name": "subvariant",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "spawnPoint",
+          "type": "net.hollowcube.ipc.util.Position",
+          "nullable": true
+        },
+        {
+          "name": "tags",
+          "type": "List\u003cString\u003e",
+          "nullable": true
+        },
+        {
+          "name": "leaderboard",
+          "type": "net.hollowcube.ipc.map.MapLeaderboard",
+          "nullable": true
+        },
+        {
+          "name": "extra",
+          "type": "com.google.gson.JsonObject",
+          "nullable": true
+        },
+        {
+          "name": "listed",
+          "type": "Boolean",
+          "nullable": true
+        },
+        {
+          "name": "qualityOverride",
+          "type": "net.hollowcube.ipc.map.MapQuality",
+          "nullable": true
+        },
+        {
+          "name": "protocolVersion",
+          "type": "Integer",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapQuality": {
+      "kind": "enum",
+      "constants": [
+        "UNRATED",
+        "GOOD",
+        "GREAT",
+        "EXCELLENT",
+        "OUTSTANDING",
+        "MASTERPIECE"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapRating": {
+      "kind": "enum",
+      "constants": [
+        "UNRATED",
+        "LIKED",
+        "DISLIKED"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapReportCategory": {
+      "kind": "enum",
+      "constants": [
+        "CHEATED",
+        "DISCRIMINATION",
+        "EXPLICIT_CONTENT",
+        "SPAM",
+        "DMCA",
+        "TROLL",
+        "UNPLAYABLE"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapSize": {
+      "kind": "enum",
+      "constants": [
+        "NORMAL",
+        "LARGE",
+        "MASSIVE",
+        "COLOSSAL",
+        "UNLIMITED"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapSlot": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "map",
+          "type": "net.hollowcube.ipc.map.MapData"
+        },
+        {
+          "name": "createdAt",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "owner",
+          "type": "boolean"
+        },
+        {
+          "name": "builders",
+          "type": "List\u003cnet.hollowcube.ipc.map.MapBuilder\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapStatus": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "draft": "net.hollowcube.ipc.map.MapStatus.Draft",
+        "not-found": "net.hollowcube.ipc.map.MapStatus.NotFound",
+        "published": "net.hollowcube.ipc.map.MapStatus.Published",
+        "ready-to-publish": "net.hollowcube.ipc.map.MapStatus.ReadyToPublish",
+        "verifying": "net.hollowcube.ipc.map.MapStatus.Verifying"
+      }
+    },
+    "net.hollowcube.ipc.map.MapStatus.Draft": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "readiness",
+          "type": "net.hollowcube.ipc.map.PublishReadiness"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapStatus.NotFound": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.MapStatus.Published": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "publishedId",
+          "type": "String"
+        },
+        {
+          "name": "publishedAt",
+          "type": "java.time.Instant"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapStatus.ReadyToPublish": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.MapStatus.Verifying": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "readiness",
+          "type": "net.hollowcube.ipc.map.PublishReadiness"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapVariant": {
+      "kind": "enum",
+      "constants": [
+        "PARKOUR",
+        "BUILDING",
+        "ADVENTURE"
+      ]
+    },
+    "net.hollowcube.ipc.map.MapVerification": {
+      "kind": "enum",
+      "constants": [
+        "UNVERIFIED",
+        "PENDING",
+        "VERIFIED"
+      ]
+    },
+    "net.hollowcube.ipc.map.PublishMapResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "blocked": "net.hollowcube.ipc.map.PublishMapResult.Blocked",
+        "not-found": "net.hollowcube.ipc.map.PublishMapResult.NotFound",
+        "success": "net.hollowcube.ipc.map.PublishMapResult.Success"
+      }
+    },
+    "net.hollowcube.ipc.map.PublishMapResult.Blocked": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "readiness",
+          "type": "net.hollowcube.ipc.map.PublishReadiness"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.PublishMapResult.NotFound": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.PublishMapResult.Success": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "map",
+          "type": "net.hollowcube.ipc.map.MapData"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.PublishReadiness": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "missing",
+          "type": "List\u003cnet.hollowcube.ipc.map.PublishRequirement\u003e"
+        },
+        {
+          "name": "buildTime",
+          "type": "long"
+        },
+        {
+          "name": "requiredBuildTime",
+          "type": "long"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.PublishRequirement": {
+      "kind": "enum",
+      "constants": [
+        "WORLD",
+        "BUILD_TIME",
+        "VERIFICATION",
+        "NAME",
+        "ICON",
+        "TAGS"
+      ]
+    },
     "net.hollowcube.ipc.replay.ReplayCommit": {
       "kind": "record",
       "used": [
@@ -791,6 +1710,35 @@
       "constants": [
         "RECORDING",
         "FINISHED"
+      ]
+    },
+    "net.hollowcube.ipc.util.Position": {
+      "kind": "record",
+      "used": [
+        "request",
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "x",
+          "type": "double"
+        },
+        {
+          "name": "y",
+          "type": "double"
+        },
+        {
+          "name": "z",
+          "type": "double"
+        },
+        {
+          "name": "yaw",
+          "type": "float"
+        },
+        {
+          "name": "pitch",
+          "type": "float"
+        }
       ]
     }
   },

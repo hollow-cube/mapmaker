@@ -41,7 +41,6 @@ class IpcRoundTripTest {
     private static final JavaFileObject SERVICE = JavaFileObjects.forSourceString("test.EchoService", """
         package test;
 
-        import net.hollowcube.common.util.RuntimeGson;
         import net.hollowcube.ipc.Blob;
         import net.hollowcube.ipc.util.Ipc;
         import org.jetbrains.annotations.Nullable;
@@ -73,7 +72,6 @@ class IpcRoundTripTest {
 
             Blob fetch(String name);
 
-            @RuntimeGson
             record Point(int x, int y) {
             }
 
@@ -82,16 +80,13 @@ class IpcRoundTripTest {
             }
 
             sealed interface Shape permits Circle, Square, Shape.Unknown {
-                @RuntimeGson
                 record Unknown(@Nullable String type) implements Shape {
                 }
             }
 
-            @RuntimeGson
             record Circle(int radius) implements Shape {
             }
 
-            @RuntimeGson
             record Square(int side) implements Shape {
             }
         }

@@ -1,13 +1,11 @@
 package net.hollowcube.ipc;
 
-import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.ToLongFunction;
 
-@RuntimeGson
 public record PaginatedList<T>(int count, List<T> results) {
 
     /// One page of query rows, where the total is a `count(*) over ()` window that every row of the

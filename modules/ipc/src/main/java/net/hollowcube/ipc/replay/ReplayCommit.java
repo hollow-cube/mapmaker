@@ -1,6 +1,5 @@
 package net.hollowcube.ipc.replay;
 
-import net.hollowcube.common.util.RuntimeGson;
 import org.jetbrains.annotations.Nullable;
 
 /// Everything about one recording commit except its bytes, which are the body.
@@ -14,7 +13,6 @@ import org.jetbrains.annotations.Nullable;
 ///                       alone
 /// @param outcome        why, when `finished`; ignored otherwise
 /// @param contentDigest  base64 of the SHA-256 of the whole body, `preamble || segment`
-@RuntimeGson
 public record ReplayCommit(
     String id,
     @Nullable Long expectedRevision,

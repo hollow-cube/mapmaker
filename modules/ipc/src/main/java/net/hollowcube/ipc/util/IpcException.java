@@ -17,6 +17,30 @@ public class IpcException extends RuntimeException {
         this.status = status;
     }
 
+    public static IpcException badRequest(String message) {
+        return new IpcException(400, message);
+    }
+
+    public static IpcException notFound(String message) {
+        return new IpcException(404, message);
+    }
+
+    public static IpcException conflict(String message) {
+        return new IpcException(409, message);
+    }
+
+    public static IpcException unprocessable(String message) {
+        return new IpcException(422, message);
+    }
+
+    public static IpcException internal(String message) {
+        return new IpcException(500, message);
+    }
+
+    public static IpcException unavailable(String message) {
+        return new IpcException(503, message);
+    }
+
     /// The status the remote answered with, or zero if the call never got one.
     public int status() {
         return status;

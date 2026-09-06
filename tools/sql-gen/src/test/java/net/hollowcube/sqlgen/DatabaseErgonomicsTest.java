@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -96,6 +97,46 @@ class DatabaseErgonomicsTest {
 
         db.gadgets.insertGadget(gadget(ID, "one"));
         assertNotNull(db.gadgets.getGadget(ID));
+    }
+
+    @Test
+    void afterCommitRunsInOrderAndCanStartANewTransaction() {
+        var calls = new ArrayList<String>();
+        var result = db.txResult(tx -> {
+            tx.gadgets.insertGadget(gadget(ID, "one"));
+            tx.afterCommit(() -> db.tx(next -> {
+                assertNotNull(next.gadgets.getGadget(ID));
+                calls.add("first");
+            }));
+            tx.afterCommit(() -> calls.add("second"));
+            assertTrue(calls.isEmpty());
+            return 42;
+        });
+
+        assertEquals(42, result);
+        assertEquals(List.of("first", "second"), calls);
+    }
+
+    @Test
+    void callbackFailureDoesNotUndoCommitOrSkipOtherCallbacksOrReachTheCaller() {
+        var calls = new ArrayList<String>();
+        db.tx(tx -> {
+            tx.gadgets.insertGadget(gadget(ID, "one"));
+            tx.afterCommit(() -> { throw new IllegalStateException("first publication failed"); });
+            tx.afterCommit(() -> { throw new IllegalStateException("second publication failed"); });
+            tx.afterCommit(() -> calls.add("last"));
+        });
+
+        assertEquals(List.of("last"), calls);
+        assertNotNull(db.gadgets.getGadget(ID));
+        db.tx(tx -> tx.gadgets.deleteGadget(ID));
+        assertNull(db.gadgets.getGadget(ID));
+    }
+
+    @Test
+    void completedTransactionRejectsNewCallbacks() {
+        var tx = db.txResult(transaction -> transaction);
+        assertThrows(IllegalStateException.class, () -> tx.afterCommit(() -> {}));
     }
 
     @Test

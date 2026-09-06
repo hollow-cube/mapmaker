@@ -1,6 +1,5 @@
 package net.hollowcube.ipc.chat;
 
-import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.ipc.util.NatsMessage;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +13,6 @@ import java.util.List;
 ///               alongside `[map]`, which is why a `LOCAL` message without one is still forwarded.
 /// @param seed   seeds the randomness in rendering, so a message that picks a random emoji picks the
 ///               same one everywhere
-@RuntimeGson
 @NatsMessage(subject = ChatMessage.SUBJECT)
 public record ChatMessage(
     String senderId,

@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
 import com.google.gson.JsonObject;
-import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
 import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
@@ -55,22 +55,8 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                     "gui.notification.map_builder.invite.action.accept.tooltip",
                     PlayerNotification.ActionExecutor
                         .ofAsync(() -> {
-                            try {
-                                context.api().maps.acceptMapBuilderInvite(data.mapId(), playerId);
-                            } catch (ApiClient.NotFoundError _) {
-                                player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.gone"));
-                                player.closeInventory();
-                            } catch (ApiClient.BadRequestError _) {
-                                // TODO: open store
-                                player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.no_slots"));
-                                return; // dont delete in this case
-                            }
-
-                            try {
-                                context.api().notifications.delete(entry.id());
-                            } catch (ApiClient.NotFoundError _) {
-                                // Ignored, it may have been deleted by the server
-                            }
+                            var result = context.api().maps.acceptMapBuilderInvite(data.mapId(), playerId);
+                            if (!result.succeeded()) player.sendMessage(MapWriteMessages.failure(result));
                         })
                         .withConfirmation("Accept Invite")
                         .withRefresh()
@@ -81,18 +67,8 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
                     "gui.notification.map_builder.invite.action.reject.tooltip",
                     PlayerNotification.ActionExecutor
                         .ofAsync(() -> {
-                            try {
-                                context.api().maps.rejectMapBuilderInvite(data.mapId(), playerId);
-                            } catch (ApiClient.NotFoundError _) {
-                                player.sendMessage(Component.translatable("gui.notification.map_builder.invite.accept.gone"));
-                                player.closeInventory();
-                            }
-
-                            try {
-                                context.api().notifications.delete(entry.id());
-                            } catch (ApiClient.NotFoundError _) {
-                                // Ignored, it may have been deleted by the server
-                            }
+                            var result = context.api().maps.rejectMapBuilderInvite(data.mapId(), playerId);
+                            if (!result.succeeded()) player.sendMessage(MapWriteMessages.failure(result));
                         })
                         .withConfirmation("Reject Invite")
                         .withRefresh()

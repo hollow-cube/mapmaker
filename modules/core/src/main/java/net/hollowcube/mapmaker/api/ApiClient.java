@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.api;
 import net.hollowcube.mapmaker.api.auth.AuthClient;
 import net.hollowcube.ipc.chat.ChatService;
 import net.hollowcube.ipc.hdb.HeadDatabaseService;
+import net.hollowcube.ipc.map.MapService;
 import net.hollowcube.ipc.replay.ReplayService;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -45,9 +46,9 @@ public final class ApiClient {
     /// Everything the Go api-server still serves comes off `http`; everything the java api-server
     /// serves is an ipc client built against its own base url, and so is passed in.
     public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat,
-                     ReplayService replays) {
+                     ReplayService replays, MapService maps) {
         this.players = new PlayerClient.Http(http);
-        this.maps = new MapClient.Http(http);
+        this.maps = new MapClient.Http(http, maps);
         this.replays = replays;
         this.headDatabase = headDatabase;
         this.chat = chat;
@@ -59,6 +60,10 @@ public final class ApiClient {
     public static class Error extends RuntimeException {
         private final int statusCode;
 
+        public Error(int statusCode) {
+            this.statusCode = statusCode;
+        }
+
         public Error(HttpResponse<?> response) {
             this.statusCode = response.statusCode();
         }
@@ -69,6 +74,10 @@ public final class ApiClient {
     }
 
     public static class NotFoundError extends Error {
+        public NotFoundError() {
+            super(404);
+        }
+
         public NotFoundError(HttpResponse<?> response) {
             super(response);
         }
