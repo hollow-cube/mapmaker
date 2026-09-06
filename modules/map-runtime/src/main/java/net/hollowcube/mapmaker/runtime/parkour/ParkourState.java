@@ -382,9 +382,14 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         if (other instanceof Finished) return this;
         if (this instanceof Finished) return other;
 
-        // Spec always has priority because it is always a user input
-        // The theory here is that if you enter spec any action that happened on that tick will happen
-        // as soon as you leave spec anyway.
+        // A pending playing state while already playing is always a reset (checkpoints mutate the
+        // PlayState in place), and it must beat spec: leaving playing stores the current position,
+        // so spamming spec on the tick a reset region is entered could otherwise inch through it,
+        // and in the air the spec change then fails its ground check so neither change applies.
+        if (other instanceof AnyPlaying) return other;
+        if (this instanceof AnyPlaying) return this;
+
+        // Spec beats the rest because it is user input, and whatever it displaced re-fires on leaving spec.
         if (other instanceof Spectating) return other;
         if (this instanceof Spectating) return this;
 
