@@ -52,6 +52,8 @@ spec:
           env:
             - name: PROXY_HTTP_PORT
               value: {{ .Values.httpPort | quote }}
+            - name: PROXY_HEAP
+              value: {{ .Values.heap | quote }}
             - name: PROXY_COOKIE_SECRET_FILE
               value: /app/cookie.secret
           {{- range $key, $value := .Values.env }}

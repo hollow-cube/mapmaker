@@ -27,6 +27,10 @@ drain:
   # replaced, and is only stopped (disconnecting whoever is left) once this runs out.
   seconds: 21600
 
+# The JVM heap (-Xms and -Xmx, pretouched at start). The anticheat ring is always on per tapped
+# connection (8 MiB cap each), so this scales with player count rather than capture rate.
+heap: 3g
+
 resources:
   limits:
     cpu: 500m

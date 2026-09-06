@@ -1,9 +1,15 @@
 name: Proxy Build & Deploy
-concurrency: proxy
+concurrency: proxy-${{ github.ref_type }}
 
-# Deploys every push to main that touches the proxy. The rollout is graceful (see the chart's
-# deployment.yaml): the new proxy takes over new logins and the old one lives on until its last
-# player leaves, so this can run whenever without dropping anyone.
+# Two deploys from one pipeline. A push to main that touches the proxy goes to staging
+# (mapmaker-proxy-staging, values-staging.yaml); a release tag goes to prod (mapmaker-proxy,
+# values-prod.yaml), but only if the proxy changed since the previous release tag - the paths filter
+# below is not evaluated for tag pushes, so the changes job does that diff itself. A manual run
+# deploys whichever the ref it was started from selects, without the diff.
+#
+# The rollout is graceful (see the chart's deployment.yaml): the new proxy takes over new logins and
+# the old one lives on until its last player leaves, so this can run whenever without dropping
+# anyone.
 #
 # modules/anticheat is a trigger because the tap, the capture engine and the trace format all live
 # there and the proxy is the only thing that runs them, so a change there is a proxy change that
@@ -15,6 +21,7 @@ concurrency: proxy
 on:
   push:
     branches: [ main ]
+    tags: [ '\d+\.\d+\.\d+' ]
     paths:
       - 'bin/proxy-plugin/**'
       - 'modules/anticheat/**'
@@ -22,7 +29,37 @@ on:
   workflow_dispatch:
 
 jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.diff.outputs.deploy }}
+    steps:
+      - uses: actions/checkout@v4
+        if: github.ref_type == 'tag' && github.event_name == 'push'
+        with:
+          fetch-depth: 0
+      - name: Diff against the previous release
+        id: diff
+        run: |
+          if [[ "$GITHUB_REF_TYPE" != "tag" || "$GITHUB_EVENT_NAME" != "push" ]]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          previous=$(git describe --tags --abbrev=0 --match '[0-9]*.[0-9]*.[0-9]*' --exclude "$GITHUB_REF_NAME" HEAD 2>/dev/null || true)
+          if [[ -z "$previous" ]]; then
+            echo "No previous release tag; deploying" >> "$GITHUB_STEP_SUMMARY"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          elif git diff --quiet "$previous" HEAD -- bin/proxy-plugin modules/anticheat .github/workflows/proxy.yml; then
+            echo "Proxy unchanged since $previous; not deploying" >> "$GITHUB_STEP_SUMMARY"
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Proxy changed since $previous; deploying" >> "$GITHUB_STEP_SUMMARY"
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+
   test:
+    needs: [ changes ]
+    if: needs.changes.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -87,9 +124,12 @@ jobs:
           path: "bin/proxy-plugin/deploy/helm-chart"
 
   helm-deploy:
-    name: Deploy Proxy
+    name: Deploy Proxy (${{ github.ref_type == 'tag' && 'prod' || 'staging' }})
     needs: [ docker-build, helm-build ]
     runs-on: ubuntu-latest
+    env:
+      RELEASE: ${{ github.ref_type == 'tag' && 'mapmaker-proxy' || 'mapmaker-proxy-staging' }}
+      VALUES: ${{ github.ref_type == 'tag' && 'values-prod.yaml' || 'values-staging.yaml' }}
     steps:
       - name: Import Secrets
         uses: hollow-cube/actions/secrets@main
@@ -108,7 +148,7 @@ jobs:
           version: v3.10.2
       - uses: actions/checkout@v4
 
-      # Not the common helm-deploy action: values-prod.yaml needs the drain cookie key substituted
+      # Not the common helm-deploy action: the values file needs the drain cookie key substituted
       # in, which lives in the proxy's own vault path as MAPMAKER_PROXY_COOKIE_SECRET.
       - name: Import Proxy Secrets
         uses: hollow-cube/actions/secrets@main
@@ -123,9 +163,9 @@ jobs:
           helm registry login registry-1.docker.io --username mworzala --password ${{ env.DOCKER_PASS }}
           helm pull oci://registry-1.docker.io/mworzala/mapmaker-proxy --version "1.0.0-${{ github.sha }}"
 
-          cat bin/proxy-plugin/deploy/values-prod.yaml | envsubst > ./values-override-proxy.yaml
+          cat "bin/proxy-plugin/deploy/$VALUES" | envsubst > ./values-override-proxy.yaml
 
-          helm upgrade mapmaker-proxy mapmaker-proxy-1.0.0-${{ github.sha }}.tgz \
+          helm upgrade "$RELEASE" mapmaker-proxy-1.0.0-${{ github.sha }}.tgz \
                --install --create-namespace --namespace mapmaker \
                --reset-values -f ./values-override-proxy.yaml \
                --set image.tag="${{ github.sha }}"

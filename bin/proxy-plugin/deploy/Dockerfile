@@ -6,5 +6,8 @@ WORKDIR /app
 # in here; the chart mounts it at /app/forwarding.secret.
 COPY ./bin/proxy-plugin/build/proxy/stage /app
 
+# Fixed heap (Xms = Xmx, pretouched), sized by the chart's `heap` value.
+ENV PROXY_HEAP=3g
+
 EXPOSE 25565 9124
-CMD ["java", "-XX:+UseG1GC", "-XX:G1HeapRegionSize=4M", "-XX:+UnlockExperimentalVMOptions", "-XX:+ParallelRefProcEnabled", "-XX:+AlwaysPreTouch", "-XX:MaxInlineLevel=15", "-Xms3g", "-Xmx3g", "-Dvelocity.max-plugin-message-payload-size=1048576", "-jar", "velocity.jar"]
+CMD ["sh", "-c", "exec java -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -Xms$PROXY_HEAP -Xmx$PROXY_HEAP -Dvelocity.max-plugin-message-payload-size=1048576 -jar velocity.jar"]

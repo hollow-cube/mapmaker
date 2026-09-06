@@ -25,7 +25,8 @@ A guide on how to update the server to a new Minecraft version.
   latest protocol version.
 * `./gradlew :bin:proxy-plugin:runProxy` runs exactly what ships, in front of a local dev server.
 
-The proxy deploys on every push to `main` that touches it (`.github/workflows/proxy.yml`), and the
-rollout is graceful: the new proxy takes new logins and the old one stays up until its last player
-leaves, so a version bump only needs the servers deployed first (or at the same time) for the
-players who reconnect to have somewhere to go.
+Every push to `main` that touches the proxy deploys it to staging (`mapmaker-proxy-staging`, nodePort
+30566), and a release tag deploys it to prod if it changed since the previous release
+(`.github/workflows/proxy.yml`). The rollout is graceful: the new proxy takes new logins and the old
+one stays up until its last player leaves, so a version bump only needs the servers deployed first
+(or at the same time) for the players who reconnect to have somewhere to go.

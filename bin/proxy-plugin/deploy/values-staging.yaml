@@ -1,0 +1,40 @@
+# The staging proxy: the same image and backends as prod, on its own nodePort, for trying a proxy
+# build on a couple of people before it is tagged. Every push to main that touches the proxy lands
+# here; the tag deploy is values-prod.yaml.
+image:
+  pullSecrets:
+    - name: dockerio
+
+forwardingSecret: "AsmMzWkjyrNvu5DprZWupQXy79mKFHK7d5Aj662YmVq4zEQns3RWb7NFpxvcTzgV"
+
+# envsubst'd by the workflow, from vault prod/proxy. The same key as prod, so a drain cookie sealed
+# by either proxy opens on the other.
+cookieSecret: "${MAPMAKER_PROXY_COOKIE_SECRET}"
+
+service:
+  nodePort: 30566
+
+nodeSelector:
+  kubernetes.io/hostname: wkr-01
+
+env:
+  SESSION_SERVICE_URL: "http://api-server:9124"
+  IPC_SERVICE_URL: "http://api-server-java:9124"
+  ANTICHEAT_ENABLED: "true"
+
+drain:
+  # Nobody is meant to be on this for long, and it is replaced on every proxy push.
+  seconds: 3600
+
+# One or two players: the prod proxy's whole working set sat at 250-350 MiB before its heap was
+# pretouched, ring included, so 512m is generous. The rest of the limit is direct buffers,
+# metaspace and stacks.
+heap: 512m
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 1Gi
+  requests:
+    cpu: 250m
+    memory: 1Gi
