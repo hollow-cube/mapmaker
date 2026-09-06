@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.test;
 
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.minestom.server.entity.Player;
 
@@ -9,7 +9,7 @@ import net.minestom.server.entity.Player;
 public final class TestMapWorld extends AbstractMapWorld<TestMapWorld.State, TestMapWorld> {
 
     public TestMapWorld() {
-        this(new MapData());
+        this(MapData.draft(java.util.UUID.randomUUID(), java.util.UUID.randomUUID()));
     }
 
     public TestMapWorld(MapData map) {

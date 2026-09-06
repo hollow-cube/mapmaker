@@ -3,10 +3,11 @@ package net.hollowcube.mapmaker.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.gui.map.browser.MapBrowserView;
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -62,7 +63,7 @@ public class PlayCommand extends CommandDsl {
 
         var currentMap = MiscFunctionality.getCurrentMap(sessionManager, api.maps, player);
         if (currentMap != null && currentMap.id().equals(map.id())) {
-            player.sendMessage(Component.translatable("command.play.already_playing", currentMap.settings().getNameComponent()));
+            player.sendMessage(Component.translatable("command.play.already_playing", MapSettings.getNameComponent(currentMap.settings())));
             return;
         }
 
@@ -71,7 +72,7 @@ public class PlayCommand extends CommandDsl {
             return;
         }
 
-        bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_command");
+        bridge.joinMap(player, map.id().toString(), ServerBridge.JoinMapState.PLAYING, "play_command");
     }
 
 }

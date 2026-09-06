@@ -1,8 +1,11 @@
 package net.hollowcube.mapmaker.gui.map.details;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapQuality;
+import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapDifficulty;
+import net.hollowcube.ipc.map.MapQuality;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
@@ -10,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,7 +29,7 @@ class MapDetailsInfoPanel extends Panel {
         add(0, 0, new IconRow(4, "gui.map_details.map_info_tab.quality_description",
             "map_details/info/quality/" + mapQuality.key, mapQuality.iconX, mapQuality.iconY,
             "gui.map_details.map_info_tab.quality." + mapQuality.key, mapQuality.name));
-        var mapDifficulty = mapDifficultyInfo(map.getDifficulty());
+        var mapDifficulty = mapDifficultyInfo(map.difficulty());
         add(5, 0, new IconRow(3, "gui.map_details.map_info_tab.difficulty_description",
             "map_browser/difficulty/" + mapDifficulty.key, mapDifficulty.iconX, mapDifficulty.iconY,
             "gui.map_details.map_info_tab.difficulty." + mapDifficulty.key, mapDifficulty.name));
@@ -35,21 +39,21 @@ class MapDetailsInfoPanel extends Panel {
             "map_details/info/type/" + mapType.key, mapType.iconX, mapType.iconY,
             "gui.map_details.map_info_tab.type." + mapType.key.replace("pk_", "parkour.")
                 .replace("bd_", "building."), mapType.name));
-        var tagsText = map.settings().getTagsString();
+        var tagsText = getTagsString(map.settings());
         add(0, 2, new IconRow(8, "gui.map_details.map_info_tab.tags_description",
             "map_details/info/tags/icon_" + (tagsText == null ? "off" : "on"), 3, 3,
-            tagsText == null ? null : text(map.settings().getTagsFullString()).decoration(TextDecoration.ITALIC, false), tagsText == null ? null : List.of(),
+            tagsText == null ? null : text(getTagsFullString(map.settings())).decoration(TextDecoration.ITALIC, false), tagsText == null ? null : List.of(),
             Objects.requireNonNullElse(tagsText, "No Tags")));
-        var settingsText = map.settings().getSettingsString();
+        var settingsText = getSettingsString(map.settings());
         add(0, 3, new IconRow(8, "gui.map_details.map_info_tab.settings_description",
             "map_details/info/settings/icon_" + (settingsText == null ? "off" : "on"), 3, 3,
-            settingsText == null ? null : text(map.settings().getSettingsFullString()).decoration(TextDecoration.ITALIC, false), settingsText == null ? null : List.of(),
+            settingsText == null ? null : text(getSettingsFullString(map.settings())).decoration(TextDecoration.ITALIC, false), settingsText == null ? null : List.of(),
             Objects.requireNonNullElse(settingsText, "No Settings")));
     }
 
     private RowInfo mapQualityInfo(MapQuality quality) {
         return switch (quality) {
-            case UNRATED -> new RowInfo("unrated", "Unrated", 3, 3);
+            case UNRATED, UNKNOWN -> new RowInfo("unrated", "Unrated", 3, 3);
             case GOOD -> new RowInfo("good", "Good", 3, 3);
             case GREAT -> new RowInfo("great", "Great", 3, 3);
             case EXCELLENT -> new RowInfo("excellent", "Excellent", 3, 3);
@@ -58,9 +62,9 @@ class MapDetailsInfoPanel extends Panel {
         };
     }
 
-    private RowInfo mapDifficultyInfo(MapData.Difficulty difficulty) {
+    private RowInfo mapDifficultyInfo(MapDifficulty difficulty) {
         return switch (difficulty) {
-            case UNKNOWN -> new RowInfo("unknown", "Unknown", 2, 2);
+            case UNRATED, UNKNOWN -> new RowInfo("unknown", "Unknown", 2, 2);
             case EASY -> new RowInfo("easy", "Easy", 4, 3);
             case MEDIUM -> new RowInfo("medium", "Medium", 3, 3);
             case HARD -> new RowInfo("hard", "Hard", 4, 4);
@@ -70,8 +74,8 @@ class MapDetailsInfoPanel extends Panel {
     }
 
     private RowInfo mapTypeInfo(MapData mapData) {
-        return switch (mapData.settings().getVariant()) {
-            case PARKOUR -> switch (mapData.settings().getParkourSubVariant()) {
+        return switch (mapData.settings().variant()) {
+            case PARKOUR -> switch (MapSettings.getParkourSubVariant(mapData.settings())) {
                 case null -> new RowInfo("pk_generic", "Generic Parkour", 2, 2);
                 case SPEEDRUN -> new RowInfo("pk_speedrun", "Speedrun Parkour", 1, 2);
                 case SECTIONED -> new RowInfo("pk_sectioned", "Sectioned Parkour", 3, 2);
@@ -81,11 +85,12 @@ class MapDetailsInfoPanel extends Panel {
                 case ONE_JUMP -> new RowInfo("pk_one_jump", "One Jump Parkour", 3, 3);
                 case INFORMATIVE -> new RowInfo("pk_informative", "Informative Parkour", 2, 3);
             };
-            case BUILDING -> switch (mapData.settings().getBuildingSubVariant()) {
+            case BUILDING -> switch (MapSettings.getBuildingSubVariant(mapData.settings())) {
                 case null -> new RowInfo("bd_generic", "Generic Build", 3, 2);
                 case SHOWCASE -> new RowInfo("bd_showcase", "Build Showcase", 4, 3);
                 case TUTORIAL -> new RowInfo("bd_tutorial", "Build Tutorial", 3, 3);
             };
+            case UNKNOWN -> new RowInfo("pk_generic", "Unknown", 2, 2);
             case ADVENTURE -> throw new UnsupportedOperationException("adventure maps");
         };
     }
@@ -125,4 +130,122 @@ class MapDetailsInfoPanel extends Panel {
         }
 
     }
+
+    private static @Nullable String getTagsString(MapData.Settings settings) {
+        List<String> tags = new ArrayList<>(MapSettings.getTags(settings).stream()
+            .map(tag -> LanguageProviderV2.translateToPlain(tag.baseTranslationKey() + ".name"))
+            .toList());
+        if (tags.isEmpty()) {
+            return null;
+        }
+
+        var tagsLength = FontUtil.measureText(String.join(", ", tags));
+        var maxLength = 110;
+
+        var initialTagsCount = tags.size();
+
+        while (tagsLength > maxLength && !tags.isEmpty()) {
+            tags.remove(tags.size() - 1);
+            tagsLength = FontUtil.measureText(String.join(", ", tags));
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        int removedTagsCount = initialTagsCount - tags.size();
+
+        for (int i = 0; i < tags.size(); i++) {
+            String tagsName = tags.get(i);
+            stringBuilder.append(tagsName);
+            if (i < tags.size() - 1) {
+                stringBuilder.append(", ");
+            } else if (i == tags.size() - 1 && removedTagsCount > 0) {
+                stringBuilder.append(", +").append(removedTagsCount);
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private static String getTagsFullString(MapData.Settings settings) {
+        List<String> tags = new ArrayList<>(MapSettings.getTags(settings).stream()
+            .map(tag -> LanguageProviderV2.translateToPlain(tag.baseTranslationKey() + ".name"))
+            .toList());
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < tags.size(); i++) {
+            String tagsName = tags.get(i);
+            stringBuilder.append(tagsName);
+            if (i < tags.size() - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private static @Nullable String getSettingsString(MapData.Settings settings) {
+        List<String> enabledSettings = new ArrayList<>();
+
+        if (MapSettings.get(settings, MapSettings.ONLY_SPRINT)) enabledSettings.add("Only Sprint");
+        if (MapSettings.get(settings, MapSettings.NO_SPRINT)) enabledSettings.add("No Sprint");
+        if (MapSettings.get(settings, MapSettings.NO_JUMP)) enabledSettings.add("No Jump");
+        if (MapSettings.get(settings, MapSettings.NO_SNEAK)) enabledSettings.add("No Sneak");
+        if (MapSettings.get(settings, MapSettings.BOAT)) enabledSettings.add("Boats");
+
+        if (enabledSettings.isEmpty()) {
+            return null;
+        }
+
+        var initialSettingCount = enabledSettings.size();
+        var settingsLength = FontUtil.measureText(String.join(", ", enabledSettings));
+        var maxLength = 139;
+
+        while (settingsLength > maxLength && !enabledSettings.isEmpty()) {
+            enabledSettings.remove(enabledSettings.size() - 1);
+            settingsLength = FontUtil.measureText(String.join(", ", enabledSettings));
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+        int removedSettingCount = initialSettingCount - enabledSettings.size();
+
+        for (int i = 0; i < enabledSettings.size(); i++) {
+            String settingName = enabledSettings.get(i);
+            stringBuilder.append(settingName);
+            if (i < enabledSettings.size() - 1) {
+                stringBuilder.append(", ");
+            } else if (i == enabledSettings.size() - 1 && removedSettingCount > 0) {
+                stringBuilder.append(", +").append(removedSettingCount);
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
+    private static String getSettingsFullString(MapData.Settings settings) {
+        List<String> enabledSettings = new ArrayList<>();
+
+
+        if (MapSettings.get(settings, MapSettings.ONLY_SPRINT)) enabledSettings.add("Only Sprint");
+        if (MapSettings.get(settings, MapSettings.NO_SPRINT)) enabledSettings.add("No Sprint");
+        if (MapSettings.get(settings, MapSettings.NO_JUMP)) enabledSettings.add("No Jump");
+        if (MapSettings.get(settings, MapSettings.NO_SNEAK)) enabledSettings.add("No Sneak");
+        if (MapSettings.get(settings, MapSettings.BOAT)) enabledSettings.add("Boats");
+
+        if (enabledSettings.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (int i = 0; i < enabledSettings.size(); i++) {
+            String settingName = enabledSettings.get(i);
+            stringBuilder.append(settingName);
+            if (i < enabledSettings.size() - 1) {
+                stringBuilder.append(", ");
+            }
+        }
+
+        return stringBuilder.toString();
+    }
+
 }

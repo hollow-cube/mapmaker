@@ -67,6 +67,6 @@ public class RemoveCommand extends CommandDsl {
     }
 
     private static boolean doesPlayerOwnMap(Player player, @Nullable MapWorld world) {
-        return world != null && player.getUuid().equals(UUID.fromString(world.map().owner()));
+        return world != null && player.getUuid().equals(UUID.fromString(world.map().owner().toString()));
     }
 }

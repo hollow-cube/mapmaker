@@ -1,11 +1,12 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.map.MapSlot;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
-import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -18,6 +19,8 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Blocking;
 
+import java.util.function.Consumer;
+
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.confirm;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.MODEL_8X;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPlayerHead2d;
@@ -29,11 +32,12 @@ public class MapSlotEntry extends Panel {
     private final ServerBridge bridge;
     private final MapSlot slot;
     private final Runnable onPublish;
+    private final Consumer<MapSlot> onEdit;
 
     private MapSlotEntry(
         ApiClient api,
         PlayerService playerService, ServerBridge bridge,
-        MapSlot slot, Runnable onPublish
+        MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
     ) {
         super(9, 1);
         this.api = api;
@@ -41,6 +45,7 @@ public class MapSlotEntry extends Panel {
         this.bridge = bridge;
         this.slot = slot;
         this.onPublish = onPublish;
+        this.onEdit = onEdit;
     }
 
     @Blocking
@@ -52,7 +57,7 @@ public class MapSlotEntry extends Panel {
 
         // If you arent the owner, we need to check the latest version to make sure its not in a verifying state
         // TODO: this is still a race, we need to check elsewhere to prevent editing a map during/after verification
-        var map = api.maps.get(slot.map().id());
+        var map = api.maps.get(slot.map().id().toString());
         if (map.verification() == MapVerification.PENDING) {
             host.player().sendMessage(Component.translatable("edit.map.failure.verify"));
             return;
@@ -69,7 +74,7 @@ public class MapSlotEntry extends Panel {
 
         async(() -> {
             // TODO: this constructor is blocking, which is kinda confusing and im not a fan overall.
-            var view = new EditMapView(this.api, this.playerService, this.bridge, slot, this.onPublish);
+            var view = new EditMapView(this.api, this.playerService, this.bridge, slot, this.onPublish, this.onEdit);
             sync(() -> host.pushView(view));
         });
     }
@@ -88,7 +93,7 @@ public class MapSlotEntry extends Panel {
         var playerId = PlayerData.fromPlayer(player).id();
         host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
-                api.maps.removeMapBuilder(slot.map().id(), playerId);
+                api.maps.removeMapBuilder(slot.map().id().toString(), playerId);
                 player.closeInventory();
                 player.sendMessage(Component.translatable("leave.other.map"));
             } catch (RuntimeException e) {
@@ -99,20 +104,20 @@ public class MapSlotEntry extends Panel {
     }
 
     private boolean isOwner(Player player) {
-        return player.getUuid().toString().equals(slot.map().owner());
+        return player.getUuid().toString().equals(slot.map().owner().toString());
     }
 
     public static final class Owner extends MapSlotEntry {
         public Owner(
             ApiClient api,
             PlayerService playerService, ServerBridge bridge,
-            MapSlot slot, Runnable onPublish
+            MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
         ) {
-            super(api, playerService, bridge, slot, onPublish);
+            super(api, playerService, bridge, slot, onPublish, onEdit);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.yours";
-            var mapName = map.settings().getNameSafe();
+            var mapName = MapSettings.getNameSafe(map.settings());
 
             // TODO: If ready to publish, green background
             background("create_maps2/slot/blue", 1, 1);
@@ -120,7 +125,7 @@ public class MapSlotEntry extends Panel {
             var iconButton = add(0, 0, new Button(null, 1, 1)
                 .translationKey(translationKey, mapName)
                 .onLeftClick(this::editMapDetails));
-            var userIcon = map.settings().getIcon();
+            var userIcon = MapSettings.getIcon(map.settings());
             if (userIcon != null) iconButton.model(userIcon.toString(), null);
             else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
 
@@ -148,14 +153,14 @@ public class MapSlotEntry extends Panel {
         public Builder(
             ApiClient api,
             PlayerService playerService, ServerBridge bridge,
-            MapSlot slot, Runnable onPublish
+            MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
         ) {
-            super(api, playerService, bridge, slot, onPublish);
+            super(api, playerService, bridge, slot, onPublish, onEdit);
             this.api = api;
             this.slot = slot;
 
             var map = slot.map();
-            var mapName = map.settings().getNameSafe();
+            var mapName = MapSettings.getNameSafe(map.settings());
 
             // TODO: Different background for builder maps
             background("create_maps2/slot/blue", 1, 1);
@@ -163,7 +168,7 @@ public class MapSlotEntry extends Panel {
             this.iconButton = add(0, 0, new Button(null, 1, 1)
                 .translationKey(TRANSLATION_KEY, mapName, LOADING)
                 .background("create_maps2/head_outline", 4, 4)
-                .profile(getPlayerHead2d(map.owner()))
+                .profile(getPlayerHead2d(map.owner().toString()))
                 .model(MODEL_8X, null)
                 .onLeftClickAsync(this::buildInWorld));
 
@@ -183,9 +188,9 @@ public class MapSlotEntry extends Panel {
 
             if (!isInitial) return;
             async(() -> {
-                var ownerDisplayName = api.players.getDisplayName(slot.map().owner()).asComponent();
+                var ownerDisplayName = api.players.getDisplayName(slot.map().owner().toString()).asComponent();
                 sync(() -> {
-                    var mapName = slot.map().settings().getNameSafe();
+                    var mapName = MapSettings.getNameSafe(slot.map().settings());
 
                     this.iconButton.translationKey(TRANSLATION_KEY, mapName, ownerDisplayName);
                     this.nameButton.translationKey(TRANSLATION_KEY, mapName, ownerDisplayName);
@@ -200,20 +205,20 @@ public class MapSlotEntry extends Panel {
         public Published(
             ApiClient api,
             PlayerService playerService, ServerBridge bridge,
-            MapSlot slot, Runnable onPublish
+            MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
         ) {
-            super(api, playerService, bridge, slot, onPublish);
+            super(api, playerService, bridge, slot, onPublish, onEdit);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.published";
-            var mapName = map.settings().getNameSafe();
+            var mapName = MapSettings.getNameSafe(map.settings());
 
             background("create_maps2/slot/gray", 1, 1);
 
             var iconButton = add(0, 0, new Button(null, 1, 1)
                 .translationKey(translationKey, mapName)
                 .onLeftClick(this::viewMapDetails));
-            var userIcon = map.settings().getIcon();
+            var userIcon = MapSettings.getIcon(map.settings());
             if (userIcon != null) iconButton.model(userIcon.toString(), null);
             else iconButton.sprite("icon2/1_1/item_frame", 1, 1);
 

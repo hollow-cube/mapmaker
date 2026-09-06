@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.editor.command;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -25,7 +25,7 @@ public class TestCommand extends CommandDsl {
         var world = EditorMapWorld.forPlayer(player);
         if (world == null) return; // Sanity
 
-        if (world.map().settings().getVariant() == MapVariant.BUILDING) {
+        if (world.map().settings().variant() == MapVariant.BUILDING) {
             player.sendMessage(Component.translatable("command.test.gameplay_only"));
             return;
         }

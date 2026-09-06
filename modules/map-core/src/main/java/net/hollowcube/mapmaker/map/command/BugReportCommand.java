@@ -1,6 +1,5 @@
 package net.hollowcube.mapmaker.map.command;
 
-
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
@@ -91,7 +90,7 @@ public class BugReportCommand extends CommandDsl {
             Map.entry("proxy", session.proxyId()),
             Map.entry("presence_type", session.presence().type()),
             Map.entry("presence_state", session.presence().state()),
-            Map.entry("map_id", world.map().id()),
+            Map.entry("map_id", world.map().id().toString()),
             Map.entry("message", message)
         ));
 

@@ -41,7 +41,7 @@ public final class DevServerBridge implements ServerBridge {
 
     @Override
     public void joinHub(@NotNull Player player) {
-        joinMapInternal(player, HubServer.HUB_MAP_DATA.id(), JoinMapState.PLAYING);
+        joinMapInternal(player, HubServer.HUB_MAP_DATA.id().toString(), JoinMapState.PLAYING);
     }
 
     private void joinMapInternal(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {

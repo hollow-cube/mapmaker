@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.gui.map;
 
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.maps.MapRating;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
@@ -37,7 +37,7 @@ public class RateMapView extends Panel {
 
         add(0, 0, backOrClose());
         add(1, 0, info("map_rating"));
-        var publishedId = MapData.formatPublishedId(map.publishedId());
+        var publishedId = map.publishedId();
         add(2, 0, new Text(null, 5, 1, publishedId)
                 .align(Text.CENTER, Text.CENTER)
                 .sprite("generic2/btn/default/5_1")
@@ -61,7 +61,7 @@ public class RateMapView extends Panel {
         // Update the remote state async TODO: this should cancel prior request if there is already one out.
         var playerId = PlayerData.fromPlayer(host.player()).id();
         async(() -> {
-            maps.setPlayerRating(this.map.id(), playerId, new MapRating(resultState, null));
+            maps.setPlayerRating(this.map.id().toString(), playerId, new MapRating(resultState, null));
             sync(() -> this.onChange.accept(newState));
         });
     }

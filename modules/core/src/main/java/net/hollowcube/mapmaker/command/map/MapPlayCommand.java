@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
@@ -48,6 +48,6 @@ public class MapPlayCommand extends CommandDsl {
             return;
         }
 
-        bridge.joinMap(player, new ServerBridge.JoinConfig(map.id(), ServerBridge.JoinMapState.PLAYING, "staff_play_map", isolateOverride));
+        bridge.joinMap(player, new ServerBridge.JoinConfig(map.id().toString(), ServerBridge.JoinMapState.PLAYING, "staff_play_map", isolateOverride));
     }
 }

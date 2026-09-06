@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
 import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
@@ -187,10 +188,10 @@ public class DevServer extends AbstractMultiMapServer {
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
         return createWorld(map, isEditor, _ -> {
             if (isEditor) return new EditorMapWorld(this, map, terraform);
-            return switch (map.settings().getVariant()) {
+            return switch (map.settings().variant()) {
                 case PARKOUR -> new ParkourMapWorld(this, map);
                 case BUILDING -> new BuildingMapWorld(this, map);
-                default -> throw new IllegalStateException("No world for map variant " + map.settings().getVariant());
+                default -> throw new IllegalStateException("No world for map variant " + map.settings().variant());
             };
         }, true);
     }
@@ -267,7 +268,7 @@ public class DevServer extends AbstractMultiMapServer {
                 event.getConnection().getProtocolVersion()
             );
 
-            addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id(), "playing");
+            addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id().toString(), "playing");
         } catch (SessionService.SessionCreationDeniedError error) {
             PlayerUtil.disconnect(event.getConnection(), error.reason());
         }

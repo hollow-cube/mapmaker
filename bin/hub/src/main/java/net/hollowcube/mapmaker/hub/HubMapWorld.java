@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub;
 
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.feature.event.christmas.AdventCalendarItem;
@@ -7,7 +8,6 @@ import net.hollowcube.mapmaker.hub.feature.event.christmas.PresentObjectHandler;
 import net.hollowcube.mapmaker.hub.item.*;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
@@ -124,9 +124,9 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     protected void loadWorldData() {
         ReadableMapData mapWorldData = null;
         try {
-            mapWorldData = server().api().maps.getWorldStream(map().id());
+            mapWorldData = server().api().maps.getWorldStream(map().id().toString());
         } catch (ApiClient.NotFoundError error) {
-            if (!map().id().equals(MapData.SPAWN_MAP_ID)) {
+            if (!map().id().toString().equals(MapData.SPAWN_MAP_ID)) {
                 throw error;
             }
         }

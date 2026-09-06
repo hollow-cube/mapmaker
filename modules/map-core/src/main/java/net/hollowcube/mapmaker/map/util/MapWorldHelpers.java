@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.map.util;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
@@ -31,7 +31,7 @@ public final class MapWorldHelpers {
     }
 
     public static void applyMapResourcePack(MapData map, Player player) {
-        var pack = map.getSetting(MapSettings.RESOURCE_PACK);
+        var pack = MapSettings.get(map.settings(), MapSettings.RESOURCE_PACK);
         if (pack.isEmpty()) {
             player.removeResourcePacks(MAP_WORLD_RESOURCE_PACK_UUID);
         } else {

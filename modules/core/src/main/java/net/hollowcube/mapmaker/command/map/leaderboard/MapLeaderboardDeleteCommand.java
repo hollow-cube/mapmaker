@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command.map.leaderboard;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -58,7 +58,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
 
         var playerId = PlayerData.fromPlayer(player).id();
         try {
-            api.maps.deleteMapLeaderboard(map.id(), target, notify);
+            api.maps.deleteMapLeaderboard(map.id().toString(), target, notify);
             player.sendMessage("deleted for " + target);
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");

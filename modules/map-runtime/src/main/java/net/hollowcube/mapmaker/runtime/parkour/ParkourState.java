@@ -5,9 +5,12 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.compat.noxesium.components.NoxesiumGameComponents;
 import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.anticheat.AnticheatCapture;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.LeaderboardFormatting;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
@@ -36,7 +39,6 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
-
 
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
 
@@ -87,7 +89,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             // logic also exists in ParkourMapWorld.
             if (lastState != null) {
                 resetTeleport(player, Objects.requireNonNullElseGet(playState.pos(),
-                        () -> world.map().settings().getSpawnPoint()));
+                        () -> MapSettings.getSpawnPoint(world.map().settings())));
             }
 
             world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState(), playState, isFreshState, isMapJoin, false));
@@ -100,7 +102,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             } else ((MapPlayer) player).resetTouchingState();
 
             var map = world.map();
-            switch (map.getSetting(MapSettings.CAN_SEND_POSE)) {
+            switch (MapSettings.get(map.settings(), MapSettings.CAN_SEND_POSE)) {
                 case NOT_SET ->
                         mp.setCanSendPose(map.publishedAt() != null && map.publishedAt().isBefore(NO_POSE_CHANGES_EPOCH));
                 case TRUE -> mp.setCanSendPose(true);
@@ -354,7 +356,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 var lb = world.map().settings().leaderboard();
                 player.sendMessage(Component.translatable(
                     "map.completed." + lb.format().name().toLowerCase() + ".first",
-                    lb.format().format(saveState.getScore())
+                    LeaderboardFormatting.format(lb.format(), saveState.getScore())
                 ));
 
                 FutureUtil.submitVirtual(() -> world.server().bridge().joinHub(player));
@@ -418,7 +420,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         // Write the save state to the database
         try {
             var playerData = PlayerData.fromPlayer(player);
-            world.server().api().maps.updateSaveState(world.map().id(), playerData.id(), saveState.id(), update);
+            world.server().api().maps.updateSaveState(world.map().id().toString(), playerData.id(), saveState.id(), update);
         } catch (Exception e) {
             var wrappedException = new RuntimeException("failed to save player save state", e);
             ExceptionReporter.reportException(wrappedException, player);

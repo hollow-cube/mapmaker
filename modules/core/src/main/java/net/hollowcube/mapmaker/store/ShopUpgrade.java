@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.store;
 
+import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
@@ -86,7 +86,7 @@ public enum ShopUpgrade {
         return switch (this) {
             case MAP_SLOT -> translatable("store.add-ons.map_slot.buy");
             case MAP_SIZE_2, MAP_SIZE_3, MAP_SIZE_4 ->
-                translatable("store.add-ons.map_size.buy", maxMapSize().asComponent());
+                translatable("store.add-ons.map_size.buy", net.hollowcube.mapmaker.map.MapPresentation.sizeComponent(maxMapSize()));
             case MAP_BUILDER_2, MAP_BUILDER_3, MAP_BUILDER_4 -> translatable("store.add-ons.trusted_builder_slot.buy");
         };
     }

@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.ServerRuntime;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
@@ -24,17 +26,17 @@ final class MapPublisher {
 
     private final ApiClient api;
     private final ServerBridge bridge;
-    private final MapData map;
+    private final MapPatch.Builder editor;
 
     private final Button button;
 
     @Blocking MapPublisher(
-        ApiClient api, ServerBridge bridge, MapData map,
+        ApiClient api, ServerBridge bridge, MapPatch.Builder editor,
         Supplier<InventoryHost> hostSupplier, Consumer<MapData> onPublish
     ) {
         this.api = api;
         this.bridge = bridge;
-        this.map = map;
+        this.editor = editor;
 
         this.button = new Button(3, 3)
             .onLeftClickAsync(() -> this.onVerifyPublish(hostSupplier.get(), onPublish));
@@ -64,13 +66,13 @@ final class MapPublisher {
 
     @Blocking
     private void verifyMap(InventoryHost host) {
-        if (this.map.verification() == MapVerification.UNVERIFIED) {
+        if (editor.map().verification() == MapVerification.UNVERIFIED) {
             this.tryBeginVerification(host);
         }
 
         try {
             host.close();
-            this.bridge.joinMap(host.player(), this.map.id(), ServerBridge.JoinMapState.VERIFYING, "edit_maps_gui_verify");
+            this.bridge.joinMap(host.player(), editor.map().id().toString(), ServerBridge.JoinMapState.VERIFYING, "edit_maps_gui_verify");
         } catch (Exception exception) {
             host.player().sendMessage(Component.translatable("map.verify.fail"));
             ExceptionReporter.reportException(exception, host.player());
@@ -81,7 +83,7 @@ final class MapPublisher {
     private void tryBeginVerification(InventoryHost host) {
         var player = host.player();
         try {
-            api.maps.beginVerification(this.map.id());
+            api.maps.beginVerification(editor.map().id().toString());
         } catch (Exception exception) {
             host.close();
             host.player().sendMessage(Component.translatable("edit.map.failure"));
@@ -106,15 +108,15 @@ final class MapPublisher {
         MapData result = null;
         try {
             // Save any pending changes immediately so details has the correct data (and we dont modify the map after publish)
-            map.settings().withUpdateRequest(req -> {
-                api.maps.update(map.id(), req);
-                return true;
+            editor.save(req -> {
+                api.maps.update(editor.map().id().toString(), req);
+                return editor.map();
             });
 
-            api.maps.publish(map.id());
+            api.maps.publish(editor.map().id().toString());
 
             // TODO(v4 api): we refetch the map so it includes leaderboard info
-            result = api.maps.get(map.id());
+            result = api.maps.get(editor.map().id().toString());
         } catch (Exception exception) {
             player.sendMessage(Component.translatable("publish.map.failure"));
             ExceptionReporter.reportException(exception, player);
@@ -126,19 +128,19 @@ final class MapPublisher {
     private PublishStage getCurrentStage() {
         long currentPlaytime;
         try {
-            var saveState = api.maps.getLatestSaveState(map.id(), map.owner(), SaveStateType.EDITING, null);
+            var saveState = api.maps.getLatestSaveState(editor.map().id().toString(), editor.map().owner().toString(), SaveStateType.EDITING, null);
             currentPlaytime = saveState.getPlaytime();
         } catch (ApiClient.NotFoundError _) {
             return PublishStage.ERROR_BUILD_AMOUNT;
         }
 
-        if (!this.map.isVerified()) return PublishStage.VERIFICATION_READY;
+        if (!editor.map().isVerified()) return PublishStage.VERIFICATION_READY;
 
-        if (this.map.settings().getName().isEmpty()) return PublishStage.ERROR_NO_NAME;
-        if (this.map.settings().getIcon() == null) return PublishStage.ERROR_NO_ICON;
+        if (editor.map().settings().name().isEmpty()) return PublishStage.ERROR_NO_NAME;
+        if (MapSettings.getIcon(editor.map().settings()) == null) return PublishStage.ERROR_NO_ICON;
         // TODO: Not sure if this is right or not - must check. Surely they need to set at least one **gameplay**
         //  tag, not just one of any tag, right?
-        if (this.map.settings().getTags().isEmpty()) return PublishStage.ERROR_NO_TAG;
+        if (editor.map().settings().tags().isEmpty()) return PublishStage.ERROR_NO_TAG;
 
         // Check playtime down here so we don't get a rogue publish error show up because they haven't built in
         // it for long enough

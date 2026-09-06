@@ -3,8 +3,8 @@ package net.hollowcube.mapmaker.hub.gui.create;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.gui.store.StoreView;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapSize;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.LockedButton;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -60,7 +60,7 @@ public class NewMapView extends Panel {
                 var button = locked
                     ? new LockedButton(tk, slotWidth, slotHeight)
                     : new Button(tk, slotWidth, slotHeight);
-                return button.sprite("icon2/1_1/" + mapSize.icon(), 1, 1);
+                return button.sprite("icon2/1_1/" + net.hollowcube.mapmaker.map.MapPresentation.sizeIcon(mapSize), 1, 1);
             };
 
             RadioSelect.ButtonUpdater updateButton = (button, selected) -> {

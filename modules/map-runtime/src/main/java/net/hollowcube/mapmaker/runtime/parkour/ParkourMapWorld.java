@@ -1,12 +1,15 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import dev.hollowcube.replay.event.ReplayEvent;
+import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.common.events.PlayerMoveVehicleEvent;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.dfu.DFU;
-import net.hollowcube.anticheat.log.TraceHeader;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapLeaderboard;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.anticheat.AnticheatCapture;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRating;
@@ -15,6 +18,8 @@ import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.cosmetic.impl.victory.AbstractVictoryEffectImpl;
 import net.hollowcube.mapmaker.gui.map.RateMapView;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.LeaderboardFormatting;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
@@ -242,7 +247,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     public void hardResetPlayer(Player player) {
         var newSaveState = new SaveState(UUID.randomUUID().toString(),
-            map().id(), player.getUuid().toString(), saveStateType,
+            map().id().toString(), player.getUuid().toString(), saveStateType,
             PlayState.SERIALIZER, new PlayState());
         newSaveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         // The state being replaced may never be written (short runs are skipped), so the
@@ -314,7 +319,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().api().maps.getLatestSaveState(map().id(),
+            saveState = server().api().maps.getLatestSaveState(map().id().toString(),
                 playerData.id(), saveStateType, PlayState.SERIALIZER);
             replayManager.prepareRecordingSession(saveState, playerData);
 
@@ -322,14 +327,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                map().id(), playerData.id(), saveStateType,
+                map().id().toString(), playerData.id(), saveStateType,
                 PlayState.SERIALIZER, new PlayState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
 
         player.setRespawnPoint(Objects.requireNonNullElseGet(
             saveState.state(PlayState.class).pos(),
-            () -> map().settings().getSpawnPoint()
+            () -> MapSettings.getSpawnPoint(map().settings())
         ));
 
         if (RateMapItem.isMapRatable(this)) {
@@ -338,7 +343,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         SaveState bestState = null;
         try {
-            bestState = server().api().maps.getBestSaveState(map().id(), player.getUuid().toString());
+            bestState = server().api().maps.getBestSaveState(map().id().toString(), player.getUuid().toString());
         } catch (ApiClient.NotFoundError _) {
         }
         player.setTag(BEST_SAVESTATE, bestState);
@@ -437,7 +442,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     private void handleSpectatorMove(PlayerMoveEvent event) {
         if (event.getNewPosition().y() < instance().getCachedDimensionType().minY()) {
-            ParkourState.AnyPlaying.resetTeleport(event.getPlayer(), map().settings().getSpawnPoint());
+            ParkourState.AnyPlaying.resetTeleport(event.getPlayer(), MapSettings.getSpawnPoint(map().settings()));
         }
     }
 
@@ -449,11 +454,11 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             player.setTag(BEST_SAVESTATE, finishState);
             player.sendMessage(Component.translatable(
                 "map.completed." + lb.format().name().toLowerCase() + ".first",
-                lb.format().format(finishState.getScore())
+                LeaderboardFormatting.format(lb.format(), finishState.getScore())
             ));
         } else {
             double bestScore = bestState.getScore(), finishScore = finishState.getScore();
-            if (lb.format() == Leaderboard.Format.TIME) {
+            if (lb.format() == MapLeaderboard.Format.TIME) {
                 // Diff playtime rounded to ticks prior to subtracting for correct display.
                 bestScore = NumberUtil.roundMillisToTicks((long) bestScore);
                 finishScore = NumberUtil.roundMillisToTicks((long) finishScore);
@@ -468,9 +473,9 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             var diffSymbol = diffScore < 0 ? "+" : "-";
             player.sendMessage(Component.translatable(
                 "map.completed." + lb.format().name().toLowerCase() + ".with_prior",
-                lb.format().format(finishState.getScore()),
+                LeaderboardFormatting.format(lb.format(), finishState.getScore()),
                 // Note: roundToTicks is not used here. We do the rounding above because we need to round prior to calculating the difference.
-                text(diffSymbol, diffColor).children(List.of(lb.format().format(Math.abs(diffScore))))
+                text(diffSymbol, diffColor).children(List.of(LeaderboardFormatting.format(lb.format(), Math.abs(diffScore))))
             ));
 
             if (isBetterScore) player.setTag(BEST_SAVESTATE, finishState);
@@ -568,14 +573,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         var time = OpUtils.mapOr(
             spawnActions.findLast(SetTimeAction.class),
             SetTimeAction::time,
-            world.map().getSetting(MapSettings.TIME_OF_DAY)
+            MapSettings.get(world.map().settings(), MapSettings.TIME_OF_DAY)
         );
         world.instance().setTime(time.time());
 
         var weather = OpUtils.mapOr(
             spawnActions.findLast(SetWeatherAction.class),
             SetWeatherAction::weather,
-            world.map().getSetting(MapSettings.WEATHER_TYPE)
+            MapSettings.get(world.map().settings(), MapSettings.WEATHER_TYPE)
         );
         world.instance().setWeather(weather.weather(), 1);
     }

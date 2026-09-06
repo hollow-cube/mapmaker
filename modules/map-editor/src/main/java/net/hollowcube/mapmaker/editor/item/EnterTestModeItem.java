@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.editor.item;
 
+import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
@@ -32,7 +32,7 @@ public class EnterTestModeItem extends ItemHandler {
         if (world == null || !(world.getPlayerState(player) instanceof EditorState.Building(var saveState)))
             return;
 
-        if (world.map().settings().getVariant() != MapVariant.PARKOUR) {
+        if (world.map().settings().variant() != MapVariant.PARKOUR) {
             player.sendMessage(Component.translatable("item.test.enter.not_in_parkour"));
             return;
         }

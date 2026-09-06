@@ -4,18 +4,21 @@ import net.hollowcube.common.components.ExtraComponents;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.map.MapBuilder;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.ipc.map.MapSlot;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
-import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.api.players.PlayerDataStub;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -30,7 +33,10 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -55,6 +61,8 @@ public class EditMapView extends Panel {
     private final PlayerService playerService;
 
     private MapSlot slot;
+    private final MapPatch.Builder editor;
+    private final Consumer<MapSlot> onEdit;
     private final MapPublisher publisher;
 
     private final Text nameText;
@@ -67,31 +75,33 @@ public class EditMapView extends Panel {
         ApiClient api,
         PlayerService playerService,
         ServerBridge bridge, MapSlot slot,
-        Runnable onPublish
+        Runnable onPublish, Consumer<MapSlot> onEdit
     ) {
         super(9, 10);
         this.api = api;
         this.playerService = playerService;
         this.slot = slot;
+        this.editor = new MapPatch.Builder(slot.map());
+        this.onEdit = onEdit;
 
         Consumer<MapData> publishCallback = publishedMap -> {
             this.host.replaceView(new MapDetailsView(api, bridge, publishedMap, true));
             onPublish.run();
         };
-        this.publisher = new MapPublisher(api, bridge, slot.map(), () -> this.host, publishCallback);
+        this.publisher = new MapPublisher(api, bridge, editor, () -> this.host, publishCallback);
 
         background("create_maps2/edit/container", -10, -31);
         add(0, 0, title("Edit Map"));
 
         add(0, 0, backOrClose());
-        var name = FontUtil.shorten(slot.map().settings().getNameSafe(), NAME_INPUT_MAX, 5);
+        var name = FontUtil.shorten(MapSettings.getNameSafe(editor.map().settings()), NAME_INPUT_MAX, 5);
         this.nameText = add(1, 0, new Text("gui.create_maps.edit.name", 7, 1, name).align(8, 5));
         this.nameText.lorePostfix(LORE_POSTFIX_CLICKEDIT)
             .onLeftClick(this::beginNameEdit);
         add(8, 0, new Button("gui.create_maps.edit.actions", 1, 1)
             .background("generic2/btn/default/1_1")
             .sprite("icon2/1_1/ellipsis", 1, 1)
-            .onLeftClick(() -> host.pushView(new EditMapActionsView(api.maps, slot.map()))));
+            .onLeftClick(() -> host.pushView(new EditMapActionsView(api.maps, editor.map()))));
 
         add(1, 1, infoText(1, "icon", -2));
         this.iconButton = add(1, 2, new Button("gui.create_maps.edit.icon", 1, 1)
@@ -103,16 +113,16 @@ public class EditMapView extends Panel {
         add(3, 2, new Button("gui.create_maps.edit.builders.owner.self", 1, 1)
             .background("create_maps2/head_outline", 4, 4)
             .model(MODEL_8X, null)
-            .profile(getPlayerHead2d(slot.map().owner())));
+            .profile(getPlayerHead2d(editor.map().owner().toString())));
         this.builderButtons = add(4, 2, new Panel(4, 1) {});
 
         // async doesn't work as host is null when this is called
         add(1, 3, infoText(1, "tags", -2));
-        add(1, 4, new EditableMapTagList(slot.map(), this::updatePublishStage));
+        add(1, 4, new EditableMapTagList(editor, this::updatePublishStage));
 
         add(1, 6, new Button("gui.create_maps.edit.build", 3, 3)
             .background("create_maps2/edit/build")
-            .onLeftClickAsync(() -> editMap(api.maps, slot.map(), this.host, bridge)));
+            .onLeftClickAsync(() -> editMap(api.maps, editor.map(), this.host, bridge)));
 
         add(5, 6, this.publisher.getButton());
     }
@@ -127,7 +137,7 @@ public class EditMapView extends Panel {
     private void drawBuilderButtons() {
         var pd = PlayerData.fromPlayer(host.player());
         // When we want to show a read-only view we will need to change this, for now not necessary.
-        Sanity.check(pd.id().equals(slot.map().owner()), "can only view your own maps right now");
+        Sanity.check(pd.id().equals(editor.map().owner().toString()), "can only view your own maps right now");
 
         var builderSlots = pd.mapBuilders();
 
@@ -142,14 +152,14 @@ public class EditMapView extends Panel {
                 button = new Button(null, 1, 1)
                     .background("create_maps2/head_outline" + (builder.pending() ? "_pending" : ""), 4, 4)
                     .model(MODEL_8X, null)
-                    .profile(getPlayerHead2d(builder.id()));
+                    .profile(getPlayerHead2d(builder.id().toString()));
 
                 async(() -> {
-                    var displayName = api.players.getDisplayName(builder.id());
+                    var displayName = api.players.getDisplayName(builder.id().toString());
                     button.translationKey("gui.create_maps.edit.builders." + (builder.pending() ? "pending" : "entry"), displayName.asComponent())
                         .onRightClick(() -> host.pushView(ExtraPanels.confirm(
                             "Remove " + displayName.getUsername() + "?",
-                            () -> FutureUtil.submitVirtual(() -> removeMapBuilder(builder.id())))));
+                            () -> FutureUtil.submitVirtual(() -> removeMapBuilder(builder.id().toString())))));
                 });
             } else if (i < builderSlots) {
                 if (addedAddButton) continue;
@@ -174,16 +184,17 @@ public class EditMapView extends Panel {
 
     @Override
     protected void unmount() {
+        onEdit.accept(new MapSlot(editor.map(), slot.createdAt(), slot.owner(), slot.builders()));
         // Updating on unmount is kinda unnecessary since itll happen when opening the add tag
         // menu for example. But at time of writing we dont have a "when really gone" callback.
         final var player = host.player();
-        async(() -> slot.map().settings().withUpdateRequest(req -> {
+        async(() -> editor.save(req -> {
             try {
-                api.maps.update(slot.map().id(), req);
-                return true;
+                api.maps.update(editor.map().id().toString(), req);
+                return editor.map();
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
-                return false;
+                return null;
             }
         }));
 
@@ -200,13 +211,13 @@ public class EditMapView extends Panel {
                 String limitedName = message.length() > MapData.MAX_NAME_LENGTH
                     ? message.substring(0, MapData.MAX_NAME_LENGTH) : message;
 
-                slot.map().settings().setName(limitedName);
+                editor.setName(limitedName);
 
-                var name = FontUtil.shorten(slot.map().settings().getNameSafe(), NAME_INPUT_MAX, 5);
+                var name = FontUtil.shorten(MapSettings.getNameSafe(editor.map().settings()), NAME_INPUT_MAX, 5);
                 nameText.text(name);
                 updatePublishStage();
             },
-            slot.map().settings().getName()
+            editor.map().settings().name()
         ));
     }
 
@@ -231,7 +242,7 @@ public class EditMapView extends Panel {
                     .decoration(TextDecoration.ITALIC, false), List.of())
                 .model(icon.key().asString(), null))
             .onSubmit(icon -> {
-                slot.map().settings().setIcon(icon);
+                editor.setIcon(icon.name());
                 updateIcon();
                 updatePublishStage();
                 return true;
@@ -241,7 +252,7 @@ public class EditMapView extends Panel {
     }
 
     private void updateIcon() {
-        var userIcon = slot.map().settings().getIcon();
+        var userIcon = MapSettings.getIcon(editor.map().settings());
         if (userIcon != null) {
             iconButton.sprite((Sprite) null);
             iconButton.model(userIcon.toString(), null);
@@ -293,7 +304,7 @@ public class EditMapView extends Panel {
         host.pushView(AnvilSearchView.<PlayerDataStub>builder()
             .icon("icon2/anvil/construction_hat")
             .title("Add Map Builder")
-            .searchFunction((query, limit) -> api.players.searchPlayers(query, List.of(slot.map().owner()), limit).results())
+            .searchFunction((query, limit) -> api.players.searchPlayers(query, List.of(editor.map().owner().toString()), limit).results())
             // todo would be cool to default to some online players
             // adding onto the above, probably their online friends
             .defaultSearchTerm("")
@@ -324,17 +335,19 @@ public class EditMapView extends Panel {
         if (isPlayerInvited(pds.id()) || !pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES))
             return false;
 
-        api.maps.inviteMapBuilder(slot.map().id(), pds.id());
-        slot = slot.withLocalBuilder(pds.id());
+        api.maps.inviteMapBuilder(editor.map().id().toString(), pds.id());
+        var builders = new ArrayList<>(slot.builders());
+        builders.add(new MapBuilder(UUID.fromString(pds.id()), Instant.now(), true));
+        slot = new MapSlot(editor.map(), slot.createdAt(), slot.owner(), builders);
         return true;
     }
 
     @Blocking
     private void removeMapBuilder(String builderId) {
-        api.maps.removeMapBuilder(slot.map().id(), builderId);
-
+        api.maps.removeMapBuilder(editor.map().id().toString(), builderId);
         sync(() -> {
-            slot = slot.withoutLocalBuilder(builderId);
+            slot = new MapSlot(editor.map(), slot.createdAt(), slot.owner(), slot.builders().stream()
+                .filter(builder -> !builder.id().toString().equals(builderId)).toList());
             drawBuilderButtons();
         });
     }
@@ -352,9 +365,7 @@ public class EditMapView extends Panel {
     @Blocking
     private static void buildMapAfterVerify(MapClient maps, ServerBridge bridge, MapData map, Player player) {
         player.sendMessage(Component.translatable("progress.verification.lost"));
-
-        maps.deleteVerification(map.id());
-
+        maps.deleteVerification(map.id().toString());
         beginBuildingMap(bridge, map, player);
     }
 
@@ -362,7 +373,7 @@ public class EditMapView extends Panel {
     static void beginBuildingMap(ServerBridge bridge, MapData map, Player player) {
         try {
             player.closeInventory();
-            bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "edit_maps_gui");
+            bridge.joinMap(player, map.id().toString(), ServerBridge.JoinMapState.EDITING, "edit_maps_gui");
         } catch (Exception e) {
             player.sendMessage(Component.translatable("edit.map.failure"));
             ExceptionReporter.reportException(e, player);
@@ -376,10 +387,10 @@ public class EditMapView extends Panel {
     }
 
     private boolean isPlayerInvited(String playerId) {
-        return slot.builders().stream().anyMatch(builder -> builder.id().equals(playerId));
+        return slot.builders().stream().anyMatch(builder -> builder.id().toString().equals(playerId));
     }
 
     private boolean isPlayerInvitePending(String playerId) {
-        return slot.builders().stream().anyMatch(builder -> builder.id().equals(playerId) && builder.pending());
+        return slot.builders().stream().anyMatch(builder -> builder.id().toString().equals(playerId) && builder.pending());
     }
 }

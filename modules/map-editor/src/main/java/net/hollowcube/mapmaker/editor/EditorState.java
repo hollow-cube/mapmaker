@@ -6,6 +6,7 @@ import net.hollowcube.compat.noxesium.handshake.NoxesiumPlayer;
 import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -59,7 +60,7 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
 
             if (lastState != null) {
                 resetTeleport(player, Objects.requireNonNullElseGet(editState.pos(),
-                        () -> world.map().settings().getSpawnPoint()));
+                        () -> MapSettings.getSpawnPoint(world.map().settings())));
             }
         }
 

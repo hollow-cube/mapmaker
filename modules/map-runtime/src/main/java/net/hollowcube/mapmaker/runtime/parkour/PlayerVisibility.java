@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.minestom.server.coordinate.Pos;
@@ -62,7 +63,7 @@ public final class PlayerVisibility {
                     var ourPos = this.self.getPosition();
                     if (viewer.getDistanceSquared(this.self) <= PLAYER_HIDE_DISTANCE_SQR) {
                         yield net.hollowcube.mapmaker.map.util.PlayerVisibility.INVISIBLE;
-                    } else if (this.world2.map().settings().getSpawnPoint().distanceSquared(ourPos) <= PLAYER_HIDE_DISTANCE_TO_POI_SQR) {
+                    } else if (MapSettings.getSpawnPoint(this.world2.map().settings()).distanceSquared(ourPos) <= PLAYER_HIDE_DISTANCE_TO_POI_SQR) {
                         yield net.hollowcube.mapmaker.map.util.PlayerVisibility.INVISIBLE;
                     } else {
                         var selfCheckpoint = getCheckpointPos(this.self);

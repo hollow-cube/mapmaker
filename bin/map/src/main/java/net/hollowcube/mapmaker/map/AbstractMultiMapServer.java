@@ -10,6 +10,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
@@ -245,7 +246,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             worldLock.lock();
             try {
                 Check.stateCondition(isClosed, "Cannot create worlds after server is closed");
-                var key = new MapKey(map.id(), editing);
+                var key = new MapKey(map.id().toString(), editing);
 
                 // Return existing world if present.
                 future = (Future<T>) worlds.get(key);
@@ -284,12 +285,12 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                     // Try to close the map if there are no registered builders left.
                     var leavingId = PlayerData.fromPlayer(event.getPlayer()).id();
                     FutureUtil.submitVirtual(() -> {
-                        var builders = api().maps.getMapBuilders(world.map().id(), true);
+                        var builders = api().maps.getMapBuilders(world.map().id().toString(), true);
                         var leavingIsBuilder = false;
                         for (var builder : builders) {
-                            if (world.hasPlayer(builder.id()))
+                            if (world.hasPlayer(builder.id().toString()))
                                 return; // dont need to close
-                            if (builder.id().equals(leavingId))
+                            if (builder.id().toString().equals(leavingId))
                                 leavingIsBuilder = true;
                         }
 
@@ -305,7 +306,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 });
 
                 var worldMessage = MapWorldMessage.created(
-                    createdWorld.worldId(), createdWorld.map().id(), "todo");
+                    createdWorld.worldId(), createdWorld.map().id().toString(), "todo");
                 jetStream.publish(worldMessage.subject(), worldMessage);
             }
 
@@ -313,7 +314,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
             return createdWorld;
         } catch (Exception e) {
-            logger.error("Failed to allocate map " + map.id(), e);
+            logger.error("Failed to allocate map " + map.id().toString(), e);
             ExceptionReporter.reportException(e);
 
             worldLock.lock();
@@ -432,9 +433,9 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             try {
                 closed.get(WORLD_CLOSE_TIMEOUT_SEC, TimeUnit.SECONDS);
             } catch (TimeoutException ignored) {
-                logger.error("failed to close world {} in {}s, continuing.", world.map().id(), WORLD_CLOSE_TIMEOUT_SEC);
+                logger.error("failed to close world {} in {}s, continuing.", world.map().id().toString(), WORLD_CLOSE_TIMEOUT_SEC);
             } catch (RuntimeException | InterruptedException | ExecutionException e) {
-                logger.error("failed to close world {}", world.map().id(), e);
+                logger.error("failed to close world {}", world.map().id().toString(), e);
             }
         } finally {
             closingWorlds.remove(world);
@@ -526,7 +527,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 return;
             }
 
-            player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id())));
+            player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id().toString())));
             player.sendMessage("Type: " + world.getClass().getSimpleName());
         }, "Shows information about the world you are in");
 
@@ -542,7 +543,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             }
 
             if (world.canEdit(player)) {
-                world.map().setSetting(MapSettings.PROGRESS_INDEX_ADDITION, true);
+                MapSettings.set(world.mapPatch(), MapSettings.PROGRESS_INDEX_ADDITION, true);
                 player.sendMessage("Enabled progress addition");
             } else {
                 player.sendMessage("You are not in an editing world!");

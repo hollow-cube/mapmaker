@@ -62,10 +62,10 @@ public class MapMapServer extends AbstractMultiMapServer {
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
         return createWorld(map, isEditor, _ -> {
             if (isEditor) return new EditorMapWorld(this, map, terraform);
-            return switch (map.settings().getVariant()) {
+            return switch (map.settings().variant()) {
                 case PARKOUR -> new ParkourMapWorld(this, map);
                 case BUILDING -> new BuildingMapWorld(this, map);
-                default -> throw new IllegalStateException("No world for map variant " + map.settings().getVariant());
+                default -> throw new IllegalStateException("No world for map variant " + map.settings().variant());
             };
         }, true);
     }

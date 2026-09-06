@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVariant;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -57,17 +57,17 @@ public class TopTimesCommand extends CommandDsl {
             }
         }
 
-        if (map.settings().getVariant() != MapVariant.PARKOUR) {
-            player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id())));
+        if (map.settings().variant() != MapVariant.PARKOUR) {
+            player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id().toString())));
         } else {
             var playerData = PlayerData.fromPlayer(player);
-            var leaderboard = api.maps.getMapLeaderboard(map.id(), playerData.id());
+            var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerData.id());
 
             var lbFormat = map.settings().leaderboard().format();
             var messages = leaderboard.toComponents(api.players, lbFormat, false);
 
             if (messages == null) {
-                player.sendMessage(Component.translatable(NO_TIMES_FOUND, Component.text(map.id())));
+                player.sendMessage(Component.translatable(NO_TIMES_FOUND, Component.text(map.id().toString())));
             } else {
                 messages.forEach(player::sendMessage);
             }

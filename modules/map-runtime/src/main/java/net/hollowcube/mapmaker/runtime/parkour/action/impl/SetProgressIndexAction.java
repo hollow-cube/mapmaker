@@ -46,7 +46,7 @@ public record SetProgressIndexAction(
     @Override
     public void applyTo(Player player, PlayState state) {
         boolean useProgressAddition = OpUtils.mapOr(MapWorld.forPlayer(player),
-                world -> world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION),
+                world -> MapSettings.get(world.map().settings(), MapSettings.PROGRESS_INDEX_ADDITION),
                 false);
         state.set(Attachments.PROGRESS_INDEX, useProgressAddition ? (state.get(Attachments.PROGRESS_INDEX, 0) + value) : value);
     }

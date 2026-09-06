@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.runtime;
 
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
+import net.hollowcube.ipc.map.MapBuilder;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.kyori.adventure.key.InvalidKeyException;

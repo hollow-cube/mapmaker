@@ -5,8 +5,8 @@ import io.nats.client.api.AckPolicy;
 import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.minestom.server.MinecraftServer;
@@ -72,9 +72,9 @@ public class PlayerTransferConsumer implements Closeable {
                 if (world == null) return;
 
                 var fromHub = "hub".equals(msg.from);
-                if (fromHub && !MapData.SPAWN_MAP_ID.equals(world.map().id()))
+                if (fromHub && !MapData.SPAWN_MAP_ID.equals(world.map().id().toString()))
                     return;
-                if (!fromHub && !msg.from.equals(world.map().id()))
+                if (!fromHub && !msg.from.equals(world.map().id().toString()))
                     return;
             }
 

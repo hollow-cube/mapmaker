@@ -7,7 +7,6 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PlayerTopTimeEntry;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -126,7 +125,7 @@ public class TopTimesInfoType extends CommandDsl {
                 comp.append(
                         Component.text(entry.mapName())
                             .hoverEvent(Component.text("Click to copy published ID"))
-                            .clickEvent(ClickEvent.copyToClipboard(MapData.formatPublishedId(entry.publishedMapId())))
+                            .clickEvent(ClickEvent.copyToClipboard(String.format(java.util.Locale.ROOT, "%03d-%03d-%03d", entry.publishedMapId() / 1_000_000, (entry.publishedMapId() / 1_000) % 1_000, entry.publishedMapId() % 1_000)))
                     ).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])))
                     .append(Component.text(" " + formatMapPlaytime(entry.completionTime(), true),
                                            TextColor.color(0xf2f2f2)));

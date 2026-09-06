@@ -1,5 +1,7 @@
 package net.hollowcube.mapmaker.map;
 
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
 import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
 import net.hollowcube.mapmaker.map.event.trait.Map2Event;
@@ -53,6 +55,8 @@ public sealed interface MapWorld extends TagReadable permits AbstractMapWorld {
     MapServer server();
 
     MapData map();
+
+    MapPatch.Builder mapPatch();
 
     /// The instance this world exists in. Each world is always tied to a single instance,
     /// but multiple worlds can use the same instance.

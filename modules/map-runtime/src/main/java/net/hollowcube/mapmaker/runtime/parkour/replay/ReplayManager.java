@@ -9,8 +9,8 @@ import dev.hollowcube.replay.io.SegmentedReplayStorage;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapPlayer;
-import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.SaveState;
+import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -89,7 +89,7 @@ public final class ReplayManager {
     ReplayManager(ParkourMapWorld world, SegmentedReplayStorage storage) {
         this.world = world;
         this.storage = storage;
-        this.recordings = new PreparedRecordings(storage, UUID.fromString(world.map().id()));
+        this.recordings = new PreparedRecordings(storage, UUID.fromString(world.map().id().toString()));
 
         world.eventNode(ParkourState.Playing2.class)
             .addListener(PlayerChangeHeldSlotEvent.class, this::onHeldSlotChange)
@@ -129,7 +129,7 @@ public final class ReplayManager {
         if (session == null) {
             var replay = recordings.take(saveState.id());
             var writer = storage.writer(saveState.id(), replay);
-            var worldId = UUID.fromString(world.map().id());
+            var worldId = UUID.fromString(world.map().id().toString());
             session = new ReplaySession(snapshot -> replay == null
                 ? ReplayRecorder.create(REGISTRY, writer, worldId, WORLD_VERSION, snapshot)
                 : ReplayRecorder.resume(REGISTRY, writer, replay.requirePreamble(), worldId, WORLD_VERSION, snapshot));

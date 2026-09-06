@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.gui.map;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.maps.MapReport;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.MultiSelect;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -40,7 +40,7 @@ public class MapReportView extends Panel {
 
         add(0, 0, backOrClose());
         add(1, 0, info("report_map"));
-        var publishedId = MapData.formatPublishedId(map.publishedId());
+        var publishedId = map.publishedId();
         add(2, 0, new Text(null, 5, 1, publishedId)
                 .align(Text.CENTER, Text.CENTER)
                 .sprite("generic2/btn/default/5_1")
@@ -107,7 +107,7 @@ public class MapReportView extends Panel {
         var playerId = PlayerData.fromPlayer(player).id();
         var req = new MapReport(playerId, new ArrayList<>(options.selectedItems()), comment, null, null);
         try {
-            maps.report(map.id(), req);
+            maps.report(map.id().toString(), req);
             player.sendMessage(Component.translatable("gui.report_map.submit.success"));
         } catch (Exception e) {
             player.sendMessage(Component.translatable("gui.report_map.submit.failure"));

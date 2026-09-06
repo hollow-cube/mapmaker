@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.editor.gui;
 
+import net.hollowcube.ipc.map.MapLeaderboard;
+import net.hollowcube.ipc.map.MapPatch;
 import net.hollowcube.mapmaker.gui.notifications.ToastManager;
-import net.hollowcube.mapmaker.map.Leaderboard;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.ui.StringInput;
 import net.hollowcube.mapmaker.runtime.parkour.action.MolangExpression;
@@ -19,13 +19,13 @@ public class LeaderboardEditorView extends Panel {
     private final Switch orderSwitch;
     private final StringInput expressionInput;
 
-    private final MapData map;
-    private Leaderboard leaderboard;
+    private final MapPatch.Builder editor;
+    private MapLeaderboard leaderboard;
     private MolangExpression expression;
 
     private boolean editingExpression = false;
 
-    public LeaderboardEditorView(MapData map) {
+    public LeaderboardEditorView(MapPatch.Builder editor) {
         super(9, 10);
 
         background("action/editor/container", -10, -31);
@@ -46,15 +46,15 @@ public class LeaderboardEditorView extends Panel {
             new Text("gui.spawn.customized_leaderboard.format.playtime", 4, 1, "Time")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/4_1")
-                .onLeftClick(() -> onFormatChange(Leaderboard.Format.NUMBER)),
+                .onLeftClick(() -> onFormatChange(MapLeaderboard.Format.NUMBER)),
             new Text("gui.spawn.customized_leaderboard.format.number", 4, 1, "Number")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/4_1")
-                .onLeftClick(() -> onFormatChange(Leaderboard.Format.PERCENT)),
+                .onLeftClick(() -> onFormatChange(MapLeaderboard.Format.PERCENT)),
             new Text("gui.spawn.customized_leaderboard.format.percent", 4, 1, "Percent")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/4_1")
-                .onLeftClick(() -> onFormatChange(Leaderboard.Format.TIME))
+                .onLeftClick(() -> onFormatChange(MapLeaderboard.Format.TIME))
         )));
 
         add(6, 1, groupText(2, "order"));
@@ -74,8 +74,8 @@ public class LeaderboardEditorView extends Panel {
             this::onExpressionChange, () -> editingExpression = true)
             .anvilIcon("action/anvil/variable_expression_icon"));
 
-        this.map = map;
-        this.leaderboard = map.settings().leaderboard();
+        this.editor = editor;
+        this.leaderboard = editor.map().settings().leaderboard();
         this.expression = MolangExpression.from(this.leaderboard.score());
         update();
     }
@@ -87,14 +87,14 @@ public class LeaderboardEditorView extends Panel {
     }
 
     private void onResetToDefault() {
-        if (Leaderboard.DEFAULT.equals(leaderboard)) return;
+        if (MapLeaderboard.DEFAULT.equals(leaderboard)) return;
 
-        leaderboard = Leaderboard.DEFAULT;
+        leaderboard = MapLeaderboard.DEFAULT;
         expression = MolangExpression.from(leaderboard.score());
         update();
     }
 
-    private void onFormatChange(Leaderboard.Format format) {
+    private void onFormatChange(MapLeaderboard.Format format) {
         leaderboard = leaderboard.withFormat(format);
         update();
     }
@@ -132,6 +132,6 @@ public class LeaderboardEditorView extends Panel {
         // Never save if the expression is invalid
         if (editingExpression || expression.error() != null) return;
 
-        map.settings().setLeaderboard(leaderboard);
+        editor.setLeaderboard(leaderboard);
     }
 }

@@ -2,10 +2,11 @@ package net.hollowcube.mapmaker.misc;
 
 import net.hollowcube.common.hud.*;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVerification;
+import net.hollowcube.mapmaker.map.MapPresentation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -82,7 +83,7 @@ public final class TitleHud {
     public static @NotNull PlayerHud.Module playing(@NotNull PlayerClient players, @NotNull MapData map) {
         Component ownerName;
         try {
-            ownerName = players.getDisplayName(map.owner()).build();
+            ownerName = players.getDisplayName(map.owner().toString()).build();
         } catch (Exception e) {
             ExceptionReporter.reportException(e);
             ownerName = Component.text("!error!", NamedTextColor.RED);
@@ -94,7 +95,7 @@ public final class TitleHud {
                 .append(text1(Component.text(map.name(), TextColor.color(0xF2F2F2)))).build()
                 : Component.text()
                 .append(small1("playing", NamedTextColor.WHITE)).append(Component.text(" "))
-                .append(text1(MapData.rewriteWithQualityFont(map.quality(), map.name())))
+                .append(text1(MapPresentation.rewriteWithQualityFont(map.quality(), map.name())))
                 .append(Component.text(" ")).append(small1("by", TextColor.color(0xB0B0B0))).append(Component.text(" "))
             .append(text1(ownerName)).build());
 
@@ -102,7 +103,7 @@ public final class TitleHud {
                 : line2(Component.text()
                 .append(small2("/play", NamedTextColor.WHITE))
                 .appendSpace()
-                .append(small2(map.publishedIdString(), NamedTextColor.WHITE))
+                .append(small2(map.publishedId(), NamedTextColor.WHITE))
                 .appendSpace()
                 .append(small2("on", TextColor.color(0xB0B0B0)))
                 .appendSpace()

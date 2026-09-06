@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.runtime.building;
 
 import net.hollowcube.common.hud.PlayerHud;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.misc.TitleHud;
@@ -38,7 +39,7 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
             RateMapItem.initLastRating(server().api().maps, player, map());
         }
 
-        player.setRespawnPoint(map().settings().getSpawnPoint());
+        player.setRespawnPoint(MapSettings.getSpawnPoint(map().settings()));
 
         return new BuildingState.Building();
     }
@@ -48,7 +49,7 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
 
         var minHeight = instance().getCachedDimensionType().minY() - 20;
         if (player.getPosition().y() < minHeight)
-            player.teleport(map().settings().getSpawnPoint());
+            player.teleport(MapSettings.getSpawnPoint(map().settings()));
     }
 
     @Override

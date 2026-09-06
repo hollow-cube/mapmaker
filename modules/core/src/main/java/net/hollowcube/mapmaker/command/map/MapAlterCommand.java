@@ -6,6 +6,11 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.ipc.map.MapQuality;
+import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -130,6 +135,7 @@ public class MapAlterCommand {
 
     private void handleSetType(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var newType = context.get(typeArg);
 
         if (map == null) {
@@ -137,19 +143,20 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        if (map.settings().getVariant() == newType) {
+        if (map.settings().variant() == newType) {
             player.sendMessage("Map already has type " + newType);
             return;
         }
 
-        map.settings().setVariant(newType);
-        if (doMapUpdate(player, map)) {
+        editor.setVariant(newType);
+        if (doMapUpdate(player, editor)) {
             player.sendMessage("Map type set to " + newType);
         }
     }
 
     private void handleSetName(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var newName = context.get(nameArg);
 
         if (map == null) {
@@ -157,14 +164,15 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        map.settings().setName(newName);
-        if (doMapUpdate(player, map)) {
+        editor.setName(newName);
+        if (doMapUpdate(player, editor)) {
             player.sendMessage("Map name set to " + newName);
         }
     }
 
     private void handleSetDisplayItem(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var newDisplayItem = context.get(displayItemArg);
 
         if (map == null) {
@@ -172,14 +180,15 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        map.settings().setIcon(newDisplayItem);
-        if (doMapUpdate(player, map)) {
+        editor.setIcon(newDisplayItem.name());
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Map display item set to ").append(LanguageProviderV2.getVanillaTranslation(newDisplayItem)));
         }
     }
 
     private void handleSetSubVariant(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var newSubVariant = context.get(subvariantArg);
 
         if (map == null) {
@@ -188,24 +197,25 @@ public class MapAlterCommand {
             return;
         }
         try {
-            if (map.settings().getVariant() == MapVariant.PARKOUR) {
+            if (map.settings().variant() == MapVariant.PARKOUR) {
                 var subVariant = ParkourSubVariant.valueOf(newSubVariant.toUpperCase());
-                map.settings().setParkourSubVariant(subVariant);
+                editor.setSubVariant(subVariant == null ? null : subVariant.name().toLowerCase(java.util.Locale.ROOT));
             } else {
                 var subVariant = BuildingSubVariant.valueOf(newSubVariant.toUpperCase());
-                map.settings().setBuildingSubVariant(subVariant);
+                editor.setSubVariant(subVariant == null ? null : subVariant.name().toLowerCase(java.util.Locale.ROOT));
             }
         } catch (IllegalArgumentException e) {
-            player.sendMessage(Component.text("Invalid variant " + newSubVariant + " for map type " + map.settings().getVariant()));
+            player.sendMessage(Component.text("Invalid variant " + newSubVariant + " for map type " + map.settings().variant()));
             return;
         }
-        if (doMapUpdate(player, map)) {
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Map variant set to " + newSubVariant));
         }
     }
 
     private void handleSetSize(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var newSize = context.get(sizeArg);
 
         if (map == null) {
@@ -213,14 +223,15 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        map.settings().setSize(newSize);
-        if (doMapUpdate(player, map)) {
+        editor.setSize(newSize);
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Map size set to " + newSize));
         }
     }
 
     private void handleAddTag(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var tag = context.get(tagArg);
 
         if (map == null) {
@@ -228,18 +239,19 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        var added = map.settings().addTag(tag);
+        var added = MapSettings.addTag(editor, tag);
         if (!added) {
             player.sendMessage(Component.text("Map already has tag " + tag));
             return;
         }
-        if (doMapUpdate(player, map)) {
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Added tag " + tag));
         }
     }
 
     private void handleRemoveTag(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var tag = context.get(tagArg);
 
         if (map == null) {
@@ -247,18 +259,19 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        var removed = map.settings().removeTag(tag);
+        var removed = MapSettings.removeTag(editor, tag);
         if (!removed) {
             player.sendMessage(Component.text("Map does not have tag " + tag));
             return;
         }
-        if (doMapUpdate(player, map)) {
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Removed tag " + tag));
         }
     }
 
     private void handleSetQuality(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var newQuality = context.get(qualityArg);
 
         if (map == null) {
@@ -266,14 +279,15 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        map.settings().modifyUpdateRequest(req -> req.setQualityOverride(newQuality));
-        if (doMapUpdate(player, map)) {
+        editor.setQualityOverride(newQuality);
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Set quality override to " + newQuality));
         }
     }
 
     private void handleSetSetting(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var setting = context.get(settingsArg);
         var json = context.get(settingDataArg);
 
@@ -285,8 +299,8 @@ public class MapAlterCommand {
         var result = setting.codec().decode(Transcoder.JSON, json);
         switch (result) {
             case Result.Ok(Object data) -> {
-                writeSetting(map.settings(), setting, data);
-                if (doMapUpdate(player, map)) {
+                writeSetting(editor, setting, data);
+                if (doMapUpdate(player, editor)) {
                     player.sendMessage(Component.text("Set setting " + setting.key() + " to " + data));
                 }
             }
@@ -299,6 +313,7 @@ public class MapAlterCommand {
 
     private void handleSetListed(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var listed = context.get(listedArg);
 
         if (map == null) {
@@ -306,14 +321,15 @@ public class MapAlterCommand {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        map.settings().modifyUpdateRequest(req -> req.setListed(listed));
-        if (doMapUpdate(player, map)) {
+        editor.setListed(listed);
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text(listed ? "Set map to listed" : "Set map to unlisted"));
         }
     }
 
     private void handleSetVersion(@NotNull Player player, @NotNull CommandContext context) {
         var map = context.get(mapArg);
+        var editor = map == null ? null : new MapPatch.Builder(map);
         var version = context.get(versionArg);
 
         if (map == null) {
@@ -326,15 +342,15 @@ public class MapAlterCommand {
             player.sendMessage(Component.text("Unknown version " + version));
             return;
         }
-        map.settings().modifyUpdateRequest(req -> req.setProtocolVersion(protocolVersion));
-        if (doMapUpdate(player, map)) {
+        editor.setProtocolVersion(protocolVersion);
+        if (doMapUpdate(player, editor)) {
             player.sendMessage(Component.text("Set minimum required version to " + version));
         }
     }
 
-    private <T> void writeSetting(@NotNull MapSettings settings, @NotNull MapSetting<T> setting, @NotNull Object data) {
+    private <T> void writeSetting(@NotNull MapPatch.Builder editor, @NotNull MapSetting<T> setting, @NotNull Object data) {
         //noinspection unchecked
-        settings.set(setting, (T) data);
+        MapSettings.set(editor, setting, (T) data);
     }
 
     /**
@@ -342,11 +358,11 @@ public class MapAlterCommand {
      * If not, the error will be handled and a relevant message will be sent to the player.
      */
     @Blocking
-    private boolean doMapUpdate(@NotNull Player player, @NotNull MapData map) {
+    private boolean doMapUpdate(@NotNull Player player, @NotNull MapPatch.Builder editor) {
         try {
-            map.settings().withUpdateRequest(req -> {
-                maps.update(map.id(), req);
-                return true; // Exceptions handled outside
+            editor.save(req -> {
+                maps.update(editor.map().id().toString(), req);
+                return editor.map(); // Exceptions handled outside
             });
             return true;
         } catch (ApiClient.NotFoundError _) {

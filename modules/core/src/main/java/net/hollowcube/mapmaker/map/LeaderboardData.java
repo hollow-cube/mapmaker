@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.map;
 
-
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.ipc.map.MapLeaderboard;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
@@ -48,7 +48,7 @@ public record LeaderboardData(
      * @return Entry text, or null if the leaderboard is empty.
      */
     @Blocking
-    public @Nullable List<Component> toComponents(@NotNull PlayerClient players, Leaderboard.Format lbFormat, boolean pad) {
+    public @Nullable List<Component> toComponents(@NotNull PlayerClient players, MapLeaderboard.Format lbFormat, boolean pad) {
         if (top().isEmpty()) return null;
 
         Component[] displayNames = new Component[top().size()];
@@ -88,7 +88,7 @@ public record LeaderboardData(
             comp.append(displayNames[i])
                 .append(text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])))
                 .appendSpace()
-                .append(lbFormat.format(entry.score()).color(TextColor.color(0xf2f2f2)));
+                .append(LeaderboardFormatting.format(lbFormat, entry.score()).color(TextColor.color(0xf2f2f2)));
 
             result.add(comp.build());
 
@@ -100,7 +100,7 @@ public record LeaderboardData(
         }
 
         if (shouldShowSelf && player() != null) {
-            result.add(text("Your time: ").append(lbFormat.format(player().score())).append(text(" (#" + player().rank() + ")")));
+            result.add(text("Your time: ").append(LeaderboardFormatting.format(lbFormat, player().score())).append(text(" (#" + player().rank() + ")")));
         }
 
         return result;

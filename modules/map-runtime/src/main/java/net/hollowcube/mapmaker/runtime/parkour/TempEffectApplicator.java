@@ -1,8 +1,8 @@
 package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.runtime.PlayState;
@@ -101,7 +101,7 @@ public class TempEffectApplicator {
         );
 
         List<String> newHistory;
-        if (world.map().getSetting(MapSettings.PROGRESS_INDEX_ADDITION)) {
+        if (MapSettings.get(world.map().settings(), MapSettings.PROGRESS_INDEX_ADDITION)) {
             // With additive progress index you can never touch a previous checkpoint
             playState.history().add(checkpointId);
             newHistory = List.copyOf(playState.history());
@@ -243,7 +243,7 @@ public class TempEffectApplicator {
         int progressIndex = OpUtils.mapOr(actionList.findLast(SetProgressIndexAction.class), SetProgressIndexAction::value, -1);
         if (progressIndex > 0) {
             int currentIndex = state.get(Attachments.PROGRESS_INDEX, 0);
-            boolean isFail = map.getSetting(MapSettings.PROGRESS_INDEX_ADDITION)
+            boolean isFail = MapSettings.get(map.settings(), MapSettings.PROGRESS_INDEX_ADDITION)
                     // With additive index you can get anything <= current + 1
                     ? (progressIndex > currentIndex + 1)
                     // Without additive progress index you must be at the prior index or the current one

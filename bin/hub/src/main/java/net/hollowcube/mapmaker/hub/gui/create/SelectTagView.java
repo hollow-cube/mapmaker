@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapTags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -39,7 +40,7 @@ public class SelectTagView extends Panel {
     private void appendTagList(MapData map, List<MapTags.Tag> tags, int y) {
         int index = 0;
         for (var tag : tags) {
-            if (map.settings().hasTag(tag))
+            if (MapSettings.hasTag(map.settings(), tag))
                 continue;
 
             var button = new Button(1, 1)

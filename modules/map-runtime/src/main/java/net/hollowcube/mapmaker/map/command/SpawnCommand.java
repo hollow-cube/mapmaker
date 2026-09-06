@@ -4,6 +4,7 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -30,7 +31,7 @@ public class SpawnCommand extends CommandDsl {
         if (world instanceof ParkourMapWorld pkWorld && pkWorld.getPlayerState(player) instanceof ParkourState.AnyPlaying) {
             Panel.open(player, ExtraPanels.confirm("Reset Map Progress?", () -> pkWorld.hardResetPlayer(player)));
         } else {
-            MapWorldHelpers.teleportPlayer(player, world.map().settings().getSpawnPoint());
+            MapWorldHelpers.teleportPlayer(player, MapSettings.getSpawnPoint(world.map().settings()));
             player.sendMessage(Component.translatable("teleport.spawn"));
         }
     }

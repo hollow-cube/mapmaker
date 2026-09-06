@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
@@ -54,8 +54,8 @@ public class MapDeleteCommand extends CommandDsl {
         }
         try {
             var playerData = PlayerData.fromPlayer(player);
-            maps.delete(playerData.id(), map.id(), reason);
-            player.sendMessage("deleted map " + map.id());
+            maps.delete(playerData.id(), map.id().toString(), reason);
+            player.sendMessage("deleted map " + map.id().toString());
         } catch (Exception e) {
             player.sendMessage("failed to delete map");
             ExceptionReporter.reportException(e, player);

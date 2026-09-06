@@ -2,11 +2,11 @@ package net.hollowcube.mapmaker.invite;
 
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.invite.types.MapInvite;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapVerification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.player.DisplayName;
@@ -26,7 +26,6 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public final class PlayerInviteServiceImpl extends AbstractHttpService implements PlayerInviteService {
 
@@ -86,7 +85,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
 
         var joinState = targetMap.isPublished() || targetPresence.state().equals("playing") ? ServerBridge.JoinMapState.PLAYING : ServerBridge.JoinMapState.EDITING;
-        bridge.joinMap(sender, targetMap.id(), joinState, "join_command");
+        bridge.joinMap(sender, targetMap.id().toString(), joinState, "join_command");
     }
 
     @Override
@@ -114,7 +113,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        if (senderMap.id().equals(targetSession.presence().mapId())) {
+        if (senderMap.id().toString().equals(targetSession.presence().mapId())) {
             sender.sendMessage(Component.translatable("map.invite.same_map"));
             return;
         }
@@ -258,7 +257,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
     }
 
     private static boolean doesPlayerOwnMap(@NotNull Player player, @NotNull MapData map) {
-        return player.getUuid().equals(UUID.fromString(map.owner()));
+        return player.getUuid().equals(map.owner());
     }
 
     @RuntimeGson

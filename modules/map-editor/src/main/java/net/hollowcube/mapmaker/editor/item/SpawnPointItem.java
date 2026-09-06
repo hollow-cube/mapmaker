@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.editor.item;
 
 import net.hollowcube.mapmaker.editor.CommonEditorActions;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
@@ -37,7 +38,7 @@ public class SpawnPointItem extends ItemHandler {
         if (player.isSneaking()) {
             CommonEditorActions.trySetSpawn(player, player.getPosition());
         } else {
-            player.teleport(world.map().settings().getSpawnPoint(), Vec.ZERO, null, RelativeFlags.NONE);
+            player.teleport(MapSettings.getSpawnPoint(world.map().settings()), Vec.ZERO, null, RelativeFlags.NONE);
             player.sendMessage(Component.translatable("teleport.spawn"));
         }
     }

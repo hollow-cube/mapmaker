@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.gui.map;
 
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -65,7 +65,7 @@ public abstract class MapListView extends Panel {
         var mapIds = new ArrayList<String>();
         var entries = new ArrayList<MapIconPanel>();
         for (var map : response.getKey()) {
-            if (map.isCompletable()) mapIds.add(map.id());
+            if (map.isCompletable()) mapIds.add(map.id().toString());
             entries.add(new MapIconPanel(api, bridge, map));
         }
 
@@ -74,7 +74,7 @@ public abstract class MapListView extends Panel {
             var resp = api.maps.searchMapProgress(playerId, mapIds).keyBy(PlayerMapProgress::mapId);
             sync(() -> {
                 for (var map : entries) {
-                    var progress = resp.get(map.map().id());
+                    var progress = resp.get(map.map().id().toString());
                     if (progress != null) map.updateProgress(progress);
                 }
             });

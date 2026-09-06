@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.editor;
 
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.impl.PacketRegistryImpl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -35,7 +35,7 @@ public class AbstractEditorMapWorldIntegrationTest {
         PacketRegistryImpl.init(env.process().eventHandler());
         CompatProvider.load(env.process().eventHandler());
 
-        var map = new MapData();
+        var map = MapData.draft(java.util.UUID.randomUUID(), java.util.UUID.randomUUID());
         world = new EditorMapWorld(null, map, null);
 
         player = env.createPlayer(world.instance(), new Pos(0, 40, 0));

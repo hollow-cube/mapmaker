@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapMgmtConsumer;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
@@ -51,9 +51,9 @@ public class MapDrainCommand extends CommandDsl {
                 Component.text(context.getRaw(mapArg))));
             return;
         }
-        var message = new MapMgmtConsumer.MapUpdateMessage(MapMgmtConsumer.MapUpdateMessage.ACTION_DRAIN, map.id(), reason);
+        var message = new MapMgmtConsumer.MapUpdateMessage(MapMgmtConsumer.MapUpdateMessage.ACTION_DRAIN, map.id().toString(), reason);
         jetStream.publish(message.subject(), message);
 
-        player.sendMessage("trying to drain map: " + map.id());
+        player.sendMessage("trying to drain map: " + map.id().toString());
     }
 }

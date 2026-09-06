@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.command.map;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.Permission;
 import net.kyori.adventure.text.Component;
@@ -45,6 +45,6 @@ public class MapEditCommand extends CommandDsl {
                 Component.translatable("command.play.map_not_found", Component.text(context.getRaw(mapArg))));
             return;
         }
-        bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.EDITING, "staff_edit_map");
+        bridge.joinMap(player, map.id().toString(), ServerBridge.JoinMapState.EDITING, "staff_edit_map");
     }
 }

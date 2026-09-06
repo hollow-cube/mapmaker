@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.feature.posthog;
 
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.posthog.FeatureFlagContext;
 import net.hollowcube.posthog.PostHog;

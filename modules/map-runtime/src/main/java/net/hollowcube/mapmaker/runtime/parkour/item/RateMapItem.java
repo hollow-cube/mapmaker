@@ -1,11 +1,11 @@
 package net.hollowcube.mapmaker.runtime.parkour.item;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.gui.map.RateMapView;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -34,7 +34,7 @@ public class RateMapItem extends ItemHandler {
     public static void initLastRating(MapClient maps, Player player, MapData map) {
         player.setTag(LAST_RATING_TAG, FutureUtil.fork(() -> {
             try {
-                return maps.getPlayerRating(map.id(), player.getUuid().toString());
+                return maps.getPlayerRating(map.id().toString(), player.getUuid().toString());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
                 // It's fine to default to a new rating since its valid to overwrite a rating anyway.

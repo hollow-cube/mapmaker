@@ -4,6 +4,9 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapVariant;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;
@@ -26,6 +29,7 @@ import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
 import net.hollowcube.mapmaker.editor.vanilla.SignEditor;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEditorScreen;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
@@ -104,7 +108,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         super(server, map, makeMapInstance(map, 'e'), EditorState.class);
 
         this.spawnEntity = new SpawnMarkerEntity();
-        instance().scheduleNextTick(_ -> this.spawnEntity.setInstance(instance(), map().settings().getSpawnPoint()));
+        instance().scheduleNextTick(_ -> this.spawnEntity.setInstance(instance(), MapSettings.getSpawnPoint(map().settings())));
 
         itemRegistry().register(BuilderMenuItem.INSTANCE);
         itemRegistry().register(DebugStickItem.INSTANCE);
@@ -146,9 +150,9 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             terraformInstanceStorage = null;
         }
 
-        if (map.settings().get(MapSettings.HAS_SCRIPT_BUNDLE)) {
-            this.scriptSession = ReloadingScriptSession.reloading(server.api().maps, map.id());
-            this.scriptChangeSource = new NatsChangeSource(server.jetStream(), map.id(), scriptSession);
+        if (MapSettings.get(map.settings(), MapSettings.HAS_SCRIPT_BUNDLE)) {
+            this.scriptSession = ReloadingScriptSession.reloading(server.api().maps, map.id().toString());
+            this.scriptChangeSource = new NatsChangeSource(server.jetStream(), map.id().toString(), scriptSession);
         } else {
             this.scriptSession = null;
             this.scriptChangeSource = null;
@@ -168,7 +172,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     ///
     /// Note that the validity is not checked, you could set the spawn outside the world border if not careful.
     public void setSpawnPoint(Pos newSpawnPoint) {
-        map().settings().setSpawnPoint(newSpawnPoint);
+        mapPatch().setSpawnPoint(MapSettings.position(newSpawnPoint));
 
         spawnEntity.setView(newSpawnPoint.yaw(), newSpawnPoint.pitch());
         spawnEntity.teleport(newSpawnPoint);
@@ -254,25 +258,25 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     public void save(boolean isAutoSave) {
         saveLock.lock();
         try {
-            if (isAutoSave) logger.info("Autosaving world {}", map().id());
-            if (!isAutoSave) logger.info("Manually saving world {}", map().id());
+            if (isAutoSave) logger.info("Autosaving world {}", map().id().toString());
+            if (!isAutoSave) logger.info("Manually saving world {}", map().id().toString());
 
             // Save the map settings
-            map().settings().withUpdateRequest(updates -> {
+            mapPatch().save(updates -> {
                 try {
-                    server().api().maps.update(map().id(), updates);
-                    return true;
+                    server().api().maps.update(map().id().toString(), updates);
+                    return map();
                 } catch (Exception e) {
-                    logger.error("Failed to save map settings for {}", map().id(), e);
+                    logger.error("Failed to save map settings for {}", map().id().toString(), e);
                     ExceptionReporter.reportException(e);
-                    return false;
+                    return null;
                 }
             });
 
             // Save the world data (if it is unverified only)
             if (map().verification() != MapVerification.PENDING) {
                 var worldData = instance().save(new ReadWriteWorldAccess(this));
-                server().api().maps.updateWorld(map().id(), worldData, createdAt);
+                server().api().maps.updateWorld(map().id().toString(), worldData, createdAt);
             }
 
             for (var player : Set.copyOf(players())) {
@@ -290,7 +294,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
             if (isAutoSave) instance().sendMessage(Component.translatable("build.world.save.success"));
         } catch (Exception e) {
-            ExceptionReporter.reportException(new RuntimeException("failed to save world: " + map().id(), e));
+            ExceptionReporter.reportException(new RuntimeException("failed to save world: " + map().id().toString(), e));
             instance().sendMessage(Component.translatable("build.world.save.failure"));
         } finally {
             saveLock.unlock();
@@ -356,13 +360,13 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         final var playerData = PlayerData.fromPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().api().maps.getLatestSaveState(map().id(), playerData.id(),
+            saveState = server().api().maps.getLatestSaveState(map().id().toString(), playerData.id(),
                 SaveStateType.EDITING, EditState.SERIALIZER);
         } catch (ApiClient.NotFoundError _) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                map().id(), playerData.id(), SaveStateType.EDITING,
+                map().id().toString(), playerData.id(), SaveStateType.EDITING,
                 EditState.SERIALIZER, new EditState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
@@ -374,7 +378,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         player.setRespawnPoint(Objects.requireNonNullElseGet(
             saveState.state(EditState.class).pos(),
-            () -> map().settings().getSpawnPoint()
+            () -> MapSettings.getSpawnPoint(map().settings())
         ));
 
         return new EditorState.Building(saveState);
@@ -402,7 +406,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         var minHeight = instance().getCachedDimensionType().minY() - 20;
         if (player.getPosition().y() < minHeight)
-            player.teleport(map().settings().getSpawnPoint());
+            player.teleport(MapSettings.getSpawnPoint(map().settings()));
     }
 
     private void handlePlayerSavedTeleport(MapPlayerTeleportingEvent event) {
@@ -438,7 +442,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
             var playerData = PlayerData.fromPlayer(player);
             var saveStateUpdate = saveState.createUpsertRequest();
-            server().api().maps.updateSaveState(map().id(), playerData.id(), saveState.id(), saveStateUpdate);
+            server().api().maps.updateSaveState(map().id().toString(), playerData.id(), saveState.id(), saveStateUpdate);
 
             logger.info("Updated data for {}", player.getUuid());
         } catch (Exception e) {
@@ -463,7 +467,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             return;
 
         final var player = event.getPlayer();
-        if (map().settings().getVariant() != MapVariant.PARKOUR) {
+        if (map().settings().variant() != MapVariant.PARKOUR) {
             player.sendMessage(Component.translatable("map.spawn_point.not_parkour"));
             return;
         }
@@ -507,7 +511,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                 .sprite("icon2/1_1/trophy", 10, 1)
                 .onLeftClick(() -> {
                     // TODO: some overarching settings page? Or just a leaderboard icon
-                    host.pushView(new LeaderboardEditorView(map()));
+                    host.pushView(new LeaderboardEditorView(mapPatch()));
                 })
             );
         }

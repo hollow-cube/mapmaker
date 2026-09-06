@@ -3,6 +3,11 @@ package net.hollowcube.mapmaker.api.maps;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.ipc.map.MapBuilder;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.PaginatedList;
 import net.hollowcube.mapmaker.api.ResultList;
@@ -40,7 +45,7 @@ public interface MapClient {
         throw notImplemented();
     }
 
-    default void update(String mapId, MapUpdateRequest body) {
+    default void update(String mapId, MapPatch body) {
         throw notImplemented();
     }
 
@@ -196,7 +201,7 @@ public interface MapClient {
         }
 
         @Override
-        public void update(String mapId, MapUpdateRequest body) {
+        public void update(String mapId, MapPatch body) {
             http.patch(
                 "updateMap",
                 V4_PREFIX + "/" + mapId,

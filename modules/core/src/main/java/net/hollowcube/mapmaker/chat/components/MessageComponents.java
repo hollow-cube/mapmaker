@@ -5,13 +5,14 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.misc.Emoji;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.ipc.chat.ChatMessage;
 import net.hollowcube.ipc.chat.MessagePart;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.mapmaker.map.MapPresentation;
+import net.hollowcube.mapmaker.misc.Emoji;
+import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -60,11 +61,11 @@ public class MessageComponents {
     private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
         var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapId, api.maps::get);
-        var author = usernameCache.get(map.owner(), id -> api.players.getDisplayName(id).build());
+        var author = usernameCache.get(map.owner().toString(), id -> api.players.getDisplayName(id).build());
         var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
-        var components = MapData.createHoverComponents(map, author, progress, playerProtocolVersion);
+        var components = MapPresentation.createHoverComponents(map, author, progress, playerProtocolVersion);
 
         var lore = components.getValue();
         if (playerProtocolVersion >= map.protocolVersion()) {
@@ -79,7 +80,7 @@ public class MessageComponents {
         builder.append(
                 Component.text(map.name(), MAP_COLOR)
                         .hoverEvent(HoverEvent.showText(result.build()))
-                        .clickEvent(ClickEvent.runCommand("/play " + MapData.formatPublishedId(map.publishedId())))
+                        .clickEvent(ClickEvent.runCommand("/play " + map.publishedId()))
         );
     }
 

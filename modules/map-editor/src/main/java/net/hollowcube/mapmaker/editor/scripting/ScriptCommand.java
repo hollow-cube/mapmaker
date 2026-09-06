@@ -37,7 +37,7 @@ public class ScriptCommand extends CommandDsl {
             if (world == null) return; // sanity
 
             var playerId = PlayerData.fromPlayer(player).id();
-            var mapId = world.map().id();
+            var mapId = world.map().id().toString();
 
             var grant = world.server().api().auth.createLaunchGrant(playerId, mapId);
 

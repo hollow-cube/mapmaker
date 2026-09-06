@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapTags;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -8,12 +9,12 @@ import net.hollowcube.mapmaker.panels.Panel;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKCHANGEORREMOVE;
 
 public class EditableMapTagList extends Panel {
-    private final MapData map;
+    private final MapPatch.Builder editor;
     private final Runnable onUpdate;
 
-    public EditableMapTagList(MapData map, Runnable onUpdate) {
+    public EditableMapTagList(MapPatch.Builder editor, Runnable onUpdate) {
         super(7, 1);
-        this.map = map;
+        this.editor = editor;
         this.onUpdate = onUpdate;
 
         update();
@@ -29,7 +30,7 @@ public class EditableMapTagList extends Panel {
     private void update() {
         clear();
 
-        var tags = map.settings().getTags();
+        var tags = MapSettings.getTags(editor.map().settings());
         int i = 0;
         for (; i < 7 && i < tags.size(); i++) {
             var tag = tags.get(i);
@@ -38,7 +39,7 @@ public class EditableMapTagList extends Panel {
                 .translationKey(tag.baseTranslationKey())
                 .lorePostfix(LORE_POSTFIX_CLICKCHANGEORREMOVE)
                 .sprite("icon2/1_1/" + tag.sprite(), 1, 1)
-                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, newTag -> handleReplaceTag(index, newTag))))
+                .onLeftClick(() -> host.pushTransientView(new SelectTagView(editor.map(), newTag -> handleReplaceTag(index, newTag))))
                 .onRightClick(() -> handleRemoveTag(index)));
         }
 
@@ -48,29 +49,29 @@ public class EditableMapTagList extends Panel {
             add(i, 0, new Button(1, 1)
                 .translationKey("gui.create_maps.edit.tags.add." + tagCategory)
                 .sprite("icon2/1_1/plus", 1, 1)
-                .onLeftClick(() -> host.pushTransientView(new SelectTagView(map, this::handleAddTag))));
+                .onLeftClick(() -> host.pushTransientView(new SelectTagView(editor.map(), this::handleAddTag))));
         }
     }
 
     private void handleAddTag(MapTags.Tag tag) {
-        map.settings().addTag(tag);
+        MapSettings.addTag(editor, tag);
         update();
         this.onUpdate.run();
     }
 
     private void handleReplaceTag(int index, MapTags.Tag tag) {
-        if (index >= map.settings().getTags().size()) {
+        if (index >= MapSettings.getTags(editor.map().settings()).size()) {
             handleAddTag(tag);
             return;
         }
 
-        map.settings().setTag(index, tag);
+        MapSettings.setTag(editor, index, tag);
         update();
         this.onUpdate.run();
     }
 
     private void handleRemoveTag(int index) {
-        map.settings().removeTag(index);
+        MapSettings.removeTag(editor, index);
         update();
         this.onUpdate.run();
     }

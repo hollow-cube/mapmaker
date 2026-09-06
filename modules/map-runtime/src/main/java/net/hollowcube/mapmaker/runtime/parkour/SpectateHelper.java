@@ -20,7 +20,7 @@ public class SpectateHelper {
     public static final PlayState.Attachment<Boolean> GAME_STATE_SAVED = PlayState.attachment(Key.key("mapmaker:game_state_saved"), Codec.BOOLEAN);
 
     public static boolean canSpectate(ParkourMapWorld world, Player player) {
-        var mode = world.map().getSetting(MapSettings.NO_SPECTATOR);
+        var mode = MapSettings.get(world.map().settings(), MapSettings.NO_SPECTATOR);
         if (mode == NoSpectateMode.ON) {
             // should maybe cache this its kinda expensive to spam-recompute. but need to be careful about test world not updating.
             var spawnActions = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
@@ -74,7 +74,7 @@ public class SpectateHelper {
                 fakePlayState.setPos(player.getPosition());
                 // Set this state to last state to create a checkpoint
                 fakePlayState.setLastState(fakePlayState.copy());
-                var saveState = new SaveState(UUID.randomUUID().toString(), player.getUuid().toString(), world.map().id(),
+                var saveState = new SaveState(UUID.randomUUID().toString(), player.getUuid().toString(), world.map().id().toString(),
                         SaveStateType.PLAYING, PlayState.SERIALIZER, fakePlayState);
                 // This is admittedly kinda hacky, we use 'saveState.getPlaytime() == 0' to determine if a save state
                 // is a new state frequently. We do not want to treat fake spectator states as new states.

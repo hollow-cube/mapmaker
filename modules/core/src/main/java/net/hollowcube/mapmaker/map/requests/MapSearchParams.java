@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.map.requests;
 
 import net.hollowcube.common.util.RuntimeGson;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapQuality;
-import net.hollowcube.mapmaker.map.MapVariant;
+import net.hollowcube.ipc.map.MapDifficulty;
+import net.hollowcube.ipc.map.MapQuality;
+import net.hollowcube.ipc.map.MapVariant;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +19,7 @@ public record MapSearchParams(
         boolean best,
         boolean ascending,
         @NotNull EnumSet<MapQuality> qualities,
-        @NotNull EnumSet<MapData.Difficulty> difficulties,
+        @NotNull EnumSet<MapDifficulty> difficulties,
         @Nullable String owner,
         @Nullable String query,
         @NotNull EnumSet<MapVariant> variants,
@@ -35,7 +35,7 @@ public record MapSearchParams(
         params.put("sortOrder", this.ascending ? "asc" : "desc");
 
         params.put("quality", toCSV(MapQuality.class, this.qualities));
-        params.put("difficulty", toCSV(MapData.Difficulty.class, this.difficulties));
+        params.put("difficulty", toCSV(MapDifficulty.class, this.difficulties));
 
         params.put("owner", Objects.requireNonNullElse(this.owner, ""));
         params.put("query", Objects.requireNonNullElse(this.query, ""));
@@ -52,7 +52,7 @@ public record MapSearchParams(
 
     private static <T extends Enum<T>> String toCSV(Class<T> type, EnumSet<T> set) {
         if (set.size() == type.getEnumConstants().length) return "";
-        return set.stream().map(Enum::name).map(it -> it.toLowerCase(Locale.ROOT)).collect(Collectors.joining(","));
+        return set.stream().filter(it -> !it.name().equals("UNKNOWN")).map(it -> it == MapDifficulty.UNRATED ? "unknown" : it.name().toLowerCase(Locale.ROOT)).collect(Collectors.joining(","));
     }
 
     public static Builder builder() {
@@ -62,7 +62,7 @@ public record MapSearchParams(
     public static class Builder {
 
         private final EnumSet<MapQuality> qualities = EnumSet.allOf(MapQuality.class);
-        private final EnumSet<MapData.Difficulty> difficulties = EnumSet.allOf(MapData.Difficulty.class);
+        private final EnumSet<MapDifficulty> difficulties = EnumSet.allOf(MapDifficulty.class);
         private final EnumSet<MapVariant> variants = EnumSet.allOf(MapVariant.class);
 
         private int page = 1;
@@ -102,7 +102,7 @@ public record MapSearchParams(
             return this;
         }
 
-        public Builder difficulties(@NotNull MapData.Difficulty... difficulties) {
+        public Builder difficulties(@NotNull MapDifficulty... difficulties) {
             this.difficulties.clear();
             this.difficulties.addAll(List.of(difficulties));
             return this;

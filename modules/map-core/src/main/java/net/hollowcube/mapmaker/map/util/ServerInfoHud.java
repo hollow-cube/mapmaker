@@ -52,7 +52,7 @@ public class ServerInfoHud implements PlayerHud.Module {
 
         var world = MapWorld.forPlayer(player);
         if (world != null) {
-            lines.add(HudNode.text(world.map().settings().getSize().name().toLowerCase(Locale.ROOT)
+            lines.add(HudNode.text(world.map().settings().size().name().toLowerCase(Locale.ROOT)
                                    + "-" + ServerRuntime.getRuntime().size()));
         }
 

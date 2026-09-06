@@ -6,6 +6,9 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.common.util.Uuids;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.playerinfo.PlayerInfoCommand;
@@ -16,9 +19,7 @@ import net.hollowcube.mapmaker.hub.command.util.HubSpawnCommand;
 import net.hollowcube.mapmaker.hub.command.util.HubTrainCommand;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.hub.util.HubTransferData;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.MapSize;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -42,6 +43,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ServiceLoader;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
@@ -50,12 +52,14 @@ public class HubServer extends AbstractMapServer {
     private static final Presence HUB_PRESENCE = new Presence(Presence.TYPE_MAPMAKER_HUB,
         "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
 
-    public static final MapData HUB_MAP_DATA = new MapData(MapData.SPAWN_MAP_ID, Uuids.ZERO);
+    public static final MapData HUB_MAP_DATA;
 
     static {
-        HUB_MAP_DATA.settings().setSize(MapSize.UNLIMITED);
-        HUB_MAP_DATA.settings().set(MapSettings.TIME_OF_DAY, TimeOfDay.NOON);
-        HUB_MAP_DATA.settings().set(MapSettings.LIGHTING, true);
+        var editor = new MapPatch.Builder(MapData.draft(UUID.fromString(MapData.SPAWN_MAP_ID), UUID.fromString(Uuids.ZERO)));
+        editor.setSize(MapSize.UNLIMITED);
+        MapSettings.set(editor, MapSettings.TIME_OF_DAY, TimeOfDay.NOON);
+        MapSettings.set(editor, MapSettings.LIGHTING, true);
+        HUB_MAP_DATA = editor.map();
     }
 
     // Its only kinda unknown. it's not created in the constructor, but after prepareState

@@ -10,6 +10,13 @@ import io.opentelemetry.context.propagation.TextMapSetter;
 import io.opentelemetry.semconv.SemanticAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapLeaderboard;
+import net.hollowcube.ipc.map.MapQuality;
+import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.map.MapSlot;
+import net.hollowcube.ipc.map.MapVariant;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.mapmaker.api.interaction.Command;
 import net.hollowcube.mapmaker.api.interaction.Interaction;
 import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
@@ -53,13 +60,15 @@ public abstract class AbstractHttpService {
     private static final System.Logger logger = System.getLogger(AbstractHttpService.class.getName());
 
     public static final Gson GSON = new GsonBuilder()
+        .registerTypeAdapter(MapData.class, new LegacyMapDataDeserializer())
+        .registerTypeAdapter(MapSlot.class, new LegacyMapSlotDeserializer())
         .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
         .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
         .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
         .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
         .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))
         .registerTypeAdapter(InviteType.class, new EnumTypeAdapter<>(InviteType.class))
-        .registerTypeAdapter(Leaderboard.Format.class, new EnumTypeAdapter<>(Leaderboard.Format.class))
+        .registerTypeAdapter(MapLeaderboard.Format.class, new EnumTypeAdapter<>(MapLeaderboard.Format.class))
         .registerTypeAdapter(MapVerification.class, new LenientEnumTypeAdapter<>(MapVerification.class))
         .registerTypeAdapter(MapSize.class, new LenientEnumTypeAdapter<>(MapSize.class))
         .registerTypeAdapter(MapWorldMessage.Action.class, new LenientEnumTypeAdapter<>(MapWorldMessage.Action.class))

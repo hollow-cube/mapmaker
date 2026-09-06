@@ -40,7 +40,7 @@ public final class ScriptEngine {
         this.closed = false;
 
         world.scheduler().scheduleNextTick(this::runEntry);
-        logger.info("[scripts:{}] script engine started", world.map().id());
+        logger.info("[scripts:{}] script engine started", world.map().id().toString());
     }
 
     public MapWorld world() {
@@ -106,7 +106,7 @@ public final class ScriptEngine {
     }
 
     private void report(String message, Throwable t) {
-        logger.warn("[scripts:{}] {}", world.map().id(), message, t);
+        logger.warn("[scripts:{}] {}", world.map().id().toString(), message, t);
         // TODO: surface to players somehow.
     }
 

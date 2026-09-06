@@ -1,12 +1,11 @@
 package net.hollowcube.mapmaker.hub.gui.create;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.api.maps.MapRole;
-import net.hollowcube.mapmaker.api.maps.MapSlot;
 import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -117,7 +116,7 @@ public class CreateMapsView extends Panel {
 
     private void acceptNewMap(MapData map) {
         // No need to re-sort, we know this should be first in the list.
-        this.slots.addFirst(new MapSlot(map, Instant.now(), MapRole.OWNER, List.of()));
+        this.slots.addFirst(new MapSlot(map, Instant.now(), true, List.of()));
         this.resetSearch();
     }
 
@@ -226,13 +225,15 @@ public class CreateMapsView extends Panel {
         for (int i = page * PAGE_SIZE; i < (page + 1) * PAGE_SIZE && i < results.size(); i++) {
             final var slot = results.get(i);
             Runnable onPublish = () -> this.remountTask = this::rebuildSlots;
+            java.util.function.Consumer<MapSlot> onEdit = updated -> slots.replaceAll(
+                current -> current.map().id().equals(updated.map().id()) ? updated : current);
 
             if (slot.map().isPublished()) {
-                entries.add(new MapSlotEntry.Published(this.api, this.playerService, this.bridge, slot, onPublish));
-            } else if (slot.role() == MapRole.OWNER) {
-                entries.add(new MapSlotEntry.Owner(this.api, this.playerService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Published(this.api, this.playerService, this.bridge, slot, onPublish, onEdit));
+            } else if (slot.owner()) {
+                entries.add(new MapSlotEntry.Owner(this.api, this.playerService, this.bridge, slot, onPublish, onEdit));
             } else {
-                entries.add(new MapSlotEntry.Builder(this.api, this.playerService, this.bridge, slot, onPublish));
+                entries.add(new MapSlotEntry.Builder(this.api, this.playerService, this.bridge, slot, onPublish, onEdit));
             }
         }
 

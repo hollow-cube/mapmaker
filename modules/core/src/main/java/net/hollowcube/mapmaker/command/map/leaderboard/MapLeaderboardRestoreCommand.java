@@ -3,10 +3,10 @@ package net.hollowcube.mapmaker.command.map.leaderboard;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.MapData;
 import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -40,8 +40,8 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
 
         var playerId = PlayerData.fromPlayer(player).id();
         try {
-            maps.restoreMapLeaderboard(map.id());
-            player.sendMessage("restored for " + map.settings().getName());
+            maps.restoreMapLeaderboard(map.id().toString());
+            player.sendMessage("restored for " + map.settings().name());
         } catch (Exception e) {
             player.sendMessage("failed to restore leaderboard");
             ExceptionReporter.reportException(e, player);

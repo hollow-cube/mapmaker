@@ -318,7 +318,7 @@ public abstract class AbstractMapServer implements MapServer {
     /// is placed exactly on both ends.
     private static @Nullable String mapOf(@NotNull Player player) {
         var world = MapWorld.forPlayer(player);
-        return world == null ? null : world.map().id();
+        return world == null ? null : world.map().id().toString();
     }
 
     @Override

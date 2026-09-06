@@ -1,7 +1,9 @@
 package net.hollowcube.mapmaker.editor;
 
 import net.hollowcube.common.hud.PlayerHud;
+import net.hollowcube.ipc.map.MapPatch;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
+import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
@@ -30,6 +32,9 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
 
         itemRegistry().registerSilent(ExitTestModeItem.INSTANCE);
     }
+
+    @Override
+    public MapPatch.Builder mapPatch() { return parent == null ? super.mapPatch() : parent.mapPatch(); }
 
     @Override
     public ParkourState.AnyPlaying createPlayingState(SaveState saveState) {
@@ -68,7 +73,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
         // Always create a dummy play state for test mode players.
         final var playerData = PlayerData.fromPlayer(player);
         var saveState = new SaveState(UUID.randomUUID().toString(),
-            map().id(), playerData.id(), SaveStateType.PLAYING,
+            map().id().toString(), playerData.id(), SaveStateType.PLAYING,
             PlayState.SERIALIZER, new PlayState());
         // Additionally set up a checkpoint at the current position as the test cp.
         var playState = saveState.state(PlayState.class);
@@ -87,7 +92,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
 
     @Override
     public void handleTestingModeFinish(Player player, SaveState saveState) {
-        var score = map().settings().leaderboard().format().format(computeScore(player, saveState));
+        var score = LeaderboardFormatting.format(map().settings().leaderboard().format(), computeScore(player, saveState));
         player.sendMessage(translatable("testing_mode.finish", score));
 
         if (parent.getPlayerState(player) instanceof EditorState.Testing(var testState))

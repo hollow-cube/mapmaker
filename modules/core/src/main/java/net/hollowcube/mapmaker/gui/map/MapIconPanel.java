@@ -3,9 +3,11 @@ package net.hollowcube.mapmaker.gui.map;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.MapPresentation;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.PlayerMapProgress;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
@@ -56,7 +58,7 @@ public class MapIconPanel extends Panel {
         if (playerProtocolVersion < map.protocolVersion()) return;
 
         player.closeInventory();
-        bridge.joinMap(player, map.id(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
+        bridge.joinMap(player, map.id().toString(), ServerBridge.JoinMapState.PLAYING, "play_maps_gui");
     }
 
     @Blocking
@@ -64,7 +66,7 @@ public class MapIconPanel extends Panel {
         if (this.authorName == null) return;
 
         // TODO(api v4): we currently have to refetch the map because v3 api doesnt return the leaderboard.
-        var map = api.maps.get(this.map.id());
+        var map = api.maps.get(this.map.id().toString());
 
         host.pushView(new MapDetailsView(api, bridge, map, authorName, true));
     }
@@ -74,7 +76,7 @@ public class MapIconPanel extends Panel {
         super.mount(host, isInitial);
 
         if (this.authorName != null) return;
-        async(() -> updateAuthor(api.players.getDisplayName(map.owner())));
+        async(() -> updateAuthor(api.players.getDisplayName(map.owner().toString())));
     }
 
     private void updateAuthor(@NotNull DisplayName displayName) {
@@ -92,12 +94,12 @@ public class MapIconPanel extends Panel {
     }
 
     private void updateIcon() {
-        var icon = Objects.requireNonNullElse(map.settings().getIcon(), Material.PAPER);
+        var icon = Objects.requireNonNullElse(MapSettings.getIcon(map.settings()), Material.PAPER);
         button.model(icon.name(), null);
 
         var authorName = OpUtils.mapOr(this.authorName, DisplayName::build, Component.text("loading"));
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(host.player());
-        var entry = MapData.createHoverComponents(map, authorName, progress, playerProtocolVersion); // todo
+        var entry = MapPresentation.createHoverComponents(map, authorName, progress, playerProtocolVersion); // todo
 
         if (playerProtocolVersion < map.protocolVersion()) {
             entry.getValue().addAll(LanguageProviderV2.translateMulti("gui.play_maps.map_display.wrongversion.footer", List.of()));

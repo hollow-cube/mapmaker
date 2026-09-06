@@ -47,7 +47,7 @@ public final class CommandLogReporter {
             Instant.now(),
             PlayerData.fromPlayer(player).id(),
             ServerRuntime.getRuntime().hostname(),
-            world == null ? null : world.map().id(),
+            world == null ? null : world.map().id().toString(),
             world == null ? null : world.worldId(),
             event.input(),
             remoteCommands.get().contains(name(event.input())),

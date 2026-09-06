@@ -2,6 +2,9 @@ package net.hollowcube.mapmaker.map;
 
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapPatch;
+import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.instance.generation.MapGenerators;
@@ -56,7 +59,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     private final String worldId = UUID.randomUUID().toString();
 
     private final MapServer server;
-    private final MapData map;
+    private final MapPatch.Builder mapPatch;
     private final MapInstance instance;
 
     private final Set<Player> players = new HashSet<>();
@@ -89,7 +92,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     @SuppressWarnings("unchecked")
     protected AbstractMapWorld(MapServer server, MapData map, MapInstance instance, Class<S> stateClass) {
         this.server = server;
-        this.map = map;
+        this.mapPatch = new MapPatch.Builder(map);
         this.instance = instance;
 
         this.stateClass = stateClass;
@@ -131,8 +134,11 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     }
 
     @Override
+    public MapPatch.Builder mapPatch() { return mapPatch; }
+
+    @Override
     public MapData map() {
-        return map;
+        return mapPatch().map();
     }
 
     @Override
@@ -205,7 +211,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     public final void configurePlayer(AsyncPlayerConfigurationEvent event) {
         final var player = event.getPlayer();
 
-        MapWorldHelpers.applyMapResourcePack(map, player);
+        MapWorldHelpers.applyMapResourcePack(map(), player);
 
         // Always add all feature flags to the world. We don't restrict what blocks/items people use.
         FeatureFlag.values().forEach(event::addFeatureFlag);
@@ -302,7 +308,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
                 allObjects.add(spatial);
             }
 
-            var size = OpUtils.mapOr(map().settings().getSize(),
+            var size = OpUtils.mapOr(map().settings().size(),
                 MapSize::size, MapSize.NORMAL.size());
             var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
             this.octree = simpleOctree(powerOfTwo, allObjects);
@@ -366,7 +372,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     protected void configureInstance() {
         instance().setGenerator(MapGenerators.voidWorld());
 
-        var diameter = map().settings().getSize().size();
+        var diameter = map().settings().size().size();
         instance().setWorldBorder(new WorldBorder(diameter,
             0f, 0f, 0,
             0, ServerFlag.WORLD_BORDER_SIZE
@@ -401,7 +407,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
     protected void loadWorldData() {
         try {
-            var data = server().api().maps.getWorldStream(map().id());
+            var data = server().api().maps.getWorldStream(map().id().toString());
             instance().loadStream(data, new ReadWorldAccess(this));
         } catch (ApiClient.NotFoundError _) {
             // No world is fine, we will add the default blocks
@@ -437,8 +443,8 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         @Nullable MapInstance.LightingMode lightingOverride
     ) {
         var lightingMode = Objects.requireNonNullElseGet(lightingOverride,
-            () -> map.getSetting(MapSettings.LIGHTING) ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT);
-        return new MapInstance(map.createDimensionName(classifier), lightingMode);
+            () -> MapSettings.get(map.settings(), MapSettings.LIGHTING) ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT);
+        return new MapInstance(MapPresentation.dimensionName(map, classifier), lightingMode);
     }
 
     private static List<Class<?>> collectRecursiveSealedSubclasses(Class<?> stateClass) {

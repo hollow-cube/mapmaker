@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.setting;
 
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
@@ -27,8 +28,8 @@ public class SavedMapSettings {
     }
 
     @SuppressWarnings("unchecked")
-    public <T> T get(MapSetting<T> setting, MapSettings settings) {
-        return (T) this.settings.getOrDefault(setting, settings.get(setting));
+    public <T> T get(MapSetting<T> setting, MapData.Settings settings) {
+        return (T) this.settings.getOrDefault(setting, MapSettings.get(settings, setting));
     }
 
     @SuppressWarnings("unchecked")

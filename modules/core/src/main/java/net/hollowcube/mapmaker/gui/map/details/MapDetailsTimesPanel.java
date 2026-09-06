@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.gui.map.details;
 
+import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.map.MapLeaderboard;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.Leaderboard;
 import net.hollowcube.mapmaker.map.LeaderboardData;
-import net.hollowcube.mapmaker.map.MapData;
+import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerData;
@@ -25,7 +26,7 @@ public class MapDetailsTimesPanel extends Panel {
 
     private final ApiClient api;
     private final MapData map;
-    private final Leaderboard.Format lbFormat;
+    private final MapLeaderboard.Format lbFormat;
 
     private final Switch tabs;
     private final TopThreePanel topThreePanel;
@@ -52,7 +53,7 @@ public class MapDetailsTimesPanel extends Panel {
             "map_details/times/other_times", 2, 1));
 
         this.playerHeadBtn = add(2, 3, new Button(null, 1, 1));
-        this.playerTimeText = add(3, 3, new Text("", 3, 1, lbFormat.missingText())
+        this.playerTimeText = add(3, 3, new Text("", 3, 1, LeaderboardFormatting.missingText(lbFormat))
             .align(Text.CENTER, Text.CENTER));
         var playerTimeBtn = add(6, 3, new Button(null, 1, 1));
         this.playerButtons = List.of(playerHeadBtn, playerTimeText, playerTimeBtn);
@@ -70,7 +71,7 @@ public class MapDetailsTimesPanel extends Panel {
 
         async(() -> {
             var playerId = PlayerData.fromPlayer(host.player()).id();
-            var leaderboard = api.maps.getMapLeaderboard(map.id(), playerId);
+            var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerId);
             // TODO: bulk endpoint?
             var displayNames = leaderboard.top().stream()
                 .map(LeaderboardData.Entry::player)
@@ -82,8 +83,8 @@ public class MapDetailsTimesPanel extends Panel {
                 this.topTenPanel.update(leaderboard.top(), displayNames);
 
                 {   // Update the player entry
-                    var time = (leaderboard.player() == null ? lbFormat.missingText()
-                        : lbFormat.formatPlain(leaderboard.player().score()));
+                    var time = (leaderboard.player() == null ? LeaderboardFormatting.missingText(lbFormat)
+                        : LeaderboardFormatting.formatPlain(lbFormat, leaderboard.player().score()));
                     for (var btn : playerButtons)
                         btn.translationKey("gui.map_details.top_times_tab.personal_best", text(time));
                     playerHeadBtn.profile(getPlayerHead2d(playerId));
@@ -102,7 +103,7 @@ public class MapDetailsTimesPanel extends Panel {
     private static class TopThreePanel extends Panel {
         private final Entry[] entries = new Entry[3];
 
-        public TopThreePanel(Leaderboard.Format lbFormat) {
+        public TopThreePanel(MapLeaderboard.Format lbFormat) {
             super(9, 3);
             background("map_details/times/top_three");
 
@@ -122,31 +123,31 @@ public class MapDetailsTimesPanel extends Panel {
         }
 
         private static class Entry extends Panel {
-            private final Leaderboard.Format lbFormat;
+            private final MapLeaderboard.Format lbFormat;
             private final String translationKey;
 
             private final Button backgroundBtn;
             private final Button playerHeadBtn;
             private final Text scoreText;
 
-            public Entry(Leaderboard.Format lbFormat, String number) {
+            public Entry(MapLeaderboard.Format lbFormat, String number) {
                 super(3, 3);
                 this.lbFormat = lbFormat;
                 this.translationKey = "gui.map_details.top_times_tab." + number + "_place";
 
                 // This abuses a bit of a hack that we set the entire area to a button then overlay the model and text
                 this.backgroundBtn = add(0, 0, new Button(null, 3, 3)
-                    .translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText()));
+                    .translationKey(translationKey, MISSING_PLAYER, LeaderboardFormatting.missingText(lbFormat)));
                 this.playerHeadBtn = add(1, 1, new Button(null, 1, 1)
-                    .translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText())
+                    .translationKey(translationKey, MISSING_PLAYER, LeaderboardFormatting.missingText(lbFormat))
                     .model(MODEL_8X, null)
                     .profile(CoreSkulls.UNKNOWN_PLAYER));
-                this.scoreText = add(0, 2, new Text(null, 3, 1, lbFormat.missingText())
+                this.scoreText = add(0, 2, new Text(null, 3, 1, LeaderboardFormatting.missingText(lbFormat))
                     .align(Text.CENTER, 6));
             }
 
             public void update(LeaderboardData.Entry entry, Component playerName) {
-                var time = lbFormat.formatPlain(entry.score());
+                var time = LeaderboardFormatting.formatPlain(lbFormat, entry.score());
                 backgroundBtn.translationKey(translationKey, playerName, time);
                 playerHeadBtn.translationKey(translationKey, playerName, time);
                 playerHeadBtn.profile(getPlayerHead2d(entry.player()));
@@ -160,7 +161,7 @@ public class MapDetailsTimesPanel extends Panel {
 
         private final TopTenPanel.Entry[] entries = new TopTenPanel.Entry[6];
 
-        public TopTenPanel(Leaderboard.Format lbFormat) {
+        public TopTenPanel(MapLeaderboard.Format lbFormat) {
             super(9, 3);
 
             background("map_details/times/top_ten");
@@ -185,28 +186,28 @@ public class MapDetailsTimesPanel extends Panel {
         }
 
         private static class Entry extends Panel {
-            private final Leaderboard.Format lbFormat;
+            private final MapLeaderboard.Format lbFormat;
             private final String translationKey;
 
             private final Button playerHeadBtn;
             private final Text timeText;
 
-            public Entry(Leaderboard.Format lbFormat, String number, boolean isRightColumn) {
+            public Entry(MapLeaderboard.Format lbFormat, String number, boolean isRightColumn) {
                 super(4, 1);
                 this.lbFormat = lbFormat;
                 this.translationKey = "gui.map_details.top_times_tab." + number + "_place";
 
                 this.playerHeadBtn = add(0, 0, new Button(null, 1, 1)
-                    .translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText())
+                    .translationKey(translationKey, MISSING_PLAYER, LeaderboardFormatting.missingText(lbFormat))
                     .model(isRightColumn ? MODEL_8X_OFFSET_2 : MODEL_8X_OFFSET_1, null)
                     .profile(CoreSkulls.UNKNOWN_PLAYER));
-                this.timeText = add(1, 0, new Text(null, 3, 1, lbFormat.missingText())
+                this.timeText = add(1, 0, new Text(null, 3, 1, LeaderboardFormatting.missingText(lbFormat))
                     .align(isRightColumn ? -1 : 5, 5));
-                this.timeText.translationKey(translationKey, MISSING_PLAYER, lbFormat.missingText());
+                this.timeText.translationKey(translationKey, MISSING_PLAYER, LeaderboardFormatting.missingText(lbFormat));
             }
 
             public void update(LeaderboardData.Entry entry, Component playerName) {
-                var time = lbFormat.formatPlain(entry.score());
+                var time = LeaderboardFormatting.formatPlain(lbFormat, entry.score());
                 playerHeadBtn.translationKey(translationKey, playerName, time);
                 playerHeadBtn.profile(getPlayerHead2d(entry.player()));
                 timeText.translationKey(translationKey, playerName, time);

@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.gui.map.browser;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import net.hollowcube.mapmaker.map.MapData;
-import net.hollowcube.mapmaker.map.MapQuality;
+import net.hollowcube.ipc.map.MapDifficulty;
+import net.hollowcube.ipc.map.MapQuality;
 import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
@@ -20,16 +20,16 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 class SimpleSortPanel extends Panel {
-    private static final List<MapData.Difficulty> DEFAULT_DIFFICULTIES = List.of(MapData.Difficulty.EASY, MapData.Difficulty.MEDIUM, MapData.Difficulty.HARD);
+    private static final List<MapDifficulty> DEFAULT_DIFFICULTIES = List.of(MapDifficulty.EASY, MapDifficulty.MEDIUM, MapDifficulty.HARD);
 
     private static final PlayerSetting<MapBrowserView.SortPreset> SORT_PRESET = PlayerSetting.Enum("map_browser.sort_preset", MapBrowserView.SortPreset.BEST);
-    private static final PlayerSetting<List<MapData.Difficulty>> DIFFICULTIES = PlayerSetting.create("map_browser.difficulties",
+    private static final PlayerSetting<List<MapDifficulty>> DIFFICULTIES = PlayerSetting.create("map_browser.difficulties",
             DEFAULT_DIFFICULTIES, SimpleSortPanel::writeDifficultyList, SimpleSortPanel::readDifficultyList);
 
     private final Consumer<MapSearchParams.Builder> onSearch;
     private final boolean fetchOnMount;
 
-    private final Set<MapData.Difficulty> difficulties = new HashSet<>();
+    private final Set<MapDifficulty> difficulties = new HashSet<>();
     private MapBrowserView.SortPreset sort = MapBrowserView.SortPreset.BEST;
 
     private final Switch sortSwitch;
@@ -52,19 +52,19 @@ class SimpleSortPanel extends Panel {
         // Difficulty
         easy = add(2, 2, new DifficultyToggleButton("gui.map_browser.difficulty_easy",
                 "map_browser/difficulty/easy", 4, 3)
-                .onChange(selected -> selectDifficulty(MapData.Difficulty.EASY, selected)));
+                .onChange(selected -> selectDifficulty(MapDifficulty.EASY, selected)));
         medium = add(3, 2, new DifficultyToggleButton("gui.map_browser.difficulty_medium",
                 "map_browser/difficulty/medium", 3, 3)
-                .onChange(selected -> selectDifficulty(MapData.Difficulty.MEDIUM, selected)));
+                .onChange(selected -> selectDifficulty(MapDifficulty.MEDIUM, selected)));
         hard = add(4, 2, new DifficultyToggleButton("gui.map_browser.difficulty_hard",
                 "map_browser/difficulty/hard", 4, 4)
-                .onChange(selected -> selectDifficulty(MapData.Difficulty.HARD, selected)));
+                .onChange(selected -> selectDifficulty(MapDifficulty.HARD, selected)));
         expert = add(5, 2, new DifficultyToggleButton("gui.map_browser.difficulty_expert",
                 "map_browser/difficulty/expert", 4, 4)
-                .onChange(selected -> selectDifficulty(MapData.Difficulty.EXPERT, selected)));
+                .onChange(selected -> selectDifficulty(MapDifficulty.EXPERT, selected)));
         nightmare = add(6, 2, new DifficultyToggleButton("gui.map_browser.difficulty_nightmare",
                 "map_browser/difficulty/nightmare", 4, 4)
-                .onChange(selected -> selectDifficulty(MapData.Difficulty.NIGHTMARE, selected)));
+                .onChange(selected -> selectDifficulty(MapDifficulty.NIGHTMARE, selected)));
 
         // Complex sort placeholder
         add(1, 3, new Button("gui.map_browser.advanced_search", 7, 1));
@@ -78,11 +78,11 @@ class SimpleSortPanel extends Panel {
 
         this.difficulties.clear();
         this.difficulties.addAll(playerData.getSetting(DIFFICULTIES));
-        easy.setSelected(this.difficulties.contains(MapData.Difficulty.EASY));
-        medium.setSelected(this.difficulties.contains(MapData.Difficulty.MEDIUM));
-        hard.setSelected(this.difficulties.contains(MapData.Difficulty.HARD));
-        expert.setSelected(this.difficulties.contains(MapData.Difficulty.EXPERT));
-        nightmare.setSelected(this.difficulties.contains(MapData.Difficulty.NIGHTMARE));
+        easy.setSelected(this.difficulties.contains(MapDifficulty.EASY));
+        medium.setSelected(this.difficulties.contains(MapDifficulty.MEDIUM));
+        hard.setSelected(this.difficulties.contains(MapDifficulty.HARD));
+        expert.setSelected(this.difficulties.contains(MapDifficulty.EXPERT));
+        nightmare.setSelected(this.difficulties.contains(MapDifficulty.NIGHTMARE));
 
         super.mount(host, isInitial);
 
@@ -108,7 +108,7 @@ class SimpleSortPanel extends Panel {
         playerData.setSetting(SORT_PRESET, sort);
     }
 
-    private void selectDifficulty(@NotNull MapData.Difficulty difficulty, boolean selected) {
+    private void selectDifficulty(@NotNull MapDifficulty difficulty, boolean selected) {
         var changed = selected ? difficulties.add(difficulty) : difficulties.remove(difficulty);
         if (!changed) return;
         onSearchChange();
@@ -122,7 +122,7 @@ class SimpleSortPanel extends Panel {
         var params = MapSearchParams.builder();
         if (!difficulties.isEmpty() && difficulties.size() != 5) {
             // Only set if not 0 or all. In those cases we also want to include unknown so can use default.
-            params.difficulties(difficulties.toArray(new MapData.Difficulty[0]));
+            params.difficulties(difficulties.toArray(new MapDifficulty[0]));
         }
         switch (sort) {
             case BEST -> params
@@ -139,11 +139,11 @@ class SimpleSortPanel extends Panel {
         this.onSearch.accept(params);
     }
 
-    private static List<MapData.Difficulty> readDifficultyList(JsonElement elem) {
+    private static List<MapDifficulty> readDifficultyList(JsonElement elem) {
         if (!(elem instanceof JsonArray array)) return DEFAULT_DIFFICULTIES;
 
-        var difficulties = new ArrayList<MapData.Difficulty>();
-        var values = MapData.Difficulty.values();
+        var difficulties = new ArrayList<MapDifficulty>();
+        var values = MapDifficulty.values();
         for (var e : array) {
             if (!(e instanceof JsonElement inner)) continue;
             difficulties.add(values[inner.getAsInt()]);
@@ -151,7 +151,7 @@ class SimpleSortPanel extends Panel {
         return difficulties;
     }
 
-    private static JsonArray writeDifficultyList(List<MapData.Difficulty> difficulties) {
+    private static JsonArray writeDifficultyList(List<MapDifficulty> difficulties) {
         var array = new JsonArray();
         for (var difficulty : difficulties) {
             array.add(difficulty.ordinal());
