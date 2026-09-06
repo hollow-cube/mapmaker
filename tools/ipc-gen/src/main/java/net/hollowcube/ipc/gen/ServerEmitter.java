@@ -218,6 +218,7 @@ final class ServerEmitter {
             // The caller only ever sees `e.toString()`, and a stack trace is what says which line
             // of the implementation threw; without this a 500 is a sentence in someone else's log.
             .addStatement("logger.error($S, ipcPath, e)", "ipc {} failed")
+            .addStatement("$T.report(ipcPath, e)", IpcNames.IPC_FAILURES)
             .addStatement("respondError(exchange, span, 500, e.toString())")
             .nextControlFlow("finally")
             .addStatement("exchange.close()")

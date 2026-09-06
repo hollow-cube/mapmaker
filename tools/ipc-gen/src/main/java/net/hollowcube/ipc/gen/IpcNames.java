@@ -34,6 +34,7 @@ final class IpcNames {
     static final String DISCRIMINATOR = "type";
     static final ClassName IPC_EXCEPTION = ClassName.get("net.hollowcube.ipc.util", "IpcException");
     static final ClassName IPC_SPAN = ClassName.get("net.hollowcube.ipc.util", "IpcSpan");
+    static final ClassName IPC_FAILURES = ClassName.get("net.hollowcube.ipc.util", "IpcFailures");
     static final ClassName IPC_TRACING = ClassName.get("net.hollowcube.ipc.util", "IpcTracing");
 
     private static final String SERVICE_SUFFIX = "Service";

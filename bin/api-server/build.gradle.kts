@@ -7,6 +7,7 @@ plugins {
 dependencies {
     implementation(project(":modules:api"))
 
+    implementation(libs.posthog)
     implementation(libs.gson)
     implementation(libs.postgresql)
     implementation(libs.slf4j)

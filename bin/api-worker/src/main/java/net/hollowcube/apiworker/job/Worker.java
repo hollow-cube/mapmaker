@@ -5,6 +5,7 @@ import net.hollowcube.apiserver.db.Jobs;
 import net.hollowcube.apiserver.db.JobsQueries;
 import net.hollowcube.apiserver.job.Cron;
 import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.posthog.PostHog;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -261,6 +262,7 @@ public final class Worker implements AutoCloseable {
                 return;
             }
             logger.error("{}/{} failed on attempt {}", row.job(), row.instance(), attempt, e);
+            PostHog.captureException(e, null, properties(row, attempt));
             report(row, () -> failed(bound.spec, row, attempt, e.toString()));
             return;
         } catch (Error e) {
@@ -270,6 +272,7 @@ public final class Worker implements AutoCloseable {
             running.inBody = false;
             Thread.interrupted();
             logger.error("{}/{} died on attempt {}", row.job(), row.instance(), attempt, e);
+            PostHog.captureException(e, null, properties(row, attempt));
             report(row, () -> failed(bound.spec, row, attempt, e.toString()));
             throw e;
         }
@@ -282,6 +285,10 @@ public final class Worker implements AutoCloseable {
             (System.nanoTime() - start) / 1_000_000
         );
         report(row, () -> succeeded(bound.spec, row));
+    }
+
+    private static Map<String, Object> properties(Jobs row, int attempt) {
+        return Map.of("job", row.job(), "instance", row.instance(), "attempt", attempt);
     }
 
     /// Reporting is best effort: a row whose outcome could not be written stays picked until the

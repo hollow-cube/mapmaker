@@ -23,6 +23,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.time.Duration;
+import java.util.Map;
 
 /// The api worker as a process: the api's background work, off the path of its requests.
 ///
@@ -68,6 +69,10 @@ public final class Main {
         } else {
             logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");
         }
+        Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
+            logger.error("uncaught exception in {}", thread.getName(), e);
+            PostHog.captureException(e, null, Map.of("thread", thread.getName()));
+        });
 
         // Same rule as posthog: a process with no vault secret is a local one.
         var apiUrl = secrets.get(

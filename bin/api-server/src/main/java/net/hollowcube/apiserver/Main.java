@@ -7,6 +7,7 @@ import net.hollowcube.apiserver.chat.ChatServiceImpl;
 import net.hollowcube.apiserver.common.Health;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.common.Pools;
+import net.hollowcube.apiserver.common.PostHogIds;
 import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
@@ -20,6 +21,8 @@ import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
 import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.session.SessionServer;
+import net.hollowcube.ipc.util.IpcFailures;
+import net.hollowcube.posthog.PostHog;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,6 +31,7 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 /// The api server as a process: the pools, the port and the secrets they come from.
@@ -50,8 +54,31 @@ public final class Main {
     /// Hardcoded in the Go api-server too; both write the same objects into it.
     private static final String REPLAY_BUCKET = "mapmaker-replays";
 
+    /// The Go api-server proxies PostHog, and the game servers go through it; so does this.
+    private static final String POSTHOG_PROXY = "http://api-server.mapmaker:9124/posthog";
+
     public static void main(String[] args) throws IOException {
         var secrets = VaultSecrets.load();
+        // A process with no vault secret is a local one, and the uninitialised client drops
+        // everything, which is what a local run wants. The endpoint is not a key the secret
+        // carries, so it is not what decides.
+        if (secrets.present() || System.getenv("POSTHOG_ENDPOINT") != null) {
+            PostHog.init(
+                PostHogIds.PROJECT_KEY,
+                config -> config.endpoint(
+                    secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT", POSTHOG_PROXY)
+                )
+            );
+        } else {
+            logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");
+        }
+        Thread.setDefaultUncaughtExceptionHandler((thread, e) -> {
+            logger.error("uncaught exception in {}", thread.getName(), e);
+            PostHog.captureException(e, null, Map.of("thread", thread.getName()));
+        });
+        // A 500 is already in the log; this is what puts it in front of someone.
+        IpcFailures.reportTo((path, e) -> PostHog.captureException(e, null, Map.of("ipc", path)));
+
         // One pool for what Go opens three on: `postgres.uri`, `postgres.maps_uri` and
         // `postgres.players_uri` are the same url, so head_db, jobs, chat_messages, player_sessions,
         // command_log, player_data and punishments are all in it.
@@ -120,6 +147,7 @@ public final class Main {
                 () -> {
                     server.stop(SHUTDOWN_SECONDS);
                     nats.close();
+                    PostHog.shutdown();
                 }
             )
         );
