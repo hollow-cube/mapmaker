@@ -49,6 +49,5 @@ public final class Digest {
         return HexFormat.of().formatHex(value);
     }
 
-    private Digest() {
-    }
+    private Digest() {}
 }

@@ -50,7 +50,9 @@ class ReplaySweepsTest {
     void reconcile_asksAgainForOneWhoseRowWasParked() throws Exception {
         replay("old-finished", "finished", "segmented", Duration.ofHours(2));
         new ReconcileReplaysRunner(db, 100).run(null);
-        TEST_DB.seed("update jobs set parked_at = now(), attempts = 5 where job = 'compact-replay'");
+        TEST_DB.seed(
+            "update jobs set parked_at = now(), attempts = 5 where job = 'compact-replay'"
+        );
 
         new ReconcileReplaysRunner(db, 100).run(null);
 
@@ -102,7 +104,8 @@ class ReplaySweepsTest {
     }
 
     private List<String> enqueued() {
-        return db.jobs.listJobs().stream()
+        return db.jobs.listJobs()
+            .stream()
             .filter(job -> job.job().equals(JobSpec.COMPACT_REPLAY.name()))
             .map(Jobs::instance)
             .sorted()
@@ -111,35 +114,48 @@ class ReplaySweepsTest {
 
     private void replay(String id, String state, String representation, Duration ago) {
         var compacted = representation.equals("compacted");
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into replays (id, version, recording_revision, state, representation, next_segment_index,
                                  current_preamble, current_preamble_digest,
                                  compacted_source_revision, compacted_object, compacted_length, compacted_digest,
                                  updated_at)
             values ('%s', 2, 2, '%s', '%s', 1, '\\x00', decode(repeat('11', 32), 'hex'),
                     %s, %s, %s, %s, now() - interval '%d seconds')
-            """.formatted(id, state, representation,
-            compacted ? "2" : "null",
-            compacted ? "'replays/aa/compacted/bb'" : "null",
-            compacted ? "16" : "null",
-            compacted ? "decode(repeat('22', 32), 'hex')" : "null",
-            ago.toSeconds()));
+            """
+                .formatted(
+                    id,
+                    state,
+                    representation,
+                    compacted ? "2" : "null",
+                    compacted ? "'replays/aa/compacted/bb'" : "null",
+                    compacted ? "16" : "null",
+                    compacted ? "decode(repeat('22', 32), 'hex')" : "null",
+                    ago.toSeconds()
+                )
+        );
     }
 
     private void segment(String replayId, int index, String object) {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into replay_segments (replay_id, segment_index, object_reference, length, digest, commit_revision)
             values ('%s', %d, '%s', 8, decode(repeat('33', 32), 'hex'), 1)
-            """.formatted(replayId, index, object));
+            """
+                .formatted(replayId, index, object)
+        );
     }
 
     private void idempotency(String replayId, String key, Duration ago) {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into replay_idempotency (replay_id, idempotency_key, request_fingerprint, response_status,
                                             response_etag, response_metadata, created_at)
             values ('%s', '%s', decode(repeat('44', 32), 'hex'), 200, '"r2"', '{}',
                     now() - interval '%d seconds')
-            """.formatted(replayId, key, ago.toSeconds()));
+            """
+                .formatted(replayId, key, ago.toSeconds())
+        );
     }
 
     /// Storage that only remembers which replays it was asked to drop the sources of. Everything

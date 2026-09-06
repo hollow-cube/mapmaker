@@ -44,7 +44,11 @@ public final class MapIndexer {
             // A uniform section has no block data at all, so it cannot go through the decode below.
             if (palette.length == 1) {
                 blockCount[0] += PolarSection.BLOCK_PALETTE_SIZE;
-                blockCounts.mergeLong(PolarHelper.blockId(palette[0]), PolarSection.BLOCK_PALETTE_SIZE, Long::sum);
+                blockCounts.mergeLong(
+                    PolarHelper.blockId(palette[0]),
+                    PolarSection.BLOCK_PALETTE_SIZE,
+                    Long::sum
+                );
                 for (int cell = 0; cell < CELLS_PER_SECTION; cell++)
                     addCell(cells, cellX, cellY, cellZ, sectionX, sectionY, sectionZ, cell);
                 return;
@@ -86,18 +90,24 @@ public final class MapIndexer {
         int[] y = sorted(cellY);
         int[] z = sorted(cellZ);
 
-        var checkpoints = scan.triggers().stream().filter(t -> t.kind() == TriggerScan.Kind.CHECKPOINT).toList();
+        var checkpoints = scan.triggers()
+            .stream()
+            .filter(t -> t.kind() == TriggerScan.Kind.CHECKPOINT)
+            .toList();
 
         // A map can be published with an empty world, which leaves nothing to measure but does not
         // stop it having triggers; every geometry field reads as zero for it.
         return new MapFeatures(
             scan.dataVersion(),
             blockCount[0],
-            trimmedExtent(x), trimmedExtent(y), trimmedExtent(z),
+            trimmedExtent(x),
+            trimmedExtent(y),
+            trimmedExtent(z),
             x.length,
             counts.length,
             blockCount[0] == 0 ? 0 : (double) counts[counts.length - 1] / blockCount[0],
-            scan.entities(), scan.textDisplays(),
+            scan.entities(),
+            scan.textDisplays(),
             checkpoints.size(),
             medianNearestNeighbour(checkpoints),
             count(scan.triggers(), TriggerScan.Kind.FINISH),
@@ -146,8 +156,14 @@ public final class MapIndexer {
     /// Marks the cell a section-local cell index falls in, recording its coordinates the first
     /// time it is seen so extent can be measured without unpacking the keys again.
     private static void addCell(
-        LongOpenHashSet cells, IntArrayList cellX, IntArrayList cellY, IntArrayList cellZ,
-        int sectionX, int sectionY, int sectionZ, int cell
+        LongOpenHashSet cells,
+        IntArrayList cellX,
+        IntArrayList cellY,
+        IntArrayList cellZ,
+        int sectionX,
+        int sectionY,
+        int sectionZ,
+        int cell
     ) {
         int x = sectionX * 2 + (cell & 1);
         int y = sectionY * 2 + ((cell >> 2) & 1);
@@ -162,9 +178,9 @@ public final class MapIndexer {
     /// Section block data is ordered `x + z * 16 + y * 256`, so the cell a block falls in is just
     /// the top bit of each coordinate.
     private static int cellOf(int blockIndex) {
-        return ((blockIndex >> 3) & 1)          // x
-            | (((blockIndex >> 7) & 1) << 1)    // z
-            | (((blockIndex >> 11) & 1) << 2);  // y
+        return ((blockIndex >> 3) & 1) // x
+            | (((blockIndex >> 7) & 1) << 1) // z
+            | (((blockIndex >> 11) & 1) << 2); // y
     }
 
     private static long key(int x, int y, int z) {
@@ -184,6 +200,5 @@ public final class MapIndexer {
         return (sortedCells[sortedCells.length - 1 - trim] - sortedCells[trim] + 1) * CELL_SIZE;
     }
 
-    private MapIndexer() {
-    }
+    private MapIndexer() {}
 }

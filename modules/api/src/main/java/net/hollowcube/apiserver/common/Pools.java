@@ -21,6 +21,5 @@ public final class Pools {
         return new HikariDataSource(config);
     }
 
-    private Pools() {
-    }
+    private Pools() {}
 }

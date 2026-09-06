@@ -12,8 +12,16 @@ import java.util.BitSet;
 /// Days of the week are `0-7` with both 0 and 7 as Sunday. As in cron, when both day fields are
 /// restricted a day matches if either does. That is every schedule anything here has wanted —
 /// `*/5 * * * *`, `0 4 * * *` — and nothing below a minute, which nothing here wants.
-public record Cron(String expression, BitSet minutes, BitSet hours, BitSet days, BitSet months, BitSet weekdays,
-                   boolean anyDay, boolean anyWeekday) {
+public record Cron(
+    String expression,
+    BitSet minutes,
+    BitSet hours,
+    BitSet days,
+    BitSet months,
+    BitSet weekdays,
+    boolean anyDay,
+    boolean anyWeekday
+) {
 
     /// Far enough that an expression with no next time — `0 0 31 2 *` — is caught, and no
     /// further, since each pass moves at least a minute and usually a field.
@@ -22,11 +30,19 @@ public record Cron(String expression, BitSet minutes, BitSet hours, BitSet days,
     public static Cron parse(String expression) {
         var fields = expression.strip().split("\\s+");
         if (fields.length != 5)
-            throw new IllegalArgumentException("a cron expression has five fields, not " + fields.length + ": '" + expression + "'");
-        var cron = new Cron(expression,
-            field(fields[0], 0, 59), field(fields[1], 0, 23), field(fields[2], 1, 31), field(fields[3], 1, 12),
+            throw new IllegalArgumentException(
+                "a cron expression has five fields, not " + fields.length + ": '" + expression + "'"
+            );
+        var cron = new Cron(
+            expression,
+            field(fields[0], 0, 59),
+            field(fields[1], 0, 23),
+            field(fields[2], 1, 31),
+            field(fields[3], 1, 12),
             weekdays(field(fields[4], 0, 7)),
-            fields[2].equals("*"), fields[4].equals("*"));
+            fields[2].equals("*"),
+            fields[4].equals("*")
+        );
         cron.next(Instant.EPOCH); // never matches → says so now, not at the first boundary
         return cron;
     }
@@ -45,10 +61,14 @@ public record Cron(String expression, BitSet minutes, BitSet hours, BitSet days,
                 t = t.plusDays(1).truncatedTo(ChronoUnit.DAYS);
             } else if (!hours.get(t.getHour())) {
                 int hour = hours.nextSetBit(t.getHour());
-                t = hour < 0 ? t.plusDays(1).truncatedTo(ChronoUnit.DAYS) : t.withHour(hour).truncatedTo(ChronoUnit.HOURS);
+                t = hour < 0
+                    ? t.plusDays(1).truncatedTo(ChronoUnit.DAYS)
+                    : t.withHour(hour).truncatedTo(ChronoUnit.HOURS);
             } else if (!minutes.get(t.getMinute())) {
                 int minute = minutes.nextSetBit(t.getMinute());
-                t = minute < 0 ? t.plusHours(1).truncatedTo(ChronoUnit.HOURS) : t.withMinute(minute);
+                t = minute < 0
+                    ? t.plusHours(1).truncatedTo(ChronoUnit.HOURS)
+                    : t.withMinute(minute);
             } else {
                 return t.toInstant();
             }
@@ -81,7 +101,8 @@ public record Cron(String expression, BitSet minutes, BitSet hours, BitSet days,
                 var dash = part.indexOf('-');
                 from = number(part.substring(0, dash), min, max, text);
                 to = number(part.substring(dash + 1), min, max, text);
-                if (to < from) throw new IllegalArgumentException("cron range runs backwards: '" + text + "'");
+                if (to < from)
+                    throw new IllegalArgumentException("cron range runs backwards: '" + text + "'");
             } else {
                 from = number(part, min, max, text);
                 to = slash >= 0 ? max : from;
@@ -99,7 +120,9 @@ public record Cron(String expression, BitSet minutes, BitSet hours, BitSet days,
             throw new IllegalArgumentException("not a cron field: '" + field + "'");
         }
         if (value < min || value > max)
-            throw new IllegalArgumentException("cron field '" + field + "' is outside " + min + "-" + max);
+            throw new IllegalArgumentException(
+                "cron field '" + field + "' is outside " + min + "-" + max
+            );
         return value;
     }
 

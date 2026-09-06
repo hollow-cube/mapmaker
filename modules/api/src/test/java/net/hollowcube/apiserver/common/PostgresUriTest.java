@@ -10,8 +10,13 @@ class PostgresUriTest {
 
     @Test
     void testFullUri() {
-        var uri = PostgresUri.parse("postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service?sslmode=disable");
-        assertEquals("jdbc:postgresql://postgres.mapmaker:5432/map-service?sslmode=disable", uri.jdbcUrl());
+        var uri = PostgresUri.parse(
+            "postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service?sslmode=disable"
+        );
+        assertEquals(
+            "jdbc:postgresql://postgres.mapmaker:5432/map-service?sslmode=disable",
+            uri.jdbcUrl()
+        );
         assertEquals("mapmaker", uri.user());
         assertEquals("hunter2", uri.password());
     }
@@ -40,6 +45,9 @@ class PostgresUriTest {
 
     @Test
     void testRejectsOtherSchemes() {
-        assertThrows(IllegalArgumentException.class, () -> PostgresUri.parse("mysql://localhost/map-service"));
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> PostgresUri.parse("mysql://localhost/map-service")
+        );
     }
 }

@@ -84,9 +84,19 @@ public final class Worker implements AutoCloseable {
     public void start() {
         // Platform threads, not virtual: they are what keeps the process alive, since it listens
         // on nothing. Runs themselves are virtual.
-        loops.add(Thread.ofPlatform().name("jobs-pick").start(() -> loop(POLL, this::pollOnce, true)));
-        loops.add(Thread.ofPlatform().name("jobs-heartbeat").start(() -> loop(HEARTBEAT, this::heartbeat, false)));
-        loops.add(Thread.ofPlatform().name("jobs-reap").start(() -> loop(HEARTBEAT.multipliedBy(2), this::revive, false)));
+        loops.add(
+            Thread.ofPlatform().name("jobs-pick").start(() -> loop(POLL, this::pollOnce, true))
+        );
+        loops.add(
+            Thread.ofPlatform()
+                .name("jobs-heartbeat")
+                .start(() -> loop(HEARTBEAT, this::heartbeat, false))
+        );
+        loops.add(
+            Thread.ofPlatform()
+                .name("jobs-reap")
+                .start(() -> loop(HEARTBEAT.multipliedBy(2), this::revive, false))
+        );
         logger.info("running {} as {} ({} slots)", jobs.keySet(), who, slots.availablePermits());
     }
 
@@ -94,7 +104,12 @@ public final class Worker implements AutoCloseable {
     public void scheduleRecurring() {
         for (var bound : jobs.values()) {
             var schedule = bound.spec.schedule();
-            if (schedule != null) db.jobs.scheduleJob(bound.spec.name(), JobSpec.TIMED_INSTANCE, schedule.next(Instant.now()));
+            if (schedule != null)
+                db.jobs.scheduleJob(
+                    bound.spec.name(),
+                    JobSpec.TIMED_INSTANCE,
+                    schedule.next(Instant.now())
+                );
         }
         scheduled = true;
     }
@@ -156,7 +171,13 @@ public final class Worker implements AutoCloseable {
                 return;
             }
         }
-        for (var key : running.keySet()) logger.warn("{}/{} is still running after {}, abandoning it", key.job, key.instance, grace);
+        for (var key : running.keySet())
+            logger.warn(
+                "{}/{} is still running after {}, abandoning it",
+                key.job,
+                key.instance,
+                grace
+            );
     }
 
     private void loop(Duration every, Runnable body, boolean wakeable) {
@@ -218,7 +239,16 @@ public final class Worker implements AutoCloseable {
             // Data that does not decode will not decode next time either.
             running.inBody = false;
             logger.error("{}/{}: {}", row.job(), row.instance(), e.getMessage());
-            report(row, () -> db.jobs.parkJob(e.getMessage(), row.job(), row.instance(), who, row.pickedAt()));
+            report(
+                row,
+                () -> db.jobs.parkJob(
+                    e.getMessage(),
+                    row.job(),
+                    row.instance(),
+                    who,
+                    row.pickedAt()
+                )
+            );
             return;
         } catch (Exception e) {
             running.inBody = false;
@@ -245,7 +275,12 @@ public final class Worker implements AutoCloseable {
         }
         running.inBody = false;
         Thread.interrupted();
-        logger.info("{}/{} done in {}ms", row.job(), row.instance(), (System.nanoTime() - start) / 1_000_000);
+        logger.info(
+            "{}/{} done in {}ms",
+            row.job(),
+            row.instance(),
+            (System.nanoTime() - start) / 1_000_000
+        );
         report(row, () -> succeeded(bound.spec, row));
     }
 
@@ -255,7 +290,12 @@ public final class Worker implements AutoCloseable {
         try {
             outcome.run();
         } catch (Exception e) {
-            logger.warn("{}/{}: could not report its outcome, the reaper will have it ({})", row.job(), row.instance(), e.getMessage());
+            logger.warn(
+                "{}/{}: could not report its outcome, the reaper will have it ({})",
+                row.job(),
+                row.instance(),
+                e.getMessage()
+            );
         }
     }
 
@@ -266,7 +306,13 @@ public final class Worker implements AutoCloseable {
     private void succeeded(JobSpec<?> spec, Jobs row) {
         var schedule = spec.schedule();
         if (schedule != null) {
-            db.jobs.completeJob(next(schedule, row), row.job(), row.instance(), who, row.pickedAt());
+            db.jobs.completeJob(
+                next(schedule, row),
+                row.job(),
+                row.instance(),
+                who,
+                row.pickedAt()
+            );
             return;
         }
         // Zero rows means it was re-enqueued while it ran and is due again; let go of it as is.
@@ -277,12 +323,30 @@ public final class Worker implements AutoCloseable {
     private void failed(JobSpec<?> spec, Jobs row, int attempt, String error) {
         var schedule = spec.schedule();
         if (schedule != null) {
-            db.jobs.failJob(new JobsQueries.FailJobParams(next(schedule, row), error, row.job(), row.instance(), who, row.pickedAt()));
+            db.jobs.failJob(
+                new JobsQueries.FailJobParams(
+                    next(schedule, row),
+                    error,
+                    row.job(),
+                    row.instance(),
+                    who,
+                    row.pickedAt()
+                )
+            );
         } else if (attempt >= spec.maxAttempts()) {
             logger.warn("{}/{} parked after {} attempts", row.job(), row.instance(), attempt);
             db.jobs.parkJob(error, row.job(), row.instance(), who, row.pickedAt());
         } else {
-            db.jobs.failJob(new JobsQueries.FailJobParams(Instant.now().plus(backoff(attempt)), error, row.job(), row.instance(), who, row.pickedAt()));
+            db.jobs.failJob(
+                new JobsQueries.FailJobParams(
+                    Instant.now().plus(backoff(attempt)),
+                    error,
+                    row.job(),
+                    row.instance(),
+                    who,
+                    row.pickedAt()
+                )
+            );
         }
     }
 
@@ -308,11 +372,15 @@ public final class Worker implements AutoCloseable {
     private void revive() {
         var deadSeconds = (int) HEARTBEAT.multipliedBy(MISSED_HEARTBEATS_BEFORE_DEAD).toSeconds();
         for (var row : db.jobs.reviveDeadJobs(deadSeconds))
-            logger.warn("{}/{} was lost by {}, due again", row.job(), row.instance(), row.lastError());
+            logger.warn(
+                "{}/{} was lost by {}, due again",
+                row.job(),
+                row.instance(),
+                row.lastError()
+            );
     }
 
-    private record Key(String job, String instance) {
-    }
+    private record Key(String job, String instance) {}
 
     /// A spec and its runner, which is where the row's json becomes the runner's record.
     private record Bound<D>(JobSpec<D> spec, JobRunner<D> runner) {
@@ -321,11 +389,15 @@ public final class Worker implements AutoCloseable {
             try {
                 data = spec.decode(json);
             } catch (RuntimeException e) {
-                throw new Undecodable("data is not a " + spec.data().getSimpleName() + ": " + e.getMessage());
+                throw new Undecodable(
+                    "data is not a " + spec.data().getSimpleName() + ": " + e.getMessage()
+                );
             }
             // A row inserted by hand without its data will not grow any next time either.
             if (data == null && spec.data() != Void.class)
-                throw new Undecodable("data is missing; " + spec.name() + " needs a " + spec.data().getSimpleName());
+                throw new Undecodable(
+                    "data is missing; " + spec.name() + " needs a " + spec.data().getSimpleName()
+                );
             runner.run(data);
         }
     }

@@ -40,7 +40,10 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
 
     @Override
     public void run(@Nullable CompactReplay data) throws IOException {
-        if (data == null) throw new IllegalArgumentException("compact-replay needs data: {\"replayId\": \"...\"}");
+        if (data == null)
+            throw new IllegalArgumentException(
+                "compact-replay needs data: {\"replayId\": \"...\"}"
+            );
         var id = data.replayId();
 
         var info = replays.getReplay(id);
@@ -63,20 +66,33 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
         // instead of five and a parked row. They compact when something can convert them.
         var version = ReplayHeader.versionOf(preamble);
         if (version != ReplayHeader.VERSION_LATEST) {
-            logger.info("replay {} is format version {}, which this build cannot read; leaving it segmented",
-                id, version);
+            logger.info(
+                "replay {} is format version {}, which this build cannot read; leaving it segmented",
+                id,
+                version
+            );
             return;
         }
 
         var start = System.nanoTime();
-        var compacted = ReplayCompactor.compact(ReplayPreamble.read(preamble), index -> segment(id, index),
-            null, ReplayManager.REGISTRY);
+        var compacted = ReplayCompactor.compact(
+            ReplayPreamble.read(preamble),
+            index -> segment(id, index),
+            null,
+            ReplayManager.REGISTRY
+        );
 
         try {
-            replays.publishCompacted(new ReplayCompaction(id, info.revision(),
-                    compactionKey(id, info.revision()), compacted.preambleLength(),
-                    Digest.base64(Digest.sha256(compacted.data()))),
-                Blob.of(compacted.data()));
+            replays.publishCompacted(
+                new ReplayCompaction(
+                    id,
+                    info.revision(),
+                    compactionKey(id, info.revision()),
+                    compacted.preambleLength(),
+                    Digest.base64(Digest.sha256(compacted.data()))
+                ),
+                Blob.of(compacted.data())
+            );
         } catch (IpcException e) {
             // A commit landed while this was compacting, or another replica got there first. The
             // newer commit enqueued a fresh row of its own.
@@ -84,8 +100,10 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
             throw e;
         }
 
-        logger.info("compacted {} ({}) to {} bytes in {}ms", id, data.reason(),
-            compacted.data().length, (System.nanoTime() - start) / 1_000_000);
+        logger.info(
+            "compacted {} ({}) to {} bytes in {}ms", id, data.reason(),
+            compacted.data().length, (System.nanoTime() - start) / 1_000_000
+        );
     }
 
     /// Derived from the replay and the revision it was compacted from, never random: a random key
@@ -104,7 +122,10 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
         try (var blob = replays.getSegment(id, index)) {
             return blob.readAllBytes();
         } catch (IOException e) {
-            throw new UncheckedIOException("reading segment " + index + " of replay " + id + " failed", e);
+            throw new UncheckedIOException(
+                "reading segment " + index + " of replay " + id + " failed",
+                e
+            );
         }
     }
 

@@ -33,7 +33,8 @@ public final class AnticheatTraceStore {
     /// PUT here. The leading character rules out `..` without a second rule about it.
     private static final Pattern ID = Pattern.compile("[A-Za-z0-9][A-Za-z0-9._-]{0,127}");
 
-    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy/MM/dd").withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("yyyy/MM/dd")
+        .withZone(ZoneOffset.UTC);
     private static final int BUFFER_BYTES = 1 << 16;
 
     private final Path root;
@@ -66,7 +67,11 @@ public final class AnticheatTraceStore {
     public Result write(String path, InputStream body) throws IOException {
         var target = resolve(path);
         Files.createDirectories(target.getParent());
-        var temp = Files.createTempFile(target.getParent(), target.getFileName().toString(), ".part");
+        var temp = Files.createTempFile(
+            target.getParent(),
+            target.getFileName().toString(),
+            ".part"
+        );
         var moved = false;
         try {
             var prefix = new byte[PREFIX_LENGTH];
@@ -74,7 +79,7 @@ public final class AnticheatTraceStore {
             var written = 0L;
             try (var out = Files.newOutputStream(temp)) {
                 var buffer = new byte[BUFFER_BYTES];
-                for (int read; (read = body.read(buffer)) != -1; ) {
+                for (int read; (read = body.read(buffer)) != -1;) {
                     // Before the write rather than after it: the cap is on what reaches the disk,
                     // and the rest of the body is not read at all.
                     if (written + read > maxBytes) return Result.TooLarge.INSTANCE;
@@ -87,10 +92,16 @@ public final class AnticheatTraceStore {
                     written += read;
                 }
             }
-            if (prefixLength < PREFIX_LENGTH || !Arrays.equals(prefix, 0, MAGIC.length, MAGIC, 0, MAGIC.length))
+            if (prefixLength < PREFIX_LENGTH
+                || !Arrays.equals(prefix, 0, MAGIC.length, MAGIC, 0, MAGIC.length))
                 return Result.NotATrace.INSTANCE;
 
-            Files.move(temp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+            Files.move(
+                temp,
+                target,
+                StandardCopyOption.REPLACE_EXISTING,
+                StandardCopyOption.ATOMIC_MOVE
+            );
             moved = true;
             return new Result.Stored(written, (prefix[4] & 0xFF) << 8 | prefix[5] & 0xFF);
         } finally {
@@ -103,8 +114,7 @@ public final class AnticheatTraceStore {
 
         /// `formatVersion` is the container's, read off the bytes rather than taken on trust from
         /// the header the proxy sent alongside them.
-        record Stored(long bytes, int formatVersion) implements Result {
-        }
+        record Stored(long bytes, int formatVersion) implements Result {}
 
         /// The body did not open with the magic, so it is not a trace and not worth keeping.
         record NotATrace() implements Result {

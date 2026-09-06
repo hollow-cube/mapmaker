@@ -12,6 +12,8 @@ import net.hollowcube.ipc.Blob;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -31,9 +33,6 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.function.Supplier;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 /// The S3 API over `java.net.http`, signed with AWS Signature Version 4.
 ///
 /// Hand-rolled rather than the AWS SDK because the api-server builds as a native image and the SDK
@@ -48,13 +47,13 @@ public final class HttpS3Client implements S3Client {
     private static final String SERVICE = "s3";
     private static final String UNSIGNED_PAYLOAD = "UNSIGNED-PAYLOAD";
     /// What a request with no body hashes to.
-    private static final String EMPTY_PAYLOAD =
-        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    private static final String EMPTY_PAYLOAD = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
-    private static final DateTimeFormatter STAMP =
-        DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
-    private static final DateTimeFormatter DAY =
-        DateTimeFormatter.ofPattern("yyyyMMdd").withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter STAMP = DateTimeFormatter
+        .ofPattern("yyyyMMdd'T'HHmmss'Z'")
+        .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("yyyyMMdd")
+        .withZone(ZoneOffset.UTC);
 
     private static final AttributeKey<String> BUCKET = AttributeKey.stringKey("aws.s3.bucket");
     private static final AttributeKey<String> KEY = AttributeKey.stringKey("aws.s3.key");
@@ -69,22 +68,54 @@ public final class HttpS3Client implements S3Client {
     private final Supplier<Instant> clock;
 
     /// An untraced client, for a caller that has no [OpenTelemetry].
-    public HttpS3Client(HttpClient http, String endpoint, String bucket, String region,
-                        String accessKey, String secretKey) {
-        this(http, OpenTelemetry.noop(), endpoint, bucket, region, accessKey, secretKey, Instant::now);
+    public HttpS3Client(
+        HttpClient http,
+        String endpoint,
+        String bucket,
+        String region,
+        String accessKey,
+        String secretKey
+    ) {
+        this(
+            http,
+            OpenTelemetry.noop(),
+            endpoint,
+            bucket,
+            region,
+            accessKey,
+            secretKey,
+            Instant::now
+        );
     }
 
-    public HttpS3Client(HttpClient http, OpenTelemetry otel, String endpoint, String bucket, String region,
-                        String accessKey, String secretKey) {
+    public HttpS3Client(
+        HttpClient http,
+        OpenTelemetry otel,
+        String endpoint,
+        String bucket,
+        String region,
+        String accessKey,
+        String secretKey
+    ) {
         this(http, otel, endpoint, bucket, region, accessKey, secretKey, Instant::now);
     }
 
     @TestOnly
-    public HttpS3Client(HttpClient http, OpenTelemetry otel, String endpoint, String bucket, String region,
-                        String accessKey, String secretKey, Supplier<Instant> clock) {
+    public HttpS3Client(
+        HttpClient http,
+        OpenTelemetry otel,
+        String endpoint,
+        String bucket,
+        String region,
+        String accessKey,
+        String secretKey,
+        Supplier<Instant> clock
+    ) {
         this.http = http;
         this.tracer = otel.getTracer("net.hollowcube.apiserver.s3");
-        this.endpoint = URI.create(endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint);
+        this.endpoint = URI.create(
+            endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint
+        );
         this.bucket = bucket;
         this.region = region;
         this.accessKey = accessKey;
@@ -96,9 +127,12 @@ public final class HttpS3Client implements S3Client {
     public void put(String key, InputStream body, long length) {
         var publisher = HttpRequest.BodyPublishers.ofInputStream(() -> body);
         if (length >= 0) publisher = HttpRequest.BodyPublishers.fromPublisher(publisher, length);
-        var response = send("put", key,
+        var response = send(
+            "put",
+            key,
             request("PUT", key, Map.of(), UNSIGNED_PAYLOAD).PUT(publisher),
-            HttpResponse.BodyHandlers.ofString());
+            HttpResponse.BodyHandlers.ofString()
+        );
         if (response.statusCode() == 404) throw new NotFoundError(key);
         require(response, "PUT", key, response.body());
     }
@@ -117,9 +151,12 @@ public final class HttpS3Client implements S3Client {
 
     @Override
     public void delete(String key) {
-        var response = send("delete", key,
+        var response = send(
+            "delete",
+            key,
             request("DELETE", key, Map.of(), EMPTY_PAYLOAD).DELETE(),
-            HttpResponse.BodyHandlers.ofString());
+            HttpResponse.BodyHandlers.ofString()
+        );
         // S3 answers 204 for a key that was never there, which is the behaviour a sweep wants.
         if (response.statusCode() == 404) return;
         require(response, "DELETE", key, response.body());
@@ -135,9 +172,12 @@ public final class HttpS3Client implements S3Client {
             query.put("prefix", prefix);
             if (token != null) query.put("continuation-token", token);
 
-            var response = send("list", prefix,
+            var response = send(
+                "list",
+                prefix,
                 request("GET", "", query, EMPTY_PAYLOAD).GET(),
-                HttpResponse.BodyHandlers.ofString());
+                HttpResponse.BodyHandlers.ofString()
+            );
             require(response, "LIST", prefix, response.body());
 
             var body = response.body();
@@ -154,9 +194,12 @@ public final class HttpS3Client implements S3Client {
     /// too. Not on [S3Client]: in the cluster the bucket exists and the credentials may not be
     /// allowed to make one.
     public void createBucketIfAbsent() {
-        var response = send("create-bucket", bucket,
+        var response = send(
+            "create-bucket",
+            bucket,
             request("PUT", "", Map.of(), EMPTY_PAYLOAD).PUT(HttpRequest.BodyPublishers.noBody()),
-            HttpResponse.BodyHandlers.ofString());
+            HttpResponse.BodyHandlers.ofString()
+        );
         // BucketAlreadyOwnedByYou, which is every start after the first.
         if (response.statusCode() == 409) return;
         require(response, "CREATE BUCKET", bucket, response.body());
@@ -166,22 +209,34 @@ public final class HttpS3Client implements S3Client {
         var builder = request("GET", key, Map.of(), EMPTY_PAYLOAD).GET();
         if (range != null) builder.header("Range", range);
 
-        var response = send(range == null ? "get" : "get-range", key, builder,
-            HttpResponse.BodyHandlers.ofInputStream());
+        var response = send(
+            range == null ? "get" : "get-range", key, builder,
+            HttpResponse.BodyHandlers.ofInputStream()
+        );
         if (response.statusCode() == 404) {
             text(response.body());
             throw new NotFoundError(key);
         }
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             var message = text(response.body());
-            throw new RequestFailedError("GET " + key + " answered " + response.statusCode() + ": " + message);
+            throw new RequestFailedError(
+                "GET " + key + " answered " + response.statusCode() + ": " + message
+            );
         }
-        return new Blob(response.headers().firstValueAsLong("content-length").orElse(-1), response.body());
+        return new Blob(
+            response.headers().firstValueAsLong("content-length").orElse(-1),
+            response.body()
+        );
     }
 
     /// `payloadHash` is what the signature commits the body to, and is a header as well as a field
     /// of the canonical request.
-    private HttpRequest.Builder request(String method, String key, Map<String, String> query, String payloadHash) {
+    private HttpRequest.Builder request(
+        String method,
+        String key,
+        Map<String, String> query,
+        String payloadHash
+    ) {
         var path = "/" + bucket + (key.isEmpty() ? "" : "/" + key);
         var canonicalPath = encodePath(path);
         var canonicalQuery = encodeQuery(query);
@@ -194,14 +249,25 @@ public final class HttpS3Client implements S3Client {
 
         // Signed but never set: java.net.http derives `host` from the uri, so what is signed here
         // has to be what it will send.
-        var host = endpoint.getHost() + (endpoint.getPort() == -1 || endpoint.getPort() == defaultPort()
-            ? "" : ":" + endpoint.getPort());
-        var canonicalRequest = method + "\n"
-            + canonicalPath + "\n"
-            + canonicalQuery + "\n"
-            + "host:" + host + "\n"
-            + "x-amz-content-sha256:" + payloadHash + "\n"
-            + "x-amz-date:" + stamp + "\n"
+        var host = endpoint.getHost()
+            + (endpoint.getPort() == -1 || endpoint.getPort() == defaultPort()
+                ? ""
+                : ":" + endpoint.getPort());
+        var canonicalRequest = method
+            + "\n"
+            + canonicalPath
+            + "\n"
+            + canonicalQuery
+            + "\n"
+            + "host:"
+            + host
+            + "\n"
+            + "x-amz-content-sha256:"
+            + payloadHash
+            + "\n"
+            + "x-amz-date:"
+            + stamp
+            + "\n"
             + "\n"
             + "host;x-amz-content-sha256;x-amz-date\n"
             + payloadHash;
@@ -211,15 +277,27 @@ public final class HttpS3Client implements S3Client {
         return HttpRequest.newBuilder(URI.create(url))
             .header("x-amz-date", stamp)
             .header("x-amz-content-sha256", payloadHash)
-            .header("Authorization", ALGORITHM
-                + " Credential=" + accessKey + "/" + scope
-                + ", SignedHeaders=host;x-amz-content-sha256;x-amz-date"
-                + ", Signature=" + signature);
+            .header(
+                "Authorization",
+                ALGORITHM
+                    + " Credential="
+                    + accessKey
+                    + "/"
+                    + scope
+                    + ", SignedHeaders=host;x-amz-content-sha256;x-amz-date"
+                    + ", Signature="
+                    + signature
+            );
     }
 
     /// The whole of SigV4 that is not string assembly.
     String signature(String canonicalRequest, String stamp, String scope, String day) {
-        var stringToSign = ALGORITHM + "\n" + stamp + "\n" + scope + "\n"
+        var stringToSign = ALGORITHM
+            + "\n"
+            + stamp
+            + "\n"
+            + scope
+            + "\n"
             + Digest.hex(Digest.sha256(canonicalRequest));
         return Digest.hex(hmac(signingKey(day), stringToSign.getBytes(StandardCharsets.UTF_8)));
     }
@@ -230,7 +308,10 @@ public final class HttpS3Client implements S3Client {
     }
 
     private byte[] signingKey(String day) {
-        var key = hmac(("AWS4" + secretKey).getBytes(StandardCharsets.UTF_8), day.getBytes(StandardCharsets.UTF_8));
+        var key = hmac(
+            ("AWS4" + secretKey).getBytes(StandardCharsets.UTF_8),
+            day.getBytes(StandardCharsets.UTF_8)
+        );
         key = hmac(key, region.getBytes(StandardCharsets.UTF_8));
         key = hmac(key, SERVICE.getBytes(StandardCharsets.UTF_8));
         return hmac(key, "aws4_request".getBytes(StandardCharsets.UTF_8));
@@ -238,21 +319,35 @@ public final class HttpS3Client implements S3Client {
 
     /// The span ends before the body is read: a [#get] answers with the stream still open, and how
     /// long the caller takes over it is not the store's time.
-    private <T> HttpResponse<T> send(String operation, String key, HttpRequest.Builder request,
-                                     HttpResponse.BodyHandler<T> handler) {
+    private <T> HttpResponse<T> send(
+        String operation,
+        String key,
+        HttpRequest.Builder request,
+        HttpResponse.BodyHandler<T> handler
+    ) {
         var span = tracer.spanBuilder("s3/" + operation).setSpanKind(SpanKind.CLIENT).startSpan();
         span.setAttribute(BUCKET, bucket);
         span.setAttribute(KEY, key);
         try (var ignored = span.makeCurrent()) {
             var response = http.send(request.build(), handler);
-            span.setAttribute(SemanticAttributes.HTTP_RESPONSE_STATUS_CODE, (long) response.statusCode());
-            if (response.statusCode() < 200 || response.statusCode() >= 300) span.setStatus(StatusCode.ERROR);
+            span.setAttribute(
+                SemanticAttributes.HTTP_RESPONSE_STATUS_CODE,
+                (long) response.statusCode()
+            );
+            if (response.statusCode() < 200 || response.statusCode() >= 300)
+                span.setStatus(StatusCode.ERROR);
             return response;
         } catch (IOException e) {
-            throw failed(span, new RequestFailedError("s3 " + operation + " " + key + " failed: " + e, e));
+            throw failed(
+                span,
+                new RequestFailedError("s3 " + operation + " " + key + " failed: " + e, e)
+            );
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw failed(span, new RequestFailedError("s3 " + operation + " " + key + " interrupted", e));
+            throw failed(
+                span,
+                new RequestFailedError("s3 " + operation + " " + key + " interrupted", e)
+            );
         } finally {
             span.end();
         }
@@ -264,9 +359,16 @@ public final class HttpS3Client implements S3Client {
         return error;
     }
 
-    private static void require(HttpResponse<?> response, String what, String key, @Nullable String body) {
+    private static void require(
+        HttpResponse<?> response,
+        String what,
+        String key,
+        @Nullable String body
+    ) {
         if (response.statusCode() >= 200 && response.statusCode() < 300) return;
-        throw new RequestFailedError(what + " " + key + " answered " + response.statusCode() + ": " + body);
+        throw new RequestFailedError(
+            what + " " + key + " answered " + response.statusCode() + ": " + body
+        );
     }
 
     /// Each segment percent-encoded, separators left alone. S3 signs the path once, unlike every
@@ -297,8 +399,13 @@ public final class HttpS3Client implements S3Client {
         var out = new StringBuilder(value.length());
         for (var b : value.getBytes(StandardCharsets.UTF_8)) {
             var c = (char) (b & 0xFF);
-            if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')
-                || c == '-' || c == '_' || c == '.' || c == '~') {
+            if ((c >= 'A' && c <= 'Z')
+                || (c >= 'a' && c <= 'z')
+                || (c >= '0' && c <= '9')
+                || c == '-'
+                || c == '_'
+                || c == '.'
+                || c == '~') {
                 out.append(c);
             } else {
                 out.append('%').append(HexFormat.of().withUpperCase().toHexDigits(b));
@@ -326,8 +433,12 @@ public final class HttpS3Client implements S3Client {
 
     private static String unescape(String value) {
         if (value.indexOf('&') < 0) return value;
-        return value.replace("&lt;", "<").replace("&gt;", ">").replace("&quot;", "\"")
-            .replace("&#39;", "'").replace("&apos;", "'").replace("&amp;", "&");
+        return value.replace("&lt;", "<")
+            .replace("&gt;", ">")
+            .replace("&quot;", "\"")
+            .replace("&#39;", "'")
+            .replace("&apos;", "'")
+            .replace("&amp;", "&");
     }
 
     private static String text(InputStream body) {

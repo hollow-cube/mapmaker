@@ -20,8 +20,10 @@ final class Trie {
         boolean surrounds(Sanitized s, int start, int end) {
             var text = s.text();
             int from = start - prefix.length(), to = end + suffix.length();
-            return from >= 0 && to <= text.length()
-                && text.startsWith(prefix, from) && text.startsWith(suffix, end)
+            return from >= 0
+                && to <= text.length()
+                && text.startsWith(prefix, from)
+                && text.startsWith(suffix, end)
                 && !s.crosses(from, to);
         }
     }
@@ -38,14 +40,23 @@ final class Trie {
     void put(String term, List<String> negatives) {
         if (term.isEmpty()) throw new IllegalArgumentException("empty term");
         for (var c : term.toCharArray())
-            if (slot(c) < 0) throw new IllegalArgumentException("term '" + term + "' is not [a-z0-9]");
+            if (slot(c) < 0)
+                throw new IllegalArgumentException("term '" + term + "' is not [a-z0-9]");
         var parsed = new ArrayList<Negative>(negatives.size());
         for (var negative : negatives) {
             int at = negative.indexOf(term);
-            if (at < 0) throw new IllegalArgumentException("'" + negative + "' does not contain its term '" + term + "'");
+            if (at < 0)
+                throw new IllegalArgumentException(
+                    "'" + negative + "' does not contain its term '" + term + "'"
+                );
             for (var c : negative.toCharArray())
-                if (slot(c) < 0) throw new IllegalArgumentException("negative '" + negative + "' is not [a-z0-9]");
-            parsed.add(new Negative(negative.substring(0, at), negative.substring(at + term.length())));
+                if (slot(c) < 0)
+                    throw new IllegalArgumentException(
+                        "negative '" + negative + "' is not [a-z0-9]"
+                    );
+            parsed.add(
+                new Negative(negative.substring(0, at), negative.substring(at + term.length()))
+            );
         }
 
         var node = root;
@@ -88,8 +99,7 @@ final class Trie {
     }
 
     private static boolean negated(Node node, Sanitized s, int start, int end) {
-        for (var negative : node.negatives)
-            if (negative.surrounds(s, start, end)) return true;
+        for (var negative : node.negatives) if (negative.surrounds(s, start, end)) return true;
         return false;
     }
 

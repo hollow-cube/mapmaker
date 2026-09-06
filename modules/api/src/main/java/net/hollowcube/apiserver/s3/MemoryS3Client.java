@@ -44,7 +44,9 @@ public final class MemoryS3Client implements S3Client {
         try {
             var bytes = body.readAllBytes();
             if (length >= 0 && bytes.length != length)
-                throw new IllegalStateException("announced " + length + " bytes but wrote " + bytes.length);
+                throw new IllegalStateException(
+                    "announced " + length + " bytes but wrote " + bytes.length
+                );
             objects.put(key, bytes);
             var action = afterPut;
             afterPut = null;
@@ -65,7 +67,9 @@ public final class MemoryS3Client implements S3Client {
     public Blob getRange(String key, long start, long endInclusive) {
         var object = objects.get(key);
         if (object == null) throw new NotFoundError(key);
-        return Blob.of(Arrays.copyOfRange(object, (int) start, (int) Math.min(endInclusive + 1, object.length)));
+        return Blob.of(
+            Arrays.copyOfRange(object, (int) start, (int) Math.min(endInclusive + 1, object.length))
+        );
     }
 
     @Override

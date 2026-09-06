@@ -28,8 +28,7 @@ final class ReplayCompat {
     static final String SEGMENTED = "segmented";
     static final String COMPACTED = "compacted";
 
-    private ReplayCompat() {
-    }
+    private ReplayCompat() {}
 
     /// The revision as Go writes it down: an HTTP entity tag, quotes included. Nothing on the wire
     /// carries this; it survives only because Go stores it in `replay_idempotency.response_etag` and
@@ -52,7 +51,12 @@ final class ReplayCompat {
     /// A fresh staging key per call. The id is hashed because it is client-supplied and never
     /// validated as a uuid, so it must not be able to escape the `replays/` prefix.
     static String objectKey(String replayId, String kind) {
-        return "replays/" + Digest.hex(Digest.sha256(replayId)) + "/" + kind + "/" + UUID.randomUUID();
+        return "replays/"
+            + Digest.hex(Digest.sha256(replayId))
+            + "/"
+            + kind
+            + "/"
+            + UUID.randomUUID();
     }
 
     /// What makes one write distinct from another under the same idempotency key.
@@ -60,11 +64,27 @@ final class ReplayCompat {
     /// Length-prefixed so no combination of values can collide by running into its neighbour, and
     /// the length is the **UTF-8 byte** count: Go writes `len(value)`, which counts bytes, so a
     /// non-ASCII replay id fingerprints differently if this counts chars.
-    static byte[] fingerprint(String method, String replayId, String ifMatch, String ifNoneMatch,
-                              String preambleLength, String segmentIndex, String finished, byte[] bodyDigest) {
+    static byte[] fingerprint(
+        String method,
+        String replayId,
+        String ifMatch,
+        String ifNoneMatch,
+        String preambleLength,
+        String segmentIndex,
+        String finished,
+        byte[] bodyDigest
+    ) {
         var out = new ByteArrayOutputStream();
-        for (var field : new String[] {method, replayId, ifMatch, ifNoneMatch, preambleLength,
-            segmentIndex, finished, Digest.base64(bodyDigest)}) {
+        for (var field : new String[] {
+            method,
+            replayId,
+            ifMatch,
+            ifNoneMatch,
+            preambleLength,
+            segmentIndex,
+            finished,
+            Digest.base64(bodyDigest),
+        }) {
             var bytes = field.getBytes(StandardCharsets.UTF_8);
             out.writeBytes((bytes.length + ":").getBytes(StandardCharsets.UTF_8));
             out.writeBytes(bytes);
@@ -76,28 +96,51 @@ final class ReplayCompat {
     /// serving it would spread the damage.
     static void validate(Replays row) {
         if (!RECORDING.equals(row.state()) && !FINISHED.equals(row.state()))
-            throw new IpcException(500, "stored replay " + row.id() + " has invalid state " + row.state());
+            throw new IpcException(
+                500,
+                "stored replay " + row.id() + " has invalid state " + row.state()
+            );
         switch (row.representation()) {
             case SEGMENTED -> {
                 if (row.nextSegmentIndex() < 0)
-                    throw new IpcException(500, "stored replay " + row.id() + " has invalid next segment index");
+                    throw new IpcException(
+                        500,
+                        "stored replay " + row.id() + " has invalid next segment index"
+                    );
             }
             case COMPACTED -> {
-                if (!FINISHED.equals(row.state()) || row.compactedObject() == null
-                    || row.compactedLength() == null || row.compactedDigest() == null)
-                    throw new IpcException(500, "stored replay " + row.id() + " has invalid compacted state");
+                if (!FINISHED.equals(row.state())
+                    || row.compactedObject() == null
+                    || row.compactedLength() == null
+                    || row.compactedDigest() == null)
+                    throw new IpcException(
+                        500,
+                        "stored replay " + row.id() + " has invalid compacted state"
+                    );
             }
-            default -> throw new IpcException(500,
-                "stored replay " + row.id() + " has invalid representation " + row.representation());
+            default -> throw new IpcException(
+                500,
+                "stored replay " + row.id() + " has invalid representation " + row.representation()
+            );
         }
         if (row.currentPreambleDigest().length != 32)
-            throw new IpcException(500, "stored replay " + row.id() + " has invalid preamble digest");
+            throw new IpcException(
+                500,
+                "stored replay " + row.id() + " has invalid preamble digest"
+            );
     }
 
     static ReplayInfo info(Replays row) {
-        return new ReplayInfo(row.id(), row.version(), state(row.state()), representation(row.representation()),
+        return new ReplayInfo(
+            row.id(),
+            row.version(),
+            state(row.state()),
+            representation(row.representation()),
             SEGMENTED.equals(row.representation()) ? (int) row.nextSegmentIndex() : null,
-            row.currentPreamble().length, outcome(row.outcome()), row.updatedAt().toEpochMilli());
+            row.currentPreamble().length,
+            outcome(row.outcome()),
+            row.updatedAt().toEpochMilli()
+        );
     }
 
     /// The `response_metadata` column. Go writes and reads the first three; the rest are ours, and
@@ -108,7 +151,8 @@ final class ReplayCompat {
         var out = new JsonObject();
         out.addProperty("state", row.state());
         out.addProperty("representation", row.representation());
-        if (SEGMENTED.equals(row.representation())) out.addProperty("nextSegmentIndex", row.nextSegmentIndex());
+        if (SEGMENTED.equals(row.representation()))
+            out.addProperty("nextSegmentIndex", row.nextSegmentIndex());
         out.addProperty("preambleLength", row.currentPreamble().length);
         if (row.outcome() != null) out.addProperty("outcome", row.outcome());
         out.addProperty("updatedAt", row.updatedAt().toEpochMilli());

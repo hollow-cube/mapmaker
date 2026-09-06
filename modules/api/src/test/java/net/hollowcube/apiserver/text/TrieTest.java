@@ -50,7 +50,10 @@ class TrieTest {
         assertEquals(-1, at(trie, "cabd", 1)); // ab negated by cabd, abcd does not continue
         assertEquals(5, at(trie, "cabcd", 1)); // ab is not negated here, and abcd is longer
         var negatedPrefix = new Trie();
-        negatedPrefix.put("ab", List.of("abcd")); // the short term is negated exactly where the long one matches
+        negatedPrefix.put(
+            "ab",
+            List.of("abcd")
+        ); // the short term is negated exactly where the long one matches
         negatedPrefix.put("abcd", List.of());
         assertEquals(4, at(negatedPrefix, "abcd", 0));
         assertEquals(2, at(negatedPrefix, "abxy", 0));

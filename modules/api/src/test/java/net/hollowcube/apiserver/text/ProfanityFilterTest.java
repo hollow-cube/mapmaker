@@ -15,8 +15,7 @@ class ProfanityFilterTest {
     }
 
     private static void passes(String... texts) {
-        for (var text : texts)
-            assertEquals("", matched(text), "'" + text + "' should pass");
+        for (var text : texts) assertEquals("", matched(text), "'" + text + "' should pass");
     }
 
     private static void flags(String term, String... texts) {
@@ -33,10 +32,39 @@ class ProfanityFilterTest {
 
     @Test
     void wordsThatMerelyContainATerm_pass() {
-        passes("grape juice", "the cockpit", "a cocktail", "raccoon", "scunthorpe", "read the document", "cumulus",
-            "the therapist", "therapeutic", "pakistan", "japan", "thorny", "peacock", "flanged", "muffin", "swank",
-            "ashkenazi", "bastardized", "retardant", "the basement", "clitheroe", "dickens", "vandyke",
-            "you scum", "scummy", "the four horsemen", "puberty", "pachinko", "poppycock", "cockles", "riddick");
+        passes(
+            "grape juice",
+            "the cockpit",
+            "a cocktail",
+            "raccoon",
+            "scunthorpe",
+            "read the document",
+            "cumulus",
+            "the therapist",
+            "therapeutic",
+            "pakistan",
+            "japan",
+            "thorny",
+            "peacock",
+            "flanged",
+            "muffin",
+            "swank",
+            "ashkenazi",
+            "bastardized",
+            "retardant",
+            "the basement",
+            "clitheroe",
+            "dickens",
+            "vandyke",
+            "you scum",
+            "scummy",
+            "the four horsemen",
+            "puberty",
+            "pachinko",
+            "poppycock",
+            "cockles",
+            "riddick"
+        );
         flags("nigger", "sniggers", "sniggering"); // deliberately still blocked
     }
 
@@ -63,9 +91,29 @@ class ProfanityFilterTest {
     @Test
     void termAcrossTwoInnocentWords_passes() {
         // The reason this filter exists: each of these spells a term across a word seam.
-        passes("elytra pearl", "elytra people", "elytra pe", "mass hit", "grass hit me", "this hitbox", "finish it",
-            "publish it", "push it", "english it", "who responded", "who returned", "who revolted", "open is",
-            "for a permanent", "class ic", "for a pen", "the class hit", "brush it off", "was hit", "elytra pearl fun");
+        passes(
+            "elytra pearl",
+            "elytra people",
+            "elytra pe",
+            "mass hit",
+            "grass hit me",
+            "this hitbox",
+            "finish it",
+            "publish it",
+            "push it",
+            "english it",
+            "who responded",
+            "who returned",
+            "who revolted",
+            "open is",
+            "for a permanent",
+            "class ic",
+            "for a pen",
+            "the class hit",
+            "brush it off",
+            "was hit",
+            "elytra pearl fun"
+        );
     }
 
     @Test
@@ -122,7 +170,10 @@ class ProfanityFilterTest {
     @Test
     void manyMatches_allReported() {
         var result = ProfanityFilter.test("fuck this shit, you cunt");
-        assertEquals(List.of("fuck", "shit", "cunt"), result.matches().stream().map(ProfanityFilter.Match::term).toList());
+        assertEquals(
+            List.of("fuck", "shit", "cunt"),
+            result.matches().stream().map(ProfanityFilter.Match::term).toList()
+        );
         assertEquals("**** this ****, you ****", result.censored('*'));
     }
 
@@ -133,10 +184,19 @@ class ProfanityFilterTest {
         assertEquals("well ****", result.censored('*'));
 
         assertEquals("****", ProfanityFilter.test("fück").censored('*'));
-        assertEquals("*****", ProfanityFilter.test("fu\u0308ck").censored('*')); // combining mark inside the span
-        assertEquals("*******", ProfanityFilter.test("r a p e").censored('*')); // spelled out: the whole span
+        assertEquals(
+            "*****",
+            ProfanityFilter.test("fu\u0308ck").censored('*')
+        ); // combining mark inside the span
+        assertEquals(
+            "*******",
+            ProfanityFilter.test("r a p e").censored('*')
+        ); // spelled out: the whole span
         assertEquals("*****!", ProfanityFilter.test("c()ck!").censored('*'));
-        assertEquals("😀 ****", ProfanityFilter.test("😀 fuck").censored('*')); // surrogate pair before it
+        assertEquals(
+            "😀 ****",
+            ProfanityFilter.test("😀 fuck").censored('*')
+        ); // surrogate pair before it
         assertEquals("****😀****", ProfanityFilter.test("fuck😀shit").censored('*'));
         assertEquals("**** ****", ProfanityFilter.test("ｆｕｃｋ shit").censored('*'));
     }

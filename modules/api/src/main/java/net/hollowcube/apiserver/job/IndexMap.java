@@ -14,5 +14,4 @@ import org.jetbrains.annotations.Nullable;
 /// Indexing is a pure function of the world bytes, so a duplicate is wasted work and nothing worse.
 ///
 /// @param reason why, for the log; nothing reads it
-public record IndexMap(String mapId, @Nullable String reason) {
-}
+public record IndexMap(String mapId, @Nullable String reason) {}

@@ -26,21 +26,36 @@ public final class HeadDatabaseServiceImpl implements HeadDatabaseService {
         var paging = Page.of(page, pageSize);
         var tsquery = TsQuery.of(query);
         if (tsquery == null) {
-            return PaginatedList.of(db.heads.getRandomHeads(paging.limit()),
-                HeadsQueries.GetRandomHeadsRow::totalCount, row -> headInfo(row.headDb()));
+            return PaginatedList.of(
+                db.heads.getRandomHeads(paging.limit()),
+                HeadsQueries.GetRandomHeadsRow::totalCount,
+                row -> headInfo(row.headDb())
+            );
         }
-        return PaginatedList.of(db.heads.getHeadsWithSearch(tsquery, paging.limit(), paging.offset()),
-            HeadsQueries.GetHeadsWithSearchRow::totalCount, row -> headInfo(row.headDb()));
+        return PaginatedList.of(
+            db.heads.getHeadsWithSearch(tsquery, paging.limit(), paging.offset()),
+            HeadsQueries.GetHeadsWithSearchRow::totalCount,
+            row -> headInfo(row.headDb())
+        );
     }
 
     @Override
     public PaginatedList<HeadInfo> getHeadsInCategory(String category, int page, int pageSize) {
         var paging = Page.of(page, pageSize);
-        return PaginatedList.of(db.heads.getHeadsWithCategory(category, paging.limit(), paging.offset()),
-            HeadsQueries.GetHeadsWithCategoryRow::totalCount, row -> headInfo(row.headDb()));
+        return PaginatedList.of(
+            db.heads.getHeadsWithCategory(category, paging.limit(), paging.offset()),
+            HeadsQueries.GetHeadsWithCategoryRow::totalCount,
+            row -> headInfo(row.headDb())
+        );
     }
 
     private static HeadInfo headInfo(HeadDb row) {
-        return new HeadInfo(String.valueOf(row.id()), row.name(), row.category(), row.texture(), row.tags());
+        return new HeadInfo(
+            String.valueOf(row.id()),
+            row.name(),
+            row.category(),
+            row.texture(),
+            row.tags()
+        );
     }
 }

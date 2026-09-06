@@ -1,5 +1,13 @@
+import dev.javafmt.gradle.task.JavaFmtTask
+
 plugins {
+    alias(libs.plugins.javafmt)
     id("mapmaker.java-library")
+}
+
+// SQL-generated sources are formatted by sql-gen.
+tasks.withType<JavaFmtTask>().configureEach {
+    excludes.add("net/hollowcube/apiserver/db/**")
 }
 
 sourceSets.main {

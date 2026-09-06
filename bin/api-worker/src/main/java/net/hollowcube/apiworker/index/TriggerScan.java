@@ -67,9 +67,12 @@ final class TriggerScan {
     private static final String ENTITY_TEXT_DISPLAY = "minecraft:text_display";
 
     enum Kind {
-        CHECKPOINT, FINISH, STATUS,
+        CHECKPOINT,
+        FINISH,
+        STATUS,
         /// The map's starting state, which is not a place in the world.
-        SPAWN;
+        SPAWN,
+        ;
 
         /// Whether two overlapping regions of this kind are one trigger. Overlapping finish
         /// regions are how you draw a shape out of boxes, but two overlapping checkpoints are
@@ -80,15 +83,19 @@ final class TriggerScan {
     }
 
     /// A trigger after merging. Position is the center of everything that merged into it.
-    record Trigger(Kind kind, double x, double y, double z, ActionTriggerData data) {
-    }
+    record Trigger(Kind kind, double x, double y, double z, ActionTriggerData data) {}
 
     /// @param dataVersion    the world's mapmaker data version, or -1 when it predates one
     /// @param entities       entities that are not markers, passengers included
     /// @param textDisplays   how many of those are text displays
     /// @param decodeFailures triggers dropped for not decoding, and so missing from `triggers`
-    record Scan(int dataVersion, List<Trigger> triggers, int entities, int textDisplays, int decodeFailures) {
-    }
+    record Scan(
+        int dataVersion,
+        List<Trigger> triggers,
+        int entities,
+        int textDisplays,
+        int decodeFailures
+    ) {}
 
     /// Running totals over a scan, passed down through the chunk readers.
     private static final class Counts {
@@ -116,7 +123,13 @@ final class TriggerScan {
 
         if (counts.failures != 0)
             logger.warn("dropped {} trigger(s) that failed to decode", counts.failures);
-        return new Scan(dataVersion, triggers, counts.entities, counts.textDisplays, counts.failures);
+        return new Scan(
+            dataVersion,
+            triggers,
+            counts.entities,
+            counts.textDisplays,
+            counts.failures
+        );
     }
 
     // Reading
@@ -148,7 +161,8 @@ final class TriggerScan {
             int version = buffer.read(NetworkBuffer.BYTE);
             if (version <= VERSION_PRE_WORLD_NBT) return null;
             if (version > VERSION_PRE_CHUNK_NBT) buffer.read(NetworkBuffer.VAR_INT);
-            if (!(buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag worldData)) return null;
+            if (!(buffer.read(NetworkBuffer.NBT) instanceof CompoundBinaryTag worldData))
+                return null;
 
             var upgraded = upgrade(HCDataTypes.WORLD, worldData, dataVersion);
             if (!upgraded.keySet().contains(SPAWN_EFFECTS)) return null;
@@ -166,7 +180,12 @@ final class TriggerScan {
     }
 
     /// Reads a chunk's entities: markers become triggers, everything else is counted.
-    private static void readEntities(PolarChunk chunk, int dataVersion, List<Raw> out, Counts counts) {
+    private static void readEntities(
+        PolarChunk chunk,
+        int dataVersion,
+        List<Raw> out,
+        Counts counts
+    ) {
         CompoundBinaryTag chunkData;
         try {
             var buffer = wrap(chunk.userData());
@@ -200,10 +219,19 @@ final class TriggerScan {
             // MarkerEntity#boundingBox adds back; a marker with no region is a point.
             double[] min = corner(data, "min", x, y, z);
             double[] max = corner(data, "max", x, y, z);
-            out.add(new Raw(kind, false,
-                Math.min(min[0], max[0]), Math.min(min[1], max[1]), Math.min(min[2], max[2]),
-                Math.max(min[0], max[0]), Math.max(min[1], max[1]), Math.max(min[2], max[2]),
-                markerData(data, kind, counts)));
+            out.add(
+                new Raw(
+                    kind,
+                    false,
+                    Math.min(min[0], max[0]),
+                    Math.min(min[1], max[1]),
+                    Math.min(min[2], max[2]),
+                    Math.max(min[0], max[0]),
+                    Math.max(min[1], max[1]),
+                    Math.max(min[2], max[2]),
+                    markerData(data, kind, counts)
+                )
+            );
         }
     }
 
@@ -223,7 +251,8 @@ final class TriggerScan {
             // A plate's block entity compound is the trigger data itself, with no wrapper, and
             // polar has already run it through the block entity fixes.
             var data = blockEntity.data() == null
-                ? ActionTriggerData.EMPTY : decodeOrEmpty(blockEntity.data(), counts);
+                ? ActionTriggerData.EMPTY
+                : decodeOrEmpty(blockEntity.data(), counts);
             double x = chunk.x() * 16 + blockEntity.x();
             double z = chunk.z() * 16 + blockEntity.z();
             out.add(new Raw(kind, true, x, blockEntity.y(), z, x, blockEntity.y(), z, data));
@@ -251,7 +280,8 @@ final class TriggerScan {
 
     private static @Nullable ActionTriggerData decode(CompoundBinaryTag tag, Counts counts) {
         try {
-            if (ActionTriggerData.CODEC.decode(PolarHelper.CODER, tag) instanceof Result.Ok<ActionTriggerData> ok)
+            if (ActionTriggerData.CODEC.decode(PolarHelper.CODER, tag)
+                instanceof Result.Ok<ActionTriggerData> ok)
                 return ok.value();
             counts.failures++;
             return null;
@@ -263,9 +293,19 @@ final class TriggerScan {
 
     /// Runs mapmaker's own user data formats forward to the current version. Worlds written before
     /// the data version existed are left alone, which is what the runtime does too.
-    private static CompoundBinaryTag upgrade(DataType type, CompoundBinaryTag tag, int dataVersion) {
+    private static CompoundBinaryTag upgrade(
+        DataType type,
+        CompoundBinaryTag tag,
+        int dataVersion
+    ) {
         if (dataVersion == -1 || dataVersion >= DataFixer.maxVersion()) return tag;
-        return (CompoundBinaryTag) DataFixer.upgrade(type, Transcoder.NBT, tag, dataVersion, DataFixer.maxVersion());
+        return (CompoundBinaryTag) DataFixer.upgrade(
+            type,
+            Transcoder.NBT,
+            tag,
+            dataVersion,
+            DataFixer.maxVersion()
+        );
     }
 
     private static @Nullable NetworkBuffer wrap(byte @Nullable [] data) {
@@ -294,21 +334,31 @@ final class TriggerScan {
         };
     }
 
-    private static double[] corner(CompoundBinaryTag data, String key, double x, double y, double z) {
+    private static double[] corner(
+        CompoundBinaryTag data,
+        String key,
+        double x,
+        double y,
+        double z
+    ) {
         var list = data.getList(key, BinaryTagTypes.DOUBLE);
-        if (list.size() < 3) return new double[]{x, y, z};
-        return new double[]{x + list.getDouble(0), y + list.getDouble(1), z + list.getDouble(2)};
+        if (list.size() < 3) return new double[] {x, y, z};
+        return new double[] {x + list.getDouble(0), y + list.getDouble(1), z + list.getDouble(2)};
     }
 
     // Merging
 
     private record Raw(
-        Kind kind, boolean plate,
-        double minX, double minY, double minZ,
-        double maxX, double maxY, double maxZ,
+        Kind kind,
+        boolean plate,
+        double minX,
+        double minY,
+        double minZ,
+        double maxX,
+        double maxY,
+        double maxZ,
         ActionTriggerData data
-    ) {
-    }
+    ) {}
 
     /// Groups triggers that are really one thing and returns one [Trigger] per group.
     ///
@@ -343,8 +393,15 @@ final class TriggerScan {
                 z += (member.minZ + member.maxZ) / 2;
                 if (member.data.actions().size() > data.actions().size()) data = member.data;
             }
-            out.add(new Trigger(members.getFirst().kind,
-                x / members.size(), y / members.size(), z / members.size(), data));
+            out.add(
+                new Trigger(
+                    members.getFirst().kind,
+                    x / members.size(),
+                    y / members.size(),
+                    z / members.size(),
+                    data
+                )
+            );
         }
         return out;
     }
@@ -362,9 +419,12 @@ final class TriggerScan {
         }
 
         if (!a.kind.mergesRegions()) return false;
-        return a.minX <= b.maxX && a.maxX >= b.minX
-            && a.minY <= b.maxY && a.maxY >= b.minY
-            && a.minZ <= b.maxZ && a.maxZ >= b.minZ;
+        return a.minX <= b.maxX
+            && a.maxX >= b.minX
+            && a.minY <= b.maxY
+            && a.maxY >= b.minY
+            && a.minZ <= b.maxZ
+            && a.maxZ >= b.minZ;
     }
 
     private static int find(int[] group, int i) {
@@ -372,6 +432,5 @@ final class TriggerScan {
         return i;
     }
 
-    private TriggerScan() {
-    }
+    private TriggerScan() {}
 }

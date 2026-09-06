@@ -58,8 +58,14 @@ public final class ChatServiceImpl implements ChatService {
     }
 
     @Override
-    public ChatResult send(String senderId, String serverId, ChatChannel channel, @Nullable String targetId,
-                           String message, @Nullable String currentMapId) {
+    public ChatResult send(
+        String senderId,
+        String serverId,
+        ChatChannel channel,
+        @Nullable String targetId,
+        String message,
+        @Nullable String currentMapId
+    ) {
         var sender = uuid(senderId, "senderId");
         var text = ChatText.strip(message);
         if (text.isEmpty()) return new ChatResult.Sent();
@@ -74,12 +80,15 @@ public final class ChatServiceImpl implements ChatService {
             case UNKNOWN -> throw new IpcException(400, "unknown chat channel");
         };
         // Nobody to reply to reads as an offline target with no name to give.
-        if (channel == ChatChannel.REPLY && target == null) return new ChatResult.TargetOffline(null);
+        if (channel == ChatChannel.REPLY && target == null)
+            return new ChatResult.TargetOffline(null);
 
         // Everything the players themselves decide, in one read: the mute that stops the message,
         // the direct message settings, and whether the sender's emoji render for everyone — which
         // travels with the message rather than being asked per server.
-        var people = db.players.getChatPlayers(target == null ? List.of(sender) : List.of(sender, target));
+        var people = db.players.getChatPlayers(
+            target == null ? List.of(sender) : List.of(sender, target)
+        );
         var senderRow = find(people, sender);
         if (senderRow != null && senderRow.muted())
             return new ChatResult.Muted(senderRow.muteExpiresAt());
@@ -89,35 +98,50 @@ public final class ChatServiceImpl implements ChatService {
         if (target != null) {
             // Someone who has turned direct messages off does not get to send them either.
             if (!allowsDms(people, sender)) return new ChatResult.DmDisabled(null);
-            if (!allowsDms(people, target))
-                return new ChatResult.DmDisabled(target.toString());
+            if (!allowsDms(people, target)) return new ChatResult.DmDisabled(target.toString());
         }
 
         // Only paid for by a message that mentions one. A server on an old tag sends its map only
         // when it has already checked this itself, so for those this is the same answer twice.
         var mentionsMap = text.contains(MAP_TAG);
-        if (mentionsMap && (currentMapId == null || !db.maps.isMapPublished(uuid(currentMapId, "currentMapId"))))
+        if (mentionsMap
+            && (currentMapId == null
+                || !db.maps.isMapPublished(uuid(currentMapId, "currentMapId"))))
             return new ChatResult.MapNotPublished();
 
         var censor = ProfanityFilter.test(text);
-        db.chat.insertChatMessage(new ChatQueries.InsertChatMessageParams(
-            serverId, channelColumn(channel, target), senderId, message,
-            censor.matched() ? CENSOR_ENGINE : null,
-            censor.matched() ? censor.matches().stream().map(ProfanityFilter.Match::term).collect(Collectors.joining(",")) : null));
+        db.chat.insertChatMessage(
+            new ChatQueries.InsertChatMessageParams(
+                serverId,
+                channelColumn(channel, target),
+                senderId,
+                message,
+                censor.matched() ? CENSOR_ENGINE : null,
+                censor.matched()
+                    ? censor.matches()
+                        .stream()
+                        .map(ProfanityFilter.Match::term)
+                        .collect(Collectors.joining(","))
+                    : null
+            )
+        );
         if (censor.matched()) return new ChatResult.Censored();
 
-        publish(new ChatMessage(
-            senderId,
-            // A resolved reply is a direct message; nothing downstream should have to know it was
-            // typed as `/r`.
-            channel == ChatChannel.REPLY ? ChatChannel.DIRECT : channel,
-            target == null ? null : target.toString(),
-            channel == ChatChannel.LOCAL ? currentMapId : null,
-            MessageTokenizer.tokenize(text, mentionsMap ? currentMapId : null),
-            // The randomness in rendering is seeded once, here, so that every server draws the
-            // same emoji for the same message.
-            ThreadLocalRandom.current().nextLong(),
-            hasHypercube(people, sender)));
+        publish(
+            new ChatMessage(
+                senderId,
+                // A resolved reply is a direct message; nothing downstream should have to know it was
+                // typed as `/r`.
+                channel == ChatChannel.REPLY ? ChatChannel.DIRECT : channel,
+                target == null ? null : target.toString(),
+                channel == ChatChannel.LOCAL ? currentMapId : null,
+                MessageTokenizer.tokenize(text, mentionsMap ? currentMapId : null),
+                // The randomness in rendering is seeded once, here, so that every server draws the
+                // same emoji for the same message.
+                ThreadLocalRandom.current().nextLong(),
+                hasHypercube(people, sender)
+            )
+        );
 
         if (target != null) {
             // Both directions, so that answering someone makes you the person they reply to. Go only
@@ -130,10 +154,20 @@ public final class ChatServiceImpl implements ChatService {
 
     @Override
     public void logCommand(CommandExecution execution) {
-        db.commandLog.insertCommandLog(new CommandLogQueries.InsertCommandLogParams(
-            execution.timestamp(), uuid(execution.playerId(), "playerId"), execution.serverId(),
-            execution.mapId(), execution.instanceId(), execution.command(), execution.remote(),
-            outcomeColumn(execution.outcome()), execution.error(), execution.durationMs()));
+        db.commandLog.insertCommandLog(
+            new CommandLogQueries.InsertCommandLogParams(
+                execution.timestamp(),
+                uuid(execution.playerId(), "playerId"),
+                execution.serverId(),
+                execution.mapId(),
+                execution.instanceId(),
+                execution.command(),
+                execution.remote(),
+                outcomeColumn(execution.outcome()),
+                execution.error(),
+                execution.durationMs()
+            )
+        );
     }
 
     /// The check constraint's spelling of an outcome.
@@ -239,7 +273,10 @@ public final class ChatServiceImpl implements ChatService {
         return row != null && row.hypercube();
     }
 
-    private static PlayersQueries.@Nullable GetChatPlayersRow find(List<PlayersQueries.GetChatPlayersRow> people, UUID id) {
+    private static PlayersQueries.@Nullable GetChatPlayersRow find(
+        List<PlayersQueries.GetChatPlayersRow> people,
+        UUID id
+    ) {
         for (var row : people) {
             if (row.id().equals(id)) return row;
         }

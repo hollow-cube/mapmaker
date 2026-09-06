@@ -36,7 +36,12 @@ public final class SweepReplaySourcesRunner implements JobRunner<Void> {
     private final int limit;
     private final boolean deleting;
 
-    public SweepReplaySourcesRunner(ApiDatabase db, ReplayService replays, int limit, boolean deleting) {
+    public SweepReplaySourcesRunner(
+        ApiDatabase db,
+        ReplayService replays,
+        int limit,
+        boolean deleting
+    ) {
         this.db = db;
         this.replays = replays;
         this.limit = limit;
@@ -47,7 +52,10 @@ public final class SweepReplaySourcesRunner implements JobRunner<Void> {
     public void run(@Nullable Void data) {
         var ids = db.replays.listCompactedReplaysWithSegments(Instant.now().minus(GRACE), limit);
         if (!deleting && !ids.isEmpty())
-            logger.info("{} compacted replays have sources past the grace period; deleting is off", ids.size());
+            logger.info(
+                "{} compacted replays have sources past the grace period; deleting is off",
+                ids.size()
+            );
 
         var dropped = 0;
         for (var id : deleting ? ids : List.<String>of()) {
@@ -60,9 +68,12 @@ public final class SweepReplaySourcesRunner implements JobRunner<Void> {
                 logger.warn("could not drop the sources of replay {}: {}", id, e.getMessage());
             }
         }
-        if (dropped > 0) logger.info("dropped {} source segments across {} replays", dropped, ids.size());
+        if (dropped > 0)
+            logger.info("dropped {} source segments across {} replays", dropped, ids.size());
 
-        var expired = db.replays.deleteExpiredReplayIdempotency(Instant.now().minus(IDEMPOTENCY_RETENTION));
+        var expired = db.replays.deleteExpiredReplayIdempotency(
+            Instant.now().minus(IDEMPOTENCY_RETENTION)
+        );
         if (expired > 0) logger.info("expired {} replay idempotency records", expired);
     }
 }

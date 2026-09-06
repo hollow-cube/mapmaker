@@ -1,9 +1,10 @@
 package net.hollowcube.apiserver.s3;
 
 import com.sun.net.httpserver.HttpExchange;
-import io.opentelemetry.api.OpenTelemetry;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import io.opentelemetry.api.OpenTelemetry;
+import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,10 +15,9 @@ import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.time.Instant;
-import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,9 +53,16 @@ class HttpS3ClientTest {
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/", fake);
         server.start();
-        s3 = new HttpS3Client(HttpClient.newHttpClient(), OpenTelemetry.noop(),
+        s3 = new HttpS3Client(
+            HttpClient.newHttpClient(),
+            OpenTelemetry.noop(),
             "http://127.0.0.1:" + server.getAddress().getPort(),
-            "mapmaker-replays", "us-east-1", ACCESS_KEY, SECRET_KEY, () -> FIXED);
+            "mapmaker-replays",
+            "us-east-1",
+            ACCESS_KEY,
+            SECRET_KEY,
+            () -> FIXED
+        );
     }
 
     @AfterEach
@@ -79,14 +86,24 @@ class HttpS3ClientTest {
             host;range;x-amz-content-sha256;x-amz-date
             e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855""";
 
-        assertEquals("f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
-            s3.signature(canonicalRequest, "20130524T000000Z",
-                "20130524/us-east-1/s3/aws4_request", "20130524"));
+        assertEquals(
+            "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
+            s3.signature(
+                canonicalRequest,
+                "20130524T000000Z",
+                "20130524/us-east-1/s3/aws4_request",
+                "20130524"
+            )
+        );
     }
 
     @Test
     void put_addressesThePathStyleKeyAndSignsTheThreeHeaders() {
-        s3.put("replays/ab/segments/0/cd", new ByteArrayInputStream("frames".getBytes(StandardCharsets.UTF_8)), 6);
+        s3.put(
+            "replays/ab/segments/0/cd",
+            new ByteArrayInputStream("frames".getBytes(StandardCharsets.UTF_8)),
+            6
+        );
 
         var request = fake.requests.getFirst();
         assertEquals("PUT", request.method());
@@ -95,20 +112,34 @@ class HttpS3ClientTest {
         assertEquals("20130524T000000Z", request.headers().get("X-Amz-Date"));
         var authorization = request.headers().get("Authorization");
         assertNotNull(authorization);
-        assertTrue(authorization.startsWith(
-                "AWS4-HMAC-SHA256 Credential=" + ACCESS_KEY + "/20130524/us-east-1/s3/aws4_request,"
-                    + " SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature="),
-            authorization);
-        assertArrayEquals("frames".getBytes(StandardCharsets.UTF_8), fake.objects.get("replays/ab/segments/0/cd"));
+        assertTrue(
+            authorization.startsWith(
+                "AWS4-HMAC-SHA256 Credential="
+                    + ACCESS_KEY
+                    + "/20130524/us-east-1/s3/aws4_request,"
+                    + " SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature="
+            ),
+            authorization
+        );
+        assertArrayEquals(
+            "frames".getBytes(StandardCharsets.UTF_8),
+            fake.objects.get("replays/ab/segments/0/cd")
+        );
     }
 
     @Test
     void get_readsTheObjectBackWithItsLength() throws IOException {
-        fake.objects.put("replays/ab/compacted/cd", "a compacted replay".getBytes(StandardCharsets.UTF_8));
+        fake.objects.put(
+            "replays/ab/compacted/cd",
+            "a compacted replay".getBytes(StandardCharsets.UTF_8)
+        );
 
         try (var blob = s3.get("replays/ab/compacted/cd")) {
             assertEquals(18, blob.length());
-            assertEquals("a compacted replay", new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8));
+            assertEquals(
+                "a compacted replay",
+                new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8)
+            );
         }
     }
 
@@ -146,8 +177,10 @@ class HttpS3ClientTest {
         fake.objects.put("other/1", new byte[] {9});
         fake.pageSize = 2;
 
-        assertEquals(List.of("replays/0", "replays/1", "replays/2", "replays/3", "replays/4"),
-            s3.list("replays/"));
+        assertEquals(
+            List.of("replays/0", "replays/1", "replays/2", "replays/3", "replays/4"),
+            s3.list("replays/")
+        );
     }
 
     private static final class FakeS3 implements HttpHandler {
@@ -155,15 +188,16 @@ class HttpS3ClientTest {
         private final List<Request> requests = new ArrayList<>();
         private int pageSize = 1000;
 
-        private record Request(String method, String path, Map<String, String> headers) {
-        }
+        private record Request(String method, String path, Map<String, String> headers) {}
 
         @Override
         public void handle(HttpExchange exchange) throws IOException {
             // com.sun.net.httpserver normalises header names to its own capitalisation, so the
             // assertions read them back by whatever case they were sent in.
             var headers = new TreeMap<String, String>(String.CASE_INSENSITIVE_ORDER);
-            exchange.getRequestHeaders().forEach((name, values) -> headers.put(name, values.getFirst()));
+            exchange.getRequestHeaders().forEach(
+                (name, values) -> headers.put(name, values.getFirst())
+            );
             var path = exchange.getRequestURI().getPath();
             requests.add(new Request(exchange.getRequestMethod(), path, headers));
 
@@ -190,7 +224,11 @@ class HttpS3ClientTest {
             }
         }
 
-        private void get(HttpExchange exchange, String key, @Nullable String range) throws IOException {
+        private void get(
+            HttpExchange exchange,
+            String key,
+            @Nullable String range
+        ) throws IOException {
             var object = objects.get(key);
             if (object == null) {
                 exchange.sendResponseHeaders(404, -1);
@@ -213,11 +251,14 @@ class HttpS3ClientTest {
             var params = new LinkedHashMap<String, String>();
             for (var pair : query.split("&")) {
                 var split = pair.indexOf('=');
-                params.put(pair.substring(0, split),
-                    URLDecoder.decode(pair.substring(split + 1), StandardCharsets.UTF_8));
+                params.put(
+                    pair.substring(0, split),
+                    URLDecoder.decode(pair.substring(split + 1), StandardCharsets.UTF_8)
+                );
             }
 
-            var matching = objects.keySet().stream()
+            var matching = objects.keySet()
+                .stream()
                 .filter(key -> key.startsWith(params.getOrDefault("prefix", "")))
                 .sorted()
                 .toList();
@@ -227,10 +268,13 @@ class HttpS3ClientTest {
             var to = Math.min(from + pageSize, matching.size());
 
             var body = new StringBuilder("<ListBucketResult>");
-            for (var key : matching.subList(from, to)) body.append("<Contents><Key>").append(key).append("</Key></Contents>");
+            for (var key : matching.subList(from, to))
+                body.append("<Contents><Key>").append(key).append("</Key></Contents>");
             body.append("<IsTruncated>").append(to < matching.size()).append("</IsTruncated>");
             if (to < matching.size())
-                body.append("<NextContinuationToken>").append(matching.get(to)).append("</NextContinuationToken>");
+                body.append("<NextContinuationToken>")
+                    .append(matching.get(to))
+                    .append("</NextContinuationToken>");
             body.append("</ListBucketResult>");
 
             var bytes = body.toString().getBytes(StandardCharsets.UTF_8);

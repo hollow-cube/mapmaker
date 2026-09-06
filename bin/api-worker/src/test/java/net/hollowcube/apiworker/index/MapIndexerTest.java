@@ -64,7 +64,10 @@ class MapIndexerTest {
         assertEquals(8, f.entityCount());
         assertEquals(5, f.textDisplayCount());
         assertEquals(4, f.checkpointCount());
-        assertEquals(Set.of(Mechanic.TELEPORT, Mechanic.RESET_HEIGHT, Mechanic.TIMER), f.mechanics());
+        assertEquals(
+            Set.of(Mechanic.TELEPORT, Mechanic.RESET_HEIGHT, Mechanic.TIMER),
+            f.mechanics()
+        );
         assertEquals(11, f.actionCount());
         assertEquals(0, f.decodeFailures());
     }

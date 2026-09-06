@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.javafmt)
     id("mapmaker.java-binary")
     id("org.graalvm.buildtools.native") version "0.10.6"
 }

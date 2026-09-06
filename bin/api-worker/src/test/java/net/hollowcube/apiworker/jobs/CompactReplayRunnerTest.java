@@ -53,7 +53,9 @@ class CompactReplayRunnerTest {
     private static final int TICKS = 500;
 
     @Test
-    void run_compactsAFinishedRecordingIntoSomethingThatPlaysBackTickForTick(@TempDir Path directory) throws Exception {
+    void run_compactsAFinishedRecordingIntoSomethingThatPlaysBackTickForTick(
+        @TempDir Path directory
+    ) throws Exception {
         var storage = new FakeStorage();
         var expected = record(directory, storage);
 
@@ -61,19 +63,29 @@ class CompactReplayRunnerTest {
 
         assertEquals(1, storage.published.size());
         var published = storage.published.getFirst();
-        assertEquals("compact:" + ID + ":" + (storage.version - 1), published.meta().idempotencyKey());
+        assertEquals(
+            "compact:" + ID + ":" + (storage.version - 1),
+            published.meta().idempotencyKey()
+        );
 
         var played = new ArrayList<ReplayEvent>();
-        try (var player = new ReplayPlayer(new CompactedReplayReader(published.body()),
-            ReplayEvents.builder().build(), played::add)) {
+        try (
+            var player = new ReplayPlayer(
+                new CompactedReplayReader(published.body()),
+                ReplayEvents.builder().build(),
+                played::add
+            )
+        ) {
             assertEquals(TICKS, player.tickCount());
-            while (player.advance() == ReplayPlayer.Advance.ADVANCED) ;
+            while (player.advance() == ReplayPlayer.Advance.ADVANCED) {}
         }
         assertEquals(expected, played);
     }
 
     @Test
-    void run_isANoOpForAReplayThatIsGoneStillRecordingOrAlreadyCompacted(@TempDir Path directory) throws Exception {
+    void run_isANoOpForAReplayThatIsGoneStillRecordingOrAlreadyCompacted(
+        @TempDir Path directory
+    ) throws Exception {
         var storage = new FakeStorage();
 
         new CompactReplayRunner(storage).run(new CompactReplay("never-recorded", "reconcile"));
@@ -94,7 +106,9 @@ class CompactReplayRunnerTest {
     /// keeps offering them because they stay finished and segmented, so the runner has to leave them
     /// alone quietly rather than burn five attempts and a parked row every tick.
     @Test
-    void run_leavesAReplayWrittenAtAnUnreadableFormatVersionAlone(@TempDir Path directory) throws Exception {
+    void run_leavesAReplayWrittenAtAnUnreadableFormatVersionAlone(
+        @TempDir Path directory
+    ) throws Exception {
         var storage = new FakeStorage();
         record(directory, storage);
         // Byte 4..5 of the preamble is the format version.
@@ -108,7 +122,9 @@ class CompactReplayRunnerTest {
 
     /// A commit that landed while the runner was compacting. There is a fresh row for it already.
     @Test
-    void run_returnsQuietlyWhenThePublicationLosesItsPrecondition(@TempDir Path directory) throws Exception {
+    void run_returnsQuietlyWhenThePublicationLosesItsPrecondition(
+        @TempDir Path directory
+    ) throws Exception {
         var storage = new FakeStorage();
         record(directory, storage);
         storage.publishStatus = 412;
@@ -122,8 +138,10 @@ class CompactReplayRunnerTest {
         record(directory, storage);
         storage.publishStatus = 500;
 
-        assertThrows(IpcException.class,
-            () -> new CompactReplayRunner(storage).run(new CompactReplay(ID, "final-commit")));
+        assertThrows(
+            IpcException.class,
+            () -> new CompactReplayRunner(storage).run(new CompactReplay(ID, "final-commit"))
+        );
     }
 
     /// The fix for the orphaning bug: two runs against one source revision derive one key, so the
@@ -139,9 +157,13 @@ class CompactReplayRunnerTest {
         new CompactReplayRunner(storage).run(new CompactReplay(ID, "final-commit"));
 
         assertEquals(2, storage.published.size());
-        assertEquals(storage.published.get(0).meta().idempotencyKey(),
-            storage.published.get(1).meta().idempotencyKey());
-        assertTrue(storage.published.getFirst().meta().idempotencyKey().startsWith("compact:" + ID + ":"));
+        assertEquals(
+            storage.published.get(0).meta().idempotencyKey(),
+            storage.published.get(1).meta().idempotencyKey()
+        );
+        assertTrue(
+            storage.published.getFirst().meta().idempotencyKey().startsWith("compact:" + ID + ":")
+        );
     }
 
     @Test
@@ -159,9 +181,13 @@ class CompactReplayRunnerTest {
     /// Records a real replay into `storage`, and answers the events it should play back as.
     private static List<ReplayEvent> record(Path directory, FakeStorage storage) {
         var files = new SegmentedFileReplayStorage(directory);
-        var recorder = ReplayRecorder.create(ReplayEvents.builder().build(), files.writer(ID, null),
-            UUID.randomUUID(), ReplayHeader.worldVersion(UUID.randomUUID()), () -> {
-            });
+        var recorder = ReplayRecorder.create(
+            ReplayEvents.builder().build(),
+            files.writer(ID, null),
+            UUID.randomUUID(),
+            ReplayHeader.worldVersion(UUID.randomUUID()),
+            () -> {}
+        );
 
         var expected = new ArrayList<ReplayEvent>();
         for (var tick = 0; tick < TICKS; tick++) {
@@ -191,8 +217,7 @@ class CompactReplayRunnerTest {
         private int publishStatus = 200;
         private boolean applyPublications = true;
 
-        private record Published(ReplayCompaction meta, byte[] body) {
-        }
+        private record Published(ReplayCompaction meta, byte[] body) {}
 
         /// The names `SegmentedFileReplayWriter` lays a local recording out under; they are
         /// package-private to it, so this is the one place they are spelled out again.
@@ -200,8 +225,12 @@ class CompactReplayRunnerTest {
             try {
                 preamble = Files.readAllBytes(directory.resolve("preamble.dat"));
                 for (var index = 0; index < segmentCount; index++)
-                    segments.put(index, Files.readAllBytes(
-                        directory.resolve(String.format("segment-%03d.dat", index))));
+                    segments.put(
+                        index,
+                        Files.readAllBytes(
+                            directory.resolve(String.format("segment-%03d.dat", index))
+                        )
+                    );
             } catch (IOException e) {
                 throw new UncheckedIOException(e);
             }
@@ -210,9 +239,16 @@ class CompactReplayRunnerTest {
         @Override
         public @Nullable ReplayInfo getReplay(String id) {
             if (!ID.equals(id) || preamble == null) return null;
-            return new ReplayInfo(id, version, state, representation,
+            return new ReplayInfo(
+                id,
+                version,
+                state,
+                representation,
                 representation == ReplayRepresentation.SEGMENTED ? segments.size() : null,
-                preamble.length, ReplayOutcome.RESET, 0);
+                preamble.length,
+                ReplayOutcome.RESET,
+                0
+            );
         }
 
         @Override

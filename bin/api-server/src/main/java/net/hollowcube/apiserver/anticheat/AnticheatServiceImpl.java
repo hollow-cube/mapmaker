@@ -63,18 +63,34 @@ public final class AnticheatServiceImpl implements AnticheatService {
         }
 
         return switch (written) {
-            case AnticheatTraceStore.Result.TooLarge _ ->
-                throw new IpcException(413, "trace is longer than the store accepts");
-            case AnticheatTraceStore.Result.NotATrace _ ->
-                throw new IpcException(400, "body does not open with the HCTR magic");
+            case AnticheatTraceStore.Result.TooLarge _ -> throw new IpcException(
+                413,
+                "trace is longer than the store accepts"
+            );
+            case AnticheatTraceStore.Result.NotATrace _ -> throw new IpcException(
+                400,
+                "body does not open with the HCTR magic"
+            );
             case AnticheatTraceStore.Result.Stored stored -> {
                 // Read before the upsert only to tell the proxy which of its retries this was; the
                 // two racing is a pair of first uploads for one trace, which is nothing.
                 var replaced = db.anticheat.getAnticheatTrace(meta.id()) != null;
-                db.anticheat.upsertAnticheatTrace(new AnticheatQueries.UpsertAnticheatTraceParams(
-                    meta.id(), meta.captureId(), uuid(meta.playerId(), "playerId"), meta.proxyVersion(), meta.proxy(),
-                    meta.clientPvn(), meta.reason(), stored.formatVersion(), startedAt, instant(meta.endedAt()),
-                    stored.bytes(), path));
+                db.anticheat.upsertAnticheatTrace(
+                    new AnticheatQueries.UpsertAnticheatTraceParams(
+                        meta.id(),
+                        meta.captureId(),
+                        uuid(meta.playerId(), "playerId"),
+                        meta.proxyVersion(),
+                        meta.proxy(),
+                        meta.clientPvn(),
+                        meta.reason(),
+                        stored.formatVersion(),
+                        startedAt,
+                        instant(meta.endedAt()),
+                        stored.bytes(),
+                        path
+                    )
+                );
 
                 logger.atInfo()
                     .setMessage("stored trace")
@@ -111,16 +127,32 @@ public final class AnticheatServiceImpl implements AnticheatService {
 
     @Override
     public List<TraceRow> listTraces(String captureId) {
-        return db.anticheat.listAnticheatTracesByCapture(captureId).stream()
+        return db.anticheat.listAnticheatTracesByCapture(captureId)
+            .stream()
             .map(AnticheatServiceImpl::row)
             .toList();
     }
 
     private static TraceRow row(AnticheatTraces row) {
-        var meta = new TraceMeta(row.id(), row.captureId(), row.playerId().toString(), row.proxyVersion(),
-            row.proxy(), row.clientPvn(), row.reason(), row.startedAt().toEpochMilli(), millis(row.endedAt()),
-            row.formatVersion());
-        return new TraceRow(meta, row.bytes(), row.path(), row.pinned(), millis(row.expiresAt()),
-            row.createdAt().toEpochMilli());
+        var meta = new TraceMeta(
+            row.id(),
+            row.captureId(),
+            row.playerId().toString(),
+            row.proxyVersion(),
+            row.proxy(),
+            row.clientPvn(),
+            row.reason(),
+            row.startedAt().toEpochMilli(),
+            millis(row.endedAt()),
+            row.formatVersion()
+        );
+        return new TraceRow(
+            meta,
+            row.bytes(),
+            row.path(),
+            row.pinned(),
+            millis(row.expiresAt()),
+            row.createdAt().toEpochMilli()
+        );
     }
 }

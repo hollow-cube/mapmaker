@@ -9,6 +9,7 @@ import net.hollowcube.sqlgen.testing.TestDb;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import javax.net.ssl.SSLSession;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import javax.net.ssl.SSLSession;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -37,7 +37,9 @@ class IndexMapRunnerTest {
         @Override
         public byte[] getWorld(String mapId) {
             if (!MAP.toString().equals(mapId)) throw new ApiClient.NotFoundError(new NotFound());
-            try (var in = IndexMapRunnerTest.class.getResourceAsStream("/index/super-fun-map.polar")) {
+            try (
+                var in = IndexMapRunnerTest.class.getResourceAsStream("/index/super-fun-map.polar")
+            ) {
                 assertNotNull(in);
                 return in.readAllBytes();
             } catch (IOException e) {
@@ -58,7 +60,11 @@ class IndexMapRunnerTest {
         assertEquals(90, row.blockCount());
         assertEquals(3, row.checkpointCount());
         assertEquals(19.235, row.checkpointSpacing(), 1e-3);
-        assertEquals(List.of("blocks", "reset_height"), row.mechanics(), "lower-cased, in enum order");
+        assertEquals(
+            List.of("blocks", "reset_height"),
+            row.mechanics(),
+            "lower-cased, in enum order"
+        );
         assertEquals(List.of("scale"), row.attributes());
         assertEquals(List.of("reset_in_water"), row.settings());
         assertEquals(0, row.decodeFailures());
@@ -84,13 +90,29 @@ class IndexMapRunnerTest {
 
     /// The api client's errors are built from a response, of which only the status is read.
     private static final class NotFound implements HttpResponse<String> {
-        public int statusCode() { return 404; }
-        public HttpRequest request() { return null; }
-        public Optional<HttpResponse<String>> previousResponse() { return Optional.empty(); }
-        public HttpHeaders headers() { return HttpHeaders.of(Map.of(), (a, b) -> true); }
-        public String body() { return ""; }
-        public Optional<SSLSession> sslSession() { return Optional.empty(); }
-        public URI uri() { return null; }
-        public HttpClient.Version version() { return HttpClient.Version.HTTP_1_1; }
+        public int statusCode() {
+            return 404;
+        }
+        public HttpRequest request() {
+            return null;
+        }
+        public Optional<HttpResponse<String>> previousResponse() {
+            return Optional.empty();
+        }
+        public HttpHeaders headers() {
+            return HttpHeaders.of(Map.of(), (a, b) -> true);
+        }
+        public String body() {
+            return "";
+        }
+        public Optional<SSLSession> sslSession() {
+            return Optional.empty();
+        }
+        public URI uri() {
+            return null;
+        }
+        public HttpClient.Version version() {
+            return HttpClient.Version.HTTP_1_1;
+        }
     }
 }

@@ -14,10 +14,11 @@ class JobSpecTest {
 
     private final ApiDatabase db = TEST_DB.database(ApiDatabase::new);
 
-    record IndexMap(String mapId, String reason) {
-    }
+    record IndexMap(String mapId, String reason) {}
 
-    private static final JobSpec<IndexMap> INDEX_MAP = JobSpec.queued("index-map", IndexMap.class, IndexMap::mapId).attempts(3);
+    private static final JobSpec<IndexMap> INDEX_MAP = JobSpec
+        .queued("index-map", IndexMap.class, IndexMap::mapId)
+        .attempts(3);
 
     @Test
     void enqueue_keysTheRowByTheDataAndStoresTheDataAsJson() {
@@ -34,6 +35,9 @@ class JobSpecTest {
     void aTimedSpec_hasNothingToEnqueue() {
         assertEquals("-", JobSpec.PLAYER_COUNT.instance().apply(null));
         assertNull(JobSpec.PLAYER_COUNT.decode(null));
-        assertThrows(IllegalArgumentException.class, () -> JobSpec.PLAYER_COUNT.enqueue(db.jobs, null));
+        assertThrows(
+            IllegalArgumentException.class,
+            () -> JobSpec.PLAYER_COUNT.enqueue(db.jobs, null)
+        );
     }
 }

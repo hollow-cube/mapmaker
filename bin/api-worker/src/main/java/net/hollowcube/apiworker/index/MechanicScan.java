@@ -21,12 +21,19 @@ final class MechanicScan {
     /// Checkpoint items are a registry of their own, so an item is matched on its registered key
     /// rather than its class. Not every item is a mechanic worth a flag.
     private static final Map<Key, Mechanic> ITEM_MECHANICS = Map.of(
-        BlockCheckpointItem.ID, Mechanic.BLOCKS,
-        EnderPearlCheckpointItem.ID, Mechanic.ENDER_PEARL,
-        WindChargeCheckpointItem.ID, Mechanic.WIND_CHARGE,
-        TridentCheckpointItem.ID, Mechanic.TRIDENT,
-        MaceCheckpointItem.ID, Mechanic.MACE,
-        FireworkRocketCheckpointItem.ID, Mechanic.FIREWORK_ROCKET);
+        BlockCheckpointItem.ID,
+        Mechanic.BLOCKS,
+        EnderPearlCheckpointItem.ID,
+        Mechanic.ENDER_PEARL,
+        WindChargeCheckpointItem.ID,
+        Mechanic.WIND_CHARGE,
+        TridentCheckpointItem.ID,
+        Mechanic.TRIDENT,
+        MaceCheckpointItem.ID,
+        Mechanic.MACE,
+        FireworkRocketCheckpointItem.ID,
+        Mechanic.FIREWORK_ROCKET
+    );
 
     /// The result of walking every action on every trigger. `actionCount` counts actions on merged
     /// triggers, so a pad of identical plates contributes once rather than once per block.
@@ -36,8 +43,7 @@ final class MechanicScan {
         Set<String> potionEffects,
         Set<String> settings,
         int actionCount
-    ) {
-    }
+    ) {}
 
     static Result scan(List<TriggerScan.Trigger> triggers) {
         var mechanics = EnumSet.noneOf(Mechanic.class);
@@ -57,11 +63,13 @@ final class MechanicScan {
                             if (item != null) mechanics.add(item);
                         }
                     }
-                    case TakeItemAction _, TakeElytraAction _ -> mechanics.add(Mechanic.ITEM_REVOKE);
+                    case TakeItemAction _, TakeElytraAction _ -> mechanics.add(
+                        Mechanic.ITEM_REVOKE
+                    );
                     case GiveElytraAction _ -> mechanics.add(Mechanic.ELYTRA);
-
                     case EditAttributeAction edit -> {
-                        if (edit.attribute() != null) attributes.add(edit.attribute().key().value());
+                        if (edit.attribute() != null)
+                            attributes.add(edit.attribute().key().value());
                     }
                     case AddPotionAction potion -> {
                         if (potion.effect() != null) potionEffects.add(potion.effect().id());
@@ -71,7 +79,6 @@ final class MechanicScan {
                     case EnableSettingAction enable -> {
                         if (enable.setting() != null) settings.add(enable.setting().key());
                     }
-
                     case EditVelocityAction _ -> mechanics.add(Mechanic.VELOCITY);
                     case TeleportAction _ -> mechanics.add(Mechanic.TELEPORT);
                     case ResetHeightAction _ -> mechanics.add(Mechanic.RESET_HEIGHT);
@@ -79,8 +86,7 @@ final class MechanicScan {
                     case EditTimerAction _ -> mechanics.add(Mechanic.TIMER);
                     case ClearBlocksAction _ -> mechanics.add(Mechanic.CLEAR_BLOCKS);
                     case EditVariableAction _ -> mechanics.add(Mechanic.VARIABLE);
-                    default -> {
-                    }
+                    default -> {}
                 }
             }
         }
@@ -88,6 +94,5 @@ final class MechanicScan {
         return new Result(mechanics, attributes, potionEffects, settings, actionCount);
     }
 
-    private MechanicScan() {
-    }
+    private MechanicScan() {}
 }

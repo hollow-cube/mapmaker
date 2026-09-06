@@ -36,19 +36,23 @@ class HeadDatabaseServiceImplTest {
 
     @BeforeEach
     void start() throws IOException {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into head_db (id, category, name, tags, texture) values
                 (1, 'mob', 'Creeper Head', array['green', 'scary'], 'tex-creeper'),
                 (2, 'mob', 'Zombie Head', array['green'], 'tex-zombie'),
-                (3, 'block', 'Stone Block', array[]::varchar[], 'tex-stone')""");
+                (3, 'block', 'Stone Block', array[]::varchar[], 'tex-stone')"""
+        );
 
         var service = new HeadDatabaseServiceImpl(TEST_DB.database(ApiDatabase::new));
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext(HeadDatabaseServer.PATH, new HeadDatabaseServer(service));
         server.start();
 
-        hdb = new HeadDatabaseClient(HttpClient.newHttpClient(),
-            "http://127.0.0.1:" + server.getAddress().getPort());
+        hdb = new HeadDatabaseClient(
+            HttpClient.newHttpClient(),
+            "http://127.0.0.1:" + server.getAddress().getPort()
+        );
     }
 
     @AfterEach
@@ -72,8 +76,10 @@ class HeadDatabaseServiceImplTest {
     void getHeads_matchesAPartialWordAsItIsTyped() {
         for (String typed : List.of("c", "cre", "creep", "creeper")) {
             var results = hdb.getHeads(typed, 0, 10);
-            assertTrue(results.results().stream().anyMatch(head -> head.name().equals("Creeper Head")),
-                "'" + typed + "' should still find the creeper");
+            assertTrue(
+                results.results().stream().anyMatch(head -> head.name().equals("Creeper Head")),
+                "'" + typed + "' should still find the creeper"
+            );
         }
     }
 

@@ -44,11 +44,16 @@ public final class NatsPublisher implements AutoCloseable {
     /// @param servers comma separated, as the `nats.servers` vault key spells them
     public static NatsPublisher connect(String servers, Gson gson) {
         try {
-            return new NatsPublisher(Nats.connectReconnectOnConnect(Options.builder()
-                .servers(servers.split(","))
-                .maxReconnects(-1)
-                .executor(Executors.newVirtualThreadPerTaskExecutor())
-                .build()), gson);
+            return new NatsPublisher(
+                Nats.connectReconnectOnConnect(
+                    Options.builder()
+                        .servers(servers.split(","))
+                        .maxReconnects(-1)
+                        .executor(Executors.newVirtualThreadPerTaskExecutor())
+                        .build()
+                ),
+                gson
+            );
         } catch (IOException | InterruptedException e) {
             if (e instanceof InterruptedException) Thread.currentThread().interrupt();
             throw new IllegalStateException("failed to connect to nats at " + servers, e);

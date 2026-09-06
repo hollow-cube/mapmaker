@@ -1,8 +1,8 @@
 package net.hollowcube.apiserver.chat;
 
-import com.sun.net.httpserver.HttpServer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.sun.net.httpserver.HttpServer;
 import io.nats.client.Connection;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.db.ApiDatabase;
@@ -16,12 +16,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
+import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.lang.reflect.Proxy;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -60,7 +60,8 @@ class ChatServiceImplTest {
 
     @BeforeEach
     void start() throws IOException {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into player_data (id, username, first_join, last_online, online) values
                 ('%s', 'sender', now(), now(), true),
                 ('%s', 'target', now(), now(), true);
@@ -69,7 +70,8 @@ class ChatServiceImplTest {
                 ('%s', 'proxy', '', '');
             insert into maps (id, owner, m_type, created_at, updated_at, file_id, opt_variant, opt_spawn_point, published_id)
                 values ('%s', '%s', 'parkour', now(), now(), 'f', 'v', '{}', 7)"""
-            .formatted(SENDER, TARGET, SENDER, TARGET, MAP, SENDER));
+                .formatted(SENDER, TARGET, SENDER, TARGET, MAP, SENDER)
+        );
 
         var db = TEST_DB.database(ApiDatabase::new);
         var service = new ChatServiceImpl(db, recordingNats(sent));
@@ -77,8 +79,10 @@ class ChatServiceImplTest {
         server.createContext(ChatServer.PATH, new ChatServer(service));
         server.start();
 
-        chat = new ChatClient(HttpClient.newHttpClient(),
-            "http://127.0.0.1:" + server.getAddress().getPort());
+        chat = new ChatClient(
+            HttpClient.newHttpClient(),
+            "http://127.0.0.1:" + server.getAddress().getPort()
+        );
     }
 
     @AfterEach
@@ -90,14 +94,21 @@ class ChatServiceImplTest {
     /// real subjects and the real bytes are what these assert on.
     private static NatsPublisher recordingNats(List<Map.Entry<String, String>> out) {
         var connection = (Connection) Proxy.newProxyInstance(
-            ChatServiceImplTest.class.getClassLoader(), new Class<?>[]{Connection.class},
+            ChatServiceImplTest.class.getClassLoader(),
+            new Class<?>[] {Connection.class},
             (_, method, args) -> {
                 if (method.getName().equals("publish") && args != null && args.length == 3) {
-                    out.add(Map.entry((String) args[0], new String((byte[]) args[2], StandardCharsets.UTF_8)));
+                    out.add(
+                        Map.entry(
+                            (String) args[0],
+                            new String((byte[]) args[2], StandardCharsets.UTF_8)
+                        )
+                    );
                     return null;
                 }
                 return method.getReturnType().isPrimitive() ? false : null;
-            });
+            }
+        );
         return new NatsPublisher(connection, Wire.gson());
     }
 
@@ -127,8 +138,18 @@ class ChatServiceImplTest {
         // Everything but the seed, which the service mints so that one message renders the same
         // everywhere; what it is does not matter, only that it is on the message.
         var message = published().getFirst();
-        assertEquals(new ChatMessage(SENDER, ChatChannel.GLOBAL, null, null,
-            List.of(new MessagePart.Raw("hello world")), message.seed(), false), message);
+        assertEquals(
+            new ChatMessage(
+                SENDER,
+                ChatChannel.GLOBAL,
+                null,
+                null,
+                List.of(new MessagePart.Raw("hello world")),
+                message.seed(),
+                false
+            ),
+            message
+        );
         assertEquals(1, published().size());
         assertEquals(List.of("global|" + SENDER + "|hello world|null|null"), rows());
     }
@@ -144,7 +165,11 @@ class ChatServiceImplTest {
 
     @Test
     void send_countsAnUnexpiredHypercubeAsOneToo() {
-        TEST_DB.seed("update player_data set hypercube_start = now(), hypercube_end = now() + interval '1 day' where id = '" + SENDER + "'");
+        TEST_DB.seed(
+            "update player_data set hypercube_start = now(), hypercube_end = now() + interval '1 day' where id = '"
+                + SENDER
+                + "'"
+        );
 
         chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hi", null);
 
@@ -166,7 +191,14 @@ class ChatServiceImplTest {
 
     @Test
     void send_logsACensoredMessageWithWhatItMatchedAndPublishesNothing() throws SQLException {
-        var result = chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "go fuck yourself", null);
+        var result = chat.send(
+            SENDER,
+            "server-1",
+            ChatChannel.GLOBAL,
+            null,
+            "go fuck yourself",
+            null
+        );
 
         assertEquals(new ChatResult.Censored(), result);
         assertEquals(List.of(), published());
@@ -193,8 +225,10 @@ class ChatServiceImplTest {
         mute("now() - interval '1 day'", null);
         mute(null, "'" + TARGET + "'");
 
-        assertEquals(new ChatResult.Sent(),
-            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null));
+        assertEquals(
+            new ChatResult.Sent(),
+            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null)
+        );
     }
 
     @Test
@@ -202,8 +236,10 @@ class ChatServiceImplTest {
         mute(null, null);
 
         // No expiry on the row, so none on the wire: this one never lifts.
-        assertEquals(new ChatResult.Muted(null),
-            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null));
+        assertEquals(
+            new ChatResult.Muted(null),
+            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null)
+        );
     }
 
     @Test
@@ -212,8 +248,10 @@ class ChatServiceImplTest {
         TEST_DB.seed("delete from player_data where id = '" + SENDER + "'");
         mute(null, null);
 
-        assertEquals(new ChatResult.Muted(null),
-            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null));
+        assertEquals(
+            new ChatResult.Muted(null),
+            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello", null)
+        );
     }
 
     //endregion
@@ -268,16 +306,20 @@ class ChatServiceImplTest {
         chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null);
         TEST_DB.seed("delete from player_sessions where player_id = '" + SENDER + "'");
 
-        assertEquals(new ChatResult.TargetOffline(SENDER),
-            chat.send(TARGET, "server-1", ChatChannel.REPLY, null, "what", null));
+        assertEquals(
+            new ChatResult.TargetOffline(SENDER),
+            chat.send(TARGET, "server-1", ChatChannel.REPLY, null, "what", null)
+        );
     }
 
     @Test
     void send_refusesADirectMessageFromSomeoneWhoHasThemTurnedOff() {
         allowDms(SENDER, false);
 
-        assertEquals(new ChatResult.DmDisabled(null),
-            chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null));
+        assertEquals(
+            new ChatResult.DmDisabled(null),
+            chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null)
+        );
     }
 
     @Test
@@ -285,14 +327,18 @@ class ChatServiceImplTest {
         allowDms(TARGET, false);
 
         // The target comes back so the sender can be told whose settings refused them, by name.
-        assertEquals(new ChatResult.DmDisabled(TARGET),
-            chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null));
+        assertEquals(
+            new ChatResult.DmDisabled(TARGET),
+            chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null)
+        );
     }
 
     @Test
     void send_treatsAnUnsetDirectMessageSettingAsOn() {
-        assertEquals(new ChatResult.Sent(),
-            chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null));
+        assertEquals(
+            new ChatResult.Sent(),
+            chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null)
+        );
     }
 
     //endregion
@@ -310,8 +356,10 @@ class ChatServiceImplTest {
     void send_forwardsALocalMessageFromAServerThatSentNoMap() {
         // Servers on an old tag only send their map alongside `[map]`, and dropping their local chat
         // for the whole overlap would be worse than delivering it the old way.
-        assertEquals(new ChatResult.Sent(),
-            chat.send(SENDER, "server-1", ChatChannel.LOCAL, null, "hi", null));
+        assertEquals(
+            new ChatResult.Sent(),
+            chat.send(SENDER, "server-1", ChatChannel.LOCAL, null, "hi", null)
+        );
         assertNull(published().getFirst().mapId());
     }
 
@@ -326,33 +374,53 @@ class ChatServiceImplTest {
     void send_resolvesTheMapTagToThePublishedMapTheSenderIsIn() {
         chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "play [map]", MAP);
 
-        assertEquals(List.of(new MessagePart.Raw("play "), new MessagePart.Map(MAP)),
-            published().getFirst().parts());
+        assertEquals(
+            List.of(new MessagePart.Raw("play "), new MessagePart.Map(MAP)),
+            published().getFirst().parts()
+        );
     }
 
     @Test
     void send_refusesTheMapTagOutsideAPublishedMap() throws SQLException {
         TEST_DB.seed("update maps set published_id = null where id = '" + MAP + "'");
 
-        assertEquals(new ChatResult.MapNotPublished(),
-            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "play [map]", MAP));
+        assertEquals(
+            new ChatResult.MapNotPublished(),
+            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "play [map]", MAP)
+        );
         assertEquals(List.of(), rows());
     }
 
     @Test
     void send_refusesTheMapTagWithNoMapAtAll() {
-        assertEquals(new ChatResult.MapNotPublished(),
-            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "play [map]", null));
+        assertEquals(
+            new ChatResult.MapNotPublished(),
+            chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "play [map]", null)
+        );
     }
 
     @Test
     void send_splitsOneMessageIntoEveryKindOfPart() {
-        chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "look :eyes: [map] at hollowcube.net", MAP);
+        chat.send(
+            SENDER,
+            "server-1",
+            ChatChannel.GLOBAL,
+            null,
+            "look :eyes: [map] at hollowcube.net",
+            MAP
+        );
 
-        assertEquals(List.of(
-            new MessagePart.Raw("look "), new MessagePart.Emoji("eyes"), new MessagePart.Raw(" "),
-            new MessagePart.Map(MAP), new MessagePart.Raw(" at "), new MessagePart.Url("hollowcube.net")
-        ), published().getFirst().parts());
+        assertEquals(
+            List.of(
+                new MessagePart.Raw("look "),
+                new MessagePart.Emoji("eyes"),
+                new MessagePart.Raw(" "),
+                new MessagePart.Map(MAP),
+                new MessagePart.Raw(" at "),
+                new MessagePart.Url("hollowcube.net")
+            ),
+            published().getFirst().parts()
+        );
     }
 
     //endregion
@@ -361,13 +429,27 @@ class ChatServiceImplTest {
     void send_refusesAChannelItDoesNotKnow() throws IOException, InterruptedException {
         // Not reachable through the client — UNKNOWN is what a channel this build does not know reads
         // as, and cannot be written back — so this is a caller from the future, posted by hand.
-        var response = HttpClient.newHttpClient().send(HttpRequest.newBuilder()
-            .uri(URI.create("http://127.0.0.1:" + server.getAddress().getPort() + ChatServer.PATH + "/send"))
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString("""
+        var response = HttpClient.newHttpClient().send(
+            HttpRequest.newBuilder()
+                .uri(
+                    URI.create(
+                        "http://127.0.0.1:"
+                            + server.getAddress().getPort()
+                            + ChatServer.PATH
+                            + "/send"
+                    )
+                )
+                .header("Content-Type", "application/json")
+                .POST(
+                    HttpRequest.BodyPublishers.ofString(
+                        """
                 {"senderId":"%s","serverId":"server-1","channel":"PARTY","message":"hi","seed":1}"""
-                .formatted(SENDER)))
-            .build(), HttpResponse.BodyHandlers.ofString());
+                            .formatted(SENDER)
+                    )
+                )
+                .build(),
+            HttpResponse.BodyHandlers.ofString()
+        );
 
         assertEquals(400, response.statusCode());
         assertEquals(List.of(), published());
@@ -375,8 +457,10 @@ class ChatServiceImplTest {
 
     @Test
     void send_refusesASenderThatIsNotAUuid() {
-        var failure = assertThrows(IpcException.class,
-            () -> chat.send("nobody", "server-1", ChatChannel.GLOBAL, null, "hi", null));
+        var failure = assertThrows(
+            IpcException.class,
+            () -> chat.send("nobody", "server-1", ChatChannel.GLOBAL, null, "hi", null)
+        );
 
         assertEquals(400, failure.status());
     }
@@ -387,15 +471,27 @@ class ChatServiceImplTest {
 
     @Test
     void send_alsoWritesTheGoShapeOnTheSubjectOlderServersRead() {
-        chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "look :sus: [map] hollowcube.net", MAP);
+        chat.send(
+            SENDER,
+            "server-1",
+            ChatChannel.GLOBAL,
+            null,
+            "look :sus: [map] hollowcube.net",
+            MAP
+        );
 
         // Every number here is an ordinal a server on an older tag reads positionally, so none of
         // them may move: type 0 is an unsigned message, parts are raw/emoji/map/url in that order.
         var json = publishedLegacy().getFirst().getAsJsonObject();
-        assertEquals(JsonParser.parseString("""
+        assertEquals(
+            JsonParser.parseString(
+                """
             [{"type":0,"text":"look "},{"type":1,"name":"sus"},{"type":0,"text":" "},
              {"type":2,"mapId":"%s"},{"type":0,"text":" "},{"type":3,"text":"hollowcube.net"}]"""
-            .formatted(MAP)), json.get("parts"));
+                    .formatted(MAP)
+            ),
+            json.get("parts")
+        );
         assertEquals(0, json.get("type").getAsInt());
         assertEquals("global", json.get("channel").getAsString());
         assertEquals(SENDER, json.get("sender").getAsString());
@@ -405,7 +501,10 @@ class ChatServiceImplTest {
     void send_putsADirectMessageTargetInTheLegacyChannel() {
         chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null);
 
-        assertEquals(TARGET, publishedLegacy().getFirst().getAsJsonObject().get("channel").getAsString());
+        assertEquals(
+            TARGET,
+            publishedLegacy().getFirst().getAsJsonObject().get("channel").getAsString()
+        );
     }
 
     @Test
@@ -431,16 +530,32 @@ class ChatServiceImplTest {
     //region Command log
 
     private static CommandExecution execution(long at, String player, String command) {
-        return new CommandExecution(Instant.ofEpochMilli(at), player, "server-1", "map-1", "world-1", command, false,
-            CommandOutcome.SUCCESS, null, 3);
+        return new CommandExecution(
+            Instant.ofEpochMilli(at),
+            player,
+            "server-1",
+            "map-1",
+            "world-1",
+            command,
+            false,
+            CommandOutcome.SUCCESS,
+            null,
+            3
+        );
     }
 
     @Test
     void logCommand_storesEveryFieldOfARow() throws SQLException {
         chat.logCommand(execution(1_000L, SENDER, "spawn"));
 
-        assertEquals(List.of("1970-01-01 00:00:01|" + SENDER + "|server-1|map-1|world-1|spawn|false|success|null|3"),
-            commandRows());
+        assertEquals(
+            List.of(
+                "1970-01-01 00:00:01|"
+                    + SENDER
+                    + "|server-1|map-1|world-1|spawn|false|success|null|3"
+            ),
+            commandRows()
+        );
     }
 
     @Test
@@ -454,20 +569,55 @@ class ChatServiceImplTest {
 
     @Test
     void logCommand_keepsTheOptionalColumnsEmptyForACommandRunOutsideAMap() throws SQLException {
-        chat.logCommand(new CommandExecution(Instant.ofEpochMilli(1_000L), SENDER, "server-1", null, null, "spawn",
-            false, CommandOutcome.SUCCESS, null, 3));
+        chat.logCommand(
+            new CommandExecution(
+                Instant.ofEpochMilli(1_000L),
+                SENDER,
+                "server-1",
+                null,
+                null,
+                "spawn",
+                false,
+                CommandOutcome.SUCCESS,
+                null,
+                3
+            )
+        );
 
-        assertEquals(List.of("1970-01-01 00:00:01|" + SENDER + "|server-1|null|null|spawn|false|success|null|3"),
-            commandRows());
+        assertEquals(
+            List.of(
+                "1970-01-01 00:00:01|" + SENDER + "|server-1|null|null|spawn|false|success|null|3"
+            ),
+            commandRows()
+        );
     }
 
     @Test
     void logCommand_keepsEveryOutcomeAndWhatWentWrongWithIt() throws SQLException {
-        chat.logCommand(new CommandExecution(Instant.ofEpochMilli(1_000L), SENDER, "server-1", null, null, "tp", true,
-            CommandOutcome.EXECUTION_ERROR, "java.lang.IllegalStateException: nope", 12));
+        chat.logCommand(
+            new CommandExecution(
+                Instant.ofEpochMilli(1_000L),
+                SENDER,
+                "server-1",
+                null,
+                null,
+                "tp",
+                true,
+                CommandOutcome.EXECUTION_ERROR,
+                "java.lang.IllegalStateException: nope",
+                12
+            )
+        );
 
-        assertEquals(List.of("1970-01-01 00:00:01|" + SENDER + "|server-1|null|null|tp|true|execution_error"
-            + "|java.lang.IllegalStateException: nope|12"), commandRows());
+        assertEquals(
+            List.of(
+                "1970-01-01 00:00:01|"
+                    + SENDER
+                    + "|server-1|null|null|tp|true|execution_error"
+                    + "|java.lang.IllegalStateException: nope|12"
+            ),
+            commandRows()
+        );
     }
 
     @Test
@@ -480,16 +630,20 @@ class ChatServiceImplTest {
 
     /// Every command row as `timestamp|playerId|serverId|mapId|instanceId|command|remote|outcome|error|durationMs`.
     private List<String> commandRows() throws SQLException {
-        return commandQuery("""
+        return commandQuery(
+            """
             select to_char(timestamp at time zone 'utc', 'YYYY-MM-DD HH24:MI:SS') || '|' || player_id || '|' ||
                    server_id || '|' || coalesce(map_id, 'null') || '|' || coalesce(instance_id, 'null') || '|' ||
                    command || '|' || remote || '|' || outcome || '|' || coalesce(error, 'null') || '|' || duration_ms
             from command_log
-            order by timestamp""");
+            order by timestamp"""
+        );
     }
 
     private List<String> commands(String... where) throws SQLException {
-        return commandQuery("select command from command_log " + String.join(" ", where) + " order by timestamp");
+        return commandQuery(
+            "select command from command_log " + String.join(" ", where) + " order by timestamp"
+        );
     }
 
     private List<String> commandQuery(String sql) throws SQLException {
@@ -503,34 +657,62 @@ class ChatServiceImplTest {
     //endregion
 
     private void mute(String expiresAt, String revokedBy) {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into punishments (player_id, executor_id, type, created_at, comment, expires_at, revoked_by)
             values ('%s', '%s', 'mute', now(), 'because', %s, %s)"""
-            .formatted(SENDER, TARGET, expiresAt == null ? "null" : expiresAt, revokedBy == null ? "null" : revokedBy));
+                .formatted(
+                    SENDER,
+                    TARGET,
+                    expiresAt == null ? "null" : expiresAt,
+                    revokedBy == null ? "null" : revokedBy
+                )
+        );
     }
 
     private void allowDms(String player, boolean allowed) {
-        TEST_DB.seed("update player_data set settings = '{\"allow_direct_messages\": %s}' where id = '%s'"
-            .formatted(allowed, player));
+        TEST_DB.seed(
+            "update player_data set settings = '{\"allow_direct_messages\": %s}' where id = '%s'".formatted(
+                allowed,
+                player
+            )
+        );
     }
 
     /// Every logged message as `channel|sender|content|censoredBy|censoredDetail`.
     private List<String> rows() throws SQLException {
         var out = new ArrayList<String>();
-        try (var st = TEST_DB.conn().createStatement();
-             var rs = st.executeQuery("select channel, sender, content, censored_by, censored_detail "
-                 + "from chat_messages order by timestamp")) {
+        try (
+            var st = TEST_DB.conn().createStatement();
+            var rs = st.executeQuery(
+                "select channel, sender, content, censored_by, censored_detail "
+                    + "from chat_messages order by timestamp"
+            )
+        ) {
             while (rs.next()) {
-                out.add(rs.getString(1) + "|" + rs.getString(2) + "|" + rs.getString(3)
-                    + "|" + rs.getString(4) + "|" + rs.getString(5));
+                out.add(
+                    rs.getString(1)
+                        + "|"
+                        + rs.getString(2)
+                        + "|"
+                        + rs.getString(3)
+                        + "|"
+                        + rs.getString(4)
+                        + "|"
+                        + rs.getString(5)
+                );
             }
         }
         return out;
     }
 
     private String replyTarget(String player) throws SQLException {
-        try (var st = TEST_DB.conn().createStatement();
-             var rs = st.executeQuery("select reply_target from player_sessions where player_id = '" + player + "'")) {
+        try (
+            var st = TEST_DB.conn().createStatement();
+            var rs = st.executeQuery(
+                "select reply_target from player_sessions where player_id = '" + player + "'"
+            )
+        ) {
             return rs.next() ? rs.getString(1) : null;
         }
     }

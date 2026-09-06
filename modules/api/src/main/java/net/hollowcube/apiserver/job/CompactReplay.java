@@ -14,5 +14,4 @@ import org.jetbrains.annotations.Nullable;
 /// data of a row asked for twice, so the runner reads the current state instead.
 ///
 /// @param reason why, for the log; nothing reads it
-public record CompactReplay(String replayId, @Nullable String reason) {
-}
+public record CompactReplay(String replayId, @Nullable String reason) {}

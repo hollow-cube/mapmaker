@@ -3,13 +3,13 @@ package net.hollowcube.apiserver.replay;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import net.hollowcube.apiserver.common.Digest;
-import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.ReplayIdempotency;
 import net.hollowcube.apiserver.db.Replays;
 import net.hollowcube.apiserver.db.ReplaysQueries;
 import net.hollowcube.apiserver.job.CompactReplay;
 import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.ipc.Blob;
 import net.hollowcube.ipc.replay.ReplayCommit;
 import net.hollowcube.ipc.replay.ReplayCompaction;
@@ -23,12 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static net.hollowcube.apiserver.replay.ReplayCompat.COMPACTED;
-import static net.hollowcube.apiserver.replay.ReplayCompat.FINISHED;
-import static net.hollowcube.apiserver.replay.ReplayCompat.SEGMENTED;
-import static net.hollowcube.apiserver.replay.ReplayCompat.info;
-import static net.hollowcube.apiserver.replay.ReplayCompat.validate;
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,6 +32,12 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
+
+import static net.hollowcube.apiserver.replay.ReplayCompat.COMPACTED;
+import static net.hollowcube.apiserver.replay.ReplayCompat.FINISHED;
+import static net.hollowcube.apiserver.replay.ReplayCompat.SEGMENTED;
+import static net.hollowcube.apiserver.replay.ReplayCompat.info;
+import static net.hollowcube.apiserver.replay.ReplayCompat.validate;
 
 /// Replay storage: the rows in Postgres, the segments and compacted objects in the bucket.
 ///
@@ -52,7 +52,6 @@ import java.util.Base64;
 public final class ReplayServiceImpl implements ReplayService {
 
     private static final Logger logger = LoggerFactory.getLogger(ReplayServiceImpl.class);
-
 
     /// Go's `replay:` block in `config/default.yaml`. Generous against what production produces —
     /// the largest observed preamble is ~320 KB and the largest segment 4.2 MB — because these stop
@@ -93,25 +92,39 @@ public final class ReplayServiceImpl implements ReplayService {
         if (row == null) throw new IpcException(404, "no replay " + id);
         validate(row);
         if (expectedRevision != null && expectedRevision != row.version())
-            throw new IpcException(412, "replay " + id + " is at revision " + row.version()
-                + ", not " + expectedRevision);
+            throw new IpcException(
+                412,
+                "replay " + id + " is at revision " + row.version() + ", not " + expectedRevision
+            );
         return Blob.of(row.currentPreamble());
     }
 
     @Override
     public Blob getSegment(String id, int segmentIndex) {
-        if (segmentIndex < 0) throw new IpcException(400, "negative segment index: " + segmentIndex);
+        if (segmentIndex < 0)
+            throw new IpcException(400, "negative segment index: " + segmentIndex);
 
         var segment = db.replays.getReplaySegment(id, segmentIndex);
-        if (segment == null) throw new IpcException(404, "no segment " + segmentIndex + " of replay " + id);
+        if (segment == null)
+            throw new IpcException(404, "no segment " + segmentIndex + " of replay " + id);
 
         if (segment.data() != null) {
             if (segment.data().length != segment.length())
-                throw new IpcException(500, "replay " + id + " segment " + segmentIndex + " has an inconsistent inline length");
+                throw new IpcException(
+                    500,
+                    "replay "
+                        + id
+                        + " segment "
+                        + segmentIndex
+                        + " has an inconsistent inline length"
+                );
             return Blob.of(segment.data());
         }
         if (segment.objectReference() == null || segment.objectReference().isEmpty())
-            throw new IpcException(500, "replay " + id + " segment " + segmentIndex + " has no data");
+            throw new IpcException(
+                500,
+                "replay " + id + " segment " + segmentIndex + " has no data"
+            );
         return object(segment.objectReference(), null, null);
     }
 
@@ -128,8 +141,18 @@ public final class ReplayServiceImpl implements ReplayService {
         if (start == null || endInclusive == null)
             throw new IpcException(400, "a replay range takes both bounds or neither");
         if (length == null || length <= 0 || start < 0 || start >= length || endInclusive < start)
-            throw new IpcException(416, "replay " + id + " is " + length + " bytes; "
-                + start + "-" + endInclusive + " is not in it");
+            throw new IpcException(
+                416,
+                "replay "
+                    + id
+                    + " is "
+                    + length
+                    + " bytes; "
+                    + start
+                    + "-"
+                    + endInclusive
+                    + " is not in it"
+            );
         return object(row.compactedObject(), start, Math.min(endInclusive, length - 1));
     }
 
@@ -157,7 +180,10 @@ public final class ReplayServiceImpl implements ReplayService {
         try (body) {
             return stageAndCommit(meta, body);
         } catch (IOException e) {
-            throw new UncheckedIOException("reading the commit body for replay " + meta.id() + " failed", e);
+            throw new UncheckedIOException(
+                "reading the commit body for replay " + meta.id() + " failed",
+                e
+            );
         }
     }
 
@@ -166,7 +192,10 @@ public final class ReplayServiceImpl implements ReplayService {
         try (body) {
             return stageAndPublish(meta, body);
         } catch (IOException e) {
-            throw new UncheckedIOException("reading the compacted body for replay " + meta.id() + " failed", e);
+            throw new UncheckedIOException(
+                "reading the compacted body for replay " + meta.id() + " failed",
+                e
+            );
         }
     }
 
@@ -195,17 +224,30 @@ public final class ReplayServiceImpl implements ReplayService {
         if (segmentIndex == null && segmentLength != 0)
             throw body.refuse(400, "segment bytes were sent with no segment index");
         if (segmentIndex != null && segmentLength == 0)
-            throw body.refuse(400, "segment index " + segmentIndex + " was sent with no segment bytes");
+            throw body.refuse(
+                400,
+                "segment index " + segmentIndex + " was sent with no segment bytes"
+            );
 
         // The fingerprint is Go's, so the revision goes into it as the entity tag Go hashed.
-        var fingerprint = ReplayCompat.fingerprint("PATCH", meta.id(),
-            creating ? "" : ReplayCompat.etag(revision), creating ? "*" : "",
-            Integer.toString(preambleLength), segmentIndex == null ? "" : Integer.toString(segmentIndex),
-            Boolean.toString(meta.finished()), expectedDigest);
+        var fingerprint = ReplayCompat.fingerprint(
+            "PATCH",
+            meta.id(),
+            creating ? "" : ReplayCompat.etag(revision),
+            creating ? "*" : "",
+            Integer.toString(preambleLength),
+            segmentIndex == null ? "" : Integer.toString(segmentIndex),
+            Boolean.toString(meta.finished()),
+            expectedDigest
+        );
 
         // Before a byte of the body is read, so a retried commit uploads nothing. Go stages first
         // and then answers from the record, which is what orphans the object.
-        var replayed = replayed(db.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()), fingerprint, body);
+        var replayed = replayed(
+            db.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()),
+            fingerprint,
+            body
+        );
         if (replayed != null) return replayed;
         // Likewise before the upload: a stale revision is knowable from the row.
         precheck(db.replays.getReplay(meta.id()), creating, revision, segmentIndex, body);
@@ -227,15 +269,26 @@ public final class ReplayServiceImpl implements ReplayService {
                     bodyDigest.update(segmentData);
                 } else {
                     segmentObject = ReplayCompat.objectKey(meta.id(), "segments/" + segmentIndex);
-                    s3.put(segmentObject, Digest.tee(body.stream(), digest, bodyDigest), segmentLength);
+                    s3.put(
+                        segmentObject,
+                        Digest.tee(body.stream(), digest, bodyDigest),
+                        segmentLength
+                    );
                 }
                 segmentDigest = digest.digest();
             }
             if (!Arrays.equals(bodyDigest.digest(), expectedDigest))
                 throw new IpcException(422, "digest_mismatch");
 
-            var segment = segmentIndex == null ? null : new Segment(
-                segmentIndex, segmentObject, segmentData, segmentLength, segmentDigest);
+            var segment = segmentIndex == null
+                ? null
+                : new Segment(
+                    segmentIndex,
+                    segmentObject,
+                    segmentData,
+                    segmentLength,
+                    segmentDigest
+                );
             var result = applyCommit(meta, preamble, fingerprint, creating, revision, segment);
             referenced = result.objectReferenced();
             return result.info();
@@ -246,8 +299,14 @@ public final class ReplayServiceImpl implements ReplayService {
 
     /// Lock the row, check it still says what staging was told, write. Nothing before this held the
     /// lock that serialises two racing commits.
-    private Applied applyCommit(ReplayCommit meta, byte[] preamble, byte[] fingerprint,
-                                boolean creating, long revision, @Nullable Segment segment) {
+    private Applied applyCommit(
+        ReplayCommit meta,
+        byte[] preamble,
+        byte[] fingerprint,
+        boolean creating,
+        long revision,
+        @Nullable Segment segment
+    ) {
         var state = meta.finished() ? FINISHED : ReplayCompat.RECORDING;
         var outcome = ReplayCompat.outcome(meta.finished(), meta.outcome());
         var preambleDigest = Digest.sha256(preamble);
@@ -256,16 +315,28 @@ public final class ReplayServiceImpl implements ReplayService {
             var row = tx.replays.getReplayForUpdate(meta.id());
             if (row == null) {
                 if (!creating)
-                    throw new IpcException(412, "no replay " + meta.id() + " at revision " + revision);
+                    throw new IpcException(
+                        412,
+                        "no replay " + meta.id() + " at revision " + revision
+                    );
                 if (segment != null && segment.index() != 0)
                     throw new IpcException(409, "wrong_segment_index");
 
-                var created = tx.replays.createReplayIfAbsent(new ReplaysQueries.CreateReplayIfAbsentParams(
-                    meta.id(), state, segment == null ? 0 : 1, preamble, preambleDigest, outcome));
+                var created = tx.replays.createReplayIfAbsent(
+                    new ReplaysQueries.CreateReplayIfAbsentParams(
+                        meta.id(),
+                        state,
+                        segment == null ? 0 : 1,
+                        preamble,
+                        preambleDigest,
+                        outcome
+                    )
+                );
                 if (created != null) {
                     // No idempotency check: nothing can have recorded a response for a replay that
                     // did not exist a statement ago.
-                    if (segment != null) insertSegment(tx, meta.id(), segment, created.recordingRevision());
+                    if (segment != null)
+                        insertSegment(tx, meta.id(), segment, created.recordingRevision());
                     recordResponse(tx, meta.id(), meta.idempotencyKey(), fingerprint, 201, created);
                     if (meta.finished()) enqueueCompaction(tx, meta.id());
                     return new Applied(info(created), true);
@@ -274,22 +345,41 @@ public final class ReplayServiceImpl implements ReplayService {
                 // Somebody else won the insert. Go answers 500 when that transaction has since
                 // rolled back and there is nothing to lock; losing a race is a 412.
                 row = tx.replays.getReplayForUpdate(meta.id());
-                if (row == null) throw new IpcException(412, "replay " + meta.id() + " was created and withdrawn");
+                if (row == null)
+                    throw new IpcException(
+                        412,
+                        "replay " + meta.id() + " was created and withdrawn"
+                    );
             }
 
-            var replayed = replayed(tx.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()), fingerprint, null);
+            var replayed = replayed(
+                tx.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()),
+                fingerprint,
+                null
+            );
             if (replayed != null) return new Applied(replayed, false);
 
             if (creating || revision != row.version())
-                throw new IpcException(412, "replay " + meta.id() + " is at revision " + row.version());
+                throw new IpcException(
+                    412,
+                    "replay " + meta.id() + " is at revision " + row.version()
+                );
             if (FINISHED.equals(row.state())) throw new IpcException(409, "replay_finished");
             if (segment != null && segment.index() != row.nextSegmentIndex())
                 throw new IpcException(409, "wrong_segment_index");
 
-            var updated = tx.replays.updateReplayRecording(new ReplaysQueries.UpdateReplayRecordingParams(
-                state, segment == null ? row.nextSegmentIndex() : row.nextSegmentIndex() + 1,
-                preamble, preambleDigest, outcome, meta.id()));
-            if (updated == null) throw new IpcException(500, "replay " + meta.id() + " vanished under its own lock");
+            var updated = tx.replays.updateReplayRecording(
+                new ReplaysQueries.UpdateReplayRecordingParams(
+                    state,
+                    segment == null ? row.nextSegmentIndex() : row.nextSegmentIndex() + 1,
+                    preamble,
+                    preambleDigest,
+                    outcome,
+                    meta.id()
+                )
+            );
+            if (updated == null)
+                throw new IpcException(500, "replay " + meta.id() + " vanished under its own lock");
 
             if (segment != null) insertSegment(tx, meta.id(), segment, updated.recordingRevision());
             recordResponse(tx, meta.id(), meta.idempotencyKey(), fingerprint, 200, updated);
@@ -309,19 +399,29 @@ public final class ReplayServiceImpl implements ReplayService {
         if (total < preambleLength)
             throw body.refuse(400, "compacted replay is shorter than the preamble it declares");
 
-        var fingerprint = ReplayCompat.fingerprint("PUT", meta.id(),
-            ReplayCompat.etag(meta.expectedRevision()), "",
-            Integer.toString(preambleLength), "", "", expectedDigest);
+        var fingerprint = ReplayCompat.fingerprint(
+            "PUT",
+            meta.id(),
+            ReplayCompat.etag(meta.expectedRevision()),
+            "",
+            Integer.toString(preambleLength),
+            "",
+            "",
+            expectedDigest
+        );
 
-        var replayed = replayed(db.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()), fingerprint, body);
+        var replayed = replayed(
+            db.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()),
+            fingerprint,
+            body
+        );
         if (replayed != null) return replayed;
         // Go uploads up to 2 GiB before looking at the row at all, so a publication for a replay
         // that is gone, stale or still recording burns the transfer and leaves the object.
         var current = db.replays.getReplay(meta.id());
         if (current == null) throw body.refuse(404, "no replay " + meta.id());
         if (meta.expectedRevision() != current.version())
-            throw body.refuse(412,
-                "replay " + meta.id() + " is at revision " + current.version());
+            throw body.refuse(412, "replay " + meta.id() + " is at revision " + current.version());
         if (!FINISHED.equals(current.state())) throw body.refuse(409, "replay_not_finished");
 
         var bodyDigest = Digest.sha256();
@@ -333,11 +433,20 @@ public final class ReplayServiceImpl implements ReplayService {
         var object = ReplayCompat.objectKey(meta.id(), COMPACTED);
         var referenced = false;
         try {
-            s3.put(object, Digest.tee(
-                new SequenceInputStream(new ByteArrayInputStream(preamble), body.stream()), bodyDigest), total);
+            s3.put(
+                object, Digest.tee(new SequenceInputStream(new ByteArrayInputStream(preamble), body.stream()), bodyDigest),
+                total
+            );
             if (!Arrays.equals(bodyDigest.digest(), expectedDigest))
                 throw new IpcException(422, "digest_mismatch");
-            var result = applyPublication(meta, preamble, fingerprint, object, total, expectedDigest);
+            var result = applyPublication(
+                meta,
+                preamble,
+                fingerprint,
+                object,
+                total,
+                expectedDigest
+            );
             referenced = result.objectReferenced();
             return result.info();
         } finally {
@@ -347,24 +456,46 @@ public final class ReplayServiceImpl implements ReplayService {
 
     /// As [#applyCommit]: staging uploaded a whole replay on the strength of a read nothing held,
     /// so the row is checked again under its lock.
-    private Applied applyPublication(ReplayCompaction meta, byte[] preamble, byte[] fingerprint,
-                                     String object, long length, byte[] bodyDigest) {
+    private Applied applyPublication(
+        ReplayCompaction meta,
+        byte[] preamble,
+        byte[] fingerprint,
+        String object,
+        long length,
+        byte[] bodyDigest
+    ) {
         var preambleDigest = Digest.sha256(preamble);
 
         return db.txResult(tx -> {
             var row = tx.replays.getReplayForUpdate(meta.id());
             if (row == null) throw new IpcException(404, "no replay " + meta.id());
 
-            var replayed = replayed(tx.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()), fingerprint, null);
+            var replayed = replayed(
+                tx.replays.getReplayIdempotency(meta.id(), meta.idempotencyKey()),
+                fingerprint,
+                null
+            );
             if (replayed != null) return new Applied(replayed, false);
 
             if (meta.expectedRevision() != row.version())
-                throw new IpcException(412, "replay " + meta.id() + " is at revision " + row.version());
+                throw new IpcException(
+                    412,
+                    "replay " + meta.id() + " is at revision " + row.version()
+                );
             if (!FINISHED.equals(row.state())) throw new IpcException(409, "replay_not_finished");
 
-            var published = tx.replays.publishReplayCompacted(new ReplaysQueries.PublishReplayCompactedParams(
-                preamble, preambleDigest, object, length, bodyDigest, meta.id()));
-            if (published == null) throw new IpcException(500, "replay " + meta.id() + " vanished under its own lock");
+            var published = tx.replays.publishReplayCompacted(
+                new ReplaysQueries.PublishReplayCompactedParams(
+                    preamble,
+                    preambleDigest,
+                    object,
+                    length,
+                    bodyDigest,
+                    meta.id()
+                )
+            );
+            if (published == null)
+                throw new IpcException(500, "replay " + meta.id() + " vanished under its own lock");
 
             recordResponse(tx, meta.id(), meta.idempotencyKey(), fingerprint, 200, published);
             return new Applied(info(published), true);
@@ -378,20 +509,52 @@ public final class ReplayServiceImpl implements ReplayService {
         JobSpec.COMPACT_REPLAY.enqueue(tx.jobs, new CompactReplay(id, "final-commit"));
     }
 
-    private static void insertSegment(ApiDatabase.Tx tx, String id, Segment segment, long commitRevision) {
-        tx.replays.createReplaySegment(new ReplaysQueries.CreateReplaySegmentParams(
-            id, segment.index(), segment.object(), segment.data(), segment.length(),
-            segment.digest(), commitRevision));
+    private static void insertSegment(
+        ApiDatabase.Tx tx,
+        String id,
+        Segment segment,
+        long commitRevision
+    ) {
+        tx.replays.createReplaySegment(
+            new ReplaysQueries.CreateReplaySegmentParams(
+                id,
+                segment.index(),
+                segment.object(),
+                segment.data(),
+                segment.length(),
+                segment.digest(),
+                commitRevision
+            )
+        );
     }
 
-    private static void recordResponse(ApiDatabase.Tx tx, String id, String key, byte[] fingerprint, int status, Replays row) {
-        tx.replays.createReplayIdempotency(new ReplaysQueries.CreateReplayIdempotencyParams(
-            id, key, fingerprint, status, ReplayCompat.etag(row.version()), ReplayCompat.recorded(row).toString()));
+    private static void recordResponse(
+        ApiDatabase.Tx tx,
+        String id,
+        String key,
+        byte[] fingerprint,
+        int status,
+        Replays row
+    ) {
+        tx.replays.createReplayIdempotency(
+            new ReplaysQueries.CreateReplayIdempotencyParams(
+                id,
+                key,
+                fingerprint,
+                status,
+                ReplayCompat.etag(row.version()),
+                ReplayCompat.recorded(row).toString()
+            )
+        );
     }
 
     /// The recorded response for a request already answered, or null. `body` is given only by the
     /// caller that has not read it yet, since nothing else will.
-    private @Nullable ReplayInfo replayed(@Nullable ReplayIdempotency record, byte[] fingerprint, @Nullable Blob body) {
+    private @Nullable ReplayInfo replayed(
+        @Nullable ReplayIdempotency record,
+        byte[] fingerprint,
+        @Nullable Blob body
+    ) {
         if (record == null) return null;
         if (body != null) body.drain();
         if (!Arrays.equals(record.requestFingerprint(), fingerprint))
@@ -400,16 +563,24 @@ public final class ReplayServiceImpl implements ReplayService {
         var recorded = JsonParser.parseString(record.responseMetadata()).getAsJsonObject();
         // A record Go wrote has only its three fields, so the rest come off the row.
         var row = recorded.has("preambleLength") ? null : db.replays.getReplay(record.replayId());
-        return new ReplayInfo(record.replayId(), ReplayCompat.revision(record.responseEtag()),
+        return new ReplayInfo(
+            record.replayId(),
+            ReplayCompat.revision(record.responseEtag()),
             ReplayCompat.state(string(recorded, "state")),
             ReplayCompat.representation(string(recorded, "representation")),
             recorded.has("nextSegmentIndex") ? recorded.get("nextSegmentIndex").getAsInt() : null,
-            recorded.has("preambleLength") ? recorded.get("preambleLength").getAsInt()
+            recorded.has("preambleLength")
+                ? recorded.get("preambleLength").getAsInt()
                 : row == null ? 0 : row.currentPreamble().length,
-            ReplayCompat.outcome(recorded.has("outcome") ? recorded.get("outcome").getAsString()
-                : row == null ? null : row.outcome()),
-            recorded.has("updatedAt") ? recorded.get("updatedAt").getAsLong()
-                : row == null ? 0 : row.updatedAt().toEpochMilli());
+            ReplayCompat.outcome(
+                recorded.has("outcome")
+                    ? recorded.get("outcome").getAsString()
+                    : row == null ? null : row.outcome()
+            ),
+            recorded.has("updatedAt")
+                ? recorded.get("updatedAt").getAsLong()
+                : row == null ? 0 : row.updatedAt().toEpochMilli()
+        );
     }
 
     private static @Nullable String string(JsonObject object, String name) {
@@ -418,18 +589,21 @@ public final class ReplayServiceImpl implements ReplayService {
 
     /// Read before anything is uploaded. A row that says the write will fail says so now; one that
     /// says it will succeed proves nothing, since the transaction checks again under the lock.
-    private void precheck(@Nullable Replays row, boolean creating, long revision,
-                          @Nullable Integer segmentIndex, Blob body) {
+    private void precheck(
+        @Nullable Replays row,
+        boolean creating,
+        long revision,
+        @Nullable Integer segmentIndex,
+        Blob body
+    ) {
         if (row == null) {
-            if (!creating)
-                throw body.refuse(412, "no replay at revision " + revision);
+            if (!creating) throw body.refuse(412, "no replay at revision " + revision);
             if (segmentIndex != null && segmentIndex != 0)
                 throw body.refuse(409, "wrong_segment_index");
             return;
         }
         if (creating || revision != row.version())
-            throw body.refuse(412,
-                "replay " + row.id() + " is at revision " + row.version());
+            throw body.refuse(412, "replay " + row.id() + " is at revision " + row.version());
         if (FINISHED.equals(row.state())) throw body.refuse(409, "replay_finished");
         if (segmentIndex != null && segmentIndex != row.nextSegmentIndex())
             throw body.refuse(409, "wrong_segment_index");
@@ -457,8 +631,7 @@ public final class ReplayServiceImpl implements ReplayService {
     }
 
     private void requireIdAndKey(String id, String key, Blob body) {
-        if (id.isEmpty() || id.length() > MAX_ID_LENGTH)
-            throw body.refuse(400, "not a replay id");
+        if (id.isEmpty() || id.length() > MAX_ID_LENGTH) throw body.refuse(400, "not a replay id");
         if (key.isEmpty() || key.length() > MAX_ID_LENGTH)
             throw body.refuse(400, "not an idempotency key");
     }
@@ -483,9 +656,13 @@ public final class ReplayServiceImpl implements ReplayService {
 
     /// Whether the object staging uploaded is now pointed at by a row decides whether staging
     /// deletes it: an idempotency hit under the lock succeeds without referencing this upload.
-    private record Applied(ReplayInfo info, boolean objectReferenced) {
-    }
+    private record Applied(ReplayInfo info, boolean objectReferenced) {}
 
-    private record Segment(int index, @Nullable String object, @Nullable byte[] data, long length, byte[] digest) {
-    }
+    private record Segment(
+        int index,
+        @Nullable String object,
+        @Nullable byte[] data,
+        long length,
+        byte[] digest
+    ) {}
 }

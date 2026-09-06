@@ -1,4 +1,5 @@
 plugins {
+    alias(libs.plugins.javafmt)
     id("mapmaker.java-binary")
     // The actions build their editor sprites up front, against the packer's sprites.json, so a
     // process that only ever decodes them still needs it on the classpath.

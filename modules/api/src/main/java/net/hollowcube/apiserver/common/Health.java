@@ -30,7 +30,10 @@ public final class Health {
     /// driver's validation.
     ///
     /// @param nats null in a process that publishes nothing
-    public record Ready(List<DataSource> pools, @Nullable NatsPublisher nats) implements HttpHandler {
+    public record Ready(
+        List<DataSource> pools,
+        @Nullable NatsPublisher nats
+    ) implements HttpHandler {
         private static final Logger logger = LoggerFactory.getLogger(Ready.class);
         private static final int VALIDATION_TIMEOUT_SECONDS = 2;
 
@@ -66,6 +69,5 @@ public final class Health {
         }
     }
 
-    private Health() {
-    }
+    private Health() {}
 }

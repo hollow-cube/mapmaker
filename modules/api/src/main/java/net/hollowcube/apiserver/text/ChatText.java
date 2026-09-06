@@ -22,12 +22,10 @@ public final class ChatText {
         if (cp >= 0x20 && cp <= 0x7E) return true;
         if (Character.isLetter(cp)) return true;
         return switch (Character.getType(cp)) {
-            case Character.NON_SPACING_MARK, Character.ENCLOSING_MARK, Character.COMBINING_SPACING_MARK,
-                 Character.CURRENCY_SYMBOL -> true;
+            case Character.NON_SPACING_MARK, Character.ENCLOSING_MARK, Character.COMBINING_SPACING_MARK, Character.CURRENCY_SYMBOL -> true;
             default -> false;
         };
     }
 
-    private ChatText() {
-    }
+    private ChatText() {}
 }

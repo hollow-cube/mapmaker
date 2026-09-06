@@ -54,27 +54,119 @@ final class Profanities {
         term("chlamydia");
         term("clit", "clitheroe", "clitch", "clitic", "clitellum");
         term("clitoris");
-        term("cock",
-            "cockade", "cockatiel", "cockatiels", "cockatoo", "cockatoos", "cockatrice", "cockayne", "cockburn",
-            "cockcroft", "cocked", "cocker", "cockerel", "cockers", "cockeyed", "cockiness", "cocking", "cocklebur",
-            "cockney", "cockpit", "cockpits", "cockroach", "cockroaches", "cockscomb", "cockspur", "cocktail", "cockle",
-            "cockamamie", "cockamamy", "babcock", "gamecock", "hancock", "haycock", "hitchcock", "leacock", "peacock",
-            "poppycock", "shuttlecock", "stopcock", "woodcock",
-            "cockchafer", "cockcrow", "cocky", "cockapoo", "cocksure", "cockswain");
-        term("coon", "cocoon", "laocoon", "raccoon", "racoon", "tycoon", "coccoon", "recoonect", "coonhound");
+        term(
+            "cock",
+            "cockade",
+            "cockatiel",
+            "cockatiels",
+            "cockatoo",
+            "cockatoos",
+            "cockatrice",
+            "cockayne",
+            "cockburn",
+            "cockcroft",
+            "cocked",
+            "cocker",
+            "cockerel",
+            "cockers",
+            "cockeyed",
+            "cockiness",
+            "cocking",
+            "cocklebur",
+            "cockney",
+            "cockpit",
+            "cockpits",
+            "cockroach",
+            "cockroaches",
+            "cockscomb",
+            "cockspur",
+            "cocktail",
+            "cockle",
+            "cockamamie",
+            "cockamamy",
+            "babcock",
+            "gamecock",
+            "hancock",
+            "haycock",
+            "hitchcock",
+            "leacock",
+            "peacock",
+            "poppycock",
+            "shuttlecock",
+            "stopcock",
+            "woodcock",
+            "cockchafer",
+            "cockcrow",
+            "cocky",
+            "cockapoo",
+            "cocksure",
+            "cockswain"
+        );
+        term(
+            "coon",
+            "cocoon",
+            "laocoon",
+            "raccoon",
+            "racoon",
+            "tycoon",
+            "coccoon",
+            "recoonect",
+            "coonhound"
+        );
         term("cocain");
         term("coitus");
         term("cottonpic");
         term("cottonpik");
-        term("cum",
-            "acumen", "acuminate", "altocumulus", "cumber", "cumbing", "cumbria", "cumbrian", "cumbrous", "cummerbund",
-            "cumming", "cumulat", "cumuli", "cumulonimbus", "cumulus", "encumber", "encumbrance", "scumbag", "locum",
-            "modicum", "magnacumlaude", "macumba", "practicum", "recumbent", "scum", "slocum", "stratocumulus", "succumb",
-            "talcum", "taraxacum", "tecumseh", "tucuman", "capsicum", "cecum", "circum", "colchicum", "document",
+        term(
+            "cum",
+            "acumen",
+            "acuminate",
+            "altocumulus",
+            "cumber",
+            "cumbing",
+            "cumbria",
+            "cumbrian",
+            "cumbrous",
+            "cummerbund",
+            "cumming",
+            "cumulat",
+            "cumuli",
+            "cumulonimbus",
+            "cumulus",
+            "encumber",
+            "encumbrance",
+            "scumbag",
+            "locum",
+            "modicum",
+            "magnacumlaude",
+            "macumba",
+            "practicum",
+            "recumbent",
+            "scum",
+            "slocum",
+            "stratocumulus",
+            "succumb",
+            "talcum",
+            "taraxacum",
+            "tecumseh",
+            "tucuman",
+            "capsicum",
+            "cecum",
+            "circum",
+            "colchicum",
+            "document",
             "ecumeni", // ecumenical, ecumenism
             "illyricum",
             "incumben", // incumbent, incumbency
-            "cumminity", "cumpl", "cumin", "cumquat", "cumbia", "cumbre", "cummins", "documet");
+            "cumminity",
+            "cumpl",
+            "cumin",
+            "cumquat",
+            "cumbia",
+            "cumbre",
+            "cummins",
+            "documet"
+        );
         term("cunt", "scunthorpe", "acocunt", "ocunting");
         term("cvnt");
         term("cunny");
@@ -82,17 +174,38 @@ final class Profanities {
         term("csam");
         term("cyka", "bouncykath");
         term("darkie");
-        term("dick",
-            "chappaquiddick", "dickens", "dickensian", "dickerson", "dickey", "dickies", "dickinson", "dickson",
-            "dickvandyke", "dicky", "riddick",
-            "dicker", "dickcissel");
+        term(
+            "dick",
+            "chappaquiddick",
+            "dickens",
+            "dickensian",
+            "dickerson",
+            "dickey",
+            "dickies",
+            "dickinson",
+            "dickson",
+            "dickvandyke",
+            "dicky",
+            "riddick",
+            "dicker",
+            "dickcissel"
+        );
         term("dildo");
         term("douchebag");
         term("dyke", "vandyke");
         term("downie");
         term("dumbass");
         term("ejaculate");
-        term("fag", "antofagasta", "serfage", "wharfage", "fagin", "leafage", "cofagrigu", "naturfag");
+        term(
+            "fag",
+            "antofagasta",
+            "serfage",
+            "wharfage",
+            "fagin",
+            "leafage",
+            "cofagrigu",
+            "naturfag"
+        );
         term("feck", "feckless");
         term("fellate");
         term("fellatio");
@@ -124,11 +237,34 @@ final class Profanities {
         term("lickmy");
         term("masturbat");
         term("molest", "molesta", "moleste", "molesti", "molesto");
-        term("muff",
-            "muffed", "muffin", "muffins", "muffle", "muffled", "muffler", "mufflers", "muffles", "muffling", "muffs",
-            "ragamuffin", "earmuff", "earmuffs");
-        term("nazi", "ashkenazi", "ashkenazic", "ashkenazim", "monazite",
-            "amnazing", "naziva", "nazim", "nazir", "nazional");
+        term(
+            "muff",
+            "muffed",
+            "muffin",
+            "muffins",
+            "muffle",
+            "muffled",
+            "muffler",
+            "mufflers",
+            "muffles",
+            "muffling",
+            "muffs",
+            "ragamuffin",
+            "earmuff",
+            "earmuffs"
+        );
+        term(
+            "nazi",
+            "ashkenazi",
+            "ashkenazic",
+            "ashkenazim",
+            "monazite",
+            "amnazing",
+            "naziva",
+            "nazim",
+            "nazir",
+            "nazional"
+        );
         term("nigg");
         term("niqa", "niqab");
         term("nigga");
@@ -136,8 +272,14 @@ final class Profanities {
         term("niggu");
         term("niqqu");
         term("niggr");
-        term("niger", // yes, this will false flag, but according to Seth it's worth it
-            "nigeria", "nigerien", "weniger", "einiger", "sonniger");
+        term(
+            "niger", // yes, this will false flag, but according to Seth it's worth it
+            "nigeria",
+            "nigerien",
+            "weniger",
+            "einiger",
+            "sonniger"
+        );
         term("nigger");
         term("niglet");
         term("nignog");
@@ -149,20 +291,43 @@ final class Profanities {
         term("pussie");
         term("pussy", "pussycat", "pussyfoot", "pussywillow");
         term("raghead");
-        term("rape",
-            "grape", "trapeze", "trapezium", "trapezius", "trapezoid", "therapeutic", "drape", "parapet", "rapeseed",
-            "scrape", "serape",
-            "rapelle", "rattrape", "trapes", "wraped");
+        term(
+            "rape",
+            "grape",
+            "trapeze",
+            "trapezium",
+            "trapezius",
+            "trapezoid",
+            "therapeutic",
+            "drape",
+            "parapet",
+            "rapeseed",
+            "scrape",
+            "serape",
+            "rapelle",
+            "rattrape",
+            "trapes",
+            "wraped"
+        );
         term("rapist", "therapist", "tharapist");
         term("retard", "retardant", "retarder", "retarding");
         term("rimjob");
-        term("shit", "cushitic", "shitake", "peshitta", "libshitz", "shitzu", "yamashita",
-            "screnshit", "zhanshishiti");
+        term(
+            "shit", "cushitic", "shitake", "peshitta", "libshitz", "shitzu", "yamashita",
+            "screnshit", "zhanshishiti"
+        );
         term("slut", "aboslutely");
         term("spunk", "spunky", "tidspunkt");
         term("suckmy");
         term("sodom");
-        term("semen", "sement", "horsemen", "norsemen", "wisemen", "advertisemen"); // basement, casement
+        term(
+            "semen",
+            "sement",
+            "horsemen",
+            "norsemen",
+            "wisemen",
+            "advertisemen"
+        ); // basement, casement
         term("teensex");
         term("tittie");
         term("titty", "entitty");

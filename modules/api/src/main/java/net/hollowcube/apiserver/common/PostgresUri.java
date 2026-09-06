@@ -32,6 +32,10 @@ public record PostgresUri(String jdbcUrl, @Nullable String user, @Nullable Strin
         var split = userInfo.indexOf(':');
         return split < 0
             ? new PostgresUri(jdbcUrl.toString(), userInfo, null)
-            : new PostgresUri(jdbcUrl.toString(), userInfo.substring(0, split), userInfo.substring(split + 1));
+            : new PostgresUri(
+                jdbcUrl.toString(),
+                userInfo.substring(0, split),
+                userInfo.substring(split + 1)
+            );
     }
 }

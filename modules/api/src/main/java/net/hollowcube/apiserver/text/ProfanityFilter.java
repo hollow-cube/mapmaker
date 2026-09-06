@@ -36,7 +36,7 @@ public final class ProfanityFilter {
         var folded = s.text();
         var matches = new ArrayList<Match>();
         var mask = new BitSet(text.length());
-        for (int i = 0; i < folded.length(); ) {
+        for (int i = 0; i < folded.length();) {
             int end = Profanities.TERM_TRIE.longestAt(s, i);
             if (end < 0) {
                 i++;

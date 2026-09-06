@@ -9,6 +9,5 @@ public final class PostHogIds {
     /// they neither create a person nor attach to one.
     public static final String INTERNAL_ID = "cccccccb-57f7-45fc-98ef-b4d2f51f5ea6";
 
-    private PostHogIds() {
-    }
+    private PostHogIds() {}
 }

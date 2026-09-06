@@ -81,7 +81,10 @@ public final class VaultSecrets {
 
     public String require(String key, String env) {
         var value = get(key, env);
-        if (value == null) throw new IllegalStateException("neither $" + env + " nor the vault key '" + key + "' is set");
+        if (value == null)
+            throw new IllegalStateException(
+                "neither $" + env + " nor the vault key '" + key + "' is set"
+            );
         return value;
     }
 }

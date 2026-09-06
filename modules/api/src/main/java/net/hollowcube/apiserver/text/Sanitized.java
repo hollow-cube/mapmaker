@@ -13,46 +13,96 @@ import java.util.Map;
 /// Every original char that does not survive is a separator. `tokenStart[i]` is set when folded
 /// char `i` follows a separator (or is first), `tail[i]` is how many folded chars follow `i` in
 /// the same word, and `[originStart[i], originEnd[i])` is the range of `raw` it came from.
-record Sanitized(String raw, String text, boolean[] tokenStart, int[] tail, int[] originStart, int[] originEnd) {
+record Sanitized(
+    String raw,
+    String text,
+    boolean[] tokenStart,
+    int[] tail,
+    int[] originStart,
+    int[] originEnd
+) {
 
     /// Substitutions the leetspeak-inclined make, folded back before matching.
     private static final Map<Character, Character> REPLACEMENTS = Map.ofEntries(
-        Map.entry('4', 'a'), Map.entry('@', 'a'),
-        Map.entry('3', 'e'), Map.entry('£', 'e'), Map.entry('€', 'e'),
-        Map.entry('1', 'i'), Map.entry('!', 'i'), Map.entry('|', 'i'),
+        Map.entry('4', 'a'),
+        Map.entry('@', 'a'),
+        Map.entry('3', 'e'),
+        Map.entry('£', 'e'),
+        Map.entry('€', 'e'),
+        Map.entry('1', 'i'),
+        Map.entry('!', 'i'),
+        Map.entry('|', 'i'),
         Map.entry('0', 'o'),
-        Map.entry('5', 's'), Map.entry('$', 's'),
-        Map.entry('7', 't'), Map.entry('+', 't'),
+        Map.entry('5', 's'),
+        Map.entry('$', 's'),
+        Map.entry('7', 't'),
+        Map.entry('+', 't'),
         Map.entry('8', 'b'),
         Map.entry('9', 'g'),
         Map.entry('¥', 'y'),
-        Map.entry('¢', 'c'), Map.entry('(', 'c'), Map.entry('{', 'c'), Map.entry('[', 'c'), Map.entry('<', 'c'),
+        Map.entry('¢', 'c'),
+        Map.entry('(', 'c'),
+        Map.entry('{', 'c'),
+        Map.entry('[', 'c'),
+        Map.entry('<', 'c'),
         // Letters from other scripts that render the same as a latin one. Normalization does not
         // touch them, and dropping them would leave `rаpe` (cyrillic а) reading as `rpe`.
-        Map.entry('а', 'a'), Map.entry('е', 'e'), Map.entry('о', 'o'), Map.entry('р', 'p'), Map.entry('с', 'c'),
-        Map.entry('х', 'x'), Map.entry('у', 'y'), Map.entry('і', 'i'), Map.entry('ѕ', 's'), Map.entry('ј', 'j'),
-        Map.entry('һ', 'h'), Map.entry('к', 'k'), Map.entry('м', 'm'), Map.entry('т', 't'), Map.entry('в', 'b'),
-        Map.entry('н', 'h'), Map.entry('ԁ', 'd'), Map.entry('ԝ', 'w'), Map.entry('ԛ', 'q'),
-        Map.entry('α', 'a'), Map.entry('ε', 'e'), Map.entry('ι', 'i'), Map.entry('κ', 'k'), Map.entry('ν', 'v'),
-        Map.entry('ο', 'o'), Map.entry('ρ', 'p'), Map.entry('τ', 't'), Map.entry('υ', 'u'), Map.entry('χ', 'x'),
-        Map.entry('β', 'b'), Map.entry('η', 'n'),
-        Map.entry('ı', 'i'), Map.entry('ł', 'l'), Map.entry('ø', 'o'), Map.entry('đ', 'd'), Map.entry('ħ', 'h'),
+        Map.entry('а', 'a'),
+        Map.entry('е', 'e'),
+        Map.entry('о', 'o'),
+        Map.entry('р', 'p'),
+        Map.entry('с', 'c'),
+        Map.entry('х', 'x'),
+        Map.entry('у', 'y'),
+        Map.entry('і', 'i'),
+        Map.entry('ѕ', 's'),
+        Map.entry('ј', 'j'),
+        Map.entry('һ', 'h'),
+        Map.entry('к', 'k'),
+        Map.entry('м', 'm'),
+        Map.entry('т', 't'),
+        Map.entry('в', 'b'),
+        Map.entry('н', 'h'),
+        Map.entry('ԁ', 'd'),
+        Map.entry('ԝ', 'w'),
+        Map.entry('ԛ', 'q'),
+        Map.entry('α', 'a'),
+        Map.entry('ε', 'e'),
+        Map.entry('ι', 'i'),
+        Map.entry('κ', 'k'),
+        Map.entry('ν', 'v'),
+        Map.entry('ο', 'o'),
+        Map.entry('ρ', 'p'),
+        Map.entry('τ', 't'),
+        Map.entry('υ', 'u'),
+        Map.entry('χ', 'x'),
+        Map.entry('β', 'b'),
+        Map.entry('η', 'n'),
+        Map.entry('ı', 'i'),
+        Map.entry('ł', 'l'),
+        Map.entry('ø', 'o'),
+        Map.entry('đ', 'd'),
+        Map.entry('ħ', 'h'),
         Map.entry('ŧ', 't')
     );
 
     /// Pairs that draw a letter between them — `c()ck`.
     private static final Map<Character, Map<Character, Character>> PAIR_REPLACEMENTS = Map.of(
-        '(', Map.of(')', 'o'),
-        '[', Map.of(']', 'o'),
-        '{', Map.of('}', 'o'),
-        '<', Map.of('>', 'o')
+        '(',
+        Map.of(')', 'o'),
+        '[',
+        Map.of(']', 'o'),
+        '{',
+        Map.of('}', 'o'),
+        '<',
+        Map.of('>', 'o')
     );
 
     static Sanitized of(String raw) {
         var out = new Output(raw.length());
         var inToken = false;
 
-        for (int i = 0; i < raw.length(); ) {
+        for (int i = 0; i < raw.length();) {
             int cp = raw.codePointAt(i);
             int width = Character.charCount(cp);
 
@@ -70,7 +120,8 @@ record Sanitized(String raw, String text, boolean[] tokenStart, int[] tail, int[
             var survived = false;
             var onlyMarks = true;
             for (var c : fold(cp).toCharArray()) {
-                if (Character.getType(c) == Character.NON_SPACING_MARK) continue; // the accent off an é
+                if (Character.getType(c) == Character.NON_SPACING_MARK)
+                    continue; // the accent off an é
                 onlyMarks = false;
                 var replaced = REPLACEMENTS.get(c);
                 if (replaced != null) c = replaced;
@@ -121,8 +172,14 @@ record Sanitized(String raw, String text, boolean[] tokenStart, int[] tail, int[
                 tail[i] = run;
                 run = tokenStart[i] ? 0 : run + 1;
             }
-            return new Sanitized(raw, text.toString(), Arrays.copyOf(tokenStart, n), tail,
-                Arrays.copyOf(originStart, n), Arrays.copyOf(originEnd, n));
+            return new Sanitized(
+                raw,
+                text.toString(),
+                Arrays.copyOf(tokenStart, n),
+                tail,
+                Arrays.copyOf(originStart, n),
+                Arrays.copyOf(originEnd, n)
+            );
         }
     }
 
@@ -132,14 +189,15 @@ record Sanitized(String raw, String text, boolean[] tokenStart, int[] tail, int[
     /// char is known; nothing the filter cares about composes across code points.
     private static String fold(int cp) {
         var s = Character.toString(cp);
-        var decomposed = Normalizer.isNormalized(s, Normalizer.Form.NFKD) ? s : Normalizer.normalize(s, Normalizer.Form.NFKD);
+        var decomposed = Normalizer.isNormalized(s, Normalizer.Form.NFKD)
+            ? s
+            : Normalizer.normalize(s, Normalizer.Form.NFKD);
         return decomposed.toLowerCase(Locale.ROOT);
     }
 
     /// Whether a match over folded chars `[from, to)` runs across a word boundary.
     boolean crosses(int from, int to) {
-        for (int i = from + 1; i < to; i++)
-            if (tokenStart[i]) return true;
+        for (int i = from + 1; i < to; i++) if (tokenStart[i]) return true;
         return false;
     }
 }

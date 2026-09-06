@@ -28,7 +28,7 @@ jobs:
           cache: 'gradle'
 
       - name: Test
-        run: ./gradlew :modules:api:sqlGenCheck :modules:api:test :bin:api-worker:test --no-daemon
+        run: ./gradlew :modules:api:checkFormat :bin:api-worker:checkFormat :modules:api:sqlGenCheck :modules:api:test :bin:api-worker:test --no-daemon
 
   docker-build:
     needs: [ test ]

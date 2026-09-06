@@ -19,38 +19,34 @@ public record MapFeatures(
     // The mapmaker data version the world was saved with, or -1 when it predates one. Markers in
     // a world that old are not scanned, so the structure and mechanics below are empty for it.
     int dataVersion,
-
     long blockCount, // Non-air blocks
     // Size, trimmed of the outermost 1% of occupied cells at each end.
-    int extentX, int extentY, int extentZ,
+    int extentX,
+    int extentY,
+    int extentZ,
     // 8^3 cells containing at least one block: how much space the map actually occupies.
     int occupiedCells,
-
     // Distinct block types, ignoring block state.
     int distinctBlocks,
     // Share of blocks that are the single most common type. Near 1 with a low distinctBlocks is
     // the obstaslop signal.
     double dominantBlockFrac,
-
     // Everything in the world that is not a marker: displays, item frames, armour stands,
     // passengers included. Good maps tend to be decorated, so this is a quality signal, and text
     // displays in particular are how a map explains itself.
     int entityCount,
     int textDisplayCount,
-
     // Structure, from checkpoint, finish and status triggers.
     //
     // Each kind is read from both chunk entity data (regions) and block entity data (plates).
     // Touching plates always merge, since a 5x5 pad is one trigger however it was built. Regions
     // only merge where overlapping them is a way of drawing a shape: finishes. Two overlapping
     // checkpoint or status regions are deliberately two triggers. The spawn is not a checkpoint.
-
     int checkpointCount,
     // Median distance from a checkpoint to its nearest neighbour; 0 under two checkpoints.
     double checkpointSpacing,
     int finishCount,
     int statusCount,
-
     // Mechanics, from the action lists on every trigger.
     //
     // Presence only. A count of triggers granting something measures map length more than it
@@ -70,11 +66,9 @@ public record MapFeatures(
     // a positive value. There is no global flag to fall back on, so this is the whole picture, and
     // it says nothing about whether a setting applies to the whole map or one section.
     Set<String> settings,
-
     // Actions across every trigger, as an overall complexity signal. Unlike the sets above this is
     // a real quantity, though it wants normalizing by checkpointCount.
     int actionCount,
-
     // Triggers that did not decode and are missing from everything above, plus one for each
     // chunk whose user data did not read at all, which takes its entities with it. Anything but
     // zero means this record is incomplete.
@@ -89,8 +83,13 @@ public record MapFeatures(
     /// GIN indexed containment test, and adding a mechanic later needs no migration.
     public enum Mechanic {
         // Items granted.
-        BLOCKS, ENDER_PEARL, WIND_CHARGE, TRIDENT,
-        MACE, ELYTRA, FIREWORK_ROCKET,
+        BLOCKS,
+        ENDER_PEARL,
+        WIND_CHARGE,
+        TRIDENT,
+        MACE,
+        ELYTRA,
+        FIREWORK_ROCKET,
         // Takes an item or elytra away again, ie the map has distinct mechanical phases.
         ITEM_REVOKE,
 
@@ -108,7 +107,8 @@ public record MapFeatures(
         // Clears placed blocks, which block-placing maps use to reset a section.
         CLEAR_BLOCKS,
         // Touches a script variable, as a rough proxy for how scripted the map is.
-        VARIABLE;
+        VARIABLE,
+        ;
 
         /// The value as it is stored.
         public String id() {

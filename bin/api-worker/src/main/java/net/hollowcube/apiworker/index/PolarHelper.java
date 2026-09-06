@@ -37,7 +37,10 @@ final class PolarHelper {
     }
 
     /// Decodes the mapmaker codecs, which resolve registry keys as they go.
-    static final Transcoder<BinaryTag> CODER = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+    static final Transcoder<BinaryTag> CODER = new RegistryTranscoder<>(
+        Transcoder.NBT,
+        MinecraftServer.process()
+    );
 
     /// Reads a world, upgrading anything written by an older game version.
     static PolarWorld read(byte[] worldData) {
@@ -71,7 +74,11 @@ final class PolarHelper {
     /// than the namespaced name it gives every other block, and worlds converted from vanilla
     /// carry `cave_air` and `void_air`, which are air with a different name. Counting either of
     /// those as solid inflates the block count, the occupied cells and the extent all at once.
-    private static final Set<String> AIR = Set.of("minecraft:air", "minecraft:cave_air", "minecraft:void_air");
+    private static final Set<String> AIR = Set.of(
+        "minecraft:air",
+        "minecraft:cave_air",
+        "minecraft:void_air"
+    );
 
     static boolean isAir(String paletteEntry) {
         return AIR.contains(blockId(paletteEntry));
@@ -111,6 +118,5 @@ final class PolarHelper {
         if (MinecraftServer.process() == null) MinecraftServer.init();
     }
 
-    private PolarHelper() {
-    }
+    private PolarHelper() {}
 }

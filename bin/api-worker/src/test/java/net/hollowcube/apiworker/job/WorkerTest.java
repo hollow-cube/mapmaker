@@ -24,17 +24,20 @@ class WorkerTest {
 
     private final ApiDatabase db = TEST_DB.database(ApiDatabase::new);
 
-    record IndexMap(String mapId, @Nullable String reason) {
-    }
+    record IndexMap(String mapId, @Nullable String reason) {}
 
     private static final JobSpec<Void> COUNT = JobSpec.timed("count", "*/5 * * * *");
-    private static final JobSpec<IndexMap> INDEX = JobSpec.queued("index", IndexMap.class, IndexMap::mapId).attempts(2);
+    private static final JobSpec<IndexMap> INDEX = JobSpec
+        .queued("index", IndexMap.class, IndexMap::mapId)
+        .attempts(2);
 
     private static final class Recording<D> implements JobRunner<D> {
         final List<D> seen = new ArrayList<>();
         int runs;
-        @Nullable RuntimeException failure;
-        @Nullable Error death;
+        @Nullable
+        RuntimeException failure;
+        @Nullable
+        Error death;
 
         @Override
         public void run(@Nullable D data) {
@@ -46,13 +49,21 @@ class WorkerTest {
     }
 
     private Jobs row(String job, String instance) {
-        return db.jobs.listJobs().stream()
+        return db.jobs.listJobs()
+            .stream()
             .filter(r -> r.job().equals(job) && r.instance().equals(instance))
-            .findFirst().orElseThrow();
+            .findFirst()
+            .orElseThrow();
     }
 
     private void makeDue(String job, String instance) {
-        TEST_DB.seed("update jobs set run_at = now() - interval '1 second' where job = '" + job + "' and instance = '" + instance + "'");
+        TEST_DB.seed(
+            "update jobs set run_at = now() - interval '1 second' where job = '"
+                + job
+                + "' and instance = '"
+                + instance
+                + "'"
+        );
     }
 
     @Test
@@ -100,7 +111,10 @@ class WorkerTest {
         assertNull(afterFirst.pickedBy());
         assertEquals(1, afterFirst.attempts());
         assertEquals("java.lang.IllegalStateException: no", afterFirst.lastError());
-        assertTrue(afterFirst.runAt().isAfter(Instant.now().minusSeconds(1)), "backed off, not due now");
+        assertTrue(
+            afterFirst.runAt().isAfter(Instant.now().minusSeconds(1)),
+            "backed off, not due now"
+        );
 
         makeDue("index", "map-1");
         assertEquals(1, worker.pollOnce());
@@ -208,7 +222,11 @@ class WorkerTest {
         assertNull(row.pickedBy());
         assertEquals(1, worker.pollOnce(), "and it runs again");
         pending.removeFirst().run();
-        assertEquals("again", runner.seen.getLast().reason(), "with the data it was re-enqueued with");
+        assertEquals(
+            "again",
+            runner.seen.getLast().reason(),
+            "with the data it was re-enqueued with"
+        );
     }
 
     @Test

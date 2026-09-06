@@ -33,8 +33,10 @@ class SessionServiceImplTest {
         server.createContext(SessionServer.PATH, new SessionServer(service));
         server.start();
 
-        sessions = new SessionClient(HttpClient.newHttpClient(),
-            "http://127.0.0.1:" + server.getAddress().getPort());
+        sessions = new SessionClient(
+            HttpClient.newHttpClient(),
+            "http://127.0.0.1:" + server.getAddress().getPort()
+        );
     }
 
     @AfterEach
@@ -49,11 +51,13 @@ class SessionServiceImplTest {
 
     @Test
     void onlinePlayers_countsEveryRowHiddenOrNot() {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into player_sessions (player_id, proxy_id, skin_texture, skin_signature, hidden) values
                 ('11111111-1111-1111-1111-111111111111', 'proxy-a', '', '', false),
                 ('22222222-2222-2222-2222-222222222222', 'proxy-b', '', '', false),
-                ('33333333-3333-3333-3333-333333333333', 'proxy-a', '', '', true)""");
+                ('33333333-3333-3333-3333-333333333333', 'proxy-a', '', '', true)"""
+        );
 
         assertEquals(3, sessions.onlinePlayers());
     }

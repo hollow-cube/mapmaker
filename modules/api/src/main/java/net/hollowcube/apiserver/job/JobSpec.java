@@ -16,25 +16,50 @@ import java.util.function.Function;
 /// worker's are the same class.
 ///
 /// @param instance what makes one request distinct from another of the same job; `-` for timed
-public record JobSpec<D>(String name, Class<D> data, Function<D, String> instance, @Nullable Cron schedule, int maxAttempts) {
+public record JobSpec<D>(
+    String name,
+    Class<D> data,
+    Function<D, String> instance,
+    @Nullable Cron schedule,
+    int maxAttempts
+) {
     private static final Gson GSON = new Gson();
     private static final int DEFAULT_MAX_ATTEMPTS = 5;
     public static final String TIMED_INSTANCE = "-";
 
     public static final JobSpec<Void> PLAYER_COUNT = timed("player-count", "*/5 * * * *");
-    public static final JobSpec<IndexMap> INDEX_MAP = queued("index-map", IndexMap.class, IndexMap::mapId);
-    public static final JobSpec<CompactReplay> COMPACT_REPLAY =
-        queued("compact-replay", CompactReplay.class, CompactReplay::replayId);
+    public static final JobSpec<IndexMap> INDEX_MAP = queued(
+        "index-map",
+        IndexMap.class,
+        IndexMap::mapId
+    );
+    public static final JobSpec<CompactReplay> COMPACT_REPLAY = queued(
+        "compact-replay",
+        CompactReplay.class,
+        CompactReplay::replayId
+    );
     /// The backstop for a [#COMPACT_REPLAY] row that was never enqueued — a replay the Go server
     /// finished during the overlap, or one whose row was parked — and the way the corpus that
     /// predates compaction is worked through.
-    public static final JobSpec<Void> RECONCILE_REPLAYS = timed("reconcile-replays", "*/15 * * * *");
+    public static final JobSpec<Void> RECONCILE_REPLAYS = timed(
+        "reconcile-replays",
+        "*/15 * * * *"
+    );
     /// Drops the source segments of replays that have been compacted long enough, which is where
     /// compaction's storage win is actually realised.
-    public static final JobSpec<Void> SWEEP_REPLAY_SOURCES = timed("sweep-replay-sources", "17 * * * *");
+    public static final JobSpec<Void> SWEEP_REPLAY_SOURCES = timed(
+        "sweep-replay-sources",
+        "17 * * * *"
+    );
 
     public static JobSpec<Void> timed(String name, String cron) {
-        return new JobSpec<>(name, Void.class, ignored -> TIMED_INSTANCE, Cron.parse(cron), DEFAULT_MAX_ATTEMPTS);
+        return new JobSpec<>(
+            name,
+            Void.class,
+            ignored -> TIMED_INSTANCE,
+            Cron.parse(cron),
+            DEFAULT_MAX_ATTEMPTS
+        );
     }
 
     public static <D> JobSpec<D> queued(String name, Class<D> data, Function<D, String> instance) {
@@ -48,7 +73,8 @@ public record JobSpec<D>(String name, Class<D> data, Function<D, String> instanc
     /// Asks for a run of a queued job. Inside a transaction this is `tx.jobs`, so the request
     /// commits with whatever caused it or not at all.
     public void enqueue(JobsQueries jobs, D data) {
-        if (schedule != null) throw new IllegalArgumentException(name + " is timed; it has its row already");
+        if (schedule != null)
+            throw new IllegalArgumentException(name + " is timed; it has its row already");
         jobs.enqueueJob(name, instance.apply(data), GSON.toJson(data));
     }
 

@@ -9,7 +9,10 @@ class ChatTextTest {
     @Test
     void strip_keepsAnythingTypedOnAKeyboard() {
         assertEquals("hello world!", ChatText.strip("hello world!"));
-        assertEquals("~`!@#$%^&*()_+-=[]{}|;':\",./<>?", ChatText.strip("~`!@#$%^&*()_+-=[]{}|;':\",./<>?"));
+        assertEquals(
+            "~`!@#$%^&*()_+-=[]{}|;':\",./<>?",
+            ChatText.strip("~`!@#$%^&*()_+-=[]{}|;':\",./<>?")
+        );
     }
 
     @Test

@@ -14,16 +14,21 @@ class VaultSecretsTest {
     @Test
     void testAgentTemplateShape(@TempDir Path dir) throws IOException {
         // What the agent sidecar's template renders: one `key = value` per secret, blank last line.
-        var file = Files.writeString(dir.resolve("service"), """
+        var file = Files.writeString(
+            dir.resolve("service"),
+            """
             postgres.maps_uri = postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service
             posthog.personal_api_key = phx_abc
 
-            """);
+            """
+        );
 
         var secrets = VaultSecrets.load(file);
         assertTrue(secrets.present());
-        assertEquals("postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service",
-            secrets.get("postgres.maps_uri", "DATABASE_URL_NOT_SET"));
+        assertEquals(
+            "postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service",
+            secrets.get("postgres.maps_uri", "DATABASE_URL_NOT_SET")
+        );
         assertEquals("phx_abc", secrets.get("posthog.personal_api_key", "NOT_SET"));
     }
 
@@ -41,6 +46,9 @@ class VaultSecretsTest {
 
         assertNull(secrets.get("postgres.maps_uri", "NOT_SET"));
         assertEquals("9124", secrets.get("http.port", "NOT_SET", "9124"));
-        assertThrows(IllegalStateException.class, () -> secrets.require("postgres.maps_uri", "NOT_SET"));
+        assertThrows(
+            IllegalStateException.class,
+            () -> secrets.require("postgres.maps_uri", "NOT_SET")
+        );
     }
 }

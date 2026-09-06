@@ -35,7 +35,8 @@ public final class IndexMapRunner implements JobRunner<IndexMap> {
 
     @Override
     public void run(@Nullable IndexMap data) {
-        if (data == null) throw new IllegalArgumentException("index-map needs data: {\"mapId\": \"...\"}");
+        if (data == null)
+            throw new IllegalArgumentException("index-map needs data: {\"mapId\": \"...\"}");
         final var mapId = UUID.fromString(data.mapId());
 
         final byte[] world;
@@ -48,15 +49,38 @@ public final class IndexMapRunner implements JobRunner<IndexMap> {
 
         final long start = System.nanoTime();
         final var features = MapIndexer.index(world);
-        db.mapFeatures.upsertMapFeatures(new UpsertMapFeaturesParams(
-            mapId, MapIndexer.FEATURE_VERSION, features.dataVersion(),
-            features.blockCount(), features.extentX(), features.extentY(), features.extentZ(),
-            features.occupiedCells(), features.distinctBlocks(), features.dominantBlockFrac(),
-            features.entityCount(), features.textDisplayCount(),
-            features.checkpointCount(), features.checkpointSpacing(), features.finishCount(), features.statusCount(),
-            features.mechanics().stream().map(MapFeatures.Mechanic::id).toList(),
-            List.copyOf(features.attributes()), List.copyOf(features.potionEffects()), List.copyOf(features.settings()),
-            features.actionCount(), features.decodeFailures()));
-        logger.info("indexed {} ({}) in {}ms: {}", mapId, data.reason(), (System.nanoTime() - start) / 1_000_000, features);
+        db.mapFeatures.upsertMapFeatures(
+            new UpsertMapFeaturesParams(
+                mapId,
+                MapIndexer.FEATURE_VERSION,
+                features.dataVersion(),
+                features.blockCount(),
+                features.extentX(),
+                features.extentY(),
+                features.extentZ(),
+                features.occupiedCells(),
+                features.distinctBlocks(),
+                features.dominantBlockFrac(),
+                features.entityCount(),
+                features.textDisplayCount(),
+                features.checkpointCount(),
+                features.checkpointSpacing(),
+                features.finishCount(),
+                features.statusCount(),
+                features.mechanics().stream().map(MapFeatures.Mechanic::id).toList(),
+                List.copyOf(features.attributes()),
+                List.copyOf(features.potionEffects()),
+                List.copyOf(features.settings()),
+                features.actionCount(),
+                features.decodeFailures()
+            )
+        );
+        logger.info(
+            "indexed {} ({}) in {}ms: {}",
+            mapId,
+            data.reason(),
+            (System.nanoTime() - start) / 1_000_000,
+            features
+        );
     }
 }

@@ -1,17 +1,17 @@
 package net.hollowcube.apiserver.replay;
 
 import com.sun.net.httpserver.HttpServer;
-import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.Jobs;
-import net.hollowcube.apiserver.s3.MemoryS3Client;
 import net.hollowcube.apiserver.job.CompactReplay;
 import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.apiserver.s3.MemoryS3Client;
+import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.ipc.Blob;
 import net.hollowcube.ipc.replay.ReplayClient;
 import net.hollowcube.ipc.replay.ReplayCommit;
-import net.hollowcube.ipc.replay.ReplayInfo;
 import net.hollowcube.ipc.replay.ReplayCompaction;
+import net.hollowcube.ipc.replay.ReplayInfo;
 import net.hollowcube.ipc.replay.ReplayOutcome;
 import net.hollowcube.ipc.replay.ReplayRepresentation;
 import net.hollowcube.ipc.replay.ReplayServer;
@@ -31,8 +31,8 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.sql.SQLException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HexFormat;
@@ -57,7 +57,10 @@ class ReplayServiceImplTest {
     @RegisterExtension
     // TRUNCATE rather than ROLLBACK: every write here goes through `db.txResult`, which cannot
     // commit inside a transaction the harness is holding open.
-    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations", TestDb.Mode.TRUNCATE);
+    static final TestDb TEST_DB = TestDb.of(
+        "../../modules/api/src/main/sql/migrations",
+        TestDb.Mode.TRUNCATE
+    );
 
     /// `ReplayServiceImpl`'s inline threshold, which the tests below straddle rather than lower.
     private static final int INLINE_BYTES = 2048;
@@ -85,8 +88,10 @@ class ReplayServiceImplTest {
         server.createContext(ReplayServer.PATH, new ReplayServer(service));
         server.start();
 
-        replays = new ReplayClient(HttpClient.newHttpClient(),
-            "http://127.0.0.1:" + server.getAddress().getPort());
+        replays = new ReplayClient(
+            HttpClient.newHttpClient(),
+            "http://127.0.0.1:" + server.getAddress().getPort()
+        );
     }
 
     @AfterEach
@@ -107,9 +112,12 @@ class ReplayServiceImplTest {
     @Test
     void migration_ordersReplaySegmentsAsProductionHasThem() {
         assertEquals(
-            List.of("replay_id", "segment_index", "object_reference", "length", "digest",
-                "commit_revision", "data"),
-            columnsOf("replay_segments"));
+            List.of(
+                "replay_id", "segment_index", "object_reference", "length", "digest",
+                "commit_revision", "data"
+            ),
+            columnsOf("replay_segments")
+        );
     }
 
     /// `pg_attribute` rather than `information_schema`, which pglite does not serve.
@@ -121,9 +129,12 @@ class ReplayServiceImplTest {
                      join pg_namespace n on n.oid = c.relnamespace
             where n.nspname = 'public' and c.relname = '%s'
               and a.attnum > 0 and not a.attisdropped
-            order by a.attnum""".formatted(table);
-        try (var statement = TEST_DB.conn().createStatement();
-             var rows = statement.executeQuery(sql)) {
+            order by a.attnum"""
+            .formatted(table);
+        try (
+            var statement = TEST_DB.conn().createStatement();
+            var rows = statement.executeQuery(sql)
+        ) {
             var columns = new ArrayList<String>();
             while (rows.next()) columns.add(rows.getString(1));
             return columns;
@@ -153,7 +164,14 @@ class ReplayServiceImplTest {
         assertEquals(2, appended.nextSegmentIndex());
 
         // The metadata-only final commit: no segment, and the outcome the recorder says it had.
-        var finished = commit(appended.revision(), "k-2", null, true, ReplayOutcome.RESET, new byte[0]);
+        var finished = commit(
+            appended.revision(),
+            "k-2",
+            null,
+            true,
+            ReplayOutcome.RESET,
+            new byte[0]
+        );
         assertEquals(3, finished.revision());
         assertEquals(ReplayState.FINISHED, finished.state());
         assertEquals(ReplayOutcome.RESET, finished.outcome());
@@ -246,7 +264,10 @@ class ReplayServiceImplTest {
         var created = commit(null, "k-0", 0, false, null, seg("aaa"));
         commit(created.revision(), "k-1", 1, false, null, seg("bbb"));
 
-        assertEquals(412, status(() -> commit(created.revision(), "k-2", 2, false, null, seg("ccc"))));
+        assertEquals(
+            412,
+            status(() -> commit(created.revision(), "k-2", 2, false, null, seg("ccc")))
+        );
     }
 
     @Test
@@ -292,8 +313,16 @@ class ReplayServiceImplTest {
     @ValueSource(ints = {3, INLINE_BYTES + 1})
     void commit_aDigestMismatchPersistsNothingAndLeavesTheBucketEmpty(int length) {
         var segment = seg("z".repeat(length));
-        var meta = new ReplayCommit(ID, null, "k-0", PREAMBLE.length, 0, false, null,
-            digest("something else".getBytes(StandardCharsets.UTF_8)));
+        var meta = new ReplayCommit(
+            ID,
+            null,
+            "k-0",
+            PREAMBLE.length,
+            0,
+            false,
+            null,
+            digest("something else".getBytes(StandardCharsets.UTF_8))
+        );
 
         var failure = failure(() -> replays.commit(meta, Blob.of(concat(PREAMBLE, segment))));
 
@@ -319,8 +348,16 @@ class ReplayServiceImplTest {
     /// what stops a caller asking this process to allocate sixteen megabytes it will never fill.
     @Test
     void commit_refusesAPreambleOverTheLimit() {
-        var meta = new ReplayCommit(ID, null, "k-0", MAX_PREAMBLE_BYTES + 1, 0, false, null,
-            digest(PREAMBLE));
+        var meta = new ReplayCommit(
+            ID,
+            null,
+            "k-0",
+            MAX_PREAMBLE_BYTES + 1,
+            0,
+            false,
+            null,
+            digest(PREAMBLE)
+        );
 
         assertEquals(413, status(() -> replays.commit(meta, Blob.of(PREAMBLE))));
     }
@@ -328,16 +365,23 @@ class ReplayServiceImplTest {
     /// The first production transactional enqueue: the row asking for the compaction commits with
     /// the commit that finished the replay, so the process dying in between cannot lose it.
     @Test
-    void commit_thatFinishesTheReplayEnqueuesItsCompactionInTheSameTransaction() throws IOException {
+    void commit_thatFinishesTheReplayEnqueuesItsCompactionInTheSameTransaction() throws
+        IOException {
         var created = commit(null, "k-0", 0, false, null, seg("aaa"));
         assertEquals(List.of(), compactionRows());
 
         commit(created.revision(), "k-1", null, true, ReplayOutcome.FINISHED, new byte[0]);
 
         assertEquals(List.of(ID), compactionRows());
-        var row = db.jobs.listJobs().stream()
-            .filter(job -> job.job().equals(JobSpec.COMPACT_REPLAY.name())).findFirst().orElseThrow();
-        assertEquals(new CompactReplay(ID, "final-commit"), JobSpec.COMPACT_REPLAY.decode(row.data()));
+        var row = db.jobs.listJobs()
+            .stream()
+            .filter(job -> job.job().equals(JobSpec.COMPACT_REPLAY.name()))
+            .findFirst()
+            .orElseThrow();
+        assertEquals(
+            new CompactReplay(ID, "final-commit"),
+            JobSpec.COMPACT_REPLAY.decode(row.data())
+        );
     }
 
     @Test
@@ -351,7 +395,8 @@ class ReplayServiceImplTest {
     }
 
     private List<String> compactionRows() {
-        return db.jobs.listJobs().stream()
+        return db.jobs.listJobs()
+            .stream()
             .filter(job -> job.job().equals(JobSpec.COMPACT_REPLAY.name()))
             .map(Jobs::instance)
             .toList();
@@ -363,8 +408,15 @@ class ReplayServiceImplTest {
         var compacted = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
 
         var published = replays.publishCompacted(
-            new ReplayCompaction(ID, finished.revision(), "compact:" + ID + ":" + finished.revision(), 17, digest(compacted)),
-            Blob.of(compacted));
+            new ReplayCompaction(
+                ID,
+                finished.revision(),
+                "compact:" + ID + ":" + finished.revision(),
+                17,
+                digest(compacted)
+            ),
+            Blob.of(compacted)
+        );
 
         assertEquals(3, published.revision());
         assertEquals(ReplayRepresentation.COMPACTED, published.representation());
@@ -384,8 +436,12 @@ class ReplayServiceImplTest {
         var created = commit(null, "k-0", 0, false, null, seg("aaa"));
         var compacted = "COMPACTED".getBytes(StandardCharsets.UTF_8);
 
-        var failure = failure(() -> replays.publishCompacted(
-            new ReplayCompaction(ID, created.revision(), "c-0", 4, digest(compacted)), Blob.of(compacted)));
+        var failure = failure(
+            () -> replays.publishCompacted(
+                new ReplayCompaction(ID, created.revision(), "c-0", 4, digest(compacted)),
+                Blob.of(compacted)
+            )
+        );
 
         assertEquals(409, failure.status());
         assertTrue(failure.getMessage().contains("replay_not_finished"), failure.getMessage());
@@ -397,7 +453,13 @@ class ReplayServiceImplTest {
     void publishCompacted_retriedWithTheDeterministicKeyUploadsOnce() throws IOException {
         var finished = finishedReplay();
         var compacted = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
-        var meta = new ReplayCompaction(ID, finished.revision(), "compact:" + ID + ":" + finished.revision(), 17, digest(compacted));
+        var meta = new ReplayCompaction(
+            ID,
+            finished.revision(),
+            "compact:" + ID + ":" + finished.revision(),
+            17,
+            digest(compacted)
+        );
         var puts = s3.puts();
 
         var first = replays.publishCompacted(meta, Blob.of(compacted));
@@ -412,10 +474,19 @@ class ReplayServiceImplTest {
     @Test
     void dropSegments_removesTheObjectsAndTheRowsOfACompactedReplay() throws IOException {
         var created = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
-        var finished = commit(created.revision(), "k-1", null, true, ReplayOutcome.RESET, new byte[0]);
+        var finished = commit(
+            created.revision(),
+            "k-1",
+            null,
+            true,
+            ReplayOutcome.RESET,
+            new byte[0]
+        );
         var compacted = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
         replays.publishCompacted(
-            new ReplayCompaction(ID, finished.revision(), "c-0", 17, digest(compacted)), Blob.of(compacted));
+            new ReplayCompaction(ID, finished.revision(), "c-0", 17, digest(compacted)),
+            Blob.of(compacted)
+        );
         var segmentObject = db.replays.getReplaySegment(ID, 0).objectReference();
 
         assertEquals(1, replays.dropSegments(ID));
@@ -477,7 +548,14 @@ class ReplayServiceImplTest {
     @Test
     void storage_writesRowsAndKeysTheGoHandlerWouldHaveWritten() throws IOException {
         var created = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
-        var finished = commit(created.revision(), "k-1", null, true, ReplayOutcome.FINISHED, new byte[0]);
+        var finished = commit(
+            created.revision(),
+            "k-1",
+            null,
+            true,
+            ReplayOutcome.FINISHED,
+            new byte[0]
+        );
 
         var row = db.replays.getReplay(ID);
         assertNotNull(row);
@@ -499,22 +577,32 @@ class ReplayServiceImplTest {
         assertEquals(1, segment.commitRevision());
         assertEquals(32, segment.digest().length);
         assertArrayEquals(sha256(seg(EXTERNAL_SEGMENT)), segment.digest());
-        assertTrue(segment.objectReference().matches(
-            "replays/[0-9a-f]{64}/segments/0/[0-9a-f-]{36}"), segment.objectReference());
+        assertTrue(
+            segment.objectReference().matches("replays/[0-9a-f]{64}/segments/0/[0-9a-f-]{36}"),
+            segment.objectReference()
+        );
         // The id is hashed rather than used, so a client-supplied one cannot leave the prefix.
-        assertTrue(segment.objectReference().startsWith(
-            "replays/" + HexFormat.of().formatHex(sha256(ID.getBytes(StandardCharsets.UTF_8))) + "/"));
+        assertTrue(
+            segment.objectReference().startsWith(
+                "replays/"
+                    + HexFormat.of().formatHex(sha256(ID.getBytes(StandardCharsets.UTF_8)))
+                    + "/"
+            )
+        );
     }
 
     /// A recording the Go handler wrote, resumed here. Same row, same etag, same next index.
     @Test
     void storage_resumesARecordingWrittenByTheGoHandler() throws IOException {
-        TEST_DB.seed("""
+        TEST_DB.seed(
+            """
             insert into replays (id, version, recording_revision, state, representation,
                                  next_segment_index, current_preamble, current_preamble_digest)
             values ('%s', 4, 4, 'recording', 'segmented', 2, '\\x505245414d424c45',
                     decode('%s', 'hex'))
-            """.formatted(ID, HexFormat.of().formatHex(sha256(PREAMBLE))));
+            """
+                .formatted(ID, HexFormat.of().formatHex(sha256(PREAMBLE)))
+        );
 
         var info = replays.getReplay(ID);
         assertNotNull(info);
@@ -533,9 +621,23 @@ class ReplayServiceImplTest {
     void overlappingRetriesDiscardTheObjectTheyDidNotInstall(boolean compacted) throws IOException {
         var body = concat(PREAMBLE, seg(EXTERNAL_SEGMENT));
         var revision = compacted ? finishedReplay().revision() : 0;
-        var commit = new ReplayCommit(ID, compacted ? revision : null, "overlap", PREAMBLE.length,
-            0, false, null, digest(body));
-        var publication = new ReplayCompaction(ID, revision, "overlap", PREAMBLE.length, digest(body));
+        var commit = new ReplayCommit(
+            ID,
+            compacted ? revision : null,
+            "overlap",
+            PREAMBLE.length,
+            0,
+            false,
+            null,
+            digest(body)
+        );
+        var publication = new ReplayCompaction(
+            ID,
+            revision,
+            "overlap",
+            PREAMBLE.length,
+            digest(body)
+        );
         // Finish the other request after staging, before this request acquires the row lock.
         s3.afterPut(() -> {
             if (compacted) service.publishCompacted(publication, Blob.of(body));
@@ -546,7 +648,8 @@ class ReplayServiceImplTest {
         else replays.commit(commit, Blob.of(body));
 
         assertEquals(2, s3.puts());
-        var installed = compacted ? db.replays.getReplay(ID).compactedObject()
+        var installed = compacted
+            ? db.replays.getReplay(ID).compactedObject()
             : db.replays.getReplaySegment(ID, 0).objectReference();
         assertEquals(List.of(installed), List.copyOf(s3.objects().keySet()));
     }
@@ -557,15 +660,40 @@ class ReplayServiceImplTest {
         var body = concat(PREAMBLE, seg(EXTERNAL_SEGMENT));
         var revision = compacted ? finishedReplay().revision() : 0;
         s3.afterPut(() -> {
-            throw new S3Client.RequestFailedError("object was stored but the PUT response was lost");
+            throw new S3Client.RequestFailedError(
+                "object was stored but the PUT response was lost"
+            );
         });
 
-        assertEquals(500, status(() -> {
-            if (compacted) replays.publishCompacted(
-                new ReplayCompaction(ID, revision, "lost-upload", PREAMBLE.length, digest(body)), Blob.of(body));
-            else replays.commit(
-                new ReplayCommit(ID, null, "lost-upload", PREAMBLE.length, 0, false, null, digest(body)), Blob.of(body));
-        }));
+        assertEquals(
+            500,
+            status(() -> {
+                if (compacted)
+                    replays.publishCompacted(
+                        new ReplayCompaction(
+                            ID,
+                            revision,
+                            "lost-upload",
+                            PREAMBLE.length,
+                            digest(body)
+                        ),
+                        Blob.of(body)
+                    );
+                else replays.commit(
+                    new ReplayCommit(
+                        ID,
+                        null,
+                        "lost-upload",
+                        PREAMBLE.length,
+                        0,
+                        false,
+                        null,
+                        digest(body)
+                    ),
+                    Blob.of(body)
+                );
+            })
+        );
         assertTrue(s3.objects().isEmpty());
         assertNull(db.replays.getReplayIdempotency(ID, "lost-upload"));
     }
@@ -573,9 +701,15 @@ class ReplayServiceImplTest {
     @Test
     void storageFingerprintUsesUtf8ByteLengths() {
         // Go writeFingerprintField uses len(string), which counts the UTF-8 bytes of this ID.
-        assertEquals("c9d781491eb9a4804f5b6db760931b95bb8de7a666faa3f2ca7125733fc16d61",
-            HexFormat.of().formatHex(ReplayCompat.fingerprint("PATCH", "réplay", "", "*", "8", "0", "false",
-                sha256(concat(PREAMBLE, seg("aaa"))))));
+        assertEquals(
+            "c9d781491eb9a4804f5b6db760931b95bb8de7a666faa3f2ca7125733fc16d61",
+            HexFormat.of().formatHex(
+                ReplayCompat.fingerprint(
+                    "PATCH", "réplay", "", "*", "8", "0", "false",
+                    sha256(concat(PREAMBLE, seg("aaa")))
+                )
+            )
+        );
     }
 
     private ReplayInfo finishedReplay() throws IOException {
@@ -586,15 +720,33 @@ class ReplayServiceImplTest {
     private void compacted(byte[] body, int preambleLength) throws IOException {
         var finished = finishedReplay();
         replays.publishCompacted(
-            new ReplayCompaction(ID, finished.revision(), "c-0", preambleLength, digest(body)), Blob.of(body));
+            new ReplayCompaction(ID, finished.revision(), "c-0", preambleLength, digest(body)),
+            Blob.of(body)
+        );
     }
 
-    private ReplayInfo commit(Long revision, String key, Integer segmentIndex,
-                                                        boolean finished, ReplayOutcome outcome, byte[] segment) {
+    private ReplayInfo commit(
+        Long revision,
+        String key,
+        Integer segmentIndex,
+        boolean finished,
+        ReplayOutcome outcome,
+        byte[] segment
+    ) {
         var body = concat(PREAMBLE, segment);
         return replays.commit(
-            new ReplayCommit(ID, revision, key, PREAMBLE.length, segmentIndex, finished, outcome, digest(body)),
-            Blob.of(body));
+            new ReplayCommit(
+                ID,
+                revision,
+                key,
+                PREAMBLE.length,
+                segmentIndex,
+                finished,
+                outcome,
+                digest(body)
+            ),
+            Blob.of(body)
+        );
     }
 
     private static byte[] seg(String text) {

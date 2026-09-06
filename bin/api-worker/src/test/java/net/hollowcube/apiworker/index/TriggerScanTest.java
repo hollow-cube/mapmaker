@@ -20,7 +20,13 @@ import static org.junit.jupiter.api.Assertions.*;
 /// saves it, with the region as offsets from the marker's position.
 class TriggerScanTest {
 
-    private static CompoundBinaryTag marker(String type, double x, double y, double z, double half) {
+    private static CompoundBinaryTag marker(
+        String type,
+        double x,
+        double y,
+        double z,
+        double half
+    ) {
         var data = CompoundBinaryTag.builder()
             .putString("type", type)
             .put("min", doubles(-half, -half, -half))
@@ -40,7 +46,12 @@ class TriggerScanTest {
     }
 
     private static PolarWorld world(CompoundBinaryTag... entities) {
-        var chunkData = CompoundBinaryTag.builder().put("entities", ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, List.of(entities))).build();
+        var chunkData = CompoundBinaryTag.builder()
+            .put(
+                "entities",
+                ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, List.of(entities))
+            )
+            .build();
         var chunkUserData = NetworkBuffer.makeArray(buffer -> {
             buffer.write(NetworkBuffer.VAR_INT, ReadWorldAccess.VERSION_LATEST);
             buffer.write(NetworkBuffer.NBT, chunkData);
@@ -53,18 +64,32 @@ class TriggerScanTest {
         var sections = new PolarSection[24];
         for (int i = 0; i < sections.length; i++) sections[i] = new PolarSection();
         var chunk = new PolarChunk(0, 0, sections, List.of(), new int[0][], chunkUserData);
-        return new PolarWorld(PolarWorld.LATEST_VERSION, 0, PolarWorld.DEFAULT_COMPRESSION, (byte) -4, (byte) 19, worldUserData, List.of(chunk));
+        return new PolarWorld(
+            PolarWorld.LATEST_VERSION,
+            0,
+            PolarWorld.DEFAULT_COMPRESSION,
+            (byte) -4,
+            (byte) 19,
+            worldUserData,
+            List.of(chunk)
+        );
     }
 
     @Test
     void regionsAreOffsetsFromTheMarker_soDistantFinishesDoNotMerge() {
         MapIndexer.init();
-        var scan = TriggerScan.scan(world(
-            marker("mapmaker:finish", 100, 64, 0, 2),
-            marker("mapmaker:finish", 500, 64, 0, 2),
-            marker("mapmaker:finish", 502, 64, 0, 2)));
+        var scan = TriggerScan.scan(
+            world(
+                marker("mapmaker:finish", 100, 64, 0, 2),
+                marker("mapmaker:finish", 500, 64, 0, 2),
+                marker("mapmaker:finish", 502, 64, 0, 2)
+            )
+        );
 
-        var finishes = scan.triggers().stream().filter(t -> t.kind() == TriggerScan.Kind.FINISH).toList();
+        var finishes = scan.triggers()
+            .stream()
+            .filter(t -> t.kind() == TriggerScan.Kind.FINISH)
+            .toList();
         assertEquals(2, finishes.size(), "the two touching ones are one shape, the far one is not");
         assertEquals(DataFixer.maxVersion(), scan.dataVersion());
         assertEquals(0, scan.decodeFailures());
@@ -74,13 +99,23 @@ class TriggerScanTest {
     @Test
     void checkpointsKeepTheirPositions() {
         MapIndexer.init();
-        var scan = TriggerScan.scan(world(
-            marker("mapmaker:checkpoint", 0, 64, 0, 1),
-            marker("mapmaker:checkpoint", 20, 64, 0, 1),
-            marker("mapmaker:checkpoint", 20, 64, 0, 1)));
+        var scan = TriggerScan.scan(
+            world(
+                marker("mapmaker:checkpoint", 0, 64, 0, 1),
+                marker("mapmaker:checkpoint", 20, 64, 0, 1),
+                marker("mapmaker:checkpoint", 20, 64, 0, 1)
+            )
+        );
 
-        var checkpoints = scan.triggers().stream().filter(t -> t.kind() == TriggerScan.Kind.CHECKPOINT).toList();
+        var checkpoints = scan.triggers()
+            .stream()
+            .filter(t -> t.kind() == TriggerScan.Kind.CHECKPOINT)
+            .toList();
         assertEquals(3, checkpoints.size(), "overlapping checkpoints are deliberately two");
-        assertEquals(20, checkpoints.stream().mapToDouble(TriggerScan.Trigger::x).max().orElseThrow(), 1e-9);
+        assertEquals(
+            20,
+            checkpoints.stream().mapToDouble(TriggerScan.Trigger::x).max().orElseThrow(),
+            1e-9
+        );
     }
 }

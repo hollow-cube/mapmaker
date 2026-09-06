@@ -59,12 +59,18 @@ class AnticheatServiceImplTest {
     void start() throws IOException {
         this.db = TEST_DB.database(ApiDatabase::new);
         this.server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
-        this.server.createContext(AnticheatServer.PATH, new AnticheatServer(
-            new AnticheatServiceImpl(this.db, new AnticheatTraceStore(this.root, MAX_BYTES))));
+        this.server.createContext(
+            AnticheatServer.PATH,
+            new AnticheatServer(
+                new AnticheatServiceImpl(this.db, new AnticheatTraceStore(this.root, MAX_BYTES))
+            )
+        );
         this.server.start();
 
-        this.traces = new AnticheatClient(HttpClient.newHttpClient(),
-            "http://127.0.0.1:" + this.server.getAddress().getPort());
+        this.traces = new AnticheatClient(
+            HttpClient.newHttpClient(),
+            "http://127.0.0.1:" + this.server.getAddress().getPort()
+        );
     }
 
     @AfterEach
@@ -128,7 +134,10 @@ class AnticheatServiceImplTest {
 
     @Test
     void list_answersEveryTraceOfOneCaptureOldestFirst() {
-        this.traces.putTrace(meta("seg-2", CAPTURE, STARTED + 300_000), Blob.of(trace(1, "second")));
+        this.traces.putTrace(
+            meta("seg-2", CAPTURE, STARTED + 300_000),
+            Blob.of(trace(1, "second"))
+        );
         this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(trace(1, "first")));
         this.traces.putTrace(meta("seg-3", "run-8", STARTED), Blob.of(trace(1, "another capture")));
 
@@ -145,12 +154,26 @@ class AnticheatServiceImplTest {
 
     @Test
     void put_upsertsTheRowWhenTheProxyRetriesTheSameTrace() throws IOException {
-        assertFalse(this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(trace(1, "partial"))).replaced());
+        assertFalse(
+            this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(trace(1, "partial")))
+                .replaced()
+        );
 
         // The retry ships the closed trace: same id, same path, a longer body and an ended_at.
         var closed = trace(1, "partial and then some");
         var ended = Instant.parse("2026-08-29T22:16:00Z").toEpochMilli();
-        var meta = new TraceMeta("seg-1", CAPTURE, PLAYER, "abc1234", "proxy-a", 776, "run", STARTED, ended, 1);
+        var meta = new TraceMeta(
+            "seg-1",
+            CAPTURE,
+            PLAYER,
+            "abc1234",
+            "proxy-a",
+            776,
+            "run",
+            STARTED,
+            ended,
+            1
+        );
 
         assertTrue(this.traces.putTrace(meta, Blob.of(closed)).replaced());
 
@@ -166,7 +189,10 @@ class AnticheatServiceImplTest {
     void put_refusesABodyThatDoesNotOpenWithTheMagic() {
         var body = Blob.of("PKnot a trace".getBytes(StandardCharsets.UTF_8));
 
-        var thrown = assertThrows(IpcException.class, () -> this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), body));
+        var thrown = assertThrows(
+            IpcException.class,
+            () -> this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), body)
+        );
 
         assertEquals(400, thrown.status());
         assertNull(this.db.anticheat.getAnticheatTrace("seg-1"));
@@ -176,7 +202,10 @@ class AnticheatServiceImplTest {
     void put_refusesATraceLongerThanTheStoreAccepts() {
         var body = Blob.of(trace(1, "x".repeat((int) MAX_BYTES)));
 
-        var thrown = assertThrows(IpcException.class, () -> this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), body));
+        var thrown = assertThrows(
+            IpcException.class,
+            () -> this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), body)
+        );
 
         assertEquals(413, thrown.status());
         assertNull(this.db.anticheat.getAnticheatTrace("seg-1"));
@@ -186,18 +215,60 @@ class AnticheatServiceImplTest {
     void put_refusesWhatTheTableWouldRefuse() {
         var body = trace(1, "frames");
 
-        assertEquals(400, assertThrows(IpcException.class,
-            () -> this.traces.putTrace(meta(".hidden", CAPTURE, STARTED), Blob.of(body))).status());
-        assertEquals(400, assertThrows(IpcException.class,
-            () -> this.traces.putTrace(meta("seg!1", CAPTURE, STARTED), Blob.of(body))).status());
+        assertEquals(
+            400,
+            assertThrows(
+                IpcException.class,
+                () -> this.traces.putTrace(meta(".hidden", CAPTURE, STARTED), Blob.of(body))
+            ).status()
+        );
+        assertEquals(
+            400,
+            assertThrows(
+                IpcException.class,
+                () -> this.traces.putTrace(meta("seg!1", CAPTURE, STARTED), Blob.of(body))
+            ).status()
+        );
 
-        var reason = new TraceMeta("seg-1", CAPTURE, PLAYER, null, null, 0, "whatever", STARTED, null, 1);
-        assertEquals(400, assertThrows(IpcException.class,
-            () -> this.traces.putTrace(reason, Blob.of(body))).status());
+        var reason = new TraceMeta(
+            "seg-1",
+            CAPTURE,
+            PLAYER,
+            null,
+            null,
+            0,
+            "whatever",
+            STARTED,
+            null,
+            1
+        );
+        assertEquals(
+            400,
+            assertThrows(
+                IpcException.class,
+                () -> this.traces.putTrace(reason, Blob.of(body))
+            ).status()
+        );
 
-        var player = new TraceMeta("seg-1", CAPTURE, "nope", null, null, 0, "run", STARTED, null, 1);
-        assertEquals(400, assertThrows(IpcException.class,
-            () -> this.traces.putTrace(player, Blob.of(body))).status());
+        var player = new TraceMeta(
+            "seg-1",
+            CAPTURE,
+            "nope",
+            null,
+            null,
+            0,
+            "run",
+            STARTED,
+            null,
+            1
+        );
+        assertEquals(
+            400,
+            assertThrows(
+                IpcException.class,
+                () -> this.traces.putTrace(player, Blob.of(body))
+            ).status()
+        );
 
         assertNull(this.db.anticheat.getAnticheatTrace("seg-1"));
     }
@@ -208,13 +279,24 @@ class AnticheatServiceImplTest {
     void put_leavesNoHalfWrittenFileBehindWhateverItDecided() throws IOException {
         this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(trace(1, "frames")));
         var junk = Blob.of("junk".getBytes(StandardCharsets.UTF_8));
-        assertThrows(IpcException.class, () -> this.traces.putTrace(meta("seg-2", CAPTURE, STARTED), junk));
+        assertThrows(
+            IpcException.class,
+            () -> this.traces.putTrace(meta("seg-2", CAPTURE, STARTED), junk)
+        );
         var big = Blob.of(trace(1, "x".repeat((int) MAX_BYTES)));
-        assertThrows(IpcException.class, () -> this.traces.putTrace(meta("seg-3", CAPTURE, STARTED), big));
+        assertThrows(
+            IpcException.class,
+            () -> this.traces.putTrace(meta("seg-3", CAPTURE, STARTED), big)
+        );
 
         try (Stream<Path> files = Files.walk(this.root)) {
-            assertEquals(List.of("seg-1.trace"), files.filter(Files::isRegularFile)
-                .map(file -> file.getFileName().toString()).sorted().toList());
+            assertEquals(
+                List.of("seg-1.trace"),
+                files.filter(Files::isRegularFile)
+                    .map(file -> file.getFileName().toString())
+                    .sorted()
+                    .toList()
+            );
         }
     }
 
@@ -222,7 +304,18 @@ class AnticheatServiceImplTest {
     /// named outside ascii still has to come back out as itself.
     @Test
     void put_carriesMetaWrittenOutsideAsciiThroughItsHeader() {
-        var meta = new TraceMeta("seg-1", CAPTURE, PLAYER, "abc1234", "pröxy-å", 776, "run", STARTED, null, 1);
+        var meta = new TraceMeta(
+            "seg-1",
+            CAPTURE,
+            PLAYER,
+            "abc1234",
+            "pröxy-å",
+            776,
+            "run",
+            STARTED,
+            null,
+            1
+        );
 
         this.traces.putTrace(meta, Blob.of(trace(1, "frames")));
 
@@ -232,14 +325,25 @@ class AnticheatServiceImplTest {
     }
 
     private static TraceMeta meta(String id, String captureId, long startedAt) {
-        return new TraceMeta(id, captureId, PLAYER, "abc1234", "proxy-a", 776, "run", startedAt, null, 1);
+        return new TraceMeta(
+            id,
+            captureId,
+            PLAYER,
+            "abc1234",
+            "proxy-a",
+            776,
+            "run",
+            startedAt,
+            null,
+            1
+        );
     }
 
     /// `HCTR`, the container's version, and whatever stands in for a zstd body.
     private static byte[] trace(int formatVersion, String body) {
         var bytes = body.getBytes(StandardCharsets.UTF_8);
         return ByteBuffer.allocate(6 + bytes.length)
-            .put(new byte[]{'H', 'C', 'T', 'R'})
+            .put(new byte[] {'H', 'C', 'T', 'R'})
             .putShort((short) formatVersion)
             .put(bytes)
             .array();

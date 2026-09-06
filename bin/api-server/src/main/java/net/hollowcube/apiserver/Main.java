@@ -1,8 +1,8 @@
 package net.hollowcube.apiserver;
 
 import com.sun.net.httpserver.HttpServer;
-import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
+import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
 import net.hollowcube.apiserver.common.Health;
 import net.hollowcube.apiserver.common.NatsPublisher;
@@ -11,8 +11,8 @@ import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
-import net.hollowcube.apiserver.s3.HttpS3Client;
 import net.hollowcube.apiserver.replay.ReplayServiceImpl;
+import net.hollowcube.apiserver.s3.HttpS3Client;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.anticheat.AnticheatServer;
@@ -55,7 +55,10 @@ public final class Main {
         // One pool for what Go opens three on: `postgres.uri`, `postgres.maps_uri` and
         // `postgres.players_uri` are the same url, so head_db, jobs, chat_messages, player_sessions,
         // command_log, player_data and punishments are all in it.
-        var pool = Pools.postgres(PostgresUri.parse(secrets.require("postgres.maps_uri", "DATABASE_URL")), "api-server");
+        var pool = Pools.postgres(
+            PostgresUri.parse(secrets.require("postgres.maps_uri", "DATABASE_URL")),
+            "api-server"
+        );
         var db = new ApiDatabase(pool);
 
         // The same vault key the Go api-server reads, so the two publish onto one cluster.
@@ -69,11 +72,14 @@ public final class Main {
 
         // The same `s3.*` keys Go's config reads out of the vault secret. Required rather than
         // defaulted: the development server builds its own client against local minio.
-        var s3 = new HttpS3Client(HttpClient.newHttpClient(),
-            secrets.require("s3.endpoint", "S3_ENDPOINT"), REPLAY_BUCKET,
+        var s3 = new HttpS3Client(
+            HttpClient.newHttpClient(),
+            secrets.require("s3.endpoint", "S3_ENDPOINT"),
+            REPLAY_BUCKET,
             secrets.get("s3.region", "S3_REGION", "auto"),
             secrets.require("s3.access_key", "S3_ACCESS_KEY"),
-            secrets.require("s3.secret_key", "S3_SECRET_KEY"));
+            secrets.require("s3.secret_key", "S3_SECRET_KEY")
+        );
 
         var port = Integer.parseInt(secrets.get("http.port", "PORT", "9124"));
         var server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -85,28 +91,41 @@ public final class Main {
         for (var context : List.of(
             server.createContext("/alive", new Health.Alive()),
             server.createContext("/ready", new Health.Ready(List.of(pool), nats)),
-            server.createContext(HeadDatabaseServer.PATH,
-                new HeadDatabaseServer(new HeadDatabaseServiceImpl(db))),
-            server.createContext(SessionServer.PATH,
-                new SessionServer(new SessionServiceImpl(db))),
-            server.createContext(ChatServer.PATH,
-                new ChatServer(new ChatServiceImpl(db, nats))),
-            server.createContext(AnticheatServer.PATH,
-                new AnticheatServer(new AnticheatServiceImpl(db, new AnticheatTraceStore(
-                    Path.of(secrets.get("anticheat.store_dir", "ANTICHEAT_STORE_DIR", TRACE_DIR)),
-                    MAX_TRACE_BYTES)))),
-            server.createContext(ReplayServer.PATH,
-                new ReplayServer(new ReplayServiceImpl(db, s3)))
-        )) context.getFilters().add(requestLog);
+            server.createContext(
+                HeadDatabaseServer.PATH,
+                new HeadDatabaseServer(new HeadDatabaseServiceImpl(db))
+            ),
+            server.createContext(SessionServer.PATH, new SessionServer(new SessionServiceImpl(db))),
+            server.createContext(ChatServer.PATH, new ChatServer(new ChatServiceImpl(db, nats))),
+            server.createContext(
+                AnticheatServer.PATH,
+                new AnticheatServer(
+                    new AnticheatServiceImpl(
+                        db,
+                        new AnticheatTraceStore(
+                            Path.of(
+                                secrets.get("anticheat.store_dir", "ANTICHEAT_STORE_DIR", TRACE_DIR)
+                            ),
+                            MAX_TRACE_BYTES
+                        )
+                    )
+                )
+            ),
+            server.createContext(ReplayServer.PATH, new ReplayServer(new ReplayServiceImpl(db, s3)))
+        ))
+            context.getFilters().add(requestLog);
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            server.stop(SHUTDOWN_SECONDS);
-            nats.close();
-        }));
+        Runtime.getRuntime().addShutdownHook(
+            new Thread(
+                () -> {
+                    server.stop(SHUTDOWN_SECONDS);
+                    nats.close();
+                }
+            )
+        );
         server.start();
         logger.info("api-server listening on {}", port);
     }
 
-    private Main() {
-    }
+    private Main() {}
 }
