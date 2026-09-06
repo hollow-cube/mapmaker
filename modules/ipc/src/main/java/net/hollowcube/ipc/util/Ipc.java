@@ -11,5 +11,4 @@ import java.lang.annotation.Target;
 /// `HeadDatabaseService` produces `HeadDatabaseClient` and `HeadDatabaseServer`.
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS)
-public @interface Ipc {
-}
+public @interface Ipc {}

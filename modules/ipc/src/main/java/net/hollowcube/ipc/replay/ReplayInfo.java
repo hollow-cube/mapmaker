@@ -23,5 +23,4 @@ public record ReplayInfo(
     int preambleLength,
     @Nullable ReplayOutcome outcome,
     long updatedAt
-) {
-}
+) {}

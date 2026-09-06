@@ -95,6 +95,5 @@ public final class Wire {
         }
     }
 
-    private Wire() {
-    }
+    private Wire() {}
 }

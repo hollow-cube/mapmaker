@@ -16,5 +16,4 @@ public record HeadInfo(
     String category,
     String texture,
     List<String> tags
-) {
-}
+) {}

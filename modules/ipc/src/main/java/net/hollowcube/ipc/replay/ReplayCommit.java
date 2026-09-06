@@ -24,5 +24,4 @@ public record ReplayCommit(
     boolean finished,
     @Nullable ReplayOutcome outcome,
     String contentDigest
-) {
-}
+) {}

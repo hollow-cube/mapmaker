@@ -8,5 +8,4 @@ import net.hollowcube.common.util.RuntimeGson;
 ///                 to ten minutes and a retry ships a longer body under the same id, so this is the
 ///                 caller's way of telling a first upload from one of its own repeats.
 @RuntimeGson
-public record PutResult(String path, long bytes, boolean replaced) {
-}
+public record PutResult(String path, long bytes, boolean replaced) {}

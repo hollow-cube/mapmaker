@@ -40,8 +40,8 @@ public record Blob(long length, InputStream stream) implements Closeable {
     /// The whole body in memory, closing the stream. For a blob small enough to want that — a test,
     /// or a caller that is about to parse it — and not for the ones this type exists for.
     public byte[] readAllBytes() throws IOException {
-        try (this) {
-            return stream.readAllBytes();
+        try (var input = stream) {
+            return input.readAllBytes();
         }
     }
 
@@ -57,7 +57,10 @@ public record Blob(long length, InputStream stream) implements Closeable {
     public byte[] read(int count, String what) throws IOException {
         var bytes = stream.readNBytes(count);
         if (bytes.length != count)
-            throw new IpcException(400, what + " ended after " + bytes.length + " of " + count + " bytes");
+            throw new IpcException(
+                400,
+                what + " ended after " + bytes.length + " of " + count + " bytes"
+            );
         return bytes;
     }
 
@@ -69,7 +72,7 @@ public record Blob(long length, InputStream stream) implements Closeable {
         try {
             var buffer = new byte[BUFFER_BYTES];
             var read = 0L;
-            for (int n; read < length && (n = stream.read(buffer)) != -1; ) read += n;
+            for (int n; read < length && (n = stream.read(buffer)) != -1;) read += n;
         } catch (IOException e) {
             logger.debug("draining a refused body failed", e);
         }

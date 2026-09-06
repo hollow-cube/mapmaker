@@ -24,7 +24,9 @@ import java.net.http.HttpRequest;
 public final class IpcTracing {
 
     /// The caller's [Wire#clientVersion], as the server span records it.
-    public static final AttributeKey<String> CLIENT_VERSION = AttributeKey.stringKey("ipc.client.version");
+    public static final AttributeKey<String> CLIENT_VERSION = AttributeKey.stringKey(
+        "ipc.client.version"
+    );
 
     private static final TextMapSetter<HttpRequest.Builder> SETTER = (carrier, key, value) -> {
         if (carrier != null) carrier.header(key, value);
@@ -69,7 +71,8 @@ public final class IpcTracing {
 
     /// Starts the span for one incoming call, continuing the trace the caller propagated.
     public IpcSpan server(String method, HttpExchange exchange) {
-        var caller = otel.getPropagators().getTextMapPropagator()
+        var caller = otel.getPropagators()
+            .getTextMapPropagator()
             .extract(Context.current(), exchange, GETTER);
         var span = tracer.spanBuilder(service + "/" + method)
             .setSpanKind(SpanKind.SERVER)

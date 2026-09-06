@@ -9,5 +9,5 @@ package net.hollowcube.ipc.replay;
 public enum ReplayOutcome {
     FINISHED,
     RESET,
-    UNKNOWN
+    UNKNOWN,
 }

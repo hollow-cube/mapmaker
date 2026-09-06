@@ -14,7 +14,8 @@ import org.jetbrains.annotations.Nullable;
 public interface ReplayService {
 
     /// Null for a replay nothing has committed yet, which the first commit creates.
-    @Nullable ReplayInfo getReplay(String id);
+    @Nullable
+    ReplayInfo getReplay(String id);
 
     /// `expectedRevision` is the one [#getReplay] answered with, since the recorder resumes from
     /// the state and the preamble together; a preamble that has moved on is a 412. Null reads

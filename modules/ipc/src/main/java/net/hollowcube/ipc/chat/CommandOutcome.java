@@ -26,6 +26,6 @@ public record CommandOutcome(Status status) {
         SYNTAX_ERROR,
         /// It threw. `error` carries what.
         EXECUTION_ERROR,
-        UNKNOWN
+        UNKNOWN,
     }
 }

@@ -28,4 +28,4 @@ jobs:
           cache: 'gradle'
 
       - name: Check
-        run: ./gradlew :tools:ipc-gen:test :modules:ipc:wireCheck :modules:ipc:wireCompat --no-daemon
+        run: ./gradlew :tools:ipc-gen:test :modules:ipc:checkFormat :modules:ipc:wireCheck :modules:ipc:wireCompat --no-daemon

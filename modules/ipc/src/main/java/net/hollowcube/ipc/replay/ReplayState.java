@@ -5,5 +5,5 @@ public enum ReplayState {
     RECORDING,
     /// One way: no commit after this one is accepted, whether or not the run was completed.
     FINISHED,
-    UNKNOWN
+    UNKNOWN,
 }

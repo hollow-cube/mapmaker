@@ -34,5 +34,4 @@ public record TraceMeta(
     long startedAt,
     @Nullable Long endedAt,
     int formatVersion
-) {
-}
+) {}

@@ -107,4 +107,5 @@ prometheus = ["prometheus", "prometheus-hotspot", "prometheus-httpserver"]
 otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-trace", "otel-extension-trace-propagators", "otel-exporter-logging", "otel-exporter-otlp", "otel-exporter-sender-jdk", "otel-semconv"]
 
 [plugins]
+javafmt = { id = "dev.javafmt.gradle", version = "0.3.1" }
 blossom = { id = "net.kyori.blossom", version.ref = "blossom" }

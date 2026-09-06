@@ -1,5 +1,6 @@
 plugins {
     id("mapmaker.java-library")
+    alias(libs.plugins.javafmt)
 }
 
 dependencies {

@@ -19,5 +19,4 @@ public record ReplayCompaction(
     String idempotencyKey,
     int preambleLength,
     String contentDigest
-) {
-}
+) {}

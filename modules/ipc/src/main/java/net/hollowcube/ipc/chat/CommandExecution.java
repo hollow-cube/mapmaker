@@ -25,5 +25,4 @@ public record CommandExecution(
     CommandOutcome outcome,
     @Nullable String error,
     int durationMs
-) {
-}
+) {}

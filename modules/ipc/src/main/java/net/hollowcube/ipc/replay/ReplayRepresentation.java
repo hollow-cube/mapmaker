@@ -7,5 +7,5 @@ public enum ReplayRepresentation {
     /// Playable. A segmented recording's chunk offsets are relative to a segment, so nothing can
     /// read one until it has been compacted.
     COMPACTED,
-    UNKNOWN
+    UNKNOWN,
 }

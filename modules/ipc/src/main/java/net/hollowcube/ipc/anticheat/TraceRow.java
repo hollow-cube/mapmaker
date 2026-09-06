@@ -20,5 +20,4 @@ public record TraceRow(
     boolean pinned,
     @Nullable Long expiresAt,
     long createdAt
-) {
-}
+) {}

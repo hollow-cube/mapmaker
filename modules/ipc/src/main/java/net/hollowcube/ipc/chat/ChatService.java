@@ -16,8 +16,14 @@ public interface ChatService {
     ///
     /// @param targetId     who [ChatChannel#DIRECT] is for; ignored otherwise, and resolved here
     ///                     for [ChatChannel#REPLY]
-    ChatResult send(String senderId, String serverId, ChatChannel channel, @Nullable String targetId,
-                    String message, @Nullable String currentMapId);
+    ChatResult send(
+        String senderId,
+        String serverId,
+        ChatChannel channel,
+        @Nullable String targetId,
+        String message,
+        @Nullable String currentMapId
+    );
 
     /// Stores what a player ran, for whoever later asks what someone was doing.
     ///

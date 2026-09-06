@@ -37,7 +37,7 @@ jobs:
       # wireCompat fails if a game server still running one of the release tags could not survive
       # what this deploys — game servers ship on tags and outlive every push here.
       - name: Test
-        run: ./gradlew :modules:api:sqlGenCheck :modules:ipc:wireCheck :modules:ipc:wireCompat :modules:api:test :bin:api-server:test --no-daemon
+        run: ./gradlew :modules:api:sqlGenCheck :modules:ipc:checkFormat :modules:ipc:wireCheck :modules:ipc:wireCompat :modules:api:test :bin:api-server:test --no-daemon
 
   docker-build:
     needs: [ test ]

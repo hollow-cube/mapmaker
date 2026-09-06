@@ -15,5 +15,5 @@ public enum ChatChannel {
     DIRECT,
     /// A direct message to whoever the sender last exchanged one with.
     REPLY,
-    UNKNOWN
+    UNKNOWN,
 }
