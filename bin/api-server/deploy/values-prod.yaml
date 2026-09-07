@@ -22,6 +22,9 @@ base:
     PORT: "9124"
     # The same broker the game servers publish and consume on; chat fans out over it.
     NATS_SERVERS: "nats://nats:4222"
+    # The same valkey the Go api-server and the game servers share (Go's SESSION_REDIS_ADDRESS);
+    # the map service clears the search cache and verification leaderboards in it.
+    REDIS_ADDRESS: "redis-valkey:6379"
 
   # The trace-store PVC is ReadWriteOnce, so the pod must come up on the node holding the volume
   # attach; pinning it is what keeps a rolling replacement from deadlocking on another node. Remove
