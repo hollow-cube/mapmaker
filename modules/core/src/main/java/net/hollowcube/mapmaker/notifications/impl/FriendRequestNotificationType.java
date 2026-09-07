@@ -2,6 +2,8 @@ package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
 import net.hollowcube.ipc.notification.Notification;
+import net.hollowcube.ipc.player.FriendRequestResult;
+import net.hollowcube.mapmaker.command.relationship.SocialUtil;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -26,13 +28,14 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
 
     @Override
     public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
-        var username = context.api().players.displayName(UUID.fromString(entry.key()));
+        var sender = UUID.fromString(entry.key());
+        var name = context.api().players.displayName(sender).render();
 
         return new PlayerNotification(
             entry,
             ICON,
             "gui.notification.friend_request",
-            List.of(username.render()),
+            List.of(name),
             List.of(
                 PlayerNotification.Action.of(
                     CONFIRM_ICON,
@@ -40,7 +43,12 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
                     "gui.notification.friend_request.action.confirm",
                     PlayerNotification.ActionExecutor
                         .of(() -> {
-                            context.api().social.sendFriendRequest(player.getUuid(), UUID.fromString(entry.key()));
+                            var result = context.api().social.sendFriendRequest(player.getUuid(), sender);
+                            player.sendMessage(SocialUtil.friendRequestMessage(player, result, name));
+                            // Sent means their request was already gone, so the inbox row is stale.
+                            if (result instanceof FriendRequestResult.Sent || result instanceof FriendRequestResult.AlreadyFriends) {
+                                context.api().notifications.delete(entry.id());
+                            }
                         })
                         .withRefresh()
                 ),
@@ -50,7 +58,9 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
                     "gui.notification.friend_request.action.reject",
                     PlayerNotification.ActionExecutor
                         .of(() -> {
-                            context.api().social.deleteFriendRequest(player.getUuid(), UUID.fromString(entry.key()), true);
+                            if (context.api().social.deleteFriendRequest(player.getUuid(), sender, true) == null) {
+                                context.api().notifications.delete(entry.id());
+                            }
                         })
                         .withRefresh()
                 )
