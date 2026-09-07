@@ -52,10 +52,11 @@ public record LeaderboardData(
     public @Nullable List<Component> toComponents(@NotNull PlayerService players, MapLeaderboard.Format lbFormat, boolean pad) {
         if (top().isEmpty()) return null;
 
-        var names = players.displayNames(top().stream().map(Entry::player).map(UUID::fromString).toList());
+        var ids = top().stream().map(entry -> UUID.fromString(entry.player())).toList();
+        var names = players.displayNames(ids);
         Component[] displayNames = new Component[top().size()];
         for (var i = 0; i < top().size(); i++) {
-            displayNames[i] = names.get(top().get(i).player()).render();
+            displayNames[i] = names.get(ids.get(i)).render();
         }
 
         var result = new ArrayList<Component>();

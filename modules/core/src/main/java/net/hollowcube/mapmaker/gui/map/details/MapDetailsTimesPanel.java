@@ -72,11 +72,9 @@ public class MapDetailsTimesPanel extends Panel {
         async(() -> {
             var playerId = localPlayer(host.player()).id().toString();
             var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerId);
-            var names = api.players.displayNames(leaderboard.top().stream().map(LeaderboardData.Entry::player).map(UUID::fromString).toList());
-            var displayNames = leaderboard.top().stream()
-                .map(LeaderboardData.Entry::player)
-                .map(names::get)
-                .toList();
+            var ids = leaderboard.top().stream().map(entry -> UUID.fromString(entry.player())).toList();
+            var names = api.players.displayNames(ids);
+            var displayNames = ids.stream().map(names::get).toList();
 
             sync(() -> {
                 this.topThreePanel.update(leaderboard.top(), displayNames);

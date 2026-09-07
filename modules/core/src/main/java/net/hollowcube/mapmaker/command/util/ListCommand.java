@@ -35,13 +35,9 @@ public class ListCommand extends CommandDsl {
 
     private void handleListPlayers(@NotNull Player player, @NotNull CommandContext context) {
         var sessions = List.copyOf(sessionManager.sessions(false));
-        var names = players.displayNames(sessions.stream().map(PlayerSession::playerId).map(UUID::fromString).toList());
-        var playerNames = sessions
-                .stream()
-                .map(PlayerSession::playerId)
-            .map(names::get)
-                .map(DisplayName::render)
-                .toList();
+        var ids = sessions.stream().map(session -> UUID.fromString(session.playerId())).toList();
+        var names = players.displayNames(ids);
+        var playerNames = ids.stream().map(names::get).map(DisplayName::render).toList();
 
         var builder = Component.text();
         builder.append(Component.text("Players (" + playerNames.size() + "): "));
