@@ -10,6 +10,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 
 /// The two probes the deployment points at.
 public final class Health {
@@ -29,16 +30,19 @@ public final class Health {
     /// busy is not unready — waiting for a connection is normal — so what is bounded here is the
     /// driver's validation.
     ///
+    /// Unready as soon as the process is draining, whatever the pools say.
+    ///
     /// @param nats null in a process that publishes nothing
     public record Ready(
         List<DataSource> pools,
-        @Nullable NatsPublisher nats
+        @Nullable NatsPublisher nats,
+        BooleanSupplier draining
     ) implements HttpHandler {
         private static final Logger logger = LoggerFactory.getLogger(Ready.class);
         private static final int VALIDATION_TIMEOUT_SECONDS = 2;
 
         public Ready(DataSource pool) {
-            this(List.of(pool), null);
+            this(List.of(pool), null, () -> false);
         }
 
         @Override
@@ -51,6 +55,10 @@ public final class Health {
         }
 
         private boolean ready() {
+            if (draining.getAsBoolean()) {
+                logger.info("ready check failed: draining");
+                return false;
+            }
             if (nats != null && !nats.connected()) {
                 logger.info("ready check failed: nats is not connected");
                 return false;

@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
 import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
+import net.hollowcube.apiserver.common.Drain;
 import net.hollowcube.apiserver.common.Health;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.common.Pools;
@@ -46,6 +47,9 @@ import java.util.concurrent.Executors;
 /// answers the same questions the Go api-server's `/v4/internal` routes already answer without one.
 public final class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
+    /// Draining ([Drain]) comes first and stopping second: `HttpServer.stop` alone leaves every
+    /// caller with a pooled connection holding a request that will never be answered.
+    private static final int DRAIN_SECONDS = 5;
     private static final int SHUTDOWN_SECONDS = 5;
 
     /// The trace volume (ReadWriteOnce, which is what holds this at one replica pinned to its
@@ -142,9 +146,10 @@ public final class Main {
         server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
 
         var requestLog = new RequestLog();
+        var drain = new Drain();
         for (var context : List.of(
             server.createContext("/alive", new Health.Alive()),
-            server.createContext("/ready", new Health.Ready(List.of(pool), nats)),
+            server.createContext("/ready", new Health.Ready(List.of(pool), nats, drain::draining)),
             server.createContext(
                 HeadDatabaseServer.PATH,
                 new HeadDatabaseServer(new HeadDatabaseServiceImpl(db))
@@ -168,11 +173,18 @@ public final class Main {
             server.createContext(MapServer.PATH, new MapServer(maps)),
             server.createContext(ReplayServer.PATH, new ReplayServer(new ReplayServiceImpl(db, s3)))
         ))
-            context.getFilters().add(requestLog);
+            context.getFilters().addAll(List.of(requestLog, drain));
 
         Runtime.getRuntime().addShutdownHook(
             new Thread(
                 () -> {
+                    logger.info("draining for {}s before stopping", DRAIN_SECONDS);
+                    drain.begin();
+                    try {
+                        Thread.sleep(Duration.ofSeconds(DRAIN_SECONDS));
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
                     server.stop(SHUTDOWN_SECONDS);
                     redis.close();
                     nats.close();
