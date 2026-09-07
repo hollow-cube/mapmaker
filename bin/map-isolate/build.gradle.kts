@@ -1,7 +1,7 @@
 plugins {
     id("mapmaker.java-binary")
     id("mapmaker.packer-data")
-    id("org.graalvm.buildtools.native") version "0.10.6"
+    alias(libs.plugins.graalvm.native)
 }
 
 repositories {

@@ -109,4 +109,5 @@ otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-tra
 
 [plugins]
 javafmt = { id = "dev.javafmt.gradle", version = "0.3.1" }
+graalvm-native = { id = "org.graalvm.buildtools.native", version = "0.10.6" }
 blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
