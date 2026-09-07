@@ -94,7 +94,7 @@ public class PlayMapStatueFeatureProvider implements HubFeature {
     private void handleCreateMapsClick(@NotNull Player player) {
         FutureUtil.submitVirtual(() -> {
             try {
-                CreateMapsView.open(player, server.api(), server.playerService(), server.bridge());
+                CreateMapsView.open(player, server.api(), server.accountService(), server.bridge());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
             }

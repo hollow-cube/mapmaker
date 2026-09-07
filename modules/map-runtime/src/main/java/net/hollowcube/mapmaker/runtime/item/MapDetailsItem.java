@@ -41,7 +41,7 @@ public class MapDetailsItem extends ItemHandler {
 
             DisplayName authorName;
             try {
-                authorName = world.server().api().players.getDisplayName(world.map().owner().toString());
+                authorName = world.server().api().players.displayName(world.map().owner());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
                 authorName = DisplayName.of("!error!");

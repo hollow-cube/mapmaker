@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.chat.components.ChatLanguage;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;

@@ -1,7 +1,7 @@
 package net.hollowcube.apiserver.map;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.Maps;
@@ -13,6 +13,7 @@ import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.ipc.Blob;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.map.*;
+import net.hollowcube.ipc.notification.NotificationUpdate;
 import net.hollowcube.posthog.PostHogClient;
 import net.hollowcube.sqlgen.runtime.Jdbc;
 import org.jetbrains.annotations.Nullable;
@@ -643,9 +644,7 @@ public final class MapServiceImpl implements MapService {
     }
 
     private static boolean allowsInvites(String settings) {
-        var setting = JsonParser.parseString(settings)
-            .getAsJsonObject()
-            .get("allow_builder_invites");
+        var setting = Json.object(settings).get("allow_builder_invites");
         return setting == null || !setting.isJsonPrimitive() || setting.getAsBoolean();
     }
 
@@ -655,14 +654,14 @@ public final class MapServiceImpl implements MapService {
             inviteKey(mapId),
             player
         )) {
-            var event = notificationEvent(
+            var update = new NotificationUpdate(
+                NotificationUpdate.DELETE,
                 notification.playerId(),
-                "delete",
                 notification.type(),
                 notification.key(),
                 null
             );
-            tx.afterCommit(() -> nats.publish(NOTIFICATION_DELETED_SUBJECT, event));
+            tx.afterCommit(() -> nats.publish(update));
         }
     }
 
@@ -674,8 +673,8 @@ public final class MapServiceImpl implements MapService {
         JsonObject data
     ) {
         tx.maps.insertNotification(UUID.randomUUID(), playerId, type, key, data.toString());
-        var event = notificationEvent(playerId, "create", type, key, data);
-        tx.afterCommit(() -> nats.publish(NOTIFICATION_CREATED_SUBJECT, event));
+        var update = new NotificationUpdate(NotificationUpdate.CREATE, playerId, type, key, data);
+        tx.afterCommit(() -> nats.publish(update));
     }
 
     private void invalidateSearch() {

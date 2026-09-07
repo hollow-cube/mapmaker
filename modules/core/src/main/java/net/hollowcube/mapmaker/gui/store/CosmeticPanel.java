@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.gui.store;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
@@ -10,7 +11,7 @@ import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.CycleButton;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -40,6 +41,7 @@ public class CosmeticPanel extends Panel {
         CosmeticType.VICTORY_EFFECT, "icon2/1_1/trophy"
     );
 
+    private final AccountService account;
     private final PlayerService players;
 
     private final Text title;
@@ -47,12 +49,13 @@ public class CosmeticPanel extends Panel {
 
     private CosmeticType selected;
 
-    public CosmeticPanel(PlayerService players) {
-        this(players, CosmeticType.HAT);
+    public CosmeticPanel(AccountService account, PlayerService players) {
+        this(account, players, CosmeticType.HAT);
     }
 
-    public CosmeticPanel(PlayerService players, CosmeticType initial) {
+    public CosmeticPanel(AccountService account, PlayerService players, CosmeticType initial) {
         super(9, 9);
+        this.account = account;
         this.players = players;
         this.selected = initial;
 
@@ -130,7 +133,7 @@ public class CosmeticPanel extends Panel {
     private @NotNull List<? extends Element> fetch(CosmeticType type, int page, int pageSize) {
         var data = localPlayer(this.host.player());
         var backpack = PlayerBackpack.fromPlayer(this.host.player());
-        var unlockedCosmetics = this.players.getUnlockedCosmetics(data.id());
+        var unlockedCosmetics = this.account.getUnlockedCosmetics(data.id().toString());
 
         boolean showLocked = data.getSetting(COSMETICS_SHOW_LOCKED);
         var cosmetics = Cosmetic.values(type)
@@ -144,7 +147,7 @@ public class CosmeticPanel extends Panel {
 
         for (var cosmetic : cosmetics) {
             var locked = !unlockedCosmetics.contains(cosmetic.path());
-            buttons.add(new CosmeticButton(this.players, cosmetic, locked, data, backpack, buttons));
+            buttons.add(new CosmeticButton(this.account, cosmetic, locked, data, backpack, buttons));
         }
         return buttons;
     }

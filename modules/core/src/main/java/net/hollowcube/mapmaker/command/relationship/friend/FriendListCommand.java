@@ -5,10 +5,8 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.ipc.player.DisplayName;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.player.PlayerFriend;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -21,17 +19,17 @@ public class FriendListCommand extends CommandDsl {
     private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
     private final ApiClient api;
-    private final PlayerService playerService;
+    private final SocialService social;
     private final SessionManager sessionManager;
 
     public FriendListCommand(
         @NotNull ApiClient api,
-        @NotNull PlayerService playerService,
+        @NotNull SocialService social,
         @NotNull SessionManager sessionManager
     ) {
         super("list");
         this.api = api;
-        this.playerService = playerService;
+        this.social = social;
         this.sessionManager = sessionManager;
 
         this.addSyntax(playerOnly(this::exec));
@@ -41,10 +39,8 @@ public class FriendListCommand extends CommandDsl {
     private void exec(@NotNull Player player, @NotNull CommandContext context) {
         int page = context.get(this.pageArg);
 
-        PlayerService.Page<PlayerFriend> friends = this.playerService.getPlayerFriends(player.getUuid().toString(),
-                                                                                       new PlayerService.Pageable(page,
-                                                                                                                  10));
-        int pageCount = Math.ceilDiv(friends.totalItems(), 10);
+        var friends = this.social.friends(player.getUuid(), false, page - 1, 10);
+        int pageCount = Math.ceilDiv(friends.count(), 10);
         
         if (pageCount == 0) {
             player.sendMessage(Component.translatable("command.friend.list.empty"));
@@ -53,37 +49,36 @@ public class FriendListCommand extends CommandDsl {
 
         TextComponent.Builder builder = Component.text()
             .append(
-                Component.translatable("command.friend.list.header", Component.text(friends.page()), Component.text(pageCount)));
-        for (PlayerFriend friend : friends.items()) {
-            DisplayName displayName = api.players.getDisplayName(friend.playerId());
-            Component username = displayName.render();
-            PlayerSession session = this.sessionManager.getSession(friend.playerId());
+                Component.translatable("command.friend.list.header", Component.text(page), Component.text(pageCount)));
+        for (var friend : friends.results()) {
+            var name = friend.player().displayName().render();
+            PlayerSession session = this.sessionManager.getSession(friend.player().id().toString());
             if (friend.online() && session != null && !session.hidden()) {
                 Presence presence = session.presence();
                 builder.appendNewline().append(
                     switch (OpUtils.map(presence, Presence::type)) {
                         case Presence.TYPE_MAPMAKER_HUB ->
-                            Component.translatable("command.friend.list.line.hub", username);
+                            Component.translatable("command.friend.list.line.hub", name);
                         case Presence.TYPE_MAPMAKER_MAP -> {
                             var map = api.maps.get(presence.mapId());
                             if (Presence.MAP_BUILDING_STATES.contains(presence.state())) {
-                                yield Component.translatable("command.friend.list.line.building", username,
-                                                             Component.text(friend.username()),
+                                yield Component.translatable("command.friend.list.line.building", name,
+                                                             Component.text(friend.player().username()),
                                                              Component.text(map.name()));
                             } else if (Presence.VERIFYING_STATE.equals(presence.state())) {
-                                yield Component.translatable("command.friend.list.line.verifying", username,
+                                yield Component.translatable("command.friend.list.line.verifying", name,
                                                              Component.text(map.name()));
                             } else {
-                                yield Component.translatable("command.friend.list.line.playing", username,
-                                                             Component.text(friend.username()),
+                                yield Component.translatable("command.friend.list.line.playing", name,
+                                                             Component.text(friend.player().username()),
                                                              Component.text(map.name()));
                             }
                         }
-                        case null, default -> Component.translatable("command.friend.list.line.online_unknown", username);
+                        case null, default -> Component.translatable("command.friend.list.line.online_unknown", name);
                     });
             } else {
                 builder.appendNewline()
-                    .append(Component.translatable("command.friend.list.line.offline", displayName.render(),
+                    .append(Component.translatable("command.friend.list.line.offline", name,
                                                    TimeComponent.of(friend.lastOnline())));
             }
         }

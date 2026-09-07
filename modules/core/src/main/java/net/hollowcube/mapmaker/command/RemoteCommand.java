@@ -73,7 +73,7 @@ public class RemoteCommand extends CommandDsl {
             interactionArgs.add(new Interaction.CommandArgument(argDecl.name(), argDecl.type(), argValue));
         }
 
-        var playerId = localPlayer(player).id();
+        var playerId = localPlayer(player).id().toString();
         var interaction = new Interaction(decl.name(), Interaction.Type.COMMAND, playerId, new Interaction.CommandData(interactionArgs));
         var response = interactions.execute(interaction);
         player.sendMessage(response.resolveMessage());

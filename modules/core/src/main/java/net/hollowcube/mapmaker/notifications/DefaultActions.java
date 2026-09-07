@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.notifications;
 import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.ipc.map.MapData;
-import net.hollowcube.mapmaker.api.notifications.Notification;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.util.ServiceContext;
@@ -43,7 +43,7 @@ public final class DefaultActions {
             "gui.notification.action.link",
             PlayerNotification.ActionExecutor
                 .of(() -> {
-                    FutureUtil.submitVirtual(() -> context.api().notifications.setReadStatus(entry.id(), true));
+                    FutureUtil.submitVirtual(() -> context.api().notifications.markRead(entry.id(), true));
                     player.sendMessage(
                         TranslatableBuilder
                             .of("gui.notification.action.link.message")
@@ -62,7 +62,7 @@ public final class DefaultActions {
             "gui.notification.action.join",
             PlayerNotification.ActionExecutor
                 .of(() -> {
-                    FutureUtil.submitVirtual(() -> context.api().notifications.setReadStatus(entry.id(), true));
+                    FutureUtil.submitVirtual(() -> context.api().notifications.markRead(entry.id(), true));
                     FutureUtil.submitVirtual(() -> context.bridge().joinMap(
                         player,
                         new ServerBridge.JoinConfig(

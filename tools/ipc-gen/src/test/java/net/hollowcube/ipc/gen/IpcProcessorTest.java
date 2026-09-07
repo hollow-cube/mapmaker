@@ -50,8 +50,8 @@ class IpcProcessorTest {
         var client = assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String();
         client.contains("PATH = \"/echo\"");
         client.contains("private static final Gson GSON = Wire.gson()");
-        client.contains("ipcRequest.add(\"message\", GSON.toJsonTree(message, String.class))");
-        client.contains("ipcRequest.add(\"count\", GSON.toJsonTree(count, Integer.class))");
+        client.contains("ipcRequest.add(\"message\", Wire.toJsonTree(message, String.class))");
+        client.contains("ipcRequest.add(\"count\", Wire.toJsonTree(count, Integer.class))");
         client.contains("return GSON.fromJson(call(\"echo\", ipcRequest), String.class)");
         client.contains("String url = baseUrl + PATH + \"/\" + method");
     }
@@ -67,7 +67,7 @@ class IpcProcessorTest {
         server.contains("case \"echo\" ->");
         server.contains("String message = GSON.fromJson(ipcArgument, String.class)");
         server.contains("int count = GSON.fromJson(ipcArgument, Integer.class)");
-        server.contains("ipcResponse = GSON.toJsonTree(impl.echo(message, count), String.class)");
+        server.contains("ipcResponse = Wire.toJsonTree(impl.echo(message, count), String.class)");
     }
 
     /// A parameter the method does not mark `@Nullable` is one the implementation was promised;
@@ -278,7 +278,7 @@ class IpcProcessorTest {
         assertThat(compilation).succeededWithoutWarnings();
 
         var client = assertThat(compilation).generatedSourceFile("test.EchoClient").contentsAsUtf8String();
-        client.contains("ipcRequest.add(\"name\", GSON.toJsonTree(name, String.class))");
+        client.contains("ipcRequest.add(\"name\", Wire.toJsonTree(name, String.class))");
         client.contains("return GSON.fromJson(json(callStream(\"store\", ipcRequest, body)), String.class)");
         client.contains(".header(Wire.ARGS_HEADER, Wire.args(request))");
         client.contains("HttpRequest.BodyPublishers.ofInputStream(body::stream)");
@@ -291,7 +291,7 @@ class IpcProcessorTest {
         server.contains("if (BLOB_REQUESTS.contains(ipcMethod))");
         server.contains("String ipcArgs = exchange.getRequestHeaders().getFirst(Wire.ARGS_HEADER)");
         server.contains("Blob body = new Blob(length(exchange), exchange.getRequestBody())");
-        server.contains("ipcResponse = GSON.toJsonTree(impl.store(name, body), String.class)");
+        server.contains("ipcResponse = Wire.toJsonTree(impl.store(name, body), String.class)");
     }
 
     /// A blob answer is the response body, written as it is read and never held.

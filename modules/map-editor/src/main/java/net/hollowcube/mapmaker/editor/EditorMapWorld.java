@@ -360,20 +360,20 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         final var playerData = localPlayer(player);
         SaveState saveState;
         try {
-            saveState = server().api().maps.getLatestSaveState(map().id().toString(), playerData.id(),
+            saveState = server().api().maps.getLatestSaveState(map().id().toString(), playerData.id().toString(),
                 SaveStateType.EDITING, EditState.SERIALIZER);
         } catch (ApiClient.NotFoundError _) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                map().id().toString(), playerData.id(), SaveStateType.EDITING,
+                map().id().toString(), playerData.id().toString(), SaveStateType.EDITING,
                 EditState.SERIALIZER, new EditState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }
 
         if (terraform != null) {
-            terraform.initPlayerSession(player, playerData.id());
-            terraform.initLocalSession(player, instance(), playerData.id());
+            terraform.initPlayerSession(player, playerData.id().toString());
+            terraform.initLocalSession(player, instance(), playerData.id().toString());
         }
 
         player.setRespawnPoint(Objects.requireNonNullElseGet(
@@ -442,7 +442,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
             var playerData = localPlayer(player);
             var saveStateUpdate = saveState.createUpsertRequest();
-            server().api().maps.updateSaveState(map().id().toString(), playerData.id(), saveState.id(), saveStateUpdate);
+            server().api().maps.updateSaveState(map().id().toString(), playerData.id().toString(), saveState.id(), saveStateUpdate);
 
             logger.info("Updated data for {}", player.getUuid());
         } catch (Exception e) {

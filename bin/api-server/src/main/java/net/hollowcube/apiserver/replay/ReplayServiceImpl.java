@@ -1,8 +1,8 @@
 package net.hollowcube.apiserver.replay;
 
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import net.hollowcube.apiserver.common.Digest;
+import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.ReplayIdempotency;
 import net.hollowcube.apiserver.db.Replays;
@@ -15,9 +15,7 @@ import net.hollowcube.ipc.replay.ReplayCommit;
 import net.hollowcube.ipc.replay.ReplayCompaction;
 import net.hollowcube.ipc.replay.ReplayInfo;
 import net.hollowcube.ipc.replay.ReplayOutcome;
-import net.hollowcube.ipc.replay.ReplayRepresentation;
 import net.hollowcube.ipc.replay.ReplayService;
-import net.hollowcube.ipc.replay.ReplayState;
 import net.hollowcube.ipc.util.IpcException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -25,17 +23,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.SequenceInputStream;
 import java.io.UncheckedIOException;
-import java.security.DigestInputStream;
-import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.Base64;
 
 import static net.hollowcube.apiserver.replay.ReplayCompat.COMPACTED;
 import static net.hollowcube.apiserver.replay.ReplayCompat.FINISHED;
-import static net.hollowcube.apiserver.replay.ReplayCompat.SEGMENTED;
 import static net.hollowcube.apiserver.replay.ReplayCompat.info;
 import static net.hollowcube.apiserver.replay.ReplayCompat.validate;
 
@@ -560,7 +554,7 @@ public final class ReplayServiceImpl implements ReplayService {
         if (!Arrays.equals(record.requestFingerprint(), fingerprint))
             throw new IpcException(409, "idempotency_key_conflict");
 
-        var recorded = JsonParser.parseString(record.responseMetadata()).getAsJsonObject();
+        var recorded = Json.object(record.responseMetadata());
         // A record Go wrote has only its three fields, so the rest come off the row.
         var row = recorded.has("preambleLength") ? null : db.replays.getReplay(record.replayId());
         return new ReplayInfo(

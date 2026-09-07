@@ -37,7 +37,7 @@ class MapDetailsRatePanel extends Panel {
         super.mount(host, isInitial);
         if (!isInitial) return;
 
-        var playerId = localPlayer(host.player()).id();
+        var playerId = localPlayer(host.player()).id().toString();
         async(() -> {
             var rating = maps.getPlayerRating(this.mapId, playerId);
             sync(() -> updateLocalRatingState(rating.state()));
@@ -49,7 +49,7 @@ class MapDetailsRatePanel extends Panel {
         updateLocalRatingState(resultState);
 
         // Update the remote state async TODO: this should cancel prior request if there is already one out.
-        var playerId = localPlayer(host.player()).id();
+        var playerId = localPlayer(host.player()).id().toString();
         async(() -> maps.setPlayerRating(this.mapId, playerId, new MapRating(resultState, null)));
     }
 

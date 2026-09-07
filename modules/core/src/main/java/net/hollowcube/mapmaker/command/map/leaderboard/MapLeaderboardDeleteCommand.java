@@ -63,7 +63,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
             player.sendMessage("deleted for " + target);
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");
-            ExceptionReporter.reportException(e, playerId);
+            ExceptionReporter.reportException(e, playerId.toString());
         }
     }
 }

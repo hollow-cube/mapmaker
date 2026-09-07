@@ -4,8 +4,8 @@ import net.hollowcube.common.hud.*;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.map.MapPresentation;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -80,10 +80,10 @@ public final class TitleHud {
 
     // Module factories
 
-    public static @NotNull PlayerHud.Module playing(@NotNull PlayerClient players, @NotNull MapData map) {
+    public static @NotNull PlayerHud.Module playing(@NotNull PlayerService players, @NotNull MapData map) {
         Component ownerName;
         try {
-            ownerName = players.getDisplayName(map.owner().toString()).render();
+            ownerName = players.displayName(map.owner()).render();
         } catch (Exception e) {
             ExceptionReporter.reportException(e);
             ownerName = Component.text("!error!", NamedTextColor.RED);

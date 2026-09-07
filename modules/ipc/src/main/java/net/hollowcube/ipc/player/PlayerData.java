@@ -1,16 +1,19 @@
 package net.hollowcube.ipc.player;
 
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.JsonAdapter;
 import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.util.JsonValueAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.UUID;
 
 public record PlayerData(
-    String id,
+    UUID id,
     String username,
     DisplayName displayName,
-    JsonObject settings,
+    @JsonAdapter(JsonValueAdapter.class) JsonObject settings,
     long playtime,
     long cubits,
     @Nullable Instant hypercubeUntil,

@@ -82,7 +82,7 @@ public class MapServerBridge implements ServerBridge {
             onConfigOrDisconnect(player, () -> future.complete(null));
 
             var playerData = localPlayer(player);
-            var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id()));
+            var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id().toString()));
             logger.info("join hub result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
 
@@ -100,7 +100,7 @@ public class MapServerBridge implements ServerBridge {
 
         try {
             // Add a pending join and then send them to the config state where it will be acted upon.
-            var playerId = localPlayer(player).id();
+            var playerId = localPlayer(player).id().toString();
             server.addPendingJoin(playerId, mapId, state);
 
             // We need to remove the player from the map before entering configuration, because by the time we get

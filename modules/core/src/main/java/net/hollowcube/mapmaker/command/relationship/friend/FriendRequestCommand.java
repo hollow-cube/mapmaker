@@ -1,14 +1,14 @@
 package net.hollowcube.mapmaker.command.relationship.friend;
 
+import java.util.UUID;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentLiteral;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.ipc.player.DisplayName;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.FriendRequest;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.FriendRequest;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
@@ -19,13 +19,11 @@ public class FriendRequestCommand extends CommandDsl {
     private final Argument<String> directionArg = Argument.Word("direction").with("outgoing", "incoming").defaultValue("incoming");
     private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
-    private final PlayerClient players;
-    private final PlayerService playerService;
+    private final SocialService social;
 
-    public FriendRequestCommand(@NotNull PlayerClient players, @NotNull PlayerService playerService) {
+    public FriendRequestCommand(@NotNull PlayerService players, @NotNull SocialService social) {
         super("request");
-        this.players = players;
-        this.playerService = playerService;
+        this.social = social;
 
         this.targetArg = CoreArgument.AnyPlayerId("target", players);
 
@@ -41,8 +39,10 @@ public class FriendRequestCommand extends CommandDsl {
         boolean incoming = directionValue.equals("incoming");
         int page = context.get(this.pageArg);
 
-        PlayerService.Page<FriendRequest> requests = this.playerService.getFriendRequests(player.getUuid().toString(), incoming, new PlayerService.Pageable(page, 10));
-        int pageCount = Math.ceilDiv(requests.totalItems(), 10);
+        var requests = incoming
+            ? this.social.incomingFriendRequests(player.getUuid(), page - 1, 10)
+            : this.social.outgoingFriendRequests(player.getUuid(), page - 1, 10);
+        int pageCount = Math.ceilDiv(requests.count(), 10);
 
         if (pageCount == 0) {
             player.sendMessage(Component.translatable("command.friend.request.list.empty." + directionValue));
@@ -50,12 +50,11 @@ public class FriendRequestCommand extends CommandDsl {
         }
 
         TextComponent.Builder builder = Component.text()
-            .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(requests.page()), Component.text(pageCount)));
-        for (FriendRequest request : requests.items()) {
-            DisplayName displayName = players.getDisplayName(request.playerId());
-            Component username = displayName.render();
+            .append(Component.translatable("command.friend.request.list.header." + directionValue, Component.text(page), Component.text(pageCount)));
+        for (FriendRequest request : requests.results()) {
+            var name = request.player().displayName().render();
             builder.appendNewline().append(
-                Component.translatable("command.friend.request.list.line." + directionValue, username, Component.text(request.username()))
+                Component.translatable("command.friend.request.list.line." + directionValue, name, Component.text(request.player().username()))
             );
         }
 
@@ -71,15 +70,11 @@ public class FriendRequestCommand extends CommandDsl {
         }
 
         var targetRaw = context.getRaw(this.targetArg);
-        try {
-            FriendRequest deletedReq = this.playerService.deleteFriendRequest(player.getUuid().toString(), targetId, true);
-            Component targetDisplayName = players.getDisplayName(deletedReq.playerId()).render();
-            // todo we can use deletedReq to indicate the direction
-            // that should be done, with a different message for outgoing and incoming
-            player.sendMessage(Component.translatable("command.friend.request.remove.success", targetDisplayName));
-        } catch (PlayerService.NotFoundError ex) {
-            player.sendMessage(
-                Component.translatable("command.friend.request.remove.not_requested", Component.text(targetRaw)));
+        var deleted = this.social.deleteFriendRequest(player.getUuid(), UUID.fromString(targetId), true);
+        if (deleted == null) {
+            player.sendMessage(Component.translatable("command.friend.request.remove.not_requested", Component.text(targetRaw)));
+        } else {
+            player.sendMessage(Component.translatable("command.friend.request.remove.success", deleted.player().displayName().render()));
         }
     }
 }

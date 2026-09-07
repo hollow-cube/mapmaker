@@ -191,7 +191,7 @@ public final class ChatServiceImpl implements ChatService {
     /// before. Only servers that old read it: a server that knows the new subject reads that one
     /// alone, which is what keeps it from rendering the message twice.
     private void publish(ChatMessage message) {
-        nats.publish(ChatMessage.SUBJECT, message);
+        nats.publish(message);
         nats.publish(LEGACY_SUBJECT, encodeLegacyChat(message));
     }
 

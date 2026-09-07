@@ -28,6 +28,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 
@@ -62,7 +63,7 @@ public class MessageComponents {
     private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
         var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapId, api.maps::get);
-        var author = usernameCache.get(map.owner().toString(), id -> api.players.getDisplayName(id).render());
+        var author = usernameCache.get(map.owner().toString(), id -> api.players.displayName(UUID.fromString(id)).render());
         var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);

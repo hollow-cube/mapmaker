@@ -73,7 +73,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
         // Always create a dummy play state for test mode players.
         final var playerData = localPlayer(player);
         var saveState = new SaveState(UUID.randomUUID().toString(),
-            map().id().toString(), playerData.id(), SaveStateType.PLAYING,
+            map().id().toString(), playerData.id().toString(), SaveStateType.PLAYING,
             PlayState.SERIALIZER, new PlayState());
         // Additionally set up a checkpoint at the current position as the test cp.
         var playState = saveState.state(PlayState.class);

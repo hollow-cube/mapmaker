@@ -28,11 +28,15 @@ public final class ApiDatabase {
 
     public final MapsQueries maps;
 
+    public final NotificationsQueries notifications;
+
     public final PlayersQueries players;
 
     public final ReplaysQueries replays;
 
     public final SessionsQueries sessions;
+
+    public final SocialQueries social;
 
     public ApiDatabase(DataSource dataSource) {
         this.dataSource = dataSource;
@@ -44,9 +48,11 @@ public final class ApiDatabase {
         this.jobs = new JobsQueriesImpl(source);
         this.mapFeatures = new MapFeaturesQueriesImpl(source);
         this.maps = new MapsQueriesImpl(source);
+        this.notifications = new NotificationsQueriesImpl(source);
         this.players = new PlayersQueriesImpl(source);
         this.replays = new ReplaysQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
+        this.social = new SocialQueriesImpl(source);
     }
 
     private ApiDatabase(Fake fake) {
@@ -58,9 +64,11 @@ public final class ApiDatabase {
         this.jobs = fake.jobs;
         this.mapFeatures = fake.mapFeatures;
         this.maps = fake.maps;
+        this.notifications = fake.notifications;
         this.players = fake.players;
         this.replays = fake.replays;
         this.sessions = fake.sessions;
+        this.social = fake.social;
     }
 
     /**
@@ -119,11 +127,15 @@ public final class ApiDatabase {
 
         public final MapsQueries maps;
 
+        public final NotificationsQueries notifications;
+
         public final PlayersQueries players;
 
         public final ReplaysQueries replays;
 
         public final SessionsQueries sessions;
+
+        public final SocialQueries social;
 
         Tx(Transaction transaction) {
             this.transaction = transaction;
@@ -135,9 +147,11 @@ public final class ApiDatabase {
             this.jobs = new JobsQueriesImpl(source);
             this.mapFeatures = new MapFeaturesQueriesImpl(source);
             this.maps = new MapsQueriesImpl(source);
+            this.notifications = new NotificationsQueriesImpl(source);
             this.players = new PlayersQueriesImpl(source);
             this.replays = new ReplaysQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
+            this.social = new SocialQueriesImpl(source);
         }
 
         /**
@@ -173,11 +187,15 @@ public final class ApiDatabase {
 
         private MapsQueries maps = new MapsQueries.Stub();
 
+        private NotificationsQueries notifications = new NotificationsQueries.Stub();
+
         private PlayersQueries players = new PlayersQueries.Stub();
 
         private ReplaysQueries replays = new ReplaysQueries.Stub();
 
         private SessionsQueries sessions = new SessionsQueries.Stub();
+
+        private SocialQueries social = new SocialQueries.Stub();
 
         public Fake anticheat(AnticheatQueries anticheat) {
             this.anticheat = anticheat;
@@ -214,6 +232,11 @@ public final class ApiDatabase {
             return this;
         }
 
+        public Fake notifications(NotificationsQueries notifications) {
+            this.notifications = notifications;
+            return this;
+        }
+
         public Fake players(PlayersQueries players) {
             this.players = players;
             return this;
@@ -226,6 +249,11 @@ public final class ApiDatabase {
 
         public Fake sessions(SessionsQueries sessions) {
             this.sessions = sessions;
+            return this;
+        }
+
+        public Fake social(SocialQueries social) {
+            this.social = social;
             return this;
         }
 

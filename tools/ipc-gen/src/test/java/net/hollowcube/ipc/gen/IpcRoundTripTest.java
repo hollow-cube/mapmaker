@@ -1,5 +1,7 @@
 package net.hollowcube.ipc.gen;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import com.sun.net.httpserver.HttpHandler;
@@ -51,6 +53,8 @@ class IpcRoundTripTest {
         public interface EchoService {
 
             String echo(String message, int count);
+
+            com.google.gson.JsonObject json(com.google.gson.JsonObject value);
 
             String suffix(String message, @Nullable String suffix);
 
@@ -124,6 +128,7 @@ class IpcRoundTripTest {
         var impl = Proxy.newProxyInstance(loader, new Class<?>[]{service}, (proxy, method, args) ->
             switch (method.getName()) {
                 case "echo" -> args[0] + ":" + args[1];
+                case "json" -> args[0];
                 case "suffix" -> (String) args[0] + (args[1] == null ? "" : args[1]);
                 case "split" -> List.of(((String) args[0]).split((String) args[1]));
                 case "group" -> Map.of("all", (List<?>) args[0]);
@@ -168,6 +173,13 @@ class IpcRoundTripTest {
         var clientClass = loader.loadClass("test.EchoClient");
         client = clientClass.getConstructor(HttpClient.class, String.class)
             .newInstance(HttpClient.newHttpClient(), baseUrl() + "/");
+    }
+
+    @Test
+    void opaqueJsonPreservesExplicitNullsAcrossBothSides() throws Exception {
+        var value = JsonParser.parseString("{\"reset\":null,\"nested\":{\"kept\":null}}").getAsJsonObject();
+        var result = client.getClass().getMethod("json", JsonObject.class).invoke(client, value);
+        assertEquals(value, result);
     }
 
     @AfterAll
@@ -298,7 +310,6 @@ class IpcRoundTripTest {
 
         assertEquals(405, response.statusCode());
     }
-
 
     /// The bytes are the body and never a json value, so what arrives is what was sent, however big
     /// it is: a megabyte is more than one read of the stream on either side.

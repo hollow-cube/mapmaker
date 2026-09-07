@@ -69,7 +69,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
 
             // Write their settings to the database
             var playerData = localPlayer(player);
-            FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(world.server().playerService()));
+            FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(world.server().api().players));
         }
     }
 

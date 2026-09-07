@@ -2,6 +2,8 @@ package net.hollowcube.ipc.map;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.JsonAdapter;
+import net.hollowcube.ipc.util.JsonValueAdapter;
 import net.hollowcube.ipc.util.Position;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,7 +25,7 @@ public record MapPatch(
     @Nullable Position spawnPoint,
     @Nullable List<String> tags,
     @Nullable MapLeaderboard leaderboard,
-    @Nullable JsonObject extra,
+    @JsonAdapter(JsonValueAdapter.class) @Nullable JsonObject extra,
     @Nullable Boolean listed,
     @Nullable MapQuality qualityOverride,
     @Nullable Integer protocolVersion

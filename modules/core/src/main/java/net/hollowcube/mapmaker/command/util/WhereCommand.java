@@ -13,6 +13,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.UUID;
 
 public class WhereCommand extends CommandDsl {
     private final Argument<String> targetArg;
@@ -68,7 +69,7 @@ public class WhereCommand extends CommandDsl {
             return;
         }
 
-        var targetName = api.players.getDisplayName(target).render();
+        var targetName = api.players.displayName(UUID.fromString(target)).render();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
                 player.sendMessage(Component.translatable("command.where.hub", targetName));

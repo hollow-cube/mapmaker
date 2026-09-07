@@ -3,9 +3,8 @@ package net.hollowcube.mapmaker.command.arg;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.ipc.player.PlayerData;
-import net.hollowcube.mapmaker.api.ApiClient;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.api.maps.MapClient;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.session.SessionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -18,40 +17,33 @@ public final class CoreArgument {
     // Player stuff
 
     public static @NotNull Argument<PlayerData> AnyPlayerData(
-        @NotNull String id, @NotNull PlayerClient players
+        @NotNull String id, @NotNull PlayerService players
     ) {
         return Argument.Word(id).map(
             /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                 if (raw.trim().isEmpty()) return null;
-                try {
-                    return players.getPlayerData(raw);
-                } catch (ApiClient.NotFoundError ignored) {
-                    return null;
-                }
+                return players.get(raw);
             }),
             /* Suggester */ (sender, raw, suggestion) -> {
-                for (var result : players.searchPlayers(raw, List.of(), 15)) {
-                    suggestion.add(result.displayName().username());
+                for (var result : players.search(raw, List.of(), 15)) {
+                    suggestion.add(result.username());
                 }
             }
         );
     }
 
     public static @NotNull Argument<@Nullable String> AnyPlayerId(
-        @NotNull String id, @NotNull PlayerClient players
+        @NotNull String id, @NotNull PlayerService players
     ) {
         return Argument.Word(id).map(
             /* Mapper */ (sender, raw) -> new ParseResult.Success<>(() -> {
                 if (raw.trim().isEmpty()) return null;
-                try {
-                    return players.getPlayerData(raw).id();
-                } catch (ApiClient.NotFoundError ignored) {
-                    return null;
-                }
+                var result = players.get(raw);
+                return result == null ? null : result.id().toString();
             }),
             /* Suggester */ (sender, raw, suggestion) -> {
-                for (var result : players.searchPlayers(raw, List.of(), 15)) {
-                    suggestion.add(result.displayName().username());
+                for (var result : players.search(raw, List.of(), 15)) {
+                    suggestion.add(result.username());
                 }
             }
         );

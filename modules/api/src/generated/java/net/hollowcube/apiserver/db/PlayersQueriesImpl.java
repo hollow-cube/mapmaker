@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
 import net.hollowcube.sqlgen.runtime.Jdbc;
 import net.hollowcube.sqlgen.runtime.Sneaky;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Runs PlayersQueries against a connection borrowed per statement.
@@ -43,6 +44,56 @@ final class PlayersQueriesImpl implements PlayersQueries {
                                     order by p.expires_at desc nulls first
                                     limit 1) mute on true""";
 
+    private static final String GET_PLAYER_BY_ID = """
+        select player_data.*
+        from player_data
+        where id = ?""";
+
+    private static final String GET_PLAYER_BY_USERNAME = """
+        select player_data.*
+        from player_data
+        where lower(username) = lower(?)""";
+
+    private static final String GET_PLAYER_NAMES = """
+        -- The columns a display name is computed from, for a batch of ids. Ids with no row are simply
+        -- absent; the caller's map says so.
+        select id, username, role, hypercube_end
+        from player_data
+        where id = any (?::uuid[])""";
+
+    private static final String UPDATE_PLAYER_SETTINGS = """
+        -- One statement rather than read-modify-write, so two servers patching different keys both land.
+        -- Null deletes only a top-level key; nested objects remain opaque.
+        update player_data
+        set settings = (settings - coalesce((select array_agg(key)
+                                             from jsonb_each(?::jsonb)
+                                             where value = 'null'::jsonb), '{}'::text[]))
+            || coalesce((select jsonb_object_agg(key, value)
+                         from jsonb_each(?::jsonb)
+                         where value <> 'null'::jsonb), '{}'::jsonb)
+        where id = ?""";
+
+    private static final String SEARCH_PLAYERS = """
+        -- Substring match, prefix matches first, then the shorter name. `pg_trgm` is not available at
+        -- describe time so this is plain `like`; in production the planner still uses Go's trigram index
+        -- for the `%q%` predicate.
+        select player_data.*
+        from player_data
+        where id <> all (?::uuid[])
+          and lower(username) like '%' || lower(?::text) || '%'
+        order by (lower(username) like lower(?::text) || '%') desc, length(username), username
+        limit ?""";
+
+    private static final String GET_PLAYER_ALTS = """
+        -- Everyone who has shared an address with the player.
+        select player_data.*
+        from player_data
+        where id in (select theirs.player_id
+                     from ip_history mine
+                              join ip_history theirs on theirs.address = mine.address and theirs.player_id <> mine.player_id
+                     where mine.player_id = ?)
+        order by username""";
+
     private final ConnectionSource source;
 
     PlayersQueriesImpl(ConnectionSource source) {
@@ -58,6 +109,119 @@ final class PlayersQueriesImpl implements PlayersQueries {
                 try (ResultSet rs = ps.executeQuery()) {
                     List<PlayersQueries.GetChatPlayersRow> rows = new ArrayList<>();
                     while (rs.next()) rows.add(new PlayersQueries.GetChatPlayersRow(rs.getObject(1, UUID.class), rs.getBoolean(2), rs.getBoolean(3), rs.getBoolean(4), Jdbc.getInstant(rs, 5)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public PlayerData getPlayerById(UUID id) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_PLAYER_BY_ID)) {
+                ps.setObject(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? PlayerData.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public PlayerData getPlayerByUsername(String username) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_PLAYER_BY_USERNAME)) {
+                ps.setString(1, username);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? PlayerData.read(rs, 1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<PlayersQueries.GetPlayerNamesRow> getPlayerNames(List<UUID> ids) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_PLAYER_NAMES)) {
+                Jdbc.setList(ps, 1, "uuid", ids);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<PlayersQueries.GetPlayerNamesRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new PlayersQueries.GetPlayerNamesRow(rs.getObject(1, UUID.class), rs.getString(2), RoleType.fromPg(rs.getString(3)), Jdbc.getInstant(rs, 4)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long updatePlayerSettings(String patch, UUID id) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(UPDATE_PLAYER_SETTINGS)) {
+                Jdbc.setInferred(ps, 1, patch);
+                Jdbc.setInferred(ps, 2, patch);
+                ps.setObject(3, id);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<PlayerData> searchPlayers(List<UUID> exclude, String query, long limit) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(SEARCH_PLAYERS)) {
+                Jdbc.setList(ps, 1, "uuid", exclude);
+                ps.setString(2, query);
+                ps.setString(3, query);
+                ps.setLong(4, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<PlayerData> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(PlayerData.read(rs, 1));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<PlayerData> getPlayerAlts(UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_PLAYER_ALTS)) {
+                ps.setObject(1, playerId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<PlayerData> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(PlayerData.read(rs, 1));
                     return rows;
                 }
             } finally {

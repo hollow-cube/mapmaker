@@ -17,6 +17,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
+
 public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
     private static final int ONE_MINUTE_TICKS = 60 * 20;
 
@@ -48,7 +50,7 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
                         LeaderboardData.Entry::score,
                         0L
                 ),
-            playerId -> world.server().api().players.getDisplayName(playerId).render(),
+            playerId -> world.server().api().players.displayName(UUID.fromString(playerId)).render(),
                 0, 0, 0, scale);
         leaderboard.setPadding(true);
         if (hasBackground) leaderboard.entriesDisplay().setUseDefaultBackground(true);

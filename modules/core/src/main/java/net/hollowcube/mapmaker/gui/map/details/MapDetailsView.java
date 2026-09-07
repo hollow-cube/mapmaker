@@ -38,7 +38,7 @@ public class MapDetailsView extends Panel {
         ApiClient api, ServerBridge bridge,
         MapData mapData, boolean showJoinButton
     ) {
-        var displayName = api.players.getDisplayName(mapData.owner().toString());
+        var displayName = api.players.displayName(mapData.owner());
         this(api, bridge, mapData, displayName, showJoinButton);
     }
 
@@ -114,7 +114,7 @@ public class MapDetailsView extends Panel {
         // Fetch the latest save state to show in play button
         async(() -> {
             try {
-                var playerId = localPlayer(host.player()).id();
+                var playerId = localPlayer(host.player()).id().toString();
                 var saveState = api.maps.getLatestSaveState(map.id().toString(), playerId, SaveStateType.PLAYING, null);
 
                 playButton.translationKey("gui.map_details.continue_map", formatMapPlaytime(saveState.getPlaytime(), true));
@@ -130,7 +130,7 @@ public class MapDetailsView extends Panel {
 
         Component authorName;
         try {
-            authorName = api.players.getDisplayName(map.owner().toString()).render();
+            authorName = api.players.displayName(map.owner()).render();
         } catch (Throwable t) {
             ExceptionReporter.reportException(t, player);
             authorName = Component.text("Unknown", NamedTextColor.RED);

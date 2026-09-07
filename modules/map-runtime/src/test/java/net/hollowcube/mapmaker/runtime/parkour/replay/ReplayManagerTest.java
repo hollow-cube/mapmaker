@@ -89,7 +89,7 @@ final class ReplayManagerTest {
     }
 
     private static LocalPlayer playerData() {
-        return new LocalPlayer(UUID.randomUUID().toString(), "tester");
+        return new LocalPlayer(UUID.randomUUID(), "tester");
     }
 
     private static ReplayManager.PreparedRecordings recordings(Supplier<@Nullable SegmentedReplay> load) {

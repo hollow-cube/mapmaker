@@ -3,6 +3,9 @@ package net.hollowcube.mapmaker.map.runtime;
 import net.hollowcube.ipc.chat.ChatService;
 import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.ipc.map.MapService;
+import net.hollowcube.ipc.notification.NotificationService;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.ipc.replay.ReplayService;
 import org.jetbrains.annotations.NotNull;
 
@@ -15,6 +18,9 @@ public record IpcServices(
     @NotNull HeadDatabaseService headDatabase,
     @NotNull ChatService chat,
     @NotNull ReplayService replays,
-    @NotNull MapService maps
+    @NotNull MapService maps,
+    @NotNull PlayerService players,
+    @NotNull SocialService social,
+    @NotNull NotificationService notifications
 ) {
 }

@@ -1,19 +1,19 @@
-package net.hollowcube.mapmaker.api.notifications;
+package net.hollowcube.ipc.notification;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.common.util.RuntimeGson;
+import com.google.gson.annotations.JsonAdapter;
+import net.hollowcube.ipc.util.JsonValueAdapter;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
+import java.util.UUID;
 
-@RuntimeGson
 public record Notification(
-    String id,
+    UUID id,
     String key,
     String type,
     Instant createdAt,
     @Nullable Instant expiresAt,
     @Nullable Instant readAt,
-    JsonObject data
-) {
-}
+    @JsonAdapter(JsonValueAdapter.class) JsonObject data
+) {}

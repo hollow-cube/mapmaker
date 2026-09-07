@@ -405,6 +405,154 @@
         }
       }
     },
+    "notification": {
+      "interface": "net.hollowcube.ipc.notification.NotificationService",
+      "methods": {
+        "delete": {
+          "params": [
+            {
+              "name": "id",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "boolean"
+          }
+        },
+        "list": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "unreadOnly",
+              "type": "boolean"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.notification.Notification\u003e"
+          }
+        },
+        "mark-read": {
+          "params": [
+            {
+              "name": "id",
+              "type": "UUID"
+            },
+            {
+              "name": "read",
+              "type": "boolean"
+            }
+          ],
+          "returns": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "player": {
+      "interface": "net.hollowcube.ipc.player.PlayerService",
+      "methods": {
+        "alts": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.player.PlayerStub\u003e"
+          }
+        },
+        "display-name": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.player.DisplayName",
+            "nullable": true
+          }
+        },
+        "display-names": {
+          "params": [
+            {
+              "name": "playerIds",
+              "type": "List\u003cUUID\u003e"
+            }
+          ],
+          "returns": {
+            "type": "Map\u003cUUID, net.hollowcube.ipc.player.DisplayName\u003e"
+          }
+        },
+        "get": {
+          "params": [
+            {
+              "name": "idOrUsername",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.player.PlayerData",
+            "nullable": true
+          }
+        },
+        "hypercube": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.player.HypercubeStatus",
+            "nullable": true
+          }
+        },
+        "search": {
+          "params": [
+            {
+              "name": "query",
+              "type": "String"
+            },
+            {
+              "name": "excludeIds",
+              "type": "List\u003cUUID\u003e"
+            },
+            {
+              "name": "limit",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.player.PlayerStub\u003e"
+          }
+        },
+        "update-settings": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "patch",
+              "type": "com.google.gson.JsonObject"
+            }
+          ]
+        }
+      }
+    },
     "replay": {
       "interface": "net.hollowcube.ipc.replay.ReplayService",
       "methods": {
@@ -522,6 +670,201 @@
           "params": [],
           "returns": {
             "type": "int"
+          }
+        }
+      }
+    },
+    "social": {
+      "interface": "net.hollowcube.ipc.player.SocialService",
+      "methods": {
+        "block": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "targetId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.player.BlockResult"
+          }
+        },
+        "blocks": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.player.Block\u003e"
+          }
+        },
+        "blocks-between": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "targetId",
+              "type": "UUID"
+            },
+            {
+              "name": "bidirectional",
+              "type": "boolean"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.player.Block\u003e"
+          }
+        },
+        "delete-friend-request": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "targetId",
+              "type": "UUID"
+            },
+            {
+              "name": "bidirectional",
+              "type": "boolean"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.player.FriendRequest",
+            "nullable": true
+          }
+        },
+        "friends": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "onlineOnly",
+              "type": "boolean"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.player.Friend\u003e"
+          }
+        },
+        "incoming-friend-requests": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.player.FriendRequest\u003e"
+          }
+        },
+        "online-friend-ids": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cUUID\u003e"
+          }
+        },
+        "outgoing-friend-requests": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.player.FriendRequest\u003e"
+          }
+        },
+        "remove-friend": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "targetId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "boolean"
+          }
+        },
+        "send-friend-request": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "targetId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.player.FriendRequestResult"
+          }
+        },
+        "unblock": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "targetId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "boolean"
           }
         }
       }
@@ -1578,6 +1921,396 @@
         "TAGS"
       ]
     },
+    "net.hollowcube.ipc.notification.Notification": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID"
+        },
+        {
+          "name": "key",
+          "type": "String"
+        },
+        {
+          "name": "type",
+          "type": "String"
+        },
+        {
+          "name": "createdAt",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "expiresAt",
+          "type": "java.time.Instant",
+          "nullable": true
+        },
+        {
+          "name": "readAt",
+          "type": "java.time.Instant",
+          "nullable": true
+        },
+        {
+          "name": "data",
+          "type": "com.google.gson.JsonObject"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.notification.NotificationUpdate": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "action",
+          "type": "String"
+        },
+        {
+          "name": "playerId",
+          "type": "UUID"
+        },
+        {
+          "name": "type",
+          "type": "String"
+        },
+        {
+          "name": "key",
+          "type": "String"
+        },
+        {
+          "name": "data",
+          "type": "com.google.gson.JsonObject",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.Block": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "blockerId",
+          "type": "UUID"
+        },
+        {
+          "name": "target",
+          "type": "net.hollowcube.ipc.player.PlayerStub"
+        },
+        {
+          "name": "blockedAt",
+          "type": "java.time.Instant"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.BlockResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "already-blocked": "net.hollowcube.ipc.player.BlockResult.AlreadyBlocked",
+        "blocked": "net.hollowcube.ipc.player.BlockResult.Blocked",
+        "target-is-staff": "net.hollowcube.ipc.player.BlockResult.TargetIsStaff"
+      }
+    },
+    "net.hollowcube.ipc.player.BlockResult.AlreadyBlocked": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.BlockResult.Blocked": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.BlockResult.TargetIsStaff": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.DisplayName": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "parts",
+          "type": "List\u003cnet.hollowcube.ipc.player.DisplayName.Part\u003e"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.DisplayName.Part": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "badge": "net.hollowcube.ipc.player.DisplayName.Part.Badge",
+        "username": "net.hollowcube.ipc.player.DisplayName.Part.Username"
+      }
+    },
+    "net.hollowcube.ipc.player.DisplayName.Part.Badge": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "name",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.DisplayName.Part.Username": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "text",
+          "type": "String"
+        },
+        {
+          "name": "color",
+          "type": "String",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.Friend": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "player",
+          "type": "net.hollowcube.ipc.player.PlayerStub"
+        },
+        {
+          "name": "online",
+          "type": "boolean"
+        },
+        {
+          "name": "lastOnline",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "friendsSince",
+          "type": "java.time.Instant"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.FriendRequest": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "player",
+          "type": "net.hollowcube.ipc.player.PlayerStub"
+        },
+        {
+          "name": "sentAt",
+          "type": "java.time.Instant"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "accepted": "net.hollowcube.ipc.player.FriendRequestResult.Accepted",
+        "already-friends": "net.hollowcube.ipc.player.FriendRequestResult.AlreadyFriends",
+        "already-requested": "net.hollowcube.ipc.player.FriendRequestResult.AlreadyRequested",
+        "blocked-by-target": "net.hollowcube.ipc.player.FriendRequestResult.BlockedByTarget",
+        "blocked-target": "net.hollowcube.ipc.player.FriendRequestResult.BlockedTarget",
+        "limit-reached": "net.hollowcube.ipc.player.FriendRequestResult.LimitReached",
+        "sent": "net.hollowcube.ipc.player.FriendRequestResult.Sent",
+        "target-auto-rejects": "net.hollowcube.ipc.player.FriendRequestResult.TargetAutoRejects"
+      }
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.Accepted": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.AlreadyFriends": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.AlreadyRequested": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.BlockedByTarget": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.BlockedTarget": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.LimitReached": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "limit",
+          "type": "int"
+        },
+        {
+          "name": "friendCount",
+          "type": "int"
+        },
+        {
+          "name": "outgoingRequestCount",
+          "type": "int"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.Sent": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.FriendRequestResult.TargetAutoRejects": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.player.HypercubeStatus": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "start",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "end",
+          "type": "java.time.Instant"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.PlayerData": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID"
+        },
+        {
+          "name": "username",
+          "type": "String"
+        },
+        {
+          "name": "displayName",
+          "type": "net.hollowcube.ipc.player.DisplayName"
+        },
+        {
+          "name": "settings",
+          "type": "com.google.gson.JsonObject"
+        },
+        {
+          "name": "playtime",
+          "type": "long"
+        },
+        {
+          "name": "cubits",
+          "type": "long"
+        },
+        {
+          "name": "hypercubeUntil",
+          "type": "java.time.Instant",
+          "nullable": true
+        },
+        {
+          "name": "permissions",
+          "type": "long"
+        },
+        {
+          "name": "mapSlots",
+          "type": "int"
+        },
+        {
+          "name": "maxMapSize",
+          "type": "net.hollowcube.ipc.map.MapSize"
+        },
+        {
+          "name": "mapBuilders",
+          "type": "int"
+        },
+        {
+          "name": "coins",
+          "type": "long"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.player.PlayerStub": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID"
+        },
+        {
+          "name": "username",
+          "type": "String"
+        },
+        {
+          "name": "displayName",
+          "type": "net.hollowcube.ipc.player.DisplayName"
+        },
+        {
+          "name": "permissions",
+          "type": "long"
+        },
+        {
+          "name": "settings",
+          "type": "com.google.gson.JsonObject"
+        }
+      ]
+    },
     "net.hollowcube.ipc.replay.ReplayCommit": {
       "kind": "record",
       "used": [
@@ -1743,7 +2476,8 @@
     }
   },
   "subjects": {
-    "chat.message": "net.hollowcube.ipc.chat.ChatMessage"
+    "chat.message": "net.hollowcube.ipc.chat.ChatMessage",
+    "notification.\u003e": "net.hollowcube.ipc.notification.NotificationUpdate"
   },
   "notifications": {}
 }

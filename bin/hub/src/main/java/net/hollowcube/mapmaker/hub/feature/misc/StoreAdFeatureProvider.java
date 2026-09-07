@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -30,14 +30,14 @@ public class StoreAdFeatureProvider implements HubFeature {
     private static final Pos GOLD_BLOCK_ENTITY_POS = new Pos(-4.5, 45, -29.5, 0, -90);
     private static final int GOLD_BLOCK_ENTITY_UPDATE_INTERVAL = 5; // Seconds
 
-    private PlayerService playerService;
+    private AccountService accountService;
 
     private final NpcItemModel goldBlockEntity = new NpcItemModel();
     private int goldBlockEntityRotationTarget = 0;
 
     @Override
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
-        this.playerService = server.playerService();
+        this.accountService = server.accountService();
 
         var viewStoreEntity = BaseNpcEntity.createInteractionEntity(
             3, 4, this::handleStoreClick);
@@ -53,7 +53,7 @@ public class StoreAdFeatureProvider implements HubFeature {
     private void handleStoreClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN) return;
 
-        Panel.open(player, new StoreView(playerService, StoreView.TAB_HYPERCUBE));
+        Panel.open(player, new StoreView(accountService, StoreView.TAB_HYPERCUBE));
     }
 
     private @NotNull TaskSchedule mapEntityUpdate() {

@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -45,11 +45,11 @@ class AddonsPanel extends Panel {
         new Addon(ShopUpgrade.MAP_BUILDER_4, "gui.store.addons.map_builder", 0, "trusted_builder")
     };
 
-    private final PlayerService playerService;
+    private final AccountService accountService;
 
-    public AddonsPanel(@NotNull PlayerService playerService) {
+    public AddonsPanel(@NotNull AccountService accountService) {
         super(9, 5);
-        this.playerService = playerService;
+        this.accountService = accountService;
 
         background("store/addons/container", 0, 1);
 
@@ -123,7 +123,7 @@ class AddonsPanel extends Panel {
             var firstLocked = firstNotOwned(player);
             if (firstLocked == null) return;
 
-            buyUpgrade(playerService, player, firstLocked.id);
+            buyUpgrade(accountService, player, firstLocked.id);
             player.scheduleNextTick(_ -> {
                 if (this.host != host) return;
                 updateDisplay(player);

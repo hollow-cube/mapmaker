@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.api.notifications.Notification;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 
 import java.util.List;
+import java.util.UUID;
 
 @AutoService(PlayerNotificationType.class)
 public class FriendRequestNotificationType implements PlayerNotificationType {
@@ -25,7 +26,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
 
     @Override
     public PlayerNotification createNotification(Player player, ServiceContext context, Notification entry) {
-        var username = context.api().players.getDisplayName(entry.key());
+        var username = context.api().players.displayName(UUID.fromString(entry.key()));
 
         return new PlayerNotification(
             entry,
@@ -39,8 +40,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
                     "gui.notification.friend_request.action.confirm",
                     PlayerNotification.ActionExecutor
                         .of(() -> {
-                            context.players().sendFriendRequest(player.getUuid().toString(), entry.key());
-                            context.api().notifications.delete(entry.id());
+                            context.api().social.sendFriendRequest(player.getUuid(), UUID.fromString(entry.key()));
                         })
                         .withRefresh()
                 ),
@@ -50,8 +50,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
                     "gui.notification.friend_request.action.reject",
                     PlayerNotification.ActionExecutor
                         .of(() -> {
-                            context.players().deleteFriendRequest(player.getUuid().toString(), entry.key(), true);
-                            context.api().notifications.delete(entry.id());
+                            context.api().social.deleteFriendRequest(player.getUuid(), UUID.fromString(entry.key()), true);
                         })
                         .withRefresh()
                 )
@@ -61,7 +60,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
 
     @Override
     public Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
-        var username = context.api().players.getDisplayName(entry.key()).render();
+        var username = context.api().players.displayName(UUID.fromString(entry.key())).render();
         return Component.translatable("gui.notification.friend_request.toast", username);
     }
 }

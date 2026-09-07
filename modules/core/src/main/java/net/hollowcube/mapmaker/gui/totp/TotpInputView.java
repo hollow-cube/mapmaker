@@ -4,7 +4,7 @@ import net.hollowcube.common.dialogs.DialogBuilder;
 import net.hollowcube.common.dialogs.DialogButtons;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.panels.AbstractAnvilView;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
@@ -22,10 +22,10 @@ public class TotpInputView extends AbstractAnvilView {
 
     private static final Component CLICK_TO_COPY = Component.text("Click to copy").color(NamedTextColor.GRAY);
 
-    private final BiFunction<String, String, PlayerService.TotpResult> checker;
-    private final Consumer<PlayerService.TotpResult> callback;
+    private final BiFunction<String, String, AccountService.TotpResult> checker;
+    private final Consumer<AccountService.TotpResult> callback;
 
-    public TotpInputView(String title, BiFunction<String, String, PlayerService.TotpResult> checker, Consumer<PlayerService.TotpResult> callback) {
+    public TotpInputView(String title, BiFunction<String, String, AccountService.TotpResult> checker, Consumer<AccountService.TotpResult> callback) {
         super("generic2/anvil/field_container", "map_browser/search_anvil_icon", title, "", true);
 
         this.checker = checker;
@@ -39,12 +39,12 @@ public class TotpInputView extends AbstractAnvilView {
 
         FutureUtil.submitVirtual(() -> {
             switch (checker.apply(playerId, truncatedCode)) {
-                case SUCCESS -> callback.accept(PlayerService.TotpResult.SUCCESS);
+                case SUCCESS -> callback.accept(AccountService.TotpResult.SUCCESS);
                 case INVALID_FORMAT ->
                     this.host.pushTransientView(new TotpInputView("Invalid format", checker, callback));
                 case INVALID_CODE -> this.host.pushTransientView(new TotpInputView("Invalid code", checker, callback));
-                case NOT_ENABLED -> callback.accept(PlayerService.TotpResult.NOT_ENABLED);
-                case ALREADY_ENABLED -> callback.accept(PlayerService.TotpResult.ALREADY_ENABLED);
+                case NOT_ENABLED -> callback.accept(AccountService.TotpResult.NOT_ENABLED);
+                case ALREADY_ENABLED -> callback.accept(AccountService.TotpResult.ALREADY_ENABLED);
             }
         });
     }

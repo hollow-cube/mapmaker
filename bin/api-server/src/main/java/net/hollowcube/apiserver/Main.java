@@ -14,6 +14,9 @@ import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
 import net.hollowcube.apiserver.map.MapServiceImpl;
+import net.hollowcube.apiserver.notification.NotificationServiceImpl;
+import net.hollowcube.apiserver.player.PlayerServiceImpl;
+import net.hollowcube.apiserver.player.SocialServiceImpl;
 import net.hollowcube.apiserver.replay.ReplayServiceImpl;
 import net.hollowcube.apiserver.s3.HttpS3Client;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
@@ -22,6 +25,9 @@ import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
 import net.hollowcube.ipc.map.MapServer;
+import net.hollowcube.ipc.notification.NotificationServer;
+import net.hollowcube.ipc.player.PlayerServer;
+import net.hollowcube.ipc.player.SocialServer;
 import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.ipc.util.IpcFailures;
@@ -145,6 +151,8 @@ public final class Main {
         // virtual threads are for.
         server.setExecutor(Executors.newVirtualThreadPerTaskExecutor());
 
+        var notifications = new NotificationServiceImpl(db, nats);
+
         var requestLog = new RequestLog();
         var drain = new Drain();
         for (var context : List.of(
@@ -171,7 +179,16 @@ public final class Main {
                 )
             ),
             server.createContext(MapServer.PATH, new MapServer(maps)),
-            server.createContext(ReplayServer.PATH, new ReplayServer(new ReplayServiceImpl(db, s3)))
+            server.createContext(
+                ReplayServer.PATH,
+                new ReplayServer(new ReplayServiceImpl(db, s3))
+            ),
+            server.createContext(PlayerServer.PATH, new PlayerServer(new PlayerServiceImpl(db))),
+            server.createContext(
+                SocialServer.PATH,
+                new SocialServer(new SocialServiceImpl(db, notifications))
+            ),
+            server.createContext(NotificationServer.PATH, new NotificationServer(notifications))
         ))
             context.getFilters().addAll(List.of(requestLog, drain));
 

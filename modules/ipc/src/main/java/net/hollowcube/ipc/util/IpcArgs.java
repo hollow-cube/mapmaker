@@ -12,10 +12,18 @@ public final class IpcArgs {
 
     public static UUID uuid(@Nullable String value, String what) {
         if (value == null) throw new IpcException(400, "missing parameter '" + what + "'");
+        var uuid = uuidOrNull(value);
+        if (uuid == null) throw new IpcException(400, what + " is not a uuid: " + value);
+        return uuid;
+    }
+
+    /// `value` as a uuid, or null when it is not one (an empty string included).
+    public static @Nullable UUID uuidOrNull(@Nullable String value) {
+        if (value == null) return null;
         try {
             return UUID.fromString(value);
         } catch (IllegalArgumentException e) {
-            throw new IpcException(400, what + " is not a uuid: " + value);
+            return null;
         }
     }
 

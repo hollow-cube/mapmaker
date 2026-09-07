@@ -320,14 +320,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         SaveState saveState;
         try {
             saveState = server().api().maps.getLatestSaveState(map().id().toString(),
-                playerData.id(), saveStateType, PlayState.SERIALIZER);
+                playerData.id().toString(), saveStateType, PlayState.SERIALIZER);
             replayManager.prepareRecordingSession(saveState, playerData);
 
         } catch (ApiClient.NotFoundError _) {
             // No save state yet, create one locally.
             // We do an upsert to save, so it will be created in the map service at that point.
             saveState = new SaveState(UUID.randomUUID().toString(),
-                map().id().toString(), playerData.id(), saveStateType,
+                map().id().toString(), playerData.id().toString(), saveStateType,
                 PlayState.SERIALIZER, new PlayState());
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         }

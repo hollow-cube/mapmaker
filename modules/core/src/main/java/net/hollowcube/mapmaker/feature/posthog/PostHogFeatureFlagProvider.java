@@ -29,7 +29,7 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
         return switch (context[0]) {
             case Player player -> {
                 var playerData = localPlayer(player);
-                yield PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
+                yield PostHog.getFeatureFlag(transformedName, playerData.id().toString(), FeatureFlagContext.newBuilder()
                         .personProperties(Map.of(
                                 "username", playerData.username(),
                                 "is_hypercube", String.valueOf(playerData.isHypercube())
@@ -37,7 +37,7 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
                         .build()).isEnabled();
             }
             case LocalPlayer playerData ->
-                    PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
+                    PostHog.getFeatureFlag(transformedName, playerData.id().toString(), FeatureFlagContext.newBuilder()
                             .personProperties(Map.of(
                                     "username", playerData.username(),
                                     "is_hypercube", String.valueOf(playerData.isHypercube())

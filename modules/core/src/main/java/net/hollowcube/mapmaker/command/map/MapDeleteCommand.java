@@ -54,7 +54,7 @@ public class MapDeleteCommand extends CommandDsl {
         }
         try {
             var playerData = localPlayer(player);
-            maps.delete(playerData.id(), map.id().toString(), reason);
+            maps.delete(playerData.id().toString(), map.id().toString(), reason);
             player.sendMessage("deleted map " + map.id().toString());
         } catch (Exception e) {
             player.sendMessage("failed to delete map");

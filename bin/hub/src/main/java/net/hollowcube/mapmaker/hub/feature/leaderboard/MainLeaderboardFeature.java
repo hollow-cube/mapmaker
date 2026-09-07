@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
+import java.util.UUID;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -27,7 +28,7 @@ public class MainLeaderboardFeature implements HubFeature {
             playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
             () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, null),
             playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, playerId).player().score(),
-            playerId -> api.players.getDisplayName(playerId).render(),
+            playerId -> api.players.displayName(UUID.fromString(playerId)).render(),
                 10);
         buildingLeaderboard = new Leaderboard2(
                 null, null,

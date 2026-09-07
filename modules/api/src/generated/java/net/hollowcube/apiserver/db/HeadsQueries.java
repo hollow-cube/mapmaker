@@ -10,9 +10,9 @@ import java.util.List;
 public interface HeadsQueries {
     List<GetRandomHeadsRow> getRandomHeads(long limit);
 
-    List<GetHeadsWithSearchRow> getHeadsWithSearch(String query, long limit, long offset);
+    List<GetHeadsWithSearchRow> getHeadsWithSearch(String query, long offset, long limit);
 
-    List<GetHeadsWithCategoryRow> getHeadsWithCategory(String category, long limit, long offset);
+    List<GetHeadsWithCategoryRow> getHeadsWithCategory(String category, long offset, long limit);
 
     /**
      * A row of `getRandomHeads`.
@@ -42,14 +42,14 @@ public interface HeadsQueries {
         }
 
         @Override
-        public List<GetHeadsWithSearchRow> getHeadsWithSearch(String query, long limit,
-                long offset) {
+        public List<GetHeadsWithSearchRow> getHeadsWithSearch(String query, long offset,
+                long limit) {
             throw new UnsupportedOperationException("HeadsQueries.getHeadsWithSearch is not stubbed on this fake");
         }
 
         @Override
-        public List<GetHeadsWithCategoryRow> getHeadsWithCategory(String category, long limit,
-                long offset) {
+        public List<GetHeadsWithCategoryRow> getHeadsWithCategory(String category, long offset,
+                long limit) {
             throw new UnsupportedOperationException("HeadsQueries.getHeadsWithCategory is not stubbed on this fake");
         }
     }

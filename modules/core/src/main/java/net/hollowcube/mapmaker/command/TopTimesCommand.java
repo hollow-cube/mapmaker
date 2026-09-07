@@ -62,7 +62,7 @@ public class TopTimesCommand extends CommandDsl {
             player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id().toString())));
         } else {
             var playerData = localPlayer(player);
-            var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerData.id());
+            var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerData.id().toString());
 
             var lbFormat = map.settings().leaderboard().format();
             var messages = leaderboard.toComponents(api.players, lbFormat, false);

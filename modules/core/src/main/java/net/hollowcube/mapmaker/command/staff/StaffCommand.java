@@ -2,12 +2,12 @@ package net.hollowcube.mapmaker.command.staff;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.mapmaker.chat.ChatChannels;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
-import net.hollowcube.mapmaker.chat.ChatChannels;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 

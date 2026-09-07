@@ -13,11 +13,32 @@ import org.jetbrains.annotations.Nullable;
 public interface PlayersQueries {
     List<GetChatPlayersRow> getChatPlayers(List<UUID> ids);
 
+    @Nullable
+    PlayerData getPlayerById(UUID id);
+
+    @Nullable
+    PlayerData getPlayerByUsername(String username);
+
+    List<GetPlayerNamesRow> getPlayerNames(List<UUID> ids);
+
+    long updatePlayerSettings(String patch, UUID id);
+
+    List<PlayerData> searchPlayers(List<UUID> exclude, String query, long limit);
+
+    List<PlayerData> getPlayerAlts(UUID playerId);
+
     /**
      * A row of `getChatPlayers`.
      */
-    record GetChatPlayersRow(UUID id, boolean allowDms, boolean hypercube, boolean muted,
+    record GetChatPlayersRow(@Nullable UUID id, boolean allowDms, boolean hypercube, boolean muted,
             @Nullable Instant muteExpiresAt) {
+    }
+
+    /**
+     * A row of `getPlayerNames`.
+     */
+    record GetPlayerNamesRow(UUID id, String username, RoleType role,
+            @Nullable Instant hypercubeEnd) {
     }
 
     /**
@@ -27,6 +48,38 @@ public interface PlayersQueries {
         @Override
         public List<GetChatPlayersRow> getChatPlayers(List<UUID> ids) {
             throw new UnsupportedOperationException("PlayersQueries.getChatPlayers is not stubbed on this fake");
+        }
+
+        @Nullable
+        @Override
+        public PlayerData getPlayerById(UUID id) {
+            throw new UnsupportedOperationException("PlayersQueries.getPlayerById is not stubbed on this fake");
+        }
+
+        @Nullable
+        @Override
+        public PlayerData getPlayerByUsername(String username) {
+            throw new UnsupportedOperationException("PlayersQueries.getPlayerByUsername is not stubbed on this fake");
+        }
+
+        @Override
+        public List<GetPlayerNamesRow> getPlayerNames(List<UUID> ids) {
+            throw new UnsupportedOperationException("PlayersQueries.getPlayerNames is not stubbed on this fake");
+        }
+
+        @Override
+        public long updatePlayerSettings(String patch, UUID id) {
+            throw new UnsupportedOperationException("PlayersQueries.updatePlayerSettings is not stubbed on this fake");
+        }
+
+        @Override
+        public List<PlayerData> searchPlayers(List<UUID> exclude, String query, long limit) {
+            throw new UnsupportedOperationException("PlayersQueries.searchPlayers is not stubbed on this fake");
+        }
+
+        @Override
+        public List<PlayerData> getPlayerAlts(UUID playerId) {
+            throw new UnsupportedOperationException("PlayersQueries.getPlayerAlts is not stubbed on this fake");
         }
     }
 }

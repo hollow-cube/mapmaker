@@ -14,7 +14,7 @@ public record PlayerSettingImpl<T>(
 
     @Override
     public @NotNull T read(@NotNull JsonObject settings) {
-        if (!settings.has(key)) return defaultValue;
+        if (!settings.has(key) || settings.get(key).isJsonNull()) return defaultValue;
         var value = deserialize.apply(settings.get(key));
         return value == null ? defaultValue : value;
     }

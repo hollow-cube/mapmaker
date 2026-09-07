@@ -4,16 +4,18 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.util.Elements;
+import java.util.HashSet;
 
 /// Emits the GraalVM reachability metadata for the wire records, which is what lets a native image
 /// serve the wire at all.
 ///
 /// Gson reads and writes a record through its canonical constructor and its component accessors,
 /// and nothing in the image graph points at either, so a record left out of this file answers every
-/// call that touches it with a 500 out of gson's reflection helper. Nothing else on the wire needs
-/// it: enums and sealed types go through the generated `WireAdapters`, which name their constants
-/// and variants outright.
+/// call that touches it with a 500 out of gson's reflection helper. Explicit @JsonAdapter classes
+/// also need constructors registered; enums and sealed types use the generated WireAdapters.
 ///
 /// Written by the processor rather than by hand for the same reason the descriptor is: the list is
 /// exactly what [WireWalker] found, so a record added to the wire cannot be forgotten here.
@@ -21,11 +23,29 @@ final class MetadataEmitter {
 
     static String json(Elements elements, WireWalker walker) {
         var reflection = new JsonArray();
+        var adapters = new HashSet<String>();
         for (var record : walker.records()) {
             var entry = new JsonObject();
             entry.addProperty("type", elements.getBinaryName(record.element()).toString());
             entry.addProperty("allDeclaredFields", true);
             entry.addProperty("allDeclaredMethods", true);
+            entry.addProperty("allDeclaredConstructors", true);
+            reflection.add(entry);
+            for (var field : record.element().getEnclosedElements()) {
+                for (var annotation : field.getAnnotationMirrors()) {
+                    if (!annotation.getAnnotationType().toString().equals("com.google.gson.annotations.JsonAdapter")) continue;
+                    for (var value : elements.getElementValuesWithDefaults(annotation).entrySet()) {
+                        if (!value.getKey().getSimpleName().contentEquals("value")) continue;
+                        var adapter = (TypeElement) ((DeclaredType) value.getValue().getValue()).asElement();
+                        adapters.add(elements.getBinaryName(adapter).toString());
+                    }
+                }
+            }
+        }
+
+        for (var adapter : adapters.stream().sorted().toList()) {
+            var entry = new JsonObject();
+            entry.addProperty("type", adapter);
             entry.addProperty("allDeclaredConstructors", true);
             reflection.add(entry);
         }

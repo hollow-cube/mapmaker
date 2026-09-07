@@ -33,7 +33,7 @@ public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
     @Override
     public void useItem(@NotNull Player player) {
         var playerId = localPlayer(player).id();
-        var session = SessionManager.instance.getSession(playerId);
+        var session = SessionManager.instance.getSession(playerId.toString());
         if (session == null || session.presence() == null) return;
 
         // Do NOT, under ANY circumstance, run this if the player is not in the hub.

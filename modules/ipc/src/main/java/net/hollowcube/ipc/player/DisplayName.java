@@ -17,6 +17,9 @@ public record DisplayName(List<Part> parts) implements ComponentLike {
     private static final Key SPRITES = Key.key("mapmaker", "sprites");
     private static final Key SPACE = Key.key("mapmaker", "space");
 
+    /// What a player the api does not know renders as.
+    public static final DisplayName UNKNOWN = of("Unknown");
+
     public static DisplayName of(String username) {
         return new DisplayName(List.of(new Part.Username(username, null)));
     }
@@ -27,7 +30,7 @@ public record DisplayName(List<Part> parts) implements ComponentLike {
 
     /// Written as `{"type": "username", ...}`; a part a server is too old to know decodes to
     /// [Unknown] and renders as nothing.
-    public sealed interface Part permits Part.Username, Part.Badge, Part.Unknown {
+    public sealed interface Part {
 
         /// The name itself, in `color` (a css hex string) when the player has one.
         record Username(String text, @Nullable String color) implements Part {}

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
@@ -104,7 +105,7 @@ public abstract class MapListView extends Panel {
                 titleText.text("Your Maps");
             else {
                 async(() -> {
-                    var displayName = api.players.getDisplayName(targetId);
+                    var displayName = api.players.displayName(UUID.fromString(targetId));
                     sync(() -> titleText.text(displayName.username() + "'s Maps"));
                 });
             }
@@ -126,7 +127,7 @@ public abstract class MapListView extends Panel {
 
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
-            var playerId = localPlayer(host.player()).id();
+            var playerId = localPlayer(host.player()).id().toString();
             var history = api.maps.getPlayerMapHistory(playerId, page, pageSize);
 
             // should probably add a multi get maps to api but its a pretty low usage gui right now so dnc.

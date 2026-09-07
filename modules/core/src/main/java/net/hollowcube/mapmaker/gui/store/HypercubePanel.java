@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.gui.store;
 
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.gui.store.StoreHelpers.Package.HYPERCUBE_1MO;
@@ -10,7 +10,7 @@ import static net.hollowcube.mapmaker.gui.store.StoreHelpers.buyPackage;
 
 class HypercubePanel extends Panel {
 
-    public HypercubePanel(@NotNull PlayerService playerService) {
+    public HypercubePanel(@NotNull AccountService accountService) {
         super(9, 5);
         background("store/hypercube", 0, 1);
 
@@ -23,9 +23,9 @@ class HypercubePanel extends Panel {
 
         // Purchase buttons
         add(1, 3, button("gui.store.hypercube.1month", 3, 2)
-                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), HYPERCUBE_1MO)));
+                .onLeftClickAsync(() -> buyPackage(accountService, host.player(), HYPERCUBE_1MO)));
         add(5, 3, button("gui.store.hypercube.1year", 3, 2)
-                .onLeftClickAsync(() -> buyPackage(playerService, host.player(), HYPERCUBE_1Y)));
+                .onLeftClickAsync(() -> buyPackage(accountService, host.player(), HYPERCUBE_1Y)));
     }
 
 }

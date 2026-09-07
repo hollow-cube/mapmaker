@@ -1,13 +1,15 @@
 package net.hollowcube.mapmaker.command.invite;
 
+import java.util.UUID;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
+import net.hollowcube.mapmaker.command.relationship.SocialUtil;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -16,19 +18,19 @@ import org.jetbrains.annotations.NotNull;
 abstract class AbstractInviteServiceCommand extends CommandDsl {
 
     protected final PlayerInviteService inviteService;
-    private final PlayerService playerService;
-    private final PlayerClient players;
+    private final SocialService social;
+    private final PlayerService players;
     private final SessionManager sessionManager;
     private final Argument<String> targetArgument;
     private final boolean preventBlocked;
 
     AbstractInviteServiceCommand(@NotNull String command, @NotNull PlayerInviteService inviteService,
-                                 @NotNull PlayerService playerService, @NotNull PlayerClient players,
+                                 @NotNull SocialService social, @NotNull PlayerService players,
                                  @NotNull SessionManager sessionManager,
                                  @NotNull String playerArgDescription, boolean preventBlocked) {
         super(command);
         this.inviteService = inviteService;
-        this.playerService = playerService;
+        this.social = social;
         this.players = players;
         this.sessionManager = sessionManager;
         this.preventBlocked = preventBlocked;
@@ -50,12 +52,12 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
             player.sendMessage(Component.translatable("generic.player.offline", Component.text(targetName)));
             return;
         }
-        if (this.preventBlocked && this.playerService.failIfBlocked(player, targetId, targetName, true)) {
+        if (this.preventBlocked && SocialUtil.failIfBlocked(this.social, player, targetId, targetName, true)) {
             return;
         }
 
         var targetSession = this.sessionManager.getSession(targetId);
-        var targetDisplayName = players.getDisplayName(targetId).render();
+        var targetDisplayName = players.displayName(UUID.fromString(targetId)).render();
         if (targetSession == null) {
             player.sendMessage(Component.translatable("generic.player.offline", targetDisplayName));
             return;

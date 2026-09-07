@@ -70,12 +70,12 @@ public class MapDetailsTimesPanel extends Panel {
         if (!isInitial) return;
 
         async(() -> {
-            var playerId = localPlayer(host.player()).id();
+            var playerId = localPlayer(host.player()).id().toString();
             var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerId);
-            // TODO: bulk endpoint?
+            var names = api.players.displayNames(leaderboard.top().stream().map(LeaderboardData.Entry::player).map(UUID::fromString).toList());
             var displayNames = leaderboard.top().stream()
                 .map(LeaderboardData.Entry::player)
-                .map(api.players::getDisplayName)
+                .map(names::get)
                 .toList();
 
             sync(() -> {

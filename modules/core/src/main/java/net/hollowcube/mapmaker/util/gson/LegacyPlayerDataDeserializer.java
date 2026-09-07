@@ -11,6 +11,8 @@ import net.hollowcube.ipc.player.PlayerData;
 import java.lang.reflect.Type;
 import java.time.Instant;
 
+import java.util.UUID;
+
 /// Go's player responses predate [PlayerData]: the display name is `displayNameV2` on the
 /// session endpoints and `displayName` on v4, the map size is a `tempMaxMapSize` id, and
 /// permissions are an unsigned decimal string.
@@ -22,7 +24,7 @@ public final class LegacyPlayerDataDeserializer implements JsonDeserializer<Play
         var settings = obj.get("settings");
         var permissions = obj.get("permissions");
         return new PlayerData(
-            obj.get("id").getAsString(),
+            UUID.fromString(obj.get("id").getAsString()),
             obj.get("username").getAsString(),
             context.deserialize(displayName, DisplayName.class),
             settings == null || settings.isJsonNull() ? new JsonObject() : settings.getAsJsonObject(),

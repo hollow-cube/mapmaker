@@ -3,26 +3,25 @@ package net.hollowcube.mapmaker.command.relationship;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public class UnblockCommand extends CommandDsl {
     private final Argument<String> targetArg;
 
-    private final PlayerClient players;
-    private final PlayerService playerService;
+    private final SocialService social;
 
-    public UnblockCommand(@NotNull PlayerClient players, @NotNull PlayerService playerService) {
+    public UnblockCommand(@NotNull PlayerService players, @NotNull SocialService social) {
         super("unblock");
-        this.players = players;
-        this.playerService = playerService;
+        this.social = social;
         this.category = CommandCategories.SOCIAL;
         this.description = "Unblocks a player";
         this.examples = List.of("/unblock SethPRG");
@@ -42,10 +41,9 @@ public class UnblockCommand extends CommandDsl {
 
         var targetRaw = context.getRaw(this.targetArg);
 
-        try {
-            this.playerService.unblockPlayer(player.getUuid().toString(), targetId);
+        if (this.social.unblock(player.getUuid(), UUID.fromString(targetId))) {
             player.sendMessage(Component.translatable("command.unblock.success", Component.text(targetRaw)));
-        } catch (PlayerService.NotFoundError ex) {
+        } else {
             player.sendMessage(Component.translatable("command.unblock.not_blocked", Component.text(targetRaw)));
         }
     }

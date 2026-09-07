@@ -1,6 +1,8 @@
 package net.hollowcube.ipc.map;
 
 import com.google.gson.JsonObject;
+import com.google.gson.annotations.JsonAdapter;
+import net.hollowcube.ipc.util.JsonValueAdapter;
 import net.hollowcube.ipc.util.Position;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,7 +116,7 @@ public record MapData(
         Position spawnPoint,
         List<String> tags,
         MapLeaderboard leaderboard,
-        JsonObject extra
+        @JsonAdapter(JsonValueAdapter.class) JsonObject extra
     ) {
         public Settings {
             tags = List.copyOf(tags);

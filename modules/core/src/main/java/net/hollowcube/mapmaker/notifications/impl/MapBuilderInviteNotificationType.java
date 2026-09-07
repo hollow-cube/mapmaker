@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
 import com.google.gson.JsonObject;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
-import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
@@ -12,6 +12,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 
 import java.util.List;
+import java.util.UUID;
 
 @AutoService(PlayerNotificationType.class)
 public final class MapBuilderInviteNotificationType implements PlayerNotificationType {
@@ -32,7 +33,7 @@ public final class MapBuilderInviteNotificationType implements PlayerNotificatio
         var inviterId = data.get("inviterId").getAsString();
         var mapId = data.get("mapId").getAsString();
 
-        var inviterDisplayName = context.api().players.getDisplayName(inviterId);
+        var inviterDisplayName = context.api().players.displayName(UUID.fromString(inviterId));
         var map = context.api().maps.get(mapId);
 
         return new EntryData(map.id().toString(), Component.text(map.name()), inviterDisplayName.render());

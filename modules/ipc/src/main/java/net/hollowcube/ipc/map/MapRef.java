@@ -6,7 +6,7 @@ import java.util.UUID;
 
 /// The two spellings a map is asked for by: its uuid, or the `000-000-000` published id, which
 /// players type and which is also accepted without the dashes.
-public sealed interface MapRef permits MapRef.Uuid, MapRef.Published {
+public sealed interface MapRef {
 
     record Uuid(UUID id) implements MapRef {}
 

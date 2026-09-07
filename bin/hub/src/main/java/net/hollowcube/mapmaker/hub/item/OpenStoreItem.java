@@ -31,7 +31,7 @@ public class OpenStoreItem extends ItemHandler {
         var world = MapWorld.forPlayer(click.player());
         if (world == null) return; // Sanity
 
-        Panel.open(click.player(), new StoreView(world.server().playerService()));
+        Panel.open(click.player(), new StoreView(world.server().accountService()));
     }
 
 }

@@ -6,8 +6,8 @@ import com.google.gson.JsonObject;
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.ipc.player.PlayerData;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.kyori.adventure.text.Component;
@@ -20,6 +20,7 @@ import org.jetbrains.annotations.TestOnly;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 /// The shared [PlayerData] snapshot plus what only this server knows about the session:
@@ -42,11 +43,11 @@ public final class LocalPlayer {
 
     @TestOnly
     public LocalPlayer(@NotNull Player player) {
-        this(player.getUuid().toString(), player.getUsername());
+        this(player.getUuid(), player.getUsername());
     }
 
     @TestOnly
-    public LocalPlayer(@NotNull String id, @NotNull String username) {
+    public LocalPlayer(@NotNull UUID id, @NotNull String username) {
         this(new PlayerData(id, username, DisplayName.of(username), new JsonObject(),
             0, 0, null, 0, 0, MapSize.NORMAL, 0, 0));
     }
@@ -55,25 +56,12 @@ public final class LocalPlayer {
         return info.get();
     }
 
-    public boolean writeUpdatesUpstream(@NotNull PlayerService playerService) {
-        //todo need to add a lock here
-        if (!updates.hasChanges()) return true;
-        try {
-            playerService.updatePlayerData(id(), updates);
-            updates = new PlayerDataUpdateRequest();
-            return true;
-        } catch (Exception e) {
-            ExceptionReporter.reportException(e); // Dont associate with the user, we don't know if they are the initiator
-            return false;
-        }
-    }
-
-    public boolean writeUpdatesUpstream(@NotNull PlayerClient players) {
+    public boolean writeUpdatesUpstream(@NotNull PlayerService players) {
         //todo need to add a lock here
         var settingChanges = updates.settings();
         if (settingChanges == null) return true;
         try {
-            players.updatePlayerSettings(id(), settingChanges);
+            players.updateSettings(id(), settingChanges);
             updates = new PlayerDataUpdateRequest();
             return true;
         } catch (Exception e) {
@@ -82,7 +70,7 @@ public final class LocalPlayer {
         }
     }
 
-    public @NotNull String id() {
+    public @NotNull UUID id() {
         return info.get().id();
     }
 

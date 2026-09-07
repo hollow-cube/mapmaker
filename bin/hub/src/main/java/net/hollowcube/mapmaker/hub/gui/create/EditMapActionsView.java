@@ -53,7 +53,7 @@ public class EditMapActionsView extends Panel {
         final var player = Objects.requireNonNull(host.player());
         async(() -> {
             try {
-                var playerId = localPlayer(player).id();
+                var playerId = localPlayer(player).id().toString();
                 maps.delete(playerId, map.id().toString(), null);
 
                 player.closeInventory();

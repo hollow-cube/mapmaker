@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
-import net.hollowcube.mapmaker.api.notifications.Notification;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.player.responses.PlayerNotificationResponse;
 import net.hollowcube.mapmaker.util.ServiceContext;

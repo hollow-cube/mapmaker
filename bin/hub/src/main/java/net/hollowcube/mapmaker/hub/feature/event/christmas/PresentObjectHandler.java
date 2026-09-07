@@ -71,8 +71,8 @@ public class PresentObjectHandler extends ObjectEntityHandler {
 
         var playerData = localPlayer(player);
         var eventData = playerData.getSetting(EventData.SETTING);
-        var service = world.server().playerService();
-        var playerId = playerData.id();
+        var service = world.server().accountService();
+        var playerId = playerData.id().toString();
 
         if (player.getDistance(this.entity) > 6f) {
             player.sendMessage(Component.translatable("advent.present.too_far"));
@@ -92,7 +92,7 @@ public class PresentObjectHandler extends ObjectEntityHandler {
             player.updateTag(CLICK_TASK, previous -> {
                 if (previous != null && previous.isAlive()) return previous;
                 return FutureUtil.createVirtual(() -> {
-                    playerData.writeUpdatesUpstream(service);
+                    playerData.writeUpdatesUpstream(world.server().api().players);
                     if (reward != null && !service.getUnlockedCosmetics(playerId).contains(reward.path())) {
                         service.buyCosmetic(playerId, reward, 0, 0, null);
                         player.sendMessage(Component.translatable("advent.present.found_cosmetic", reward.displayName()));

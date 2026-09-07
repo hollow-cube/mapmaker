@@ -8,7 +8,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
@@ -48,10 +48,10 @@ public final class StoreHelpers {
         }
     }
 
-    public static void buyPackage(@NotNull PlayerService playerService, @NotNull Player player, @NotNull Package packageName) {
+    public static void buyPackage(@NotNull AccountService accountService, @NotNull Player player, @NotNull Package packageName) {
         try {
             var playerData = localPlayer(player);
-            var resp = playerService.createCheckoutLink(
+            var resp = accountService.createCheckoutLink(
                 PURCHASE_SOURCE, playerData.username(), packageName.name().toLowerCase(Locale.ROOT));
 
             var url = resp.url();
@@ -75,7 +75,7 @@ public final class StoreHelpers {
         return upgrade.has(localPlayer(player));
     }
 
-    public static void buyUpgrade(@NotNull PlayerService playerService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
+    public static void buyUpgrade(@NotNull AccountService accountService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
         if (isUpgradeOwned(player, upgrade))
             return; // Sanity check
 
@@ -94,14 +94,14 @@ public final class StoreHelpers {
         try {
             var meta = new JsonObject();
             meta.addProperty("source", "ingame/store");
-            playerService.buyUpgrade(playerData.id(), upgrade.name().toLowerCase(Locale.ROOT), upgrade.cubits(), meta);
+            accountService.buyUpgrade(playerData.id().toString(), upgrade.name().toLowerCase(Locale.ROOT), upgrade.cubits(), meta);
 
             // Success! Preempt the update message by updating locally
             playerData.setCubits(playerData.cubits() - upgrade.cubits());
             playerData.updateFromMapUpgrade(upgrade.mapSlots(), upgrade.maxMapSize(), upgrade.mapBuilders());
 
             player.sendMessage(upgrade.buyComponent());
-        } catch (PlayerService.NotFoundError e) {
+        } catch (AccountService.NotFoundError e) {
             player.sendMessage(Component.translatable("store.add-ons.buy.error"));
             player.closeInventory();
         } catch (Exception e) {

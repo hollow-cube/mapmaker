@@ -4,7 +4,7 @@ import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.api.notifications.Notification;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.util.ServiceContext;
@@ -59,7 +59,7 @@ public class NotificationListView extends Panel {
         if (host == null) return List.of(); // This happens if the async task finishes after the panel is closed
 
         var playerId = localPlayer(host.player()).id();
-        var notifications = this.context.api().notifications.list(playerId, page, PAGE_SIZE, false);
+        var notifications = this.context.api().notifications.list(playerId, false, page, PAGE_SIZE);
         pagination.totalPages(notifications.totalPages(PAGE_SIZE));
 
         return notifications
@@ -84,7 +84,7 @@ public class NotificationListView extends Panel {
                 .sprite(DEFAULT_ICON)
                 .onLeftClick(() -> host.player().sendMessage(LanguageProviderV2.translateMultiMerged(
                         "gui.notification.unhandled.message",
-                        List.of(Component.text(entry.id()))
+                        List.of(Component.text(entry.id().toString()))
                 )));
 
             this.add(0, 0, button);
@@ -150,7 +150,7 @@ public class NotificationListView extends Panel {
             var context = NotificationListView.this.context;
             if (host == null) return;
 
-            FutureUtil.submitVirtual(() -> context.api().notifications.setReadStatus(notification.entry().id(), true));
+            FutureUtil.submitVirtual(() -> context.api().notifications.markRead(notification.entry().id(), true));
         }
     }
 }

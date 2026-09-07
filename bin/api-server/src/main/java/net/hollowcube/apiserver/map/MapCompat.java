@@ -2,6 +2,7 @@ package net.hollowcube.apiserver.map;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.db.MapSlots;
 import net.hollowcube.apiserver.db.MapStats;
 import net.hollowcube.apiserver.db.Maps;
@@ -47,8 +48,6 @@ final class MapCompat {
     static final String PLAYER_TRANSFER_SUBJECT = "player.transfer";
 
     /// Go's notification events and the two notification types the map service writes.
-    static final String NOTIFICATION_CREATED_SUBJECT = "notification.created";
-    static final String NOTIFICATION_DELETED_SUBJECT = "notification.deleted";
     static final String BUILDER_INVITE_NOTIFICATION = "map_builder_invite";
     static final String BUILDER_REJECTED_NOTIFICATION = "map_builder_rejected";
 
@@ -143,7 +142,7 @@ final class MapCompat {
     /// has.
     static MapLeaderboard leaderboard(@Nullable String column) {
         if (column == null) return MapLeaderboard.DEFAULT;
-        var json = JsonParser.parseString(column).getAsJsonObject();
+        var json = Json.object(column);
         return new MapLeaderboard(
             json.get("asc").getAsBoolean(),
             // A format Go grows that this build does not have still has to read, or the map it is
@@ -192,19 +191,4 @@ final class MapCompat {
         return event;
     }
 
-    static JsonObject notificationEvent(
-        UUID playerId,
-        String action,
-        String type,
-        String key,
-        @Nullable JsonObject data
-    ) {
-        var event = new JsonObject();
-        event.addProperty("playerId", playerId.toString());
-        event.addProperty("action", action);
-        event.addProperty("type", type);
-        event.addProperty("key", key);
-        event.add("data", data);
-        return event;
-    }
 }

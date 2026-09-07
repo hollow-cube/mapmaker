@@ -3,11 +3,11 @@ package net.hollowcube.mapmaker.command.staff;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.minestom.server.entity.Player;
@@ -40,13 +40,13 @@ public class UnvanishCommand extends CommandDsl {
         boolean isSilent = context.has(silentArg);
 
         var playerData = localPlayer(player);
-        if (!sessionManager.isHidden(playerData.id())) {
+        if (!sessionManager.isHidden(playerData.id().toString())) {
             player.sendMessage("you are already visible");
             return;
         }
 
         try {
-            sessionManager.updateState(playerData.id(), SessionStateUpdateRequest.hidden(false, isSilent));
+            sessionManager.updateState(playerData.id().toString(), SessionStateUpdateRequest.hidden(false, isSilent));
             player.sendMessage("you are now visible");
 
             playerData.setSetting(PlayerSettings.IS_VANISHED, false);

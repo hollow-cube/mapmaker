@@ -46,7 +46,7 @@ public final class CommandLogReporter {
         var world = MapWorld.forPlayer(player);
         var run = new CommandExecution(
             Instant.now(),
-            localPlayer(player).id(),
+            localPlayer(player).id().toString(),
             ServerRuntime.getRuntime().hostname(),
             world == null ? null : world.map().id().toString(),
             world == null ? null : world.worldId(),

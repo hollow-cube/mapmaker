@@ -90,7 +90,7 @@ public final class MapInviteAcceptedOrRejectedListener implements Closeable {
         }
 
         var targetName = Component.text(targetSession.username());
-        var targetDisplayName = api.players.getDisplayName(targetId).render();
+        var targetDisplayName = api.players.displayName(UUID.fromString(targetId)).render();
 
         var playBuild = map.isPublished() ? "play" : "build";
         var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";

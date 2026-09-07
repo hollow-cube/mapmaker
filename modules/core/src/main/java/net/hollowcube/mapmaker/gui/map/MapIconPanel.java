@@ -76,7 +76,7 @@ public class MapIconPanel extends Panel {
         super.mount(host, isInitial);
 
         if (this.authorName != null) return;
-        async(() -> updateAuthor(api.players.getDisplayName(map.owner().toString())));
+        async(() -> updateAuthor(api.players.displayName(map.owner())));
     }
 
     private void updateAuthor(@NotNull DisplayName displayName) {

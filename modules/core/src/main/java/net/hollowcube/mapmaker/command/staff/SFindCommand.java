@@ -15,6 +15,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
@@ -51,7 +52,7 @@ public class SFindCommand extends CommandDsl {
             return;
         }
 
-        var targetName = api.players.getDisplayName(target).render();
+        var targetName = api.players.displayName(UUID.fromString(target)).render();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
                 player.sendMessage(Component.translatable("command.sfind.result.hub", targetName));

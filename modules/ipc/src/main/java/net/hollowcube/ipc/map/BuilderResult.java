@@ -5,11 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 /// What became of an invitation, acceptance, rejection or removal.
-public sealed interface BuilderResult permits
-    BuilderResult.Success, BuilderResult.AlreadyDone, BuilderResult.NoSlots,
-    BuilderResult.CapacityReached, BuilderResult.InvitesDisabled, BuilderResult.AlreadyBuilder,
-    BuilderResult.InviteGone, BuilderResult.MapNotFound, BuilderResult.PlayerNotFound,
-    BuilderResult.MapPublished, BuilderResult.Owner, BuilderResult.Unknown {
+public sealed interface BuilderResult {
 
     /// Whether the builders are as asked, whether this call or an earlier one made them so.
     default boolean succeeded() {

@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
+import java.util.UUID;
 
 public class OpenNotificationsItem extends ItemHandler {
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/notifications"));
@@ -47,7 +48,7 @@ public class OpenNotificationsItem extends ItemHandler {
         if (playerId == null) return;
 
         FutureUtil.submitVirtual(() -> {
-            var response = api.notifications.list(playerId, 0, 1, true);
+            var response = api.notifications.list(UUID.fromString(playerId), true, 0, 1);
             if (response.isEmpty()) return;
             var hasOne = response.count() == 1;
             var amount = response.count();

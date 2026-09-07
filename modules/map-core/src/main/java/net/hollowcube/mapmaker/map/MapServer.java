@@ -4,7 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -25,7 +25,7 @@ public interface MapServer {
 
     @NotNull SessionService sessionService();
 
-    @NotNull PlayerService playerService();
+    @NotNull AccountService accountService();
 
     @NotNull PunishmentService punishmentService();
 
@@ -34,7 +34,7 @@ public interface MapServer {
     default @NotNull ServiceContext createServiceContext() {
         return new ServiceContext(
             this.api(),
-            this.playerService(),
+            this.accountService(),
             this.bridge()
         );
     }

@@ -4,8 +4,8 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
@@ -30,7 +30,7 @@ abstract class AbstractPunishCommand extends CommandDsl {
     private final Argument<String> commentArgument = Argument.GreedyString("comment");
 
     AbstractPunishCommand(@NotNull String name, @NotNull PunishmentType type, @NotNull PunishmentService service,
-                          @NotNull PlayerClient players) {
+                          @NotNull PlayerService players) {
         super(name);
 
         this.service = service;

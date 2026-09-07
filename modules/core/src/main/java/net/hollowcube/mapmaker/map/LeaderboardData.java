@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.map;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.ipc.map.MapLeaderboard;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import org.jetbrains.annotations.Blocking;
@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static net.kyori.adventure.text.Component.text;
 
@@ -48,12 +49,13 @@ public record LeaderboardData(
      * @return Entry text, or null if the leaderboard is empty.
      */
     @Blocking
-    public @Nullable List<Component> toComponents(@NotNull PlayerClient players, MapLeaderboard.Format lbFormat, boolean pad) {
+    public @Nullable List<Component> toComponents(@NotNull PlayerService players, MapLeaderboard.Format lbFormat, boolean pad) {
         if (top().isEmpty()) return null;
 
+        var names = players.displayNames(top().stream().map(Entry::player).map(UUID::fromString).toList());
         Component[] displayNames = new Component[top().size()];
         for (var i = 0; i < top().size(); i++) {
-            displayNames[i] = players.getDisplayName(top().get(i).player()).render();
+            displayNames[i] = names.get(top().get(i).player()).render();
         }
 
         var result = new ArrayList<Component>();
@@ -83,7 +85,6 @@ public record LeaderboardData(
                 case 3 -> COLOR_BRONZE;
                 default -> COLOR_DEFAULT;
             }));
-
 
             comp.append(displayNames[i])
                 .append(text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])))

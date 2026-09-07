@@ -121,9 +121,9 @@ class WireWalkerTest {
         assertThat(compile("""
             @Ipc
             public interface EchoService {
-                com.google.gson.JsonObject raw(String id);
+                com.google.gson.JsonArray raw(String id);
             }
-            """)).succeeded();
+            """)).hadErrorContaining("com.google.gson.JsonArray is raw json");
 
         assertThat(compile("""
             @Ipc
@@ -131,6 +131,39 @@ class WireWalkerTest {
                 Map<String, Object> raw(String id);
             }
             """)).hadErrorContaining("java.lang.Object is raw json");
+    }
+
+    @Test
+    void requiresTheNullKeepingAdapterOnOpaqueJsonComponents() {
+        assertThat(compile("""
+            @Ipc
+            public interface EchoService {
+                Settings get(String id);
+                record Settings(com.google.gson.JsonObject values) {}
+            }
+            """)).hadErrorContaining("must be `@JsonAdapter(JsonValueAdapter.class)`");
+
+        assertThat(compile("""
+            @Ipc
+            public interface EchoService {
+                Settings get(String id);
+                record Settings(
+                    @com.google.gson.annotations.JsonAdapter(net.hollowcube.ipc.util.JsonValueAdapter.class)
+                    com.google.gson.JsonObject values
+                ) {}
+            }
+            """)).succeededWithoutWarnings();
+    }
+
+    @Test
+    void acceptsAnOpaqueJsonObject() {
+        assertThat(compile("""
+            @Ipc
+            public interface EchoService {
+                com.google.gson.JsonObject settings(String id);
+                void patch(String id, com.google.gson.JsonElement patch);
+            }
+            """)).succeededWithoutWarnings();
     }
 
     @Test
@@ -339,5 +372,22 @@ class WireWalkerTest {
                   }
                 }
                 """);
+    }
+
+    @Test
+    void acceptsUuidMapKeys() {
+        assertThat(compile("""
+            @Ipc
+            public interface EchoService {
+                java.util.Map<java.util.UUID, String> names(java.util.List<java.util.UUID> ids);
+            }
+            """)).succeeded();
+
+        assertThat(compile("""
+            @Ipc
+            public interface EchoService {
+                java.util.Map<Integer, String> names(String id);
+            }
+            """)).hadErrorContaining("a wire Map is keyed by String or UUID");
     }
 }

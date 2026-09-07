@@ -1,18 +1,18 @@
 package net.hollowcube.mapmaker.command.invite;
 
 import net.hollowcube.command.CommandContext;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 public class AcceptCommand extends AbstractInviteServiceCommand {
 
-    public AcceptCommand(@NotNull PlayerInviteService inviteService, @NotNull PlayerService playerService,
-                         @NotNull PlayerClient players, @NotNull SessionManager sessionManager) {
-        super("accept", inviteService, playerService, players, sessionManager, "The player to accept the invite from", false);
+    public AcceptCommand(@NotNull PlayerInviteService inviteService, @NotNull SocialService social,
+                         @NotNull PlayerService players, @NotNull SessionManager sessionManager) {
+        super("accept", inviteService, social, players, sessionManager, "The player to accept the invite from", false);
 
         description = "Accept any pending request or invite from a player";
 

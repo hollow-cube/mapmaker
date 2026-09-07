@@ -104,7 +104,7 @@ public class MapReportView extends Panel {
 
         var player = host.player();
         player.closeInventory();
-        var playerId = localPlayer(player).id();
+        var playerId = localPlayer(player).id().toString();
         var req = new MapReport(playerId, new ArrayList<>(options.selectedItems()), comment, null, null);
         try {
             maps.report(map.id().toString(), req);

@@ -28,7 +28,7 @@ final class HeadsQueriesImpl implements HeadsQueries {
         from head_db
         where head_db_search(name, tags) @@ to_tsquery('simple', ?)
         order by ts_rank(head_db_search(name, tags), to_tsquery('simple', ?)) desc, head_db.id
-        limit ? offset ?""";
+        offset ? limit ?""";
 
     private static final String GET_HEADS_WITH_CATEGORY = """
         select head_db.*,
@@ -36,7 +36,7 @@ final class HeadsQueriesImpl implements HeadsQueries {
         from head_db
         where category = ?
         order by head_db.name, head_db.id
-        limit ? offset ?""";
+        offset ? limit ?""";
 
     private final ConnectionSource source;
 
@@ -64,15 +64,15 @@ final class HeadsQueriesImpl implements HeadsQueries {
     }
 
     @Override
-    public List<HeadsQueries.GetHeadsWithSearchRow> getHeadsWithSearch(String query, long limit,
-            long offset) {
+    public List<HeadsQueries.GetHeadsWithSearchRow> getHeadsWithSearch(String query, long offset,
+            long limit) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(GET_HEADS_WITH_SEARCH)) {
                 ps.setString(1, query);
                 ps.setString(2, query);
-                ps.setLong(3, limit);
-                ps.setLong(4, offset);
+                ps.setLong(3, offset);
+                ps.setLong(4, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<HeadsQueries.GetHeadsWithSearchRow> rows = new ArrayList<>();
                     while (rs.next()) rows.add(new HeadsQueries.GetHeadsWithSearchRow(HeadDb.read(rs, 1), rs.getLong(6)));
@@ -88,13 +88,13 @@ final class HeadsQueriesImpl implements HeadsQueries {
 
     @Override
     public List<HeadsQueries.GetHeadsWithCategoryRow> getHeadsWithCategory(String category,
-            long limit, long offset) {
+            long offset, long limit) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(GET_HEADS_WITH_CATEGORY)) {
                 ps.setString(1, category);
-                ps.setLong(2, limit);
-                ps.setLong(3, offset);
+                ps.setLong(2, offset);
+                ps.setLong(3, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<HeadsQueries.GetHeadsWithCategoryRow> rows = new ArrayList<>();
                     while (rs.next()) rows.add(new HeadsQueries.GetHeadsWithCategoryRow(HeadDb.read(rs, 1), rs.getLong(6)));

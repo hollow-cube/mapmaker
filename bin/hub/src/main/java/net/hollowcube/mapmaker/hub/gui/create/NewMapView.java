@@ -10,7 +10,7 @@ import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.LockedButton;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.kyori.adventure.text.Component;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -23,7 +23,7 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 public class NewMapView extends Panel {
 
     private final MapClient maps;
-    private final PlayerService playerService;
+    private final AccountService accountService;
     private final Consumer<MapData> onNewMap;
 
     private final AtomicBoolean submitting = new AtomicBoolean();
@@ -31,10 +31,10 @@ public class NewMapView extends Panel {
     private final RadioSelect<MapSize> sizeSelect;
     private final Button confirmButton;
 
-    public NewMapView(MapClient maps, PlayerService playerService, Consumer<MapData> onNewMap) {
+    public NewMapView(MapClient maps, AccountService accountService, Consumer<MapData> onNewMap) {
         super(9, 10);
         this.maps = maps;
-        this.playerService = playerService;
+        this.accountService = accountService;
         this.onNewMap = onNewMap;
 
         background("create_maps2/new/container", -10, -31);
@@ -95,7 +95,7 @@ public class NewMapView extends Panel {
         if (!submitting.compareAndSet(false, true)) return;
         var player = host.player();
         try {
-            var result = maps.create(localPlayer(player).id(), sizeSelect.selected());
+            var result = maps.create(localPlayer(player).id().toString(), sizeSelect.selected());
             if (!(result instanceof CreateMapResult.Success(var map))) {
                 player.sendMessage(MapWriteMessages.failure(result));
                 return;
@@ -113,7 +113,7 @@ public class NewMapView extends Panel {
     }
 
     private void handleOpenStore() {
-        host.pushView(new StoreView(playerService, StoreView.TAB_ADDONS));
+        host.pushView(new StoreView(accountService, StoreView.TAB_ADDONS));
     }
 
     private void updateConfirmButton(MapSize size) {

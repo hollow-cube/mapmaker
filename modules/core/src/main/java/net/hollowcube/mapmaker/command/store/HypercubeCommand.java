@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,12 +22,12 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class HypercubeCommand extends CommandDsl {
     private final ApiClient api;
-    private final PlayerService playerService;
+    private final AccountService accountService;
 
-    public HypercubeCommand(@NotNull ApiClient api, @NotNull PlayerService playerService) {
+    public HypercubeCommand(@NotNull ApiClient api, @NotNull AccountService accountService) {
         super("hypercube");
         this.api = api;
-        this.playerService = playerService;
+        this.accountService = accountService;
 
         addSyntax(playerOnly(this::handleHypercubeInfo));
     }
@@ -35,9 +35,9 @@ public class HypercubeCommand extends CommandDsl {
     private void handleHypercubeInfo(@NotNull Player player, @NotNull CommandContext context) {
         try {
             var playerId = localPlayer(player).id();
-            var hypercube = api.players.getHypercube(playerId);
+            var hypercube = api.players.hypercube(playerId);
             if (hypercube == null) {
-                Panel.open(player, new StoreView(playerService, TAB_HYPERCUBE));
+                Panel.open(player, new StoreView(accountService, TAB_HYPERCUBE));
                 return;
             }
 

@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.hub.gui.create.CreateMapsView;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -19,13 +19,13 @@ public class CreateMapsItem extends ItemHandler {
     public static final Key ID = Key.key("mapmaker:create_maps");
 
     private final ApiClient api;
-    private final PlayerService playerService;
+    private final AccountService accountService;
     private final ServerBridge bridge;
 
-    public CreateMapsItem(ApiClient api, PlayerService playerService, ServerBridge bridge) {
+    public CreateMapsItem(ApiClient api, AccountService accountService, ServerBridge bridge) {
         super(ID, RIGHT_CLICK_ANY);
         this.api = api;
-        this.playerService = playerService;
+        this.accountService = accountService;
         this.bridge = bridge;
     }
 
@@ -40,7 +40,7 @@ public class CreateMapsItem extends ItemHandler {
 
         FutureUtil.submitVirtual(() -> {
             try {
-                CreateMapsView.open(player, api, playerService, bridge);
+                CreateMapsView.open(player, api, accountService, bridge);
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
             }

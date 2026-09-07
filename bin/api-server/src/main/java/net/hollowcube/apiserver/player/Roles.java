@@ -55,5 +55,13 @@ public final class Roles {
         return bought;
     }
 
+    public static boolean hasExtendedLimits(RoleType role, @Nullable Instant hypercubeEnd) {
+        return (flags(role, hypercubeEnd) & EXTENDED_LIMITS) != 0;
+    }
+
+    public static boolean isStaff(RoleType role, @Nullable Instant hypercubeEnd) {
+        return (flags(role, hypercubeEnd) & GENERIC_STAFF) != 0;
+    }
+
     private Roles() {}
 }

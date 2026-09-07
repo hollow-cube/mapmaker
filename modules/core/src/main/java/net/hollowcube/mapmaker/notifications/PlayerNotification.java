@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.notifications;
 
 import net.hollowcube.common.components.TranslatableBuilder;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.notifications.impl.PlayerNotificationType;
 import net.hollowcube.mapmaker.panels.InventoryHost;

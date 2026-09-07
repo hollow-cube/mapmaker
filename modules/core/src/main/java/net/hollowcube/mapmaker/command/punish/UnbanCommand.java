@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.command.punish;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
@@ -26,7 +26,7 @@ public class UnbanCommand extends CommandDsl {
 
     public UnbanCommand(
         @NotNull PunishmentService punishmentService,
-        @NotNull PlayerClient players
+        @NotNull PlayerService players
     ) {
         super("unban");
         this.punishmentService = punishmentService;

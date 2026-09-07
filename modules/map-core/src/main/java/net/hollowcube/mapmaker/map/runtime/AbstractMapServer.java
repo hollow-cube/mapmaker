@@ -27,14 +27,17 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.datafix.DataFixer;
-import net.hollowcube.mapmaker.CoreFeatureFlags;
-import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.chat.ChatClient;
 import net.hollowcube.ipc.hdb.HeadDatabaseClient;
 import net.hollowcube.ipc.map.MapClient;
+import net.hollowcube.ipc.notification.NotificationClient;
+import net.hollowcube.ipc.player.PlayerClient;
+import net.hollowcube.ipc.player.SocialClient;
 import net.hollowcube.ipc.replay.ReplayClient;
+import net.hollowcube.mapmaker.CoreFeatureFlags;
+import net.hollowcube.mapmaker.ExceptionReporter;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
 import net.hollowcube.mapmaker.chat.ChatAutoCompleter;
@@ -83,11 +86,12 @@ import net.hollowcube.mapmaker.map.util.ServerInfoHud;
 import net.hollowcube.mapmaker.misc.ExpBarRenderer;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.noop.NoopPlayerInviteService;
-import net.hollowcube.mapmaker.misc.noop.NoopPlayerService;
+import net.hollowcube.mapmaker.misc.noop.NoopAccountService;
 import net.hollowcube.mapmaker.misc.noop.NoopPunishmentService;
 import net.hollowcube.mapmaker.misc.noop.NoopSessionService;
 import net.hollowcube.mapmaker.notifications.NotificationsConsumer;
 import net.hollowcube.mapmaker.player.*;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.punishments.PunishmentManagementListener;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.punishments.PunishmentServiceImpl;
@@ -143,7 +147,7 @@ public abstract class AbstractMapServer implements MapServer {
     protected final OpenTelemetry otel;
     private final ApiClient api;
     private final SessionService sessionService;
-    private final PlayerService playerService;
+    private final AccountService accountService;
     private final PunishmentService punishmentService;
     private PlayerInviteService inviteService; // So many dependencies very yikes
 
@@ -182,18 +186,19 @@ public abstract class AbstractMapServer implements MapServer {
         Wire.setClientVersion(ServerRuntime.getRuntime().version());
         var ipc = createIpcServices(config, otel);
 
-        this.api = new ApiClient(http, ipc.headDatabase(), ipc.chat(), ipc.replays(), ipc.maps());
+        this.api = new ApiClient(http, ipc.headDatabase(), ipc.chat(), ipc.replays(), ipc.maps(),
+            ipc.players(), ipc.social(), ipc.notifications());
 
         var playerServiceUrl = config.get(Player_ServiceConfig.class).url();
         if (!playerServiceUrl.isEmpty()) {
-            playerService = new PlayerServiceImpl(otel, playerServiceUrl);
+            accountService = new AccountServiceImpl(otel, playerServiceUrl);
             punishmentService = new PunishmentServiceImpl(playerServiceUrl);
         } else if (globalConfig.noop()) {
-            playerService = new NoopPlayerService();
+            accountService = new NoopAccountService();
             punishmentService = new NoopPunishmentService();
         } else {
             var localUrl = "http://localhost:9127"; // tilt
-            playerService = new PlayerServiceImpl(otel, localUrl);
+            accountService = new AccountServiceImpl(otel, localUrl);
             punishmentService = new PunishmentServiceImpl(localUrl);
         }
 
@@ -210,7 +215,9 @@ public abstract class AbstractMapServer implements MapServer {
         if (ipcUrl.isEmpty()) ipcUrl = "http://localhost:9124";
         var http = HttpClient.newHttpClient();
         return new IpcServices(new HeadDatabaseClient(http, ipcUrl, otel), new ChatClient(http, ipcUrl, otel),
-            new ReplayClient(http, ipcUrl, otel), new MapClient(http, ipcUrl, otel));
+            new ReplayClient(http, ipcUrl, otel), new MapClient(http, ipcUrl, otel),
+            new PlayerClient(http, ipcUrl, otel), new SocialClient(http, ipcUrl, otel),
+            new NotificationClient(http, ipcUrl, otel));
     }
 
     protected abstract @NotNull String name();
@@ -261,7 +268,7 @@ public abstract class AbstractMapServer implements MapServer {
             throw new RuntimeException(e);
         }
 
-        sessionManager = new SessionManager(sessionService(), playerService(), api().players, jetStream);
+        sessionManager = new SessionManager(sessionService(), api().social, api().players, jetStream);
         shutdowner.queue("session-manager", sessionManager::close);
         FutureUtil.submitVirtual(sessionManager()::sync); // Sync existing sessions with remote
 
@@ -277,7 +284,7 @@ public abstract class AbstractMapServer implements MapServer {
             this.inviteService = new PlayerInviteServiceImpl(otel, "http://localhost:9127", api, sessionManager, bridge); // tilt
         }
 
-        var services = new ServiceContext(api(), playerService(), bridge());
+        var services = new ServiceContext(api(), accountService(), bridge());
 
         if (!globalConfig.noop()) {
             mapInviteListener = new MapInviteListener(api, sessionManager, jetStream);
@@ -335,8 +342,8 @@ public abstract class AbstractMapServer implements MapServer {
     }
 
     @Override
-    public @NotNull PlayerService playerService() {
-        return playerService;
+    public @NotNull AccountService accountService() {
+        return accountService;
     }
 
     @Override
@@ -384,10 +391,10 @@ public abstract class AbstractMapServer implements MapServer {
 
         CompatProvider.load(globalEventHandler);
 
-        CosmeticEventHandler.init(playerService());
+        CosmeticEventHandler.init(accountService(), api().players);
         AbstractAccessoryImpl.addListeners(globalEventHandler);
 
-        PlayerSettingsScreen.init(playerService(), globalEventHandler);
+        PlayerSettingsScreen.init(api().players, globalEventHandler);
         DialogButtons.init(globalEventHandler);
 
         var entityEvents = EventNode.type("mapmaker:map/entity", EventFilter.INSTANCE);
@@ -398,52 +405,52 @@ public abstract class AbstractMapServer implements MapServer {
 
         commandManager.register(new MinestomCommand());
         commandManager.register(new EmojisCommand());
-        if (fullInstance) commandManager.register(new CosmeticsCommand(playerService()));
+        if (fullInstance) commandManager.register(new CosmeticsCommand(accountService(), api().players));
         if (fullInstance) commandManager.register(new RulesCommand());
         commandManager.register(createDebugCommand());
-        commandManager.register(new StoreCommand(playerService()));
-        commandManager.register(new HypercubeCommand(api(), playerService()));
+        commandManager.register(new StoreCommand(accountService()));
+        commandManager.register(new HypercubeCommand(api(), accountService()));
         commandManager.register(new DiscordCommand());
-        if (fullInstance) commandManager.register(new TotpCommand(playerService()));
+        if (fullInstance) commandManager.register(new TotpCommand(accountService()));
         commandManager.register(new NoobCommand());
-        commandManager.register(new HideCommand(playerService()));
+        commandManager.register(new HideCommand(api().players));
         commandManager.register(new SettingsCommand());
         commandManager.register(new BugReportCommand());
-        commandManager.register(new UwUCommand(playerService()));
+        commandManager.register(new UwUCommand(api().players));
 
         if (fullInstance) {
-            commandManager.register(new UnblockCommand(api().players, playerService()));
-            commandManager.register(new BlockCommand(api().players, playerService()));
-            commandManager.register(new FriendCommand(api(), playerService(), sessionManager()));
+            commandManager.register(new UnblockCommand(api().players, api().social));
+            commandManager.register(new BlockCommand(api().players, api().social));
+            commandManager.register(new FriendCommand(api(), api().social, sessionManager()));
         }
 
         if (fullInstance) {
             commandManager.register(new PlayCommand(api(), sessionManager(), bridge()));
             commandManager.register(new WhereCommand(api(), sessionManager()));
             commandManager.register(new ListCommand(sessionManager(), api().players));
-            commandManager.register(new MsgCommand(sessionManager(), chatMessageListener, playerService()));
+            commandManager.register(new MsgCommand(sessionManager(), chatMessageListener, api().social));
             commandManager.register(new ChannelCommand.Global(chatMessageListener));
             commandManager.register(new ChannelCommand.Local(chatMessageListener));
             commandManager.register(new ChannelCommand.Reply(chatMessageListener));
             commandManager.register(new ChannelCommand.Staff(chatMessageListener));
-            commandManager.register(new ChatCommand(playerService()));
+            commandManager.register(new ChatCommand(api().players));
         }
 
         if (fullInstance) {
-            commandManager.register(new RequestCommand(inviteService(), playerService(), api().players, sessionManager()));
-            commandManager.register(new RejectCommand(inviteService(), playerService(), api().players, sessionManager()));
-            commandManager.register(new InviteCommand(inviteService(), playerService(), api().players, sessionManager()));
-            commandManager.register(new AcceptCommand(inviteService(), playerService(), api().players, sessionManager()));
-            commandManager.register(new JoinCommand(inviteService(), playerService(), api().players, sessionManager()));
+            commandManager.register(new RequestCommand(inviteService(), api().social, api().players, sessionManager()));
+            commandManager.register(new RejectCommand(inviteService(), api().social, api().players, sessionManager()));
+            commandManager.register(new InviteCommand(inviteService(), api().social, api().players, sessionManager()));
+            commandManager.register(new AcceptCommand(inviteService(), api().social, api().players, sessionManager()));
+            commandManager.register(new JoinCommand(inviteService(), api().social, api().players, sessionManager()));
         }
 
         commandManager.register(new MapCommand(api(), bridge(), jetStream));
 
         if (fullInstance) {
             commandManager.register(new SFindCommand(api(), sessionManager()));
-            commandManager.register(new VanishCommand(sessionManager(), playerService()));
-            commandManager.register(new UnvanishCommand(sessionManager(), playerService()));
-            commandManager.register(new StaffCommand(playerService()));
+            commandManager.register(new VanishCommand(sessionManager(), api().players));
+            commandManager.register(new UnvanishCommand(sessionManager(), api().players));
+            commandManager.register(new StaffCommand(api().players));
         }
 
         if (fullInstance) {

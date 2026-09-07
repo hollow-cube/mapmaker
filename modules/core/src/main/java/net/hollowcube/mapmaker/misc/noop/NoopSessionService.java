@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public class NoopSessionService implements SessionService {
 
@@ -23,7 +24,7 @@ public class NoopSessionService implements SessionService {
     @Override
     public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin, @NotNull String version, int protocolVersion) {
         return new PlayerData(
-                id, username,
+                UUID.fromString(id), username,
                 DisplayName.of(username),
                 new JsonObject(),
                 0, 0, null, 0, 0, MapSize.NORMAL, 0, 0
@@ -34,7 +35,7 @@ public class NoopSessionService implements SessionService {
     public @NotNull TransferSessionResponse transferSession(@NotNull String id, @NotNull SessionTransferRequest req) {
         return new TransferSessionResponse(
                 new PlayerData(
-                        id, id,
+                        UUID.fromString(id), id,
                         DisplayName.of(id),
                         new JsonObject(),
                         0, 0, null, 0, 0, MapSize.NORMAL, 0, 0

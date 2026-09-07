@@ -1,8 +1,37 @@
 package net.hollowcube.mapmaker.dev;
 
+import io.opentelemetry.api.OpenTelemetry;
+import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
+import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
+import net.hollowcube.apiserver.chat.ChatServiceImpl;
+import net.hollowcube.apiserver.common.NatsPublisher;
+import net.hollowcube.apiserver.common.Pools;
+import net.hollowcube.apiserver.common.PostgresUri;
+import net.hollowcube.apiserver.db.ApiDatabase;
+import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
+import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.apiserver.notification.NotificationServiceImpl;
+import net.hollowcube.apiserver.player.PlayerServiceImpl;
+import net.hollowcube.apiserver.player.SocialServiceImpl;
+import net.hollowcube.apiserver.replay.ReplayServiceImpl;
+import net.hollowcube.apiserver.s3.HttpS3Client;
+import net.hollowcube.apiserver.session.SessionServiceImpl;
+import net.hollowcube.apiworker.job.Worker;
+import net.hollowcube.apiworker.jobs.IndexMapRunner;
+import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.util.*;
+import net.hollowcube.ipc.Wire;
+import net.hollowcube.ipc.anticheat.AnticheatServer;
+import net.hollowcube.ipc.chat.ChatServer;
+import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.map.MapServer;
+import net.hollowcube.ipc.notification.NotificationServer;
+import net.hollowcube.ipc.player.PlayerServer;
+import net.hollowcube.ipc.player.SocialServer;
+import net.hollowcube.ipc.replay.ReplayServer;
+import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
@@ -11,31 +40,8 @@ import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.ipc.map.MapData;
-import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
-import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
-import net.hollowcube.apiserver.chat.ChatServiceImpl;
-import net.hollowcube.apiserver.replay.ReplayServiceImpl;
-import net.hollowcube.apiserver.s3.HttpS3Client;
-import net.hollowcube.apiserver.common.NatsPublisher;
-import net.hollowcube.apiserver.session.SessionServiceImpl;
-import net.hollowcube.apiserver.common.Pools;
-import net.hollowcube.apiserver.common.PostgresUri;
-import net.hollowcube.apiserver.db.ApiDatabase;
-import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
-import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.map.MapServiceImpl;
-import net.hollowcube.apiworker.job.Worker;
-import net.hollowcube.apiworker.jobs.IndexMapRunner;
-import net.hollowcube.apiworker.jobs.PlayerCountRunner;
-import net.hollowcube.posthog.PostHog;
-import net.hollowcube.ipc.Wire;
-import net.hollowcube.ipc.anticheat.AnticheatServer;
-import net.hollowcube.ipc.chat.ChatServer;
-import net.hollowcube.ipc.replay.ReplayServer;
-import net.hollowcube.ipc.hdb.HeadDatabaseServer;
-import net.hollowcube.ipc.map.MapServer;
-import net.hollowcube.ipc.session.SessionServer;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
 import net.hollowcube.mapmaker.util.nats.NatsConfig;
 import net.hollowcube.mapmaker.map.runtime.IpcServices;
@@ -45,9 +51,9 @@ import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.posthog.PostHog;
 import net.hollowcube.terraform.Terraform;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import io.opentelemetry.api.OpenTelemetry;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -162,11 +168,13 @@ public class DevServer extends AbstractMultiMapServer {
         var redis = Pools.redis(System.getenv().getOrDefault("REDIS_ADDRESS", "localhost:6379"));
         shutdowner().queue("dev-ipc-map-redis", redis::close);
 
+        var notifications = new NotificationServiceImpl(db, nats);
         this.ipc = new IpcServices(
             new HeadDatabaseServiceImpl(db),
             new ChatServiceImpl(db, nats),
             new ReplayServiceImpl(db, s3),
-            new MapServiceImpl(db, mapWorlds, nats, redis, PostHog.getClient(), Duration.ZERO));
+            new MapServiceImpl(db, mapWorlds, nats, redis, PostHog.getClient(), Duration.ZERO),
+            new PlayerServiceImpl(db), new SocialServiceImpl(db, notifications), notifications);
         return ipc;
     }
 
@@ -183,6 +191,9 @@ public class DevServer extends AbstractMultiMapServer {
         http.addRoute(AnticheatServer.PATH, new AnticheatServer(new AnticheatServiceImpl(db, store)));
         http.addRoute(MapServer.PATH, new MapServer(ipc.maps()));
         http.addRoute(ReplayServer.PATH, new ReplayServer(ipc.replays()));
+        http.addRoute(PlayerServer.PATH, new PlayerServer(ipc.players()));
+        http.addRoute(SocialServer.PATH, new SocialServer(ipc.social()));
+        http.addRoute(NotificationServer.PATH, new NotificationServer(ipc.notifications()));
     }
 
     @Override

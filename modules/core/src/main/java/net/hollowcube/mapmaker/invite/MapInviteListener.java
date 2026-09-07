@@ -75,7 +75,7 @@ public final class MapInviteListener implements Closeable {
         }
 
         var senderName = Component.text(senderSession.username());
-        var senderDisplayName = api.players.getDisplayName(message.senderId()).render();
+        var senderDisplayName = api.players.displayName(UUID.fromString(message.senderId())).render();
 
         var playBuild = map.isPublished() ? "play" : "build";
         var inviteRequest = message.type() == InviteType.INVITE ? "invite" : "request";

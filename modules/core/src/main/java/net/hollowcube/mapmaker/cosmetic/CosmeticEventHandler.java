@@ -1,10 +1,11 @@
 package net.hollowcube.mapmaker.cosmetic;
 
 import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.gui.store.CosmeticPanel;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
@@ -27,20 +28,20 @@ public class CosmeticEventHandler {
             //            Map.entry((short) 45, CosmeticType.ACCESSORY)
     );
 
-    public static void init(@NotNull PlayerService players) {
+    public static void init(@NotNull AccountService account, PlayerService players) {
         var globalEventHandler = MinecraftServer.getGlobalEventHandler();
-        globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(players, event));
+        globalEventHandler.addListener(InventoryPreClickEvent.class, event -> handleInventoryCosmeticSelector(account, players, event));
         globalEventHandler.addListener(PlayerGiveCreativeItemEvent.class, CosmeticEventHandler::creativeClickListener);
     }
 
-    private static void handleInventoryCosmeticSelector(@NotNull PlayerService players, @NotNull InventoryPreClickEvent event) {
+    private static void handleInventoryCosmeticSelector(@NotNull AccountService account, PlayerService players, @NotNull InventoryPreClickEvent event) {
         if (!(event.getInventory() instanceof PlayerInventory)) return; // Not the player inventory (e one, not just lower section)
         if (!(event.getClick() instanceof Click.Left(int slot))) return;
 
         var cosmeticType = CosmeticType.byIconSlot(slot);
         if (cosmeticType == null) return;
         if (CosmeticPanel.DISABLED_TABS.contains(cosmeticType)) return;
-        Panel.open(event.getPlayer(), new CosmeticPanel(players, cosmeticType));
+        Panel.open(event.getPlayer(), new CosmeticPanel(account, players, cosmeticType));
     }
 
     private static void creativeClickListener(@NotNull PlayerGiveCreativeItemEvent event) {

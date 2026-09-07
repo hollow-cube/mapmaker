@@ -4,30 +4,28 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentLiteral;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.ipc.player.DisplayName;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.BlockResult;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.BlockedPlayer;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.UUID;
 
 public class BlockCommand extends CommandDsl {
     private final Argument<String> targetArg;
     private final Argument<Integer> pageArg = Argument.Int("page").min(1).defaultValue(1);
 
-    private final PlayerClient players;
-    private final PlayerService playerService;
+    private final SocialService social;
 
-    public BlockCommand(@NotNull PlayerClient players, @NotNull PlayerService playerService) {
+    public BlockCommand(@NotNull PlayerService players, @NotNull SocialService social) {
         super("block");
-        this.players = players;
-        this.playerService = playerService;
+        this.social = social;
 
         this.category = CommandCategories.SOCIAL;
         this.description = "Blocks a player";
@@ -49,31 +47,29 @@ public class BlockCommand extends CommandDsl {
         }
         var targetRaw = context.getRaw(this.targetArg);
 
-        try {
-            this.playerService.blockPlayer(player.getUuid().toString(), targetId);
-            player.sendMessage(Component.translatable("command.block.success", Component.text(targetRaw)));
-        } catch (PlayerService.AlreadyExistsError ex) {
-            player.sendMessage(Component.translatable("command.block.already_blocked", Component.text(targetRaw)));
-        } catch (PlayerService.BadRequestError ex) {
-            player.sendMessage(Component.translatable("command.block.cannot_target_staff", Component.text(targetRaw)));
-        }
+        var key = switch (this.social.block(player.getUuid(), UUID.fromString(targetId))) {
+            case BlockResult.Blocked _ -> "command.block.success";
+            case BlockResult.AlreadyBlocked _ -> "command.block.already_blocked";
+            case BlockResult.TargetIsStaff _ -> "command.block.cannot_target_staff";
+            case BlockResult.Unknown _ -> "generic.unknown_error";
+        };
+        player.sendMessage(Component.translatable(key, Component.text(targetRaw)));
     }
 
     private void execListBlocks(@NotNull Player player, @NotNull CommandContext context) {
         int page = context.get(this.pageArg);
-        PlayerService.Page<BlockedPlayer> blocks = this.playerService.getBlockedPlayers(player.getUuid().toString(), new PlayerService.Pageable(page, 10));
-        int pageCount = Math.ceilDiv(blocks.totalItems(), 10);
+        var blocks = this.social.blocks(player.getUuid(), page - 1, 10);
+        int pageCount = Math.ceilDiv(blocks.count(), 10);
 
         if (pageCount == 0) {
             player.sendMessage(Component.translatable("command.block.list.empty"));
             return;
         }
 
-        TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header", Component.text(blocks.page()), Component.text(pageCount)));
-        for (BlockedPlayer block : blocks.items()) {
-            DisplayName displayName = players.getDisplayName(block.playerId());
-            Component username = displayName.render();
-            builder.appendNewline().append(Component.translatable("command.block.list.line", username, Component.text(block.username())));
+        TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header", Component.text(page), Component.text(pageCount)));
+        for (var block : blocks.results()) {
+            var name = block.target().displayName().render();
+            builder.appendNewline().append(Component.translatable("command.block.list.line", name, Component.text(block.target().username())));
         }
         player.sendMessage(builder.build());
     }

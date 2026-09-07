@@ -7,11 +7,11 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.suggestion.Suggestion;
 import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.entity.Player;
@@ -23,7 +23,6 @@ import java.util.function.Predicate;
 import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class ChatCommand extends CommandDsl {
-
 
     private final PlayerService players;
     private final Argument<Channel> channelArg;

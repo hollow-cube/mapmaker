@@ -37,7 +37,7 @@ public class MapListCommand extends CommandDsl {
         String targetId;
         if (!context.has(targetArg)) {
             // No target specified, use self
-            targetId = localPlayer(player).id();
+            targetId = localPlayer(player).id().toString();
         } else {
             // Execute for the target, if they exist.
             targetId = context.get(targetArg);

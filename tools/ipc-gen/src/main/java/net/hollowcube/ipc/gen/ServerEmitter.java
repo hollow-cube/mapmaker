@@ -132,8 +132,8 @@ final class ServerEmitter {
                         Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(returnType).build());
                     returnType = CodeBlock.of("$N", constant);
                 }
-                dispatch.addStatement("ipcResponse = GSON.toJsonTree(impl.$N($L), $L)",
-                    method.name(), arguments.build(), returnType);
+                dispatch.addStatement("ipcResponse = $T.toJsonTree(impl.$N($L), $L)",
+                    IpcNames.WIRE, method.name(), arguments.build(), returnType);
             }
 
             dispatch.endControlFlow();

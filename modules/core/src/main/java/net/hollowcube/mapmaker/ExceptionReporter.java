@@ -16,7 +16,7 @@ public final class ExceptionReporter {
     }
 
     public static void reportException(@NotNull Throwable t, @NotNull LocalPlayer playerData) {
-        reportException(t, playerData.id());
+        reportException(t, playerData.id().toString());
     }
 
     public static void reportException(@NotNull Throwable t, @NotNull Player player) {

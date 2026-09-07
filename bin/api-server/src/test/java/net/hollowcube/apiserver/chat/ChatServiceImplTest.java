@@ -3,8 +3,7 @@ package net.hollowcube.apiserver.chat;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
-import io.nats.client.Connection;
-import net.hollowcube.apiserver.common.NatsPublisher;
+import net.hollowcube.apiserver.common.RecordingNats;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.chat.*;
@@ -16,13 +15,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.io.IOException;
-import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -53,7 +50,7 @@ class ChatServiceImplTest {
     private static final String MAP = "33333333-3333-3333-3333-333333333333";
 
     /// Every publish the service made, in order, as (subject, body).
-    private final List<Map.Entry<String, String>> sent = new ArrayList<>();
+    private final RecordingNats nats = new RecordingNats();
 
     private HttpServer server;
     private ChatClient chat;
@@ -74,7 +71,7 @@ class ChatServiceImplTest {
         );
 
         var db = TEST_DB.database(ApiDatabase::new);
-        var service = new ChatServiceImpl(db, recordingNats(sent));
+        var service = new ChatServiceImpl(db, nats.publisher);
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext(ChatServer.PATH, new ChatServer(service));
         server.start();
@@ -90,31 +87,9 @@ class ChatServiceImplTest {
         server.stop(0);
     }
 
-    /// A publisher over a connection that records what it was handed instead of sending it, so the
-    /// real subjects and the real bytes are what these assert on.
-    private static NatsPublisher recordingNats(List<Map.Entry<String, String>> out) {
-        var connection = (Connection) Proxy.newProxyInstance(
-            ChatServiceImplTest.class.getClassLoader(),
-            new Class<?>[] {Connection.class},
-            (_, method, args) -> {
-                if (method.getName().equals("publish") && args != null && args.length == 3) {
-                    out.add(
-                        Map.entry(
-                            (String) args[0],
-                            new String((byte[]) args[2], StandardCharsets.UTF_8)
-                        )
-                    );
-                    return null;
-                }
-                return method.getReturnType().isPrimitive() ? false : null;
-            }
-        );
-        return new NatsPublisher(connection, Wire.gson());
-    }
-
     /// What went out on the subject servers read today.
     private List<ChatMessage> published() {
-        return sent.stream()
+        return nats.sent.stream()
             .filter(entry -> entry.getKey().equals(ChatMessage.SUBJECT))
             .map(entry -> Wire.gson().fromJson(entry.getValue(), ChatMessage.class))
             .toList();
@@ -122,7 +97,7 @@ class ChatServiceImplTest {
 
     /// What went out on the subject a server too old for the above reads.
     private List<JsonElement> publishedLegacy() {
-        return sent.stream()
+        return nats.sent.stream()
             .filter(entry -> entry.getKey().equals("chat.processed.global"))
             .map(entry -> JsonParser.parseString(entry.getValue()))
             .toList();
@@ -273,7 +248,7 @@ class ChatServiceImplTest {
     @Test
     void send_resolvesAReplyToWhoeverWasLastSpokenTo() {
         chat.send(SENDER, "server-1", ChatChannel.DIRECT, TARGET, "psst", null);
-        sent.clear();
+        nats.sent.clear();
 
         var result = chat.send(TARGET, "server-1", ChatChannel.REPLY, null, "what", null);
 
@@ -522,7 +497,7 @@ class ChatServiceImplTest {
     void send_publishesNothingOnEitherSubjectWhenItRefuses() {
         chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "go fuck yourself", null);
 
-        assertEquals(List.of(), sent);
+        assertEquals(List.of(), nats.sent);
     }
 
     //endregion

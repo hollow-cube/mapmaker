@@ -7,8 +7,7 @@ import org.jetbrains.annotations.Nullable;
 ///
 /// Written as `{"type": "raw", "text": "..."}`; a variant a server is too old to know decodes to
 /// [Unknown] and renders as nothing.
-public sealed interface MessagePart permits
-    MessagePart.Raw, MessagePart.Url, MessagePart.Emoji, MessagePart.Map, MessagePart.Unknown {
+public sealed interface MessagePart {
 
     /// Text as the player typed it.
     record Raw(String text) implements MessagePart {}

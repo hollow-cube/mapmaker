@@ -6,7 +6,7 @@ import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.mapmaker.gui.totp.QrCodeView;
 import net.hollowcube.mapmaker.gui.totp.TotpInputView;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.common.ShowDialogPacket;
@@ -15,9 +15,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class TotpCommand extends CommandDsl {
 
-    private final PlayerService service;
+    private final AccountService service;
 
-    public TotpCommand(@NotNull PlayerService service) {
+    public TotpCommand(@NotNull AccountService service) {
         super("2fa");
 
         this.service = service;
@@ -64,14 +64,14 @@ public class TotpCommand extends CommandDsl {
 
     private void onDisable(@NotNull Player player) {
         String playerId = player.getUuid().toString();
-        if (this.service.checkTotp(playerId, null) == PlayerService.TotpResult.NOT_ENABLED) {
+        if (this.service.checkTotp(playerId, null) == AccountService.TotpResult.NOT_ENABLED) {
             player.sendMessage("You do not have two-factor authentication enabled.");
         } else {
             Panel.open(player, new TotpInputView(
                 "Enter 2FA Code",
                 this.service::checkTotp,
                 result -> {
-                    if (result == PlayerService.TotpResult.NOT_ENABLED || service.removeTotp(playerId) == PlayerService.TotpResult.SUCCESS) {
+                    if (result == AccountService.TotpResult.NOT_ENABLED || service.removeTotp(playerId) == AccountService.TotpResult.SUCCESS) {
                         player.sendMessage("Two-factor authentication has been disabled.");
                     } else {
                         player.sendMessage("Error disabling two-factor authentication.");

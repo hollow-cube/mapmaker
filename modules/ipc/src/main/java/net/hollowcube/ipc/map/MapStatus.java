@@ -5,9 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Instant;
 
 /// Where a map is on the way to being published.
-public sealed interface MapStatus permits
-    MapStatus.Draft, MapStatus.Verifying, MapStatus.ReadyToPublish, MapStatus.Published,
-    MapStatus.NotFound, MapStatus.Unknown {
+public sealed interface MapStatus {
 
     record Draft(PublishReadiness readiness) implements MapStatus {}
 

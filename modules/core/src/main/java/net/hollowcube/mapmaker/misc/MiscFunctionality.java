@@ -122,7 +122,7 @@ public final class MiscFunctionality {
     @Blocking
     public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapClient maps, @NotNull Player player) {
         var playerId = localPlayer(player).id();
-        return getCurrentMap(sessionManager, maps, playerId);
+        return getCurrentMap(sessionManager, maps, playerId.toString());
     }
 
     @Blocking

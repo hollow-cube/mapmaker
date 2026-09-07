@@ -1,39 +1,44 @@
 package net.hollowcube.mapmaker.api;
 
-import net.hollowcube.mapmaker.api.auth.AuthClient;
 import net.hollowcube.ipc.chat.ChatService;
 import net.hollowcube.ipc.hdb.HeadDatabaseService;
 import net.hollowcube.ipc.map.MapService;
+import net.hollowcube.ipc.notification.NotificationService;
+import net.hollowcube.ipc.player.PlayerService;
+import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.ipc.replay.ReplayService;
+import net.hollowcube.mapmaker.api.auth.AuthClient;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
-import net.hollowcube.mapmaker.api.notifications.NotificationClient;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.mapmaker.player.LocalPlayerService;
 
 import java.net.http.HttpResponse;
 
 public final class ApiClient {
 
-    public final PlayerClient players;
+    public final PlayerService players;
+    public final SocialService social;
     public final MapClient maps;
     public final ReplayService replays;
     public final HeadDatabaseService headDatabase;
     public final ChatService chat;
     public final InteractionClient interactions;
-    public final NotificationClient notifications;
+    public final NotificationService notifications;
     public final AuthClient auth;
 
     public ApiClient(
-        PlayerClient players,
+        PlayerService players,
+        SocialService social,
         MapClient maps,
         ReplayService replays,
         HeadDatabaseService headDatabase,
         ChatService chat,
         InteractionClient interactions,
-        NotificationClient notifications,
+        NotificationService notifications,
         AuthClient auth
     ) {
         this.players = players;
+        this.social = social;
         this.maps = maps;
         this.replays = replays;
         this.headDatabase = headDatabase;
@@ -46,14 +51,16 @@ public final class ApiClient {
     /// Everything the Go api-server still serves comes off `http`; everything the java api-server
     /// serves is an ipc client built against its own base url, and so is passed in.
     public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat,
-                     ReplayService replays, MapService maps) {
-        this.players = new PlayerClient.Http(http);
+                     ReplayService replays, MapService maps, PlayerService players, SocialService social,
+                     NotificationService notifications) {
+        this.players = new LocalPlayerService(players);
+        this.social = social;
         this.maps = new MapClient.Http(http, maps);
         this.replays = replays;
         this.headDatabase = headDatabase;
         this.chat = chat;
         this.interactions = new InteractionClient.Http(http);
-        this.notifications = new NotificationClient.Http(http);
+        this.notifications = notifications;
         this.auth = new AuthClient.Http(http);
     }
 

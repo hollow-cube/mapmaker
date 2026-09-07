@@ -1,6 +1,7 @@
 package net.hollowcube.ipc.chat;
 
 import net.hollowcube.ipc.util.NatsMessage;
+import net.hollowcube.ipc.util.Publishable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -22,6 +23,10 @@ public record ChatMessage(
     List<MessagePart> parts,
     long seed,
     boolean senderHasHypercube
-) {
+) implements Publishable {
     public static final String SUBJECT = "chat.message";
+    @Override
+    public String subject() {
+        return SUBJECT;
+    }
 }

@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.player.LocalPlayer;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.store.CostEntry;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class CosmeticButton extends Button {
 
-        private final PlayerService players;
+        private final AccountService players;
 
         private final Cosmetic cosmetic;
         private final boolean locked;
@@ -31,7 +31,7 @@ public class CosmeticButton extends Button {
 
         private boolean previewing = false;
 
-        public CosmeticButton(PlayerService players, Cosmetic cosmetic, boolean locked, LocalPlayer data, PlayerBackpack backpack, List<CosmeticButton> siblings) {
+        public CosmeticButton(AccountService players, Cosmetic cosmetic, boolean locked, LocalPlayer data, PlayerBackpack backpack, List<CosmeticButton> siblings) {
             super(1, 1);
             this.players = players;
             this.cosmetic = cosmetic;
@@ -95,7 +95,7 @@ public class CosmeticButton extends Button {
                     cubits = entry.getValue();
             }
 
-            this.players.buyCosmetic(this.data.id(), this.cost.result(), null, cubits, new JsonObject());
+            this.players.buyCosmetic(this.data.id().toString(), this.cost.result(), null, cubits, new JsonObject());
 
             var icon = this.cost.result().iconItem();
             player.sendMessage(Component.translatable("merchant.trade.success", icon.get(DataComponents.CUSTOM_NAME, Component.empty()).hoverEvent(icon.asHoverEvent())));

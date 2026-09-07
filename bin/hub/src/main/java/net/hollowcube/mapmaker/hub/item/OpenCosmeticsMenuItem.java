@@ -1,9 +1,10 @@
 package net.hollowcube.mapmaker.hub.item;
 
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.gui.store.CosmeticPanel;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.NotNull;
@@ -15,10 +16,12 @@ public class OpenCosmeticsMenuItem extends ItemHandler {
     private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/cosmetic_menu"));
     public static final Key ID = Key.key("mapmaker:cosmetics");
 
+    private final AccountService account;
     private final PlayerService players;
 
-    public OpenCosmeticsMenuItem(@NotNull PlayerService players) {
+    public OpenCosmeticsMenuItem(@NotNull AccountService account, PlayerService players) {
         super(ID, RIGHT_CLICK_ANY);
+        this.account = account;
         this.players = players;
     }
 
@@ -29,7 +32,7 @@ public class OpenCosmeticsMenuItem extends ItemHandler {
 
     @Override
     protected void rightClicked(@NotNull Click click) {
-        Panel.open(click.player(), new CosmeticPanel(this.players));
+        Panel.open(click.player(), new CosmeticPanel(this.account, players));
     }
 
 }

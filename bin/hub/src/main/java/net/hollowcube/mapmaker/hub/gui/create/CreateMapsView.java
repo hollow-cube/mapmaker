@@ -8,7 +8,7 @@ import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.StringComparison;
 import net.minestom.server.entity.Player;
@@ -27,19 +27,19 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
-    public static void open(Player player, ApiClient api, PlayerService playerService, ServerBridge bridge) {
-        var playerId = localPlayer(player).id();
+    public static void open(Player player, ApiClient api, AccountService accountService, ServerBridge bridge) {
+        var playerId = localPlayer(player).id().toString();
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
-            Panel.open(player, new NewMapView(api.maps, playerService, _ -> FutureUtil.submitVirtual(() -> open(player, api, playerService, bridge))));
+            Panel.open(player, new NewMapView(api.maps, accountService, _ -> FutureUtil.submitVirtual(() -> open(player, api, accountService, bridge))));
         } else {
-            Panel.open(player, new CreateMapsView(api, playerService, bridge, slots));
+            Panel.open(player, new CreateMapsView(api, accountService, bridge, slots));
         }
     }
 
     private final ApiClient api;
-    private final PlayerService playerService;
+    private final AccountService accountService;
     private final ServerBridge bridge;
 
     private final Button createButton;
@@ -52,10 +52,10 @@ public class CreateMapsView extends Panel {
     private String searchText = "";
     private @Nullable Runnable remountTask;
 
-    public CreateMapsView(ApiClient api, PlayerService playerService, ServerBridge bridge, List<MapSlot> initialSlots) {
+    public CreateMapsView(ApiClient api, AccountService accountService, ServerBridge bridge, List<MapSlot> initialSlots) {
         super(9, 10);
         this.api = api;
-        this.playerService = playerService;
+        this.accountService = accountService;
         this.bridge = bridge;
         this.slots.addAll(initialSlots);
 
@@ -101,7 +101,7 @@ public class CreateMapsView extends Panel {
 
     private void rebuildSlots() {
         async(() -> {
-            var playerId = localPlayer(this.host.player()).id();
+            var playerId = localPlayer(this.host.player()).id().toString();
             var slots = this.api.maps.getPlayerSlots(playerId).results();
 
             sync(() -> {
@@ -146,7 +146,7 @@ public class CreateMapsView extends Panel {
     private void createMapOrOpenStore() {
         int availableSlots = getAvailableSlots();
         if (availableSlots > 0) {
-            host.pushTransientView(new NewMapView(api.maps, playerService, this::acceptNewMap));
+            host.pushTransientView(new NewMapView(api.maps, accountService, this::acceptNewMap));
             return;
         }
 
@@ -154,9 +154,9 @@ public class CreateMapsView extends Panel {
         if (playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits()) {
             host.pushView(confirm("Buy Map Slot?", FutureUtil.virtual(this::handleBuyMapSlot)));
         } else if (playerData.isHypercube()) {
-            this.host.pushView(new StoreView(playerService, StoreView.TAB_CUBITS));
+            this.host.pushView(new StoreView(accountService, StoreView.TAB_CUBITS));
         } else {
-            this.host.pushView(new StoreView(playerService, StoreView.TAB_HYPERCUBE));
+            this.host.pushView(new StoreView(accountService, StoreView.TAB_HYPERCUBE));
         }
     }
 
@@ -168,12 +168,12 @@ public class CreateMapsView extends Panel {
         if (playerData.isHypercube()) return;
 
         var secondaryTab = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits() ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
-        this.host.pushView(new StoreView(playerService, secondaryTab));
+        this.host.pushView(new StoreView(accountService, secondaryTab));
     }
 
     @Blocking
     private void handleBuyMapSlot(Player player) {
-        StoreHelpers.buyUpgrade(playerService, player, ShopUpgrade.MAP_SLOT);
+        StoreHelpers.buyUpgrade(accountService, player, ShopUpgrade.MAP_SLOT);
         sync(() -> {
             updateCreateButton();
 
@@ -229,11 +229,11 @@ public class CreateMapsView extends Panel {
                 current -> current.map().id().equals(updated.map().id()) ? updated : current);
 
             if (slot.map().isPublished()) {
-                entries.add(new MapSlotEntry.Published(this.api, this.playerService, this.bridge, slot, onPublish, onEdit));
+                entries.add(new MapSlotEntry.Published(this.api, this.accountService, this.bridge, slot, onPublish, onEdit));
             } else if (slot.owner()) {
-                entries.add(new MapSlotEntry.Owner(this.api, this.playerService, this.bridge, slot, onPublish, onEdit));
+                entries.add(new MapSlotEntry.Owner(this.api, this.accountService, this.bridge, slot, onPublish, onEdit));
             } else {
-                entries.add(new MapSlotEntry.Builder(this.api, this.playerService, this.bridge, slot, onPublish, onEdit));
+                entries.add(new MapSlotEntry.Builder(this.api, this.accountService, this.bridge, slot, onPublish, onEdit));
             }
         }
 

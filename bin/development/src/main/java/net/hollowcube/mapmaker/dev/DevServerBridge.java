@@ -48,7 +48,7 @@ public final class DevServerBridge implements ServerBridge {
         var future = new CompletableFuture<Void>();
         onConfigOrDisconnect(player, () -> future.complete(null));
 
-        var playerId = localPlayer(player).id();
+        var playerId = localPlayer(player).id().toString();
         server.addPendingJoin(playerId, mapId, joinMapState.name().toLowerCase(Locale.ROOT));
 
         // We need to remove the player from the map before entering configuration, because by the time we get

@@ -135,7 +135,7 @@ public class DebugCommand extends CommandDsl {
 
     private void handleDebugSelf(@NotNull Player player, @NotNull CommandContext context) {
         var playerData = localPlayer(player);
-        player.sendMessage(Component.text(playerData.username() + " (" + playerData.id().substring(0, 8) + "...)"));
+        player.sendMessage(Component.text(playerData.username() + " (" + playerData.id().toString().substring(0, 8) + "...)"));
         player.sendMessage(Component.text("Display: ").append(playerData.info().displayName().render()));
         var rawSettings = playerData.settingsRawValues();
         player.sendMessage(Component.text("Settings: " + (rawSettings.isEmpty() ? "empty" : "")));

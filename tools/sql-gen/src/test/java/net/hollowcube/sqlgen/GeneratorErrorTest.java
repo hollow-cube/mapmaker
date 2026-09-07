@@ -72,6 +72,17 @@ class GeneratorErrorTest {
     }
 
     @Test
+    void timestampsWithoutTimeZoneAreRejected() throws IOException {
+        var message = generate("""
+            -- name: getTimestamp :one
+            select timestamp '2026-09-06 12:00:00' as created_at;
+            """);
+
+        assertTrue(message.contains("no Java type for Postgres type 'timestamp'"), message);
+        assertTrue(message.contains("getTimestamp"), message);
+    }
+
+    @Test
     void execMustNotReturnColumns() throws IOException {
         var message = generate("""
             -- name: insertThing :exec

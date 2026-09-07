@@ -60,7 +60,7 @@ public class RateMapView extends Panel {
         updateLocalRatingState(resultState);
 
         // Update the remote state async TODO: this should cancel prior request if there is already one out.
-        var playerId = localPlayer(host.player()).id();
+        var playerId = localPlayer(host.player()).id().toString();
         async(() -> {
             maps.setPlayerRating(this.map.id().toString(), playerId, new MapRating(resultState, null));
             sync(() -> this.onChange.accept(newState));

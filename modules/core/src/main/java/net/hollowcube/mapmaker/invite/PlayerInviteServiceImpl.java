@@ -24,6 +24,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
@@ -58,7 +59,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        var targetDisplayName = api.players.getDisplayName(targetId).render();
+        var targetDisplayName = api.players.displayName(UUID.fromString(targetId)).render();
         var targetSession = sessionManager.getSession(targetId);
         if (targetSession == null) {
             sender.sendMessage(Component.translatable("map.join.target_offline", targetDisplayName));
@@ -101,7 +102,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
         }
 
         var senderMapName = Component.text(senderMap.name());
-        var targetDisplayName = api.players.getDisplayName(targetId).render();
+        var targetDisplayName = api.players.displayName(UUID.fromString(targetId)).render();
         if (!doesPlayerOwnMap(sender, senderMap) && !senderMap.isPublished()) {
             sender.sendMessage(Component.translatable("map.invite.no_permission", targetDisplayName, senderMapName));
             return;
@@ -139,7 +140,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
 
     @Override
     public void registerRequest(@NotNull Player sender, @NotNull String targetId) {
-        var targetDisplayName = api.players.getDisplayName(targetId).render();
+        var targetDisplayName = api.players.displayName(UUID.fromString(targetId)).render();
 
         var targetSession = sessionManager.getSession(targetId);
         if (targetSession == null) {
@@ -153,7 +154,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
             return;
         }
 
-        var senderPresence = sessionManager.getSession(localPlayer(sender).id()).presence();
+        var senderPresence = sessionManager.getSession(localPlayer(sender).id().toString()).presence();
         if (senderPresence.mapId().equals(targetPresence.mapId())) {
             sender.sendMessage(Component.translatable("map.request.same_map", targetDisplayName));
             return;
@@ -225,7 +226,7 @@ public final class PlayerInviteServiceImpl extends AbstractHttpService implement
                 String inviteRequest = isInvite ? "invite" : "request";
                 String playBuild = inviteMap.isPublished() ? "play" : "build";
 
-                var senderDisplayName = api.players.getDisplayName(invite.senderId()).render();
+                var senderDisplayName = api.players.displayName(UUID.fromString(invite.senderId())).render();
 
                 String translateString = "map." + playBuild + "." + inviteRequest + "." + acceptReject;
                 sender.sendMessage(Component.translatable(translateString, senderDisplayName, Component.text(inviteMap.name())));

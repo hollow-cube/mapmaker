@@ -10,6 +10,7 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+
 import java.util.*;
 
 /// Walks every type reachable from a wire root and decides whether it is allowed there.
@@ -50,6 +51,8 @@ final class WireWalker {
         "java.time.Instant", "com.google.gson.JsonObject", "com.google.gson.JsonElement");
     private static final Set<String> COLLECTIONS = Set.of("java.util.List", "java.util.Set", "java.util.Collection");
     private static final String MAP = "java.util.Map";
+    private static final Set<String> RAW_JSON = Set.of("com.google.gson.JsonObject", "com.google.gson.JsonElement");
+    private static final Set<String> MAP_KEYS = Set.of("java.lang.String", "java.util.UUID");
 
     private final Messager messager;
     private final TreeMap<String, WireRecord> records = new TreeMap<>();
@@ -128,8 +131,10 @@ final class WireWalker {
             return;
         }
         if (name.equals(MAP)) {
-            if (arguments.size() != 2 || !arguments.getFirst().toString().equals("java.lang.String")) {
-                error(site, "a wire Map is keyed by String; json objects have no other kind of key", path);
+            // Gson writes a UUID key as its string form and reads it back through the UUID adapter,
+            // so it is the one non-String key a json object can carry losslessly.
+            if (arguments.size() != 2 || !MAP_KEYS.contains(arguments.getFirst().toString())) {
+                error(site, "a wire Map is keyed by String or UUID; json objects have no other kind of key", path);
                 return;
             }
             visit(site, arguments.get(1), use, path, typeVariables);
@@ -177,6 +182,10 @@ final class WireWalker {
                 if (hasAnnotation(component, IpcNames.SERIALIZED_NAME_ANNOTATION)
                     || hasAnnotation(component.getAccessor(), IpcNames.SERIALIZED_NAME_ANNOTATION)) {
                     error(component, "component names are the wire names; @SerializedName is not honoured", path);
+                }
+                if (isRawJson(component.asType()) && !hasFieldAnnotation(element, component, IpcNames.JSON_ADAPTER_ANNOTATION)) {
+                    error(component, "an opaque json component must be `@JsonAdapter(JsonValueAdapter.class)`: gson's own "
+                        + "JsonElement adapter cannot be replaced and drops null members, which opaque json uses", path);
                 }
                 fields.add(new Field(component, component.getSimpleName().toString(), component.asType(),
                     Nullability.isNullable(component, component.asType())));
@@ -273,7 +282,7 @@ final class WireWalker {
                 + " variant: a build that predates a new variant decodes it as " + IpcNames.UNKNOWN_VARIANT
                 + ", and an exhaustive switch is what makes that handled. Write "
                 + "`record " + IpcNames.UNKNOWN_VARIANT + "(@Nullable String " + IpcNames.DISCRIMINATOR + ") "
-                + "implements " + element.getSimpleName() + " {}` and add it to the permits clause", path);
+                + "implements " + element.getSimpleName() + " {}` inside the interface", path);
             return;
         }
         sealeds.put(name, new WireSealed(element, ClassName.get(unknown), variants));
@@ -312,6 +321,21 @@ final class WireWalker {
                 return;
             }
         }
+    }
+
+    /// `@JsonAdapter` has no RECORD_COMPONENT target, so javac hangs it on the component's field.
+    private static boolean hasFieldAnnotation(TypeElement record, RecordComponentElement component, String qualifiedName) {
+        for (var member : record.getEnclosedElements()) {
+            if (member.getKind() == ElementKind.FIELD && member.getSimpleName().equals(component.getSimpleName())) {
+                return hasAnnotation(member, qualifiedName);
+            }
+        }
+        return false;
+    }
+
+    private static boolean isRawJson(TypeMirror type) {
+        return type instanceof DeclaredType declared
+            && RAW_JSON.contains(((TypeElement) declared.asElement()).getQualifiedName().toString());
     }
 
     private static boolean hasAnnotation(Element element, String qualifiedName) {

@@ -1,7 +1,7 @@
 -- Queries against player_data and punishments.
 
 -- name: getChatPlayers :many
--- not-null: id, allow_dms, hypercube, muted
+-- not-null: allow_dms, hypercube, muted
 -- Everything chat asks about the people in a message, in one round trip: whether they take direct
 -- messages, whether their emoji render for everyone, and whether they may talk at all.
 --
@@ -26,3 +26,53 @@ from unnest($ids::uuid[]) as asked(id)
                               and (p.expires_at is null or p.expires_at > now())
                             order by p.expires_at desc nulls first
                             limit 1) mute on true;
+
+-- name: getPlayerById :one
+select player_data.*
+from player_data
+where id = $id;
+
+-- name: getPlayerByUsername :one
+select player_data.*
+from player_data
+where lower(username) = lower($username);
+
+-- name: getPlayerNames :many
+-- The columns a display name is computed from, for a batch of ids. Ids with no row are simply
+-- absent; the caller's map says so.
+select id, username, role, hypercube_end
+from player_data
+where id = any ($ids::uuid[]);
+
+-- name: updatePlayerSettings :exec
+-- One statement rather than read-modify-write, so two servers patching different keys both land.
+-- Null deletes only a top-level key; nested objects remain opaque.
+update player_data
+set settings = (settings - coalesce((select array_agg(key)
+                                     from jsonb_each($patch::jsonb)
+                                     where value = 'null'::jsonb), '{}'::text[]))
+    || coalesce((select jsonb_object_agg(key, value)
+                 from jsonb_each($patch::jsonb)
+                 where value <> 'null'::jsonb), '{}'::jsonb)
+where id = $id;
+
+-- name: searchPlayers :many
+-- Substring match, prefix matches first, then the shorter name. `pg_trgm` is not available at
+-- describe time so this is plain `like`; in production the planner still uses Go's trigram index
+-- for the `%q%` predicate.
+select player_data.*
+from player_data
+where id <> all ($exclude::uuid[])
+  and lower(username) like '%' || lower($query::text) || '%'
+order by (lower(username) like lower($query::text) || '%') desc, length(username), username
+limit $limit;
+
+-- name: getPlayerAlts :many
+-- Everyone who has shared an address with the player.
+select player_data.*
+from player_data
+where id in (select theirs.player_id
+             from ip_history mine
+                      join ip_history theirs on theirs.address = mine.address and theirs.player_id <> mine.player_id
+             where mine.player_id = $playerId)
+order by username;

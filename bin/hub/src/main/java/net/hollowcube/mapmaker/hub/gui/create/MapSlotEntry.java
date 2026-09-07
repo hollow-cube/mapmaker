@@ -13,7 +13,7 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -29,7 +29,7 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 public class MapSlotEntry extends Panel {
 
     private final ApiClient api;
-    private final PlayerService playerService;
+    private final AccountService accountService;
     private final ServerBridge bridge;
     private final MapSlot slot;
     private final Runnable onPublish;
@@ -37,12 +37,12 @@ public class MapSlotEntry extends Panel {
 
     private MapSlotEntry(
         ApiClient api,
-        PlayerService playerService, ServerBridge bridge,
+        AccountService accountService, ServerBridge bridge,
         MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
     ) {
         super(9, 1);
         this.api = api;
-        this.playerService = playerService;
+        this.accountService = accountService;
         this.bridge = bridge;
         this.slot = slot;
         this.onPublish = onPublish;
@@ -75,7 +75,7 @@ public class MapSlotEntry extends Panel {
 
         async(() -> {
             // TODO: this constructor is blocking, which is kinda confusing and im not a fan overall.
-            var view = new EditMapView(this.api, this.playerService, this.bridge, slot, this.onPublish, this.onEdit);
+            var view = new EditMapView(this.api, this.accountService, this.bridge, slot, this.onPublish, this.onEdit);
             sync(() -> host.pushView(view));
         });
     }
@@ -91,7 +91,7 @@ public class MapSlotEntry extends Panel {
 
     protected void removeFromMap() {
         var player = host.player();
-        var playerId = localPlayer(player).id();
+        var playerId = localPlayer(player).id().toString();
         host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
                 var result = api.maps.removeMapBuilder(slot.map().id().toString(), playerId);
@@ -115,10 +115,10 @@ public class MapSlotEntry extends Panel {
     public static final class Owner extends MapSlotEntry {
         public Owner(
             ApiClient api,
-            PlayerService playerService, ServerBridge bridge,
+            AccountService accountService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
         ) {
-            super(api, playerService, bridge, slot, onPublish, onEdit);
+            super(api, accountService, bridge, slot, onPublish, onEdit);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.yours";
@@ -157,10 +157,10 @@ public class MapSlotEntry extends Panel {
 
         public Builder(
             ApiClient api,
-            PlayerService playerService, ServerBridge bridge,
+            AccountService accountService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
         ) {
-            super(api, playerService, bridge, slot, onPublish, onEdit);
+            super(api, accountService, bridge, slot, onPublish, onEdit);
             this.api = api;
             this.slot = slot;
 
@@ -193,7 +193,7 @@ public class MapSlotEntry extends Panel {
 
             if (!isInitial) return;
             async(() -> {
-                var ownerDisplayName = api.players.getDisplayName(slot.map().owner().toString()).render();
+                var ownerDisplayName = api.players.displayName(slot.map().owner()).render();
                 sync(() -> {
                     var mapName = MapSettings.getNameSafe(slot.map().settings());
 
@@ -202,17 +202,16 @@ public class MapSlotEntry extends Panel {
                 });
             });
 
-
         }
     }
 
     public static final class Published extends MapSlotEntry {
         public Published(
             ApiClient api,
-            PlayerService playerService, ServerBridge bridge,
+            AccountService accountService, ServerBridge bridge,
             MapSlot slot, Runnable onPublish, Consumer<MapSlot> onEdit
         ) {
-            super(api, playerService, bridge, slot, onPublish, onEdit);
+            super(api, accountService, bridge, slot, onPublish, onEdit);
 
             var map = slot.map();
             var translationKey = "gui.create_maps.slot.published";

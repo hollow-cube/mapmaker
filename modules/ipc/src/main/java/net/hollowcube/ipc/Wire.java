@@ -8,6 +8,7 @@ import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonWriter;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.time.Instant;
 import java.time.format.DateTimeParseException;
 
@@ -37,6 +38,11 @@ public final class Wire {
 
     public static Gson gson() {
         return GSON;
+    }
+
+    public static JsonElement toJsonTree(Object value, Type type) {
+        // Gson.toJsonTree omits null object members, but in opaque JSON they carry meaning.
+        return value instanceof JsonElement json ? json : GSON.toJsonTree(value, type);
     }
 
     /// What this process says it is on every ipc call: the release tag or commit it was built

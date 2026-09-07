@@ -5,7 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
@@ -30,11 +31,11 @@ public class PHistoryCommand extends CommandDsl {
     private final Argument<PunishmentType> typeArg = Argument.Enum("type", PunishmentType.class)
         .description("The type of punishment to check");
 
-    private final PlayerClient players;
+    private final PlayerService players;
     private final PunishmentService punishmentService;
 
     public PHistoryCommand(
-        @NotNull PlayerClient players,
+        @NotNull PlayerService players,
         @NotNull PunishmentService punishmentService
     ) {
         super("phistory");
@@ -67,7 +68,7 @@ public class PHistoryCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = players.getDisplayName(target).render();
+        var targetDisplayName = players.displayName(UUID.fromString(target)).render();
         var builder = Component.text();
         builder.append(Component.translatable("punishment.history.header", targetDisplayName, Component.text(punishments.size())));
 
@@ -84,14 +85,14 @@ public class PHistoryCommand extends CommandDsl {
             }
 
             builder.append(Component.text(" by "));
-            builder.append(players.getDisplayName(punishment.executorId()).render());
+            builder.append(players.displayName(UUID.fromString(punishment.executorId())).render());
 
             if (punishment.revokedAt() != null) {
                 builder.append(Component.text(" ("));
                 builder.append(Component.text("revoked").hoverEvent(HoverEvent.showText(
                     Component.text(Objects.requireNonNullElse(punishment.revokedReason(), "no reason given")))));
                 builder.append(Component.text(" by "));
-                builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> players.getDisplayName(it).render(), Component.text("Unknown")));
+                builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> players.displayName(UUID.fromString(it)).render(), Component.text("Unknown")));
                 builder.append(Component.text(" " + NumberUtil.formatTimeSince(punishment.revokedAt())));
                 builder.append(Component.text(" ago)"));
             } else if (punishment.expiresAt() != null) {

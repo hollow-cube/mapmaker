@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.gui.store;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Switch;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -17,11 +17,11 @@ public class StoreView extends Panel {
     public static final int TAB_HYPERCUBE = 1;
     public static final int TAB_ADDONS = 2;
 
-    public StoreView(@NotNull PlayerService playerService) {
-        this(playerService, TAB_HYPERCUBE);
+    public StoreView(@NotNull AccountService accountService) {
+        this(accountService, TAB_HYPERCUBE);
     }
 
-    public StoreView(@NotNull PlayerService playerService, int defaultTab) {
+    public StoreView(@NotNull AccountService accountService, int defaultTab) {
         super(9, 10);
         background("store/container", -10, -31);
         add(0, 0, title("Store"));
@@ -36,9 +36,9 @@ public class StoreView extends Panel {
             .sprite("store/coins_to_cubits", 2, 3));
 
         var tabs = add(0, 1, new Switch(9, 5, List.of(
-            new CubitsPanel(playerService),
-            new HypercubePanel(playerService),
-            new AddonsPanel(playerService)
+            new CubitsPanel(accountService),
+            new HypercubePanel(accountService),
+            new AddonsPanel(accountService)
         )));
         tabs.onSelect(index -> title.text(TITLES.get(index)));
 

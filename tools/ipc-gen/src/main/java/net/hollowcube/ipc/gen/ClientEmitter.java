@@ -84,8 +84,8 @@ final class ClientEmitter {
             for (var parameter : method.parameters()) {
                 var parameterType = GsonTypes.runtimeType(messager, parameter, parameter.asType());
                 if (parameterType == null) return null;
-                body.addStatement("ipcRequest.add($S, GSON.toJsonTree($N, $L))",
-                    parameter.getSimpleName(), parameter.getSimpleName(), parameterType);
+                body.addStatement("ipcRequest.add($S, $T.toJsonTree($N, $L))",
+                    parameter.getSimpleName(), IpcNames.WIRE, parameter.getSimpleName(), parameterType);
             }
             // The call, as the plumbing below spells it: a json body, or the blob as the body with
             // the arguments in a header.

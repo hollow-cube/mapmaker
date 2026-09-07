@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.notifications.impl;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.mapmaker.api.notifications.Notification;
+import net.hollowcube.ipc.notification.Notification;
 import net.hollowcube.mapmaker.notifications.DefaultActions;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.Sprite;

@@ -7,8 +7,8 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.PlayerUtil;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
@@ -42,12 +42,12 @@ public class PunishmentManagementListener implements Closeable {
         .inactiveThreshold(Duration.ofMinutes(5))
         .build();
 
-    private final PlayerClient players;
+    private final PlayerService players;
 
     private final MessageConsumer consumer;
 
     public PunishmentManagementListener(
-        @NotNull PlayerClient players,
+        @NotNull PlayerService players,
         @NotNull JetStreamWrapper jetStream
     ) {
         this.players = players;
@@ -107,8 +107,8 @@ public class PunishmentManagementListener implements Closeable {
         var typeName = punishment.type().name().toLowerCase(Locale.ROOT);
         var announcement = Component.translatable(
             created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",
-            players.getDisplayName(punishment.playerId()).render(),
-            players.getDisplayName(punishment.executorId()).render(),
+            players.displayName(UUID.fromString(punishment.playerId())).render(),
+            players.displayName(UUID.fromString(punishment.executorId())).render(),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
         );
         for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {

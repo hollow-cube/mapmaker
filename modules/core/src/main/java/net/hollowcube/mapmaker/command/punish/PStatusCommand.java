@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.command.punish;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
-import net.hollowcube.mapmaker.api.players.PlayerClient;
+import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
@@ -18,16 +18,17 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 
 public class PStatusCommand extends CommandDsl {
     private final Argument<String> playerArg;
 
-    private final PlayerClient players;
+    private final PlayerService players;
     private final PunishmentService punishmentService;
 
-    public PStatusCommand(@NotNull PlayerClient players, @NotNull PunishmentService punishmentService) {
+    public PStatusCommand(@NotNull PlayerService players, @NotNull PunishmentService punishmentService) {
         super("pstatus");
         this.players = players;
         this.punishmentService = punishmentService;
@@ -48,7 +49,7 @@ public class PStatusCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = players.getDisplayName(target).render();
+        var targetDisplayName = players.displayName(UUID.fromString(target)).render();
         player.sendMessage(Component.translatable("punishment.status.header", targetDisplayName));
 
         var ban = punishmentService.getActivePunishment(target, PunishmentType.BAN);
@@ -62,7 +63,7 @@ public class PStatusCommand extends CommandDsl {
         if (punishment == null) return Component.translatable("punishment.status.none");
 
         return Component.translatable("punishment.status.entry", List.of(
-            players.getDisplayName(punishment.executorId()).render(),
+            players.displayName(UUID.fromString(punishment.executorId())).render(),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), "none")),
             Component.text(punishment.comment()),
             Component.text(NumberUtil.formatTimeSince(punishment.createdAt())),

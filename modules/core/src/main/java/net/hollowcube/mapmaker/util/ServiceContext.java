@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.util;
 
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import org.jetbrains.annotations.NotNullByDefault;
 
 // TODO: long term this should just be ApiClient.
@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNullByDefault;
 @NotNullByDefault
 public record ServiceContext(
     ApiClient api,
-    PlayerService players,
+    AccountService players,
     ServerBridge bridge
 ) {
 

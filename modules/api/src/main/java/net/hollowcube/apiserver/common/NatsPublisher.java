@@ -12,6 +12,7 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapPropagator;
 import io.opentelemetry.context.propagation.TextMapSetter;
+import net.hollowcube.ipc.util.Publishable;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +93,11 @@ public final class NatsPublisher implements AutoCloseable {
         } finally {
             span.end();
         }
+    }
+
+    /// [Publishable#subject()] picks the subject.
+    public void publish(Publishable message) {
+        publish(message.subject(), message);
     }
 
     /// Whether the connection is up, for the readiness probe. A reconnecting client is not ready:

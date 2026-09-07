@@ -9,12 +9,12 @@ import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapPatch;
 import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.player.PlayerStub;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
-import net.hollowcube.mapmaker.api.players.PlayerDataStub;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.gui.store.StoreHelpers;
@@ -23,7 +23,7 @@ import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.player.LocalPlayer;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.hollowcube.mapmaker.util.Sanity;
@@ -57,7 +57,7 @@ public class EditMapView extends Panel {
     private static final int NAME_INPUT_MAX = 100;
 
     private final ApiClient api;
-    private final PlayerService playerService;
+    private final AccountService accountService;
 
     private MapSlot slot;
     private final MapPatch.Builder editor;
@@ -72,13 +72,13 @@ public class EditMapView extends Panel {
     @Blocking
     public EditMapView(
         ApiClient api,
-        PlayerService playerService,
+        AccountService accountService,
         ServerBridge bridge, MapSlot slot,
         Runnable onPublish, Consumer<MapSlot> onEdit
     ) {
         super(9, 10);
         this.api = api;
-        this.playerService = playerService;
+        this.accountService = accountService;
         this.slot = slot;
         this.editor = new MapPatch.Builder(slot.map());
         this.onEdit = onEdit;
@@ -136,7 +136,7 @@ public class EditMapView extends Panel {
     private void drawBuilderButtons() {
         var pd = localPlayer(host.player());
         // When we want to show a read-only view we will need to change this, for now not necessary.
-        Sanity.check(pd.id().equals(editor.map().owner().toString()), "can only view your own maps right now");
+        Sanity.check(pd.id().equals(editor.map().owner()), "can only view your own maps right now");
 
         var builderSlots = pd.mapBuilders();
 
@@ -154,7 +154,7 @@ public class EditMapView extends Panel {
                     .profile(getPlayerHead2d(builder.id().toString()));
 
                 async(() -> {
-                    var displayName = api.players.getDisplayName(builder.id().toString());
+                    var displayName = api.players.displayName(builder.id());
                     button.translationKey("gui.create_maps.edit.builders." + (builder.pending() ? "pending" : "entry"), displayName.render())
                         .onRightClick(() -> host.pushView(ExtraPanels.confirm(
                             "Remove " + displayName.username() + "?",
@@ -268,7 +268,7 @@ public class EditMapView extends Panel {
         if (hasCubits) {
             host.pushView(confirm("Buy Trusted Builder", FutureUtil.virtual(this::buyBuilderSlot)));
         } else {
-            this.host.pushView(new StoreView(playerService, StoreView.TAB_HYPERCUBE));
+            this.host.pushView(new StoreView(accountService, StoreView.TAB_HYPERCUBE));
         }
     }
 
@@ -277,7 +277,7 @@ public class EditMapView extends Panel {
         boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
 
         this.host.pushView(new StoreView(
-            playerService,
+            accountService,
             hasCubits ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS
         ));
     }
@@ -288,7 +288,7 @@ public class EditMapView extends Panel {
         var nextSlot = latestBuilderUpgrade(playerData);
         if (nextSlot == null) return;
 
-        StoreHelpers.buyUpgrade(playerService, player, nextSlot);
+        StoreHelpers.buyUpgrade(accountService, player, nextSlot);
         sync(this::drawBuilderButtons);
     }
 
@@ -300,10 +300,10 @@ public class EditMapView extends Panel {
     }
 
     private void beginAddMapBuilder() {
-        host.pushView(AnvilSearchView.<PlayerDataStub>builder()
+        host.pushView(AnvilSearchView.<PlayerStub>builder()
             .icon("icon2/anvil/construction_hat")
             .title("Add Map Builder")
-            .searchFunction((query, limit) -> api.players.searchPlayers(query, List.of(editor.map().owner().toString()), limit).results())
+            .searchFunction((query, limit) -> api.players.search(query, List.of(editor.map().owner()), limit))
             // todo would be cool to default to some online players
             // adding onto the above, probably their online friends
             .defaultSearchTerm("")
@@ -312,14 +312,14 @@ public class EditMapView extends Panel {
                 var button = new Button(null, 1, 1)
                     .text(ExtraComponents.noItalic(pds.displayName().render()), List.of())
                     .model(MODEL_8X, null)
-                    .profile(getPlayerHead2d(pds.id()));
-                if (isPlayerInvitePending(pds.id())) {
+                    .profile(getPlayerHead2d(pds.id().toString()));
+                if (isPlayerInvitePending(pds.id().toString())) {
 //                    button.background("create_maps2/head_outline_pending", 4, 4)
 //                        .translationKey("gui.create_maps.edit.builders.already_invited", pds.displayName().asComponent());
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_invited.lore")));
-                } else if (isPlayerInvited(pds.id())) {
+                } else if (isPlayerInvited(pds.id().toString())) {
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.already_added.lore")));
-                } else if (!pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES)) {
+                } else if (!PlayerSettings.ALLOW_BUILDER_INVITES.read(pds.settings())) {
                     button.lorePostfix(List.of(Component.translatable("gui.create_maps.edit.builders.add.search.entry.invites_disabled.lore")));
                 }
                 return button;
@@ -330,11 +330,11 @@ public class EditMapView extends Panel {
     }
 
     @Blocking
-    private boolean addMapBuilder(PlayerDataStub pds) {
-        if (isPlayerInvited(pds.id()) || !pds.getSetting(PlayerSettings.ALLOW_BUILDER_INVITES))
+    private boolean addMapBuilder(PlayerStub pds) {
+        if (isPlayerInvited(pds.id().toString()) || !PlayerSettings.ALLOW_BUILDER_INVITES.read(pds.settings()))
             return false;
 
-        var result = api.maps.inviteMapBuilder(editor.map().id().toString(), pds.id());
+        var result = api.maps.inviteMapBuilder(editor.map().id().toString(), pds.id().toString());
         if (!result.succeeded()) {
             host.player().sendMessage(MapWriteMessages.failure(result));
             return false;

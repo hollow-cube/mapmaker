@@ -17,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
@@ -47,7 +48,7 @@ public class TopTimesInfoType extends CommandDsl {
             sender.sendMessage(Component.text("Player not found"));
             return;
         }
-        Component targetName = api.players.getDisplayName(targetId).render();
+        Component targetName = api.players.displayName(UUID.fromString(targetId)).render();
 
         var resp = api.maps.getPlayerTopTimes(targetId, page - 1, PAGE_SIZE);
         int maxPage = Math.ceilDiv(resp.count(), PAGE_SIZE);
@@ -136,6 +137,5 @@ public class TopTimesInfoType extends CommandDsl {
             return result;
         }
     }
-
 
 }

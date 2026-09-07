@@ -4,7 +4,7 @@ import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.invite.PlayerInviteService;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.mapmaker.player.AccountService;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
@@ -17,7 +17,7 @@ import java.util.Objects;
 public class MockMapServer implements MapServer {
     public ApiClient api;
     public SessionService sessionService;
-    public PlayerService playerService;
+    public AccountService accountService;
     public PunishmentService punishmentService;
     public PlayerInviteService inviteService;
     public SessionManager sessionManager;
@@ -37,8 +37,8 @@ public class MockMapServer implements MapServer {
     }
 
     @Override
-    public @NotNull PlayerService playerService() {
-        return Objects.requireNonNull(playerService, "PlayerService is not initialized");
+    public @NotNull AccountService accountService() {
+        return Objects.requireNonNull(accountService, "AccountService is not initialized");
     }
 
     @Override

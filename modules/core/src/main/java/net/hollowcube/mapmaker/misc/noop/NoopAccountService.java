@@ -4,20 +4,13 @@ import com.google.gson.JsonObject;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.Hats;
 import net.hollowcube.mapmaker.player.*;
-import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.hollowcube.mapmaker.player.responses.TotpSetupResponse;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Set;
 
-public class NoopPlayerService implements PlayerService {
-
-    @Override
-    public void updatePlayerData(@NotNull String id, @NotNull PlayerDataUpdateRequest update) {
-
-    }
+public class NoopAccountService implements AccountService {
 
     @Override
     public @NotNull Set<String> getUnlockedCosmetics(@NotNull String playerId) {
@@ -61,52 +54,6 @@ public class NoopPlayerService implements PlayerService {
     @Override
     public @NotNull TotpResult completeTotpSetup(@NotNull String playerId, @NotNull String code) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull Page<PlayerFriend> getPlayerFriends(@NotNull String playerId, @Nullable Boolean onlineState, @NotNull Pageable pageable) {
-        return Page.empty();
-    }
-
-    @Override
-    public void removeFriend(@NotNull String playerId, @NotNull String targetId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull Page<FriendRequest> getFriendRequests(@NotNull String playerId, boolean incoming, @NotNull Pageable pageable) {
-        return Page.empty();
-    }
-
-    @Override
-    public @NotNull SendFriendRequestResult sendFriendRequest(@NotNull String playerId, @NotNull String targetId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull FriendRequest deleteFriendRequest(@NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void blockPlayer(@NotNull String playerId, @NotNull String targetId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public @NotNull Page<BlockedPlayer> getBlockedPlayers(@NotNull String playerId, @NotNull Pageable pageable) {
-        return Page.empty();
-    }
-
-    @Override
-    public void unblockPlayer(@NotNull String playerId, @NotNull String targetId) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public List<BlockedPlayer> getBlocksBetween(
-        @NotNull String playerId, @NotNull String targetId, boolean bidirectional) {
-        return List.of();
     }
 
 }

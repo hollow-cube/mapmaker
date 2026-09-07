@@ -73,7 +73,7 @@ public class MapIsolateBridge implements ServerBridge {
             onConfigOrDisconnect(player, () -> future.complete(null));
 
             var playerData = localPlayer(player);
-            var res = sessionService.joinHubV2(new JoinHubRequest(playerData.id()));
+            var res = sessionService.joinHubV2(new JoinHubRequest(playerData.id().toString()));
             logger.info("join hub result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
 

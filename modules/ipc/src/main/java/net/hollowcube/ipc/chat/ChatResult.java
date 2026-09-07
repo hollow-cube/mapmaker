@@ -14,9 +14,7 @@ import java.time.Instant;
 /// most have nothing — and a shared bag of optional fields is a lie about all of them: every reader
 /// has to know which fields its own case actually fills. A result this build does not know decodes
 /// to [Unknown].
-public sealed interface ChatResult permits
-    ChatResult.Sent, ChatResult.Muted, ChatResult.Censored, ChatResult.TargetOffline,
-    ChatResult.DmDisabled, ChatResult.MapNotPublished, ChatResult.Unknown {
+public sealed interface ChatResult {
 
     record Sent() implements ChatResult {}
 

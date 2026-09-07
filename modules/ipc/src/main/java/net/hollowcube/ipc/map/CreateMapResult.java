@@ -3,9 +3,7 @@ package net.hollowcube.ipc.map;
 import org.jetbrains.annotations.Nullable;
 
 /// What creating a map answered.
-public sealed interface CreateMapResult permits
-    CreateMapResult.Success, CreateMapResult.NoSlots, CreateMapResult.SizeLocked,
-    CreateMapResult.NotFound, CreateMapResult.Unknown {
+public sealed interface CreateMapResult {
 
     record Success(MapData map) implements CreateMapResult {}
 

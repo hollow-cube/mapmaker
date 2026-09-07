@@ -4,7 +4,7 @@ import net.hollowcube.common.dialogs.DialogBuilder;
 import net.hollowcube.common.events.RequestStatsEvent;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.mapmaker.player.PlayerService;
+import net.hollowcube.ipc.player.PlayerService;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
