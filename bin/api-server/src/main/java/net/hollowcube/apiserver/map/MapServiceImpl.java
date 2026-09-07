@@ -313,7 +313,7 @@ public final class MapServiceImpl implements MapService {
 
                     return new PublishMapResult.Success(mapData(tx.maps, published));
                 });
-            } catch (RuntimeException e) {
+            } catch (Exception e) {
                 if (!Jdbc.hasState(e, Jdbc.UNIQUE_VIOLATION)) throw e;
             }
         }
