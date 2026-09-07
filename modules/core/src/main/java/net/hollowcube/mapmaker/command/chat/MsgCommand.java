@@ -42,7 +42,7 @@ public class MsgCommand extends AbstractChatCommand {
         var message = context.get(messageArg);
 
         if (targetId == null) {
-            player.sendMessage(Component.translatable("generic.other_players_only"));
+            player.sendMessage(Component.translatable("generic.player.offline", Component.text(context.getRaw(targetArg))));
             return;
         }
         if (player.getUuid().toString().equals(targetId)) {

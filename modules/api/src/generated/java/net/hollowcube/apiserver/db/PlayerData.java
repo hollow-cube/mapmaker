@@ -12,10 +12,10 @@ import org.jetbrains.annotations.Nullable;
  * A row of the `player_data` table.
  */
 public record PlayerData(UUID id, String username, Instant firstJoin, Instant lastOnline,
-        long playtime, long experience, @Nullable Boolean betaEnabled, String settings,
-        @Nullable String skin, boolean online, long coins, long cubits,
-        @Nullable Instant hypercubeStart, @Nullable Instant hypercubeEnd, RoleType role,
-        int extraMapSlots, int maxMapSize, int mapBuilders) {
+        long playtime, long experience, @Nullable Boolean betaEnabled, String settings, long coins,
+        long cubits, @Nullable String skin, boolean online, @Nullable Instant hypercubeStart,
+        @Nullable Instant hypercubeEnd, RoleType role, int extraMapSlots, int maxMapSize,
+        int mapBuilders) {
     /**
      * Reads one `player_data` row, its first column at `col`.
      */
@@ -29,10 +29,10 @@ public record PlayerData(UUID id, String username, Instant firstJoin, Instant la
                 rs.getLong(col + 5),
                 rs.getObject(col + 6, Boolean.class),
                 rs.getString(col + 7),
-                rs.getString(col + 8),
-                rs.getBoolean(col + 9),
-                rs.getLong(col + 10),
-                rs.getLong(col + 11),
+                rs.getLong(col + 8),
+                rs.getLong(col + 9),
+                rs.getString(col + 10),
+                rs.getBoolean(col + 11),
                 Jdbc.getInstant(rs, col + 12),
                 Jdbc.getInstant(rs, col + 13),
                 RoleType.fromPg(rs.getString(col + 14)),
