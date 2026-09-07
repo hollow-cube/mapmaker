@@ -80,9 +80,7 @@ final class MapCompat {
                 map.optSubvariant(),
                 Wire.gson().fromJson(map.optSpawnPoint(), Position.class),
                 tags,
-                map.leaderboard() == null
-                    ? MapLeaderboard.DEFAULT
-                    : Wire.gson().fromJson(map.leaderboard(), MapLeaderboard.class),
+                leaderboard(map.leaderboard()),
                 extra(map)
             ),
             verification(map),
@@ -137,13 +135,46 @@ final class MapCompat {
         return extra;
     }
 
-    /// The default leaderboard is stored as null, which is also what every map made before
-    /// leaderboards were configurable has.
+    /// The `leaderboard` column, which is not a wire value even though it holds a wire record:
+    /// Go spells `format` lower case and [Wire#gson()] spells an enum with the constant name, so
+    /// reading it with that gson gives `UNKNOWN` for every map that has one.
+    ///
+    /// Null is the default leaderboard, which is what every map made before they were configurable
+    /// has.
+    static MapLeaderboard leaderboard(@Nullable String column) {
+        if (column == null) return MapLeaderboard.DEFAULT;
+        var json = JsonParser.parseString(column).getAsJsonObject();
+        return new MapLeaderboard(
+            json.get("asc").getAsBoolean(),
+            // A format Go grows that this build does not have still has to read, or the map it is
+            // on cannot be fetched at all.
+            switch (json.get("format").getAsString()) {
+                case "time" -> MapLeaderboard.Format.TIME;
+                case "percent" -> MapLeaderboard.Format.PERCENT;
+                case "number" -> MapLeaderboard.Format.NUMBER;
+                default -> MapLeaderboard.Format.UNKNOWN;
+            },
+            json.get("score").getAsString()
+        );
+    }
+
     static @Nullable String leaderboardColumn(MapLeaderboard board) {
         var isDefault = board.asc()
             && board.format() == MapLeaderboard.Format.TIME
             && "q.playtime".equalsIgnoreCase(board.score().strip());
-        return isDefault ? null : Wire.gson().toJson(board);
+        if (isDefault) return null;
+        var format = switch (board.format()) {
+            case TIME -> "time";
+            case PERCENT -> "percent";
+            case NUMBER -> "number";
+            // `MapPatch` rejects it, so this is only reachable from a caller that skipped it.
+            case UNKNOWN -> throw new IllegalArgumentException("cannot write an unknown format");
+        };
+        var json = new JsonObject();
+        json.addProperty("asc", board.asc());
+        json.addProperty("format", format);
+        json.addProperty("score", board.score());
+        return json.toString();
     }
 
     static MapBuilder builder(MapSlots slot) {

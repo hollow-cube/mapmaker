@@ -144,6 +144,34 @@ class MapServiceImplTest {
     }
 
     @Test
+    void leaderboard_readsAndWritesGosLowerCaseFormat() {
+        var id = create(OWNER).id();
+        TEST_DB.seed(
+            """
+            update maps set leaderboard = '{"asc":false,"format":"percent","score":"q.score"}'
+            where id = '%s'
+            """
+                .formatted(id)
+        );
+        var read = client.get(id.toString()).settings().leaderboard();
+        assertEquals(MapLeaderboard.Format.PERCENT, read.format());
+        assertFalse(read.asc());
+        assertEquals("q.score", read.score());
+
+        var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
+        patch.setLeaderboard(read.withFormat(MapLeaderboard.Format.NUMBER));
+        client.update(id, patch.build());
+        assertEquals(
+            "number",
+            column("select leaderboard ->> 'format' from maps where id = '" + id + "'")
+        );
+        assertEquals(
+            MapLeaderboard.Format.NUMBER,
+            client.get(id.toString()).settings().leaderboard().format()
+        );
+    }
+
+    @Test
     void update_refusesTheAdventureVariant() {
         var id = create(OWNER).id();
         assertEquals(
@@ -581,6 +609,15 @@ class MapServiceImplTest {
             """
                 .formatted(UUID.randomUUID(), map, player, type, completed, playtime)
         );
+    }
+
+    private String column(String sql) {
+        try (var st = TEST_DB.conn().createStatement(); var rs = st.executeQuery(sql)) {
+            rs.next();
+            return rs.getString(1);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 
     private long count(String sql) {
