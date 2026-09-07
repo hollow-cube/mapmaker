@@ -24,7 +24,7 @@ class LegacyPlayerDataDeserializerTest {
                   "%s": [{"type": "username", "text": "Alice", "color": "#3895ff"}],
                   "settings": {"enabled": true}, "playtime": 1234,
                   "coins": 12, "cubits": 34, "hypercubeUntil": "2099-01-01T00:00:00Z",
-                  "permissions": "18446744073709551615", "mapSlots": 5, "tempMaxMapSize": -1, "mapBuilders": 4
+                  "permissions": "18446744073709551615", "mapSlots": 5, "tempMaxMapSize": 4, "mapBuilders": 4
                 }
                 """.formatted(nameField), PlayerData.class);
 

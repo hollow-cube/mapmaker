@@ -7,7 +7,7 @@ public enum MapSize {
     LARGE(1, 300),
     MASSIVE(2, 600),
     COLOSSAL(3, 1200),
-    UNLIMITED(-1, 29_999_984),
+    UNLIMITED(4, 29_999_984),
     UNKNOWN(-2, 150),
     ;
 
@@ -20,8 +20,10 @@ public enum MapSize {
         this.size = size;
     }
 
-    /// The size a stored id means; anything unrecognised, which nothing should have written, is
-    /// read as the smallest so that the map still opens.
+    /// The size a stored id means, which is Go's `model.MapSize`: `maps.size` and
+    /// `player_data.max_map_size` both hold it. Anything unrecognised reads as the smallest so
+    /// that the map still opens, which includes -1 (Go's "unlimited, old, not real") and the tall
+    /// sizes 5 and 6 that were never given out.
     public static MapSize fromId(long id) {
         for (var size : values()) if (size != UNKNOWN && size.id == id) return size;
         return NORMAL;
