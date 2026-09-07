@@ -38,7 +38,6 @@ import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
@@ -77,6 +76,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS;
 
 public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld> {
@@ -357,7 +357,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
     @Override
     public EditorState configurePlayer(Player player) {
-        final var playerData = PlayerData.fromPlayer(player);
+        final var playerData = localPlayer(player);
         SaveState saveState;
         try {
             saveState = server().api().maps.getLatestSaveState(map().id().toString(), playerData.id(),
@@ -440,7 +440,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             saveState.updatePlaytime();
             saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var saveStateUpdate = saveState.createUpsertRequest();
             server().api().maps.updateSaveState(map().id().toString(), playerData.id(), saveState.id(), saveStateUpdate);
 

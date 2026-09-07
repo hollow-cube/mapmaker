@@ -51,7 +51,7 @@ public class SFindCommand extends CommandDsl {
             return;
         }
 
-        var targetName = api.players.getDisplayName(target).build();
+        var targetName = api.players.getDisplayName(target).render();
         switch (presence.type()) {
             case Presence.TYPE_MAPMAKER_HUB ->
                 player.sendMessage(Component.translatable("command.sfind.result.hub", targetName));

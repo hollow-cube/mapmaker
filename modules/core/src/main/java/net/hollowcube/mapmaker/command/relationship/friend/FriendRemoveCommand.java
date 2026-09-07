@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.command.relationship.friend;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -37,7 +37,7 @@ public class FriendRemoveCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = players.getDisplayName(targetData.id()).build();
+        var targetDisplayName = targetData.displayName().render();
 
         try {
             this.playerService.removeFriend(player.getUuid().toString(), targetData.id());

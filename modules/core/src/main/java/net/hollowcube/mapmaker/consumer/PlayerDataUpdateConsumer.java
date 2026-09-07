@@ -7,7 +7,6 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
 import net.kyori.adventure.text.Component;
@@ -22,6 +21,8 @@ import java.io.Closeable;
 import java.time.Duration;
 import java.util.Objects;
 import java.util.UUID;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class PlayerDataUpdateConsumer implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(PlayerDataUpdateConsumer.class);
@@ -73,7 +74,7 @@ public class PlayerDataUpdateConsumer implements Closeable {
         // todo message.experience
         // todo message.hypercubeExp
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         if (message.coins() != null) playerData.setCoins(message.coins());
         if (message.cubits() != null) playerData.setCubits(message.cubits());
 
@@ -88,14 +89,14 @@ public class PlayerDataUpdateConsumer implements Closeable {
             case CUBITS -> {
                 player.sendMessage(Component.translatable("store.confirmation.cubits", Component.text(reason.quantity())));
 
-                var displayName = players.getDisplayName(player.getUuid().toString()).build();
+                var displayName = players.getDisplayName(player.getUuid().toString()).render();
                 Audiences.all().sendMessage(Component.translatable("store.broadcast.cubits", displayName));
             }
             case HYPERCUBE -> {
                 var months = Component.text(reason.quantity() / MINUTES_TO_MONTHS);
                 player.sendMessage(Component.translatable("store.confirmation.hypercube", months));
 
-                var displayName = players.getDisplayName(player.getUuid().toString()).build();
+                var displayName = players.getDisplayName(player.getUuid().toString()).render();
                 Audiences.all().sendMessage(Component.translatable("store.broadcast.hypercube", displayName));
 
                 //todo need to refresh the players display name everywhere, it probably changed.

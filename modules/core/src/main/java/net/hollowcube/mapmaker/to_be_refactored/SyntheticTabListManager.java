@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.to_be_refactored;
 
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.session.PlayerSession;
@@ -34,11 +35,11 @@ public class SyntheticTabListManager {
         List<PlayerInfoUpdatePacket.Property> properties = session.skin().texture() == null ? List.of()
                 : List.of(new PlayerInfoUpdatePacket.Property("textures", session.skin().texture(), session.skin().signature()));
         var displayName = players.getDisplayName(session.playerId());
-        var username = Objects.requireNonNullElse(displayName.getUsername(), "Unknown");
+        var username = Objects.requireNonNullElse(displayName.username(), "Unknown");
         var playerListEntry = new PlayerInfoUpdatePacket.Entry(
                 getListUuid(session.playerId()), username, properties,
-                true, 0, null, displayName.build(),
-                null, displayName.getTabListOrder(), true
+                true, 0, null, displayName.render(),
+                null, tabListOrder(displayName), true
         );
 
         listedPlayers.put(session.playerId(), playerListEntry);
@@ -64,5 +65,16 @@ public class SyntheticTabListManager {
     private @NotNull UUID getListUuid(@NotNull String playerId) {
         var playerUuid = UUID.fromString(playerId);
         return new UUID(playerUuid.getMostSignificantBits(), playerUuid.getLeastSignificantBits() + 1);
+    }
+
+    private static int tabListOrder(DisplayName name) {
+        return switch (name.badge()) {
+            case "dev_3", "mod_3", "ct_3" -> 5;
+            case "dev_2", "mod_2", "ct_2" -> 4;
+            case "dev_1", "mod_1", "ct_1" -> 3;
+            case "media" -> 2;
+            case "hypercube/gold" -> 1;
+            case null, default -> 0;
+        };
     }
 }

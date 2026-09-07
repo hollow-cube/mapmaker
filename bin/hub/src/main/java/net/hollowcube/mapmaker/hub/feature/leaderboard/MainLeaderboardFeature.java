@@ -27,7 +27,7 @@ public class MainLeaderboardFeature implements HubFeature {
             playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
             () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, null),
             playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, playerId).player().score(),
-            playerId -> api.players.getDisplayName(playerId).build(),
+            playerId -> api.players.getDisplayName(playerId).render(),
                 10);
         buildingLeaderboard = new Leaderboard2(
                 null, null,

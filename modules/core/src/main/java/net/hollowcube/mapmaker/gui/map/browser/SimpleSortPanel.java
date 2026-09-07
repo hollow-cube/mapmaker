@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Switch;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 class SimpleSortPanel extends Panel {
     private static final List<MapDifficulty> DEFAULT_DIFFICULTIES = List.of(MapDifficulty.EASY, MapDifficulty.MEDIUM, MapDifficulty.HARD);
@@ -72,7 +73,7 @@ class SimpleSortPanel extends Panel {
 
     @Override
     protected void mount(@NotNull InventoryHost host, boolean isInitial) {
-        var playerData = PlayerData.fromPlayer(host.player());
+        var playerData = localPlayer(host.player());
         this.sort = playerData.getSetting(SORT_PRESET);
         sortSwitch.select(sort.ordinal());
 
@@ -104,7 +105,7 @@ class SimpleSortPanel extends Panel {
         onSearchChange();
 
         if (host == null || !sync) return;
-        var playerData = PlayerData.fromPlayer(host.player());
+        var playerData = localPlayer(host.player());
         playerData.setSetting(SORT_PRESET, sort);
     }
 
@@ -114,7 +115,7 @@ class SimpleSortPanel extends Panel {
         onSearchChange();
 
         if (host == null || !sync) return;
-        var playerData = PlayerData.fromPlayer(host.player());
+        var playerData = localPlayer(host.player());
         playerData.setSetting(DIFFICULTIES, new ArrayList<>(difficulties));
     }
 

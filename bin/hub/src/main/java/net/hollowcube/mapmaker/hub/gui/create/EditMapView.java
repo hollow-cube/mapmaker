@@ -22,7 +22,7 @@ import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.Autocompletors;
@@ -43,6 +43,7 @@ import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.MODEL_8X;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPlayerHead2d;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class EditMapView extends Panel {
     private static final Predicate<@Nullable Material> ICON_SEARCH_PREDICATE = material ->
@@ -133,7 +134,7 @@ public class EditMapView extends Panel {
     }
 
     private void drawBuilderButtons() {
-        var pd = PlayerData.fromPlayer(host.player());
+        var pd = localPlayer(host.player());
         // When we want to show a read-only view we will need to change this, for now not necessary.
         Sanity.check(pd.id().equals(editor.map().owner().toString()), "can only view your own maps right now");
 
@@ -154,9 +155,9 @@ public class EditMapView extends Panel {
 
                 async(() -> {
                     var displayName = api.players.getDisplayName(builder.id().toString());
-                    button.translationKey("gui.create_maps.edit.builders." + (builder.pending() ? "pending" : "entry"), displayName.asComponent())
+                    button.translationKey("gui.create_maps.edit.builders." + (builder.pending() ? "pending" : "entry"), displayName.render())
                         .onRightClick(() -> host.pushView(ExtraPanels.confirm(
-                            "Remove " + displayName.getUsername() + "?",
+                            "Remove " + displayName.username() + "?",
                             () -> FutureUtil.submitVirtual(() -> removeMapBuilder(builder.id().toString())))));
                 });
             } else if (i < builderSlots) {
@@ -261,7 +262,7 @@ public class EditMapView extends Panel {
     }
 
     private void buyBuilderPrimary() {
-        var playerData = PlayerData.fromPlayer(host.player());
+        var playerData = localPlayer(host.player());
         boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
 
         if (hasCubits) {
@@ -272,7 +273,7 @@ public class EditMapView extends Panel {
     }
 
     private void buyBuilderSecondary() {
-        var playerData = PlayerData.fromPlayer(host.player());
+        var playerData = localPlayer(host.player());
         boolean hasCubits = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits();
 
         this.host.pushView(new StoreView(
@@ -283,7 +284,7 @@ public class EditMapView extends Panel {
 
     @Blocking
     private void buyBuilderSlot(Player player) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         var nextSlot = latestBuilderUpgrade(playerData);
         if (nextSlot == null) return;
 
@@ -291,7 +292,7 @@ public class EditMapView extends Panel {
         sync(this::drawBuilderButtons);
     }
 
-    private static @Nullable ShopUpgrade latestBuilderUpgrade(PlayerData playerData) {
+    private static @Nullable ShopUpgrade latestBuilderUpgrade(LocalPlayer playerData) {
         for (var upgrade : ShopUpgrade.MAP_BUILDERS) {
             if (!upgrade.has(playerData)) return upgrade;
         }
@@ -309,7 +310,7 @@ public class EditMapView extends Panel {
             // TODO if the player is already invited they should not be clickable
             .buttonFactory(pds -> {
                 var button = new Button(null, 1, 1)
-                    .text(ExtraComponents.noItalic(pds.displayName()), List.of())
+                    .text(ExtraComponents.noItalic(pds.displayName().render()), List.of())
                     .model(MODEL_8X, null)
                     .profile(getPlayerHead2d(pds.id()));
                 if (isPlayerInvitePending(pds.id())) {

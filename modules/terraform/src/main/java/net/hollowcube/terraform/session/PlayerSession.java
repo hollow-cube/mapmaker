@@ -1,7 +1,6 @@
 package net.hollowcube.terraform.session;
 
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.terraform.Terraform;
 import net.hollowcube.terraform.cui.ClientInterface;
 import net.hollowcube.terraform.cui.ClientRenderer;
@@ -18,6 +17,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.hollowcube.terraform.util.ProtocolUtil.assertMarker;
 import static net.hollowcube.terraform.util.ProtocolUtil.insertMarker;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
@@ -148,7 +148,7 @@ public class PlayerSession {
 
     public void updateRenderer() {
         var isDefaultRenderer = this.renderer instanceof DefaultClientRenderer;
-        if (PlayerData.fromPlayer(player).getSetting(PlayerSettings.ENABLE_WE_CUI)) {
+        if (localPlayer(player).getSetting(PlayerSettings.ENABLE_WE_CUI)) {
             if (!isDefaultRenderer) {
                 this.renderer = new DefaultClientRenderer(player);
 

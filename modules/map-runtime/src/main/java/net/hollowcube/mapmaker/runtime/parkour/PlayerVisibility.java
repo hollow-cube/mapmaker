@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
@@ -11,6 +11,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public final class PlayerVisibility {
     private static final double PLAYER_HIDE_DISTANCE_SQR = 5.0 * 5.0;
@@ -21,10 +23,10 @@ public final class PlayerVisibility {
     }
 
     public record ViewerRule(
-            Player self, ParkourMapWorld world, PlayerData data
+            Player self, ParkourMapWorld world, LocalPlayer data
     ) implements Predicate<Entity> {
         public ViewerRule(Player self, ParkourMapWorld world) {
-            this(self, world, PlayerData.fromPlayer(self));
+            this(self, world, localPlayer(self));
         }
 
         @Override
@@ -42,10 +44,10 @@ public final class PlayerVisibility {
     }
 
     public record VisibilityRule(
-            Player self, ParkourMapWorld world2, PlayerData data
+            Player self, ParkourMapWorld world2, LocalPlayer data
     ) implements Function<Player, net.hollowcube.mapmaker.map.util.PlayerVisibility> {
         public VisibilityRule(Player self, ParkourMapWorld world2) {
-            this(self, world2, PlayerData.fromPlayer(self));
+            this(self, world2, localPlayer(self));
         }
 
         private @Nullable Pos getCheckpointPos(Player player) {

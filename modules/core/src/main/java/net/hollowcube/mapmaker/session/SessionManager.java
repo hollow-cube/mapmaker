@@ -7,6 +7,7 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.player.*;
@@ -28,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class SessionManager {
     private static final Logger logger = LoggerFactory.getLogger(SessionManager.class);
@@ -219,7 +222,7 @@ public class SessionManager {
     }
 
     private boolean showJoinLeaveMessage(@NotNull DisplayName displayName) {
-        return displayName.getBadgeName() != null; // Show anyone with a badge for now.
+        return displayName.badge() != null; // Show anyone with a badge for now.
     }
 
     private void broadcastJoinMessage(@NotNull String playerId) {
@@ -230,11 +233,11 @@ public class SessionManager {
         if (showJoinLeaveMessage(displayName)) {
             // only send to non-friends
             Audiences.players(lPlayer -> !friends.contains(lPlayer.getUuid().toString()))
-                .sendMessage(Component.translatable("chat.player.join", displayName.build()));
+                .sendMessage(Component.translatable("chat.player.join", displayName.render()));
         }
 
         Audiences.players(lPlayer -> friends.contains(lPlayer.getUuid().toString()))
-            .sendMessage(Component.translatable("chat.friend.join", displayName.build()));
+            .sendMessage(Component.translatable("chat.friend.join", displayName.render()));
     }
 
     private void broadcastLeaveMessage(@NotNull String playerId) {
@@ -245,15 +248,15 @@ public class SessionManager {
         if (showJoinLeaveMessage(displayName)) {
             // only send to non-friends
             Audiences.players(player -> !friends.contains(player.getUuid().toString()))
-                .sendMessage(Component.translatable("chat.player.leave", displayName.build()));
+                .sendMessage(Component.translatable("chat.player.leave", displayName.render()));
         }
 
         Audiences.players(player -> friends.contains(player.getUuid().toString()))
-            .sendMessage(Component.translatable("chat.friend.leave", displayName.build()));
+            .sendMessage(Component.translatable("chat.friend.leave", displayName.render()));
     }
 
     public void configureVanishedPlayer(@NotNull Player player) {
-        player.scheduleNextTick(e -> e.updateViewableRule(p -> PlayerData.fromPlayer(p).has(Permission.GENERIC_STAFF)));
+        player.scheduleNextTick(e -> e.updateViewableRule(p -> localPlayer(p).has(Permission.GENERIC_STAFF)));
     }
 
     private void configureVisiblePlayer(@NotNull Player player) {

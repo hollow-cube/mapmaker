@@ -6,9 +6,8 @@ import dev.hollowcube.replay.io.SegmentedReplayWriter;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.runtime.PlayState;
-import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -89,8 +88,8 @@ final class ReplayManagerTest {
         FeatureFlagProvider.replaceGlobals((_, _) -> enabled);
     }
 
-    private static PlayerData playerData() {
-        return new PlayerData(UUID.randomUUID().toString(), "tester", Component.text("tester"));
+    private static LocalPlayer playerData() {
+        return new LocalPlayer(UUID.randomUUID().toString(), "tester");
     }
 
     private static ReplayManager.PreparedRecordings recordings(Supplier<@Nullable SegmentedReplay> load) {

@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.backpack;
 
 import com.google.gson.JsonObject;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -14,6 +13,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.EnumMap;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class PlayerBackpack {
     private static final PlayerSetting<Boolean> IS_BACKPACK_OPEN = PlayerSetting.Bool("backpack_open", false);
@@ -81,7 +82,7 @@ public class PlayerBackpack {
     private static void handleSetRecipeBookState(@NotNull ClientSetRecipeBookStatePacket packet, @NotNull Player player) {
         if (packet.bookType() != ClientSetRecipeBookStatePacket.BookType.CRAFTING) return;
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         playerData.setSetting(IS_BACKPACK_OPEN, packet.bookOpen());
         playerData.setSetting(IS_BACKPACK_FILTERED, packet.filterActive());
         // No need to write updates, the player data will be saved when leaving the hub

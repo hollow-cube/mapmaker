@@ -3,15 +3,17 @@ package net.hollowcube.mapmaker.command.relationship.friend;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.player.responses.SendFriendRequestResult;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class FriendAddCommand extends CommandDsl {
     private final Argument<@Nullable PlayerData> targetArg;
@@ -40,7 +42,7 @@ public class FriendAddCommand extends CommandDsl {
 
         SendFriendRequestResult result = this.playerService.sendFriendRequest(player.getUuid().toString(),
                                                                               targetData.id());
-        Component targetDisplayName = players.getDisplayName(targetData.id()).build();
+        Component targetDisplayName = targetData.displayName().render();
 
         if (result.successful()) {
             if (result.isRequest()) {
@@ -56,7 +58,7 @@ public class FriendAddCommand extends CommandDsl {
         SendFriendRequestResult.LimitError limitError = result.limitError();
         if (limitError != null) {
             String translationKey = "command.friend.add.limit_reached.";
-            translationKey = translationKey +  (PlayerData.fromPlayer(player).isHypercube() ? "hypercube" : "non_hypercube");
+            translationKey = translationKey +  (localPlayer(player).isHypercube() ? "hypercube" : "non_hypercube");
             player.sendMessage(
                 Component.translatable(translationKey, Component.text(limitError.limit()),
                                        Component.text(limitError.friendCount()),

@@ -53,7 +53,7 @@ public record LeaderboardData(
 
         Component[] displayNames = new Component[top().size()];
         for (var i = 0; i < top().size(); i++) {
-            displayNames[i] = players.getDisplayName(top().get(i).player()).build();
+            displayNames[i] = players.getDisplayName(top().get(i).player()).render();
         }
 
         var result = new ArrayList<Component>();

@@ -7,13 +7,14 @@ import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapLeaderboardDeleteCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
@@ -56,7 +57,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
             return;
         }
 
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         try {
             api.maps.deleteMapLeaderboard(map.id().toString(), target, notify);
             player.sendMessage("deleted for " + target);

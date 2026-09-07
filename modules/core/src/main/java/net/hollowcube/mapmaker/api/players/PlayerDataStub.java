@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.api.players;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.RuntimeGson;
-import net.hollowcube.mapmaker.player.DisplayName;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 
 @RuntimeGson

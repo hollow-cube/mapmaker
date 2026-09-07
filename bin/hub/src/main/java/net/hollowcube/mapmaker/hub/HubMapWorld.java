@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.misc.ProxySupport;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.scripting.ScriptEngine;
 import net.hollowcube.mapmaker.scripting.require.BundleModuleLoader;
 import net.minestom.server.coordinate.Point;
@@ -33,6 +32,8 @@ import java.nio.channels.Channels;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     private static final Logger logger = LoggerFactory.getLogger(HubMapWorld.class);
@@ -144,7 +145,7 @@ public class HubMapWorld extends AbstractMapWorld<HubPlayerState, HubMapWorld> {
     }
 
     private void handleSwitchSlot(PlayerChangeHeldSlotEvent event) {
-        var playerData = PlayerData.fromPlayer(event.getPlayer());
+        var playerData = localPlayer(event.getPlayer());
         playerData.setSetting(PlayerSettings.HUB_SELECTED_SLOT, (int) event.getNewSlot());
     }
 

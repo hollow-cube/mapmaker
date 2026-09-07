@@ -22,7 +22,6 @@ import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -47,6 +46,8 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public abstract class AbstractMultiMapServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMultiMapServer.class);
@@ -283,7 +284,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                     if (world.map().isPublished()) return;
 
                     // Try to close the map if there are no registered builders left.
-                    var leavingId = PlayerData.fromPlayer(event.getPlayer()).id();
+                    var leavingId = localPlayer(event.getPlayer()).id();
                     FutureUtil.submitVirtual(() -> {
                         var builders = api().maps.getMapBuilders(world.map().id().toString(), true);
                         var leavingIsBuilder = false;

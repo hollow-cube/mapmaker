@@ -3,11 +3,12 @@ package net.hollowcube.terraform.command.terraform;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.terraform.session.PlayerSession;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class TerraformToggleCuiCommand extends CommandDsl {
     public TerraformToggleCuiCommand() {
@@ -18,7 +19,7 @@ public class TerraformToggleCuiCommand extends CommandDsl {
     }
 
     private void execute(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         boolean setting = playerData.getSetting(PlayerSettings.ENABLE_WE_CUI);
         playerData.setSetting(PlayerSettings.ENABLE_WE_CUI, !setting);
         //todo save

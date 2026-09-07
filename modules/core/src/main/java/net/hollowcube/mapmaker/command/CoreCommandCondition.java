@@ -4,23 +4,24 @@ import net.hollowcube.command.CommandCondition;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.feature.FeatureFlag;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.entity.Player;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 import static net.hollowcube.command.CommandCondition.*;
 
 public class CoreCommandCondition {
 
     public static final CommandCondition IN_STAFF_MODE = (sender, _) ->
-        sender instanceof Player p && PlayerData.fromPlayer(p).getSetting(PlayerSettings.STAFF_MODE)
+        sender instanceof Player p && localPlayer(p).getSetting(PlayerSettings.STAFF_MODE)
             ? CommandCondition.ALLOW : CommandCondition.HIDE;
 
     public static @NotNull CommandCondition perm(@MagicConstant(flagsFromClass = Permission.class) long perm) {
         return (sender, _) -> {
             if (!(sender instanceof Player player)) return HIDE;
-            return PlayerData.fromPlayer(player).has(perm) ? ALLOW : HIDE;
+            return localPlayer(player).has(perm) ? ALLOW : HIDE;
         };
     }
 

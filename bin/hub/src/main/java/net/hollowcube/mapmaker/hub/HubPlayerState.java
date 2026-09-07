@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.hub.util.HubTime;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.misc.TitleHud;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.entity.GameMode;
@@ -21,6 +20,8 @@ import net.minestom.server.entity.attribute.AttributeOperation;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMapWorld> {
 
@@ -37,7 +38,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
         public void configurePlayer(HubMapWorld world, Player player, @Nullable HubPlayerState lastState) {
             HubPlayerState.super.configurePlayer(world, player, lastState);
 
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             player.setGameMode(GameMode.ADVENTURE);
             player.setAllowFlying(true);
             player.setFlyingSpeed(player.getTag(DoubleJumpFeature.TAG) ? 0 : 0.05f);
@@ -67,7 +68,7 @@ public sealed interface HubPlayerState extends PlayerState<HubPlayerState, HubMa
             PlayerHud.forPlayer(player).removeModule(TITLE);
 
             // Write their settings to the database
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(world.server().playerService()));
         }
     }

@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapListView;
@@ -11,8 +12,6 @@ import net.hollowcube.mapmaker.gui.map.MapReportView;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.jetbrains.annotations.Blocking;
@@ -23,6 +22,7 @@ import java.util.Objects;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.info;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public class MapDetailsView extends Panel {
@@ -60,12 +60,12 @@ public class MapDetailsView extends Panel {
             .sprite("map_details/variant_" + lowerVariant, -5, -27));
 
         add(0, 0, backOrClose());
-        add(1, 0, info("map_browser").onLeftClickAsync(this::showMapDatarmation));
-        var authorUsername = Objects.requireNonNullElse(authorName.getUsername(), "Unknown");
+        add(1, 0, info("map_browser").onLeftClickAsync(this::showMapInformation));
+        var authorUsername = Objects.requireNonNullElse(authorName.username(), "Unknown");
         add(2, 0, new Text("", 5, 1, authorUsername)
             .align(Text.CENTER, Text.CENTER)
             .background("generic2/btn/default/5_1")
-            .translationKey("gui.map_details.creator_profile", authorName.build()))
+            .translationKey("gui.map_details.creator_profile", authorName.render()))
             .onLeftClick(() -> host.pushView(new MapListView.Player(api, bridge, map.owner().toString())));
         add(7, 0, new Button("gui.map_rating.report_map", 2, 1)
             .background("generic2/btn/default/2_1")
@@ -114,7 +114,7 @@ public class MapDetailsView extends Panel {
         // Fetch the latest save state to show in play button
         async(() -> {
             try {
-                var playerId = PlayerData.fromPlayer(host.player()).id();
+                var playerId = localPlayer(host.player()).id();
                 var saveState = api.maps.getLatestSaveState(map.id().toString(), playerId, SaveStateType.PLAYING, null);
 
                 playButton.translationKey("gui.map_details.continue_map", formatMapPlaytime(saveState.getPlaytime(), true));
@@ -124,13 +124,13 @@ public class MapDetailsView extends Panel {
         });
     }
 
-    private void showMapDatarmation() {
+    private void showMapInformation() {
         var player = host.player();
         player.closeInventory();
 
         Component authorName;
         try {
-            authorName = api.players.getDisplayName(map.owner().toString()).build();
+            authorName = api.players.getDisplayName(map.owner().toString()).render();
         } catch (Throwable t) {
             ExceptionReporter.reportException(t, player);
             authorName = Component.text("Unknown", NamedTextColor.RED);

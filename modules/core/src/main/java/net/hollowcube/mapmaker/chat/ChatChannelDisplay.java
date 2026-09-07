@@ -4,9 +4,10 @@ import net.hollowcube.common.hud.HudAnchor;
 import net.hollowcube.common.hud.HudNode;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.PlayerSettings;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.minestom.server.entity.Player;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class ChatChannelDisplay implements PlayerHud.Module {
 
@@ -24,7 +25,7 @@ public class ChatChannelDisplay implements PlayerHud.Module {
 
     @Override
     public HudNode.Anchored render(Player player) {
-        var channel = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
+        var channel = localPlayer(player).getSetting(PlayerSettings.CHAT_CHANNEL);
         var sprite = switch (channel) {
             case ChatChannels.LOCAL -> LOCAL;
             case ChatChannels.STAFF -> STAFF;

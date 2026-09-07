@@ -9,8 +9,8 @@ import net.hollowcube.command.util.StringReader;
 import net.hollowcube.command.util.WordType;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.command.CommandSender;
@@ -19,6 +19,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Locale;
 import java.util.function.Predicate;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class ChatCommand extends CommandDsl {
 
@@ -39,7 +41,7 @@ public class ChatCommand extends CommandDsl {
 
     private void handle(@NotNull Player player, @NotNull CommandContext context) {
         var channel = context.get(channelArg);
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         if (!channel.available.test(player)) return;
 
         playerData.setSetting(PlayerSettings.CHAT_CHANNEL, channel.name().toLowerCase(Locale.ROOT));
@@ -88,7 +90,7 @@ public class ChatCommand extends CommandDsl {
         GLOBAL("commands.chat.switching.global"),
         LOCAL("commands.chat.switching.local"),
         STAFF("commands.chat.switching.staff", (player) -> {
-            PlayerData playerData = PlayerData.fromPlayer(player);
+            LocalPlayer playerData = localPlayer(player);
             var isStaffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
             return isStaffMode && playerData.has(Permission.GENERIC_STAFF);
         }),

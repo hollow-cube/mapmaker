@@ -12,7 +12,9 @@ import net.hollowcube.common.util.font.FontSpacing;
 import net.hollowcube.common.util.font.FontWidthMap;
 import net.hollowcube.common.util.font.FontWidths;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
+import net.hollowcube.common.components.Sprites;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.ObjectComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
 import org.jetbrains.annotations.NotNull;
@@ -127,6 +129,8 @@ public final class FontUtil {
             width += FontUtil.measureText(text.content());
         } else if (comp instanceof TranslatableComponent translatable) {
             throw new RuntimeException("Cannot measure unresolved translation key: " + translatable.key());
+        } else if (comp instanceof ObjectComponent object && Sprites.text(object) != null) {
+            width += FontUtil.measureText(Sprites.text(object));
         } else {
             throw new UnsupportedOperationException("unsupported component type: " + comp.getClass().getName());
         }

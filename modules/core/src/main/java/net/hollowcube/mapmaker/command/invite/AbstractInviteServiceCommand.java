@@ -55,7 +55,7 @@ abstract class AbstractInviteServiceCommand extends CommandDsl {
         }
 
         var targetSession = this.sessionManager.getSession(targetId);
-        var targetDisplayName = players.getDisplayName(targetId);
+        var targetDisplayName = players.getDisplayName(targetId).render();
         if (targetSession == null) {
             player.sendMessage(Component.translatable("generic.player.offline", targetDisplayName));
             return;

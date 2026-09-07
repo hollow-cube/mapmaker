@@ -4,7 +4,7 @@ import net.hollowcube.compat.api.CompatProvider;
 import net.hollowcube.compat.impl.PacketRegistryImpl;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -39,7 +39,7 @@ public class AbstractEditorMapWorldIntegrationTest {
         world = new EditorMapWorld(null, map, null);
 
         player = env.createPlayer(world.instance(), new Pos(0, 40, 0));
-        player.setTag(PlayerData.TAG, new PlayerData(player));
+        player.setTag(LocalPlayer.TAG, new LocalPlayer(player));
 
 
         world.configurePlayer(new AsyncPlayerConfigurationEvent(player, true));

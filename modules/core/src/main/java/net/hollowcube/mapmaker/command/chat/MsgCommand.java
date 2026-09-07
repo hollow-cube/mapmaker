@@ -6,12 +6,13 @@ import net.hollowcube.ipc.chat.ChatChannel;
 import net.hollowcube.mapmaker.chat.ChatMessageListener;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MsgCommand extends AbstractChatCommand {
 
@@ -43,7 +44,7 @@ public class MsgCommand extends AbstractChatCommand {
             player.sendMessage(Component.translatable("generic.other_players_only"));
             return;
         }
-        if (PlayerData.fromPlayer(player).id().equals(targetId)) {
+        if (localPlayer(player).id().equals(targetId)) {
             player.sendMessage(Component.translatable("chat.msg.cant_message_yourself"));
             return;
         }

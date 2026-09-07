@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.command.util;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
@@ -38,7 +38,7 @@ public class ListCommand extends CommandDsl {
                 .stream()
                 .map(PlayerSession::playerId)
             .map(players::getDisplayName)
-                .map(DisplayName::build)
+                .map(DisplayName::render)
                 .toList();
 
         var builder = Component.text();
@@ -65,7 +65,7 @@ public class ListCommand extends CommandDsl {
                     .map(otherPlayer -> otherPlayer.getUuid().toString())
                     .filter(Predicate.not(sessionManager::isHidden))
                 .map(players::getDisplayName)
-                    .map(DisplayName::build)
+                    .map(DisplayName::render)
                     .toList();
 
             var builder = Component.text();

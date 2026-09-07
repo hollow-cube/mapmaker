@@ -8,13 +8,13 @@ import net.hollowcube.mapmaker.map.MapPresentation;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 
 import java.util.Objects;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class EditMapActionsView extends Panel {
 
@@ -53,7 +53,7 @@ public class EditMapActionsView extends Panel {
         final var player = Objects.requireNonNull(host.player());
         async(() -> {
             try {
-                var playerId = PlayerData.fromPlayer(player).id();
+                var playerId = localPlayer(player).id();
                 maps.delete(playerId, map.id().toString(), null);
 
                 player.closeInventory();

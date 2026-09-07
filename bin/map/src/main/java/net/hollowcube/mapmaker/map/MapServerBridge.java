@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
@@ -22,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 
 import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapServerBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapServerBridge.class);
@@ -81,7 +81,7 @@ public class MapServerBridge implements ServerBridge {
             var future = new CompletableFuture<Void>();
             onConfigOrDisconnect(player, () -> future.complete(null));
 
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id()));
             logger.info("join hub result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());
@@ -100,7 +100,7 @@ public class MapServerBridge implements ServerBridge {
 
         try {
             // Add a pending join and then send them to the config state where it will be acted upon.
-            var playerId = PlayerData.fromPlayer(player).id();
+            var playerId = localPlayer(player).id();
             server.addPendingJoin(playerId, mapId, state);
 
             // We need to remove the player from the map before entering configuration, because by the time we get

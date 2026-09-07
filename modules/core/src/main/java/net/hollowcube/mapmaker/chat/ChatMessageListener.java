@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.chat.components.MessageComponents;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.NumberUtil;
@@ -43,6 +42,8 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 /// Both ends of chat on a game server: what a player types goes to the api, and what the api
 /// publishes is rendered for whoever here should see it.
@@ -100,7 +101,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
             return;
         }
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         var channel = ChatChannels.of(playerData.getSetting(PlayerSettings.CHAT_CHANNEL));
 
         if (channel != ChatChannel.STAFF && sessionManager.isHidden(playerData.id())) {
@@ -128,7 +129,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
         try {
             // The map goes whether or not they wrote `[map]`: it is what places a local message, and
             // the api is what decides whether the map is one anyone else could open.
-            result = api.chat.send(PlayerData.fromPlayer(sender).id(), ServerRuntime.getRuntime().hostname(),
+            result = api.chat.send(localPlayer(sender).id(), ServerRuntime.getRuntime().hostname(),
                 channel, targetId, message, mapOf.apply(sender));
         } catch (IpcException e) {
             ExceptionReporter.reportException(e, sender);
@@ -164,7 +165,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
     }
 
     private Component displayName(String playerId) {
-        return api.players.getDisplayName(playerId).build();
+        return api.players.getDisplayName(playerId).render();
     }
 
     @Blocking
@@ -173,7 +174,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
             case GLOBAL -> handleUnsignedChat(message, "chat.channel.global", _ -> true);
             case LOCAL -> handleLocalChat(message);
             case STAFF -> handleUnsignedChat(message, "chat.channel.staff", recipient -> {
-                var playerData = PlayerData.fromPlayer(recipient);
+                var playerData = localPlayer(recipient);
                 return playerData.getSetting(PlayerSettings.STAFF_MODE) && playerData.has(Permission.GENERIC_STAFF);
             });
             // A reply is resolved to a direct message before it is published; this is only here
@@ -206,7 +207,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
 
         try {
             var senderDisplayName = api.players.getDisplayName(message.senderId());
-            var senderName = senderDisplayName.build();
+            var senderName = senderDisplayName.render();
             var isColored = senderDisplayName.parts().size() > 1;
 
             for (var recipient : CONNECTION_MANAGER.getOnlinePlayers()) {
@@ -219,7 +220,7 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
                 if (!filter.test(recipient)) continue;
 
                 var data = this.components.createGlobalMessage(recipient, message);
-                var shouldPing = PlayerData.fromPlayer(recipient).getSetting(PlayerSettings.ENABLE_PING_SOUNDS);
+                var shouldPing = localPlayer(recipient).getSetting(PlayerSettings.ENABLE_PING_SOUNDS);
                 if (data.ping() && shouldPing) recipient.playSound(TAG_DING);
 
                 var text = data.text().color(isColored ? NamedTextColor.WHITE : NamedTextColor.GRAY);
@@ -250,8 +251,8 @@ public class ChatMessageListener implements Closeable, PacketPlayListenerConsume
 
             if (sender == null && target == null && spies.isEmpty()) return; // Not relevant to this server
 
-            var targetDisplayName = api.players.getDisplayName(targetId).build();
-            var senderDisplayName = api.players.getDisplayName(message.senderId()).build();
+            var targetDisplayName = api.players.getDisplayName(targetId).render();
+            var senderDisplayName = api.players.getDisplayName(message.senderId()).render();
 
             if (target != null) {
                 var data = this.components.createDirectMessage(target, message);

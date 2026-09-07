@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.kyori.adventure.text.Component;
@@ -20,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 
 import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapIsolateBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateBridge.class);
@@ -72,7 +72,7 @@ public class MapIsolateBridge implements ServerBridge {
             var future = new CompletableFuture<Void>();
             onConfigOrDisconnect(player, () -> future.complete(null));
 
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var res = sessionService.joinHubV2(new JoinHubRequest(playerData.id()));
             logger.info("join hub result: {}", res);
             ProxySupport.transfer(player, res.serverClusterIp());

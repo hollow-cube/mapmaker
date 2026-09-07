@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
@@ -15,6 +14,7 @@ import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class UnvanishCommand extends CommandDsl {
     private final Argument<String> silentArg = Argument.Literal("silent")
@@ -39,7 +39,7 @@ public class UnvanishCommand extends CommandDsl {
     private void handleVanish(@NotNull Player player, @NotNull CommandContext context) {
         boolean isSilent = context.has(silentArg);
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         if (!sessionManager.isHidden(playerData.id())) {
             player.sendMessage("you are already visible");
             return;

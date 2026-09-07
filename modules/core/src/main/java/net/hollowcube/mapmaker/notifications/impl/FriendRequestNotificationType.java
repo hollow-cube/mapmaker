@@ -31,7 +31,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
             entry,
             ICON,
             "gui.notification.friend_request",
-            List.of(username.asComponent()),
+            List.of(username.render()),
             List.of(
                 PlayerNotification.Action.of(
                     CONFIRM_ICON,
@@ -61,7 +61,7 @@ public class FriendRequestNotificationType implements PlayerNotificationType {
 
     @Override
     public Component createToast(Player player, ServiceContext context, PlayerNotificationResponse.SimpleEntry entry) {
-        var username = context.api().players.getDisplayName(entry.key());
+        var username = context.api().players.getDisplayName(entry.key()).render();
         return Component.translatable("gui.notification.friend_request.toast", username);
     }
 }

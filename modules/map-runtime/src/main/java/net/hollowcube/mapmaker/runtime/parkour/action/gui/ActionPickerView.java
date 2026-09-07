@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionRegistry;
@@ -18,6 +17,8 @@ import net.minestom.server.utils.Unit;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 
@@ -66,7 +67,7 @@ public class ActionPickerView extends Panel {
     }
 
     private List<Key> availableActions() {
-        var playerData = PlayerData.fromPlayer(this.host.player());
+        var playerData = localPlayer(this.host.player());
 
         var available = new ArrayList<Key>();
         for (var actionKey : ActionRegistry.keys(this.type)) {

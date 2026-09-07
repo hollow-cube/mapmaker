@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.api.interaction.Interaction;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.entity.Player;
 
 import java.util.ArrayList;
@@ -18,6 +17,7 @@ import java.util.Objects;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.perm;
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class RemoteCommand extends CommandDsl {
     private final InteractionClient interactions;
@@ -73,7 +73,7 @@ public class RemoteCommand extends CommandDsl {
             interactionArgs.add(new Interaction.CommandArgument(argDecl.name(), argDecl.type(), argValue));
         }
 
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         var interaction = new Interaction(decl.name(), Interaction.Type.COMMAND, playerId, new Interaction.CommandData(interactionArgs));
         var response = interactions.execute(interaction);
         player.sendMessage(response.resolveMessage());

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.util;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.compat.axiom.AxiomPlayer;
@@ -227,7 +228,7 @@ public class LeaderboardDisplay {
         // Compute the target width of each line
         int maxWidth = 0;
         for (var entry : data.top()) {
-            var name = nameFunc.apply(entry.player());
+            var name = LanguageProviderV2.translate(nameFunc.apply(entry.player()));
             names.add(name);
             maxWidth = Math.max(maxWidth, measureLine(name, entry));
         }

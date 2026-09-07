@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.CycleButton;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Blocking;
@@ -24,6 +23,7 @@ import java.util.Set;
 import static net.hollowcube.mapmaker.PlayerSettings.COSMETICS_SHOW_LOCKED;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class CosmeticPanel extends Panel {
 
@@ -94,7 +94,7 @@ public class CosmeticPanel extends Panel {
         super.mount(host, isInitial);
 
         if (isInitial) {
-            var data = PlayerData.fromPlayer(this.host.player());
+            var data = localPlayer(this.host.player());
             var filter = new CycleButton<>(1, 1, data.getSetting(COSMETICS_SHOW_LOCKED));
             filter.translationKey("gui.cosmetics.filter");
             filter.background("generic2/btn/default/1_1");
@@ -113,7 +113,7 @@ public class CosmeticPanel extends Panel {
     @Override
     protected void unmount() {
         var player = this.host.player();
-        var data = PlayerData.fromPlayer(player);
+        var data = localPlayer(player);
 
         super.unmount();
         FutureUtil.submitVirtual(() -> data.writeUpdatesUpstream(this.players));
@@ -128,7 +128,7 @@ public class CosmeticPanel extends Panel {
 
     @Blocking
     private @NotNull List<? extends Element> fetch(CosmeticType type, int page, int pageSize) {
-        var data = PlayerData.fromPlayer(this.host.player());
+        var data = localPlayer(this.host.player());
         var backpack = PlayerBackpack.fromPlayer(this.host.player());
         var unlockedCosmetics = this.players.getUnlockedCosmetics(data.id());
 

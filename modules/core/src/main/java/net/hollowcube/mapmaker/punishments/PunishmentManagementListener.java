@@ -10,7 +10,6 @@ import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.punishments.event.PunishmentCreatedEvent;
 import net.hollowcube.mapmaker.punishments.event.PunishmentRevokedEvent;
 import net.hollowcube.mapmaker.punishments.types.Punishment;
@@ -29,6 +28,8 @@ import java.time.Duration;
 import java.util.Locale;
 import java.util.Objects;
 import java.util.UUID;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class PunishmentManagementListener implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(PunishmentManagementListener.class);
@@ -106,12 +107,12 @@ public class PunishmentManagementListener implements Closeable {
         var typeName = punishment.type().name().toLowerCase(Locale.ROOT);
         var announcement = Component.translatable(
             created ? "punishment.staff_announce." + typeName + ".created" : "punishment.staff_announce." + typeName + ".revoked",
-            players.getDisplayName(punishment.playerId()),
-            players.getDisplayName(punishment.executorId()),
+            players.getDisplayName(punishment.playerId()).render(),
+            players.getDisplayName(punishment.executorId()).render(),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), punishment.comment()))
         );
         for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var staffMode = playerData.getSetting(PlayerSettings.STAFF_MODE);
             if (!staffMode || !playerData.has(Permission.GENERIC_STAFF)) continue;
 

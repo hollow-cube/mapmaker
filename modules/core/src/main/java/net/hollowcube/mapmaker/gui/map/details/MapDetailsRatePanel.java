@@ -5,8 +5,9 @@ import net.hollowcube.mapmaker.api.maps.MapRating;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerData;
 import org.jetbrains.annotations.UnknownNullability;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 class MapDetailsRatePanel extends Panel {
     private final MapClient maps;
@@ -36,7 +37,7 @@ class MapDetailsRatePanel extends Panel {
         super.mount(host, isInitial);
         if (!isInitial) return;
 
-        var playerId = PlayerData.fromPlayer(host.player()).id();
+        var playerId = localPlayer(host.player()).id();
         async(() -> {
             var rating = maps.getPlayerRating(this.mapId, playerId);
             sync(() -> updateLocalRatingState(rating.state()));
@@ -48,7 +49,7 @@ class MapDetailsRatePanel extends Panel {
         updateLocalRatingState(resultState);
 
         // Update the remote state async TODO: this should cancel prior request if there is already one out.
-        var playerId = PlayerData.fromPlayer(host.player()).id();
+        var playerId = localPlayer(host.player()).id();
         async(() -> maps.setPlayerRating(this.mapId, playerId, new MapRating(resultState, null)));
     }
 

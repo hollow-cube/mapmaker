@@ -1,6 +1,9 @@
 package net.hollowcube.mapmaker.misc.noop;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.player.DisplayName;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.player.*;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.Presence;
@@ -21,9 +24,9 @@ public class NoopSessionService implements SessionService {
     public @NotNull PlayerData createSession(@NotNull String id, @NotNull String proxy, @NotNull String username, @NotNull String ip, @NotNull PlayerSkin skin, @NotNull String version, int protocolVersion) {
         return new PlayerData(
                 id, username,
-                new DisplayName(List.of(new DisplayName.Part("username", username, null))),
+                DisplayName.of(username),
                 new JsonObject(),
-                0, 0, 0
+                0, 0, null, 0, 0, MapSize.NORMAL, 0, 0
         );
     }
 
@@ -32,9 +35,9 @@ public class NoopSessionService implements SessionService {
         return new TransferSessionResponse(
                 new PlayerData(
                         id, id,
-                        new DisplayName(List.of(new DisplayName.Part("username", id, null))),
+                        DisplayName.of(id),
                         new JsonObject(),
-                        0, 0, 0
+                        0, 0, null, 0, 0, MapSize.NORMAL, 0, 0
                 ),
                 new PlayerSession(id, Instant.now(), 0, "noop-proxy-id", "noop-server-id", false, id, new PlayerSkin("", ""),
                         new Presence(req.type(), req.state(), req.server(), req.map())),

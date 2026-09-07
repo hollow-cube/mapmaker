@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.utils.Unit;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -20,6 +19,7 @@ import java.util.Map;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public abstract class MapListView extends Panel {
     protected final ApiClient api;
@@ -105,7 +105,7 @@ public abstract class MapListView extends Panel {
             else {
                 async(() -> {
                     var displayName = api.players.getDisplayName(targetId);
-                    sync(() -> titleText.text(displayName.getUsername() + "'s Maps"));
+                    sync(() -> titleText.text(displayName.username() + "'s Maps"));
                 });
             }
         }
@@ -126,7 +126,7 @@ public abstract class MapListView extends Panel {
 
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
-            var playerId = PlayerData.fromPlayer(host.player()).id();
+            var playerId = localPlayer(host.player()).id();
             var history = api.maps.getPlayerMapHistory(playerId, page, pageSize);
 
             // should probably add a multi get maps to api but its a pretty low usage gui right now so dnc.

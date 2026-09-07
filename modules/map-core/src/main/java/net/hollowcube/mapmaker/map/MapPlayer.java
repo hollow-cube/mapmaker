@@ -30,7 +30,6 @@ import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -86,6 +85,8 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Predicate;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFunctionality.CosmeticCallback {
 
@@ -1090,8 +1091,8 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     private final UUID nameTagEntityUuid = UUID.randomUUID(), nameTagOffsetEntityUuid = UUID.randomUUID();
 
     private void createNameTagEntity(Player player) {
-        var playerData = PlayerData.fromPlayer(this);
-        var displayName = playerData.displayName2().build(NamedTextColor.WHITE);
+        var playerData = localPlayer(this);
+        var displayName = playerData.info().displayName().render(NamedTextColor.WHITE);
         player.sendPackets(List.of(
             new BundlePacket(),
             new SpawnEntityPacket(nameTagEntityId, nameTagEntityUuid, EntityType.ARMOR_STAND,

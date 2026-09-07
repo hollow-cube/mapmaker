@@ -48,7 +48,7 @@ public class PStatusCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = players.getDisplayName(target).build();
+        var targetDisplayName = players.getDisplayName(target).render();
         player.sendMessage(Component.translatable("punishment.status.header", targetDisplayName));
 
         var ban = punishmentService.getActivePunishment(target, PunishmentType.BAN);
@@ -62,7 +62,7 @@ public class PStatusCommand extends CommandDsl {
         if (punishment == null) return Component.translatable("punishment.status.none");
 
         return Component.translatable("punishment.status.entry", List.of(
-            players.getDisplayName(punishment.executorId()).build(),
+            players.getDisplayName(punishment.executorId()).render(),
             Component.text(Objects.requireNonNullElse(punishment.ladderId(), "none")),
             Component.text(punishment.comment()),
             Component.text(NumberUtil.formatTimeSince(punishment.createdAt())),

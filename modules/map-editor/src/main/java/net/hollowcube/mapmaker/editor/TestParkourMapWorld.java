@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.SaveStateType;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -20,6 +19,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiPredicate;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.kyori.adventure.text.Component.translatable;
 
 public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
@@ -71,7 +71,7 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     @Override
     public ParkourState configurePlayer(Player player) {
         // Always create a dummy play state for test mode players.
-        final var playerData = PlayerData.fromPlayer(player);
+        final var playerData = localPlayer(player);
         var saveState = new SaveState(UUID.randomUUID().toString(),
             map().id().toString(), playerData.id(), SaveStateType.PLAYING,
             PlayState.SERIALIZER, new PlayState());

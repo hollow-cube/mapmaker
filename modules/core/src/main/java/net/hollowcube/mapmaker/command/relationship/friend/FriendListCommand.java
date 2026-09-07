@@ -5,8 +5,8 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.lang.TimeComponent;
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerFriend;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.session.PlayerSession;
@@ -56,7 +56,7 @@ public class FriendListCommand extends CommandDsl {
                 Component.translatable("command.friend.list.header", Component.text(friends.page()), Component.text(pageCount)));
         for (PlayerFriend friend : friends.items()) {
             DisplayName displayName = api.players.getDisplayName(friend.playerId());
-            Component username = displayName.asComponent();
+            Component username = displayName.render();
             PlayerSession session = this.sessionManager.getSession(friend.playerId());
             if (friend.online() && session != null && !session.hidden()) {
                 Presence presence = session.presence();
@@ -83,7 +83,7 @@ public class FriendListCommand extends CommandDsl {
                     });
             } else {
                 builder.appendNewline()
-                    .append(Component.translatable("command.friend.list.line.offline", displayName.asComponent(),
+                    .append(Component.translatable("command.friend.list.line.offline", displayName.render(),
                                                    TimeComponent.of(friend.lastOnline())));
             }
         }

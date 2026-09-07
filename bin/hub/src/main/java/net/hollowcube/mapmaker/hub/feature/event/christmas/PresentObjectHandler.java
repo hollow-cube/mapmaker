@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.hub.util.HubTime;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,6 +22,8 @@ import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class PresentObjectHandler extends ObjectEntityHandler {
 
@@ -68,7 +69,7 @@ public class PresentObjectHandler extends ObjectEntityHandler {
         var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         var eventData = playerData.getSetting(EventData.SETTING);
         var service = world.server().playerService();
         var playerId = playerData.id();
@@ -127,7 +128,7 @@ public class PresentObjectHandler extends ObjectEntityHandler {
         }
 
         private boolean hasPresent(Player player) {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var eventData = playerData.getSetting(EventData.SETTING);
             return eventData.hasPresent(this.day);
         }

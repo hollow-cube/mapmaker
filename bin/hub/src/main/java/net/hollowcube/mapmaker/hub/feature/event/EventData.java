@@ -6,9 +6,10 @@ import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerSetting;
 import net.minestom.server.entity.Player;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public record EventData(IntSet presents) {
 
@@ -22,7 +23,7 @@ public record EventData(IntSet presents) {
     private static final String KEY = "christmas_2025";
 
     public static EventData fromPlayer(Player player) {
-        return PlayerData.fromPlayer(player).getSetting(SETTING);
+        return localPlayer(player).getSetting(SETTING);
     }
 
     public boolean hasPresent(int day) {

@@ -2,10 +2,10 @@ package net.hollowcube.mapmaker.command.arg;
 
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.SessionManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -31,7 +31,7 @@ public final class CoreArgument {
             }),
             /* Suggester */ (sender, raw, suggestion) -> {
                 for (var result : players.searchPlayers(raw, List.of(), 15)) {
-                    suggestion.add(result.displayName().getUsername());
+                    suggestion.add(result.displayName().username());
                 }
             }
         );
@@ -51,7 +51,7 @@ public final class CoreArgument {
             }),
             /* Suggester */ (sender, raw, suggestion) -> {
                 for (var result : players.searchPlayers(raw, List.of(), 15)) {
-                    suggestion.add(result.displayName().getUsername());
+                    suggestion.add(result.displayName().username());
                 }
             }
         );

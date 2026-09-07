@@ -1,10 +1,11 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
+import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.hub.entity.NpcTextModel;
 import net.hollowcube.mapmaker.map.LeaderboardData;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.coordinate.Pos;
@@ -98,7 +99,7 @@ public class LeaderboardText {
         // Compute the target width of each line
         int maxWidth = 0;
         for (var entry : data.top()) {
-            var name = nameFunc.apply(entry.player()).build();
+            var name = LanguageProviderV2.translate(nameFunc.apply(entry.player()).render());
             names.add(name);
             maxWidth = Math.max(maxWidth, measureLine(name, entry));
         }

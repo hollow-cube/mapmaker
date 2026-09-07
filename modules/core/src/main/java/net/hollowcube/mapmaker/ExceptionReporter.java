@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker;
 
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.posthog.PostHog;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -15,7 +15,7 @@ public final class ExceptionReporter {
         PostHog.captureException(t);
     }
 
-    public static void reportException(@NotNull Throwable t, @NotNull PlayerData playerData) {
+    public static void reportException(@NotNull Throwable t, @NotNull LocalPlayer playerData) {
         reportException(t, playerData.id());
     }
 

@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapDeleteCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
@@ -53,7 +53,7 @@ public class MapDeleteCommand extends CommandDsl {
             return;
         }
         try {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             maps.delete(playerData.id(), map.id().toString(), reason);
             player.sendMessage("deleted map " + map.id().toString());
         } catch (Exception e) {

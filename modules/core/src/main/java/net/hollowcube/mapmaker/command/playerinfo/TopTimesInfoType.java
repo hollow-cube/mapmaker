@@ -47,7 +47,7 @@ public class TopTimesInfoType extends CommandDsl {
             sender.sendMessage(Component.text("Player not found"));
             return;
         }
-        Component targetName = api.players.getDisplayName(targetId).asComponent();
+        Component targetName = api.players.getDisplayName(targetId).render();
 
         var resp = api.maps.getPlayerTopTimes(targetId, page - 1, PAGE_SIZE);
         int maxPage = Math.ceilDiv(resp.count(), PAGE_SIZE);

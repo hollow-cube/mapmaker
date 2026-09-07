@@ -2,12 +2,11 @@ package net.hollowcube.mapmaker.gui.map.details;
 
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapLeaderboard;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.CoreSkulls;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.network.player.ResolvableProfile;
@@ -16,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.UUID;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.kyori.adventure.text.Component.text;
 
 public class MapDetailsTimesPanel extends Panel {
@@ -70,7 +70,7 @@ public class MapDetailsTimesPanel extends Panel {
         if (!isInitial) return;
 
         async(() -> {
-            var playerId = PlayerData.fromPlayer(host.player()).id();
+            var playerId = localPlayer(host.player()).id();
             var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerId);
             // TODO: bulk endpoint?
             var displayNames = leaderboard.top().stream()
@@ -117,7 +117,7 @@ public class MapDetailsTimesPanel extends Panel {
                 if (i >= entries.size()) continue;
 
                 var entry = entries.get(i);
-                var displayName = displayNames.get(i).build();
+                var displayName = displayNames.get(i).render();
                 this.entries[i].update(entry, displayName);
             }
         }
@@ -180,7 +180,7 @@ public class MapDetailsTimesPanel extends Panel {
                 if (index >= entries.size()) return;
 
                 var entry = entries.get(index);
-                var displayName = displayNames.get(index).build();
+                var displayName = displayNames.get(index).render();
                 this.entries[i].update(entry, displayName);
             }
         }

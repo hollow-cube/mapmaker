@@ -4,11 +4,12 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.chat.components.ChatLanguage;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class UwUCommand extends CommandDsl {
 
@@ -25,7 +26,7 @@ public class UwUCommand extends CommandDsl {
     }
 
     private void invoke(@NotNull Player player, @NotNull CommandContext context) {
-        var data = PlayerData.fromPlayer(player);
+        var data = localPlayer(player);
         var current = data.getSetting(PlayerSettings.CHAT_LANGUAGE);
         data.setSetting(PlayerSettings.CHAT_LANGUAGE, switch (current) {
             case ORIGINAL -> ChatLanguage.UWU;

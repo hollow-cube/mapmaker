@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.player;
 
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.GenericServiceError;

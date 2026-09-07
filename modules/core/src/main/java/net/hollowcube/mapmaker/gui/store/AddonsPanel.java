@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.kyori.adventure.text.Component;
@@ -20,6 +19,7 @@ import java.util.Objects;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.confirm;
 import static net.hollowcube.mapmaker.gui.store.StoreHelpers.buyUpgrade;
 import static net.hollowcube.mapmaker.gui.store.StoreHelpers.isUpgradeOwned;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 class AddonsPanel extends Panel {
     private static final String[] COST_SPRITES = new String[]{
@@ -140,7 +140,7 @@ class AddonsPanel extends Panel {
         }
 
         private Component countComponent(@NotNull Player player) {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             return Component.text(switch (chain[0].id) {
                 case MAP_SLOT -> {
                     int totalSlots = playerData.mapSlots();

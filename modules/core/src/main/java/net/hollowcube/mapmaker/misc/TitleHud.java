@@ -83,7 +83,7 @@ public final class TitleHud {
     public static @NotNull PlayerHud.Module playing(@NotNull PlayerClient players, @NotNull MapData map) {
         Component ownerName;
         try {
-            ownerName = players.getDisplayName(map.owner().toString()).build();
+            ownerName = players.getDisplayName(map.owner().toString()).render();
         } catch (Exception e) {
             ExceptionReporter.reportException(e);
             ownerName = Component.text("!error!", NamedTextColor.RED);

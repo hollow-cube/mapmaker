@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -31,6 +31,8 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
+
 public final class MiscFunctionality {
 
     private static final Component FADEOUT_TITLE = Component.text(BadSprite.SPRITE_MAP.get("hud/fadeout").fontChar());
@@ -41,9 +43,9 @@ public final class MiscFunctionality {
     }
 
     public static void assignTeam(@NotNull Player player) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         player.setTeam(CoreTeams.DEFAULT);
-//        player.setTeam(switch (playerData.displayName2().getBadgeName()) {
+//        player.setTeam(switch (playerData.info().displayName().badge()) {
 //            case "dev_3", "mod_3", "ct_3" -> CoreTeams.RED;
 //            case "dev_2", "mod_2", "ct_2" -> CoreTeams.CYAN;
 //            case "dev_1", "mod_1", "ct_1" -> CoreTeams.GREEN;
@@ -103,7 +105,7 @@ public final class MiscFunctionality {
             // which should not show this ui for sure (it looks awful).
             if (player.getGameMode() == GameMode.SPECTATOR) return null;
 
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
 
             return HudNode.zstack(
                     HudNode.sprite(CURRENCY_DISPLAY),
@@ -119,7 +121,7 @@ public final class MiscFunctionality {
 
     @Blocking
     public static @Nullable MapData getCurrentMap(@NotNull SessionManager sessionManager, @NotNull MapClient maps, @NotNull Player player) {
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         return getCurrentMap(sessionManager, maps, playerId);
     }
 
@@ -134,7 +136,7 @@ public final class MiscFunctionality {
         }
     }
 
-    public static void applyCosmetics(@NotNull Player player, @NotNull PlayerData playerData) {
+    public static void applyCosmetics(@NotNull Player player, @NotNull LocalPlayer playerData) {
         for (var type : CosmeticType.VALUES) {
             type.reset(player); // Clear existing data for a cosmetic before applying
 

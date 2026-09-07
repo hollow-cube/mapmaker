@@ -4,11 +4,11 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ArgumentLiteral;
 import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.players.PlayerClient;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.player.BlockedPlayer;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -72,7 +72,7 @@ public class BlockCommand extends CommandDsl {
         TextComponent.Builder builder = Component.text().append(Component.translatable("command.block.list.header", Component.text(blocks.page()), Component.text(pageCount)));
         for (BlockedPlayer block : blocks.items()) {
             DisplayName displayName = players.getDisplayName(block.playerId());
-            Component username = displayName.asComponent();
+            Component username = displayName.render();
             builder.appendNewline().append(Component.translatable("command.block.list.line", username, Component.text(block.username())));
         }
         player.sendMessage(builder.build());

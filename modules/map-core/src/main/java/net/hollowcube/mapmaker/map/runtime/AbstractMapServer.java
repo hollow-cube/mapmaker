@@ -130,6 +130,8 @@ import java.util.concurrent.Executors;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
+
 public abstract class AbstractMapServer implements MapServer {
     private final Logger logger = LoggerFactory.getLogger(MapServer.class);
 
@@ -582,7 +584,7 @@ public abstract class AbstractMapServer implements MapServer {
             var session = sessionService.transferSession(playerId, transferReq);
 
             player.setTag(CompatProvider.FIRST_JOIN_TAG, session.isJoin());
-            player.setTag(PlayerData.TAG, session.data());
+            player.setTag(LocalPlayer.TAG, new LocalPlayer(session.data()));
             sessionManager.updateSessionOptimistic(session.session(), new SessionStateUpdateRequest.Metadata());
             var backpack = new PlayerBackpack(player);
             player.setTag(PlayerBackpack.TAG, backpack);
@@ -608,7 +610,7 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected void handleFirstSpawn(@NotNull Player player) {
         logger.info("doing spawn for {}", player.getUsername());
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
 
         player.sendPacket(new ServerLinksPacket(List.of(
             new ServerLinksPacket.Entry(ServerLinksPacket.KnownLinkType.WEBSITE, "https://hollowcube.net/"),
@@ -620,7 +622,7 @@ public abstract class AbstractMapServer implements MapServer {
         )));
 
         // Player init
-        player.setDisplayName(playerData.displayName2().build());
+        player.setDisplayName(playerData.info().displayName().render());
         MiscFunctionality.assignTeam(player);
         ChatAutoCompleter.sendSuggestions(player);
 

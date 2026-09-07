@@ -6,7 +6,7 @@ import net.hollowcube.compat.impl.PacketRegistryImpl;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -56,7 +56,7 @@ public abstract class AbstractMapWorldTest<W extends MapWorld> {
 
     protected @NotNull Player spawnTestPlayer(@NotNull Pos pos) {
         var player = env.createPlayer(world.instance(), pos);
-        player.setTag(PlayerData.TAG, new PlayerData(player));
+        player.setTag(LocalPlayer.TAG, new LocalPlayer(player));
 
         // Schedule configure/spawn on the instance scheduler instead of running
         // them inline on the test thread. The instance tick (and anything it

@@ -8,7 +8,6 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
@@ -24,6 +23,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Locale;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public final class StoreHelpers {
 
@@ -49,7 +50,7 @@ public final class StoreHelpers {
 
     public static void buyPackage(@NotNull PlayerService playerService, @NotNull Player player, @NotNull Package packageName) {
         try {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var resp = playerService.createCheckoutLink(
                 PURCHASE_SOURCE, playerData.username(), packageName.name().toLowerCase(Locale.ROOT));
 
@@ -71,7 +72,7 @@ public final class StoreHelpers {
     }
 
     static boolean isUpgradeOwned(@NotNull Player player, @NotNull ShopUpgrade upgrade) {
-        return upgrade.has(PlayerData.fromPlayer(player));
+        return upgrade.has(localPlayer(player));
     }
 
     public static void buyUpgrade(@NotNull PlayerService playerService, @NotNull Player player, @NotNull ShopUpgrade upgrade) {
@@ -79,7 +80,7 @@ public final class StoreHelpers {
             return; // Sanity check
 
         // Ensure the player has enough cubits to buy the upgrade.
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         var backpack = PlayerBackpack.fromPlayer(player);
         if (!upgrade.canAfford(playerData, backpack)) {
             // Cannot afford, prompt to buy more cubits

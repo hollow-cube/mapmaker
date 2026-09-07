@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.cosmetic.impl.accessory;
 
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.TagCooldown;
@@ -15,6 +14,8 @@ import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.time.TimeUnit;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
     private static final TagCooldown USE_COOLDOWN = new TagCooldown("cosmetic:shrinking_device", 60 * 1000); // 1m cooldown
@@ -31,7 +32,7 @@ public class ShrinkingDeviceImpl extends AbstractAccessoryImpl {
 
     @Override
     public void useItem(@NotNull Player player) {
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         var session = SessionManager.instance.getSession(playerId);
         if (session == null || session.presence() == null) return;
 

@@ -7,7 +7,6 @@ import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.api.notifications.Notification;
 import net.hollowcube.mapmaker.notifications.PlayerNotification;
 import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.utils.Unit;
@@ -18,6 +17,7 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class NotificationListView extends Panel {
     private static final int PAGE_SIZE = 21;
@@ -58,7 +58,7 @@ public class NotificationListView extends Panel {
         var host = this.host; // Capture host to avoid NPE in async context - this will hold on to the host reference
         if (host == null) return List.of(); // This happens if the async task finishes after the panel is closed
 
-        var playerId = PlayerData.fromPlayer(host.player()).id();
+        var playerId = localPlayer(host.player()).id();
         var notifications = this.context.api().notifications.list(playerId, page, PAGE_SIZE, false);
         pagination.totalPages(notifications.totalPages(PAGE_SIZE));
 

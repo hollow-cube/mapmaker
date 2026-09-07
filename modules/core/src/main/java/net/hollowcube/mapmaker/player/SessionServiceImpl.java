@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.session.PlayerSession;
 import net.hollowcube.mapmaker.session.SessionStateUpdateRequest;
 import net.hollowcube.mapmaker.util.AbstractHttpService;

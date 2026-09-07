@@ -6,7 +6,9 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import net.hollowcube.common.components.Sprites;
 import net.kyori.adventure.text.*;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.Context;
@@ -103,10 +105,15 @@ public class LanguageProviderV2 {
     public static @Nullable Component translate(@Nullable Component component) {
         if (component == null) return null;
         if (!(component instanceof TranslatableComponent translatable)) {
+            var result = component instanceof ObjectComponent object ? Objects.requireNonNullElse(Sprites.resolve(object), object) : component;
             // Minestom seems not to check for children so we do it here, but this is probably insanely slow for the 99% of cases we dont need it...
-            return component.children(component.children().stream()
+            result = result.children(result.children().stream()
                 .map(LanguageProviderV2::translate)
                 .toList());
+            if (result.hoverEvent() != null && result.hoverEvent().value() instanceof Component hover) {
+                result = result.hoverEvent(HoverEvent.showText(translate(hover)));
+            }
+            return result;
         }
 
         // Return from cache if present

@@ -7,7 +7,7 @@ import net.hollowcube.mapmaker.cosmetic.impl.ModelCosmeticImpl;
 import net.hollowcube.mapmaker.gui.common.ExtraPanels;
 import net.hollowcube.mapmaker.hub.merchant.MerchantTrade;
 import net.hollowcube.mapmaker.panels.Button;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.CostEntry;
 import net.kyori.adventure.text.Component;
@@ -24,14 +24,14 @@ public class CosmeticButton extends Button {
 
         private final Cosmetic cosmetic;
         private final boolean locked;
-        private final PlayerData data;
+        private final LocalPlayer data;
         private final PlayerBackpack backpack;
         private final MerchantTrade cost;
         private final List<CosmeticButton> siblings;
 
         private boolean previewing = false;
 
-        public CosmeticButton(PlayerService players, Cosmetic cosmetic, boolean locked, PlayerData data, PlayerBackpack backpack, List<CosmeticButton> siblings) {
+        public CosmeticButton(PlayerService players, Cosmetic cosmetic, boolean locked, LocalPlayer data, PlayerBackpack backpack, List<CosmeticButton> siblings) {
             super(1, 1);
             this.players = players;
             this.cosmetic = cosmetic;

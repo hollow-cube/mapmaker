@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -24,6 +23,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 /// Debug overlay for the current play state, shown whenever the player is in an
 /// [ParkourState.AnyPlaying] state backed by a [PlayState].
@@ -68,7 +69,7 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
 
     @Override
     public @Nullable HudNode.Anchored render(Player player) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         if (!playerData.getSetting(PlayerSettings.PARKOUR_DEBUG_HUD))
             return null;
 

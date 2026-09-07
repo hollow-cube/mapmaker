@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    // Wire types that have a presentation, like DisplayName, render themselves to a Component.
+    api(libs.adventure.api)
     annotationProcessor(project(":tools:ipc-gen"))
 
     // Gson and the JDK http client are what the generated `*Client`/`*Server` classes run on, and

@@ -16,6 +16,8 @@ import net.hollowcube.ipc.map.MapQuality;
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.player.DisplayName;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.api.interaction.Command;
 import net.hollowcube.mapmaker.api.interaction.Interaction;
 import net.hollowcube.mapmaker.api.interaction.InteractionResponse;
@@ -26,7 +28,6 @@ import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.backpack.BackpackItem;
 import net.hollowcube.mapmaker.invite.types.InviteType;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.player.PlayerDataUpdateMessage;
 import net.hollowcube.mapmaker.player.RewardType;
 import net.hollowcube.mapmaker.punishments.types.PunishmentType;
@@ -84,6 +85,7 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(Component.class, new ComponentTypeAdapter())
         .registerTypeAdapter(Point.class, new PointTypeAdapter())
         .registerTypeAdapter(DisplayName.class, new DisplayNameTypeAdapter())
+        .registerTypeAdapter(PlayerData.class, new LegacyPlayerDataDeserializer())
         .registerTypeAdapter(Optional.class, new OptionalTypeAdapter())
         .registerTypeAdapter(PlayerDataUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.Action.class))
         .registerTypeAdapter(PlayerDataUpdateMessage.ReasonType.class, new EnumOrdinalTypeAdapter<>(PlayerDataUpdateMessage.ReasonType.class))

@@ -13,7 +13,6 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.util.Sanity;
 import net.kyori.adventure.text.Component;
@@ -25,6 +24,7 @@ import java.util.function.Consumer;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.confirm;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.MODEL_8X;
 import static net.hollowcube.mapmaker.gui.map.details.MapDetailsTimesPanel.getPlayerHead2d;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapSlotEntry extends Panel {
 
@@ -84,14 +84,14 @@ public class MapSlotEntry extends Panel {
         // We only show this for the player themselves anyway so its fine to just get it from them.
         Sanity.check(isOwner(host.player()), "cannot show details for someone else's map");
 
-        var displayName = PlayerData.fromPlayer(host.player()).displayName2();
+        var displayName = localPlayer(host.player()).info().displayName();
         var view = new MapDetailsView(api, bridge, slot.map(), displayName, true);
         this.host.pushView(view);
     }
 
     protected void removeFromMap() {
         var player = host.player();
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         host.pushView(confirm("Leave Map?", () -> FutureUtil.submitVirtual(() -> {
             try {
                 var result = api.maps.removeMapBuilder(slot.map().id().toString(), playerId);
@@ -193,7 +193,7 @@ public class MapSlotEntry extends Panel {
 
             if (!isInitial) return;
             async(() -> {
-                var ownerDisplayName = api.players.getDisplayName(slot.map().owner().toString()).asComponent();
+                var ownerDisplayName = api.players.getDisplayName(slot.map().owner().toString()).render();
                 sync(() -> {
                     var mapName = MapSettings.getNameSafe(slot.map().settings());
 

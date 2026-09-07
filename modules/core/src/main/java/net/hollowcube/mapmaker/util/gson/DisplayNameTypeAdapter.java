@@ -1,24 +1,29 @@
 package net.hollowcube.mapmaker.util.gson;
 
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import net.hollowcube.mapmaker.player.DisplayName;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import net.hollowcube.ipc.player.DisplayName;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 
-public class DisplayNameTypeAdapter implements JsonSerializer<DisplayName>, JsonDeserializer<DisplayName> {
-
+/// Go sends a display name as a bare array of parts with string types.
+public final class DisplayNameTypeAdapter implements JsonDeserializer<DisplayName> {
     @Override
-    public JsonElement serialize(DisplayName displayName, Type type, JsonSerializationContext jsonSerializationContext) {
-        throw new UnsupportedOperationException();
+    public DisplayName deserialize(JsonElement json, Type type, JsonDeserializationContext context) {
+        var parts = new ArrayList<DisplayName.Part>();
+        for (var element : json.getAsJsonArray()) {
+            var part = element.getAsJsonObject();
+            var kind = part.get("type").getAsString();
+            var color = part.get("color");
+            parts.add(switch (kind) {
+                case "username" -> new DisplayName.Part.Username(part.get("text").getAsString(),
+                    color == null || color.isJsonNull() ? null : color.getAsString());
+                case "badge" -> new DisplayName.Part.Badge(part.get("text").getAsString());
+                default -> new DisplayName.Part.Unknown(kind);
+            });
+        }
+        return new DisplayName(parts);
     }
-
-    @Override
-    public DisplayName deserialize(JsonElement elem, Type type, JsonDeserializationContext context) throws JsonParseException {
-        Type listOfPartType = new TypeToken<ArrayList<DisplayName.Part>>() {
-        }.getType();
-        return new DisplayName(context.deserialize(elem, listOfPartType));
-    }
-
 }

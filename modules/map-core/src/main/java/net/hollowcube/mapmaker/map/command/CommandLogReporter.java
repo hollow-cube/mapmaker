@@ -8,7 +8,6 @@ import net.hollowcube.ipc.chat.CommandExecution;
 import net.hollowcube.ipc.chat.CommandOutcome;
 import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.player.PlayerData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -18,6 +17,8 @@ import java.time.Instant;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 /// Sends every command a player ran to the api.
 ///
@@ -45,7 +46,7 @@ public final class CommandLogReporter {
         var world = MapWorld.forPlayer(player);
         var run = new CommandExecution(
             Instant.now(),
-            PlayerData.fromPlayer(player).id(),
+            localPlayer(player).id(),
             ServerRuntime.getRuntime().hostname(),
             world == null ? null : world.map().id().toString(),
             world == null ? null : world.worldId(),

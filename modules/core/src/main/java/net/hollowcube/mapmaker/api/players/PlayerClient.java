@@ -2,11 +2,11 @@ package net.hollowcube.mapmaker.api.players;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.ipc.player.DisplayName;
+import net.hollowcube.ipc.player.PlayerData;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
-import net.hollowcube.mapmaker.player.DisplayName;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public interface PlayerClient {
 
@@ -58,7 +59,7 @@ public interface PlayerClient {
         @Override
         public DisplayName getDisplayName(String playerId) {
             var player = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(UUID.fromString(playerId));
-            if (player != null) return PlayerData.fromPlayer(player).displayName2();
+            if (player != null) return localPlayer(player).info().displayName();
 
             return http.get(
                 "getDisplayName",

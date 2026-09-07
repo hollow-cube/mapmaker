@@ -4,7 +4,6 @@ import net.hollowcube.common.events.PlayerGiveCreativeItemEvent;
 import net.hollowcube.mapmaker.gui.store.CosmeticPanel;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
@@ -15,6 +14,8 @@ import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class CosmeticEventHandler {
 
@@ -58,7 +59,7 @@ public class CosmeticEventHandler {
         if (cosmeticType == null || !item.isAir()) return; // Defer to the Minestom handling
 
         // Reset the inventory state
-        MiscFunctionality.applyCosmetics(event.getPlayer(), PlayerData.fromPlayer(event.getPlayer()));
+        MiscFunctionality.applyCosmetics(event.getPlayer(), localPlayer(event.getPlayer()));
         event.getPlayer().getInventory().setCursorItem(ItemStack.AIR);
         event.getPlayer().getInventory().update();
 

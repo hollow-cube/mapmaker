@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.api.maps.MapWriteMessages;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.buttons.LockedButton;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.text.Component;
 
@@ -19,6 +18,7 @@ import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.panels.RadioSelect.ButtonUpdater.SQUARE_BACKGROUND_EX;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class NewMapView extends Panel {
 
@@ -58,7 +58,7 @@ public class NewMapView extends Panel {
     @Override
     protected void mount(InventoryHost host, boolean isInitial) {
         sizeSelect.clear();
-        var maxMapSize = PlayerData.fromPlayer(host.player()).maxMapSize();
+        var maxMapSize = localPlayer(host.player()).maxMapSize();
 
         for (var mapSize : MapSize.GUI_SIZES) {
             boolean locked = !maxMapSize.unlocks(mapSize);
@@ -95,7 +95,7 @@ public class NewMapView extends Panel {
         if (!submitting.compareAndSet(false, true)) return;
         var player = host.player();
         try {
-            var result = maps.create(PlayerData.fromPlayer(player).id(), sizeSelect.selected());
+            var result = maps.create(localPlayer(player).id(), sizeSelect.selected());
             if (!(result instanceof CreateMapResult.Success(var map))) {
                 player.sendMessage(MapWriteMessages.failure(result));
                 return;

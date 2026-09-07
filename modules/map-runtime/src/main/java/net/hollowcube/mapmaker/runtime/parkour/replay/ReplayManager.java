@@ -11,7 +11,7 @@ import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.replay.event.*;
@@ -104,7 +104,7 @@ public final class ReplayManager {
 
     /// Loads an existing committed recording before the save state is handed to the tick thread.
     @Blocking
-    public void prepareRecordingSession(SaveState saveState, PlayerData playerData) {
+    public void prepareRecordingSession(SaveState saveState, LocalPlayer playerData) {
         var priorFinalization = finalizations.get(saveState.id());
         // Only whether the prior write landed matters here. A failed one is terminal for that
         // recording either way, and waiting on it must never deny the player their join.
@@ -368,7 +368,7 @@ public final class ReplayManager {
 
         /// Loads what the save state resumes from, and decides whether it may be recorded to.
         @Blocking
-        void prepare(SaveState saveState, PlayerData playerData) {
+        void prepare(SaveState saveState, LocalPlayer playerData) {
             prepared.remove(saveState.id());
             unrecordable.remove(saveState.id());
             disabled.remove(saveState.id());

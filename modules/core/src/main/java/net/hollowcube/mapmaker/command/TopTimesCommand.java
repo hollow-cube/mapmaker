@@ -8,12 +8,13 @@ import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class TopTimesCommand extends CommandDsl {
 
@@ -60,7 +61,7 @@ public class TopTimesCommand extends CommandDsl {
         if (map.settings().variant() != MapVariant.PARKOUR) {
             player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id().toString())));
         } else {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerData.id());
 
             var lbFormat = map.settings().leaderboard().format();

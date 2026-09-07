@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.store;
 
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.backpack.PlayerBackpack;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,11 +45,11 @@ public enum ShopUpgrade {
         this.mapBuilders = mapBuilders;
     }
 
-    public boolean canAfford(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack) {
+    public boolean canAfford(@NotNull LocalPlayer playerData, @NotNull PlayerBackpack backpack) {
         return cost.canAfford(playerData, backpack);
     }
 
-    public void appendLore(@NotNull PlayerData playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
+    public void appendLore(@NotNull LocalPlayer playerData, @NotNull PlayerBackpack backpack, @NotNull List<Component> lore) {
         cost.appendLore(playerData, backpack, lore);
     }
 
@@ -72,7 +72,7 @@ public enum ShopUpgrade {
         return mapBuilders;
     }
 
-    public boolean has(PlayerData playerData) {
+    public boolean has(LocalPlayer playerData) {
         if ((this == MAP_SIZE_2 || this == MAP_SIZE_3) && playerData.has(Permission.EXTENDED_LIMITS))
             return true;
         return switch (this) {

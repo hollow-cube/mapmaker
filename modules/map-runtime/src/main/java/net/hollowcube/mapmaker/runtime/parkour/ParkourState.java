@@ -14,7 +14,6 @@ import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
@@ -39,6 +38,8 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMapWorld> {
 
@@ -419,7 +420,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
 
         // Write the save state to the database
         try {
-            var playerData = PlayerData.fromPlayer(player);
+            var playerData = localPlayer(player);
             world.server().api().maps.updateSaveState(world.map().id().toString(), playerData.id(), saveState.id(), update);
         } catch (Exception e) {
             var wrappedException = new RuntimeException("failed to save player save state", e);

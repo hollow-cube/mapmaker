@@ -4,7 +4,6 @@ import net.hollowcube.common.dialogs.DialogBuilder;
 import net.hollowcube.common.events.RequestStatsEvent;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
@@ -15,6 +14,8 @@ import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.minestom.server.network.packet.server.play.CloseWindowPacket;
 import org.jetbrains.annotations.NotNull;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
+
 public class PlayerSettingsScreen {
 
     public static void init(@NotNull PlayerService players, @NotNull GlobalEventHandler events) {
@@ -22,7 +23,7 @@ public class PlayerSettingsScreen {
             if (!event.getKey().equals(PlayerSettingsOptions.SETTINGS_DIALOG_ID)) return;
             if (!(event.getPayload() instanceof CompoundBinaryTag tag)) return;
 
-            var data = PlayerData.fromPlayer(event.getPlayer());
+            var data = localPlayer(event.getPlayer());
 
             for (var option : PlayerSettingsOptions.OPTIONS) {
                 var value = tag.get(option.key());
@@ -43,7 +44,7 @@ public class PlayerSettingsScreen {
     }
 
     public static void openSettingsDialog(@NotNull Player player) {
-        var data = PlayerData.fromPlayer(player);
+        var data = localPlayer(player);
         var dialog = DialogBuilder.create()
                 .title(Component.translatable("dialog.settings.title"))
                 .closeOnEscape()

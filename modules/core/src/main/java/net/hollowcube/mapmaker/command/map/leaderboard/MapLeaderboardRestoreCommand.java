@@ -7,11 +7,12 @@ import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapLeaderboardRestoreCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
@@ -38,7 +39,7 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
             return;
         }
 
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         try {
             maps.restoreMapLeaderboard(map.id().toString());
             player.sendMessage("restored for " + map.settings().name());

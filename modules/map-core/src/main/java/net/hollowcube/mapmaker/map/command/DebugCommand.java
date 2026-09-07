@@ -30,7 +30,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.ComponentUtil;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -48,6 +47,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class DebugCommand extends CommandDsl {
 
@@ -134,9 +134,9 @@ public class DebugCommand extends CommandDsl {
     }
 
     private void handleDebugSelf(@NotNull Player player, @NotNull CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         player.sendMessage(Component.text(playerData.username() + " (" + playerData.id().substring(0, 8) + "...)"));
-        player.sendMessage(Component.text("Display: ").append(playerData.displayName2().build()));
+        player.sendMessage(Component.text("Display: ").append(playerData.info().displayName().render()));
         var rawSettings = playerData.settingsRawValues();
         player.sendMessage(Component.text("Settings: " + (rawSettings.isEmpty() ? "empty" : "")));
         for (var entry : rawSettings) {
@@ -307,7 +307,7 @@ public class DebugCommand extends CommandDsl {
 
     private void handleParkourHud(@NotNull Player player, @NotNull CommandContext context) {
         // The hud module itself checks the setting each render, so flipping it is enough.
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         boolean enabled = !playerData.getSetting(PlayerSettings.PARKOUR_DEBUG_HUD);
         playerData.setSetting(PlayerSettings.PARKOUR_DEBUG_HUD, enabled);
         player.sendMessage(Component.text("Parkour debug hud " + (enabled ? "enabled" : "disabled")));

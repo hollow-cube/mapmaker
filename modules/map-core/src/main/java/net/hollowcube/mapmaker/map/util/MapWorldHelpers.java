@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.resource.ResourcePackInfo;
 import net.kyori.adventure.resource.ResourcePackRequest;
 import net.kyori.adventure.text.Component;
@@ -22,6 +21,8 @@ import org.jetbrains.annotations.NotNull;
 import java.net.URI;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public final class MapWorldHelpers {
 
@@ -68,7 +69,7 @@ public final class MapWorldHelpers {
 //        player.setPermissionLevel(4); TODO this enables operator commands on the client which is problematic, we need to find another way to do this
 
         // Reapply the cosmetics they have on
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         MiscFunctionality.applyCosmetics(player, playerData);
     }
 

@@ -33,7 +33,6 @@ import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
 import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.AppliedRewards;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
@@ -86,6 +85,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.kyori.adventure.text.Component.text;
 import static net.kyori.adventure.text.Component.translatable;
 
@@ -316,7 +316,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     @Override
     public ParkourState configurePlayer(Player player) {
-        final var playerData = PlayerData.fromPlayer(player);
+        final var playerData = localPlayer(player);
         SaveState saveState;
         try {
             saveState = server().api().maps.getLatestSaveState(map().id().toString(),
@@ -498,7 +498,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         MapCompletionAnimation.schedule(player, new AppliedRewards.Inventory(null, null, null, null), tryShowRateGui);
 
         // Play the victory effect
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         var victoryEffect = Cosmetic.byId(CosmeticType.VICTORY_EFFECT, playerData.getSetting(CosmeticType.VICTORY_EFFECT.setting()));
         if (victoryEffect != null && victoryEffect.impl() instanceof AbstractVictoryEffectImpl impl) {
             impl.trigger(player, player.getPosition());

@@ -8,7 +8,6 @@ import net.hollowcube.mapmaker.gui.store.StoreHelpers;
 import net.hollowcube.mapmaker.gui.store.StoreView;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.store.ShopUpgrade;
 import net.hollowcube.mapmaker.util.StringComparison;
@@ -23,12 +22,13 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class CreateMapsView extends Panel {
     private static final int PAGE_SIZE = 5;
 
     public static void open(Player player, ApiClient api, PlayerService playerService, ServerBridge bridge) {
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         var slots = api.maps.getPlayerSlots(playerId).results();
 
         if (slots.isEmpty()) {
@@ -101,7 +101,7 @@ public class CreateMapsView extends Panel {
 
     private void rebuildSlots() {
         async(() -> {
-            var playerId = PlayerData.fromPlayer(this.host.player()).id();
+            var playerId = localPlayer(this.host.player()).id();
             var slots = this.api.maps.getPlayerSlots(playerId).results();
 
             sync(() -> {
@@ -134,7 +134,7 @@ public class CreateMapsView extends Panel {
         }
 
         // No remaining slots, prompt to unlock more in the store with hypercube first, or cubits if they already have hypercube.
-        var playerData = PlayerData.fromPlayer(this.host.player());
+        var playerData = localPlayer(this.host.player());
         boolean isHypercube = playerData.isHypercube();
         boolean hasCubits = playerData.cubits() >= 50;
 
@@ -150,7 +150,7 @@ public class CreateMapsView extends Panel {
             return;
         }
 
-        var playerData = PlayerData.fromPlayer(this.host.player());
+        var playerData = localPlayer(this.host.player());
         if (playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits()) {
             host.pushView(confirm("Buy Map Slot?", FutureUtil.virtual(this::handleBuyMapSlot)));
         } else if (playerData.isHypercube()) {
@@ -164,7 +164,7 @@ public class CreateMapsView extends Panel {
         int availableSlots = getAvailableSlots();
         if (availableSlots > 0) return;
 
-        var playerData = PlayerData.fromPlayer(this.host.player());
+        var playerData = localPlayer(this.host.player());
         if (playerData.isHypercube()) return;
 
         var secondaryTab = playerData.cubits() >= ShopUpgrade.MAP_BUILDER_2.cubits() ? StoreView.TAB_HYPERCUBE : StoreView.TAB_CUBITS;
@@ -185,7 +185,7 @@ public class CreateMapsView extends Panel {
     }
 
     private int getAvailableSlots() {
-        var playerData = PlayerData.fromPlayer(this.host.player());
+        var playerData = localPlayer(this.host.player());
         var unlockedSlots = playerData.mapSlots();
         var usedSlots = this.getUsedSlots();
         return unlockedSlots - usedSlots;

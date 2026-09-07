@@ -1,17 +1,16 @@
 package net.hollowcube.mapmaker.runtime.item;
 
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.List;
 import java.util.Objects;
 
 public class MapDetailsItem extends ItemHandler {
@@ -45,7 +44,7 @@ public class MapDetailsItem extends ItemHandler {
                 authorName = world.server().api().players.getDisplayName(world.map().owner().toString());
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
-                authorName = new DisplayName(List.of(new DisplayName.Part("username", "!error!", null)));
+                authorName = DisplayName.of("!error!");
             }
             DisplayName finalAuthorName = authorName;
 

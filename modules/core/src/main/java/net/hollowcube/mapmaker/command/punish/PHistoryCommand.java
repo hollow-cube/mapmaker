@@ -67,7 +67,7 @@ public class PHistoryCommand extends CommandDsl {
             return;
         }
 
-        var targetDisplayName = players.getDisplayName(target).build();
+        var targetDisplayName = players.getDisplayName(target).render();
         var builder = Component.text();
         builder.append(Component.translatable("punishment.history.header", targetDisplayName, Component.text(punishments.size())));
 
@@ -84,14 +84,14 @@ public class PHistoryCommand extends CommandDsl {
             }
 
             builder.append(Component.text(" by "));
-            builder.append(players.getDisplayName(punishment.executorId()).build());
+            builder.append(players.getDisplayName(punishment.executorId()).render());
 
             if (punishment.revokedAt() != null) {
                 builder.append(Component.text(" ("));
                 builder.append(Component.text("revoked").hoverEvent(HoverEvent.showText(
                     Component.text(Objects.requireNonNullElse(punishment.revokedReason(), "no reason given")))));
                 builder.append(Component.text(" by "));
-                builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> players.getDisplayName(it).build(), Component.text("Unknown")));
+                builder.append(OpUtils.mapOr(punishment.revokedBy(), it -> players.getDisplayName(it).render(), Component.text("Unknown")));
                 builder.append(Component.text(" " + NumberUtil.formatTimeSince(punishment.revokedAt())));
                 builder.append(Component.text(" ago)"));
             } else if (punishment.expiresAt() != null) {

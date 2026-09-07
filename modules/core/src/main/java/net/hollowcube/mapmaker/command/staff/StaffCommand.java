@@ -6,13 +6,13 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.command.CommandCategories;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.player.PlayerService;
 import net.hollowcube.mapmaker.chat.ChatChannels;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.perm;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class StaffCommand extends CommandDsl {
     private final PlayerService playerService;
@@ -29,7 +29,7 @@ public class StaffCommand extends CommandDsl {
     }
 
     private void handleToggleStaffMode(Player player, CommandContext context) {
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
 
         var nextStaffMode = !playerData.getSetting(PlayerSettings.STAFF_MODE);
         playerData.setSetting(PlayerSettings.STAFF_MODE, nextStaffMode);

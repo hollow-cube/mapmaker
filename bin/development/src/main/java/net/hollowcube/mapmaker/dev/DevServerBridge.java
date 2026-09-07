@@ -5,7 +5,6 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.mapmaker.hub.HubServer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
@@ -15,6 +14,7 @@ import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 
 import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public final class DevServerBridge implements ServerBridge {
     private final DevServer server;
@@ -26,7 +26,7 @@ public final class DevServerBridge implements ServerBridge {
     @Override
     public void joinMap(@NotNull Player player, @NotNull JoinConfig joinConfig) {
         FutureUtil.assertThread();
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         var map = server.api().maps.get(joinConfig.mapId());
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
@@ -48,7 +48,7 @@ public final class DevServerBridge implements ServerBridge {
         var future = new CompletableFuture<Void>();
         onConfigOrDisconnect(player, () -> future.complete(null));
 
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         server.addPendingJoin(playerId, mapId, joinMapState.name().toLowerCase(Locale.ROOT));
 
         // We need to remove the player from the map before entering configuration, because by the time we get

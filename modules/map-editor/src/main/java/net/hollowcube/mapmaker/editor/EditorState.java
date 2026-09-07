@@ -10,7 +10,6 @@ import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.runtime.parkour.item.ResetSaveStateItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.ReturnToCheckpointItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.SetSpectatorCheckpointItem;
@@ -22,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Objects;
 
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 import static net.hollowcube.mapmaker.runtime.parkour.ParkourState.AnyPlaying.resetTeleport;
 
 public sealed interface EditorState extends PlayerState<EditorState, EditorMapWorld> {
@@ -50,7 +50,7 @@ public sealed interface EditorState extends PlayerState<EditorState, EditorMapWo
             ));
             player.setHeldItemSlot((byte) editState.selectedSlot());
             player.setFlying(editState.isFlying());
-            MiscFunctionality.applyCosmetics(player, PlayerData.fromPlayer(player));
+            MiscFunctionality.applyCosmetics(player, localPlayer(player));
 
             if (editState.pos() == null) {
                 // If there is no position stored then this is a fresh edit state so add the builder menu

@@ -9,7 +9,6 @@ import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.MultiSelect;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
 
@@ -18,6 +17,7 @@ import java.util.List;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapReportView extends Panel {
 
@@ -104,7 +104,7 @@ public class MapReportView extends Panel {
 
         var player = host.player();
         player.closeInventory();
-        var playerId = PlayerData.fromPlayer(player).id();
+        var playerId = localPlayer(player).id();
         var req = new MapReport(playerId, new ArrayList<>(options.selectedItems()), comment, null, null);
         try {
             maps.report(map.id().toString(), req);

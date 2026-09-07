@@ -4,6 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.ipc.map.MapData;
+import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.details.MapDetailsView;
 import net.hollowcube.mapmaker.map.MapPresentation;
@@ -13,7 +14,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.hollowcube.mapmaker.player.DisplayName;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
 import org.jetbrains.annotations.Blocking;
@@ -97,7 +97,7 @@ public class MapIconPanel extends Panel {
         var icon = Objects.requireNonNullElse(MapSettings.getIcon(map.settings()), Material.PAPER);
         button.model(icon.name(), null);
 
-        var authorName = OpUtils.mapOr(this.authorName, DisplayName::build, Component.text("loading"));
+        var authorName = OpUtils.mapOr(this.authorName, DisplayName::render, Component.text("loading"));
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(host.player());
         var entry = MapPresentation.createHoverComponents(map, authorName, progress, playerProtocolVersion); // todo
 

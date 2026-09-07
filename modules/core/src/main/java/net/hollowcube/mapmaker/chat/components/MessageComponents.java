@@ -12,7 +12,6 @@ import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.MapPresentation;
 import net.hollowcube.mapmaker.misc.Emoji;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextReplacementConfig;
@@ -31,6 +30,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MessageComponents {
 
@@ -61,7 +62,7 @@ public class MessageComponents {
     private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
         var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapId, api.maps::get);
-        var author = usernameCache.get(map.owner().toString(), id -> api.players.getDisplayName(id).build());
+        var author = usernameCache.get(map.owner().toString(), id -> api.players.getDisplayName(id).render());
         var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
@@ -120,7 +121,7 @@ public class MessageComponents {
 
     public @NotNull MessageComponent createGlobalMessage(@NotNull Player player, @NotNull ChatMessage message) {
         Random random = new Random(message.seed());
-        var shouldUwuify = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
+        var shouldUwuify = localPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
 
         var builder = MessageComponent.builder();
 
@@ -159,7 +160,7 @@ public class MessageComponents {
 
     public @NotNull MessageComponent createDirectMessage(@NotNull Player player, @NotNull ChatMessage message) {
         Random random = new Random(message.seed());
-        var shouldUwuify = PlayerData.fromPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
+        var shouldUwuify = localPlayer(player).getSetting(PlayerSettings.CHAT_LANGUAGE) == ChatLanguage.UWU;
 
         var builder = MessageComponent.builder();
 

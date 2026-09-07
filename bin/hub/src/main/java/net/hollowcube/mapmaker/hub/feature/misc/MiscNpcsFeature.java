@@ -7,13 +7,14 @@ import net.hollowcube.mapmaker.hub.entity.NpcHandler;
 import net.hollowcube.mapmaker.hub.entity.NpcPlayer;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.PlayerSkin;
 import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 @AutoService(HubFeature.class)
 @SuppressWarnings("UnstableApiUsage")
@@ -36,7 +37,7 @@ public class MiscNpcsFeature implements HubFeature {
     private void handlePlaytimeClick(@NotNull Player player, @NotNull BaseNpcEntity npc, @NotNull PlayerHand hand, boolean isLeftClick) {
         if (hand != PlayerHand.MAIN || isLeftClick) return;
 
-        var playerData = PlayerData.fromPlayer(player);
+        var playerData = localPlayer(player);
         player.sendMessage("You have played for " + NumberUtil.formatPlayerPlaytime(playerData.totalPlaytime()).trim());
     }
 

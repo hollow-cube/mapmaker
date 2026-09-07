@@ -29,12 +29,12 @@ class AltsInfoType implements PlayerInfoType<String> {
         } else {
             var component = text()
                 .append(text("Alts for "))
-                .append(players.getDisplayName(target).build())
+                .append(players.getDisplayName(target).render())
                 .append(text(":"))
                 .appendNewline();
             for (var alt : alts) {
                 component = component.append(text(" - "))
-                    .append(alt.displayName())
+                    .append(alt.displayName().render())
                     .appendNewline();
             }
             user.sendMessage(component);

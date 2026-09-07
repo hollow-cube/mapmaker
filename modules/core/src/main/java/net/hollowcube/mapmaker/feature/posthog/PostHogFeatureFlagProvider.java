@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.feature.posthog;
 
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
-import net.hollowcube.mapmaker.player.PlayerData;
+import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.posthog.FeatureFlagContext;
 import net.hollowcube.posthog.PostHog;
 import net.minestom.server.entity.Player;
@@ -11,6 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
     public static final String NO_USER = "00000000-0000-0000-0000-000000000000";
@@ -26,7 +28,7 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
             return PostHog.getFeatureFlag(transformedName, NO_USER).isEnabled();
         return switch (context[0]) {
             case Player player -> {
-                var playerData = PlayerData.fromPlayer(player);
+                var playerData = localPlayer(player);
                 yield PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
                         .personProperties(Map.of(
                                 "username", playerData.username(),
@@ -34,7 +36,7 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
                         ))
                         .build()).isEnabled();
             }
-            case PlayerData playerData ->
+            case LocalPlayer playerData ->
                     PostHog.getFeatureFlag(transformedName, playerData.id(), FeatureFlagContext.newBuilder()
                             .personProperties(Map.of(
                                     "username", playerData.username(),

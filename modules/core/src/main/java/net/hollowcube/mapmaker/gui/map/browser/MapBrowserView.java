@@ -11,7 +11,6 @@ import net.hollowcube.mapmaker.panels.Element;
 import net.hollowcube.mapmaker.panels.Pagination;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Text;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.util.StringComparison;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -22,6 +21,7 @@ import java.util.List;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
 import static net.hollowcube.mapmaker.panels.AbstractAnvilView.simpleAnvil;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapBrowserView extends Panel {
 
@@ -133,7 +133,7 @@ public class MapBrowserView extends Panel {
 
     @Override
     protected void unmount() {
-        var playerData = PlayerData.fromPlayer(host.player());
+        var playerData = localPlayer(host.player());
         FutureUtil.submitVirtual(() -> playerData.writeUpdatesUpstream(api.players));
 
         super.unmount();

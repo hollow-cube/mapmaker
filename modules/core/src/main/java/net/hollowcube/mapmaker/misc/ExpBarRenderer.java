@@ -5,7 +5,6 @@ import net.hollowcube.common.hud.HudNode;
 import net.hollowcube.common.hud.HudText;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FontUIBuilder;
-import net.hollowcube.mapmaker.player.PlayerData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.GameMode;
@@ -46,20 +45,11 @@ public class ExpBarRenderer implements PlayerHud.Module {
             require("hud/level/num_7"), require("hud/level/num_8"), require("hud/level/num_9")
     };
 
-    private long lastExp = -1;
     private long lastBarKey = -1;
     private HudNode.Anchored lastBar = null; // late init
 
     @Override
     public @Nullable HudNode.Anchored render(@NotNull Player player) {
-        // Update the player experience bar if it has changed
-        var playerData = PlayerData.fromPlayer(player);
-        if (playerData.experience() != lastExp) {
-            player.setLevel(playerData.level());
-            player.setExp(playerData.levelProgress());
-            lastExp = playerData.experience();
-        }
-
         // Only creative uses the custom bar: survival/adventure use the builtin one, and spectator
         // shows nothing (it generally makes no sense, but also Axiom uses spectator when in editor
         // mode, which should not show this ui for sure - it looks awful).
