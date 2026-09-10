@@ -6,6 +6,7 @@ import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.s3.MemoryS3Client;
 import net.hollowcube.ipc.Blob;
+import net.hollowcube.ipc.PaginatedList;
 import net.hollowcube.ipc.map.*;
 import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.sqlgen.testing.TestDb;
@@ -18,6 +19,7 @@ import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -42,6 +44,7 @@ class MapServiceImplTest {
     private MapServiceImpl service;
     private MapClient client;
     private HttpServer http;
+    private long publishedIdCounter = 1;
 
     @BeforeEach
     void start() throws Exception {
@@ -565,6 +568,177 @@ class MapServiceImplTest {
             assertTrue(columns.indexOf("deleted_reason") < columns.indexOf("protocol_version"));
             assertTrue(columns.indexOf("protocol_version") < columns.indexOf("leaderboard"));
         }
+    }
+
+    @Test
+    void search_filtersListedPublishedMapsAndOrdersBestThenNewest() {
+        var good = published("Good one", MapVariant.PARKOUR, 2, 5, "2026-01-01");
+        var best = published("Best one", MapVariant.PARKOUR, 5, 1, "2025-01-01");
+        var liked = published("Liked one", MapVariant.BUILDING, 2, 9, "2026-02-01");
+        var unlisted = published("Hidden", MapVariant.PARKOUR, 5, 0, "2026-03-01");
+        TEST_DB.seed("update maps set listed = false where id = '" + unlisted + "'");
+        create(OWNER); // unpublished, must not be listed
+
+        var byBest = client.search(MapSearch.builder().sort(MapSearch.Sort.BEST).build());
+        assertEquals(3, byBest.count());
+        assertEquals(List.of(best, liked, good), ids(byBest));
+        assertEquals(
+            List.of(liked, good, best),
+            ids(client.search(MapSearch.builder().sort(MapSearch.Sort.PUBLISHED).build()))
+        );
+        assertEquals(
+            List.of(best, good, liked),
+            ids(
+                client.search(
+                    MapSearch.builder().sort(MapSearch.Sort.PUBLISHED).ascending(true).build()
+                )
+            )
+        );
+        assertEquals(
+            List.of(liked),
+            ids(client.search(MapSearch.builder().variants(MapVariant.BUILDING).build()))
+        );
+        assertEquals(
+            List.of(best),
+            ids(client.search(MapSearch.builder().qualities(MapQuality.MASTERPIECE).build()))
+        );
+        assertEquals(
+            List.of(liked, good),
+            ids(client.search(MapSearch.builder().query("d ON").build()))
+        );
+        assertEquals(List.of(), ids(client.search(MapSearch.builder().owner(BUILDER).build())));
+        var page = client.search(
+            MapSearch.builder().sort(MapSearch.Sort.BEST).page(1).pageSize(2).build()
+        );
+        assertEquals(3, page.count());
+        assertEquals(List.of(good), ids(page));
+        // The filter binds sit before offset and limit: a slip would put "one" in the offset.
+        var filtered = client.search(
+            MapSearch.builder()
+                .query("one")
+                .qualities(MapQuality.GREAT, MapQuality.MASTERPIECE)
+                .variants(MapVariant.PARKOUR)
+                .sort(MapSearch.Sort.BEST)
+                .page(1)
+                .pageSize(1)
+                .build()
+        );
+        assertEquals(2, filtered.count());
+        assertEquals(List.of(good), ids(filtered));
+        assertThrows(
+            IpcException.class,
+            () -> service.search(MapSearch.builder().sort(MapSearch.Sort.UNKNOWN).build())
+        );
+    }
+
+    @Test
+    void search_ratesDifficultyLikeTheGoView() {
+        var easy = published("Easy", MapVariant.PARKOUR, 0, 0, "2026-01-01");
+        var hard = published("Hard", MapVariant.PARKOUR, 0, 0, "2026-01-02");
+        var fresh = published("Fresh", MapVariant.PARKOUR, 0, 0, "2026-01-03");
+        TEST_DB.seed(
+            """
+            insert into map_stats (map_id, play_count, win_count)
+            values ('%s', 100, 90), ('%s', 100, 30), ('%s', 5, 5)
+            """
+                .formatted(easy, hard, fresh)
+        );
+        assertEquals(
+            List.of(easy),
+            ids(client.search(MapSearch.builder().difficulties(MapDifficulty.EASY).build()))
+        );
+        assertEquals(
+            List.of(hard),
+            ids(client.search(MapSearch.builder().difficulties(MapDifficulty.HARD).build()))
+        );
+        assertEquals(
+            List.of(fresh),
+            ids(client.search(MapSearch.builder().difficulties(MapDifficulty.UNRATED).build()))
+        );
+        var first = client.search(MapSearch.builder().difficulties(MapDifficulty.EASY).build())
+            .first();
+        assertEquals(100, first.uniquePlays());
+        assertEquals(MapDifficulty.EASY, first.difficulty());
+        assertEquals(List.of("terrain"), first.settings().tags());
+    }
+
+    @Test
+    void progress_reportsTheBestFinishedRunElseTheLatest() {
+        TEST_DB.seed("update player_data set extra_map_slots = 10");
+        var done = create(OWNER).id();
+        var going = create(OWNER).id();
+        var never = create(OWNER).id();
+        state(done, BUILDER, "playing", true, 30_000);
+        state(done, BUILDER, "playing", true, 20_049);
+        state(done, BUILDER, "playing", false, 1_000);
+        state(going, BUILDER, "verifying", false, 4_000);
+        TEST_DB.seed(
+            "update save_states set updated = now() - interval '1 hour' where map_id = '"
+                + going
+                + "'"
+        );
+        state(going, BUILDER, "playing", false, 7_000);
+        state(going, OWNER, "playing", true, 1);
+        state(never, BUILDER, "editing", true, 1);
+
+        var progress = new HashMap<UUID, PlayerMapProgress>();
+        for (var entry : client.progress(BUILDER, List.of(done, going, never))) {
+            progress.put(entry.mapId(), entry);
+        }
+        assertEquals(2, progress.size());
+        assertEquals(PlayerMapProgress.Progress.COMPLETE, progress.get(done).progress());
+        assertEquals(20_050, progress.get(done).playtime());
+        assertEquals(PlayerMapProgress.Progress.STARTED, progress.get(going).progress());
+        assertEquals(7_000, progress.get(going).playtime());
+        assertEquals(List.of(), client.progress(BUILDER, List.of()));
+    }
+
+    @Test
+    void history_listsMapsLastPlayedFirstWithoutDeletedOnes() {
+        TEST_DB.seed("update player_data set extra_map_slots = 10");
+        var first = create(OWNER).id();
+        var second = create(OWNER).id();
+        var gone = create(OWNER).id();
+        state(first, BUILDER, "playing", false, 1);
+        state(gone, BUILDER, "playing", false, 1);
+        state(second, BUILDER, "editing", false, 1);
+        TEST_DB.seed("update save_states set updated = now() - interval '1 hour'");
+        state(second, BUILDER, "playing", true, 1);
+        state(first, BUILDER, "playing", false, 1);
+        client.delete(OWNER, gone, null);
+
+        var history = client.history(BUILDER, 0, 10);
+        assertEquals(2, history.count());
+        assertEquals(List.of(first, second), ids(history));
+        assertEquals(List.of(second), ids(client.history(BUILDER, 1, 1)));
+        assertEquals(List.of(), ids(client.history(OWNER, 0, 10)));
+    }
+
+    private UUID published(
+        String name,
+        MapVariant variant,
+        int quality,
+        int likes,
+        String publishedAt
+    ) {
+        var id = create(OWNER).id();
+        var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
+        patch.setName(name);
+        patch.setVariant(variant);
+        patch.setTags(List.of("terrain"));
+        client.update(id, patch.build());
+        TEST_DB.seed(
+            """
+            update maps set published_id = %s, published_at = '%s', quality_override = %s, total_likes = %s
+            where id = '%s'
+            """
+                .formatted(publishedIdCounter++, publishedAt, quality, likes, id)
+        );
+        return id;
+    }
+
+    private static List<UUID> ids(PaginatedList<MapData> page) {
+        return page.results().stream().map(MapData::id).toList();
     }
 
     private MapData create(UUID player) {

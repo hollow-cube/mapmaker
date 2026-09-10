@@ -4,6 +4,7 @@ package net.hollowcube.apiserver.db;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
+import net.hollowcube.sqlgen.runtime.SqlFragment;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -98,6 +99,13 @@ public interface MapsQueries {
 
     long insertReport(UUID mapId, UUID playerId, List<Integer> categories, String comment);
 
+    List<SearchMapsRow> searchMaps(long offset, long limit, @Nullable SqlFragment where,
+            @Nullable SqlFragment orderBy);
+
+    List<GetMultiMapProgressRow> getMultiMapProgress(UUID playerId, List<UUID> mapIds);
+
+    List<ListPlayerHistoryRow> listPlayerHistory(UUID playerId, long offset, long limit);
+
     /**
      * The arguments of `updateMap`.
      */
@@ -119,6 +127,26 @@ public interface MapsQueries {
      */
     record GetPlayersForUpdateRow(UUID id, RoleType role, @Nullable Instant hypercubeEnd,
             int extraMapSlots, int maxMapSize, int mapBuilders, String settings) {
+    }
+
+    /**
+     * A row of `searchMaps`.
+     */
+    record SearchMapsRow(Maps maps, List<String> tags, long playCount, long winCount,
+            long totalCount) {
+    }
+
+    /**
+     * A row of `getMultiMapProgress`.
+     */
+    record GetMultiMapProgressRow(UUID mapId, boolean completed, long playtime) {
+    }
+
+    /**
+     * A row of `listPlayerHistory`.
+     */
+    record ListPlayerHistoryRow(Maps maps, List<String> tags, long playCount, long winCount,
+            long totalCount) {
     }
 
     /**
@@ -327,6 +355,23 @@ public interface MapsQueries {
         public long insertReport(UUID mapId, UUID playerId, List<Integer> categories,
                 String comment) {
             throw new UnsupportedOperationException("MapsQueries.insertReport is not stubbed on this fake");
+        }
+
+        @Override
+        public List<SearchMapsRow> searchMaps(long offset, long limit, @Nullable SqlFragment where,
+                @Nullable SqlFragment orderBy) {
+            throw new UnsupportedOperationException("MapsQueries.searchMaps is not stubbed on this fake");
+        }
+
+        @Override
+        public List<GetMultiMapProgressRow> getMultiMapProgress(UUID playerId, List<UUID> mapIds) {
+            throw new UnsupportedOperationException("MapsQueries.getMultiMapProgress is not stubbed on this fake");
+        }
+
+        @Override
+        public List<ListPlayerHistoryRow> listPlayerHistory(UUID playerId, long offset,
+                long limit) {
+            throw new UnsupportedOperationException("MapsQueries.listPlayerHistory is not stubbed on this fake");
         }
     }
 }

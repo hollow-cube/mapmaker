@@ -11,6 +11,7 @@ import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.player.Roles;
 import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.ipc.Blob;
+import net.hollowcube.ipc.PaginatedList;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.map.*;
 import net.hollowcube.ipc.notification.NotificationUpdate;
@@ -19,7 +20,6 @@ import net.hollowcube.sqlgen.runtime.Jdbc;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import redis.clients.jedis.JedisPooled;
-import redis.clients.jedis.params.ScanParams;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -38,6 +38,8 @@ import java.util.function.LongSupplier;
 
 import static java.util.Objects.requireNonNullElse;
 import static net.hollowcube.apiserver.map.MapCompat.*;
+import static net.hollowcube.ipc.PaginatedList.limit;
+import static net.hollowcube.ipc.PaginatedList.offset;
 import static net.hollowcube.ipc.util.IpcException.badRequest;
 import static net.hollowcube.ipc.util.IpcException.notFound;
 import static net.hollowcube.ipc.util.IpcException.unavailable;
@@ -141,6 +143,44 @@ public final class MapServiceImpl implements MapService {
     }
 
     @Override
+    public PaginatedList<MapData> search(MapSearch search) {
+        if (search.sort() == MapSearch.Sort.UNKNOWN
+            || search.variants().contains(MapVariant.UNKNOWN)
+            || search.qualities().contains(MapQuality.UNKNOWN)
+            || search.difficulties().contains(MapDifficulty.UNKNOWN))
+            throw badRequest("invalid search filter");
+        var rows = db.maps.searchMaps(
+            offset(search.page(), search.pageSize()),
+            limit(search.pageSize()),
+            MapSearchSql.where(search),
+            MapSearchSql.orderBy(search)
+        );
+        return PaginatedList.of(
+            rows,
+            MapsQueries.SearchMapsRow::totalCount,
+            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount())
+        );
+    }
+
+    @Override
+    public List<PlayerMapProgress> progress(UUID playerId, List<UUID> mapIds) {
+        if (mapIds.isEmpty()) return List.of();
+        return db.maps.getMultiMapProgress(playerId, mapIds)
+            .stream()
+            .map(MapCompat::progress)
+            .toList();
+    }
+
+    @Override
+    public PaginatedList<MapData> history(UUID playerId, int page, int pageSize) {
+        return PaginatedList.of(
+            db.maps.listPlayerHistory(playerId, offset(page, pageSize), limit(pageSize)),
+            MapsQueries.ListPlayerHistoryRow::totalCount,
+            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount())
+        );
+    }
+
+    @Override
     public void update(UUID mapId, MapPatch patch) {
         patch.validate();
         db.tx(tx -> {
@@ -213,7 +253,6 @@ public final class MapServiceImpl implements MapService {
             var becomesParkour = patch.variant() == MapVariant.PARKOUR
                 && variant(map) != MapVariant.PARKOUR;
             if (map.publishedAt() != null && becomesParkour) tx.maps.deleteInProgressStates(mapId);
-            tx.afterCommit(this::invalidateSearch);
         });
     }
 
@@ -236,7 +275,6 @@ public final class MapServiceImpl implements MapService {
             tx.afterCommit(
                 () -> nats.publish(MAP_DELETE_SUBJECT, mapEvent(MAP_ACTION_DELETE, mapId))
             );
-            tx.afterCommit(this::invalidateSearch);
         });
     }
 
@@ -310,7 +348,6 @@ public final class MapServiceImpl implements MapService {
                     tx.afterCommit(
                         () -> posthog.capture(map.owner().toString(), "map_published", properties)
                     );
-                    tx.afterCommit(this::invalidateSearch);
 
                     return new PublishMapResult.Success(mapData(tx.maps, published));
                 });
@@ -675,16 +712,6 @@ public final class MapServiceImpl implements MapService {
         tx.maps.insertNotification(UUID.randomUUID(), playerId, type, key, data.toString());
         var update = new NotificationUpdate(NotificationUpdate.CREATE, playerId, type, key, data);
         tx.afterCommit(() -> nats.publish(update));
-    }
-
-    private void invalidateSearch() {
-        var cursor = "0";
-        var params = new ScanParams().match(SEARCH_CACHE_PATTERN).count(100);
-        do {
-            var page = redis.scan(cursor, params);
-            if (!page.getResult().isEmpty()) redis.del(page.getResult().toArray(String[]::new));
-            cursor = page.getCursor();
-        } while (!"0".equals(cursor));
     }
 
 }

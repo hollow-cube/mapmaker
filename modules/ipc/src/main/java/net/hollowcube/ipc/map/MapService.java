@@ -1,15 +1,16 @@
 package net.hollowcube.ipc.map;
 
 import net.hollowcube.ipc.Blob;
+import net.hollowcube.ipc.PaginatedList;
 import net.hollowcube.ipc.util.Ipc;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
 
-/// Map writes, ported from Go's `/v4/internal/maps`: the map row, its world object, builders,
-/// verification and publishing. The reads Go still serves — search, save states, leaderboards —
-/// stay on core's `MapClient.Http`.
+/// Maps, ported from Go's `/v4/internal/maps`: the map row, its world object, builders,
+/// verification and publishing, plus the listing reads (search, progress, history). Save states
+/// and leaderboards are still Go's and stay on core's `MapClient.Http`.
 @Ipc
 public interface MapService {
 
@@ -20,6 +21,17 @@ public interface MapService {
     MapData get(String idOrPublishedId);
 
     void update(UUID mapId, MapPatch patch);
+
+    /// Listed published maps only.
+    PaginatedList<MapData> search(MapSearch search);
+
+    /// One entry per map of `mapIds` the player has a playing or verifying save state on; a map
+    /// never started has none.
+    List<PlayerMapProgress> progress(UUID playerId, List<UUID> mapIds);
+
+    /// The maps the player has played, most recently played first. A map deleted since is left
+    /// out rather than returned as a hole.
+    PaginatedList<MapData> history(UUID playerId, int page, int pageSize);
 
     /// A reason is required unless the owner is deleting their own unpublished map.
     void delete(UUID actorId, UUID mapId, @Nullable String reason);

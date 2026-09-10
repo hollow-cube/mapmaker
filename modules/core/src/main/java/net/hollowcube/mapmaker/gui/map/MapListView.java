@@ -2,8 +2,7 @@ package net.hollowcube.mapmaker.gui.map;
 
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.PlayerMapProgress;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.ipc.map.MapSearch;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Pagination;
@@ -62,21 +61,21 @@ public abstract class MapListView extends Panel {
         var response = search(page, pageSize);
         if (response.getValue() > page) pagination.totalPages(response.getValue());
 
-        var playerId = host.player().getUuid().toString();
-        var mapIds = new ArrayList<String>();
+        var playerId = host.player().getUuid();
+        var mapIds = new ArrayList<UUID>();
         var entries = new ArrayList<MapIconPanel>();
         for (var map : response.getKey()) {
-            if (map.isCompletable()) mapIds.add(map.id().toString());
+            if (map.isCompletable()) mapIds.add(map.id());
             entries.add(new MapIconPanel(api, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
         if (!mapIds.isEmpty()) async(() -> {
-            var resp = api.maps.searchMapProgress(playerId, mapIds).keyBy(PlayerMapProgress::mapId);
+            var progress = api.mapService.progress(playerId, mapIds);
             sync(() -> {
-                for (var map : entries) {
-                    var progress = resp.get(map.map().id().toString());
-                    if (progress != null) map.updateProgress(progress);
+                for (var entry : progress) {
+                    entries.stream().filter(map -> map.map().id().equals(entry.mapId()))
+                        .forEach(map -> map.updateProgress(entry));
                 }
             });
         });
@@ -113,8 +112,8 @@ public abstract class MapListView extends Panel {
 
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
-            var response = api.maps.search(MapSearchParams.builder()
-                .page(page).pageSize(pageSize).owner(this.targetId).build());
+            var response = api.mapService.search(MapSearch.builder()
+                .page(page).pageSize(pageSize).owner(UUID.fromString(this.targetId)).build());
             return Map.entry(response.results(), response.totalPages(pageSize));
         }
     }
@@ -127,14 +126,8 @@ public abstract class MapListView extends Panel {
 
         @Override
         protected Map.@NotNull Entry<List<MapData>, Integer> search(int page, int pageSize) {
-            var playerId = localPlayer(host.player()).id().toString();
-            var history = api.maps.getPlayerMapHistory(playerId, page, pageSize);
-
-            // should probably add a multi get maps to api but its a pretty low usage gui right now so dnc.
-            var maps = history.results().stream()
-                .map(api.maps::get)
-                .toList();
-            return Map.entry(maps, history.hasNext(page, pageSize) ? page + 2 : page);
+            var history = api.mapService.history(localPlayer(host.player()).id(), page, pageSize);
+            return Map.entry(history.results(), history.totalPages(pageSize));
         }
     }
 }

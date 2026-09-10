@@ -282,6 +282,25 @@
             "type": "net.hollowcube.ipc.Blob"
           }
         },
+        "history": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.map.MapData\u003e"
+          }
+        },
         "invite-builder": {
           "params": [
             {
@@ -295,6 +314,21 @@
           ],
           "returns": {
             "type": "net.hollowcube.ipc.map.BuilderResult"
+          }
+        },
+        "progress": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "mapIds",
+              "type": "List\u003cUUID\u003e"
+            }
+          ],
+          "returns": {
+            "type": "List\u003cnet.hollowcube.ipc.map.PlayerMapProgress\u003e"
           }
         },
         "publish": {
@@ -358,6 +392,17 @@
               "nullable": true
             }
           ]
+        },
+        "search": {
+          "params": [
+            {
+              "name": "search",
+              "type": "net.hollowcube.ipc.map.MapSearch"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.map.MapData\u003e"
+          }
         },
         "set-player-rating": {
           "params": [
@@ -1735,6 +1780,64 @@
         "UNPLAYABLE"
       ]
     },
+    "net.hollowcube.ipc.map.MapSearch": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "page",
+          "type": "int"
+        },
+        {
+          "name": "pageSize",
+          "type": "int"
+        },
+        {
+          "name": "sort",
+          "type": "net.hollowcube.ipc.map.MapSearch.Sort"
+        },
+        {
+          "name": "ascending",
+          "type": "boolean"
+        },
+        {
+          "name": "qualities",
+          "type": "Set\u003cnet.hollowcube.ipc.map.MapQuality\u003e"
+        },
+        {
+          "name": "difficulties",
+          "type": "Set\u003cnet.hollowcube.ipc.map.MapDifficulty\u003e"
+        },
+        {
+          "name": "variants",
+          "type": "Set\u003cnet.hollowcube.ipc.map.MapVariant\u003e"
+        },
+        {
+          "name": "owner",
+          "type": "UUID",
+          "nullable": true
+        },
+        {
+          "name": "query",
+          "type": "String",
+          "nullable": true
+        },
+        {
+          "name": "contest",
+          "type": "UUID",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.MapSearch.Sort": {
+      "kind": "enum",
+      "constants": [
+        "BEST",
+        "PUBLISHED"
+      ]
+    },
     "net.hollowcube.ipc.map.MapSize": {
       "kind": "enum",
       "constants": [
@@ -1848,6 +1951,33 @@
         "UNVERIFIED",
         "PENDING",
         "VERIFIED"
+      ]
+    },
+    "net.hollowcube.ipc.map.PlayerMapProgress": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "mapId",
+          "type": "UUID"
+        },
+        {
+          "name": "progress",
+          "type": "net.hollowcube.ipc.map.PlayerMapProgress.Progress"
+        },
+        {
+          "name": "playtime",
+          "type": "long"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.PlayerMapProgress.Progress": {
+      "kind": "enum",
+      "constants": [
+        "STARTED",
+        "COMPLETE"
       ]
     },
     "net.hollowcube.ipc.map.PublishMapResult": {

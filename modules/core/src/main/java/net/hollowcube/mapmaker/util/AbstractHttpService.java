@@ -75,7 +75,6 @@ public abstract class AbstractHttpService {
         .registerTypeAdapter(Interaction.Type.class, new LenientEnumTypeAdapter<>(Interaction.Type.class))
         .registerTypeAdapter(InteractionResponse.Type.class, new LenientEnumTypeAdapter<>(InteractionResponse.Type.class))
         .registerTypeAdapter(MapRole.class, new LenientEnumTypeAdapter<>(MapRole.class))
-        .registerTypeAdapter(PlayerMapProgress.Progress.class, new EnumTypeAdapter<>(PlayerMapProgress.Progress.class))
         .registerTypeAdapter(SessionUpdateMessage.Action.class, new EnumOrdinalTypeAdapter<>(SessionUpdateMessage.Action.class))
         .registerTypeAdapter(MapRating.State.class, new LenientEnumTypeAdapter<>(MapRating.State.class))
         .registerTypeAdapter(MapQuality.class, new LenientEnumTypeAdapter<>(MapQuality.class))

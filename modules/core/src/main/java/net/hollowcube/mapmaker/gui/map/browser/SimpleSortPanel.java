@@ -4,7 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import net.hollowcube.ipc.map.MapDifficulty;
 import net.hollowcube.ipc.map.MapQuality;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.ipc.map.MapSearch;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -27,7 +27,7 @@ class SimpleSortPanel extends Panel {
     private static final PlayerSetting<List<MapDifficulty>> DIFFICULTIES = PlayerSetting.create("map_browser.difficulties",
             DEFAULT_DIFFICULTIES, SimpleSortPanel::writeDifficultyList, SimpleSortPanel::readDifficultyList);
 
-    private final Consumer<MapSearchParams.Builder> onSearch;
+    private final Consumer<MapSearch.Builder> onSearch;
     private final boolean fetchOnMount;
 
     private final Set<MapDifficulty> difficulties = new HashSet<>();
@@ -38,7 +38,7 @@ class SimpleSortPanel extends Panel {
 
     private boolean sync = true;
 
-    public SimpleSortPanel(@NotNull Consumer<MapSearchParams.Builder> onSearch, boolean fetchOnMount) {
+    public SimpleSortPanel(@NotNull Consumer<MapSearch.Builder> onSearch, boolean fetchOnMount) {
         super(9, 4);
         this.onSearch = onSearch;
         this.fetchOnMount = fetchOnMount;
@@ -120,22 +120,19 @@ class SimpleSortPanel extends Panel {
     }
 
     private void onSearchChange() {
-        var params = MapSearchParams.builder();
+        var params = MapSearch.builder();
         if (!difficulties.isEmpty() && difficulties.size() != 5) {
             // Only set if not 0 or all. In those cases we also want to include unknown so can use default.
             params.difficulties(difficulties.toArray(new MapDifficulty[0]));
         }
         switch (sort) {
             case BEST -> params
-                    .ascending(false)
-                    .best(true)
+                    .sort(MapSearch.Sort.BEST)
                     .qualities(MapQuality.GOOD, MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
             case QUALITY -> params
-                    .ascending(false)
+                    .sort(MapSearch.Sort.PUBLISHED)
                     .qualities(MapQuality.GREAT, MapQuality.EXCELLENT, MapQuality.OUTSTANDING, MapQuality.MASTERPIECE);
-            case NEW -> params
-                    .ascending(false)
-                    .best(false);
+            case NEW -> params.sort(MapSearch.Sort.PUBLISHED);
         }
         this.onSearch.accept(params);
     }

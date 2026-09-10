@@ -61,13 +61,13 @@ public class MessageComponents {
 
     @Blocking
     private void map(@NotNull MessageComponent.Builder builder, @NotNull String mapId, @NotNull Player player) {
-        var uuid = player.getUuid().toString();
         var map = mapDataCache.get(mapId, api.maps::get);
         var author = usernameCache.get(map.owner().toString(), id -> api.players.displayName(UUID.fromString(id)).render());
-        var progress = api.maps.searchMapProgress(uuid, List.of(mapId)).first();
+        var progress = api.mapService.progress(player.getUuid(), List.of(map.id()));
 
         var playerProtocolVersion = ProtocolVersions.getProtocolVersion(player);
-        var components = MapPresentation.createHoverComponents(map, author, progress, playerProtocolVersion);
+        var components = MapPresentation.createHoverComponents(
+            map, author, progress.isEmpty() ? null : progress.getFirst(), playerProtocolVersion);
 
         var lore = components.getValue();
         if (playerProtocolVersion >= map.protocolVersion()) {

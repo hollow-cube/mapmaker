@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.gui.map.browser;
 
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.ipc.map.MapSearch;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Element;
@@ -9,6 +9,8 @@ import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.UUID;
 
 public class MapContestBrowserView extends MapBrowserView {
 
@@ -38,9 +40,8 @@ public class MapContestBrowserView extends MapBrowserView {
         super.mount(host, isInitial);
         if (!isInitial) return;
 
-        var playerId = host.player().getUuid().toString();
-        pagination.reset(MapSearchParams.builder()
-            .contest("c9354e33-96c2-414a-9f4a-8c2ff4669086"));
+        pagination.reset(MapSearch.builder()
+            .contest(UUID.fromString("c9354e33-96c2-414a-9f4a-8c2ff4669086")));
     }
 
     private static class BottomPanel extends Panel {

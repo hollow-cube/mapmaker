@@ -18,6 +18,8 @@ public final class ApiClient {
 
     public final PlayerService players;
     public final SocialService social;
+    /// The map reads and writes the java api-server serves; `maps` wraps what Go still does.
+    public final MapService mapService;
     public final MapClient maps;
     public final ReplayService replays;
     public final HeadDatabaseService headDatabase;
@@ -26,28 +28,6 @@ public final class ApiClient {
     public final NotificationService notifications;
     public final AuthClient auth;
 
-    public ApiClient(
-        PlayerService players,
-        SocialService social,
-        MapClient maps,
-        ReplayService replays,
-        HeadDatabaseService headDatabase,
-        ChatService chat,
-        InteractionClient interactions,
-        NotificationService notifications,
-        AuthClient auth
-    ) {
-        this.players = players;
-        this.social = social;
-        this.maps = maps;
-        this.replays = replays;
-        this.headDatabase = headDatabase;
-        this.chat = chat;
-        this.interactions = interactions;
-        this.notifications = notifications;
-        this.auth = auth;
-    }
-
     /// Everything the Go api-server still serves comes off `http`; everything the java api-server
     /// serves is an ipc client built against its own base url, and so is passed in.
     public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat,
@@ -55,6 +35,7 @@ public final class ApiClient {
                      NotificationService notifications) {
         this.players = new LocalPlayerService(players);
         this.social = social;
+        this.mapService = maps;
         this.maps = new MapClient.Http(http, maps);
         this.replays = replays;
         this.headDatabase = headDatabase;

@@ -268,3 +268,61 @@ on conflict (map_id, player_id) do update
 -- name: insertReport :exec
 insert into map_reports (map_id, player_id, time, categories, comment)
 values ($mapId, $playerId, now(), $categories, $comment);
+
+-- name: searchMaps :many
+-- not-null: tags, play_count, win_count, total_count
+-- Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
+-- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
+-- sort the `order by` fragment, both built in `MapSearchSql`.
+select maps.*,
+       array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
+       coalesce(stats.play_count, 0)                                                 as play_count,
+       coalesce(stats.win_count, 0)                                                  as win_count,
+       count(*) over ()                                                              as total_count
+from maps
+         left join map_stats stats on stats.map_id = maps.id
+/* where */
+/* order by */
+offset $offset limit $limit;
+
+-- name: getMultiMapProgress :many
+-- not-null: completed, playtime
+-- Go's `GetMultiMapProgress`: complete if any playing or verifying run finished, and the playtime
+-- of the best finished run, else of the run touched last. Playtime is tick-rounded milliseconds;
+-- Go's `round(playtime / 50.0)` is spelt as integer arithmetic because pglite cannot inline `round`.
+with runs as (select ss.map_id,
+                     ss.completed,
+                     (greatest((ss.playtime + 25) / 50, ss.ticks) * 50)::int8 as playtime,
+                     ss.updated
+              from save_states ss
+              where ss.player_id = $playerId
+                and ss.map_id = any ($mapIds::uuid[])
+                and ss.deleted is null
+                and ss.type in ('playing', 'verifying'))
+select map_id,
+       bool_or(completed) as completed,
+       case
+           when bool_or(completed) then min(playtime) filter (where completed)
+           else (select r.playtime from runs r where r.map_id = runs.map_id order by r.updated desc limit 1)
+           end            as playtime
+from runs
+group by map_id;
+
+-- name: listPlayerHistory :many
+-- not-null: tags, play_count, win_count, total_count
+-- Maps drop out here once deleted instead of 404ing the page in the client.
+select maps.*,
+       array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
+       coalesce(stats.play_count, 0)                                                 as play_count,
+       coalesce(stats.win_count, 0)                                                  as win_count,
+       count(*) over ()                                                              as total_count
+from (select map_id, max(updated) as last_played
+      from save_states
+      where player_id = $playerId
+        and type = 'playing'
+        and deleted is null
+      group by map_id) recent
+         join maps on maps.id = recent.map_id and maps.deleted_at is null
+         left join map_stats stats on stats.map_id = maps.id
+order by recent.last_played desc
+offset $offset limit $limit;

@@ -6,6 +6,7 @@ import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.db.MapSlots;
 import net.hollowcube.apiserver.db.MapStats;
 import net.hollowcube.apiserver.db.Maps;
+import net.hollowcube.apiserver.db.MapsQueries;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.map.MapBuilder;
 import net.hollowcube.ipc.map.MapData;
@@ -15,6 +16,7 @@ import net.hollowcube.ipc.map.MapQuality;
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.map.PlayerMapProgress;
 import net.hollowcube.ipc.util.Position;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,9 +57,7 @@ final class MapCompat {
     /// no reason given.
     static final String USER_DELETION = "user_deletion";
 
-    /// Go's search cache, cleared on every map write, and the verification leaderboard a reset
-    /// throws away.
-    static final String SEARCH_CACHE_PATTERN = "maps:search:*";
+    /// The verification leaderboard a reset throws away.
     static final String VERIFICATION_LEADERBOARD_PREFIX = "map:";
     static final String VERIFICATION_LEADERBOARD_SUFFIX = ":lb_playtime";
 
@@ -65,8 +65,16 @@ final class MapCompat {
 
     /// `stats` is null for an unpublished map, which has none.
     static MapData mapData(Maps map, List<String> tags, @Nullable MapStats stats) {
-        long plays = stats == null ? 0 : stats.playCount();
-        var winRate = plays == 0 ? 0.0 : (double) stats.winCount() / plays;
+        return mapData(
+            map,
+            tags,
+            stats == null ? 0 : stats.playCount(),
+            stats == null ? 0 : stats.winCount()
+        );
+    }
+
+    static MapData mapData(Maps map, List<String> tags, long plays, long wins) {
+        var winRate = plays == 0 ? 0.0 : (double) wins / plays;
         return new MapData(
             map.id(),
             map.owner(),
@@ -107,6 +115,19 @@ final class MapCompat {
         if (value == VERIFICATION_PENDING) return MapVerification.PENDING;
         if (value == VERIFICATION_VERIFIED) return MapVerification.VERIFIED;
         return MapVerification.UNVERIFIED;
+    }
+
+    /// The number the search filter compares against: Go's `mapDifficultyIndex`, where unrated
+    /// is -1 and the rest count up from easy.
+    static long difficultyId(MapDifficulty difficulty) {
+        return switch (difficulty) {
+            case UNRATED, UNKNOWN -> -1;
+            case EASY -> 0;
+            case MEDIUM -> 1;
+            case HARD -> 2;
+            case EXPERT -> 3;
+            case NIGHTMARE -> 4;
+        };
     }
 
     static MapDifficulty difficulty(MapVariant variant, long plays, double winRate) {
@@ -174,6 +195,16 @@ final class MapCompat {
         json.addProperty("format", format);
         json.addProperty("score", board.score());
         return json.toString();
+    }
+
+    static PlayerMapProgress progress(MapsQueries.GetMultiMapProgressRow row) {
+        return new PlayerMapProgress(
+            row.mapId(),
+            row.completed()
+                ? PlayerMapProgress.Progress.COMPLETE
+                : PlayerMapProgress.Progress.STARTED,
+            row.playtime()
+        );
     }
 
     static MapBuilder builder(MapSlots slot) {

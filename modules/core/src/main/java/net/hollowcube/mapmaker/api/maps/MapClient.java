@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.ipc.Blob;
+import net.hollowcube.ipc.PaginatedList;
 import net.hollowcube.ipc.map.BeginVerificationResult;
 import net.hollowcube.ipc.map.BuilderResult;
 import net.hollowcube.ipc.map.CreateMapResult;
@@ -20,10 +21,8 @@ import net.hollowcube.ipc.map.PublishMapResult;
 import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
-import net.hollowcube.mapmaker.api.PaginatedList;
 import net.hollowcube.mapmaker.api.ResultList;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
@@ -131,19 +130,7 @@ public interface MapClient {
         throw notImplemented();
     }
 
-    default PaginatedList<String> getPlayerMapHistory(String playerId, int page, int pageSize) {
-        throw notImplemented();
-    }
-
     default PaginatedList<PlayerTopTimeEntry> getPlayerTopTimes(String playerId, int page, int pageSize) {
-        throw notImplemented();
-    }
-
-    default PaginatedList<MapData> search(MapSearchParams params) {
-        throw notImplemented();
-    }
-
-    default ResultList<PlayerMapProgress> searchMapProgress(String playerId, List<String> mapIds) {
         throw notImplemented();
     }
 
@@ -319,38 +306,10 @@ public interface MapClient {
         }
 
         @Override
-        public PaginatedList<String> getPlayerMapHistory(String playerId, int page, int pageSize) {
-            return http.get(
-                "getPlayerMapHistory",
-                V4_PLAYERS_PREFIX + "/" + playerId + "/map-history" + query("page", page, "pageSize", pageSize),
-                new TypeToken<>() {}
-            );
-        }
-
-        @Override
         public PaginatedList<PlayerTopTimeEntry> getPlayerTopTimes(String playerId, int page, int pageSize) {
             return http.get(
                 "getPlayerTopTimes",
                 V4_PLAYERS_PREFIX + "/" + playerId + "/top-times" + query("page", page, "pageSize", pageSize),
-                new TypeToken<>() {}
-            );
-        }
-
-        @Override
-        public PaginatedList<MapData> search(MapSearchParams params) {
-            return http.get(
-                "searchMaps",
-                params.toUrl(V4_PREFIX + "/search"),
-                new TypeToken<>() {}
-            );
-        }
-
-        @Override
-        public ResultList<PlayerMapProgress> searchMapProgress(String playerId, List<String> mapIds) {
-            return http.post(
-                "searchMapProgress",
-                V4_PREFIX + "/search/progress",
-                Map.of("playerId", playerId, "mapIds", mapIds),
                 new TypeToken<>() {}
             );
         }

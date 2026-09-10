@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.util;
 
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.map.*;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -48,13 +47,5 @@ class LegacyMapDataTest {
         var map = AbstractHttpService.GSON.fromJson("{" + IDS + ",\"difficulty\":\"future_difficulty\",\"quality\":\"future_quality\"}", MapData.class);
         assertEquals(MapDifficulty.UNKNOWN, map.difficulty());
         assertEquals(MapQuality.UNKNOWN, map.quality());
-    }
-
-    @Test
-    void unratedSearchUsesTheGoEnumName() {
-        assertTrue(MapSearchParams.builder().difficulties(MapDifficulty.UNRATED).build().toUrl("/search")
-            .contains("difficulty=unknown"));
-        assertTrue(MapSearchParams.builder().difficulties(MapDifficulty.HARD).build().toUrl("/search")
-            .contains("difficulty=hard"));
     }
 }

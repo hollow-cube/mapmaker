@@ -4,8 +4,7 @@ import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapIconPanel;
-import net.hollowcube.mapmaker.map.PlayerMapProgress;
-import net.hollowcube.mapmaker.map.requests.MapSearchParams;
+import net.hollowcube.ipc.map.MapSearch;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.Element;
 import net.hollowcube.mapmaker.panels.Pagination;
@@ -17,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.backOrClose;
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.title;
@@ -35,7 +35,7 @@ public class MapBrowserView extends Panel {
 
     protected final Text titleText;
 
-    protected final Pagination<MapSearchParams.Builder> pagination;
+    protected final Pagination<MapSearch.Builder> pagination;
     private final Text searchTextElement;
     private SimpleSortPanel simpleSortPanel;
     protected boolean ignoreParamsOnSearch = true;
@@ -61,7 +61,7 @@ public class MapBrowserView extends Panel {
         this.searchTextElement.onLeftClick(this::openSearchInput);
         this.searchTextElement.onShiftLeftClick(this::handleSearchClear);
 
-        this.pagination = add(1, 2, new Pagination<MapSearchParams.Builder>(7, 3)
+        this.pagination = add(1, 2, new Pagination<MapSearch.Builder>(7, 3)
             .fetchAsync(this::onSearch));
         add(2, 5, pagination.prevButton());
         add(3, 5, pagination.pageText(3, 1));
@@ -93,13 +93,13 @@ public class MapBrowserView extends Panel {
     }
 
     @Blocking
-    private @NotNull List<? extends Panel> onSearch(@NotNull MapSearchParams.Builder params, int page, int pageSize) {
+    private @NotNull List<? extends Panel> onSearch(@NotNull MapSearch.Builder params, int page, int pageSize) {
         // If we have a search query, ignore the given params.
         if (ignoreParamsOnSearch && !this.searchText.isEmpty()) {
-            params = MapSearchParams.builder().query(searchText);
+            params = MapSearch.builder().query(searchText);
         } else params = params.query(searchText);
 
-        var response = api.maps.search(params.page(page).pageSize(pageSize).build());
+        var response = api.mapService.search(params.page(page).pageSize(pageSize).build());
         if (page == 0) pagination.totalPages(response.totalPages(pageSize));
 
         // Sort the page of results using string similarity to the query
@@ -109,21 +109,20 @@ public class MapBrowserView extends Panel {
             results.sort(StringComparison.jaroWinkler(searchText, MapData::name));
         }
 
-        var mapIds = new ArrayList<String>();
+        var mapIds = new ArrayList<UUID>();
         var entries = new ArrayList<MapIconPanel>();
         for (var map : results) {
-            if (map.isCompletable()) mapIds.add(map.id().toString());
+            if (map.isCompletable()) mapIds.add(map.id());
             entries.add(new MapIconPanel(api, bridge, map));
         }
 
         // Fetch the player's current progress on the maps
         if (!mapIds.isEmpty()) async(() -> {
-            var playerId = host.player().getUuid().toString();
-            var resp = api.maps.searchMapProgress(playerId, mapIds).keyBy(PlayerMapProgress::mapId);
+            var progress = api.mapService.progress(host.player().getUuid(), mapIds);
             sync(() -> {
-                for (var map : entries) {
-                    var progress = resp.get(map.map().id().toString());
-                    if (progress != null) map.updateProgress(progress);
+                for (var entry : progress) {
+                    entries.stream().filter(map -> map.map().id().equals(entry.mapId()))
+                        .forEach(map -> map.updateProgress(entry));
                 }
             });
         });
@@ -139,7 +138,7 @@ public class MapBrowserView extends Panel {
         super.unmount();
     }
 
-    private void handleSortChange(@NotNull MapSearchParams.Builder params) {
+    private void handleSortChange(@NotNull MapSearch.Builder params) {
         // Altering the sort params will reset any search query to use the search you input.
         handleSearchTextChange("");
         this.pagination.reset(params);

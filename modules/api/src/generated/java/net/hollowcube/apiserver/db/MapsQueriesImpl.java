@@ -11,6 +11,7 @@ import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
 import net.hollowcube.sqlgen.runtime.Jdbc;
 import net.hollowcube.sqlgen.runtime.Sneaky;
+import net.hollowcube.sqlgen.runtime.SqlFragment;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -284,6 +285,64 @@ final class MapsQueriesImpl implements MapsQueries {
     private static final String INSERT_REPORT = """
         insert into map_reports (map_id, player_id, time, categories, comment)
         values (?, ?, now(), ?, ?)""";
+
+    private static final String SEARCH_MAPS_0 = """
+        -- Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
+        -- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
+        -- sort the `order by` fragment, both built in `MapSearchSql`.
+        select maps.*,
+               array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
+               coalesce(stats.play_count, 0)                                                 as play_count,
+               coalesce(stats.win_count, 0)                                                  as win_count,
+               count(*) over ()                                                              as total_count
+        from maps
+                 left join map_stats stats on stats.map_id = maps.id""";
+
+    private static final String SEARCH_MAPS_1 = "\n";
+
+    private static final String SEARCH_MAPS_2 = """
+
+        offset ? limit ?""";
+
+    private static final String GET_MULTI_MAP_PROGRESS = """
+        -- Go's `GetMultiMapProgress`: complete if any playing or verifying run finished, and the playtime
+        -- of the best finished run, else of the run touched last. Playtime is tick-rounded milliseconds;
+        -- Go's `round(playtime / 50.0)` is spelt as integer arithmetic because pglite cannot inline `round`.
+        with runs as (select ss.map_id,
+                             ss.completed,
+                             (greatest((ss.playtime + 25) / 50, ss.ticks) * 50)::int8 as playtime,
+                             ss.updated
+                      from save_states ss
+                      where ss.player_id = ?
+                        and ss.map_id = any (?::uuid[])
+                        and ss.deleted is null
+                        and ss.type in ('playing', 'verifying'))
+        select map_id,
+               bool_or(completed) as completed,
+               case
+                   when bool_or(completed) then min(playtime) filter (where completed)
+                   else (select r.playtime from runs r where r.map_id = runs.map_id order by r.updated desc limit 1)
+                   end            as playtime
+        from runs
+        group by map_id""";
+
+    private static final String LIST_PLAYER_HISTORY = """
+        -- Maps drop out here once deleted instead of 404ing the page in the client.
+        select maps.*,
+               array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
+               coalesce(stats.play_count, 0)                                                 as play_count,
+               coalesce(stats.win_count, 0)                                                  as win_count,
+               count(*) over ()                                                              as total_count
+        from (select map_id, max(updated) as last_played
+              from save_states
+              where player_id = ?
+                and type = 'playing'
+                and deleted is null
+              group by map_id) recent
+                 join maps on maps.id = recent.map_id and maps.deleted_at is null
+                 left join map_stats stats on stats.map_id = maps.id
+        order by recent.last_played desc
+        offset ? limit ?""";
 
     private final ConnectionSource source;
 
@@ -965,6 +1024,77 @@ final class MapsQueriesImpl implements MapsQueries {
                 Jdbc.setList(ps, 3, "int4", categories);
                 ps.setString(4, comment);
                 return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapsQueries.SearchMapsRow> searchMaps(long offset, long limit,
+            @Nullable SqlFragment where, @Nullable SqlFragment orderBy) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(SEARCH_MAPS_0
+                    + SqlFragment.clause("where", where)
+                    + SEARCH_MAPS_1
+                    + SqlFragment.clause("order by", orderBy)
+                    + SEARCH_MAPS_2)) {
+                int i = 1;
+                i = SqlFragment.bind(ps, i, where);
+                i = SqlFragment.bind(ps, i, orderBy);
+                ps.setLong(i++, offset);
+                ps.setLong(i++, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapsQueries.SearchMapsRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 35, String.class), rs.getLong(36), rs.getLong(37), rs.getLong(38)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapsQueries.GetMultiMapProgressRow> getMultiMapProgress(UUID playerId,
+            List<UUID> mapIds) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_MULTI_MAP_PROGRESS)) {
+                ps.setObject(1, playerId);
+                Jdbc.setList(ps, 2, "uuid", mapIds);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapsQueries.GetMultiMapProgressRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new MapsQueries.GetMultiMapProgressRow(rs.getObject(1, UUID.class), rs.getBoolean(2), rs.getLong(3)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapsQueries.ListPlayerHistoryRow> listPlayerHistory(UUID playerId, long offset,
+            long limit) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_PLAYER_HISTORY)) {
+                ps.setObject(1, playerId);
+                ps.setLong(2, offset);
+                ps.setLong(3, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapsQueries.ListPlayerHistoryRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 35, String.class), rs.getLong(36), rs.getLong(37), rs.getLong(38)));
+                    return rows;
+                }
             } finally {
                 source.release(conn);
             }
