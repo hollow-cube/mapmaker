@@ -2,6 +2,7 @@
 package sample.db;
 
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The queries in `widgets.sql`.
@@ -11,6 +12,8 @@ public interface WidgetsQueries {
     List<Widget> listWidgets(long limit);
 
     List<SearchWidgetsRow> searchWidgets(String query, long limit, long offset);
+
+    List<Widget> listWidgetsAbove(@Nullable Integer minimum);
 
     /**
      * A row of `searchWidgets`.
@@ -30,6 +33,11 @@ public interface WidgetsQueries {
         @Override
         public List<SearchWidgetsRow> searchWidgets(String query, long limit, long offset) {
             throw new UnsupportedOperationException("WidgetsQueries.searchWidgets is not stubbed on this fake");
+        }
+
+        @Override
+        public List<Widget> listWidgetsAbove(@Nullable Integer minimum) {
+            throw new UnsupportedOperationException("WidgetsQueries.listWidgetsAbove is not stubbed on this fake");
         }
     }
 }

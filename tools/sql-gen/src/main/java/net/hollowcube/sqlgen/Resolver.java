@@ -67,8 +67,16 @@ final class Resolver {
         var described = Describe.describe(conn, query);
 
         var params = new ArrayList<Model.Param>(query.params().size());
+        for (var directive : query.nullable()) {
+            if (directive.startsWith("$") && !query.params().contains(directive.substring(1))) {
+                throw new GenException(query.where() + ": '-- nullable: " + directive + "' does not name a parameter");
+            }
+        }
         for (int i = 0; i < query.params().size(); i++) {
             var name = query.params().get(i);
+            // The server cannot say whether a parameter may be null, so it is not-null unless the
+            // query says otherwise; a nullable one boxes and binds with the sql type spelled out.
+            var nullable = query.nullable().contains("$" + name);
             var pgType = described.paramTypes().get(query.binds().indexOf(i));
             // A placeholder used twice is one argument, so both uses have to want the same type.
             for (int bind = 0; bind < query.binds().size(); bind++) {
@@ -79,7 +87,7 @@ final class Resolver {
                     + pgType + "' and '" + other + "'");
             }
             params.add(new Model.Param(name, pgType,
-                types.javaType(pgType, false, query.where() + " parameter $" + name)));
+                types.javaType(pgType, nullable, query.where() + " parameter $" + name), nullable));
         }
 
         var paramsClass = params.size() > MAX_INLINE_PARAMS
@@ -106,7 +114,7 @@ final class Resolver {
         var components = segment(query, described, used);
 
         for (var directive : query.nullable()) {
-            if (!used.contains(directive)) {
+            if (!directive.startsWith("$") && !used.contains(directive)) {
                 throw new GenException(query.where() + ": '-- nullable: " + directive
                     + "' does not name a result column or an embedded table");
             }

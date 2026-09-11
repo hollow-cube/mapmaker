@@ -5,6 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapVariant;
+import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -62,10 +63,10 @@ public class TopTimesCommand extends CommandDsl {
             player.sendMessage(Component.translatable(MAP_CANT_HAVE_TIMES, Component.text(map.id().toString())));
         } else {
             var playerData = localPlayer(player);
-            var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerData.id().toString());
+            var leaderboard = api.mapService.getMapLeaderboard(map.id(), playerData.id());
 
             var lbFormat = map.settings().leaderboard().format();
-            var messages = leaderboard.toComponents(api.players, lbFormat, false);
+            var messages = LeaderboardFormatting.lines(leaderboard, api.players, lbFormat, false);
 
             if (messages == null) {
                 player.sendMessage(Component.translatable(NO_TIMES_FOUND, Component.text(map.id().toString())));

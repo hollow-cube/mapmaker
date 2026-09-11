@@ -5,7 +5,7 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
-import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
@@ -17,15 +17,15 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 public class MapLeaderboardRestoreCommand extends CommandDsl {
     private final Argument<@Nullable MapData> mapArg;
 
-    private final MapClient maps;
+    private final ApiClient api;
 
-    public MapLeaderboardRestoreCommand(@NotNull MapClient maps) {
+    public MapLeaderboardRestoreCommand(@NotNull ApiClient api) {
         super("restore");
-        this.maps = maps;
+        this.api = api;
 
         description = "Syncs the leaderboard with internal source of truth. Do not use unless you know this is correct";
 
-        mapArg = CoreArgument.Map("map", maps)
+        mapArg = CoreArgument.Map("map", api.maps)
                 .description("The ID of the map to restore");
 
         addSyntax(playerOnly(this::handleRestoreLeaderboard), mapArg);
@@ -41,7 +41,7 @@ public class MapLeaderboardRestoreCommand extends CommandDsl {
 
         var playerId = localPlayer(player).id();
         try {
-            maps.restoreMapLeaderboard(map.id().toString());
+            api.mapService.rebuildLeaderboard(map.id());
             player.sendMessage("restored for " + map.settings().name());
         } catch (Exception e) {
             player.sendMessage("failed to restore leaderboard");

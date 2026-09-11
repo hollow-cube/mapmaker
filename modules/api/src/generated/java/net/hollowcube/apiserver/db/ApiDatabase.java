@@ -24,6 +24,8 @@ public final class ApiDatabase {
 
     public final JobsQueries jobs;
 
+    public final LeaderboardsQueries leaderboards;
+
     public final MapFeaturesQueries mapFeatures;
 
     public final MapsQueries maps;
@@ -33,6 +35,8 @@ public final class ApiDatabase {
     public final PlayersQueries players;
 
     public final ReplaysQueries replays;
+
+    public final SaveStatesQueries saveStates;
 
     public final SessionsQueries sessions;
 
@@ -46,11 +50,13 @@ public final class ApiDatabase {
         this.commandLog = new CommandLogQueriesImpl(source);
         this.heads = new HeadsQueriesImpl(source);
         this.jobs = new JobsQueriesImpl(source);
+        this.leaderboards = new LeaderboardsQueriesImpl(source);
         this.mapFeatures = new MapFeaturesQueriesImpl(source);
         this.maps = new MapsQueriesImpl(source);
         this.notifications = new NotificationsQueriesImpl(source);
         this.players = new PlayersQueriesImpl(source);
         this.replays = new ReplaysQueriesImpl(source);
+        this.saveStates = new SaveStatesQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
         this.social = new SocialQueriesImpl(source);
     }
@@ -62,11 +68,13 @@ public final class ApiDatabase {
         this.commandLog = fake.commandLog;
         this.heads = fake.heads;
         this.jobs = fake.jobs;
+        this.leaderboards = fake.leaderboards;
         this.mapFeatures = fake.mapFeatures;
         this.maps = fake.maps;
         this.notifications = fake.notifications;
         this.players = fake.players;
         this.replays = fake.replays;
+        this.saveStates = fake.saveStates;
         this.sessions = fake.sessions;
         this.social = fake.social;
     }
@@ -123,6 +131,8 @@ public final class ApiDatabase {
 
         public final JobsQueries jobs;
 
+        public final LeaderboardsQueries leaderboards;
+
         public final MapFeaturesQueries mapFeatures;
 
         public final MapsQueries maps;
@@ -132,6 +142,8 @@ public final class ApiDatabase {
         public final PlayersQueries players;
 
         public final ReplaysQueries replays;
+
+        public final SaveStatesQueries saveStates;
 
         public final SessionsQueries sessions;
 
@@ -145,11 +157,13 @@ public final class ApiDatabase {
             this.commandLog = new CommandLogQueriesImpl(source);
             this.heads = new HeadsQueriesImpl(source);
             this.jobs = new JobsQueriesImpl(source);
+            this.leaderboards = new LeaderboardsQueriesImpl(source);
             this.mapFeatures = new MapFeaturesQueriesImpl(source);
             this.maps = new MapsQueriesImpl(source);
             this.notifications = new NotificationsQueriesImpl(source);
             this.players = new PlayersQueriesImpl(source);
             this.replays = new ReplaysQueriesImpl(source);
+            this.saveStates = new SaveStatesQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
             this.social = new SocialQueriesImpl(source);
         }
@@ -183,6 +197,8 @@ public final class ApiDatabase {
 
         private JobsQueries jobs = new JobsQueries.Stub();
 
+        private LeaderboardsQueries leaderboards = new LeaderboardsQueries.Stub();
+
         private MapFeaturesQueries mapFeatures = new MapFeaturesQueries.Stub();
 
         private MapsQueries maps = new MapsQueries.Stub();
@@ -192,6 +208,8 @@ public final class ApiDatabase {
         private PlayersQueries players = new PlayersQueries.Stub();
 
         private ReplaysQueries replays = new ReplaysQueries.Stub();
+
+        private SaveStatesQueries saveStates = new SaveStatesQueries.Stub();
 
         private SessionsQueries sessions = new SessionsQueries.Stub();
 
@@ -222,6 +240,11 @@ public final class ApiDatabase {
             return this;
         }
 
+        public Fake leaderboards(LeaderboardsQueries leaderboards) {
+            this.leaderboards = leaderboards;
+            return this;
+        }
+
         public Fake mapFeatures(MapFeaturesQueries mapFeatures) {
             this.mapFeatures = mapFeatures;
             return this;
@@ -244,6 +267,11 @@ public final class ApiDatabase {
 
         public Fake replays(ReplaysQueries replays) {
             this.replays = replays;
+            return this;
+        }
+
+        public Fake saveStates(SaveStatesQueries saveStates) {
+            this.saveStates = saveStates;
             return this;
         }
 

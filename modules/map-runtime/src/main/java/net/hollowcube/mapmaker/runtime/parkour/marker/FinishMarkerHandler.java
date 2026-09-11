@@ -26,7 +26,6 @@ public class FinishMarkerHandler extends ObjectEntityHandler {
 
         var finishState = saveState.copy(saveState.state(PlayState.class));
         finishState.complete(System.nanoTime() / 1_000_000);
-        finishState.setEndLatency(((MapPlayer) player).averageLatency());
         world.changePlayerState(player, new ParkourState.Finished(finishState));
     }
 

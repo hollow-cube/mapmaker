@@ -5,10 +5,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
 import net.hollowcube.sqlgen.runtime.Sneaky;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Runs WidgetsQueries against a connection borrowed per statement.
@@ -27,6 +29,13 @@ final class WidgetsQueriesImpl implements WidgetsQueries {
         from widget
         where name ilike ?
         limit ? offset ?""";
+
+    private static final String LIST_WIDGETS_ABOVE = """
+        select widget.*
+        from widget
+        where ?::int is null
+           or id > ?
+        order by id""";
 
     private final ConnectionSource source;
 
@@ -65,6 +74,26 @@ final class WidgetsQueriesImpl implements WidgetsQueries {
                 try (ResultSet rs = ps.executeQuery()) {
                     List<WidgetsQueries.SearchWidgetsRow> rows = new ArrayList<>();
                     while (rs.next()) rows.add(new WidgetsQueries.SearchWidgetsRow(Widget.read(rs, 1), rs.getLong(5)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<Widget> listWidgetsAbove(@Nullable Integer minimum) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_WIDGETS_ABOVE)) {
+                ps.setObject(1, minimum, Types.INTEGER);
+                ps.setObject(2, minimum, Types.INTEGER);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<Widget> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(Widget.read(rs, 1));
                     return rows;
                 }
             } finally {

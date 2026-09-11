@@ -112,7 +112,7 @@ final class EmitGroup {
             if (query.paramsClass() == null) continue;
 
             var arguments = new ArrayList<ParameterSpec>(query.params().size());
-            for (var param : query.params()) arguments.add(Emitter.component(param.type(), param.name(), false));
+            for (var param : query.params()) arguments.add(Emitter.component(param.type(), param.name(), param.nullable()));
             records.add(Emitter.record(query.paramsClass().simpleName(),
                 "The arguments of `" + query.name() + "`.\n", arguments, Modifier.STATIC));
         }
@@ -140,7 +140,7 @@ final class EmitGroup {
         if (query.paramsClass() != null) {
             method.addParameter(query.paramsClass(), "params");
         } else {
-            for (var param : query.params()) method.addParameter(param.type(), param.name());
+            for (var param : query.params()) method.addParameter(Emitter.component(param.type(), param.name(), param.nullable()));
         }
         for (var hole : query.holes()) {
             method.addParameter(ParameterSpec.builder(SQL_FRAGMENT, hole.kind().argument)
@@ -243,7 +243,7 @@ final class EmitGroup {
             var value = query.paramsClass() == null
                 ? CodeBlock.of("$N", param.name())
                 : CodeBlock.of("params.$N()", param.name());
-            code.addStatement(types.bind(param.pgType(), false, "ps", counted ? "i++" : String.valueOf(bind + 1), value));
+            code.addStatement(types.bind(param.pgType(), param.nullable(), "ps", counted ? "i++" : String.valueOf(bind + 1), value));
         }
         return code.build();
     }

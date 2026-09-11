@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
@@ -59,7 +60,7 @@ public class MapLeaderboardDeleteCommand extends CommandDsl {
 
         var playerId = localPlayer(player).id();
         try {
-            api.maps.deleteMapLeaderboard(map.id().toString(), target, notify);
+            api.mapService.deleteLeaderboardEntry(map.id(), UUID.fromString(target), notify);
             player.sendMessage("deleted for " + target);
         } catch (Exception e) {
             player.sendMessage("failed to delete leaderboard");

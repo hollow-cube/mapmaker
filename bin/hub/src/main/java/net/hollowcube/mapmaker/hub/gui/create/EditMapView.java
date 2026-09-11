@@ -112,7 +112,7 @@ public class EditMapView extends Panel {
         add(3, 2, new Button("gui.create_maps.edit.builders.owner.self", 1, 1)
             .background("create_maps2/head_outline", 4, 4)
             .model(MODEL_8X, null)
-            .profile(getPlayerHead2d(editor.map().owner().toString())));
+            .profile(getPlayerHead2d(editor.map().owner())));
         this.builderButtons = add(4, 2, new Panel(4, 1) {});
 
         // async doesn't work as host is null when this is called
@@ -151,7 +151,7 @@ public class EditMapView extends Panel {
                 button = new Button(null, 1, 1)
                     .background("create_maps2/head_outline" + (builder.pending() ? "_pending" : ""), 4, 4)
                     .model(MODEL_8X, null)
-                    .profile(getPlayerHead2d(builder.id().toString()));
+                    .profile(getPlayerHead2d(builder.id()));
 
                 async(() -> {
                     var displayName = api.players.displayName(builder.id());
@@ -312,7 +312,7 @@ public class EditMapView extends Panel {
                 var button = new Button(null, 1, 1)
                     .text(ExtraComponents.noItalic(pds.displayName().render()), List.of())
                     .model(MODEL_8X, null)
-                    .profile(getPlayerHead2d(pds.id().toString()));
+                    .profile(getPlayerHead2d(pds.id()));
                 if (isPlayerInvitePending(pds.id().toString())) {
 //                    button.background("create_maps2/head_outline_pending", 4, 4)
 //                        .translationKey("gui.create_maps.edit.builders.already_invited", pds.displayName().asComponent());

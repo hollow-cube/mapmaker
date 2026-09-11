@@ -1,10 +1,10 @@
 package net.hollowcube.mapmaker.gui.map.details;
 
+import net.hollowcube.ipc.map.LeaderboardData;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapLeaderboard;
 import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.mapmaker.api.ApiClient;
-import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.util.CoreSkulls;
@@ -70,9 +70,9 @@ public class MapDetailsTimesPanel extends Panel {
         if (!isInitial) return;
 
         async(() -> {
-            var playerId = localPlayer(host.player()).id().toString();
-            var leaderboard = api.maps.getMapLeaderboard(map.id().toString(), playerId);
-            var ids = leaderboard.top().stream().map(entry -> UUID.fromString(entry.player())).toList();
+            var playerId = localPlayer(host.player()).id();
+            var leaderboard = api.mapService.getMapLeaderboard(map.id(), playerId);
+            var ids = leaderboard.top().stream().map(LeaderboardData.Entry::player).toList();
             var names = api.players.displayNames(ids);
             var displayNames = ids.stream().map(names::get).toList();
 
@@ -93,9 +93,9 @@ public class MapDetailsTimesPanel extends Panel {
         });
     }
 
-    public static ResolvableProfile getPlayerHead2d(@Nullable String uuid) {
+    public static ResolvableProfile getPlayerHead2d(@Nullable UUID uuid) {
         if (uuid == null) return CoreSkulls.UNKNOWN_PLAYER;
-        return new ResolvableProfile(new ResolvableProfile.Partial(null, UUID.fromString(uuid), List.of()));
+        return new ResolvableProfile(new ResolvableProfile.Partial(null, uuid, List.of()));
     }
 
     private static class TopThreePanel extends Panel {

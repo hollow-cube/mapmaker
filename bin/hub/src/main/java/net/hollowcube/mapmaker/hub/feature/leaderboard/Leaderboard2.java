@@ -4,7 +4,7 @@ import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.hub.entity.NpcItemModel;
-import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.ipc.map.LeaderboardData;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.mapmaker.util.LeaderboardDisplay;
 import net.kyori.adventure.text.Component;
@@ -17,6 +17,7 @@ import net.minestom.server.item.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -42,10 +43,10 @@ public class Leaderboard2 {
 
     public Leaderboard2(
             @Nullable Supplier<LeaderboardData> leftGlobalLeaderboardSupplier,
-            @Nullable Function<String, Long> leftPlayerScoreSupplier,
+            @Nullable Function<UUID, LeaderboardData.Entry> leftPlayerScoreSupplier,
             @Nullable Supplier<LeaderboardData> rightGlobalLeaderboardSupplier,
-            @Nullable Function<String, Long> rightPlayerScoreSupplier,
-            @NotNull Function<String, Component> displayNameSupplier,
+            @Nullable Function<UUID, LeaderboardData.Entry> rightPlayerScoreSupplier,
+            @NotNull Function<UUID, Component> displayNameSupplier,
             double screenAngle
     ) {
         screenModel.setModel(Material.STICK, BadSprite.require("lb_screen"));

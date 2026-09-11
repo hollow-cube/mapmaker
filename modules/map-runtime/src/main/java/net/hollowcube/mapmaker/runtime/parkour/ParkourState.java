@@ -99,7 +99,6 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 // If the playtime is non-zero (ie they have played before) start timing immediately.
                 // Otherwise, we will start timing when they move the first time.
                 saveState().setPlayStartTime(System.nanoTime() / 1_000_000);
-                saveState().setStartLatency(mp.averageLatency());
             } else ((MapPlayer) player).resetTouchingState();
 
             var map = world.map();
@@ -406,8 +405,8 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
         SaveState saveState,
         CompletableFuture<Void> replayFinalization
     ) {
+        saveState.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
         var update = saveState.createUpsertRequest();
-        update.setProtocolVersion(ProtocolVersions.getProtocolVersion(player));
 
         // A finalized local replay is durable under the same ID as this save state. Replay upload
         // is still a separate integration step, but never race the state write with local closure.

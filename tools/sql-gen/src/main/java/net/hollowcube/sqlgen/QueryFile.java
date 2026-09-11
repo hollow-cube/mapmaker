@@ -18,7 +18,7 @@ record QueryFile(String group, List<Query> queries) {
         /// One entry per `?` in [#sql], holding the index into [#params] it binds. A placeholder
         /// used twice appears twice here.
         List<Integer> binds,
-        /// Columns `-- nullable:` widens.
+        /// Columns `-- nullable:` widens, and the `$parameters` it boxes.
         Set<String> nullable,
         /// Columns `-- not-null:` narrows.
         Set<String> notNull,

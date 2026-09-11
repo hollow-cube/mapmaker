@@ -10,6 +10,7 @@ import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapLeaderboard;
 import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.anticheat.AnticheatCapture;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.maps.MapRating;
@@ -391,8 +392,6 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             saveState.setPlayStartTime(System.nanoTime() / 1_000_000);
             // Reset touching state so you can begin touching
             mp.resetTouchingState();
-            // Set starting latency
-            saveState.setStartLatency(mp.averageLatency());
 
             recordReplayEvent(player, new RunStartEvent());
 

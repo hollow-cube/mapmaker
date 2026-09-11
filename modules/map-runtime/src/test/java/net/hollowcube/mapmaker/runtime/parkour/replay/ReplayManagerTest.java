@@ -5,7 +5,7 @@ import dev.hollowcube.replay.io.SegmentedReplayStorage;
 import dev.hollowcube.replay.io.SegmentedReplayWriter;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import org.jetbrains.annotations.Nullable;

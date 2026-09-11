@@ -191,6 +191,13 @@ final class MapsQueriesImpl implements MapsQueries {
         set verification = ?
         where id = ?""";
 
+    private static final String MARK_VERIFIED = """
+        -- A verifying run that finished; the map is stamped with the version that verified it.
+        update maps
+        set verification     = ?,
+            protocol_version = ?
+        where id = ?""";
+
     private static final String GET_LATEST_EDITING_TIME = """
         select playtime
         from save_states
@@ -767,6 +774,23 @@ final class MapsQueriesImpl implements MapsQueries {
             try (PreparedStatement ps = conn.prepareStatement(UPDATE_VERIFICATION)) {
                 ps.setLong(1, verification);
                 ps.setObject(2, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long markVerified(long verification, int protocolVersion, UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(MARK_VERIFIED)) {
+                ps.setLong(1, verification);
+                ps.setInt(2, protocolVersion);
+                ps.setObject(3, mapId);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);

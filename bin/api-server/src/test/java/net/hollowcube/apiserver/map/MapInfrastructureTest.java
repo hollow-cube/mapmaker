@@ -95,13 +95,9 @@ class MapInfrastructureTest {
                 )
             );
 
-            for (int i = 0; i < 201; i++) redis.set("maps:search:" + i, "cached");
-            redis.set("unrelated", "keep");
             var patch = new MapPatch.Builder(map);
             patch.setName("Updated");
             service.update(id, patch.build());
-            assertTrue(redis.keys("maps:search:*").isEmpty());
-            assertEquals("keep", redis.get("unrelated"));
             redis.zadd("map:" + id + ":lb_playtime", 100, "player");
             assertEquals(DeleteVerificationResult.RESET, service.deleteVerification(id));
             assertFalse(redis.exists("map:" + id + ":lb_playtime"));

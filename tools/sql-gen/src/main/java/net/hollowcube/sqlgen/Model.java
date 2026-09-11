@@ -48,7 +48,7 @@ final class Model {
     ) {
     }
 
-    record Param(String name, String pgType, TypeName type) {
+    record Param(String name, String pgType, TypeName type, boolean nullable) {
     }
 
     /// The shape of one row, and how to build it from a [java.sql.ResultSet]. A [Shape#ROW] row

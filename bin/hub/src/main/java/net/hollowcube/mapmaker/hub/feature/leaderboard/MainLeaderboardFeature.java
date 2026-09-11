@@ -1,9 +1,8 @@
 package net.hollowcube.mapmaker.hub.feature.leaderboard;
 
-import java.util.UUID;
 import com.google.auto.service.AutoService;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.mapmaker.api.maps.MapClient;
+import net.hollowcube.ipc.map.GlobalLeaderboard;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.feature.HubFeature;
 import net.hollowcube.mapmaker.map.MapServer;
@@ -24,11 +23,11 @@ public class MainLeaderboardFeature implements HubFeature {
     public void load(@NotNull MapServer server, @NotNull HubMapWorld world) {
         var api = server.api();
         parkourLeaderboard = new Leaderboard2(
-            () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, null),
-            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_MAPS_BEATEN, playerId).player().score(),
-            () -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, null),
-            playerId -> api.maps.getGlobalLeaderboard(MapClient.LEADERBOARD_TOP_TIMES, playerId).player().score(),
-            playerId -> api.players.displayName(UUID.fromString(playerId)).render(),
+            () -> api.mapService.getGlobalLeaderboard(GlobalLeaderboard.MAPS_BEATEN, null),
+            playerId -> api.mapService.getGlobalLeaderboard(GlobalLeaderboard.MAPS_BEATEN, playerId).player(),
+            () -> api.mapService.getGlobalLeaderboard(GlobalLeaderboard.TOP_TIMES, null),
+            playerId -> api.mapService.getGlobalLeaderboard(GlobalLeaderboard.TOP_TIMES, playerId).player(),
+            playerId -> api.players.displayName(playerId).render(),
                 10);
         buildingLeaderboard = new Leaderboard2(
                 null, null,

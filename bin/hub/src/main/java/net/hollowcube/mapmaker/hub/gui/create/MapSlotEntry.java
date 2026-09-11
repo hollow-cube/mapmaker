@@ -173,7 +173,7 @@ public class MapSlotEntry extends Panel {
             this.iconButton = add(0, 0, new Button(null, 1, 1)
                 .translationKey(TRANSLATION_KEY, mapName, LOADING)
                 .background("create_maps2/head_outline", 4, 4)
-                .profile(getPlayerHead2d(map.owner().toString()))
+                .profile(getPlayerHead2d(map.owner()))
                 .model(MODEL_8X, null)
                 .onLeftClickAsync(this::buildInWorld));
 

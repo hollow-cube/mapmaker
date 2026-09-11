@@ -75,7 +75,9 @@ final class QueryFileParser {
                 var target = directive.group(1).equals("nullable") ? nullable : notNull;
                 for (var name : directive.group(2).split(",")) {
                     var trimmed = name.trim();
-                    if (!trimmed.isEmpty()) target.add(trimmed.toLowerCase(Locale.ROOT));
+                    if (trimmed.isEmpty()) continue;
+                    // A `$parameter` keeps its case: it has to match the placeholder as written.
+                    target.add(trimmed.startsWith("$") ? trimmed : trimmed.toLowerCase(Locale.ROOT));
                 }
                 return;
             }

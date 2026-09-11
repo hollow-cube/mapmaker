@@ -9,7 +9,7 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.gui.map.MapListView;
 import net.hollowcube.mapmaker.gui.map.MapReportView;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.panels.*;
 import net.kyori.adventure.text.Component;

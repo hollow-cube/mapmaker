@@ -29,7 +29,6 @@ public class FinishPlateBlock implements BlockHandler, PressurePlateBlock {
             case ParkourState.Playing2(var saveState) -> {
                 var finishState = saveState.copy(saveState.state(PlayState.class));
                 finishState.complete(System.nanoTime() / 1_000_000);
-                finishState.setEndLatency(((MapPlayer) player).averageLatency());
                 yield new ParkourState.Finished(finishState);
             }
             case ParkourState.Testing(var saveState, var parent) -> {

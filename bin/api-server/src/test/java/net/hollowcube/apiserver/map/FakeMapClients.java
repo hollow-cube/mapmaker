@@ -8,9 +8,6 @@ import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.posthog.PostHogClient;
 import org.jetbrains.annotations.Nullable;
-import redis.clients.jedis.JedisPooled;
-import redis.clients.jedis.params.ScanParams;
-import redis.clients.jedis.resps.ScanResult;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -26,7 +23,6 @@ final class FakeMapClients implements AutoCloseable {
     record Message(String subject, JsonObject body) {}
 
     final List<Message> messages = new CopyOnWriteArrayList<>();
-    final List<String> deleted = new CopyOnWriteArrayList<>();
     private final List<String> analytics = new CopyOnWriteArrayList<>();
     private final HttpServer analyticsServer;
     private boolean analyticsFinished;
@@ -35,18 +31,7 @@ final class FakeMapClients implements AutoCloseable {
 
     final NatsPublisher nats;
     final PostHogClient posthog;
-    final JedisPooled redis = new JedisPooled() {
-        @Override
-        public ScanResult<String> scan(String cursor, ScanParams params) {
-            return new ScanResult<>("0", List.of());
-        }
-
-        @Override
-        public long del(String key) {
-            deleted.add(key);
-            return 1;
-        }
-    };
+    final FakeRedis redis = new FakeRedis();
 
     FakeMapClients() {
         var connection = (Connection) Proxy.newProxyInstance(

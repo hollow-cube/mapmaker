@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.runtime;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.ipc.map.MapBuilder;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.kyori.adventure.key.InvalidKeyException;
 import net.kyori.adventure.key.Key;
@@ -46,7 +46,7 @@ public final class PlayState {
             StructCodec.INLINE, new ActionDataCodec(Integer.MAX_VALUE), PlayState::actionData,
             PlayState::new));
 
-    public static final SaveStateType.Serializer<PlayState> SERIALIZER = SaveStateType.serializer("playState", CODEC, HCDataTypes.PLAY_STATE);
+    public static final SaveState.Serializer<PlayState> SERIALIZER = SaveState.serializer(CODEC, HCDataTypes.PLAY_STATE);
 
     private @Nullable PlayState lastState; // The previous state of the player (ie at the last checkpoint)
     // Has two meanings:

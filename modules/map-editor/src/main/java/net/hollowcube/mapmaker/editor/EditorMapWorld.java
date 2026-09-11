@@ -7,6 +7,7 @@ import net.hollowcube.common.util.ProtocolVersions;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.ipc.map.MapVerification;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;

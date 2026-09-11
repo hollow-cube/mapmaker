@@ -1,12 +1,14 @@
 package net.hollowcube.apiserver.map;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.db.MapSlots;
 import net.hollowcube.apiserver.db.MapStats;
 import net.hollowcube.apiserver.db.Maps;
 import net.hollowcube.apiserver.db.MapsQueries;
+import net.hollowcube.apiserver.db.SaveStates;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.map.MapBuilder;
 import net.hollowcube.ipc.map.MapData;
@@ -17,20 +19,28 @@ import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.ipc.map.PlayerMapProgress;
+import net.hollowcube.ipc.map.SaveStateData;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.ipc.util.Position;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
 import static java.util.Objects.requireNonNullElse;
+import static net.hollowcube.ipc.util.IpcException.badRequest;
 
 /// What the Go api-server and this one have to spell identically: the column values of `maps`, the
 /// events on `map.*` and `notification.*`, and how a row becomes the [MapData] every server reads.
 /// Transcribed from `api/v4Internal/server_maps.go` and `internal/mapdb`; both servers write these
 /// tables for as long as both are deployed.
 final class MapCompat {
+
+    private static final Logger logger = LoggerFactory.getLogger(MapCompat.class);
 
     /// `maps.verification`.
     static final long VERIFICATION_NONE = 0;
@@ -57,9 +67,11 @@ final class MapCompat {
     /// no reason given.
     static final String USER_DELETION = "user_deletion";
 
-    /// The verification leaderboard a reset throws away.
-    static final String VERIFICATION_LEADERBOARD_PREFIX = "map:";
-    static final String VERIFICATION_LEADERBOARD_SUFFIX = ":lb_playtime";
+    /// The notification a player gets when staff strike their time on a map; its key is the map id.
+    static final String MAP_TIME_DELETED_NOTIFICATION = "map_time_deleted";
+
+    /// A game tick, which is what a time board resolves to.
+    static final long TICK_MILLIS = 50;
 
     private MapCompat() {}
 
@@ -204,6 +216,85 @@ final class MapCompat {
                 ? PlayerMapProgress.Progress.COMPLETE
                 : PlayerMapProgress.Progress.STARTED,
             row.playtime()
+        );
+    }
+
+    /// A map's board: a sorted set of every player's best score. The key is what Go's
+    /// `mapLeaderboardKey(mapId, "playtime")` spells, and the member is what Go writes through
+    /// `common.UUIDToBin`, the player's uuid as sixteen big-endian bytes rather than its text.
+    static byte[] leaderboardKey(UUID mapId) {
+        return ("map:" + mapId + ":lb_playtime").getBytes(StandardCharsets.UTF_8);
+    }
+
+    static byte[] leaderboardMember(UUID playerId) {
+        return ByteBuffer.allocate(16)
+            .putLong(playerId.getMostSignificantBits())
+            .putLong(playerId.getLeastSignificantBits())
+            .array();
+    }
+
+    static UUID leaderboardMember(byte[] member) {
+        var buffer = ByteBuffer.wrap(member);
+        return new UUID(buffer.getLong(), buffer.getLong());
+    }
+
+    /// A completed run's score: what it was scored, or its playtime for runs from before boards
+    /// were configurable, which is also how the queries order them.
+    static double score(SaveStates state) {
+        return state.score() != null
+            ? state.score()
+            : Math.max(state.playtime(), state.ticks() * TICK_MILLIS);
+    }
+
+    static SaveStateType saveStateType(net.hollowcube.apiserver.db.SaveStateType type) {
+        return switch (type) {
+            case EDITING -> SaveStateType.EDITING;
+            case PLAYING -> SaveStateType.PLAYING;
+            case VERIFYING -> SaveStateType.VERIFYING;
+        };
+    }
+
+    static net.hollowcube.apiserver.db.SaveStateType saveStateColumn(SaveStateType type) {
+        return switch (type) {
+            case EDITING -> net.hollowcube.apiserver.db.SaveStateType.EDITING;
+            case PLAYING -> net.hollowcube.apiserver.db.SaveStateType.PLAYING;
+            case VERIFYING -> net.hollowcube.apiserver.db.SaveStateType.VERIFYING;
+            case UNKNOWN -> throw badRequest("unknown save state type");
+        };
+    }
+
+    /// `state_v2` holds json text; a row Go could not read it answered with an empty state rather
+    /// than refusing the player their map, and so does this.
+    static SaveStateData saveStateData(SaveStates state) {
+        JsonObject data = null;
+        if (!state.completed()) {
+            try {
+                var json = JsonParser.parseString(
+                    new String(state.stateV2(), StandardCharsets.UTF_8)
+                );
+                data = json.isJsonObject() ? json.getAsJsonObject() : new JsonObject();
+            } catch (JsonParseException e) {
+                logger.error("save state {} holds unreadable state", state.id(), e);
+                data = new JsonObject();
+            }
+        }
+        return new SaveStateData(
+            state.id(),
+            state.mapId(),
+            state.playerId(),
+            saveStateType(state.type()),
+            state.created(),
+            state.updated(),
+            state.dataVersion(),
+            requireNonNullElse(state.protocolVersion(), DEFAULT_PROTOCOL_VERSION),
+            state.playtime(),
+            state.ticks(),
+            state.resets(),
+            // Rows from before the column existed have it at zero; playtime is the floor.
+            Math.max(state.totalPlaytime(), state.playtime()),
+            state.completed(),
+            state.completed() ? Double.valueOf(score(state)) : state.score(),
+            data
         );
     }
 

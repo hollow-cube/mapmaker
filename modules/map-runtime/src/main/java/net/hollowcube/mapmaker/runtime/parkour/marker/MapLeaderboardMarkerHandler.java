@@ -3,8 +3,6 @@ package net.hollowcube.mapmaker.runtime.parkour.marker;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.mapmaker.map.LeaderboardData;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
@@ -16,8 +14,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.UUID;
 
 public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
     private static final int ONE_MINUTE_TICKS = 60 * 20;
@@ -44,13 +40,9 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
         var facing = data.getString("facing", "follow");
         var hasBackground = data.getBoolean("background", true);
         var leaderboard = this.leaderboard = new LeaderboardDisplay(entity,
-            () -> world.server().api().maps.getMapLeaderboard(world.map().id().toString(), null),
-                playerId -> OpUtils.mapOr(
-                    world.server().api().maps.getMapLeaderboard(world.map().id().toString(), playerId).player(),
-                        LeaderboardData.Entry::score,
-                        0L
-                ),
-            playerId -> world.server().api().players.displayName(UUID.fromString(playerId)).render(),
+            () -> world.server().api().mapService.getMapLeaderboard(world.map().id(), null),
+            playerId -> world.server().api().mapService.getMapLeaderboard(world.map().id(), playerId).player(),
+            playerId -> world.server().api().players.displayName(playerId).render(),
                 0, 0, 0, scale);
         leaderboard.setPadding(true);
         if (hasBackground) leaderboard.entriesDisplay().setUseDefaultBackground(true);

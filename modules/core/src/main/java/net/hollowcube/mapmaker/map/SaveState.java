@@ -1,18 +1,46 @@
 package net.hollowcube.mapmaker.map;
 
+import com.google.gson.JsonObject;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.common.util.RuntimeGson;
+import net.hollowcube.datafix.DataFixer;
+import net.hollowcube.datafix.DataType;
+import net.hollowcube.ipc.map.SaveStateData;
+import net.hollowcube.ipc.map.SaveStateType;
+import net.hollowcube.ipc.map.SaveStateUpdate;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Transcoder;
+import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Instant;
 import java.util.Map;
 
-@RuntimeGson
+/// A run or edit session in progress on this server, which [SaveStateData] is only the stored
+/// shape of: this one ticks, accrues playtime as the player plays, carries the decoded state
+/// object and the serializer that wrote it, and inherits the attempt counters of the save state a
+/// hard reset replaced.
 public class SaveState {
-    private String id;
-    private String playerId;
-    private String mapId;
-    private SaveStateType type;
+
+    /// How a map server turns its state into the json the api stores, and back.
+    public interface Serializer<T> {
+        @NotNull Codec<T> codec();
+
+        @NotNull DataType dataType();
+    }
+
+    public static <T> Serializer<T> serializer(Codec<T> codec, DataType dataType) {
+        record SerializerImpl<T>(Codec<T> codec, DataType dataType) implements Serializer<T> {
+        }
+        return new SerializerImpl<>(codec, dataType);
+    }
+
+    private final String id;
+    private final String playerId;
+    private final String mapId;
+    private final SaveStateType type;
+    private final Instant created;
     private boolean completed;
     private long playtime;
     private long ticks;
@@ -20,29 +48,66 @@ public class SaveState {
     // save state (and the old one is often never written), so the newest one holds the aggregate.
     private int resets;
     private long totalPlaytime; // never zeroed, unlike playtime on only-sprint maps
-    private transient long playStartTime;
-    public int dataVersion;
+    private long playStartTime;
+    private int dataVersion;
     private int protocolVersion;
 
-    private Double startLatency;
-    private Double endLatency;
     private Double score;
 
     // TODO: nothing here should be public in future.
-    public SaveStateType.Serializer<?> serializer;
+    public Serializer<?> serializer;
     public Object state;
 
-    public SaveState() {
-    }
-
-    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId, @NotNull SaveStateType type, @NotNull SaveStateType.Serializer<?> serializer, @NotNull Object state) {
+    /// A state made on this server, reaching the api with its first save.
+    public SaveState(@NotNull String id, @NotNull String playerId, @NotNull String mapId, @NotNull SaveStateType type, @NotNull Serializer<?> serializer, @NotNull Object state) {
         this.id = id;
         this.playerId = playerId;
         this.mapId = mapId;
         this.type = type;
+        this.created = Instant.now();
+        this.dataVersion = DataFixer.maxVersion();
 
         this.serializer = serializer;
         this.state = state;
+    }
+
+    /// A state read back from the api; `state` is what `serializer` decoded at `dataVersion`,
+    /// or null when the caller only wanted the numbers.
+    public SaveState(@NotNull SaveStateData data, int dataVersion, @Nullable Serializer<?> serializer, @Nullable Object state) {
+        this.id = data.id().toString();
+        this.playerId = data.playerId().toString();
+        this.mapId = data.mapId().toString();
+        this.type = data.type();
+        this.created = data.created();
+        this.completed = data.completed();
+        this.playtime = data.playtime();
+        this.ticks = data.ticks();
+        this.resets = data.resets();
+        this.totalPlaytime = data.totalPlaytime();
+        this.dataVersion = dataVersion;
+        this.protocolVersion = data.protocolVersion();
+        this.score = data.score();
+        this.serializer = serializer;
+        this.state = state;
+    }
+
+    private SaveState(SaveState copy, Object newState) {
+        this.id = copy.id;
+        this.playerId = copy.playerId;
+        this.mapId = copy.mapId;
+        this.type = copy.type;
+        this.created = copy.created;
+        this.completed = copy.completed;
+        this.playtime = copy.playtime;
+        this.ticks = copy.ticks;
+        this.resets = copy.resets;
+        this.totalPlaytime = copy.totalPlaytime;
+        this.playStartTime = copy.playStartTime;
+        this.dataVersion = copy.dataVersion;
+        this.protocolVersion = copy.protocolVersion;
+        this.score = copy.score;
+        this.serializer = copy.serializer;
+        this.state = newState;
     }
 
     public @NotNull String id() {
@@ -59,6 +124,10 @@ public class SaveState {
 
     public @NotNull SaveStateType type() {
         return type;
+    }
+
+    public int dataVersion() {
+        return dataVersion;
     }
 
     public boolean isCompleted() {
@@ -146,14 +215,6 @@ public class SaveState {
         playStartTime = currentTime;
     }
 
-    public void setStartLatency(double latency) {
-        this.startLatency = latency;
-    }
-
-    public void setEndLatency(double latency) {
-        this.endLatency = latency;
-    }
-
     public double getScore() {
         return OpUtils.or(score, () -> (double) getEffectivePlaytime());
     }
@@ -201,44 +262,31 @@ public class SaveState {
         this.state = state;
     }
 
-    public @NotNull SaveStateUpdateRequest createUpsertRequest() {
-        var req = new SaveStateUpdateRequest()
-            .setType(type)
-            .setPlaytime(playtime)
-            .setTicks(ticks)
-            .setAttemptStats(resets, getTotalPlaytime())
-            .setLatency(startLatency, endLatency)
-            .setCompleted(completed)
-            .setProtocolVersion(protocolVersion)
-            .setScore(score);
+    /// Everything the api needs to store this state as it is now. The state itself is encoded at
+    /// the current data version, whatever version it was read at.
+    @SuppressWarnings("unchecked")
+    public @NotNull SaveStateUpdate createUpsertRequest() {
+        var update = SaveStateUpdate.builder(type)
+            .created(created)
+            .playtime(playtime)
+            .ticks(ticks)
+            .attempts(resets, getTotalPlaytime())
+            .dataVersion(DataFixer.maxVersion())
+            .protocolVersion(protocolVersion)
+            .completed(completed, score);
         if (serializer != null && state != null) {
-            req.setState(state, serializer);
+            var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
+            var encoded = ((Codec<Object>) serializer.codec()).encode(coder, state).orElseThrow();
+            update.state(encoded instanceof JsonObject object ? object : new JsonObject());
         }
-        return req;
+        return update.build();
     }
 
     public SaveState copy(Object newState) {
         if (state.getClass() != newState.getClass())
             throw new UnsupportedOperationException("Cannot copy SaveState with different state type. Original state: " + state.getClass() + ", new state: " + newState.getClass());
 
-        var copy = new SaveState();
-        copy.id = id;
-        copy.playerId = playerId;
-        copy.mapId = mapId;
-        copy.type = type;
-        copy.completed = completed;
-        copy.playtime = playtime;
-        copy.ticks = ticks;
-        copy.resets = resets;
-        copy.totalPlaytime = totalPlaytime;
-        copy.playStartTime = playStartTime;
-        copy.dataVersion = dataVersion;
-        copy.protocolVersion = protocolVersion;
-        copy.startLatency = startLatency;
-        copy.endLatency = endLatency;
-        copy.score = score;
-        copy.serializer = serializer;
-        copy.state = newState;
+        var copy = new SaveState(this, newState);
 
         // Snapshot the old state here.
         copy.updatePlaytime();

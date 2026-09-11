@@ -418,7 +418,7 @@ class MapServiceImplTest {
         assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
         assertEquals(
             List.of("map:" + id + ":lb_playtime", "map:" + id + ":lb_playtime"),
-            clients.deleted
+            clients.redis.deleted
         );
         assertEquals(2, count("select count(*) from save_states where deleted is null"));
     }

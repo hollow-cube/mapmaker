@@ -19,7 +19,7 @@ public class MapLeaderboardCommand extends CommandDsl {
         setCondition(staffPerm(Permission.GENERIC_STAFF));
 
         addSubcommand(new MapLeaderboardDeleteCommand(api));
-        addSubcommand(new MapLeaderboardRestoreCommand(api.maps));
+        addSubcommand(new MapLeaderboardRestoreCommand(api));
     }
 
 }

@@ -4,7 +4,7 @@ import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.compat.axiom.AxiomPlayer;
-import net.hollowcube.mapmaker.map.LeaderboardData;
+import net.hollowcube.ipc.map.LeaderboardData;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -47,8 +47,8 @@ public class LeaderboardDisplay {
     private final Viewable parent;
 
     private final Supplier<LeaderboardData> globalLeaderboardSupplier;
-    private final Function<String, Long> playerScoreSupplier;
-    private final Function<String, Component> displayNameSupplier;
+    private final Function<UUID, LeaderboardData.Entry> playerScoreSupplier;
+    private final Function<UUID, Component> displayNameSupplier;
 
     private final TextDisplay entriesEntity = new TextDisplay() {
         @Override
@@ -71,8 +71,8 @@ public class LeaderboardDisplay {
     public LeaderboardDisplay(
             @NotNull Viewable parent,
             @NotNull Supplier<LeaderboardData> globalLeaderboardSupplier,
-            @NotNull Function<String, Long> playerScoreSupplier,
-            @NotNull Function<String, Component> displayNameSupplier
+            @NotNull Function<UUID, LeaderboardData.Entry> playerScoreSupplier,
+            @NotNull Function<UUID, Component> displayNameSupplier
     ) {
         this(parent, globalLeaderboardSupplier, playerScoreSupplier, displayNameSupplier, 0, 0, 0, 1);
     }
@@ -80,8 +80,8 @@ public class LeaderboardDisplay {
     public LeaderboardDisplay(
             @NotNull Viewable parent,
             @NotNull Supplier<LeaderboardData> globalLeaderboardSupplier,
-            @NotNull Function<String, Long> playerScoreSupplier,
-            @NotNull Function<String, Component> displayNameSupplier,
+            @NotNull Function<UUID, LeaderboardData.Entry> playerScoreSupplier,
+            @NotNull Function<UUID, Component> displayNameSupplier,
             double horizontalOffset, double screenAngle, double shift, double scale
     ) {
         this.parent = parent;
@@ -183,19 +183,17 @@ public class LeaderboardDisplay {
     public void update(@NotNull Player player) {
         if (cachedData == null) return;
 
-        var playerId = player.getUuid().toString();
-        long playerScore = cachedData.getScore(playerId);
-        int playerRank = cachedData.getRank(playerId);
-
-        if (playerScore == -1) {
-            playerScore = playerScoreSupplier.apply(playerId);
-        }
+        var playerId = player.getUuid();
+        var entry = cachedData.top().stream()
+                .filter(e -> e.player().equals(playerId))
+                .findFirst()
+                .orElseGet(() -> playerScoreSupplier.apply(playerId));
 
         var content = cachedTopTen.appendNewline().append(
-                Component.text("You: " + scoreFormatter.apply(playerScore)));
-        if (playerRank != -1) {
+                Component.text("You: " + scoreFormatter.apply(entry == null ? 0 : entry.score())));
+        if (entry != null && entry.rank() != -1) {
             content = content.append(Component.text(" (", NamedTextColor.GRAY)
-                    .append(Component.text("#" + cachedData.getRank(playerId)))
+                    .append(Component.text("#" + entry.rank()))
                     .append(Component.text(")", NamedTextColor.GRAY)));
         }
         if (padding) content = content.appendNewline();
@@ -222,7 +220,7 @@ public class LeaderboardDisplay {
         ));
     }
 
-    private @NotNull Component buildTop10(@NotNull Function<String, Component> nameFunc, @NotNull LeaderboardData data) {
+    private @NotNull Component buildTop10(@NotNull Function<UUID, Component> nameFunc, @NotNull LeaderboardData data) {
         List<Component> names = new ArrayList<>();
 
         // Compute the target width of each line
@@ -230,7 +228,7 @@ public class LeaderboardDisplay {
         for (var entry : data.top()) {
             var name = LanguageProviderV2.translate(nameFunc.apply(entry.player()));
             names.add(name);
-            maxWidth = Math.max(maxWidth, measureLine(name, entry));
+            maxWidth = Math.max(maxWidth, measureLine(name, entry.score(), entry.rank()));
         }
 
         // Rebuild each line properly with the known length
@@ -238,39 +236,38 @@ public class LeaderboardDisplay {
         if (padding) result.appendNewline().appendNewline().appendNewline();
         for (int i = 0; i < data.top().size(); i++) {
             var entry = data.top().get(i);
-            result.append(buildLine(names.get(i), entry, targetWidth, trueCenter))
+            result.append(buildLine(names.get(i), entry.score(), entry.rank(), targetWidth, trueCenter))
                     .appendNewline();
         }
         for (int i = data.top().size(); i < 10; i++) {
             result.append(buildLine(Component.text("—"),
-                    new LeaderboardData.Entry("", 0, i + 1),
-                    targetWidth, trueCenter)).appendNewline();
+                    0, i + 1, targetWidth, trueCenter)).appendNewline();
         }
         return result.build();
     }
 
-    private int measureLine(@NotNull Component playerName, @NotNull LeaderboardData.Entry entry) {
+    private int measureLine(@NotNull Component playerName, long score, int rank) {
         var plainName = PlainTextComponentSerializer.plainText().serialize(playerName);
-        return FontUtil.measureText(String.format("#%d%s%s", trueCenter ? entry.rank() : 10, plainName, scoreFormatter.apply(entry.score())));
+        return FontUtil.measureText(String.format("#%d%s%s", trueCenter ? rank : 10, plainName, scoreFormatter.apply(score)));
     }
 
-    private @NotNull Component buildLine(@NotNull Component playerName, @NotNull LeaderboardData.Entry entry, int targetSize, boolean trueCenter) {
+    private @NotNull Component buildLine(@NotNull Component playerName, long score, int rank, int targetSize, boolean trueCenter) {
         var plainName = PlainTextComponentSerializer.plainText().serialize(playerName);
-        var padding = (targetSize - measureLine(playerName, entry));
+        var padding = (targetSize - measureLine(playerName, score, rank));
 
         int leftPadding;
         if (trueCenter) {
-            leftPadding = (int) Math.ceil((targetSize / 2.0) - (FontUtil.measureText(plainName) / 2.0) - FontUtil.measureText("#" + entry.rank()));
+            leftPadding = (int) Math.ceil((targetSize / 2.0) - (FontUtil.measureText(plainName) / 2.0) - FontUtil.measureText("#" + rank));
         } else {
             leftPadding = (int) Math.ceil(padding / 2.0);
         }
 
-        int lpDiff = FontUtil.measureText("#10") - FontUtil.measureText("#" + entry.rank());
-        var component = Component.text("#" + entry.rank())
+        int lpDiff = FontUtil.measureText("#10") - FontUtil.measureText("#" + rank);
+        var component = Component.text("#" + rank)
                 .append(Component.text(FontUtil.computeOffset(leftPadding + (trueCenter ? 0 : lpDiff))))
                 .append(playerName)
                 .append(Component.text(FontUtil.computeOffset(padding - leftPadding)))
-                .append(Component.text(scoreFormatter.apply(entry.score())));
+                .append(Component.text(scoreFormatter.apply(score)));
         if (!this.padding) {
             return component;
         }

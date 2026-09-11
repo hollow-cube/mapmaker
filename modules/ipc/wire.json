@@ -196,6 +196,38 @@
             }
           ]
         },
+        "delete-leaderboard": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ]
+        },
+        "delete-leaderboard-entry": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "notify",
+              "type": "boolean"
+            }
+          ]
+        },
+        "delete-player-leaderboard-entries": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ]
+        },
         "delete-verification": {
           "params": [
             {
@@ -219,6 +251,22 @@
             "nullable": true
           }
         },
+        "get-best-save-state": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.SaveStateData",
+            "nullable": true
+          }
+        },
         "get-builders": {
           "params": [
             {
@@ -232,6 +280,58 @@
           ],
           "returns": {
             "type": "List\u003cnet.hollowcube.ipc.map.MapBuilder\u003e"
+          }
+        },
+        "get-global-leaderboard": {
+          "params": [
+            {
+              "name": "board",
+              "type": "net.hollowcube.ipc.map.GlobalLeaderboard"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.LeaderboardData"
+          }
+        },
+        "get-latest-save-state": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "type",
+              "type": "net.hollowcube.ipc.map.SaveStateType"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.SaveStateData",
+            "nullable": true
+          }
+        },
+        "get-map-leaderboard": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.LeaderboardData"
           }
         },
         "get-player-rating": {
@@ -258,6 +358,25 @@
           ],
           "returns": {
             "type": "List\u003cnet.hollowcube.ipc.map.MapSlot\u003e"
+          }
+        },
+        "get-player-top-times": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "page",
+              "type": "int"
+            },
+            {
+              "name": "pageSize",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.PaginatedList\u003cnet.hollowcube.ipc.map.PlayerTopTime\u003e"
           }
         },
         "get-status": {
@@ -342,6 +461,14 @@
             "type": "net.hollowcube.ipc.map.PublishMapResult"
           }
         },
+        "rebuild-leaderboard": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            }
+          ]
+        },
         "reject-builder-invite": {
           "params": [
             {
@@ -420,6 +547,73 @@
             }
           ]
         },
+        "undelete-leaderboard": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "deletedAfter",
+              "type": "java.time.Instant",
+              "nullable": true
+            },
+            {
+              "name": "deletedBefore",
+              "type": "java.time.Instant",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "int"
+          }
+        },
+        "undelete-leaderboard-entry": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "deletedAfter",
+              "type": "java.time.Instant",
+              "nullable": true
+            },
+            {
+              "name": "deletedBefore",
+              "type": "java.time.Instant",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "int"
+          }
+        },
+        "undelete-player-leaderboard-entries": {
+          "params": [
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "deletedAfter",
+              "type": "java.time.Instant",
+              "nullable": true
+            },
+            {
+              "name": "deletedBefore",
+              "type": "java.time.Instant",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "int"
+          }
+        },
         "update": {
           "params": [
             {
@@ -445,6 +639,26 @@
             {
               "name": "world",
               "type": "net.hollowcube.ipc.Blob"
+            }
+          ]
+        },
+        "upsert-save-state": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "playerId",
+              "type": "UUID"
+            },
+            {
+              "name": "stateId",
+              "type": "UUID"
+            },
+            {
+              "name": "update",
+              "type": "net.hollowcube.ipc.map.SaveStateUpdate"
             }
           ]
         }
@@ -1501,6 +1715,50 @@
         "MAP_PUBLISHED"
       ]
     },
+    "net.hollowcube.ipc.map.GlobalLeaderboard": {
+      "kind": "enum",
+      "constants": [
+        "TOP_TIMES",
+        "MAPS_BEATEN"
+      ]
+    },
+    "net.hollowcube.ipc.map.LeaderboardData": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "top",
+          "type": "List\u003cnet.hollowcube.ipc.map.LeaderboardData.Entry\u003e"
+        },
+        {
+          "name": "player",
+          "type": "net.hollowcube.ipc.map.LeaderboardData.Entry",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.LeaderboardData.Entry": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "player",
+          "type": "UUID"
+        },
+        {
+          "name": "score",
+          "type": "long"
+        },
+        {
+          "name": "rank",
+          "type": "int"
+        }
+      ]
+    },
     "net.hollowcube.ipc.map.MapBuilder": {
       "kind": "record",
       "used": [
@@ -1980,6 +2238,34 @@
         "COMPLETE"
       ]
     },
+    "net.hollowcube.ipc.map.PlayerTopTime": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "mapId",
+          "type": "UUID"
+        },
+        {
+          "name": "publishedId",
+          "type": "String"
+        },
+        {
+          "name": "mapName",
+          "type": "String"
+        },
+        {
+          "name": "completionTime",
+          "type": "long"
+        },
+        {
+          "name": "rank",
+          "type": "int"
+        }
+      ]
+    },
     "net.hollowcube.ipc.map.PublishMapResult": {
       "kind": "sealed",
       "discriminator": "type",
@@ -2049,6 +2335,139 @@
         "NAME",
         "ICON",
         "TAGS"
+      ]
+    },
+    "net.hollowcube.ipc.map.SaveStateData": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "UUID"
+        },
+        {
+          "name": "mapId",
+          "type": "UUID"
+        },
+        {
+          "name": "playerId",
+          "type": "UUID"
+        },
+        {
+          "name": "type",
+          "type": "net.hollowcube.ipc.map.SaveStateType"
+        },
+        {
+          "name": "created",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "lastModified",
+          "type": "java.time.Instant"
+        },
+        {
+          "name": "dataVersion",
+          "type": "int"
+        },
+        {
+          "name": "protocolVersion",
+          "type": "int"
+        },
+        {
+          "name": "playtime",
+          "type": "long"
+        },
+        {
+          "name": "ticks",
+          "type": "long"
+        },
+        {
+          "name": "resets",
+          "type": "int"
+        },
+        {
+          "name": "totalPlaytime",
+          "type": "long"
+        },
+        {
+          "name": "completed",
+          "type": "boolean"
+        },
+        {
+          "name": "score",
+          "type": "Double",
+          "nullable": true
+        },
+        {
+          "name": "state",
+          "type": "com.google.gson.JsonObject",
+          "nullable": true
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.SaveStateType": {
+      "kind": "enum",
+      "constants": [
+        "EDITING",
+        "PLAYING",
+        "VERIFYING"
+      ]
+    },
+    "net.hollowcube.ipc.map.SaveStateUpdate": {
+      "kind": "record",
+      "used": [
+        "request"
+      ],
+      "fields": [
+        {
+          "name": "type",
+          "type": "net.hollowcube.ipc.map.SaveStateType"
+        },
+        {
+          "name": "created",
+          "type": "java.time.Instant",
+          "nullable": true
+        },
+        {
+          "name": "playtime",
+          "type": "long"
+        },
+        {
+          "name": "ticks",
+          "type": "long"
+        },
+        {
+          "name": "resets",
+          "type": "int"
+        },
+        {
+          "name": "totalPlaytime",
+          "type": "long"
+        },
+        {
+          "name": "dataVersion",
+          "type": "int"
+        },
+        {
+          "name": "protocolVersion",
+          "type": "int"
+        },
+        {
+          "name": "state",
+          "type": "com.google.gson.JsonObject",
+          "nullable": true
+        },
+        {
+          "name": "completed",
+          "type": "boolean"
+        },
+        {
+          "name": "score",
+          "type": "Double",
+          "nullable": true
+        }
       ]
     },
     "net.hollowcube.ipc.notification.Notification": {

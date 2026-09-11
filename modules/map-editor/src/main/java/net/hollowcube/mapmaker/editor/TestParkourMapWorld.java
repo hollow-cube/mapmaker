@@ -5,7 +5,7 @@ import net.hollowcube.ipc.map.MapPatch;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;

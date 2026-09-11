@@ -173,6 +173,13 @@ update maps
 set verification = $verification
 where id = $mapId;
 
+-- name: markVerified :exec
+-- A verifying run that finished; the map is stamped with the version that verified it.
+update maps
+set verification     = $verification,
+    protocol_version = $protocolVersion
+where id = $mapId;
+
 -- name: getLatestEditingTime :one
 select playtime
 from save_states

@@ -4,7 +4,7 @@ import net.hollowcube.common.util.dfu.ExtraCodecs;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.datafix.DataType;
 import net.hollowcube.datafix.DataTypes;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.codec.Codec;
@@ -57,22 +57,7 @@ public final class EditState {
             "selectedSlot", Codec.INT.optional(0), EditState::selectedSlot,
             EditState::new);
 
-    public static final SaveStateType.Serializer<EditState> SERIALIZER = new SaveStateType.Serializer<>() {
-        @Override
-        public String name() {
-            return "editState";
-        }
-
-        @Override
-        public Codec<EditState> codec() {
-            return CODEC;
-        }
-
-        @Override
-        public DataType dataType() {
-            return HCDataTypes.EDIT_STATE;
-        }
-    };
+    public static final SaveState.Serializer<EditState> SERIALIZER = SaveState.serializer(CODEC, HCDataTypes.EDIT_STATE);
 
     private Pos pos;
     private boolean isFlying;

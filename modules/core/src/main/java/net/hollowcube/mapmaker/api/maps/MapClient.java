@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.ipc.Blob;
-import net.hollowcube.ipc.PaginatedList;
 import net.hollowcube.ipc.map.BeginVerificationResult;
 import net.hollowcube.ipc.map.BuilderResult;
 import net.hollowcube.ipc.map.CreateMapResult;
@@ -18,6 +17,8 @@ import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.ipc.map.MapStatus;
 import net.hollowcube.ipc.map.PublishMapResult;
+import net.hollowcube.ipc.map.SaveStateType;
+import net.hollowcube.ipc.map.SaveStateUpdate;
 import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
@@ -43,8 +44,6 @@ import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
 import static net.hollowcube.mapmaker.api.HttpClientWrapper.query;
 
 public interface MapClient {
-    String LEADERBOARD_TOP_TIMES = "top_times";
-    String LEADERBOARD_MAPS_BEATEN = "maps_beaten";
 
     default CreateMapResult create(String owner, MapSize size) {
         throw notImplemented();
@@ -130,11 +129,9 @@ public interface MapClient {
         throw notImplemented();
     }
 
-    default PaginatedList<PlayerTopTimeEntry> getPlayerTopTimes(String playerId, int page, int pageSize) {
-        throw notImplemented();
-    }
-
-    default SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
+    /// The newest state of this type, decoded with `serializer` when given; [ApiClient.NotFoundError] when
+    /// there is none to continue from.
+    default SaveState getLatestSaveState(String mapId, String playerId, SaveStateType type, @Nullable SaveState.Serializer<?> serializer) {
         throw notImplemented();
     }
 
@@ -142,23 +139,7 @@ public interface MapClient {
         throw notImplemented();
     }
 
-    default void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdateRequest update) {
-        throw notImplemented();
-    }
-
-    default LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId) {
-        throw notImplemented();
-    }
-
-    default LeaderboardData getMapLeaderboard(String mapId, @Nullable String playerId) {
-        throw notImplemented();
-    }
-
-    default void deleteMapLeaderboard(String mapId, @Nullable String playerId, boolean notify) {
-        throw notImplemented();
-    }
-
-    default void restoreMapLeaderboard(String mapId) {
+    default void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdate update) {
         throw notImplemented();
     }
 
@@ -306,97 +287,40 @@ public interface MapClient {
         }
 
         @Override
-        public PaginatedList<PlayerTopTimeEntry> getPlayerTopTimes(String playerId, int page, int pageSize) {
-            return http.get(
-                "getPlayerTopTimes",
-                V4_PLAYERS_PREFIX + "/" + playerId + "/top-times" + query("page", page, "pageSize", pageSize),
-                new TypeToken<>() {}
-            );
-        }
+        public SaveState getLatestSaveState(String mapId, String playerId, SaveStateType type, @Nullable SaveState.Serializer<?> serializer) {
+            var data = maps.getLatestSaveState(UUID.fromString(mapId), UUID.fromString(playerId), type);
+            if (data == null) throw new ApiClient.NotFoundError();
+            if (serializer == null) return new SaveState(data, data.dataVersion(), null, null);
 
-        @Override
-        public SaveState getLatestSaveState(String mapId, String playerId, @Nullable SaveStateType type, @Nullable SaveStateType.Serializer<?> serializer) {
-            JsonObject raw = http.get(
-                "getLatestSaveState",
-                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/latest" + query("type", type == null ? null : type.name().toLowerCase()),
-                new TypeToken<>() {}
-            );
-
-            var saveState = AbstractHttpService.GSON.fromJson(raw, SaveState.class);
-            if (serializer != null) {
-                var stateObj = raw.get(serializer.name()) instanceof JsonObject jo ? jo : new JsonObject();
-
-                // Upgrade the save state if relevant
-                // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
-                // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
-                // the state and finding a compatible server (server data version > state data version).
-                if (!stateObj.isEmpty() && saveState.dataVersion < DataFixer.maxVersion()) {
-                    var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, saveState.dataVersion, DataFixer.maxVersion());
-                    if (!(upgraded instanceof JsonObject upgradedObject))
-                        throw new IllegalStateException("invalid save state upgrade: " + upgraded);
-                    stateObj = upgradedObject;
-                    saveState.dataVersion = DataFixer.maxVersion();
-                }
-
-                saveState.serializer = serializer;
-                var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
-                saveState.state = serializer.codec().decode(coder, stateObj).orElseThrow();
+            var stateObj = data.state() != null ? data.state() : new JsonObject();
+            var dataVersion = data.dataVersion();
+            // Upgrade the save state if relevant
+            // Note that this is a non-backwards compatible change, so once we write a new state an old server cannot necessarily
+            // read this state. For now, we will likely ignore this, however in the future joining a map will require checking
+            // the state and finding a compatible server (server data version > state data version).
+            if (!stateObj.isEmpty() && dataVersion < DataFixer.maxVersion()) {
+                var upgraded = DataFixer.upgrade(serializer.dataType(), Transcoder.JSON, stateObj, dataVersion, DataFixer.maxVersion());
+                if (!(upgraded instanceof JsonObject upgradedObject))
+                    throw new IllegalStateException("invalid save state upgrade: " + upgraded);
+                stateObj = upgradedObject;
+                dataVersion = DataFixer.maxVersion();
             }
 
-            return saveState;
+            var coder = new RegistryTranscoder<>(Transcoder.JSON, MinecraftServer.process());
+            var state = serializer.codec().decode(coder, stateObj).orElseThrow();
+            return new SaveState(data, dataVersion, serializer, state);
         }
 
         @Override
         public SaveState getBestSaveState(String mapId, String playerId) {
-            return http.get(
-                "getBestSaveState",
-                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/best",
-                new TypeToken<>() {}
-            );
+            var data = maps.getBestSaveState(UUID.fromString(mapId), UUID.fromString(playerId));
+            if (data == null) throw new ApiClient.NotFoundError();
+            return new SaveState(data, data.dataVersion(), null, null);
         }
 
         @Override
-        public void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdateRequest update) {
-            http.put(
-                "updateSaveState",
-                V4_PREFIX + "/" + mapId + "/states/" + playerId + "/" + saveStateId,
-                update.updates()
-            );
-        }
-
-        @Override
-        public LeaderboardData getGlobalLeaderboard(String name, @Nullable String playerId) {
-            return http.get(
-                "getGlobalLeaderboard",
-                V4_PREFIX + "/hub/leaderboard/" + name + query("playerId", playerId),
-                new TypeToken<>() {}
-            );
-        }
-
-        @Override
-        public LeaderboardData getMapLeaderboard(String mapId, @Nullable String playerId) {
-            return http.get(
-                "getLeaderboard",
-                V4_PREFIX + "/" + mapId + "/leaderboard" + query("playerId", playerId),
-                new TypeToken<>() {}
-            );
-        }
-
-        @Override
-        public void deleteMapLeaderboard(String mapId, @Nullable String playerId, boolean notify) {
-            http.delete(
-                "deleteLeaderboard",
-                V4_PREFIX + "/" + mapId + "/leaderboard" + query("playerId", playerId, "notify", notify)
-            );
-        }
-
-        @Override
-        public void restoreMapLeaderboard(String mapId) {
-            http.put(
-                "restoreLeaderboard",
-                V4_PREFIX + "/" + mapId + "/leaderboard",
-                Map.of()
-            );
+        public void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdate update) {
+            maps.upsertSaveState(UUID.fromString(mapId), UUID.fromString(playerId), UUID.fromString(saveStateId), update);
         }
 
         @Override

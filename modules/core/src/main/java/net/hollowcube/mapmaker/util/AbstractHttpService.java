@@ -62,7 +62,6 @@ public abstract class AbstractHttpService {
     public static final Gson GSON = new GsonBuilder()
         .registerTypeAdapter(MapData.class, new LegacyMapDataDeserializer())
         .registerTypeAdapter(MapVariant.class, new EnumTypeAdapter<>(MapVariant.class))
-        .registerTypeAdapter(SaveStateType.class, new EnumTypeAdapter<>(SaveStateType.class))
         .registerTypeAdapter(BackpackItem.class, new EnumTypeAdapter<>(BackpackItem.class))
         .registerTypeAdapter(RewardType.class, new EnumTypeAdapter<>(RewardType.class))
         .registerTypeAdapter(MapTags.Tag.class, new EnumTypeAdapter<>(MapTags.Tag.class))

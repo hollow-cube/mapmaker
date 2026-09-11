@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.runtime.parkour;
 
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.mapmaker.map.SaveStateType;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.map.setting.NoSpectateMode;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EnableNoSpecAction;

@@ -11,3 +11,11 @@ select widget.*,
 from widget
 where name ilike $query
 limit $limit offset $offset;
+
+-- name: listWidgetsAbove :many
+-- nullable: $minimum
+select widget.*
+from widget
+where $minimum::int is null
+   or id > $minimum
+order by id;

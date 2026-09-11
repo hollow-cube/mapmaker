@@ -114,6 +114,17 @@ class GeneratorErrorTest {
     }
 
     @Test
+    void aNullableParameterThatDoesNotExistIsAnError() throws IOException {
+        var message = generate("""
+            -- name: getThing :one
+            -- nullable: $missing
+            select thing.* from thing where id = $id;
+            """);
+
+        assertTrue(message.contains("does not name a parameter"), message);
+    }
+
+    @Test
     void notNullOnAColumnTheServerAlreadyKnowsIsRedundant() throws IOException {
         var message = generate("""
             -- name: getThingName :one

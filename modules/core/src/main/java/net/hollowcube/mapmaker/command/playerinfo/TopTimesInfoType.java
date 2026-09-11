@@ -7,7 +7,7 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.RuntimeGson;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
-import net.hollowcube.mapmaker.map.PlayerTopTimeEntry;
+import net.hollowcube.ipc.map.PlayerTopTime;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.TextColor;
@@ -48,9 +48,10 @@ public class TopTimesInfoType extends CommandDsl {
             sender.sendMessage(Component.text("Player not found"));
             return;
         }
-        Component targetName = api.players.displayName(UUID.fromString(targetId)).render();
+        var target = UUID.fromString(targetId);
+        Component targetName = api.players.displayName(target).render();
 
-        var resp = api.maps.getPlayerTopTimes(targetId, page - 1, PAGE_SIZE);
+        var resp = api.mapService.getPlayerTopTimes(target, page - 1, PAGE_SIZE);
         int maxPage = Math.ceilDiv(resp.count(), PAGE_SIZE);
         if (maxPage == 0) {
             sender.sendMessage(targetName.append(Component.text(" has no top times")));
@@ -59,13 +60,13 @@ public class TopTimesInfoType extends CommandDsl {
 
         if (page > maxPage) {
             page = maxPage;
-            resp = api.maps.getPlayerTopTimes(targetId, page - 1, PAGE_SIZE);
+            resp = api.mapService.getPlayerTopTimes(target, page - 1, PAGE_SIZE);
         }
 
         sender.sendMessage(targetName.append(
             Component.text("'s Top Times (%s/%s):".formatted(page, Math.ceilDiv(resp.count(), PAGE_SIZE)))));
         List<LeaderboardData.Entry> entries = new ArrayList<>();
-        for (PlayerTopTimeEntry entry : resp.results()) {
+        for (PlayerTopTime entry : resp.results()) {
             entries.add(
                 new LeaderboardData.Entry(entry.mapName(), entry.publishedId(), entry.completionTime(), entry.rank()));
         }
@@ -86,7 +87,7 @@ public class TopTimesInfoType extends CommandDsl {
         private static final TextColor COLOR_DEFAULT = TextColor.color(0x696969);
 
         @RuntimeGson
-        public record Entry(@NotNull String mapName, int publishedMapId, long completionTime, int rank) {
+        public record Entry(@NotNull String mapName, @NotNull String publishedId, long completionTime, int rank) {
         }
 
         /**
@@ -126,7 +127,7 @@ public class TopTimesInfoType extends CommandDsl {
                 comp.append(
                         Component.text(entry.mapName())
                             .hoverEvent(Component.text("Click to copy published ID"))
-                            .clickEvent(ClickEvent.copyToClipboard(String.format(java.util.Locale.ROOT, "%03d-%03d-%03d", entry.publishedMapId() / 1_000_000, (entry.publishedMapId() / 1_000) % 1_000, entry.publishedMapId() % 1_000)))
+                            .clickEvent(ClickEvent.copyToClipboard(entry.publishedId()))
                     ).append(Component.text(FontUtil.computeOffset(maxNameWidth - nameWidths[i])))
                     .append(Component.text(" " + formatMapPlaytime(entry.completionTime(), true),
                                            TextColor.color(0xf2f2f2)));

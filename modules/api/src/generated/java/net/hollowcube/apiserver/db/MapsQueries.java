@@ -68,6 +68,8 @@ public interface MapsQueries {
 
     long updateVerification(long verification, UUID mapId);
 
+    long markVerified(long verification, int protocolVersion, UUID mapId);
+
     @Nullable
     Long getLatestEditingTime(UUID mapId, UUID playerId);
 
@@ -279,6 +281,11 @@ public interface MapsQueries {
         @Override
         public long updateVerification(long verification, UUID mapId) {
             throw new UnsupportedOperationException("MapsQueries.updateVerification is not stubbed on this fake");
+        }
+
+        @Override
+        public long markVerified(long verification, int protocolVersion, UUID mapId) {
+            throw new UnsupportedOperationException("MapsQueries.markVerified is not stubbed on this fake");
         }
 
         @Nullable
