@@ -5,6 +5,7 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
+import net.minestom.server.event.inventory.InventoryCloseEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerAnvilInputEvent;
 import net.minestom.server.inventory.Inventory;
@@ -52,6 +53,7 @@ public class InventoryHost implements TagReadable, TagWritable {
     static {
         MinecraftServer.getGlobalEventHandler()
             .addListener(InventoryPreClickEvent.class, InventoryHost::handleInventoryClick)
+            .addListener(InventoryCloseEvent.class, InventoryHost::handleInventoryClose)
             .addListener(PlayerAnvilInputEvent.class, InventoryHost::handleAnvilInput);
     }
 
@@ -242,6 +244,11 @@ public class InventoryHost implements TagReadable, TagWritable {
         }
     }
 
+    private static void handleInventoryClose(InventoryCloseEvent event) {
+        if (event.getInventory() instanceof InventoryWrapper inventory)
+            inventory.serverSideClose = !event.isFromClient();
+    }
+
     private static void handleAnvilInput(PlayerAnvilInputEvent event) {
         if (!(event.getInventory() instanceof InventoryWrapper inventory)) return;
         var host = inventory.owner();
@@ -261,6 +268,9 @@ public class InventoryHost implements TagReadable, TagWritable {
         // May be smaller than the player inventory (eg 9 items) and will show the player items for the rest.
         // TODO: why is this ever null?
         private ItemStack @UnknownNullability [] playerInventory = null;
+
+        // Set from InventoryCloseEvent, read in removeViewer (see there).
+        private boolean serverSideClose = false;
 
         public InventoryWrapper() {
             // We override handling of inventory type and title. If these values are ever observed, a mistake has been made
@@ -324,6 +334,12 @@ public class InventoryHost implements TagReadable, TagWritable {
 
         @Override
         public boolean removeViewer(Player player) {
+            // Minestom sends the close packet from removeViewer, gated on Player#didCloseInventory, which
+            // WindowListener clears as soon as it sees it. A click handler which closes the gui off the tick
+            // thread races that clear, and losing it means the client keeps the gui open forever.
+            if (serverSideClose) player.UNSAFE_changeDidCloseInventory(true);
+            this.serverSideClose = false;
+
             var result = super.removeViewer(player);
             if (result) { // Update the player inventory to show their original items.
                 player.getInventory().update();
