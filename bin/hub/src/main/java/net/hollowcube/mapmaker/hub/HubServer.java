@@ -32,6 +32,7 @@ import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
@@ -42,6 +43,8 @@ import org.jetbrains.annotations.UnknownNullability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.ServiceLoader;
 import java.util.UUID;
 
@@ -49,6 +52,8 @@ import static net.hollowcube.mapmaker.map.MapPlayer.simpleMapPlayer;
 
 public class HubServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(HubServer.class);
+    // How long the shutdown drain waits before asking the session service for another hub again.
+    private static final Duration DRAIN_RETRY_DELAY = Duration.ofSeconds(5);
     private static final Presence HUB_PRESENCE = new Presence(Presence.TYPE_MAPMAKER_HUB,
         "__hub_unused__", ServerRuntime.getRuntime().hostname(), "hub");
 
@@ -165,24 +170,52 @@ public class HubServer extends AbstractMapServer {
         super.handlePlayerDisconnect(event.getPlayer());
     }
 
+    /// When the hub is instructed to shut down, move the players to another hub, retrying until it is
+    /// empty. A single attempt at this point virtually never lands: the replacement pod is what made
+    /// kubernetes stop this one, and it is usually still starting, so `join_hub` answers 503 (it only
+    /// offers hubs the session service has already seen become ready, which it polls for every 5s).
+    /// The shutdown budget is hours long, so retrying is free, and until it existed every rollout left
+    /// everybody sitting on the dying pod.
     private void handleServerShutdown(ServerBeginShutdownEvent ignored) {
-        // When the hub is instructed to shut down, try to move the players to a new hub.
-        var players = MinecraftServer.getConnectionManager().getOnlinePlayers();
+        var connectionManager = MinecraftServer.getConnectionManager();
+        // Async only because FutureUtil has not been marked shut down yet; running the loop inline
+        // here would hold up the shutdown sequence waiting on it.
         FutureUtil.submitVirtual(() -> {
-            for (var player : players) {
-                try {
-                    var hub = sessionService().joinHubV2(new JoinHubRequest(
-                        player.getUuid().toString(), AbstractHttpService.hostname));
+            while (true) {
+                var players = List.copyOf(connectionManager.getOnlinePlayers());
+                if (players.isEmpty()) return;
 
-                    var state = new HubTransferData(player.getPosition(), player.getHeldSlot());
-                    ProxySupport.transferWithData(player, hub.serverClusterIp(), state);
-                } catch (SessionService.NoAvailableServerException ignored2) {
-                    // No other hub is available. Leave them here for now, they can move on their own
-                    // when a hub becomes available.
-                } catch (Exception e) {
-                    ExceptionReporter.reportException(e, player);
+                var stranded = transferToAnotherHub(players);
+                if (stranded != 0)
+                    logger.warn("no other hub is available for {} of {} players, retrying in {}",
+                        stranded, players.size(), DRAIN_RETRY_DELAY);
+
+                try {
+                    Thread.sleep(DRAIN_RETRY_DELAY);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                    return;
                 }
             }
         });
+    }
+
+    /// The number of players left behind because no other hub was available.
+    private int transferToAnotherHub(List<Player> players) {
+        var stranded = 0;
+        for (var player : players) {
+            try {
+                var hub = sessionService().joinHubV2(new JoinHubRequest(
+                    player.getUuid().toString(), AbstractHttpService.hostname));
+
+                var state = new HubTransferData(player.getPosition(), player.getHeldSlot());
+                ProxySupport.transferWithData(player, hub.serverClusterIp(), state);
+            } catch (SessionService.NoAvailableServerException ignored) {
+                stranded++;
+            } catch (Exception e) {
+                ExceptionReporter.reportException(e, player);
+            }
+        }
+        return stranded;
     }
 }
