@@ -136,6 +136,13 @@ class PlayerServiceImplTest {
     }
 
     @Test
+    void displayNames_orgAccountHasNoRow() {
+        var org = UUID.fromString("b571aed9-19f4-4032-9c06-75a4b7cf6c00");
+        assertEquals("Hollow Cube", players.displayName(org).username());
+        assertEquals("Hollow Cube", players.displayNames(List.of(org, ALICE)).get(org).username());
+    }
+
+    @Test
     void hypercube_onlyWhileRunning() {
         assertNotNull(players.hypercube(BOB));
         assertNull(players.hypercube(CAROL));

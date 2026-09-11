@@ -49,6 +49,10 @@ public final class PlayerServiceImpl implements PlayerService {
     public Map<UUID, DisplayName> displayNames(List<UUID> playerIds) {
         if (playerIds.isEmpty()) return Map.of();
         var names = new HashMap<UUID, DisplayName>();
+        for (var id : playerIds) {
+            var org = DisplayNames.org(id);
+            if (org != null) names.put(id, org);
+        }
         for (var row : db.players.getPlayerNames(playerIds)) {
             var name = DisplayNames.of(row.id(), row.username(), row.role(), row.hypercubeEnd());
             names.put(row.id(), name);

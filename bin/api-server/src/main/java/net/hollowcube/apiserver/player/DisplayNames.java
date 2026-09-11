@@ -20,6 +20,12 @@ public final class DisplayNames {
         List.of(new DisplayName.Part.Username("Hollow Cube", "#3895ff"))
     );
 
+    /// The org account has no `player_data` row, so its name cannot come from one; Go's
+    /// display-name endpoint short circuited on the id before it read the player.
+    public static @Nullable DisplayName org(UUID id) {
+        return id.equals(ORG_ACCOUNT) ? ORG_NAME : null;
+    }
+
     public static DisplayName of(PlayerData row) {
         return of(row.id(), row.username(), row.role(), row.hypercubeEnd());
     }
@@ -30,7 +36,8 @@ public final class DisplayNames {
         RoleType role,
         @Nullable Instant hypercubeEnd
     ) {
-        if (id.equals(ORG_ACCOUNT)) return ORG_NAME;
+        var org = org(id);
+        if (org != null) return org;
         var effective = Roles.effective(role, hypercubeEnd);
         var badge = badge(effective);
         var name = new DisplayName.Part.Username(username, color(effective));
