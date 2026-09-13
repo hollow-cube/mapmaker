@@ -10,7 +10,8 @@ import net.hollowcube.mapmaker.map.util.spatial.Octree;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
-import net.hollowcube.molang.MolangExpr;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
+import net.hollowcube.molang.MolangProgram;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -115,8 +116,8 @@ public class TestParkourMapWorld extends ParkourMapWorld implements SubWorld {
     }
 
     @Override
-    protected MolangExpr leaderboardScoreExpr() {
+    protected MolangProgram<VariableQueries.Context> leaderboardScoreExpr() {
         // Always parse it inline since it can change during editing.
-        return MolangExpr.parseOrThrow(map().settings().leaderboard().score());
+        return VariableQueries.ENVIRONMENT.compile(map().settings().leaderboard().score());
     }
 }

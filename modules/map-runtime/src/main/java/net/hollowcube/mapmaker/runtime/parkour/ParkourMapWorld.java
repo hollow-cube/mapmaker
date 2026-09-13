@@ -44,7 +44,7 @@ import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetTimeAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetWeatherAction;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
 import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
@@ -58,8 +58,8 @@ import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent
 import net.hollowcube.mapmaker.runtime.parkour.replay.event.RunStartEvent;
 import net.hollowcube.mapmaker.runtime.parkour.setting.*;
 import net.hollowcube.mapmaker.util.NumberUtil;
-import net.hollowcube.molang.MolangExpr;
-import net.hollowcube.molang.MolangOptimizer;
+import net.hollowcube.molang.MolangProgram;
+import net.hollowcube.molang.MolangState;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -154,7 +154,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
     }
 
-    private final MolangExpr leaderboardScoreExpr;
+    private final MolangProgram<VariableQueries.Context> leaderboardScoreExpr;
     private final ReplayManager replayManager;
 
     private final SaveStateType saveStateType;
@@ -211,7 +211,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
         // We throw on world creation if the expression is invalid. We parse when setting it, so this
         // should not happen. Not sure if theres any better recourse than failing to load.
-        this.leaderboardScoreExpr = MolangOptimizer.optimizeAst(MolangExpr.parseOrThrow(map.settings().leaderboard().score()));
+        this.leaderboardScoreExpr = VariableQueries.ENVIRONMENT.compile(map.settings().leaderboard().score());
     }
 
     public int defaultResetHeight() {
@@ -521,16 +521,14 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         return OpUtils.map(player.getTag(BEST_SAVESTATE), SaveState::getEffectivePlaytime);
     }
 
-    protected MolangExpr leaderboardScoreExpr() {
+    protected MolangProgram<VariableQueries.Context> leaderboardScoreExpr() {
         return this.leaderboardScoreExpr;
     }
 
     public double computeScore(Player player, SaveState saveState) {
         var playState = saveState.state(PlayState.class);
-        var variables = Objects.requireNonNullElseGet(playState.get(Attachments.VARIABLES), VariableStorage::new);
-        TempEffectApplicator.VARIABLE_LOOKUP.setStorage(variables);
-        TempEffectApplicator.QUERY.setContext(player);
-        return TempEffectApplicator.EVALUATOR.eval(leaderboardScoreExpr());
+        var context = new VariableQueries.Context(player, playState.get(Attachments.VARIABLES));
+        return leaderboardScoreExpr().eval(new MolangState(), context);
         // TODO: what to do with errors during eval?
     }
 

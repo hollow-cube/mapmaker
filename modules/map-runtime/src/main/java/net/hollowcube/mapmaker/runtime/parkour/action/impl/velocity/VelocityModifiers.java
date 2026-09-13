@@ -4,8 +4,8 @@ import net.hollowcube.common.math.relative.RelativeField;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.MolangExpression;
-import net.hollowcube.mapmaker.runtime.parkour.action.util.MolangResolver;
-import net.hollowcube.molang.eval.MolangEvaluator;
+import net.hollowcube.molang.MolangEnvironment;
+import net.hollowcube.molang.MolangState;
 import net.hollowcube.molang.runtime.ContentError;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Codec;
@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class VelocityModifiers {
@@ -61,29 +60,38 @@ public class VelocityModifiers {
 
     }
 
-    public record Molang(MolangExpression dx, MolangExpression dy, MolangExpression dz) implements VelocityModifier {
+    public record Molang(
+        MolangExpression<Player> dx,
+        MolangExpression<Player> dy,
+        MolangExpression<Player> dz
+    ) implements VelocityModifier {
+
+        private static final MolangEnvironment<Player> ENVIRONMENT = MolangEnvironment.<Player>builder()
+            .query(q -> q
+                .bool("isSneaking", Player::isSneaking)
+                .bool("isSwimming", player -> player.getPose() == EntityPose.SWIMMING)
+                .bool("isSprinting", Player::isSprinting)
+                .bool("isGliding", Player::isFlyingWithElytra))
+            .variables(v -> v
+                .number("x", player -> player.getPosition().x())
+                .number("y", player -> player.getPosition().y())
+                .number("z", player -> player.getPosition().z())
+                .number("dx", player -> player.getVelocity().x())
+                .number("dy", player -> player.getVelocity().y())
+                .number("dz", player -> player.getVelocity().z())
+                .number("yaw", player -> player.getPosition().yaw())
+                .number("pitch", player -> player.getPosition().pitch()))
+            .build();
 
         public static final StructCodec<Molang> CODEC = StructCodec.struct(
-            "dx", MolangExpression.CODEC, Molang::dx,
-            "dy", MolangExpression.CODEC, Molang::dy,
-            "dz", MolangExpression.CODEC, Molang::dz,
+            "dx", MolangExpression.codec(ENVIRONMENT), Molang::dx,
+            "dy", MolangExpression.codec(ENVIRONMENT), Molang::dy,
+            "dz", MolangExpression.codec(ENVIRONMENT), Molang::dz,
             Molang::new
         );
 
-        private static final MolangResolver<Player> QUERIES = new MolangResolver<>(Molang::resolveQuery);
-        private static final MolangResolver<Player> VARIABLES = new MolangResolver<>(Molang::resolveVariable);
-        private static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
-            "query", QUERIES,
-            "q", QUERIES,
-            "variable", VARIABLES,
-            "v", VARIABLES
-        ));
-
         @Override
         public @Nullable Vec get(Player player) {
-            QUERIES.setContext(player);
-            VARIABLES.setContext(player);
-
             var errors = new ArrayList<ContentError>();
             var dx = evaluate(errors, player, this.dx);
             var dy = evaluate(errors, player, this.dy);
@@ -91,12 +99,9 @@ public class VelocityModifiers {
 
             var world = MapWorld.forPlayer(player);
             if (world != null && !world.map().isPublished() && !errors.isEmpty()) {
-                var error = errors.stream().map(ContentError::message).collect(Collectors.joining("\n"));
+                var error = errors.stream().map(ContentError::toString).collect(Collectors.joining("\n"));
                 player.sendMessage(Component.text("Errors evaluating velocity expression:\n" + error));
             }
-
-            QUERIES.setContext(null);
-            VARIABLES.setContext(null);
 
             if (dx != null && dy != null && dz != null) {
                 return new Vec(dx, dy, dz);
@@ -106,8 +111,8 @@ public class VelocityModifiers {
         }
 
         private static @Nullable Double evaluate(
-            List<ContentError> errors, Player player, MolangExpression expression) {
-            var parsed = expression.parsed();
+            List<ContentError> errors, Player player, MolangExpression<Player> expression) {
+            var program = expression.program();
             var error = expression.error();
 
             if (error != null) {
@@ -115,49 +120,22 @@ public class VelocityModifiers {
                 return null;
             }
 
-            if (parsed == null) {
+            if (program == null) {
                 errors.add(new ContentError("Unknown error parsing expression."));
                 return null;
             }
 
+            var state = new MolangState();
             try {
-                return EVALUATOR.eval(parsed);
-            } catch (ArithmeticException exception) {
-                errors.add(new ContentError(exception.getMessage()));
+                return program.eval(state, player);
             } catch (Exception exception) {
                 ExceptionReporter.reportException(exception, player);
                 errors.add(new ContentError("Internal Server Error, please report to administrators if persistent."));
             } finally {
-                errors.addAll(EVALUATOR.getErrors());
+                errors.addAll(state.getErrors());
             }
 
             return null;
-        }
-
-        private static @Nullable Double resolveQuery(String field, @Nullable Player player) {
-            if (player == null) return null;
-            return switch (field) {
-                case "isSneaking" -> player.isSneaking() ? 1.0 : 0.0;
-                case "isSwimming" -> player.getPose() == EntityPose.SWIMMING ? 1.0 : 0.0;
-                case "isSprinting" -> player.isSprinting() ? 1.0 : 0.0;
-                case "isGliding" -> player.isFlyingWithElytra() ? 1.0 : 0.0;
-                default -> null;
-            };
-        }
-
-        private static @Nullable Double resolveVariable(String field, @Nullable Player player) {
-            if (player == null) return null;
-            return switch (field) {
-                case "x" -> player.getPosition().x();
-                case "y" -> player.getPosition().y();
-                case "z" -> player.getPosition().z();
-                case "dx" -> player.getVelocity().x();
-                case "dy" -> player.getVelocity().y();
-                case "dz" -> player.getVelocity().z();
-                case "yaw" -> (double) player.getPosition().yaw();
-                case "pitch" -> (double) player.getPosition().pitch();
-                default -> null;
-            };
         }
 
     }

@@ -2,9 +2,9 @@ package net.hollowcube.mapmaker.map.entity.marker.builtin;
 
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.molang.MolangExpr;
-import net.hollowcube.molang.eval.MolangEvaluator;
-import net.hollowcube.molang.eval.MolangValue;
+import net.hollowcube.molang.MolangEnvironment;
+import net.hollowcube.molang.MolangProgram;
+import net.hollowcube.molang.MolangState;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.color.AlphaColor;
 import net.minestom.server.color.Color;
@@ -24,9 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Supplier;
 
@@ -39,29 +37,42 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
     private int lifetime; // Loop duration, in ticks. 0 for infinite
     private double rate; // Particles per tick
     private Supplier<Particle> particle;
-    private MolangExpr positionX;
-    private MolangExpr positionY;
-    private MolangExpr positionZ;
+    private MolangProgram<Variables> positionX;
+    private MolangProgram<Variables> positionY;
+    private MolangProgram<Variables> positionZ;
     // Speed, count and offsetXYZ are mutually exclusive with velocityXYZ
-    private MolangExpr speed;
-    private MolangExpr count;
-    private MolangExpr offsetX;
-    private MolangExpr offsetY;
-    private MolangExpr offsetZ;
+    private MolangProgram<Variables> speed;
+    private MolangProgram<Variables> count;
+    private MolangProgram<Variables> offsetX;
+    private MolangProgram<Variables> offsetY;
+    private MolangProgram<Variables> offsetZ;
     // See above comment
-    private MolangExpr velocityX;
-    private MolangExpr velocityY;
-    private MolangExpr velocityZ;
+    private MolangProgram<Variables> velocityX;
+    private MolangProgram<Variables> velocityY;
+    private MolangProgram<Variables> velocityZ;
     // If not provided or 1, particles will be spawned. Otherwise they will not.
-    private MolangExpr active;
+    private MolangProgram<Variables> active;
+
+    private static final MolangEnvironment<Variables> ENVIRONMENT = MolangEnvironment.<Variables>builder()
+        .variables(v -> v
+            .number("age", vars -> vars.age)
+            .number("lifetime", vars -> vars.lifetime)
+            .number("random_1", vars -> vars.random1)
+            .number("random_2", vars -> vars.random2)
+            .number("random_3", vars -> vars.random3)
+            .number("random_4", vars -> vars.random4)
+            .number("particle_random_1", vars -> vars.particleRandom1)
+            .number("particle_random_2", vars -> vars.particleRandom2)
+            .number("particle_random_3", vars -> vars.particleRandom3)
+            .number("particle_random_4", vars -> vars.particleRandom4))
+        .query(q -> q
+            .pure("hsb_to_red", ParticleEmitterMarkerHandler::hsbToRed)
+            .pure("hsb_to_green", ParticleEmitterMarkerHandler::hsbToGreen)
+            .pure("hsb_to_blue", ParticleEmitterMarkerHandler::hsbToBlue))
+        .build();
 
     private final Variables variables = new Variables();
-    private final MolangEvaluator molangEval = new MolangEvaluator(Map.of(
-        "variable", variables,
-        "v", variables,
-        "query", Queries.INSTANCE,
-        "q", Queries.INSTANCE
-    ));
+    private final MolangState molangState = new MolangState();
     private double toSpawn = 0;
     private int age = -1; // Current loop age
 
@@ -104,7 +115,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         while (toSpawn >= 1) {
             toSpawn--;
 
-            if (active != null && !molangEval.evalBool(active))
+            if (active != null && !active.evalBool(molangState, variables))
                 continue;
 
             variables.particleRandom1 = ThreadLocalRandom.current().nextDouble();
@@ -115,9 +126,9 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             Point position = entity.getPosition();
             if (positionX != null) {
                 position = position.add(
-                    molangEval.eval(positionX),
-                    molangEval.eval(positionY),
-                    molangEval.eval(positionZ)
+                    positionX.eval(molangState, variables),
+                    positionY.eval(molangState, variables),
+                    positionZ.eval(molangState, variables)
                 );
             }
 
@@ -125,19 +136,19 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
             int computedCount;
             Vec computedOffset;
             if (speed != null || count != null || offsetX != null) {
-                computedSpeed = (float) (speed != null ? molangEval.eval(speed) : 0);
-                double evaledCount = count != null ? molangEval.eval(count) : 1;
+                computedSpeed = (float) (speed != null ? speed.eval(molangState, variables) : 0);
+                double evaledCount = count != null ? count.eval(molangState, variables) : 1;
                 computedCount = evaledCount < 1 ? 1 : (int) evaledCount;
                 computedOffset = new Vec(
-                    offsetX != null ? molangEval.eval(offsetX) : 0,
-                    offsetY != null ? molangEval.eval(offsetY) : 0,
-                    offsetZ != null ? molangEval.eval(offsetZ) : 0
+                    offsetX != null ? offsetX.eval(molangState, variables) : 0,
+                    offsetY != null ? offsetY.eval(molangState, variables) : 0,
+                    offsetZ != null ? offsetZ.eval(molangState, variables) : 0
                 );
             } else if (velocityX != null) {
                 var computedVelocity = new Vec(
-                    molangEval.eval(velocityX),
-                    molangEval.eval(velocityY),
-                    molangEval.eval(velocityZ)
+                    velocityX.eval(molangState, variables),
+                    velocityY.eval(molangState, variables),
+                    velocityZ.eval(molangState, variables)
                 );
                 computedSpeed = (float) computedVelocity.length();
                 computedCount = 0;
@@ -243,16 +254,16 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         return type == BinaryTagTypes.STRING || type == BinaryTagTypes.BYTE || type == BinaryTagTypes.SHORT || type == BinaryTagTypes.INT || type == BinaryTagTypes.LONG || type == BinaryTagTypes.FLOAT || type == BinaryTagTypes.DOUBLE;
     }
 
-    private @Nullable MolangExpr loadValueScript(@NotNull String name, @Nullable BinaryTag tag) {
+    private @Nullable MolangProgram<Variables> loadValueScript(@NotNull String name, @Nullable BinaryTag tag) {
         if (tag == null) return null;
         if (tag instanceof StringBinaryTag scriptTag) {
             try {
-                return MolangExpr.parseOrThrow(scriptTag.value());
-            } catch (Throwable e) {
+                return ENVIRONMENT.compile(scriptTag.value());
+            } catch (RuntimeException e) {
                 throw new IllegalArgumentException(name + ": failed to compile script: " + e.getMessage());
             }
         } else if (tag instanceof NumberBinaryTag numberTag) {
-            return new MolangExpr.Num(numberTag.doubleValue());
+            return ENVIRONMENT.compile(Double.toString(numberTag.doubleValue()));
         } else {
             throw new IllegalArgumentException(name + ": expected number or script, got " + tag.getClass().getSimpleName());
         }
@@ -276,7 +287,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 }
             }
             case Particle.Dust dustParticle -> {
-                MolangExpr red, green, blue;
+                MolangProgram<Variables> red, green, blue;
                 if (data.keySet().contains("color")) {
                     var colorTag = assertVecTag("color", data.get("color"));
                     red = loadValueScript("color.r", colorTag.get(0));
@@ -287,23 +298,23 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 particle = () -> {
                     var p = dustParticle;
                     if (red != null && green != null && blue != null) p = p.withColor(new Color(
-                        (int) (molangEval.eval(red) * 255.),
-                        (int) (molangEval.eval(green) * 255.),
-                        (int) (molangEval.eval(blue) * 255.)
+                        (int) (red.eval(molangState, variables) * 255.),
+                        (int) (green.eval(molangState, variables) * 255.),
+                        (int) (blue.eval(molangState, variables) * 255.)
                     ));
-                    if (scale != null) p = p.withScale((float) molangEval.eval(scale));
+                    if (scale != null) p = p.withScale((float) scale.eval(molangState, variables));
                     return p;
                 };
             }
             case Particle.DustColorTransition dustColorTransitionParticle -> {
-                MolangExpr red, green, blue;
+                MolangProgram<Variables> red, green, blue;
                 if (data.keySet().contains("color")) {
                     var colorTag = assertVecTag("color", data.get("color"));
                     red = loadValueScript("color.r", colorTag.get(0));
                     green = loadValueScript("color.g", colorTag.get(1));
                     blue = loadValueScript("color.b", colorTag.get(2));
                 } else red = green = blue = null;
-                MolangExpr tRed, tGreen, tBlue;
+                MolangProgram<Variables> tRed, tGreen, tBlue;
                 if (data.keySet().contains("transition")) {
                     var transitionTag = assertVecTag("transition", data.get("transition"));
                     tRed = loadValueScript("transition.r", transitionTag.get(0));
@@ -314,16 +325,16 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 particle = () -> {
                     var p = dustColorTransitionParticle;
                     if (red != null && green != null && blue != null) p = p.withColor(new Color(
-                        (int) (molangEval.eval(red) * 255.),
-                        (int) (molangEval.eval(green) * 255.),
-                        (int) (molangEval.eval(blue) * 255.)
+                        (int) (red.eval(molangState, variables) * 255.),
+                        (int) (green.eval(molangState, variables) * 255.),
+                        (int) (blue.eval(molangState, variables) * 255.)
                     ));
                     if (tRed != null && tGreen != null && tBlue != null) p = p.withTransitionColor(new Color(
-                        (int) (molangEval.eval(tRed) * 255.),
-                        (int) (molangEval.eval(tGreen) * 255.),
-                        (int) (molangEval.eval(tBlue) * 255.)
+                        (int) (tRed.eval(molangState, variables) * 255.),
+                        (int) (tGreen.eval(molangState, variables) * 255.),
+                        (int) (tBlue.eval(molangState, variables) * 255.)
                     ));
-                    if (scale != null) p = p.withScale((float) molangEval.eval(scale));
+                    if (scale != null) p = p.withScale((float) scale.eval(molangState, variables));
                     return p;
                 };
             }
@@ -356,10 +367,10 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
                 var blue = loadValueScript("color.b", colorTag.get(2));
                 var alpha = loadValueScript("color.a", colorTag.get(3));
                 particle = () -> itemParticle.withColor(new AlphaColor(
-                    alpha != null ? (int) (molangEval.eval(alpha)) : 255,
-                    red != null ? (int) (molangEval.eval(red)) : 255,
-                    green != null ? (int) (molangEval.eval(green)) : 255,
-                    blue != null ? (int) (molangEval.eval(blue)) : 255
+                    alpha != null ? (int) (alpha.eval(molangState, variables)) : 255,
+                    red != null ? (int) (red.eval(molangState, variables)) : 255,
+                    green != null ? (int) (green.eval(molangState, variables)) : 255,
+                    blue != null ? (int) (blue.eval(molangState, variables)) : 255
                 ));
             }
             default -> {
@@ -368,8 +379,7 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         }
     }
 
-
-    private static class Variables implements MolangValue.Holder {
+    private static class Variables {
         public double age;
         public double lifetime;
         public double random1;
@@ -380,99 +390,41 @@ public class ParticleEmitterMarkerHandler extends ObjectEntityHandler {
         public double particleRandom2;
         public double particleRandom3;
         public double particleRandom4;
-
-        @Override
-        public @NotNull MolangValue get(@NotNull String field) {
-            return switch (field) {
-                case "age" -> new MolangValue.Num(age);
-                case "lifetime" -> new MolangValue.Num(lifetime);
-                case "random_1" -> new MolangValue.Num(random1);
-                case "random_2" -> new MolangValue.Num(random2);
-                case "random_3" -> new MolangValue.Num(random3);
-                case "random_4" -> new MolangValue.Num(random4);
-                case "particle_random_1" -> new MolangValue.Num(particleRandom1);
-                case "particle_random_2" -> new MolangValue.Num(particleRandom2);
-                case "particle_random_3" -> new MolangValue.Num(particleRandom3);
-                case "particle_random_4" -> new MolangValue.Num(particleRandom4);
-                default -> MolangValue.NIL;
-            };
-        }
     }
 
-    private static class Queries implements MolangValue.Holder {
-        public static final Queries INSTANCE = new Queries();
-
-        private Queries() {
-        }
-
-        private static double hsbToRed(double hue, double saturation, double brightness) {
-            if (saturation == 0) return brightness;
-            double h = (hue - Math.floor(hue)) * 6.0f;
-            double f = h - Math.floor(h);
-            return switch ((int) h) {
-                case 1 -> brightness * (1.0f - saturation * f);
-                case 2, 3 -> brightness * (1.0f - saturation);
-                case 4 -> brightness * (1.0f - (saturation * (1.0f - f)));
-                default -> brightness;
-            };
-        }
-
-        private static double hsbToGreen(double hue, double saturation, double brightness) {
-            if (saturation == 0) return brightness;
-            double h = (hue - Math.floor(hue)) * 6.0f;
-            double f = h - Math.floor(h);
-            return switch ((int) h) {
-                case 0 -> brightness * (1.0f - (saturation * (1.0f - f)));
-                case 3 -> brightness * (1.0f - saturation * f);
-                case 4, 5 -> brightness * (1.0f - saturation);
-                default -> brightness;
-            };
-        }
-
-        private static double hsbToBlue(double hue, double saturation, double brightness) {
-            if (saturation == 0) return brightness;
-            double h = (hue - Math.floor(hue)) * 6.0f;
-            double f = h - Math.floor(h);
-            return switch ((int) h) {
-                case 0, 1 -> brightness * (1.0f - saturation);
-                case 2 -> brightness * (1.0f - (saturation * (1.0f - f)));
-                case 5 -> brightness * (1.0f - saturation * f);
-                default -> brightness;
-            };
-        }
-
-        private static final MolangValue.Function HSB_TO_RED = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
-            return new MolangValue.Num(hsbToRed(args[0], args[1], args[2]));
+    private static double hsbToRed(double hue, double saturation, double brightness) {
+        if (saturation == 0) return brightness;
+        double h = (hue - Math.floor(hue)) * 6.0f;
+        double f = h - Math.floor(h);
+        return switch ((int) h) {
+            case 1 -> brightness * (1.0f - saturation * f);
+            case 2, 3 -> brightness * (1.0f - saturation);
+            case 4 -> brightness * (1.0f - (saturation * (1.0f - f)));
+            default -> brightness;
         };
-        private static final MolangValue.Function HSB_TO_GREEN = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
-            return new MolangValue.Num(hsbToGreen(args[0], args[1], args[2]));
-        };
-        private static final MolangValue.Function HSB_TO_BLUE = (rawArgs) -> {
-            double[] args = checkArgs(rawArgs, 3);
-            return new MolangValue.Num(hsbToBlue(args[0], args[1], args[2]));
-        };
+    }
 
-        @Override
-        public @NotNull MolangValue get(@NotNull String field) {
-            return switch (field) {
-                case "hsb_to_red" -> HSB_TO_RED;
-                case "hsb_to_green" -> HSB_TO_GREEN;
-                case "hsb_to_blue" -> HSB_TO_BLUE;
-                default -> MolangValue.NIL;
-            };
-        }
+    private static double hsbToGreen(double hue, double saturation, double brightness) {
+        if (saturation == 0) return brightness;
+        double h = (hue - Math.floor(hue)) * 6.0f;
+        double f = h - Math.floor(h);
+        return switch ((int) h) {
+            case 0 -> brightness * (1.0f - (saturation * (1.0f - f)));
+            case 3 -> brightness * (1.0f - saturation * f);
+            case 4, 5 -> brightness * (1.0f - saturation);
+            default -> brightness;
+        };
+    }
 
-        private static double[] checkArgs(@NotNull List<MolangValue> args, int expected) {
-            if (args.size() != expected)
-                throw new IllegalArgumentException("expected " + expected + " arguments, got: " + args.size());
-            double[] result = new double[expected];
-            for (int i = 0; i < expected; i++) {
-                // TODO: this needs to generate a content error...
-                result[i] = args.get(i) instanceof MolangValue.Num(double value) ? value : 0.0;
-            }
-            return result;
-        }
+    private static double hsbToBlue(double hue, double saturation, double brightness) {
+        if (saturation == 0) return brightness;
+        double h = (hue - Math.floor(hue)) * 6.0f;
+        double f = h - Math.floor(h);
+        return switch ((int) h) {
+            case 0, 1 -> brightness * (1.0f - saturation);
+            case 2 -> brightness * (1.0f - (saturation * (1.0f - f)));
+            case 5 -> brightness * (1.0f - saturation * f);
+            default -> brightness;
+        };
     }
 }

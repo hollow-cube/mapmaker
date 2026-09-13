@@ -14,13 +14,11 @@ import net.hollowcube.mapmaker.runtime.parkour.action.impl.RespawnPosAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetProgressIndexAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableStorage;
-import net.hollowcube.mapmaker.runtime.parkour.action.util.MolangResolver;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointReachedEvent;
 import net.hollowcube.mapmaker.util.TagCooldown;
-import net.hollowcube.molang.eval.MolangEvaluator;
+import net.hollowcube.molang.MolangState;
 import net.hollowcube.molang.runtime.ContentError;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
@@ -47,15 +45,6 @@ public class TempEffectApplicator {
     private static final Instant LEGACY_STATUS_PLATE_DATE = Instant.ofEpochMilli(1776387977716L); // 2026-04-16 ish
     private static final TagCooldown LEGACY_STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
     private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 1);
-
-    static final VariableStorage.MolangLookup VARIABLE_LOOKUP = VariableStorage.lookup();
-    static final MolangResolver<Player> QUERY = new MolangResolver<>(VariableQueries::resolve);
-    static final MolangEvaluator EVALUATOR = new MolangEvaluator(Map.of(
-            "variable", VARIABLE_LOOKUP,
-            "v", VARIABLE_LOOKUP,
-            "query", QUERY,
-            "q", QUERY
-    ));
 
     public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId, Point position) {
         var world = ParkourMapWorld.forPlayer(player);
@@ -198,18 +187,15 @@ public class TempEffectApplicator {
         var expression = condition.expression();
         if (expression == null) return false;
         if (expression.error() != null) return true;
-        if (expression.parsed() == null) return true;
+        if (expression.program() == null) return true;
 
         List<ContentError> errors;
         boolean result = false;
 
         try {
-            VARIABLE_LOOKUP.setStorage(state.get(Attachments.VARIABLES));
-            QUERY.setContext(player);
-            result = EVALUATOR.evalBool(expression.parsed());
-            errors = EVALUATOR.getErrors();
-        } catch (ArithmeticException exception) {
-            errors = List.of(new ContentError(exception.getMessage()));
+            var molangState = new MolangState();
+            result = expression.program().evalBool(molangState, new VariableQueries.Context(player, state.get(Attachments.VARIABLES)));
+            errors = molangState.getErrors();
         } catch (Exception exception) {
             // Sanity check for unexpected errors, but molang should handle errors gracefully
             ExceptionReporter.reportException(exception, player);
@@ -217,7 +203,7 @@ public class TempEffectApplicator {
         }
 
         if (!map.isPublished() && !errors.isEmpty()) {
-            var error = errors.stream().map(ContentError::message).collect(Collectors.joining("\n"));
+            var error = errors.stream().map(ContentError::toString).collect(Collectors.joining("\n"));
             player.sendMessage(Component.text("Errors evaluating condition:\n" + error));
         }
 

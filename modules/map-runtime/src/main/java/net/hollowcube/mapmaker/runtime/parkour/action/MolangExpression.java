@@ -1,34 +1,31 @@
 package net.hollowcube.mapmaker.runtime.parkour.action;
 
-import net.hollowcube.molang.MolangExpr;
-import net.hollowcube.molang.MolangOptimizer;
+import net.hollowcube.molang.MolangEnvironment;
+import net.hollowcube.molang.MolangProgram;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.Nullable;
 
-public record MolangExpression(
+public record MolangExpression<T>(
         String text,
-        @Nullable MolangExpr parsed,
+        @Nullable MolangProgram<T> program,
         @Nullable Throwable error
 ) {
 
-    public static final MolangExpression ZERO = new MolangExpression("0", new MolangExpr.Num(0), null);
-    public static final Codec<MolangExpression> CODEC = Codec.STRING.transform(
-            MolangExpression::from,
-            MolangExpression::text
-    );
+    public static <T> Codec<MolangExpression<T>> codec(MolangEnvironment<T> environment) {
+        return Codec.STRING.transform(text -> from(environment, text), MolangExpression::text);
+    }
 
     // TODO syntax highlighting
     public Component display() {
         return Component.text(this.text);
     }
 
-    public static MolangExpression from(String text) {
+    public static <T> MolangExpression<T> from(MolangEnvironment<T> environment, String text) {
         try {
-            var expr = MolangExpr.parseOrThrow(text);
-            return new MolangExpression(text, MolangOptimizer.optimizeAst(expr), null);
-        } catch (Throwable t) {
-            return new MolangExpression(text, null, t);
+            return new MolangExpression<>(text, environment.compile(text), null);
+        } catch (RuntimeException e) {
+            return new MolangExpression<>(text, null, e);
         }
     }
 }

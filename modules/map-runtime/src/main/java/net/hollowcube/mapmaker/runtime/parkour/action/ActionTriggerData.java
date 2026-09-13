@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.action;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
 import net.minestom.server.codec.Codec;
 import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ public record ActionTriggerData(
         }
 
         public void setConditionExpression(@Nullable String condition) {
-            this.condition = this.condition.withCondition(OpUtils.map(condition, MolangExpression::from));
+            this.condition = this.condition.withCondition(OpUtils.map(condition, text -> MolangExpression.from(VariableQueries.ENVIRONMENT, text)));
         }
 
         public void setConditionMessage(String message) {

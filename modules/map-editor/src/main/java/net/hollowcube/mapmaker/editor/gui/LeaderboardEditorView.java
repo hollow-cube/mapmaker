@@ -6,6 +6,7 @@ import net.hollowcube.mapmaker.gui.notifications.ToastManager;
 import net.hollowcube.mapmaker.panels.*;
 import net.hollowcube.mapmaker.panels.ui.StringInput;
 import net.hollowcube.mapmaker.runtime.parkour.action.MolangExpression;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 
@@ -21,7 +22,7 @@ public class LeaderboardEditorView extends Panel {
 
     private final MapPatch.Builder editor;
     private MapLeaderboard leaderboard;
-    private MolangExpression expression;
+    private MolangExpression<VariableQueries.Context> expression;
 
     private boolean editingExpression = false;
 
@@ -76,7 +77,7 @@ public class LeaderboardEditorView extends Panel {
 
         this.editor = editor;
         this.leaderboard = editor.map().settings().leaderboard();
-        this.expression = MolangExpression.from(this.leaderboard.score());
+        this.expression = MolangExpression.from(VariableQueries.ENVIRONMENT, this.leaderboard.score());
         update();
     }
 
@@ -90,7 +91,7 @@ public class LeaderboardEditorView extends Panel {
         if (MapLeaderboard.DEFAULT.equals(leaderboard)) return;
 
         leaderboard = MapLeaderboard.DEFAULT;
-        expression = MolangExpression.from(leaderboard.score());
+        expression = MolangExpression.from(VariableQueries.ENVIRONMENT, leaderboard.score());
         update();
     }
 
@@ -106,7 +107,7 @@ public class LeaderboardEditorView extends Panel {
 
     private void onExpressionChange(String newExpression) {
         leaderboard = leaderboard.withScore(newExpression);
-        expression = MolangExpression.from(newExpression);
+        expression = MolangExpression.from(VariableQueries.ENVIRONMENT, newExpression);
         update();
 
         if (expression.error() != null) {

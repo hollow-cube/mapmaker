@@ -3,10 +3,7 @@ package net.hollowcube.mapmaker.runtime.parkour.action.impl.variables;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
-import net.hollowcube.molang.eval.MolangValue;
 import net.minestom.server.codec.Codec;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Map;
 
 public class VariableStorage {
@@ -54,23 +51,5 @@ public class VariableStorage {
     @Override
     public String toString() {
         return String.format("VariableStorage%s", this.variables);
-    }
-
-    public static VariableStorage.MolangLookup lookup() {
-        return new MolangLookup();
-    }
-
-    public static class MolangLookup implements MolangValue.Holder {
-
-        private @Nullable VariableStorage storage = null;
-
-        public void setStorage(@Nullable VariableStorage storage) {
-            this.storage = storage;
-        }
-
-        @Override
-        public MolangValue get(String field) {
-            return new MolangValue.Num(this.storage != null ? this.storage.getOrDefault(field, 0.0) : 0.0);
-        }
     }
 }
