@@ -322,6 +322,11 @@ public final class ReplayManager {
     private void dropFailedSession(Player player, Throwable failure) {
         if (!(world.getPlayerState(player) instanceof ParkourState.Playing2(var saveState))) return;
 
+        // Without this the next state transition starts a session again, and the recording it
+        // resumed from has already been taken, so it writes at no revision at all against a replay
+        // the store has moved past. Every run after the first failure then fails the same way until
+        // the player rejoins: one player produced twenty identical reports over two hours that way.
+        recordings.disable(saveState.id());
         sessions.remove(saveState.id());
         ExceptionReporter.reportException(
             new RuntimeException("replay recording failed for save state " + saveState.id(), failure),
