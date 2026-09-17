@@ -195,10 +195,51 @@ class HttpS3ClientTest {
         );
     }
 
+    /// The R2 brownout of 2026-09-15, which lost ~140 replay writes in a hundred seconds because
+    /// the first `InternalError` was the last word.
+    @Test
+    void get_triesAgainWhenTheStoreAnswersInternalError() throws IOException {
+        fake.objects.put("k", "recovered".getBytes(StandardCharsets.UTF_8));
+        fake.internalErrors = 2;
+
+        try (var blob = s3.get("k")) {
+            assertEquals(
+                "recovered",
+                new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8)
+            );
+        }
+        assertEquals(3, fake.requests.size());
+    }
+
+    @Test
+    void get_givesUpOnAStoreThatStaysUnwell() {
+        fake.objects.put("k", new byte[] {1});
+        fake.internalErrors = 99;
+
+        assertThrows(S3Client.RequestFailedError.class, () -> s3.get("k"));
+        assertEquals(4, fake.requests.size());
+    }
+
+    /// A body is the inbound ipc stream, already read and already digested by the time the status
+    /// arrives, so a second attempt would upload nothing. The caller retries instead.
+    @Test
+    void put_isSentOnceEvenWhenTheStoreCouldBeTriedAgain() {
+        fake.internalErrors = 1;
+
+        assertThrows(
+            S3Client.RequestFailedError.class,
+            () -> s3.put("k", new ByteArrayInputStream(new byte[] {1, 2, 3}), 3)
+        );
+        assertEquals(1, fake.requests.size());
+    }
+
     private static final class FakeS3 implements HttpHandler {
         private final Map<String, byte[]> objects = new LinkedHashMap<>();
         private final List<Request> requests = new ArrayList<>();
         private int pageSize = 1000;
+        /// Answered before anything else, and spent one per request, so a test can say how many
+        /// attempts the store is unwell for.
+        private int internalErrors = 0;
 
         private record Request(String method, String path, Map<String, String> headers) {}
 
@@ -214,6 +255,19 @@ class HttpS3ClientTest {
             requests.add(new Request(exchange.getRequestMethod(), path, headers));
 
             try (exchange) {
+                if (internalErrors > 0) {
+                    internalErrors--;
+                    // Unread, the upload would fail the client before it ever saw the status.
+                    exchange.getRequestBody().readAllBytes();
+                    var body = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Error>"
+                        + "<Code>InternalError</Code>"
+                        + "<Message>We encountered an internal error. Please try again.</Message>"
+                        + "</Error>").getBytes(StandardCharsets.UTF_8);
+                    exchange.sendResponseHeaders(500, body.length);
+                    exchange.getResponseBody().write(body);
+                    return;
+                }
+
                 var query = exchange.getRequestURI().getQuery();
                 if (query != null && query.contains("list-type=2")) {
                     list(exchange, query);

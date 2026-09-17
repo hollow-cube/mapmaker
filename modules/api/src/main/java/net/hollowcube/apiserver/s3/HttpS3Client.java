@@ -61,6 +61,13 @@ public final class HttpS3Client implements S3Client {
     /// upload counts against it, and worlds run to tens of megabytes.
     private static final Duration REQUEST_TIMEOUT = Duration.ofMinutes(4);
 
+    /// R2 answers `InternalError` for seconds at a time and asks in the message body to be tried
+    /// again; without this every such blip became a lost replay write. A `PUT` is exempt and takes
+    /// one attempt only: its body is the inbound ipc stream, read once and teed into a digest, so a
+    /// second attempt would sign a body that is no longer there.
+    private static final int MAX_ATTEMPTS = 4;
+    private static final Duration FIRST_BACKOFF = Duration.ofMillis(200);
+
     private static final AttributeKey<String> BUCKET = AttributeKey.stringKey("aws.s3.bucket");
     private static final AttributeKey<String> KEY = AttributeKey.stringKey("aws.s3.key");
 
@@ -137,7 +144,8 @@ public final class HttpS3Client implements S3Client {
             "put",
             key,
             request("PUT", key, Map.of(), UNSIGNED_PAYLOAD).PUT(publisher),
-            HttpResponse.BodyHandlers.ofString()
+            HttpResponse.BodyHandlers.ofString(),
+            false
         );
         if (response.statusCode() == 404) throw new NotFoundError(key);
         require(response, "PUT", key, response.body());
@@ -348,31 +356,76 @@ public final class HttpS3Client implements S3Client {
         HttpRequest.Builder request,
         HttpResponse.BodyHandler<T> handler
     ) {
-        var span = tracer.spanBuilder("s3/" + operation).setSpanKind(SpanKind.CLIENT).startSpan();
-        span.setAttribute(BUCKET, bucket);
-        span.setAttribute(KEY, key);
-        try (var ignored = span.makeCurrent()) {
-            var response = http.send(request.build(), handler);
-            span.setAttribute(
-                SemanticAttributes.HTTP_RESPONSE_STATUS_CODE,
-                (long) response.statusCode()
-            );
-            if (response.statusCode() < 200 || response.statusCode() >= 300)
-                span.setStatus(StatusCode.ERROR);
-            return response;
-        } catch (IOException e) {
-            throw failed(
-                span,
-                new RequestFailedError("s3 " + operation + " " + key + " failed: " + e, e)
-            );
+        return send(operation, key, request, handler, true);
+    }
+
+    private <T> HttpResponse<T> send(
+        String operation,
+        String key,
+        HttpRequest.Builder request,
+        HttpResponse.BodyHandler<T> handler,
+        boolean repeatable
+    ) {
+        var backoff = FIRST_BACKOFF;
+        for (var attempt = 1; ; attempt++) {
+            var last = !repeatable || attempt == MAX_ATTEMPTS;
+            var span = tracer.spanBuilder("s3/" + operation)
+                .setSpanKind(SpanKind.CLIENT)
+                .startSpan();
+            span.setAttribute(BUCKET, bucket);
+            span.setAttribute(KEY, key);
+            try (var ignored = span.makeCurrent()) {
+                var response = http.send(request.build(), handler);
+                span.setAttribute(
+                    SemanticAttributes.HTTP_RESPONSE_STATUS_CODE,
+                    (long) response.statusCode()
+                );
+                if (response.statusCode() < 200 || response.statusCode() >= 300)
+                    span.setStatus(StatusCode.ERROR);
+                if (last || !worthRetrying(response.statusCode())) return response;
+                discard(response.body());
+            } catch (IOException e) {
+                var error = failed(
+                    span,
+                    new RequestFailedError("s3 " + operation + " " + key + " failed: " + e, e)
+                );
+                if (last) throw error;
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw failed(
+                    span,
+                    new RequestFailedError("s3 " + operation + " " + key + " interrupted", e)
+                );
+            } finally {
+                span.end();
+            }
+            backoff = backOff(backoff, operation, key);
+        }
+    }
+
+    /// The store being unwell rather than the request being wrong, which is the only thing another
+    /// attempt can fix.
+    private static boolean worthRetrying(int status) {
+        return status == 429 || status == 500 || status == 502 || status == 503 || status == 504;
+    }
+
+    private static Duration backOff(Duration backoff, String operation, String key) {
+        try {
+            Thread.sleep(backoff);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw failed(
-                span,
-                new RequestFailedError("s3 " + operation + " " + key + " interrupted", e)
-            );
-        } finally {
-            span.end();
+            throw new RequestFailedError("s3 " + operation + " " + key + " interrupted", e);
+        }
+        return backoff.multipliedBy(2);
+    }
+
+    /// An abandoned attempt still holds its connection until its body is closed.
+    private static void discard(@Nullable Object body) {
+        if (!(body instanceof InputStream stream)) return;
+        try {
+            stream.close();
+        } catch (IOException ignored) {
+            // The attempt is being thrown away regardless.
         }
     }
 
