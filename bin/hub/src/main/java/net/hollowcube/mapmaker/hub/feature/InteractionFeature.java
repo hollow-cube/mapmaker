@@ -1,13 +1,11 @@
 package net.hollowcube.mapmaker.hub.feature;
 
 import com.google.auto.service.AutoService;
-import net.hollowcube.common.physics.RayUtils2;
-import net.hollowcube.common.physics.SweepResult2;
+import net.hollowcube.common.physics.Shapes;
 import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.hub.HubMapWorld;
 import net.hollowcube.mapmaker.hub.entity.util.InteractionEntity;
 import net.hollowcube.mapmaker.map.MapServer;
-import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.instance.InstanceTickEvent;
@@ -15,6 +13,8 @@ import net.minestom.server.event.player.PlayerEntityInteractEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 @AutoService(HubFeature.class)
 public class InteractionFeature implements HubFeature {
@@ -38,27 +38,30 @@ public class InteractionFeature implements HubFeature {
 
             InteractionEntity hitEntity = null;
             boolean wasInside = false;
-            var result = new SweepResult2();
+            double hitDistance = Double.MAX_VALUE;
             for (var e : world.instance().getEntities()) {
                 if (!(e instanceof InteractionEntity entity)) continue;
 
-                final BoundingBox entityBB = entity.getBoundingBox();
-
-                if (RayUtils2.BoundingBoxIntersectionCheck(rayStart, rayDirection, entityBB, entity.getPosition(), result)) {
-                    hitEntity = entity;
-                } else if (RayUtils2.boundingBoxContainsPoint(entityBB, entity.getPosition(), rayStart)) {
+                var box = Shapes.absolute(entity.getPosition(), entity.getBoundingBox());
+                if (Shapes.containsPoint(box, rayStart)) {
                     hitEntity = entity;
                     wasInside = true;
                     break; // If we are inside the entity its always a hit
                 }
+
+                var reach = rayStart.add(rayDirection.mul(entity.interactionDistance()));
+                var hit = Shapes.clip(List.of(box), rayStart, reach);
+                if (hit == null) continue;
+
+                double distance = rayStart.distance(hit.position());
+                if (distance >= hitDistance) continue;
+                hitDistance = distance;
+                hitEntity = entity;
             }
 
-            // Now ensure we arent looking at a block before the entity, and that the entity is closer than the target interaction distance.
-            if (!wasInside && hitEntity != null) {
-                double distance = rayStart.distance(result.collidedPositionX(), result.collidedPositionY(), result.collidedPositionZ());
-                if (hitEntity.interactionDistance() < distance) hitEntity = null;
-                else if (PlayerUtil.getTargetBlock(player, distance, true) != null) hitEntity = null;
-            }
+            // Now ensure we arent looking at a block before the entity.
+            if (!wasInside && hitEntity != null && PlayerUtil.getTargetBlock(player, hitDistance, true) != null)
+                hitEntity = null;
 
             var lastEntity = player.getTag(LAST_ENTITY);
             if (lastEntity == hitEntity) continue;
@@ -79,12 +82,10 @@ public class InteractionFeature implements HubFeature {
         // Do our own sweep to check interaction distance (with a little leniency for ping).
         // A check from the interaction entity to the player position will be significantly different than the test
         // we do during the above hover check, so do this for better accuracy.
-        var result = new SweepResult2();
         var rayStart = player.getPosition().add(0, player.getEyeHeight(), 0);
-        boolean hit = RayUtils2.BoundingBoxIntersectionCheck(rayStart, rayStart.direction(),
-                entity.getBoundingBox(), entity.getPosition(), result);
-        if (!hit || result.getCollidedPosition().distance(rayStart) > entity.interactionDistance() + 0.5)
-            return;
+        var reach = rayStart.add(rayStart.direction().mul(entity.interactionDistance() + 0.5));
+        var box = Shapes.absolute(entity.getPosition(), entity.getBoundingBox());
+        if (Shapes.clip(List.of(box), rayStart, reach) == null) return;
         // Only trigger the right click if they dont have another item or they are sneaking.
         if (!player.isSneaking() && !player.getItemInMainHand().isAir())
             return;

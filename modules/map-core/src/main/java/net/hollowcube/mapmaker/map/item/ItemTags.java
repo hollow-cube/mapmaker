@@ -20,6 +20,7 @@ public final class ItemTags {
     public static Collection<Key> LEAVES = builtin("minecraft:leaves");
     public static Collection<Key> SAPLINGS = builtin("minecraft:saplings");
     public static Collection<Key> BOOKSHELF_BOOKS = builtin("minecraft:bookshelf_books");
+    public static Collection<Key> CUSHIONS = builtin("minecraft:cushions");
     public static Collection<Key> SPAWN_EGGS = create("spawn_egg");
     public static Collection<Key> SHERDS = create("_sherd");
 

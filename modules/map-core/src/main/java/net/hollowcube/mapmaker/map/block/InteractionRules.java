@@ -68,6 +68,7 @@ public class InteractionRules {
         item(Material.BONE_MEAL, new BonemealInteractionRule());
         item(Material.LILY_PAD, new LilyPadInteractionRule());
         item(Material.LEAD, LeadInteractionRule.INSTANCE);
+        item(ItemTags.CUSHIONS, new CushionInteractionRule());
     }
 
     public static void register(@NotNull EventNode<InstanceEvent> eventNode) {

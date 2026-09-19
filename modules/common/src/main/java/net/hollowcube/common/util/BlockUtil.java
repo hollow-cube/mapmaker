@@ -4,7 +4,10 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
+import net.hollowcube.common.physics.Shapes;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockTags;
 import net.minestom.server.item.Material;
@@ -37,6 +40,17 @@ public final class BlockUtil {
 
     private static final RegistryTag<Block> SUPPRESSES_BOUNCE = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.SUPPRESSES_BOUNCE));
     private static final RegistryTag<Block> BEDS = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.BEDS));
+    private static final RegistryTag<Block> LEAVES = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.LEAVES));
+    private static final RegistryTag<Block> IMPERMEABLE = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.IMPERMEABLE));
+    private static final RegistryTag<Block> CAUSES_SUFFOCATION = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.CAUSES_SUFFOCATION));
+    // Blocks that answer this for themselves rather than by their shape, which Minestom does not expose
+    private static final Set<Key> ALWAYS_SUFFOCATING = Set.of(Block.FARMLAND.key(), Block.SOUL_SAND.key(), Block.DIRT_PATH.key(), Block.MUD.key());
+    private static final Set<Key> NEVER_SUFFOCATING = Set.of(
+        Block.MANGROVE_ROOTS.key(), Block.MOVING_PISTON.key(),
+        Block.COPPER_GRATE.key(), Block.EXPOSED_COPPER_GRATE.key(), Block.WEATHERED_COPPER_GRATE.key(), Block.OXIDIZED_COPPER_GRATE.key(),
+        Block.WAXED_COPPER_GRATE.key(), Block.WAXED_EXPOSED_COPPER_GRATE.key(), Block.WAXED_WEATHERED_COPPER_GRATE.key(), Block.WAXED_OXIDIZED_COPPER_GRATE.key()
+    );
+    private static final BoundingBox UNIT = new BoundingBox(1, 1, 1, Vec.ZERO);
 
     private static final Int2ObjectMap<Map<String, String[]>> BLOCK_PROPERTIES;
     private static final Int2ObjectMap<Material> BLOCK_TO_ITEM;
@@ -185,6 +199,18 @@ public final class BlockUtil {
 
     public static boolean suppressesBounce(@NotNull Block block) {
         return SUPPRESSES_BOUNCE.contains(block);
+    }
+
+    /// Whether a block smothers whatever is inside it: a solid, impermeable full cube.
+    public static boolean isSuffocating(@NotNull Block block) {
+        if (ALWAYS_SUFFOCATING.contains(block.key())) return true;
+        if (NEVER_SUFFOCATING.contains(block.key()) || LEAVES.contains(block)) return false;
+        if (IMPERMEABLE.contains(block) && !block.compare(Block.BARRIER)) return false;
+        if (!CAUSES_SUFFOCATION.contains(block)) return false;
+
+        var shape = block.registry().collisionShape();
+        var bounds = Shapes.bounds(shape, Vec.ZERO);
+        return bounds != null && Shapes.contains(UNIT, bounds) && Shapes.covers(Shapes.boxes(shape, Vec.ZERO), UNIT);
     }
 
     public static double blockRestitution(@NotNull Block block) {

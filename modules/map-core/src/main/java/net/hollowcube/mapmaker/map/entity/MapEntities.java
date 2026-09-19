@@ -86,6 +86,7 @@ public final class MapEntities {
         MapEntityType.override(EntityType.ARMOR_STAND, ArmorStandEntity::new);
         MapEntityType.override(EntityType.END_CRYSTAL, EndCrystalEntity::new);
         MapEntityType.override(EntityType.LEASH_KNOT, LeashKnotEntity::new);
+        MapEntityType.override(EntityType.CUSHION, CushionEntity::new);
 
         // Animals
         MapEntityType.override(EntityType.ALLAY, AllayEntity::new);

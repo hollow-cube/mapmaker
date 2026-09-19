@@ -18,6 +18,7 @@ import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.CaveSpiderEntit
 import net.hollowcube.mapmaker.map.entity.impl.hostile.arthropod.SpiderEntity;
 import net.hollowcube.mapmaker.map.entity.impl.hostile.zombie.*;
 import net.hollowcube.mapmaker.map.entity.impl.other.ArmorStandEntity;
+import net.hollowcube.mapmaker.map.entity.impl.other.CushionEntity;
 import net.hollowcube.mapmaker.map.entity.impl.other.EndCrystalEntity;
 import net.hollowcube.mapmaker.map.entity.impl.physics.SulfurCubeEntity;
 import net.hollowcube.mapmaker.map.entity.impl.villager.VillagerEntity;
@@ -125,6 +126,7 @@ public class MapEntityInfoRegistry {
 
         register(ArmorStandEntity.class, ArmorStandEntity.INFO);
         register(EndCrystalEntity.class, EndCrystalEntity.INFO);
+        register(CushionEntity.class, CushionEntity.INFO);
     }
 
     private static <M extends EntityMeta, E extends MapEntity<? extends M>> void register(Class<E> clazz, MapEntityInfo<E> info) {

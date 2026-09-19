@@ -4,6 +4,7 @@ import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
+import net.hollowcube.mapmaker.map.entity.impl.other.CushionEntity;
 import net.hollowcube.mapmaker.map.entity.info.MapEntityInfo;
 import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoRegistry;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -47,7 +48,7 @@ public class EntityEditor {
         if (!MapEntityType.hasOverride(entity.getEntityType())) return;
         if (!world.canEdit(player)) return;
 
-        var item = ENTITY_TO_ITEM.get(entity.getEntityType());
+        var item = entity instanceof CushionEntity cushion ? cushion.material() : ENTITY_TO_ITEM.get(entity.getEntityType());
         if (item == null) return;
         var stack = ItemStack.builder(item);
         if (event.isIncludeData()) {
@@ -85,6 +86,8 @@ public class EntityEditor {
         if (world == null) return;
         if (data == null) return;
         if (!MapEntityType.hasOverride(data.type())) return;
+        // Placed by CushionInteractionRule, which applies the entity data itself
+        if (data.type() == EntityType.CUSHION) return;
 
         var position = event.getBlockPosition().relative(event.getBlockFace());
         var entity = MapEntityType.create(data.type(), UUID.randomUUID());
