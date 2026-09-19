@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
+import net.minestom.server.instance.block.SignTextSlot;
 import net.minestom.server.network.packet.client.play.ClientUpdateSignPacket;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,7 @@ import java.util.List;
 public record UpdateSignTextEvent(
         @NotNull Player player,
         @NotNull Point position,
-        boolean isFrontText,
+        @NotNull SignTextSlot slot,
         @NotNull List<String> lines
 ) implements PlayerInstanceEvent {
 
@@ -24,7 +25,7 @@ public record UpdateSignTextEvent(
 
     @ApiStatus.Internal
     public static void post(@NotNull ClientUpdateSignPacket packet, @NotNull Player player) {
-        EventDispatcher.call(new UpdateSignTextEvent(player, packet.blockPosition(), packet.isFrontText(), packet.lines()));
+        EventDispatcher.call(new UpdateSignTextEvent(player, packet.blockPosition(), packet.slot(), packet.lines()));
     }
 
 }

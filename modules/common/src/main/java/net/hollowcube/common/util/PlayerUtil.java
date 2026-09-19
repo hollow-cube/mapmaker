@@ -6,6 +6,7 @@ import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.collision.CollisionUtils;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
@@ -16,7 +17,9 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.component.SwingAnimation;
 import net.minestom.server.network.packet.server.common.PluginMessagePacket;
+import net.minestom.server.network.packet.server.play.SwingAnimationPacket;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.utils.block.BlockIterator;
 import org.jetbrains.annotations.NotNull;
@@ -86,10 +89,27 @@ public final class PlayerUtil {
         player.getInventory().addItemStack(oldItem);
     }
 
-    @SuppressWarnings("UnstableApiUsage")
-    public static void swing(@NotNull Player player, @NotNull PlayerHand hand, boolean includeSelf) {
-        if (hand == PlayerHand.MAIN) player.swingMainHand(includeSelf);
-        else player.swingOffHand(includeSelf);
+    /// Swings the way vanilla does after a successful use, placement or interaction, with the
+    /// interact animation of the item as it was before the use changed it.
+    ///
+    /// Since 26.3 the client never reports these swings, so viewers only see one if the server sends
+    /// it. The swinging client plays its own swing whenever it predicted the interaction succeeding,
+    /// so include it only when it could not have (vanilla's `SwingSource.SERVER_ONLY`).
+    public static void swing(@NotNull Player player, @NotNull PlayerHand hand, @NotNull ItemStack usedItem, boolean includeSelf) {
+        var packet = swingPacket(player, hand, usedItem);
+        if (includeSelf) player.sendPacketToViewersAndSelf(packet);
+        else player.sendPacketToViewers(packet);
+    }
+
+    /// The swing for only the swinging client, for a success it did not predict after [#swing]
+    /// already showed it to the viewers.
+    public static void swingSelf(@NotNull Player player, @NotNull PlayerHand hand, @NotNull ItemStack usedItem) {
+        player.sendPacket(swingPacket(player, hand, usedItem));
+    }
+
+    private static @NotNull SwingAnimationPacket swingPacket(@NotNull Player player, @NotNull PlayerHand hand, @NotNull ItemStack usedItem) {
+        var animation = usedItem.get(DataComponents.INTERACT_ANIMATION, SwingAnimation.DEFAULT);
+        return new SwingAnimationPacket(player.getEntityId(), hand, animation);
     }
 
     public static boolean canFit(@NotNull Player player, @NotNull Point position) {

@@ -4,9 +4,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.arg.ParseResult;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.event.Map2PlayerBlockInteractEvent;
+import net.hollowcube.mapmaker.map.item.vanilla.VanillaItemHandler;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -258,6 +260,7 @@ public class ItemRegistry {
                     null, null,
                     null, null
             ));
+            swingAfterUse(itemHandler, player, event.getHand(), event.getItemStack());
         }
 
         event.setCancelled(true);
@@ -293,6 +296,7 @@ public class ItemRegistry {
                     event.getBlockFace(),
                     null
             ));
+            swingAfterUse(itemHandler, player, event.getHand(), itemStack);
         }
 
         event.setBlockingItemUse(true);
@@ -311,7 +315,15 @@ public class ItemRegistry {
         if (useCooldown.test(player) && player instanceof MapPlayer mp && mp.tryUseItem(itemStack)) {
             player.setTag(TRIGGER_TAG, true);
             handler.rightClicked(new ItemHandler.Click(handler, player, itemStack, event.getHand(), event.getTarget()));
+            swingAfterUse(handler, player, event.getHand(), itemStack);
         }
+    }
+
+    // Only the stand-ins for vanilla items swing, as the item they stand in for would. Mapmaker's own
+    // items are menus and tools, and a vanilla client never swung for using those.
+    private static void swingAfterUse(ItemHandler handler, Player player, PlayerHand hand, ItemStack usedItem) {
+        if (handler instanceof VanillaItemHandler)
+            PlayerUtil.swing(player, hand, usedItem, false);
     }
 
     private void handlePlaceBlock(@NotNull PlayerBlockPlaceEvent event) {

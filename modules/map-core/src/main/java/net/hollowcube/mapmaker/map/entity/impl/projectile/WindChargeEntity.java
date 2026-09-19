@@ -127,7 +127,8 @@ public class WindChargeEntity extends AbstractProjectileEntity {
                 motion,
                 isSmall ? smallParticle : bigParticle,
                 sound,
-                WeightedList.of()
+                WeightedList.of(),
+                true
             ));
         }
     }

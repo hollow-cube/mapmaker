@@ -24,6 +24,7 @@ import net.hollowcube.mapmaker.map.entity.OwnedEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
 import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
+import net.hollowcube.mapmaker.map.event.PlayerSwingEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
@@ -52,6 +53,7 @@ import net.minestom.server.instance.Weather;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockFace;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.component.SwingAnimation;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.PlayerProvider;
 import net.minestom.server.network.packet.client.common.ClientPongPacket;
@@ -231,6 +233,10 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             return; // Packet was handled by intercept function
 
         super.sendPacketToViewers(packet);
+
+        if (packet instanceof SwingAnimationPacket(int entityId, PlayerHand hand, SwingAnimation animation)
+            && entityId == getEntityId())
+            EventDispatcher.call(new PlayerSwingEvent(this, hand, animation));
     }
 
     @Override

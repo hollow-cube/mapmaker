@@ -15,6 +15,7 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.SignTextSlot;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
 import net.minestom.server.network.packet.server.play.BundlePacket;
@@ -38,7 +39,7 @@ public class SignEditor {
 
 
         // Otherwise, open the sign editor
-        event.getPlayer().sendPacket(new OpenSignEditorPacket(event.getBlockPosition(), true));
+        event.getPlayer().sendPacket(new OpenSignEditorPacket(event.getBlockPosition(), SignTextSlot.FRONT));
     }
 
     private static void handleInteraction(Map2PlayerBlockInteractEvent event) {
@@ -80,7 +81,7 @@ public class SignEditor {
 
             player.sendPacket(new BundlePacket());
             player.sendPacket(new BlockEntityDataPacket(blockPosition, 7, realBlockData.build()));
-            player.sendPacket(new OpenSignEditorPacket(blockPosition, isFront));
+            player.sendPacket(new OpenSignEditorPacket(blockPosition, isFront ? SignTextSlot.FRONT : SignTextSlot.BACK));
             player.sendPacket(new BundlePacket());
             return;
         }
@@ -99,7 +100,7 @@ public class SignEditor {
         var map = EditorMapWorld.forPlayer(event.getPlayer());
         if (map == null) return;
 
-        var tag = event.isFrontText() ? FRONT_TEXT : BACK_TEXT;
+        var tag = event.slot() == SignTextSlot.FRONT ? FRONT_TEXT : BACK_TEXT;
         var data = block.getTag(tag);
 
         var lines = event.lines().stream().map(Component::text).toArray(Component[]::new);

@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.item.handler;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -73,6 +74,7 @@ public class BlockItemHandler extends ItemHandler {
                     click.player(), click.hand(), click.face(),
                     0f, 0f, 0f
             ));
+            PlayerUtil.swing(click.player(), click.hand(), click.itemStack(), false);
         });
     }
 }

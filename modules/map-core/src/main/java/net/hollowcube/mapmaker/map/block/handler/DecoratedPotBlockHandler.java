@@ -43,14 +43,14 @@ public class DecoratedPotBlockHandler implements BlockHandler {
 
             if (face == null) return false;
 
-            var material = stack.material();
+            var sherd = stack.isAir() ? null : stack.withAmount(1);
 
             var sherds = block.getTag(SHERDS);
             sherds = switch (face) {
-                case FRONT -> new PotDecorations(sherds.back(), sherds.left(), sherds.right(), material);
-                case BACK -> new PotDecorations(material, sherds.left(), sherds.right(), sherds.front());
-                case LEFT -> new PotDecorations(sherds.back(), material, sherds.right(), sherds.front());
-                case RIGHT -> new PotDecorations(sherds.back(), sherds.left(), material, sherds.front());
+                case FRONT -> new PotDecorations(sherds.back(), sherds.left(), sherds.right(), sherd);
+                case BACK -> new PotDecorations(sherd, sherds.left(), sherds.right(), sherds.front());
+                case LEFT -> new PotDecorations(sherds.back(), sherd, sherds.right(), sherds.front());
+                case RIGHT -> new PotDecorations(sherds.back(), sherds.left(), sherd, sherds.front());
             };
 
             interaction.getInstance().setBlock(

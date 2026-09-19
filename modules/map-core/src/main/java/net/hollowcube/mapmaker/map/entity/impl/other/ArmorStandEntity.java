@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.impl.other;
 
 import net.hollowcube.common.util.OpUtils;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.impl.base.AbstractLivingEntity;
 import net.hollowcube.mapmaker.map.entity.info.MapEntityInfo;
@@ -65,6 +66,8 @@ public class ArmorStandEntity extends AbstractLivingEntity<ArmorStandMeta> {
             if (slot.isHand() && !meta.isHasArms()) return;
             setEquipment(slot, item.withAmount(1));
         }
+        // The client never predicts an armor stand swap succeeding, so it only swings if told to.
+        PlayerUtil.swing(player, hand, item, true);
     }
 
     @Override

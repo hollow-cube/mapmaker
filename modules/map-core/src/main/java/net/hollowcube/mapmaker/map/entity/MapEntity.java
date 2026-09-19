@@ -172,13 +172,13 @@ public class MapEntity<M extends EntityMeta> extends Entity implements Terraform
         var velocityPerTick = velocity.div(ServerFlag.SERVER_TICKS_PER_SECOND);
         var chunkCache = new ChunkCache(instance, currentChunk, Block.STONE);
         var result = CollisionUtils.handlePhysics(
-                chunkCache, boundingBox, position, velocityPerTick, previousPhysicsResult, false);
+                chunkCache, instance.getWorldBorder(), boundingBox, position, velocityPerTick, previousPhysicsResult, false);
         this.previousPhysicsResult = result;
 
         var finalChunk = ChunkUtils.retrieve(instance, currentChunk, result.newPosition());
         if (!ChunkUtils.isLoaded(finalChunk)) return;
 
-        var newPosition = CollisionUtils.applyWorldBorder(instance.getWorldBorder(), position, result.newPosition());
+        var newPosition = result.newPosition();
         onGround = result.isOnGround();
 
         var newVelocity = applyRestitution(chunkCache, result, velocityPerTick, newPosition);

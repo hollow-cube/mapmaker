@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.block;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.block.interaction.*;
 import net.hollowcube.mapmaker.map.item.ItemTags;
 import net.kyori.adventure.key.Key;
@@ -9,6 +10,7 @@ import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
+import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.block.Block;
@@ -72,6 +74,7 @@ public class InteractionRules {
         eventNode.addListener(PlayerBlockInteractEvent.class, InteractionRules::handleBlockInteract);
         eventNode.addListener(PlayerBlockBreakEvent.class, InteractionRules::handleBlockBreak);
         eventNode.addListener(PlayerUseItemEvent.class, InteractionRules::handleItemUse);
+        eventNode.addListener(PlayerBlockPlaceEvent.class, InteractionRules::handleBlockPlace);
     }
 
     // Handler functions
@@ -97,6 +100,7 @@ public class InteractionRules {
 
             if (rule.handleInteraction(interaction)) {
                 event.setBlockingItemUse(true);
+                PlayerUtil.swing(player, event.getHand(), itemStack, false);
                 return;
             }
 
@@ -115,6 +119,7 @@ public class InteractionRules {
 
         if (rule.handleInteraction(interaction)) {
             event.setBlockingItemUse(true);
+            PlayerUtil.swing(player, event.getHand(), itemStack, false);
         }
     }
 
@@ -122,6 +127,17 @@ public class InteractionRules {
         var block = event.getBlock();
         if ("true".equals(block.getProperty("waterlogged")) || BlockTags.PRE_WATERLOGGED_BLOCKS.contains(block.key()))
             event.setResultBlock(Block.WATER);
+    }
+
+    private static void handleBlockPlace(@NotNull PlayerBlockPlaceEvent event) {
+        // A listener after this one may still cancel the placement, and Minestom only acts on the
+        // outcome once every listener has run, so the swing waits for that outcome too.
+        var player = event.getPlayer();
+        var hand = event.getHand();
+        var usedItem = player.getItemInHand(hand);
+        player.scheduler().scheduleEndOfTick(() -> {
+            if (!event.isCancelled()) PlayerUtil.swing(player, hand, usedItem, false);
+        });
     }
 
     private static void handleItemUse(@NotNull PlayerUseItemEvent event) {
@@ -142,6 +158,7 @@ public class InteractionRules {
 
         if (airRule.handleAirInteraction(interaction)) {
             event.setCancelled(true);
+            PlayerUtil.swing(player, event.getHand(), itemStack, false);
         }
     }
 

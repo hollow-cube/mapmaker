@@ -3,7 +3,7 @@ package net.hollowcube.mapmaker.gui.totp;
 import net.hollowcube.mapmaker.panels.AbstractImagePanel;
 import net.hollowcube.mapmaker.panels.InventoryHost;
 import net.hollowcube.mapmaker.panels.Panel;
-import net.minestom.server.map.Framebuffer;
+import net.hollowcube.mapmaker.util.ImageBuffer;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.image.BufferedImage;
@@ -12,7 +12,7 @@ import java.util.BitSet;
 
 public class QrCodeView extends AbstractImagePanel {
 
-    private static final int SIZE = Framebuffer.WIDTH;
+    private static final int SIZE = ImageBuffer.SIZE;
 
     private final BufferedImage qrCode;
     private final Panel toOpen;

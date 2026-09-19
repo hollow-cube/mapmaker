@@ -63,7 +63,9 @@ public class ScaffoldingInteractionRule implements BlockInteractionRule {
                     var player = interaction.player();
                     player.playSound(Sound.sound(SoundEvent.BLOCK_SCAFFOLDING_PLACE, Sound.Source.BLOCK, 1f, 1f),
                             blockPosition.x(), blockPosition.y(), blockPosition.z());
-                    PlayerUtil.swing(player, interaction.hand(), true);
+                    // InteractionRules swings for the viewers, but this far out the client predicted
+                    // no placement, so it never swung for itself.
+                    PlayerUtil.swingSelf(player, interaction.hand(), interaction.item());
                 }
 
                 break;

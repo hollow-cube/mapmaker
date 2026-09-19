@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.entity.impl.other;
 
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
@@ -78,20 +79,17 @@ public class ItemFrameEntity extends MapEntity<ItemFrameMeta> {
                                   @NotNull Point interactPosition) {
         ItemStack heldItem = player.getItemInMainHand();
         if (heldItem.isAir()) {
+            // Don't rotate if there's no item
+            if (getEntityMeta().getItem().isAir()) return;
             rotate();
         } else {
             addItem(heldItem);
         }
+        PlayerUtil.swing(player, hand, heldItem, false);
     }
 
     private void rotate() {
         var meta = getEntityMeta();
-
-        var existingItem = meta.getItem();
-        if (existingItem.isAir()) {
-            // Don't rotate if there's no item
-            return;
-        }
 
         var currentRotation = meta.getRotation();
         var newRotation = currentRotation.rotateClockwise();

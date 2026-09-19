@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.block;
 
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -136,6 +137,7 @@ public class ClientBlockPlacementListener {
         if (usedItem.amount() == 99) // Force an update to keep the stack at 99
             player.getInventory().sendSlotRefresh(player.getHeldSlot(), newUsedItem);
         player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
+        PlayerUtil.swing(player, hand, usedItem, false);
         world.initTimerFromAction(player);
 
         return true; // Done :)

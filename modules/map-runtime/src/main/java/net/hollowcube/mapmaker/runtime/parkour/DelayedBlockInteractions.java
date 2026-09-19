@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.runtime.parkour;
 import it.unimi.dsi.fastutil.longs.Long2BooleanArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2BooleanMap;
 import net.hollowcube.common.util.BlockUtil;
+import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
@@ -73,6 +74,7 @@ public class DelayedBlockInteractions {
 
         event.setCancelled(true);
         event.setBlockingItemUse(true);
+        PlayerUtil.swing(player, event.getHand(), player.getItemInHand(event.getHand()), false);
     }
 
     private static Block handleFenceGate(boolean state, Block block, Player player) {
