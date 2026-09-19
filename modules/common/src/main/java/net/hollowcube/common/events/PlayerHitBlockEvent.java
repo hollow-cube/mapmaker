@@ -65,6 +65,11 @@ public final class PlayerHitBlockEvent implements PlayerInstanceEvent, BlockEven
 
     @ApiStatus.Internal
     public static void post(ClientPlayerActionPacket packet, Player player) {
+        if (packet.status() == ClientPlayerActionPacket.Status.CHANGED_DIGGING_DIRECTION) {
+            PlayerActionListener.playerActionListener(packet, player);
+            return;
+        }
+
         var block = player.getInstance().getBlock(packet.blockPosition());
         var event = new PlayerHitBlockEvent(player, block, packet.blockPosition().asBlockVec(), packet.blockFace());
         EventDispatcher.call(event);

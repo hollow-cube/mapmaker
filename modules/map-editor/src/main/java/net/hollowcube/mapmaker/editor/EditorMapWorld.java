@@ -129,6 +129,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         eventNode(EditorState.Building.class)
             .addListener(PlayerTickEvent.class, this::handlePlayerTick)
+            .addListener(PlayerBlockPlaceEvent.class, this::handleBlockPlace)
             .addListener(MapPlayerTeleportingEvent.class, this::handlePlayerSavedTeleport)
             .addListener(PlayerEntityInteractEvent.class, this::handleSpawnEntityInteraction)
             .addListener(PlayerPickBlockEvent.class, PickBlock::handlePickBlock)
@@ -462,6 +463,12 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
     }
 
     // endregion
+
+    private void handleBlockPlace(PlayerBlockPlaceEvent event) {
+        // Minestom only border-checks the clicked block, so placing against the edge would write outside the map.
+        if (!instance().getWorldBorder().inBounds(event.getBlockPosition()))
+            event.setCancelled(true);
+    }
 
     private void handleSpawnEntityInteraction(PlayerEntityInteractEvent event) {
         if (!(event.getTarget() instanceof SpawnMarkerEntity entity))
