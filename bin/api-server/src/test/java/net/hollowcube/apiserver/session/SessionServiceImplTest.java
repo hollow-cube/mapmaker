@@ -98,7 +98,10 @@ class SessionServiceImplTest {
                 ('isolate-b', 'map-isolate', 0, '', 0)"""
         );
 
-        assertEquals(new GameServer("isolate-a", "10.0.0.4", 777), sessions.findServer("isolate-a"));
+        assertEquals(
+            new GameServer("isolate-a", "10.0.0.4", 777),
+            sessions.findServer("isolate-a")
+        );
         assertNull(sessions.findServer("isolate-b"));
         assertNull(sessions.findServer("isolate-c"));
     }

@@ -367,7 +367,7 @@ public final class HttpS3Client implements S3Client {
         boolean repeatable
     ) {
         var backoff = FIRST_BACKOFF;
-        for (var attempt = 1; ; attempt++) {
+        for (var attempt = 1;; attempt++) {
             var last = !repeatable || attempt == MAX_ATTEMPTS;
             var span = tracer.spanBuilder("s3/" + operation)
                 .setSpanKind(SpanKind.CLIENT)
