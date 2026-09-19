@@ -36,6 +36,7 @@ import com.velocitypowered.api.util.GameProfile;
 import io.prometheus.client.CollectorRegistry;
 import net.hollowcube.anticheat.capture.CaptureClock;
 import net.hollowcube.ipc.session.SessionClient;
+import net.hollowcube.ipc.session.Transfer;
 import net.hollowcube.proxy.anticheat.AnticheatConfig;
 import net.hollowcube.proxy.anticheat.AnticheatConnections;
 import net.hollowcube.proxy.anticheat.TraceShipper;
@@ -73,7 +74,7 @@ import java.util.List;
     dependencies = @Dependency(id = "viaversion", optional = true))
 public class ProxyPlugin {
     private static final ChannelIdentifier PROTOCOL_VERSION_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "pvn");
-    private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
+    private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.from(Transfer.CHANNEL);
     private static final ChannelIdentifier RESOURCE_PACK_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "resource_pack");
     private static final ChannelIdentifier DISCONNECT_MESSAGE_ID = MinecraftChannelIdentifier.create("velocity", "disconnect");
     private static final ChannelIdentifier ANTICHEAT_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "anticheat");

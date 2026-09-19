@@ -1,11 +1,12 @@
 package net.hollowcube.proxy;
 
-import com.google.gson.JsonParser;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.session.GameServer;
 import net.hollowcube.ipc.session.SessionService;
+import net.hollowcube.ipc.session.Transfer;
 import net.hollowcube.ipc.util.IpcException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -47,18 +48,12 @@ final class Backends {
     /// @param server null from a backend on a build that only sends the address
     record Target(@Nullable String server, String address, int protocolVersion) {
 
-        /// `mapmaker:transfer` is json since backends learned the target's protocol. A backend
-        /// still on an older build sends the bare address.
+        /// A backend on a build from before [Transfer] sends the bare address.
         static Target parse(byte[] data) {
             var text = new String(data, StandardCharsets.UTF_8);
             if (!text.startsWith("{")) return new Target(null, text, 0);
-            var json = JsonParser.parseString(text).getAsJsonObject();
-            var server = json.get("server");
-            var protocolVersion = json.get("protocolVersion");
-            return new Target(
-                server == null || server.isJsonNull() ? null : server.getAsString(),
-                json.get("address").getAsString(),
-                protocolVersion == null || protocolVersion.isJsonNull() ? 0 : protocolVersion.getAsInt());
+            var transfer = Wire.gson().fromJson(text, Transfer.class);
+            return new Target(transfer.server(), transfer.address(), transfer.protocolVersion());
         }
     }
 

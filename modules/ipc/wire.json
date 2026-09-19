@@ -3039,6 +3039,26 @@
         }
       ]
     },
+    "net.hollowcube.ipc.session.Transfer": {
+      "kind": "record",
+      "used": [
+        "message"
+      ],
+      "fields": [
+        {
+          "name": "server",
+          "type": "String"
+        },
+        {
+          "name": "address",
+          "type": "String"
+        },
+        {
+          "name": "protocolVersion",
+          "type": "int"
+        }
+      ]
+    },
     "net.hollowcube.ipc.util.Position": {
       "kind": "record",
       "used": [
@@ -3071,6 +3091,7 @@
   },
   "payloads": {
     "chat.message": "net.hollowcube.ipc.chat.ChatMessage",
+    "mapmaker:transfer": "net.hollowcube.ipc.session.Transfer",
     "notification.\u003e": "net.hollowcube.ipc.notification.NotificationUpdate"
   }
 }

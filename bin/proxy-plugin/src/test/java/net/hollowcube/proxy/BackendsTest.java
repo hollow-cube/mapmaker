@@ -4,8 +4,10 @@ import com.velocitypowered.api.plugin.PluginManager;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.proxy.server.ServerInfo;
+import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.session.GameServer;
 import net.hollowcube.ipc.session.SessionService;
+import net.hollowcube.ipc.session.Transfer;
 import net.hollowcube.ipc.util.IpcException;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -59,8 +61,8 @@ class BackendsTest {
     }
 
     @Test
-    void target_readsTheJsonABackendSends() {
-        var data = "{\"server\":\"hub-a\",\"address\":\"10.42.0.7\",\"protocolVersion\":777}".getBytes(StandardCharsets.UTF_8);
+    void target_readsTheTransferABackendSends() {
+        var data = Wire.gson().toJson(new Transfer("hub-a", "10.42.0.7", 777), Transfer.class).getBytes(StandardCharsets.UTF_8);
         assertEquals(new Backends.Target("hub-a", "10.42.0.7", 777), Backends.Target.parse(data));
     }
 

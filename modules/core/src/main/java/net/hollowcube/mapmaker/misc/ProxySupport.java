@@ -2,7 +2,9 @@ package net.hollowcube.mapmaker.misc;
 
 import com.google.gson.JsonObject;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.session.GameServer;
+import net.hollowcube.ipc.session.Transfer;
 import net.hollowcube.mapmaker.player.JoinMapResponse;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.minestom.server.entity.Player;
@@ -15,15 +17,16 @@ import java.util.Map;
 public class ProxySupport {
 
     public static void transfer(@NotNull Player player, @NotNull JoinMapResponse server) {
-        transfer(player, server.server(), server.serverClusterIp(), server.protocolVersion());
+        transfer(player, new Transfer(server.server(), server.serverClusterIp(), server.protocolVersion()));
     }
 
     public static void transfer(@NotNull Player player, @NotNull GameServer server) {
-        transfer(player, server.id(), server.clusterIp(), server.protocolVersion());
+        transfer(player, new Transfer(server.id(), server.clusterIp(), server.protocolVersion()));
     }
 
-    private static void transfer(@NotNull Player player, @NotNull String server, @NotNull String address, int protocolVersion) {
-        player.sendPluginMessage("mapmaker:transfer", address.getBytes(StandardCharsets.UTF_8));
+    private static void transfer(@NotNull Player player, @NotNull Transfer transfer) {
+        var message = Wire.gson().toJson(transfer, Transfer.class);
+        player.sendPluginMessage(Transfer.CHANNEL, message.getBytes(StandardCharsets.UTF_8));
     }
 
     public static <T> void transferWithData(@NotNull Player player, @NotNull GameServer server, @NotNull T metadata) {
