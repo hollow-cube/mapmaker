@@ -13,10 +13,12 @@ public final class ReplayHeader {
 
     /// Any incompatible change to the header layout, or to anything laid out after it, bumps this.
     ///
-    /// There is no back-compat: a replay written at any other version is refused outright, because
-    /// reading an old layout as if it were this one silently misparses every field after the point
-    /// the two diverge.
-    public static final short VERSION_LATEST = 4;
+    public static final short VERSION_LATEST = 5;
+
+    /// Wrote block states and entity types by protocol ID. Every format 4 replay was recorded at
+    /// [#LEGACY_IDS_DATA_VERSION].
+    public static final short VERSION_LEGACY_IDS = 4;
+    public static final int LEGACY_IDS_DATA_VERSION = 4903;
 
     /// The world version is opaque to the format, so the cap is just a sanity bound: whatever is
     /// large enough for the identity schemes a host might want. 32 bytes fits a SHA-256 digest (and
@@ -37,6 +39,10 @@ public final class ReplayHeader {
             | (preamble[2] & 0xFF) << 8 | preamble[3] & 0xFF;
         Check.argCondition(magic != MAGIC, "corrupt header");
         return (short) ((preamble[4] & 0xFF) << 8 | preamble[5] & 0xFF);
+    }
+
+    public static boolean readable(int version) {
+        return version == VERSION_LATEST || version == VERSION_LEGACY_IDS;
     }
 
     public static final int RECORD_COMPRESSION_LEVEL = 3;
@@ -75,7 +81,7 @@ public final class ReplayHeader {
         Check.argCondition(magic != MAGIC, "corrupt header");
 
         this.version = buffer.read(NetworkBuffer.SHORT);
-        Check.argCondition(version != VERSION_LATEST,
+        Check.argCondition(!readable(version),
             "unsupported replay version: {0}, expected {1}", version, VERSION_LATEST);
 
         buffer.read(NetworkBuffer.SHORT); // flags
@@ -98,6 +104,7 @@ public final class ReplayHeader {
         buffer.advanceRead(HEADER_LENGTH - (buffer.readIndex() - startIndex));
     }
 
+    /// The version this header was read at; it is always written at [#VERSION_LATEST].
     public short version() {
         return version;
     }
@@ -128,10 +135,7 @@ public final class ReplayHeader {
         return dictionary;
     }
 
-    /// The Minecraft data version this replay was recorded against.
-    ///
-    /// Entity type IDs and item NBT are only meaningful against the game data they were written
-    /// with, so anything reading a replay from an older version has to fix it up first.
+    /// The data version the replay was started at. Each chunk carries its own.
     public int dataVersion() {
         return dataVersion;
     }
@@ -167,7 +171,7 @@ public final class ReplayHeader {
         long startIndex = buffer.writeIndex();
 
         buffer.write(NetworkBuffer.INT, MAGIC);
-        buffer.write(NetworkBuffer.SHORT, version);
+        buffer.write(NetworkBuffer.SHORT, VERSION_LATEST);
         buffer.write(NetworkBuffer.SHORT, FLAGS_NONE);
         buffer.write(NetworkBuffer.UUID, worldId);
         buffer.write(NetworkBuffer.BYTE, (byte) worldVersion.length);

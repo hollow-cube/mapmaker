@@ -112,3 +112,14 @@ where replay_id = $replayId;
 delete
 from replay_idempotency
 where created_at < $before;
+
+-- name: listLegacyFormatReplays :many
+-- Format 4 preambles (bytes 5-6), finished or idle since $idleBefore. Uses replays_legacy_format_idx.
+select id
+from replays
+where substring(current_preamble from 5 for 2) = '\x0004'::bytea
+  and (state = 'finished' or updated_at < $idleBefore)
+  and id > $after
+  and not exists (select 1 from jobs where jobs.job = $job and jobs.instance = replays.id)
+order by id
+limit $limit;

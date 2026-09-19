@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.logback)
 
     testImplementation(project(":tools:sql-gen:testing"))
+    // The transcode tests build format 4 replays by hand, which nothing in main can write any more.
+    testImplementation(libs.zstd)
     testImplementation(libs.junit.api)
     testImplementation(libs.junit.engine)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")

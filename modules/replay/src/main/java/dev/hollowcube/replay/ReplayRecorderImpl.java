@@ -344,7 +344,7 @@ final class ReplayRecorderImpl implements ReplayRecorder {
 
             writeIndex = buffer.writeIndex();
             for (var chunkIndex : this.index)
-                buffer.write(ChunkIndex.NETWORK_TYPE, chunkIndex);
+                chunkIndex.write(buffer);
             var indexLength = buffer.writeIndex() - writeIndex;
 
             this.header.update((int) metadataLength, (int) indexLength, tick, this.index.size());

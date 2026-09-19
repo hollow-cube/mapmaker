@@ -1,10 +1,10 @@
 package dev.hollowcube.replay.event;
 
+import dev.hollowcube.replay.data.ChunkIndex;
 import net.minestom.server.network.NetworkBuffer;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public final class ReplayEventRegistry {
 
@@ -33,23 +33,18 @@ public final class ReplayEventRegistry {
         //noinspection unchecked
         var entry = (Entry<T>) typeLookup.get(event.getClass());
         buffer.write(NetworkBuffer.VAR_INT, entry.id());
-        buffer.write(entry.networkType(), event);
+        entry.codec().write(buffer, event);
     }
 
-    public ReplayEvent read(NetworkBuffer buffer) {
+    public ReplayEvent read(NetworkBuffer buffer, ChunkIndex chunk) {
+        return entry(buffer).codec().read(buffer, chunk);
+    }
+
+    private Entry<?> entry(NetworkBuffer buffer) {
         int id = buffer.read(NetworkBuffer.VAR_INT);
         if (id < 0 || id >= idLookup.length)
             throw new IllegalArgumentException("invalid event id: " + id);
-        var entry = idLookup[id];
-        return buffer.read(entry.networkType());
-    }
-
-    /// Advances over an event; a custom skipper can avoid resolving host game state.
-    public void skip(NetworkBuffer buffer) {
-        int id = buffer.read(NetworkBuffer.VAR_INT);
-        if (id < 0 || id >= idLookup.length)
-            throw new IllegalArgumentException("invalid event id: " + id);
-        idLookup[id].skip().accept(buffer);
+        return idLookup[id];
     }
 
     public static final class Builder {
@@ -58,13 +53,14 @@ public final class ReplayEventRegistry {
         private Builder() {
         }
 
+        /// For an event that carries no game data and whose type reads the bytes of every readable
+        /// format version by itself.
         public <T extends ReplayEvent> Builder register(Class<T> eventClass, NetworkBuffer.Type<T> networkType) {
-            return register(eventClass, networkType, networkType::read);
+            return register(eventClass, ReplayEventCodec.of(networkType));
         }
 
-        public <T extends ReplayEvent> Builder register(Class<T> eventClass, NetworkBuffer.Type<T> networkType,
-                                                        Consumer<NetworkBuffer> skip) {
-            events.add(new Entry<>(eventClass, events.size(), networkType, skip));
+        public <T extends ReplayEvent> Builder register(Class<T> eventClass, ReplayEventCodec<T> codec) {
+            events.add(new Entry<>(eventClass, events.size(), codec));
             return this;
         }
 
@@ -73,7 +69,6 @@ public final class ReplayEventRegistry {
         }
     }
 
-    record Entry<T extends ReplayEvent>(Class<T> eventClass, int id, NetworkBuffer.Type<T> networkType,
-                                        Consumer<NetworkBuffer> skip) {}
+    record Entry<T extends ReplayEvent>(Class<T> eventClass, int id, ReplayEventCodec<T> codec) {}
 
 }

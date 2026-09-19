@@ -1,11 +1,10 @@
 package dev.hollowcube.replay.event;
 
+import dev.hollowcube.replay.data.ChunkIndex;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.network.NetworkBufferTemplate;
 import net.minestom.server.utils.inventory.PlayerInventoryUtils;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,14 +20,29 @@ import java.util.Map;
 public record SetItemEvent(int entityId, Map<Integer, ItemStack> items) implements ReplayEvent {
     private static final NetworkBuffer.Type<Map<Integer, CompoundBinaryTag>> RAW_ITEMS_TYPE = NetworkBuffer.VAR_INT
         .mapValue(NetworkBuffer.NBT_COMPOUND);
-    private static final NetworkBuffer.Type<Map<Integer, ItemStack>> ITEMS_TYPE = RAW_ITEMS_TYPE
-        .transform(SetItemEvent::decodeItems, SetItemEvent::encodeItems);
 
-    public static final NetworkBuffer.Type<SetItemEvent> NETWORK_TYPE = NetworkBufferTemplate.template(
-        NetworkBuffer.VAR_INT, SetItemEvent::entityId,
-        ITEMS_TYPE, SetItemEvent::items,
-        SetItemEvent::new
-    );
+    public static final ReplayEventCodec<SetItemEvent> CODEC = new ReplayEventCodec<>() {
+        @Override
+        public void write(NetworkBuffer buffer, SetItemEvent event) {
+            var encoded = new LinkedHashMap<Integer, CompoundBinaryTag>(event.items().size());
+            for (var entry : event.items().entrySet())
+                encoded.put(entry.getKey(), entry.getValue().toItemNBT(ReplayGameData.registries()));
+            buffer.write(NetworkBuffer.VAR_INT, event.entityId());
+            buffer.write(RAW_ITEMS_TYPE, encoded);
+        }
+
+        @Override
+        public SetItemEvent read(NetworkBuffer buffer, ChunkIndex chunk) {
+            var entityId = buffer.read(NetworkBuffer.VAR_INT);
+            var items = buffer.read(RAW_ITEMS_TYPE);
+            var decoded = new LinkedHashMap<Integer, ItemStack>(items.size());
+            for (var entry : items.entrySet()) {
+                var item = ReplayGameData.upgradeItemStack(entry.getValue(), chunk);
+                decoded.put(entry.getKey(), ItemStack.fromItemNBT(item, ReplayGameData.registries()));
+            }
+            return new SetItemEvent(entityId, decoded);
+        }
+    };
 
     /// The inventory slot an equipment slot occupies, or -1 for equipment no player inventory has a
     /// slot for: the main hand, which the held slot already names, and the mob-only slots.
@@ -51,25 +65,5 @@ public record SetItemEvent(int entityId, Map<Integer, ItemStack> items) implemen
             case PlayerInventoryUtils.BOOTS_SLOT -> EquipmentSlot.BOOTS;
             default -> null;
         };
-    }
-
-    // Compaction needs the NBT boundary, not item decoding against the worker's game registries.
-    static void skip(NetworkBuffer buffer) {
-        buffer.read(NetworkBuffer.VAR_INT);
-        buffer.read(RAW_ITEMS_TYPE);
-    }
-
-    private static Map<Integer, ItemStack> decodeItems(Map<Integer, CompoundBinaryTag> items) {
-        var decoded = new LinkedHashMap<Integer, ItemStack>(items.size());
-        for (var entry : items.entrySet())
-            decoded.put(entry.getKey(), ItemStack.fromItemNBT(entry.getValue(), MinecraftServer.process()));
-        return decoded;
-    }
-
-    private static Map<Integer, CompoundBinaryTag> encodeItems(Map<Integer, ItemStack> items) {
-        var encoded = new LinkedHashMap<Integer, CompoundBinaryTag>(items.size());
-        for (var entry : items.entrySet())
-            encoded.put(entry.getKey(), entry.getValue().toItemNBT(MinecraftServer.process()));
-        return encoded;
     }
 }

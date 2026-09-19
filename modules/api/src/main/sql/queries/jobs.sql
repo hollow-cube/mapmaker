@@ -142,3 +142,10 @@ returning jobs.*;
 select jobs.*
 from jobs
 order by job, instance;
+
+-- name: countWaitingJobs :one
+-- Rows of $job not yet done, running or not, leaving out the parked.
+select count(*)::int as waiting
+from jobs
+where job = $job
+  and parked_at is null;

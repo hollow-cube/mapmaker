@@ -8,10 +8,13 @@ import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiworker.job.Worker;
+import net.hollowcube.apiworker.jobs.BackfillReplayTranscodeRunner;
 import net.hollowcube.apiworker.jobs.CompactReplayRunner;
 import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.apiworker.jobs.ReconcileReplaysRunner;
+import net.hollowcube.apiworker.jobs.SampleReplayTranscodeRunner;
+import net.hollowcube.apiworker.jobs.TranscodeReplayRunner;
 import net.hollowcube.ipc.replay.ReplayClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -105,6 +108,27 @@ public final class Main {
         );
         // SWEEP_REPLAY_SOURCES is deliberately not bound: nothing has been compacted to sweep yet,
         // and binding it is the switch. An unbound spec creates no row.
+        var recordingIdle = Duration.parse(
+            secrets.get("replay.transcode.recording_idle", "REPLAY_TRANSCODE_RECORDING_IDLE", "P7D")
+        );
+        worker.handle(JobSpec.TRANSCODE_REPLAY, new TranscodeReplayRunner(replays, recordingIdle));
+        worker.handle(
+            JobSpec.SAMPLE_REPLAY_TRANSCODE,
+            new SampleReplayTranscodeRunner(db, replays, recordingIdle)
+        );
+        if (Boolean.parseBoolean(
+            secrets.get("replay.transcode.backfill", "REPLAY_TRANSCODE_BACKFILL", "false")
+        ))
+            worker.handle(
+                JobSpec.BACKFILL_REPLAY_TRANSCODE,
+                new BackfillReplayTranscodeRunner(
+                    db,
+                    Integer.parseInt(
+                        secrets.get("replay.transcode.batch", "REPLAY_TRANSCODE_BATCH", "200")
+                    ),
+                    recordingIdle
+                )
+            );
 
         Runtime.getRuntime().addShutdownHook(
             new Thread(

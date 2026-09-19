@@ -3,6 +3,7 @@ package net.hollowcube.apiserver.db;
 
 import java.time.Instant;
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * The queries in `jobs.sql`.
@@ -32,6 +33,9 @@ public interface JobsQueries {
     List<Jobs> reviveDeadJobs(int deadSeconds);
 
     List<Jobs> listJobs();
+
+    @Nullable
+    Integer countWaitingJobs(String job);
 
     /**
      * The arguments of `failJob`.
@@ -105,6 +109,12 @@ public interface JobsQueries {
         @Override
         public List<Jobs> listJobs() {
             throw new UnsupportedOperationException("JobsQueries.listJobs is not stubbed on this fake");
+        }
+
+        @Nullable
+        @Override
+        public Integer countWaitingJobs(String job) {
+            throw new UnsupportedOperationException("JobsQueries.countWaitingJobs is not stubbed on this fake");
         }
     }
 }

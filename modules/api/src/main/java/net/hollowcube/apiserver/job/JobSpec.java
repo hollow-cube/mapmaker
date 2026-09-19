@@ -52,6 +52,23 @@ public record JobSpec<D>(
         "17 * * * *"
     );
 
+    /// Rewrites one replay at this build's format and data version.
+    public static final JobSpec<TranscodeReplay> TRANSCODE_REPLAY = queued(
+        "transcode-replay",
+        TranscodeReplay.class,
+        TranscodeReplay::replayId
+    );
+    public static final JobSpec<Void> BACKFILL_REPLAY_TRANSCODE = timed(
+        "backfill-replay-transcode",
+        "* * * * *"
+    );
+    /// Dry run of [#TRANSCODE_REPLAY] over a sample, logging the size change.
+    public static final JobSpec<SampleReplayTranscode> SAMPLE_REPLAY_TRANSCODE = queued(
+        "sample-replay-transcode",
+        SampleReplayTranscode.class,
+        ignored -> "sample"
+    ).attempts(1);
+
     public static JobSpec<Void> timed(String name, String cron) {
         return new JobSpec<>(
             name,

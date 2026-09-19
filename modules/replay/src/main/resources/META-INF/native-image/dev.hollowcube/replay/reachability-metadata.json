@@ -1,0 +1,7 @@
+{
+  "resources": [
+    {
+      "glob": "dev/hollowcube/replay/event/legacy-ids-*"
+    }
+  ]
+}

@@ -133,6 +133,16 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         from replay_idempotency
         where created_at < ?""";
 
+    private static final String LIST_LEGACY_FORMAT_REPLAYS = "-- Format 4 preambles (bytes 5-6), finished or idle since $idleBefore. Uses replays_legacy_format_idx.\n"
+            + "select id\n"
+            + "from replays\n"
+            + "where substring(current_preamble from 5 for 2) = '\\x0004'::bytea\n"
+            + "  and (state = 'finished' or updated_at < ?)\n"
+            + "  and id > ?\n"
+            + "  and not exists (select 1 from jobs where jobs.job = ? and jobs.instance = replays.id)\n"
+            + "order by id\n"
+            + "limit ?";
+
     private final ConnectionSource source;
 
     ReplaysQueriesImpl(ConnectionSource source) {
@@ -405,6 +415,29 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
             try (PreparedStatement ps = conn.prepareStatement(DELETE_EXPIRED_REPLAY_IDEMPOTENCY)) {
                 Jdbc.setInstant(ps, 1, before);
                 return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<String> listLegacyFormatReplays(Instant idleBefore, String after, String job,
+            long limit) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_LEGACY_FORMAT_REPLAYS)) {
+                Jdbc.setInstant(ps, 1, idleBefore);
+                ps.setString(2, after);
+                ps.setString(3, job);
+                ps.setLong(4, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<String> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(rs.getString(1));
+                    return rows;
+                }
             } finally {
                 source.release(conn);
             }

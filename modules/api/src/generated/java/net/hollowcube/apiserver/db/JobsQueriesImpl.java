@@ -11,6 +11,7 @@ import java.util.List;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
 import net.hollowcube.sqlgen.runtime.Jdbc;
 import net.hollowcube.sqlgen.runtime.Sneaky;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Runs JobsQueries against a connection borrowed per statement.
@@ -161,6 +162,13 @@ final class JobsQueriesImpl implements JobsQueries {
         select jobs.*
         from jobs
         order by job, instance""";
+
+    private static final String COUNT_WAITING_JOBS = """
+        -- Rows of $job not yet done, running or not, leaving out the parked.
+        select count(*)::int as waiting
+        from jobs
+        where job = ?
+          and parked_at is null""";
 
     private final ConnectionSource source;
 
@@ -380,6 +388,25 @@ final class JobsQueriesImpl implements JobsQueries {
                     List<Jobs> rows = new ArrayList<>();
                     while (rs.next()) rows.add(Jobs.read(rs, 1));
                     return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Integer countWaitingJobs(String job) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(COUNT_WAITING_JOBS)) {
+                ps.setString(1, job);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next()) throw new SQLException("countWaitingJobs returned no row");
+                    return rs.getObject(1, Integer.class);
                 }
             } finally {
                 source.release(conn);

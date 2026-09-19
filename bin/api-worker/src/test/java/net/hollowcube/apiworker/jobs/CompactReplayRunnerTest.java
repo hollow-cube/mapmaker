@@ -19,6 +19,7 @@ import net.hollowcube.ipc.replay.ReplayRepresentation;
 import net.hollowcube.ipc.replay.ReplayService;
 import net.hollowcube.ipc.replay.ReplayState;
 import net.hollowcube.ipc.util.IpcException;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.Nullable;

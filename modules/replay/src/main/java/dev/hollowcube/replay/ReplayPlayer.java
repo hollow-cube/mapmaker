@@ -128,10 +128,11 @@ public final class ReplayPlayer implements AutoCloseable {
     }
 
     private void playTick(NetworkBuffer buffer) {
+        var source = reader.index().get(chunkIndex);
         buffer.read(NetworkBuffer.VAR_INT); // tick index, implied by our position in the chunk
         var eventCount = buffer.read(NetworkBuffer.SHORT);
         for (var i = 0; i < eventCount; i++)
-            handler.accept(registry.read(buffer));
+            handler.accept(registry.read(buffer, source));
     }
 
     private @Nullable NetworkBuffer chunkContaining(int tick) {

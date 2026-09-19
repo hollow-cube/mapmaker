@@ -61,11 +61,8 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
             preamble = blob.readAllBytes();
         }
 
-        // Nothing can read an older format, and the reconciler keeps offering these because they
-        // stay finished and segmented — so returning rather than throwing costs one attempt a tick
-        // instead of five and a parked row. They compact when something can convert them.
         var version = ReplayHeader.versionOf(preamble);
-        if (version != ReplayHeader.VERSION_LATEST) {
+        if (!ReplayHeader.readable(version)) {
             logger.info(
                 "replay {} is format version {}, which this build cannot read; leaving it segmented",
                 id,
@@ -75,12 +72,20 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
         }
 
         var start = System.nanoTime();
-        var compacted = ReplayCompactor.compact(
-            ReplayPreamble.read(preamble),
-            index -> segment(id, index),
-            null,
-            ReplayManager.REGISTRY
-        );
+        // Compacted as is, older chunks would get a current header the backfill scan cannot see past.
+        var compacted = StoredReplay.needsRewrite(preamble)
+            ? ReplayCompactor.transcode(
+                ReplayPreamble.read(preamble),
+                index -> segment(id, index),
+                null,
+                ReplayManager.REGISTRY
+            )
+            : ReplayCompactor.compact(
+                ReplayPreamble.read(preamble),
+                index -> segment(id, index),
+                null,
+                ReplayManager.REGISTRY
+            );
 
         try {
             replays.publishCompacted(
@@ -110,12 +115,16 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
     /// means a retry after a lost response publishes a second object and orphans the first, which is
     /// what `ApiReplayCompactor` did.
     static String compactionKey(String replayId, long sourceRevision) {
-        var key = "compact:" + replayId + ":" + sourceRevision;
+        return idempotencyKey("compact", replayId, sourceRevision);
+    }
+
+    static String idempotencyKey(String kind, String replayId, long sourceRevision) {
+        var key = kind + ":" + replayId + ":" + sourceRevision;
         // A replay id may be 512 characters on its own, which is the whole column. Hashing keeps it
         // deterministic, which is all the key has to be.
         return key.length() <= MAX_KEY_LENGTH
             ? key
-            : "compact:" + Digest.hex(Digest.sha256(replayId + ":" + sourceRevision));
+            : kind + ":" + Digest.hex(Digest.sha256(replayId + ":" + sourceRevision));
     }
 
     private byte[] segment(String id, int index) {

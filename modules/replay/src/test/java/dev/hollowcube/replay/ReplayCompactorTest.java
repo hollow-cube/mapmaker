@@ -55,9 +55,11 @@ final class ReplayCompactorTest {
     }
 
     @Test
-    void oversizedItemChunksDoNotResolveItemsAgainstTheWorkersRegistries() {
-        var item = CompoundBinaryTag.builder().putString("id", "old:unknown_item")
-            .putString("payload", "x".repeat(4096)).build();
+    void oversizedItemChunksAreSplitIntoFrames() {
+        var item = CompoundBinaryTag.builder().putString("id", "minecraft:written_book")
+            .put("components", CompoundBinaryTag.builder()
+                .putString("minecraft:custom_name", "x".repeat(4096)).build())
+            .build();
         var payload = NetworkBuffer.makeArray(buffer -> {
             for (var tick = 0; tick < 100; tick++) {
                 buffer.write(NetworkBuffer.VAR_INT, tick);
@@ -106,7 +108,7 @@ final class ReplayCompactorTest {
 
         var metadata = NetworkBuffer.makeArray(NetworkBuffer.NBT_COMPOUND, CompoundBinaryTag.empty());
         var indexLength = NetworkBuffer.makeArray(buffer -> {
-            for (var chunk : index) buffer.write(ChunkIndex.NETWORK_TYPE, chunk);
+            for (var chunk : index) chunk.write(buffer);
         }).length;
         header.update(metadata.length, indexLength, ticks, index.size());
 

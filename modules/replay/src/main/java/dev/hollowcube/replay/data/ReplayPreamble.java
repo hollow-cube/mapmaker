@@ -21,8 +21,6 @@ public record ReplayPreamble(
     public ReplayPreamble {
         index = List.copyOf(index);
 
-        // The version needs no check here: a header is either built at the latest version or read
-        // by a decoder that refuses anything else.
         if (header.dictionary() != ReplayDictionary.VERSION_LATEST)
             throw new IllegalArgumentException("unsupported replay dictionary: " + header.dictionary()
                 + ", expected " + ReplayDictionary.VERSION_LATEST);
@@ -40,6 +38,9 @@ public record ReplayPreamble(
             if (chunk.startTick() != expectedTick)
                 throw new IllegalArgumentException("replay chunks are not tick-contiguous: chunk " + i
                     + " starts at tick " + chunk.startTick() + ", expected " + expectedTick);
+            if (!ReplayHeader.readable(chunk.formatVersion()))
+                throw new IllegalArgumentException("replay chunk " + i + " has an unsupported format version: "
+                    + chunk.formatVersion());
             if (chunk.tickCount() <= 0)
                 throw new IllegalArgumentException("replay chunk " + i + " has no ticks: " + chunk.tickCount());
             if (chunk.compressedLength() <= 0 || chunk.uncompressedLength() <= 0)
@@ -53,7 +54,8 @@ public record ReplayPreamble(
             long segmentOffset = segmentOffset(chunk);
             if (segmentIndex < 0)
                 throw new IllegalArgumentException("replay chunk " + i + " has a negative segment index: " + segmentIndex);
-            if (segmentIndex < lastSegmentIndex || segmentIndex > lastSegmentIndex + 1)
+            // A rewritten recording starts past segment 0.
+            if (i > 0 && (segmentIndex < lastSegmentIndex || segmentIndex > lastSegmentIndex + 1))
                 throw new IllegalArgumentException("replay segments are not contiguous: chunk " + i
                     + " is in segment " + segmentIndex + ", after segment " + lastSegmentIndex);
             if (segmentIndex != lastSegmentIndex) {
@@ -107,7 +109,7 @@ public record ReplayPreamble(
             long indexStart = buffer.readIndex();
             var index = new ArrayList<ChunkIndex>(header.chunkCount());
             for (int i = 0; i < header.chunkCount(); i++)
-                index.add(buffer.read(ChunkIndex.NETWORK_TYPE));
+                index.add(ChunkIndex.read(buffer, header));
             if (buffer.readIndex() - indexStart != header.indexLength())
                 throw new IllegalArgumentException("replay index length does not match header:"
                     + " expected " + header.indexLength() + " bytes, read "
@@ -119,6 +121,17 @@ public record ReplayPreamble(
         } catch (Exception e) {
             throw new IllegalArgumentException("invalid replay preamble", e);
         }
+    }
+
+    /// Unvalidated, so it reads compacted preambles too.
+    public static List<ChunkIndex> index(byte[] data) {
+        var buffer = NetworkBuffer.wrap(data, 0, data.length);
+        var header = new ReplayHeader(buffer);
+        buffer.read(NetworkBuffer.NBT_COMPOUND);
+        var index = new ArrayList<ChunkIndex>(header.chunkCount());
+        for (var i = 0; i < header.chunkCount(); i++)
+            index.add(ChunkIndex.read(buffer, header));
+        return index;
     }
 
     public void requireCompatible(UUID worldId, byte[] worldVersion) {

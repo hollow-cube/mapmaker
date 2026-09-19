@@ -57,6 +57,35 @@ final class ReplayHeaderTest {
         assertTrue(error.getMessage().contains("unsupported replay version: 1"), error.getMessage());
     }
 
+    @Test
+    void aLegacyVersionIsReadAtTheOnlyDataVersionItWasWrittenWith() {
+        var written = legacy(ReplayHeader.LEGACY_IDS_DATA_VERSION);
+        var read = new ReplayHeader(NetworkBuffer.wrap(written, 0, written.length));
+        assertEquals(ReplayHeader.VERSION_LEGACY_IDS, read.version());
+
+        var error = assertThrows(IllegalArgumentException.class, () -> new ChunkIndex(0, 1, (byte) 0, 0, 1, 1,
+            ReplayHeader.VERSION_LEGACY_IDS, 4786));
+        assertTrue(error.getMessage().contains("has no ID mapping"), error.getMessage());
+    }
+
+    @Test
+    void aHeaderReadAtTheLegacyVersionIsWrittenAtTheLatest() {
+        var written = legacy(ReplayHeader.LEGACY_IDS_DATA_VERSION);
+        var read = new ReplayHeader(NetworkBuffer.wrap(written, 0, written.length));
+
+        assertEquals(ReplayHeader.VERSION_LATEST, ReplayHeader.versionOf(write(read)));
+    }
+
+    /// A format 4 header, whose layout is the latest one with a different version.
+    private static byte[] legacy(int dataVersion) {
+        var written = write(new ReplayHeader(UUID.randomUUID(), new byte[0]));
+        written[5] = ReplayHeader.VERSION_LEGACY_IDS;
+        // The data version is the last field, past an empty world version and everything before it.
+        var dataVersionOffset = 4 + 2 + 2 + 16 + 1 + 8 + 2 + 4 * 4;
+        NetworkBuffer.wrap(written, dataVersionOffset, dataVersionOffset).write(NetworkBuffer.INT, dataVersion);
+        return written;
+    }
+
     private static void assertRoundTrip(byte[] worldVersion) {
         var worldId = UUID.randomUUID();
         var header = new ReplayHeader(worldId, worldVersion);
