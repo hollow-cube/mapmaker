@@ -23,9 +23,9 @@ logback = "1.5.18"
 json5 = "2.0.0"
 graalvm = "25.0.0"
 blossom = "2.1.0"
-velocity = "3.5.0-SNAPSHOT"
-# Matches the netty velocity 3.5.0 ships, so the proxy plugin compiles against what it runs on.
-netty = "4.2.15.Final"
+velocity = "4.2.1-SNAPSHOT"
+# Matches the netty velocity 4.2.1 ships, so the proxy plugin compiles against what it runs on.
+netty = "4.2.18.Final"
 classgraph = "4.8.179"
 javapoet = "0.7.0"
 luau = "1.1.0"

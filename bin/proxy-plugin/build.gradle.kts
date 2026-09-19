@@ -108,8 +108,8 @@ tasks.assemble {
 // (https://fill.papermc.io/v3/projects/velocity/versions/<version>/builds/latest); bump the three
 // together. libs.versions.toml's velocity is the api the plugin compiles against, which is this
 // build's version line.
-val velocityBuild = "3.5.0-SNAPSHOT-609"
-val velocitySha256 = "0c3d16b70ed757638b696a9a87d670b4301f23a6fef30c3acbbd9b0e0d7b29bb"
+val velocityBuild = "4.2.1-SNAPSHOT-31"
+val velocitySha256 = "b2879bb60eba6be23e99fdd659084b7adbe1190d42b7ddf296356331f8ea7c9a"
 val velocityUrl = "https://fill-data.papermc.io/v1/objects/$velocitySha256/velocity-$velocityBuild.jar"
 
 val velocityJar = layout.buildDirectory.file("proxy/velocity-$velocityBuild.jar")
