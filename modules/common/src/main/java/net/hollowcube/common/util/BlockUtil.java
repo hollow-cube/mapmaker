@@ -6,7 +6,9 @@ import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockTags;
 import net.minestom.server.item.Material;
+import net.minestom.server.registry.RegistryTag;
 import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +34,9 @@ public final class BlockUtil {
             return o1.compareTo(o2);
         }
     };
+
+    private static final RegistryTag<Block> SUPPRESSES_BOUNCE = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.SUPPRESSES_BOUNCE));
+    private static final RegistryTag<Block> BEDS = Objects.requireNonNull(Block.staticRegistry().getTag(BlockTags.BEDS));
 
     private static final Int2ObjectMap<Map<String, String[]>> BLOCK_PROPERTIES;
     private static final Int2ObjectMap<Material> BLOCK_TO_ITEM;
@@ -179,12 +184,12 @@ public final class BlockUtil {
     }
 
     public static boolean suppressesBounce(@NotNull Block block) {
-        return block.compare(Block.HONEY_BLOCK);
+        return SUPPRESSES_BOUNCE.contains(block);
     }
 
     public static double blockRestitution(@NotNull Block block) {
         if (block.compare(Block.SLIME_BLOCK)) return 1.0;
-        if (block.key().value().endsWith("_bed")) return 0.75;
+        if (BEDS.contains(block) || block.compare(Block.SHELF_MUSHROOM)) return 0.75;
         return 0.0;
     }
 

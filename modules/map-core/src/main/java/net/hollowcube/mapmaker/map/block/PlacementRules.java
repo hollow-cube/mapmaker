@@ -53,6 +53,7 @@ public final class PlacementRules {
         register(BlockTags.WALL_SIGNS, WaterloggedPlacementRule::new); // These two are actually unplaceable, but are here for sanity
         register(BlockTags.WALL_HANGING_SIGNS, WaterloggedPlacementRule::new); // These two are actually unplaceable, but are here for sanity
         register(BlockTags.BEDS, BedPlacementRule::new);
+        register(Block.STRAW_BED, BedPlacementRule::new);
         register(BlockTags.ANVILS, AnvilPlacementRule::new);
 
         register(Block.FLOWER_POT, FlowerPotPlacementRule::new);
@@ -144,6 +145,7 @@ public final class PlacementRules {
 
         register(Block.LADDER, b -> new FacingClickHorizontalPlacementRule(b, false));
         register(Block.COCOA, b -> new FacingClickHorizontalPlacementRule(b, true));
+        register(Block.SHELF_MUSHROOM, b -> new FacingClickHorizontalPlacementRule(b, false));
 
         register(Block.PLAYER_HEAD, HeadPlacementRule::new);
         register(BlockTags.SKULLS, HeadPlacementRule::new);

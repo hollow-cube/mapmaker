@@ -53,6 +53,12 @@ public class AxeInteractionRule implements BlockInteractionRule {
         STRIP_MAP.put(Block.STRIPPED_MANGROVE_LOG.id(), Block.MANGROVE_LOG.id());
         STRIP_MAP.put(Block.CHERRY_LOG.id(), Block.STRIPPED_CHERRY_LOG.id());
         STRIP_MAP.put(Block.STRIPPED_CHERRY_LOG.id(), Block.CHERRY_LOG.id());
+        STRIP_MAP.put(Block.PALE_OAK_LOG.id(), Block.STRIPPED_PALE_OAK_LOG.id());
+        STRIP_MAP.put(Block.STRIPPED_PALE_OAK_LOG.id(), Block.PALE_OAK_LOG.id());
+        STRIP_MAP.put(Block.POPLAR_LOG.id(), Block.STRIPPED_POPLAR_LOG.id());
+        STRIP_MAP.put(Block.STRIPPED_POPLAR_LOG.id(), Block.POPLAR_LOG.id());
+        STRIP_MAP.put(Block.BAMBOO_BLOCK.id(), Block.STRIPPED_BAMBOO_BLOCK.id());
+        STRIP_MAP.put(Block.STRIPPED_BAMBOO_BLOCK.id(), Block.BAMBOO_BLOCK.id());
         STRIP_MAP.put(Block.WARPED_STEM.id(), Block.STRIPPED_WARPED_STEM.id());
         STRIP_MAP.put(Block.STRIPPED_WARPED_STEM.id(), Block.WARPED_STEM.id());
         STRIP_MAP.put(Block.CRIMSON_STEM.id(), Block.STRIPPED_CRIMSON_STEM.id());
@@ -75,6 +81,10 @@ public class AxeInteractionRule implements BlockInteractionRule {
         STRIP_MAP.put(Block.STRIPPED_MANGROVE_WOOD.id(), Block.MANGROVE_WOOD.id());
         STRIP_MAP.put(Block.CHERRY_WOOD.id(), Block.STRIPPED_CHERRY_WOOD.id());
         STRIP_MAP.put(Block.STRIPPED_CHERRY_WOOD.id(), Block.CHERRY_WOOD.id());
+        STRIP_MAP.put(Block.PALE_OAK_WOOD.id(), Block.STRIPPED_PALE_OAK_WOOD.id());
+        STRIP_MAP.put(Block.STRIPPED_PALE_OAK_WOOD.id(), Block.PALE_OAK_WOOD.id());
+        STRIP_MAP.put(Block.POPLAR_WOOD.id(), Block.STRIPPED_POPLAR_WOOD.id());
+        STRIP_MAP.put(Block.STRIPPED_POPLAR_WOOD.id(), Block.POPLAR_WOOD.id());
         STRIP_MAP.put(Block.WARPED_HYPHAE.id(), Block.STRIPPED_WARPED_HYPHAE.id());
         STRIP_MAP.put(Block.STRIPPED_WARPED_HYPHAE.id(), Block.WARPED_HYPHAE.id());
         STRIP_MAP.put(Block.CRIMSON_HYPHAE.id(), Block.STRIPPED_CRIMSON_HYPHAE.id());
