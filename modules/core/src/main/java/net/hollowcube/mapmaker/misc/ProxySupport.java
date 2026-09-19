@@ -22,14 +22,8 @@ public class ProxySupport {
         transfer(player, server.id(), server.clusterIp(), server.protocolVersion());
     }
 
-    /// The proxy hands the protocol to ViaVersion (0 is unknown, and its configured default), and
-    /// seals the server id into the cookie if it is draining.
     private static void transfer(@NotNull Player player, @NotNull String server, @NotNull String address, int protocolVersion) {
-        var message = new JsonObject();
-        message.addProperty("server", server);
-        message.addProperty("address", address);
-        message.addProperty("protocolVersion", protocolVersion);
-        player.sendPluginMessage("mapmaker:transfer", message.toString().getBytes(StandardCharsets.UTF_8));
+        player.sendPluginMessage("mapmaker:transfer", address.getBytes(StandardCharsets.UTF_8));
     }
 
     public static <T> void transferWithData(@NotNull Player player, @NotNull GameServer server, @NotNull T metadata) {
