@@ -15,7 +15,7 @@ class SectionTest {
         writer.u8(0).varInt(3); // biomes: single value
         byte[] bytes = writer.toByteArray();
 
-        var section = Section.decode(new ByteReader(bytes));
+        var section = Section.decode(new ByteReader(bytes), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
         assertEquals(0, section.nonEmptyBlockCount());
         assertEquals(1, section.get(0, 0, 0));
         assertEquals(1, section.get(15, 15, 15));
@@ -34,7 +34,7 @@ class SectionTest {
         writer.u8(1).varIntArray(new int[]{0, 1}).fixedLongArray(new long[Section.longCount(1, Section.BIOME_ENTRY_COUNT)]);
         byte[] bytes = writer.toByteArray();
 
-        var section = Section.decode(new ByteReader(bytes));
+        var section = Section.decode(new ByteReader(bytes), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
         assertEquals(4096, section.nonEmptyBlockCount());
         assertEquals(0, section.get(0, 0, 0));
         assertEquals(9, section.get(1, 0, 0));
@@ -50,13 +50,13 @@ class SectionTest {
 
         var writer = new ByteWriter();
         writer.i16(4096).i16(64);
-        writer.u8(Section.DIRECT_BLOCK_BITS);
-        writer.fixedLongArray(pack(ids, Section.DIRECT_BLOCK_BITS));
+        writer.u8(S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
+        writer.fixedLongArray(pack(ids, S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS));
         writer.u8(0).varInt(0);
         byte[] bytes = writer.toByteArray();
 
-        var section = Section.decode(new ByteReader(bytes));
-        assertEquals(1024, Section.longCount(Section.DIRECT_BLOCK_BITS, Section.BLOCK_ENTRY_COUNT));
+        var section = Section.decode(new ByteReader(bytes), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
+        assertEquals(1024, Section.longCount(S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS, Section.BLOCK_ENTRY_COUNT));
         for (int y = 0; y < 16; y++)
             for (int z = 0; z < 16; z++)
                 for (int x = 0; x < 16; x++)
@@ -72,7 +72,7 @@ class SectionTest {
         writer.u8(7).fixedLongArray(new long[Section.longCount(7, Section.BIOME_ENTRY_COUNT)]);
         byte[] bytes = writer.toByteArray();
 
-        assertArrayEquals(bytes, encode(Section.decode(new ByteReader(bytes))));
+        assertArrayEquals(bytes, encode(Section.decode(new ByteReader(bytes), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS)));
     }
 
     private static byte[] encode(Section section) {

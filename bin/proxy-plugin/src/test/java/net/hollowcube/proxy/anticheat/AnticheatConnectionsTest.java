@@ -159,7 +159,7 @@ class AnticheatConnectionsTest {
     }
 
     private static int id(ProtocolState state, Direction direction, String name) {
-        return Protocol776.packetId(state, direction, name);
+        return Protocol776.PACKETS.packetId(state, direction, name);
     }
 
     /// The other half of what only the connections know: captures their floor threw away, charged

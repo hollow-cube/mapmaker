@@ -12,25 +12,24 @@ import org.jetbrains.annotations.Nullable;
 ///
 /// The palette shape follows `Strategy#createForBlockStates`: 0 bits is a single-value palette,
 /// 1..8 an indirect list (with 1..4 stored at 4 bits in memory, exactly as the client does) and
-/// anything above 8 the global palette at [#DIRECT_BLOCK_BITS].
+/// anything above 8 the global palette at `directBits`. That width is `Strategy#globalPaletteBitsInMemory`
+/// — `ceillog2` of the version's block state count — and a direct-palette section is stored at it
+/// no matter what the declared bits byte says, because that is what the client does. It is not on
+/// the wire, so the section carries it for whoever repacks it to the global palette later.
 public record Section(
     int nonEmptyBlockCount,
     int fluidCount,
     int bitsPerEntry,
     int @Nullable [] palette,
     long[] data,
-    byte[] biomes
+    byte[] biomes,
+    int directBits
 ) {
 
     public static final int BLOCK_ENTRY_COUNT = 4096;
     public static final int BIOME_ENTRY_COUNT = 64;
 
-    /// `Strategy#globalPaletteBitsInMemory` for the 26.2 block state registry: `ceillog2` of a
-    /// registry with between 2^14 and 2^15 states. A direct-palette section is stored at this
-    /// width no matter what the declared bits byte says, because that is what the client does.
-    public static final int DIRECT_BLOCK_BITS = 15;
-
-    public static Section decode(ByteReader reader) {
+    public static Section decode(ByteReader reader, int directBits) {
         int nonEmptyBlockCount = reader.i16();
         int fluidCount = reader.i16();
 
@@ -43,11 +42,12 @@ public record Section(
         } else {
             palette = null;
         }
-        long[] data = reader.fixedLongArray(longCount(blockStorageBits(bitsPerEntry), BLOCK_ENTRY_COUNT));
+        long[] data = reader.fixedLongArray(longCount(storageBits(bitsPerEntry, directBits), BLOCK_ENTRY_COUNT));
 
         int biomeStart = reader.index();
         skipBiomes(reader);
-        return new Section(nonEmptyBlockCount, fluidCount, bitsPerEntry, palette, data, reader.since(biomeStart));
+        return new Section(nonEmptyBlockCount, fluidCount, bitsPerEntry, palette, data, reader.since(biomeStart),
+            directBits);
     }
 
     public void encode(ByteWriter writer) {
@@ -70,7 +70,7 @@ public record Section(
         var palette = this.palette;
         if (bitsPerEntry == 0) return palette == null ? 0 : palette[0];
 
-        int bits = blockStorageBits(bitsPerEntry);
+        int bits = storageBits(bitsPerEntry, directBits);
         int index = (y << 4 | z) << 4 | x;
         int valuesPerLong = 64 / bits;
         int cell = index / valuesPerLong;
@@ -79,10 +79,10 @@ public record Section(
         return palette == null ? id : palette[id];
     }
 
-    public static int blockStorageBits(int bitsPerEntry) {
+    public static int storageBits(int bitsPerEntry, int directBits) {
         if (bitsPerEntry == 0) return 0;
         if (bitsPerEntry <= 4) return 4;
-        return bitsPerEntry <= 8 ? bitsPerEntry : DIRECT_BLOCK_BITS;
+        return bitsPerEntry <= 8 ? bitsPerEntry : directBits;
     }
 
     public static int longCount(int storageBits, int entryCount) {

@@ -112,7 +112,7 @@ class PacketRoundTripTest {
     void testAnimateEntityEventAndSetEntityMotion() {
         var animate = roundTrip(new ByteWriter().varInt(77).u8(2).toByteArray(), S2CAnimate.V776::decode);
         assertEquals(77, animate.entityId());
-        assertEquals(S2CAnimate.WAKE_UP, animate.action());
+        assertEquals(S2CAnimate.V776.WAKE_UP, animate.action());
 
         // The one play packet whose entity id is a plain int, not a varint.
         var event = roundTrip(new ByteWriter().i32(77).u8(55).toByteArray(), S2CEntityEvent.V776::decode);

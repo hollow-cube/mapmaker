@@ -7,21 +7,21 @@ package net.hollowcube.anticheat.protocol;
 /// send reads as zero — [#hasPosition()] and [#hasRotation()] say which half is real, and a reader
 /// that ignores them would apply a move the client never made.
 public sealed interface MoveEntity extends EntityKeyed
-    permits S2CMoveEntityPos, S2CMoveEntityPosRot, S2CMoveEntityRot {
+    permits S2CMoveEntityPos, S2CMoveEntityPosRot, S2CMoveEntityRot, MoveEntity.Delta {
 
     boolean hasPosition();
 
     boolean hasRotation();
 
-    default short deltaX() {
+    default int deltaX() {
         return 0;
     }
 
-    default short deltaY() {
+    default int deltaY() {
         return 0;
     }
 
-    default short deltaZ() {
+    default int deltaZ() {
         return 0;
     }
 
@@ -34,4 +34,25 @@ public sealed interface MoveEntity extends EntityKeyed
     }
 
     boolean onGround();
+
+    /// 26.3's moves, whose position is a [VecDelta] that may be a path of several steps.
+    sealed interface Delta extends MoveEntity permits S2CMoveEntityPos.V777, S2CMoveEntityPosRot.V777 {
+
+        VecDelta delta();
+
+        @Override
+        default int deltaX() {
+            return delta().totalX();
+        }
+
+        @Override
+        default int deltaY() {
+            return delta().totalY();
+        }
+
+        @Override
+        default int deltaZ() {
+            return delta().totalZ();
+        }
+    }
 }

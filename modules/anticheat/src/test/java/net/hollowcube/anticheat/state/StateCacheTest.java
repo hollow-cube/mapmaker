@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.state;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.protocol.*;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,7 @@ class StateCacheTest {
 
     @Test
     void testEntityKeysAreLastWinsAndDropOnRemove() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, add(7, ZOMBIE));
         feed(cache, add(8, ZOMBIE));
         feed(cache, new S2CUpdateMobEffect.V776(7, 1, 0, 200, (byte) 0));
@@ -47,7 +48,7 @@ class StateCacheTest {
 
     @Test
     void testEntityDataAccumulatesInOrder() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, add(7, ZOMBIE));
         feed(cache, new S2CSetEntityData.V776(7, new byte[]{1}));
         feed(cache, new S2CSetEntityData.V776(7, new byte[]{2}));
@@ -63,7 +64,7 @@ class StateCacheTest {
 
     @Test
     void testContainerSetContentResetsThatContainersSlots() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, new S2CContainerSetSlot.V776(1, slotBody(3)), CONTAINER_SET_SLOT);
         feed(cache, new S2CContainerSetSlot.V776(1, slotBody(4)), CONTAINER_SET_SLOT);
         feed(cache, new S2CContainerSetSlot.V776(2, slotBody(3)), CONTAINER_SET_SLOT);
@@ -79,8 +80,8 @@ class StateCacheTest {
 
     @Test
     void testDisplayEntitiesAreNotCachedUntilTheyArePromoted() {
-        var cache = new StateCache();
-        feed(cache, add(7, EntityTypes776.BLOCK_DISPLAY));
+        var cache = new StateCache(Protocol.V776);
+        feed(cache, add(7, EntityTypes.V776.blockDisplay()));
         feed(cache, new S2CSetEntityData.V776(7, new byte[]{1}));
 
         assertTrue(cache.entities().isDropped(7));
@@ -95,7 +96,7 @@ class StateCacheTest {
         var synthesized = cache.frame(new StateKey.Entity(7, ADD_ENTITY));
         assertNotNull(synthesized, "promotion emits a synthesized add_entity");
         var spawn = S2CAddEntity.V776.decode(new ByteReader(synthesized.body()));
-        assertEquals(EntityTypes776.BLOCK_DISPLAY, spawn.entityTypeId());
+        assertEquals(EntityTypes.V776.blockDisplay(), spawn.entityTypeId());
         assertEquals(1.0, spawn.x());
         assertNotNull(cache.frame(new StateKey.Entity(7, SET_PASSENGERS)));
 
@@ -105,9 +106,9 @@ class StateCacheTest {
 
     @Test
     void testADisplayCarryingOnlyDisplaysIsNotPromoted() {
-        var cache = new StateCache();
-        feed(cache, add(7, EntityTypes776.TEXT_DISPLAY));
-        feed(cache, add(8, EntityTypes776.ITEM_DISPLAY));
+        var cache = new StateCache(Protocol.V776);
+        feed(cache, add(7, EntityTypes.V776.textDisplay()));
+        feed(cache, add(8, EntityTypes.V776.itemDisplay()));
 
         feed(cache, new S2CSetPassengers.V776(7, new int[]{8}));
 
@@ -117,7 +118,7 @@ class StateCacheTest {
 
     @Test
     void testUndecodedPacketsAreKeyedByTheirPrefix() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feedRaw(cache, SET_HEALTH, new byte[]{0, 0, 0, 0, 5, 0, 0, 0, 0});
         feedRaw(cache, GAME_EVENT, new byte[]{3, 0, 0, 0, 0});
         feedRaw(cache, GAME_EVENT, new byte[]{7, 0, 0, 0, 0});
@@ -131,7 +132,7 @@ class StateCacheTest {
 
     @Test
     void testTeamsAreKeyedByNameAndRemovedByMethodOne() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feedRaw(cache, SET_PLAYER_TEAM, team("red", 0));
         feedRaw(cache, SET_PLAYER_TEAM, team("blue", 0));
         assertNotNull(cache.frame(new StateKey.Team("red")));
@@ -144,7 +145,7 @@ class StateCacheTest {
 
     @Test
     void testPlayerInfoIsSplitPerProfileAndResetOnAdd() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         var first = new UUID(1, 1);
         var second = new UUID(2, 2);
 
@@ -164,7 +165,7 @@ class StateCacheTest {
 
     @Test
     void testUnsplittablePlayerInfoFallsBackToOneBucket() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feedRaw(cache, PLAYER_INFO_UPDATE, new byte[]{(byte) 0xFF, 1, 0, 0});
 
         assertEquals(1, cache.frames(new StateKey.PlayerInfo(null)).size());
@@ -172,9 +173,9 @@ class StateCacheTest {
 
     @Test
     void testLoginResetsPlayStateButKeepsTheConfigurationSet() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         cache.apply(ProtocolState.CONFIGURATION, Direction.S2C,
-            Protocol776.packetId(ProtocolState.CONFIGURATION, Direction.S2C, "registry_data"),
+            Protocol776.PACKETS.packetId(ProtocolState.CONFIGURATION, Direction.S2C, "registry_data"),
             new S2CRegistryData.V776("minecraft:dimension_type", List.of()).toByteArray(), null);
         feed(cache, add(7, ZOMBIE));
         feedRaw(cache, SET_HEALTH, new byte[]{0, 0, 0, 0, 5, 0, 0, 0, 0});
@@ -191,7 +192,7 @@ class StateCacheTest {
 
     @Test
     void testRespawnOnlyDropsEntitiesWhenTheDimensionChanges() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, login("minecraft:overworld"));
         feed(cache, add(7, ZOMBIE));
         feed(cache, new S2CContainerSetSlot.V776(1, slotBody(3)), CONTAINER_SET_SLOT);
@@ -207,7 +208,7 @@ class StateCacheTest {
 
     @Test
     void testRespawnIntoAnotherDimensionKeepsThePlayersAttributesAsTheClientDoes() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, login("minecraft:overworld"));
         feed(cache, add(7, ZOMBIE));
         int updateAttributes = playId("update_attributes");
@@ -239,9 +240,9 @@ class StateCacheTest {
 
     @Test
     void testStartConfigurationResetsEverything() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         cache.apply(ProtocolState.CONFIGURATION, Direction.S2C,
-            Protocol776.packetId(ProtocolState.CONFIGURATION, Direction.S2C, "update_tags"), new byte[]{0}, null);
+            Protocol776.PACKETS.packetId(ProtocolState.CONFIGURATION, Direction.S2C, "update_tags"), new byte[]{0}, null);
         feed(cache, login("minecraft:overworld"));
         feed(cache, add(7, ZOMBIE));
 
@@ -253,7 +254,7 @@ class StateCacheTest {
 
     @Test
     void testSnapshotIsUnchangedByLaterWrites() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, add(7, ZOMBIE));
         feed(cache, new S2CSetEntityData.V776(7, new byte[]{1}));
 
@@ -272,7 +273,7 @@ class StateCacheTest {
 
     @Test
     void testFramesComeBackInArrivalOrder() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, login("minecraft:overworld"));
         feed(cache, add(7, ZOMBIE));
         feed(cache, new S2CSetEntityData.V776(7, new byte[]{1}));
@@ -288,8 +289,8 @@ class StateCacheTest {
 
     @Test
     void testRegisteredChannelsAccumulateUntilUnregistered() {
-        var cache = new StateCache();
-        int customPayload = Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "custom_payload");
+        var cache = new StateCache(Protocol.V776);
+        int customPayload = Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.C2S, "custom_payload");
         cache.apply(ProtocolState.PLAY, Direction.C2S, customPayload, new byte[0],
             new C2SCustomPayload.V776(CustomPayload.REGISTER_CHANNEL, "noxesium-v3:client_settings\0fabric:registry/sync".getBytes(StandardCharsets.UTF_8)));
         cache.apply(ProtocolState.PLAY, Direction.C2S, customPayload, new byte[0],
@@ -304,9 +305,9 @@ class StateCacheTest {
 
     @Test
     void testClientBrandIsPicked() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         byte[] payload = new ByteWriter().utf("vanilla").toByteArray();
-        cache.apply(ProtocolState.PLAY, Direction.C2S, Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "custom_payload"),
+        cache.apply(ProtocolState.PLAY, Direction.C2S, Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.C2S, "custom_payload"),
             new byte[0], new C2SCustomPayload.V776("minecraft:brand", payload));
 
         assertEquals("vanilla", cache.brand());
@@ -314,7 +315,7 @@ class StateCacheTest {
 
     @Test
     void testAttributesAreKeptOneByOneAcrossPackets() {
-        var cache = new StateCache();
+        var cache = new StateCache(Protocol.V776);
         feed(cache, add(7, ZOMBIE));
         var speed = new S2CUpdateAttributes.Snapshot(26, 0.1, List.of());
         var gravity = new S2CUpdateAttributes.Snapshot(14, 0.08, List.of());
@@ -372,8 +373,8 @@ class StateCacheTest {
             spawnInfo(dimension), false, false);
     }
 
-    private static CommonPlayerSpawnInfo spawnInfo(String dimension) {
-        return new CommonPlayerSpawnInfo(0, dimension, 0L, 0, (byte) -1, false, false, null, 0, 63);
+    private static CommonPlayerSpawnInfo.V776 spawnInfo(String dimension) {
+        return new CommonPlayerSpawnInfo.V776(0, dimension, 0L, 0, (byte) -1, false, false, null, 0, 63);
     }
 
     /// `container_set_slot` after its container id: a varint state id then a short slot.
@@ -398,6 +399,6 @@ class StateCacheTest {
     }
 
     private static int playId(String name) {
-        return Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, name);
+        return Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, name);
     }
 }

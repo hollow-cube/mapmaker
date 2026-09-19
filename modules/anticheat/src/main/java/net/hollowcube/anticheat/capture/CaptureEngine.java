@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.capture;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.log.*;
 import net.hollowcube.anticheat.protocol.*;
 import net.hollowcube.anticheat.state.StateCache;
@@ -65,8 +66,9 @@ public final class CaptureEngine implements FrameSink {
     private final CaptureClock clock;
     private final Completion completion;
 
+    private final Protocol protocol;
     private final ChunkMap world = new ChunkMap();
-    private final StateCache state = new StateCache();
+    private final StateCache state;
     private final RingBuffer ring;
     private final Trim trim = new Trim();
 
@@ -126,6 +128,8 @@ public final class CaptureEngine implements FrameSink {
                   Supplier<? extends Collection<String>> clientChannels, CaptureClock clock, Completion completion, Executor writer) {
         this.config = config;
         this.identity = identity;
+        this.protocol = Protocol.of(identity.clientPvn());
+        this.state = new StateCache(protocol);
         this.clientBrand = clientBrand;
         this.clientChannels = clientChannels;
         this.clock = clock;
@@ -154,7 +158,7 @@ public final class CaptureEngine implements FrameSink {
     @Override
     public boolean frame(long tNs, Direction direction, ProtocolState protocolState, int packetId, int pingId, byte[] body) {
         if (closed) return false;
-        var entry = Protocol776.lookup(protocolState, direction, packetId);
+        var entry = protocol.packets().lookup(protocolState, direction, packetId);
         if (!entry.kept()) return false;
         advance(tNs);
         if (pingId != Frame.NO_PING) currentPingId = pingId;
@@ -180,8 +184,7 @@ public final class CaptureEngine implements FrameSink {
         // trace. Decided after `state.apply`, so a promotion has already un-dropped its subject.
         if (packet instanceof EntityKeyed keyed && state.entities().isDropped(keyed.entityId())) return fence;
 
-        var frameBody = packet instanceof S2CLevelChunkWithLight.V776 chunk
-            ? sectionsOnly(chunk, body) : body;
+        var frameBody = packet instanceof S2CLevelChunkWithLight chunk ? sectionsOnly(chunk, body) : body;
         var frame = new Frame(tNs, direction, protocolState, packetId, pingId, frameBody);
         ring.frame(frame);
 
@@ -296,7 +299,7 @@ public final class CaptureEngine implements FrameSink {
         return capture == null ? oldest : Math.min(oldest, capture.snapshot.tNs());
     }
 
-    private @Nullable Packet decode(Protocol776.Entry entry, ProtocolState state, Direction direction, int packetId,
+    private @Nullable Packet decode(PacketTable.Entry entry, ProtocolState state, Direction direction, int packetId,
                                     byte[] body) {
         var decoder = entry.decoder();
         if (decoder == null) return null;
@@ -320,7 +323,7 @@ public final class CaptureEngine implements FrameSink {
     /// Both are windows into `body`, so this splices rather than re-encodes: everything up to the
     /// heightmaps, an empty heightmap map in their place, then the section data up to where the
     /// tail starts. A decoder that handed back a slice of something else gets the body untouched.
-    private static byte[] sectionsOnly(S2CLevelChunkWithLight.V776 chunk, byte[] body) {
+    private static byte[] sectionsOnly(S2CLevelChunkWithLight chunk, byte[] body) {
         var heightmaps = chunk.heightmaps();
         var tail = chunk.blockEntitiesAndLight();
         if (heightmaps.array() != body || tail.array() != body) return body;
@@ -623,7 +626,7 @@ public final class CaptureEngine implements FrameSink {
             var header = spoolTruncated
                 ? job.header().withFlags(job.header().flags().withSpoolTruncated(true))
                 : job.header();
-            var prelude = Prelude.frames(job.snapshot());
+            var prelude = Prelude.frames(job.snapshot(), protocol);
             var world = Trim.world(job.snapshot().world(), job.policy(), job.interest());
 
             var written = TraceWriter.assemble(temp, header, prelude, world, frames);

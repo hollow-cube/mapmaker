@@ -4,9 +4,11 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.prometheus.client.Counter;
 import io.netty.util.ResourceLeakDetector;
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.protocol.ByteWriter;
 import net.hollowcube.anticheat.protocol.Direction;
 import net.hollowcube.anticheat.protocol.Protocol776;
+import net.hollowcube.anticheat.protocol.Protocol777;
 import net.hollowcube.anticheat.protocol.ProtocolState;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assumptions;
@@ -38,9 +40,9 @@ class AnticheatTapTest {
 
     private static final Logger logger = LoggerFactory.getLogger(AnticheatTapTest.class);
 
-    private static final int BUNDLE_DELIMITER = Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "bundle_delimiter");
-    private static final int PLAY_PING = Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "ping");
-    private static final int PLAY_PONG = Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "pong");
+    private static final int BUNDLE_DELIMITER = Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "bundle_delimiter");
+    private static final int PLAY_PING = Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "ping");
+    private static final int PLAY_PONG = Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.C2S, "pong");
 
     private static ResourceLeakDetector.Level leakLevel;
 
@@ -89,7 +91,7 @@ class AnticheatTapTest {
         var clock = new ManualClock();
         // The tap only ever goes in at PostLoginEvent, so the handshake is not its problem; the
         // fixture is a whole session, and the replay picks it up where the tap would have.
-        var tap = new AnticheatTap(sink, clock, () -> false, ProtocolState.LOGIN,
+        var tap = new AnticheatTap(Protocol.V776, sink, clock, () -> false, ProtocolState.LOGIN,
             ProtocolState.LOGIN);
         var channel = channel(tap, via);
 
@@ -102,7 +104,7 @@ class AnticheatTapTest {
         for (var frame : frames) {
             if (frame.state() == ProtocolState.HANDSHAKE) continue;
             clock.set(frame.tNs());
-            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
             var bytes = frame(frame.packetId(), frame.body());
 
             if (frame.direction() == Direction.C2S) {
@@ -201,7 +203,7 @@ class AnticheatTapTest {
     @Test
     void testOnlyAPongForAnOutstandingInjectedPingIsSwallowed() {
         var sink = new RecordingSink();
-        var tap = new AnticheatTap(sink, new ManualClock(), () -> false, ProtocolState.PLAY,
+        var tap = new AnticheatTap(Protocol.V776, sink, new ManualClock(), () -> false, ProtocolState.PLAY,
             ProtocolState.PLAY);
         var channel = channel(tap, false);
 
@@ -210,7 +212,7 @@ class AnticheatTapTest {
         var stranger = frame(PLAY_PONG, new ByteWriter(4).i32(AnticheatTap.PROXY_PING_BIT | 7).toByteArray());
         assertPassesThroughInbound(channel, stranger, "a pong for a ping we never issued");
 
-        channel.write(buffer(frame(Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "set_health"), new byte[12])));
+        channel.write(buffer(frame(Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "set_health"), new byte[12])));
         channel.flush();
         readOutbound(channel, "health");
         readOutbound(channel, "ping");
@@ -239,7 +241,7 @@ class AnticheatTapTest {
         var channel = channel(tap, false);
 
         // keep_alive is kept but is not in the ping set: nothing about it needs timing.
-        var keepAlive = frame(Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "keep_alive"), new byte[8]);
+        var keepAlive = frame(Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "keep_alive"), new byte[8]);
         channel.write(buffer(keepAlive));
         channel.flush();
 
@@ -258,7 +260,7 @@ class AnticheatTapTest {
         var tap = play(sink);
         var channel = channel(tap, false);
 
-        var keepAlive = frame(Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "keep_alive"), new byte[8]);
+        var keepAlive = frame(Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "keep_alive"), new byte[8]);
         channel.write(buffer(keepAlive));
         channel.flush();
 
@@ -274,7 +276,7 @@ class AnticheatTapTest {
         var tap = play(new RecordingSink());
         var channel = channel(tap, false);
         var delimiter = frame(BUNDLE_DELIMITER, new byte[0]);
-        var health = frame(Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "set_health"), new byte[12]);
+        var health = frame(Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "set_health"), new byte[12]);
 
         channel.write(buffer(delimiter));
         channel.write(buffer(health));
@@ -325,7 +327,7 @@ class AnticheatTapTest {
     @Test
     void testAFrameInAStateTheTapDoesNotTrackIsCountedAndNotKept() {
         var sink = new RecordingSink();
-        var tap = new AnticheatTap(sink, new ManualClock(), () -> false,
+        var tap = new AnticheatTap(Protocol.V776, sink, new ManualClock(), () -> false,
             ProtocolState.HANDSHAKE, ProtocolState.HANDSHAKE);
         var channel = channel(tap, false);
 
@@ -345,12 +347,34 @@ class AnticheatTapTest {
         assertFalse(channel.finishAndReleaseAll());
     }
 
+    @Test
+    void testA777ConnectionTracksStateWith777Ids() {
+        var sink = new RecordingSink();
+        var tap = new AnticheatTap(Protocol.V777, sink, new ManualClock(), () -> false, ProtocolState.PLAY,
+            ProtocolState.PLAY);
+        var channel = channel(tap, false);
+
+        // 26.3 inserted packets ahead of start_configuration, so 26.2's id names something else.
+        int startConfiguration776 = Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "start_configuration");
+        int startConfiguration777 = Protocol777.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "start_configuration");
+        assertNotEquals(startConfiguration776, startConfiguration777);
+
+        channel.writeOutbound(buffer(frame(startConfiguration776, new byte[0])));
+        assertEquals(ProtocolState.PLAY, tap.s2cState());
+        channel.writeOutbound(buffer(frame(startConfiguration777, new byte[0])));
+        assertEquals(ProtocolState.CONFIGURATION, tap.s2cState());
+
+        channel.releaseOutbound();
+        assertFalse(tap.failed());
+        assertFalse(channel.finishAndReleaseAll());
+    }
+
     private AnticheatTap play(RecordingSink sink) {
         return play(sink, false);
     }
 
     private AnticheatTap play(RecordingSink sink, boolean shuttingDown) {
-        return new AnticheatTap(sink, new ManualClock(),
+        return new AnticheatTap(Protocol.V776, sink, new ManualClock(),
             () -> shuttingDown, ProtocolState.PLAY, ProtocolState.PLAY);
     }
 

@@ -61,10 +61,10 @@ final class TraceFixture {
     static List<Frame> prelude() {
         return List.of(
             new Frame(0, Direction.S2C, ProtocolState.CONFIGURATION,
-                Protocol776.packetId(ProtocolState.CONFIGURATION, Direction.S2C, "registry_data"),
+                Protocol776.PACKETS.packetId(ProtocolState.CONFIGURATION, Direction.S2C, "registry_data"),
                 Frame.NO_PING, bytes(0x01, 8)),
             new Frame(0, Direction.S2C, ProtocolState.PLAY,
-                Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "login"),
+                Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "login"),
                 Frame.NO_PING, bytes(0x02, 24))
         );
     }
@@ -72,12 +72,12 @@ final class TraceFixture {
     static List<WorldChunk> chunks() {
         return List.of(
             new WorldChunk(4, -3, List.of(
-                new WorldChunk.SectionEntry.Inline(WorldChunk.airSection()),
+                new WorldChunk.SectionEntry.Inline(WorldChunk.airSection(S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS)),
                 new WorldChunk.SectionEntry.Inline(palettedSection()),
                 new WorldChunk.SectionEntry.ByHash(bytes(0x20, TraceFormat.SECTION_HASH_LENGTH))
             )),
             new WorldChunk(5, -3, List.of(
-                new WorldChunk.SectionEntry.Inline(WorldChunk.airSection())
+                new WorldChunk.SectionEntry.Inline(WorldChunk.airSection(S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS))
             ))
         );
     }
@@ -91,8 +91,8 @@ final class TraceFixture {
                 c2s ? Direction.C2S : Direction.S2C,
                 ProtocolState.PLAY,
                 c2s
-                    ? Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "move_player_pos")
-                    : Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "move_entity_pos"),
+                    ? Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.C2S, "move_player_pos")
+                    : Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "move_entity_pos"),
                 i < 2 ? Frame.NO_PING : i,
                 bytes(0x40 + i, 3 + i)
             ));
@@ -110,7 +110,7 @@ final class TraceFixture {
         for (int i = 0; i < data.length; i++) data[i] = 0x0123_4567_89AB_CDEFL + i;
         writer.fixedLongArray(data);
         writer.u8(0).varInt(3);
-        return Section.decode(new ByteReader(writer.toByteArray()));
+        return Section.decode(new ByteReader(writer.toByteArray()), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
     }
 
     static byte[] bytes(int seed, int length) {

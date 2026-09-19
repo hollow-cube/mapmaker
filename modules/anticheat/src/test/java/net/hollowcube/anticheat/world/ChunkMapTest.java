@@ -242,7 +242,7 @@ class ChunkMapTest {
 
         for (int i = 0; i < 20; i++) assertEquals(100 + i, map.blockState(i & 0xF, -64, i >> 4));
         var written = map.chunk(0, 0).sections().getFirst();
-        assertEquals(Section.DIRECT_BLOCK_BITS, written.bitsPerEntry());
+        assertEquals(S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS, written.bitsPerEntry());
         assertNull(written.palette());
     }
 

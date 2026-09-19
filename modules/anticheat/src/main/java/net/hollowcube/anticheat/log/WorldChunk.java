@@ -43,8 +43,8 @@ public record WorldChunk(int chunkX, int chunkZ, List<SectionEntry> sections) {
 
     /// An all-air section: no blocks, a single-value block palette of state 0, a single-value biome
     /// palette. Exactly what the client reads for a section the server never filled.
-    public static Section airSection() {
-        return new Section(0, 0, 0, new int[]{0}, new long[0], new byte[]{0, 0});
+    public static Section airSection(int directBits) {
+        return new Section(0, 0, 0, new int[]{0}, new long[0], new byte[]{0, 0}, directBits);
     }
 
     public void encode(DataOutput out) throws IOException {
@@ -68,7 +68,9 @@ public record WorldChunk(int chunkX, int chunkZ, List<SectionEntry> sections) {
         }
     }
 
-    public static WorldChunk decode(DataInput in) throws IOException {
+    /// `directBits` is the width the trace's client version packs a global palette at: it is not
+    /// in the section bytes, and a direct section cannot be read without it.
+    public static WorldChunk decode(DataInput in, int directBits) throws IOException {
         int chunkX = in.readInt();
         int chunkZ = in.readInt();
 
@@ -80,7 +82,7 @@ public record WorldChunk(int chunkX, int chunkZ, List<SectionEntry> sections) {
             int kind = in.readUnsignedByte();
             switch (kind) {
                 case TraceFormat.SECTION_INLINE ->
-                    sections.add(new SectionEntry.Inline(Section.decode(new ByteReader(TraceFormat.readBytes(in)))));
+                    sections.add(new SectionEntry.Inline(Section.decode(new ByteReader(TraceFormat.readBytes(in)), directBits)));
                 case TraceFormat.SECTION_BY_HASH -> {
                     var hash = new byte[TraceFormat.SECTION_HASH_LENGTH];
                     in.readFully(hash);

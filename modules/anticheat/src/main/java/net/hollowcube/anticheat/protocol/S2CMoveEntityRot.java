@@ -1,7 +1,7 @@
 package net.hollowcube.anticheat.protocol;
 
 /// `play move_entity_rot`: a rotation with no move.
-public sealed interface S2CMoveEntityRot extends MoveEntity permits S2CMoveEntityRot.V776 {
+public sealed interface S2CMoveEntityRot extends MoveEntity permits S2CMoveEntityRot.V776, S2CMoveEntityRot.V777 {
 
     @Override
     default boolean hasPosition() {
@@ -22,6 +22,19 @@ public sealed interface S2CMoveEntityRot extends MoveEntity permits S2CMoveEntit
         @Override
         public void encode(ByteWriter writer) {
             writer.varInt(entityId).u8(yRot).u8(xRot).bool(onGround);
+        }
+    }
+
+    /// The on-ground flag moved ahead of the rotation.
+    record V777(int entityId, boolean onGround, byte yRot, byte xRot) implements S2CMoveEntityRot {
+
+        public static V777 decode(ByteReader reader) {
+            return new V777(reader.varInt(), reader.bool(), reader.i8(), reader.i8());
+        }
+
+        @Override
+        public void encode(ByteWriter writer) {
+            writer.varInt(entityId).bool(onGround).u8(yRot).u8(xRot);
         }
     }
 }

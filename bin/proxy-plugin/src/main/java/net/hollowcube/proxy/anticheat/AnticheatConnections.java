@@ -144,7 +144,7 @@ public final class AnticheatConnections {
             identity(protocolVersion, playerId, playerName, connectionId, extras), clientBrand,
             () -> VelocityInternals.knownChannelsOf(player), clock, this::trace);
         // PostLoginEvent fires on the login acknowledgement, so both directions are in configuration.
-        var tap = new AnticheatTap(engine, clock, shuttingDown,
+        var tap = new AnticheatTap(Protocol.of(protocolVersion), engine, clock, shuttingDown,
             ProtocolState.CONFIGURATION, ProtocolState.CONFIGURATION);
         if (!tap.install(channel.pipeline())) {
             engine.close();

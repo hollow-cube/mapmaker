@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.capture;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.log.Frame;
 import net.hollowcube.anticheat.protocol.Direction;
 import net.hollowcube.anticheat.protocol.ProtocolState;
@@ -133,7 +134,7 @@ class RingBufferTest {
     }
 
     private static Snapshot snapshot(long tNs) {
-        return Snapshot.of(tNs, Frame.NO_PING, new ChunkMap(), new StateCache());
+        return Snapshot.of(tNs, Frame.NO_PING, new ChunkMap(), new StateCache(Protocol.V776));
     }
 
     private static Frame frame(long tNs, int size) {

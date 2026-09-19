@@ -3,11 +3,12 @@ package net.hollowcube.proxy.anticheat;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.prometheus.client.Counter;
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.capture.CaptureClock;
 import net.hollowcube.anticheat.capture.FrameSink;
 import net.hollowcube.anticheat.log.Frame;
 import net.hollowcube.anticheat.protocol.Direction;
-import net.hollowcube.anticheat.protocol.Protocol776;
+import net.hollowcube.anticheat.protocol.PacketTable;
 import net.hollowcube.anticheat.protocol.ProtocolState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,16 +61,17 @@ public final class AnticheatTap {
     /// what stops an unanswered ping from leaking a slot for the life of the connection.
     private static final int OUTSTANDING_PINGS = 64;
 
-    private static final int LOGIN_FINISHED = id(ProtocolState.LOGIN, Direction.S2C, "login_finished");
-    private static final int LOGIN_ACKNOWLEDGED = id(ProtocolState.LOGIN, Direction.C2S, "login_acknowledged");
-    private static final int CONFIGURATION_FINISH_S2C = id(ProtocolState.CONFIGURATION, Direction.S2C, "finish_configuration");
-    private static final int CONFIGURATION_FINISH_C2S = id(ProtocolState.CONFIGURATION, Direction.C2S, "finish_configuration");
-    private static final int CONFIGURATION_PONG = id(ProtocolState.CONFIGURATION, Direction.C2S, "pong");
-    private static final int PLAY_START_CONFIGURATION = id(ProtocolState.PLAY, Direction.S2C, "start_configuration");
-    private static final int PLAY_CONFIGURATION_ACKNOWLEDGED = id(ProtocolState.PLAY, Direction.C2S, "configuration_acknowledged");
-    private static final int PLAY_BUNDLE_DELIMITER = id(ProtocolState.PLAY, Direction.S2C, "bundle_delimiter");
-    private static final int PLAY_PING = id(ProtocolState.PLAY, Direction.S2C, "ping");
-    private static final int PLAY_PONG = id(ProtocolState.PLAY, Direction.C2S, "pong");
+    private final PacketTable packets;
+    private final int loginFinished;
+    private final int loginAcknowledged;
+    private final int configurationFinishS2C;
+    private final int configurationFinishC2S;
+    private final int configurationPong;
+    private final int playStartConfiguration;
+    private final int playConfigurationAcknowledged;
+    private final int playBundleDelimiter;
+    private final int playPing;
+    private final int playPong;
 
     private final FrameSink sink;
     private final CaptureClock clock;
@@ -112,8 +114,19 @@ public final class AnticheatTap {
     ///
     /// `shuttingDown` is asked once, when the channel goes inactive, for the one thing the channel
     /// cannot say for itself: whether the proxy is going down and took the player with it.
-    public AnticheatTap(FrameSink sink, CaptureClock clock, BooleanSupplier shuttingDown,
+    public AnticheatTap(Protocol protocol, FrameSink sink, CaptureClock clock, BooleanSupplier shuttingDown,
                         ProtocolState c2sState, ProtocolState s2cState) {
+        this.packets = protocol.packets();
+        this.loginFinished = id(packets, ProtocolState.LOGIN, Direction.S2C, "login_finished");
+        this.loginAcknowledged = id(packets, ProtocolState.LOGIN, Direction.C2S, "login_acknowledged");
+        this.configurationFinishS2C = id(packets, ProtocolState.CONFIGURATION, Direction.S2C, "finish_configuration");
+        this.configurationFinishC2S = id(packets, ProtocolState.CONFIGURATION, Direction.C2S, "finish_configuration");
+        this.configurationPong = id(packets, ProtocolState.CONFIGURATION, Direction.C2S, "pong");
+        this.playStartConfiguration = id(packets, ProtocolState.PLAY, Direction.S2C, "start_configuration");
+        this.playConfigurationAcknowledged = id(packets, ProtocolState.PLAY, Direction.C2S, "configuration_acknowledged");
+        this.playBundleDelimiter = id(packets, ProtocolState.PLAY, Direction.S2C, "bundle_delimiter");
+        this.playPing = id(packets, ProtocolState.PLAY, Direction.S2C, "ping");
+        this.playPong = id(packets, ProtocolState.PLAY, Direction.C2S, "pong");
         this.sink = sink;
         this.clock = clock;
         this.shuttingDown = shuttingDown;
@@ -233,7 +246,7 @@ public final class AnticheatTap {
         var state = s2cState;
 
         if (keep(Direction.S2C, state, packetId, buffer, (int) (peeked >>> 32))) pingSetSinceLastPing = true;
-        if (state == ProtocolState.PLAY && packetId == PLAY_BUNDLE_DELIMITER) inBundle = !inBundle;
+        if (state == ProtocolState.PLAY && packetId == playBundleDelimiter) inBundle = !inBundle;
         advanceS2C(state, packetId);
     }
 
@@ -250,8 +263,8 @@ public final class AnticheatTap {
         try {
             int pingId = ++pingCounter;
             int wireId = PROXY_PING_BIT | pingId;
-            ping = context.alloc().buffer(varIntLength(PLAY_PING) + Integer.BYTES);
-            writeVarInt(ping, PLAY_PING);
+            ping = context.alloc().buffer(varIntLength(playPing) + Integer.BYTES);
+            writeVarInt(ping, playPing);
             ping.writeInt(wireId);
 
             lastPingId = pingId;
@@ -260,7 +273,7 @@ public final class AnticheatTap {
             outstandingCursor = (outstandingCursor + 1) % outstandingPings.length;
             AnticheatMetrics.pings.inc();
             // The ping is a frame the client saw, and the first one of its own bracket.
-            keep(Direction.S2C, ProtocolState.PLAY, PLAY_PING, ping, varIntLength(PLAY_PING));
+            keep(Direction.S2C, ProtocolState.PLAY, playPing, ping, varIntLength(playPing));
 
             var written = ping;
             ping = null;
@@ -287,7 +300,7 @@ public final class AnticheatTap {
             AnticheatMetrics.dropped(AnticheatMetrics.Drop.UNKNOWN_STATE);
             return false;
         }
-        var entry = Protocol776.lookup(state, direction, packetId);
+        var entry = packets.lookup(state, direction, packetId);
         if (!entry.kept()) return false;
 
         var body = new byte[buffer.readableBytes() - idLength];
@@ -324,13 +337,13 @@ public final class AnticheatTap {
     private void advanceC2S(ProtocolState state, int packetId) {
         switch (state) {
             case LOGIN -> {
-                if (packetId == LOGIN_ACKNOWLEDGED) c2sState = ProtocolState.CONFIGURATION;
+                if (packetId == loginAcknowledged) c2sState = ProtocolState.CONFIGURATION;
             }
             case CONFIGURATION -> {
-                if (packetId == CONFIGURATION_FINISH_C2S) c2sState = ProtocolState.PLAY;
+                if (packetId == configurationFinishC2S) c2sState = ProtocolState.PLAY;
             }
             case PLAY -> {
-                if (packetId == PLAY_CONFIGURATION_ACKNOWLEDGED) c2sState = ProtocolState.CONFIGURATION;
+                if (packetId == playConfigurationAcknowledged) c2sState = ProtocolState.CONFIGURATION;
             }
             case HANDSHAKE -> {
                 // The tap goes in at PostLoginEvent, long after the intention packet.
@@ -341,13 +354,13 @@ public final class AnticheatTap {
     private void advanceS2C(ProtocolState state, int packetId) {
         switch (state) {
             case LOGIN -> {
-                if (packetId == LOGIN_FINISHED) s2cState = ProtocolState.CONFIGURATION;
+                if (packetId == loginFinished) s2cState = ProtocolState.CONFIGURATION;
             }
             case CONFIGURATION -> {
-                if (packetId == CONFIGURATION_FINISH_S2C) enterPlay();
+                if (packetId == configurationFinishS2C) enterPlay();
             }
             case PLAY -> {
-                if (packetId == PLAY_START_CONFIGURATION) leavePlay();
+                if (packetId == playStartConfiguration) leavePlay();
             }
             case HANDSHAKE -> {
             }
@@ -382,17 +395,17 @@ public final class AnticheatTap {
         logger.warn("anticheat: tap disabled for this connection", cause);
     }
 
-    private static boolean isPong(ProtocolState state, int packetId) {
+    private boolean isPong(ProtocolState state, int packetId) {
         return switch (state) {
-            case PLAY -> packetId == PLAY_PONG;
-            case CONFIGURATION -> packetId == CONFIGURATION_PONG;
+            case PLAY -> packetId == playPong;
+            case CONFIGURATION -> packetId == configurationPong;
             case HANDSHAKE, LOGIN -> false;
         };
     }
 
-    private static int id(ProtocolState state, Direction direction, String name) {
-        int id = Protocol776.packetId(state, direction, name);
-        if (id < 0) throw new IllegalStateException("no 776 packet named " + name + " in " + state + " " + direction);
+    private static int id(PacketTable packets, ProtocolState state, Direction direction, String name) {
+        int id = packets.packetId(state, direction, name);
+        if (id < 0) throw new IllegalStateException("no packet named " + name + " in " + state + " " + direction);
         return id;
     }
 

@@ -36,8 +36,8 @@ class FixtureTest {
             int decoded = 0;
             for (var frame : capture.frames()) {
                 var where = source + " " + frame.state() + " " + frame.direction() + " id " + frame.packetId();
-                var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
-                assertNotSame(Protocol776.UNKNOWN, entry, where);
+                var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
+                assertNotSame(PacketTable.UNKNOWN, entry, where);
 
                 var decoder = entry.decoder();
                 if (decoder == null) continue;

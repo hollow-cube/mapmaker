@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.capture;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.log.Frame;
 import net.hollowcube.anticheat.protocol.*;
 import net.hollowcube.anticheat.state.TrackedEntity;
@@ -21,12 +22,9 @@ import java.util.List;
 /// relative to it.
 final class Prelude {
 
-    private static final int ENTITY_POSITION_SYNC =
-        Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "entity_position_sync");
-    private static final int PLAYER_POSITION =
-        Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, "player_position");
-
-    static List<Frame> frames(Snapshot snapshot) {
+    static List<Frame> frames(Snapshot snapshot, Protocol protocol) {
+        int positionSync = protocol.packets().packetId(ProtocolState.PLAY, Direction.S2C, "entity_position_sync");
+        int playerPosition = protocol.packets().packetId(ProtocolState.PLAY, Direction.S2C, "player_position");
         var cached = snapshot.state().frames();
         var frames = new ArrayList<Frame>(cached.size() + snapshot.entities().size() + 1);
         for (var frame : cached)
@@ -37,13 +35,13 @@ final class Prelude {
         entities.sort(Comparator.comparingInt(TrackedEntity::entityId));
         for (var entity : entities) {
             if (entity.dropped() || entity.entityId() == player.entityId()) continue;
-            frames.add(frame(snapshot, ENTITY_POSITION_SYNC,
-                new S2CEntityPositionSync.V776(entity.entityId(), position(entity), entity.onGround())));
+            frames.add(frame(snapshot, positionSync, protocol.entityPositionSync().create(entity.entityId(),
+                entity.x(), entity.y(), entity.z(), entity.yRot(), entity.xRot(), entity.onGround())));
         }
 
         // Before the login there is no player to place, and nothing above it either.
         if (player.entityId() >= 0)
-            frames.add(frame(snapshot, PLAYER_POSITION, new S2CPlayerPosition.V776(0, position(player), 0)));
+            frames.add(frame(snapshot, playerPosition, new S2CPlayerPosition.V776(0, position(player), 0)));
 
         return List.copyOf(frames);
     }

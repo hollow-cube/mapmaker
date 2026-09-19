@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.state;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.protocol.*;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,42 +24,23 @@ import java.util.TreeSet;
 /// of an entity that *is* kept, it can be promoted with a synthesized `add_entity` carrying its
 /// current position and kept from then on.
 ///
-/// Packet ids are 776's. All state is owned by the calling thread.
+/// Packet ids come from the [Protocol] the cache was built for. All state is owned by the calling
+/// thread.
 public final class StateCache {
 
-    private static final int PLAY_ADD_ENTITY = playId("add_entity");
-    private static final int PLAY_COOLDOWN = playId("cooldown");
-    private static final int PLAY_GAME_EVENT = playId("game_event");
-    private static final int PLAY_PLAYER_INFO_REMOVE = playId("player_info_remove");
-    private static final int PLAY_PLAYER_INFO_UPDATE = playId("player_info_update");
-    private static final int PLAY_SET_ENTITY_DATA = playId("set_entity_data");
-    private static final int PLAY_SET_PLAYER_TEAM = playId("set_player_team");
-
+    private final int playAddEntity;
+    private final int playCooldown;
+    private final int playGameEvent;
+    private final int playPlayerInfoRemove;
+    private final int playPlayerInfoUpdate;
+    private final int playSetEntityData;
+    private final int playSetPlayerTeam;
     /// The plan's singleton-state row: one frame per packet id, last one wins.
-    private static final Set<Integer> PLAY_SINGLETONS = Set.of(
-        playId("initialize_border"),
-        playId("player_abilities"),
-        playId("set_border_center"),
-        playId("set_border_lerp_size"),
-        playId("set_border_size"),
-        playId("set_camera"),
-        playId("set_chunk_cache_center"),
-        playId("set_chunk_cache_radius"),
-        playId("set_cursor_item"),
-        playId("set_health"),
-        playId("set_held_slot"),
-        playId("set_simulation_distance"),
-        playId("set_time"),
-        playId("ticking_state"),
-        playId("update_tags"));
-
+    private final Set<Integer> playSingletons;
     /// The configuration-phase set, replaced wholesale by the next configuration phase.
-    private static final Set<Integer> CONFIGURATION_SET = Set.of(
-        configurationId("registry_data"),
-        configurationId("update_enabled_features"),
-        configurationId("update_tags"));
+    private final Set<Integer> configurationSet;
 
-    private final EntityTable entities = new EntityTable();
+    private final EntityTable entities;
 
     private Map<StateKey, StateFrame> lastWins = new HashMap<>();
     private Map<StateKey, FrameNode> accumulated = new HashMap<>();
@@ -69,6 +51,38 @@ public final class StateCache {
     /// The plugin channels the client has registered: the connection's, not the level's, so no
     /// boundary clears them, and an `unregister` takes them out.
     private final TreeSet<String> channels = new TreeSet<>();
+
+    public StateCache(Protocol protocol) {
+        var packets = protocol.packets();
+        playAddEntity = playId(packets, "add_entity");
+        playCooldown = playId(packets, "cooldown");
+        playGameEvent = playId(packets, "game_event");
+        playPlayerInfoRemove = playId(packets, "player_info_remove");
+        playPlayerInfoUpdate = playId(packets, "player_info_update");
+        playSetEntityData = playId(packets, "set_entity_data");
+        playSetPlayerTeam = playId(packets, "set_player_team");
+        playSingletons = Set.of(
+            playId(packets, "initialize_border"),
+            playId(packets, "player_abilities"),
+            playId(packets, "set_border_center"),
+            playId(packets, "set_border_lerp_size"),
+            playId(packets, "set_border_size"),
+            playId(packets, "set_camera"),
+            playId(packets, "set_chunk_cache_center"),
+            playId(packets, "set_chunk_cache_radius"),
+            playId(packets, "set_cursor_item"),
+            playId(packets, "set_health"),
+            playId(packets, "set_held_slot"),
+            playId(packets, "set_simulation_distance"),
+            playId(packets, "set_time"),
+            playId(packets, "ticking_state"),
+            playId(packets, "update_tags"));
+        configurationSet = Set.of(
+            configurationId(packets, "registry_data"),
+            configurationId(packets, "update_enabled_features"),
+            configurationId(packets, "update_tags"));
+        entities = new EntityTable(protocol.entityTypes());
+    }
 
     public EntityTable entities() {
         return entities;
@@ -137,7 +151,7 @@ public final class StateCache {
     }
 
     private void applyConfiguration(int packetId, byte[] body) {
-        if (CONFIGURATION_SET.contains(packetId))
+        if (configurationSet.contains(packetId))
             append(StateKey.Config.INSTANCE, frame(ProtocolState.CONFIGURATION, packetId, body));
     }
 
@@ -212,19 +226,19 @@ public final class StateCache {
     /// The packets that are kept but never decoded, whose key is the id plus whatever prefix of the
     /// payload tells two of them apart.
     private void applyById(int packetId, byte[] body) {
-        if (packetId == PLAY_GAME_EVENT) {
+        if (packetId == playGameEvent) {
             if (body.length > 0)
                 put(new StateKey.Singleton(packetId, body[0] & 0xFF), frame(ProtocolState.PLAY, packetId, body));
-        } else if (packetId == PLAY_COOLDOWN) {
+        } else if (packetId == playCooldown) {
             var group = leadingString(body);
             if (group != null) put(new StateKey.Cooldown(group), frame(ProtocolState.PLAY, packetId, body));
-        } else if (packetId == PLAY_SET_PLAYER_TEAM) {
+        } else if (packetId == playSetPlayerTeam) {
             applyTeam(packetId, body);
-        } else if (packetId == PLAY_PLAYER_INFO_UPDATE) {
+        } else if (packetId == playPlayerInfoUpdate) {
             applyPlayerInfo(packetId, body);
-        } else if (packetId == PLAY_PLAYER_INFO_REMOVE) {
+        } else if (packetId == playPlayerInfoRemove) {
             applyPlayerInfoRemove(packetId, body);
-        } else if (PLAY_SINGLETONS.contains(packetId)) {
+        } else if (playSingletons.contains(packetId)) {
             put(new StateKey.Singleton(packetId), frame(ProtocolState.PLAY, packetId, body));
         }
     }
@@ -253,7 +267,7 @@ public final class StateCache {
             boolean keepEntityData = (packet.dataToKeep() & S2CRespawn.KEEP_ENTITY_DATA) != 0;
             entities.clear();
             removeKeys(key -> switch (key) {
-                case StateKey.Entity entity -> entity.entityId() != playerId || entity.packetId() != PLAY_SET_ENTITY_DATA || !keepEntityData;
+                case StateKey.Entity entity -> entity.entityId() != playerId || entity.packetId() != playSetEntityData || !keepEntityData;
                 case StateKey.EntityAttribute attribute -> attribute.entityId() != playerId;
                 case StateKey.Effect _ -> true;
                 default -> false;
@@ -306,8 +320,8 @@ public final class StateCache {
             TrackedEntity.packRotation(entity.yRot()),
             TrackedEntity.packRotation(entity.yRot()),
             0);
-        put(new StateKey.Entity(entityId, PLAY_ADD_ENTITY),
-            frame(ProtocolState.PLAY, PLAY_ADD_ENTITY, synthesized.toByteArray()));
+        put(new StateKey.Entity(entityId, playAddEntity),
+            frame(ProtocolState.PLAY, playAddEntity, synthesized.toByteArray()));
     }
 
     private void applyTeam(int packetId, byte[] body) {
@@ -440,11 +454,11 @@ public final class StateCache {
         }
     }
 
-    private static int playId(String name) {
-        return Protocol776.packetId(ProtocolState.PLAY, Direction.S2C, name);
+    private static int playId(PacketTable packets, String name) {
+        return packets.packetId(ProtocolState.PLAY, Direction.S2C, name);
     }
 
-    private static int configurationId(String name) {
-        return Protocol776.packetId(ProtocolState.CONFIGURATION, Direction.S2C, name);
+    private static int configurationId(PacketTable packets, String name) {
+        return packets.packetId(ProtocolState.CONFIGURATION, Direction.S2C, name);
     }
 }

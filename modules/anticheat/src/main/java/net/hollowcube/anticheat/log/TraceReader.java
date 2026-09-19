@@ -1,6 +1,7 @@
 package net.hollowcube.anticheat.log;
 
 import com.github.luben.zstd.ZstdInputStreamNoFinalizer;
+import net.hollowcube.anticheat.Protocol;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -82,7 +83,12 @@ public final class TraceReader implements AutoCloseable {
                 prelude.add(frame);
             }
             int chunkCount = TraceFormat.readVarInt(this.body);
-            for (int i = 0; i < chunkCount; i++) chunks.add(WorldChunk.decode(this.body));
+            if (chunkCount > 0) {
+                if (!Protocol.isSupported(this.header.clientPvn()))
+                    throw new TraceFormatException("no chunk layout for client protocol " + this.header.clientPvn());
+                int directBits = Protocol.of(this.header.clientPvn()).directBlockBits();
+                for (int i = 0; i < chunkCount; i++) chunks.add(WorldChunk.decode(this.body, directBits));
+            }
         } catch (IOException e) {
             // The body was cut before the frames even started; keep what parsed and stop there.
             this.truncated = true;

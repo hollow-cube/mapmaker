@@ -2,17 +2,13 @@ package net.hollowcube.anticheat.protocol;
 
 import static net.hollowcube.anticheat.protocol.PacketTable.*;
 
-/// The packet id tables for protocol version 776 (26.2).
+/// The packet id tables for protocol version 777 (26.3): [Protocol776]'s, with the packets 26.3
+/// added and the decoders whose layout it changed.
 ///
-/// What is kept and what is decoded comes from `anticheat-packet-audit.md`; the ping set is that
-/// document's YES rows minus the per-entity and screen-opening groups, per plan section 2.3, plus
-/// `block_entity_data` (a piston moving-block entity is a live collision shape, and `block_event` —
-/// the same subsystem — is fenced). The per-entity exclusion leaks for the local player, so the
-/// own-player-relevant members of that group carry a [PingWhen] instead: fenced only when the
-/// decoded packet lands on the local player (or, for `animate`, when the action writes a block).
-public final class Protocol776 {
-
-    public static final int PROTOCOL_VERSION = 776;
+/// `swing` became `punch`, which is kept: the server resets the attack strength ticker on it. The
+/// new S2C packets are all dropped — `add_transient_block` is a render-only ghost block,
+/// `post_effects` a shader list, `swing_animation` the arm swing that left `animate`.
+public final class Protocol777 {
 
     private static final Builder HANDSHAKE_C2S = new Builder()
         .drop("intention");
@@ -51,6 +47,7 @@ public final class Protocol776 {
         .decode("registry_data", S2CRegistryData.V776::decode)
         .drop("resource_pack_pop")
         .keep("resource_pack_push")
+        .drop("post_effects")
         .drop("store_cookie")
         .keep("transfer")
         .keep("update_enabled_features")
@@ -108,6 +105,7 @@ public final class Protocol776 {
         .keep("player_input")
         .keep("player_loaded")
         .decode("pong", C2SPong.V776::decode)
+        .keep("punch")
         .drop("recipe_book_change_settings")
         .drop("recipe_book_seen_recipe")
         .drop("rename_item")
@@ -125,7 +123,6 @@ public final class Protocol776 {
         .drop("set_test_block")
         .drop("sign_update")
         .keep("spectator_action")
-        .drop("swing")
         .keep("teleport_to_entity")
         .drop("test_instance_block_action")
         .keep("use_item_on")
@@ -134,12 +131,10 @@ public final class Protocol776 {
     private static final Builder PLAY_S2C = new Builder()
         .decode("bundle_delimiter", S2CBundleDelimiter.V776::decode)
         .decode("add_entity", S2CAddEntity.V776::decode)
-        .decodePingWhen("animate", S2CAnimate.V776::decode, WAKE_UP)
+        .decodePingWhen("animate", S2CAnimate.V777::decode, WAKE_UP)
         .drop("award_stats")
         .ping("block_changed_ack")
         .drop("block_destruction")
-        // A piston moving-block entity is a live collision shape; block_event, the same piston
-        // subsystem, is fenced, so this is too.
         .ping("block_entity_data")
         .ping("block_event")
         .decodePing("block_update", S2CBlockUpdate.V776::decode)
@@ -169,11 +164,9 @@ public final class Protocol776 {
         .keep("disconnect")
         .drop("disguised_chat")
         .decodePingWhen("entity_event", S2CEntityEvent.V776::decode, SELF_EVENT)
-        // Unfenced even when it moves the player through their vehicle: a non-interpolated update
-        // to the vehicle forces a C2S move_player echo, and that echo is the de-facto fence. The
-        // same goes for teleport_entity and move_vehicle below.
-        .decode("entity_position_sync", S2CEntityPositionSync.V776::decode)
+        .decode("entity_position_sync", S2CEntityPositionSync.V777::decode)
         .ping("explode")
+        .drop("add_transient_block")
         .decodePing("forget_level_chunk", S2CForgetLevelChunk.V776::decode)
         .ping("game_event")
         .drop("game_rule_values")
@@ -182,18 +175,18 @@ public final class Protocol776 {
         .drop("hurt_animation")
         .ping("initialize_border")
         .keep("keep_alive")
-        .decodePing("level_chunk_with_light", S2CLevelChunkWithLight.V776::decode)
+        .decodePing("level_chunk_with_light", S2CLevelChunkWithLight.V777::decode)
         .drop("level_event")
         .drop("level_particles")
         .keep("light_update")
-        .decodePing("login", S2CLogin.V776::decode)
+        .decodePing("login", S2CLogin.V777::decode)
         .drop("low_disk_space_warning")
         .drop("map_item_data")
         .drop("merchant_offers")
-        .decode("move_entity_pos", S2CMoveEntityPos.V776::decode)
-        .decode("move_entity_pos_rot", S2CMoveEntityPosRot.V776::decode)
+        .decode("move_entity_pos", S2CMoveEntityPos.V777::decode)
+        .decode("move_entity_pos_rot", S2CMoveEntityPosRot.V777::decode)
         .keep("move_minecart_along_track")
-        .decode("move_entity_rot", S2CMoveEntityRot.V776::decode)
+        .decode("move_entity_rot", S2CMoveEntityRot.V777::decode)
         .keep("move_vehicle")
         .keep("open_book")
         .keep("open_screen")
@@ -215,14 +208,12 @@ public final class Protocol776 {
         .drop("recipe_book_remove")
         .drop("recipe_book_settings")
         .decode("remove_entities", S2CRemoveEntities.V776::decode)
-        // Fenced for self together with update_attributes: removing an effect leaves its
-        // attribute modifiers in place until the following update_attributes, so the relative
-        // timing of the two packets is itself load-bearing.
         .decodePingWhen("remove_mob_effect", S2CRemoveMobEffect.V776::decode, SELF)
         .drop("reset_score")
         .drop("resource_pack_pop")
         .keep("resource_pack_push")
-        .decodePing("respawn", S2CRespawn.V776::decode)
+        .drop("post_effects")
+        .decodePing("respawn", S2CRespawn.V777::decode)
         .drop("rotate_head")
         .decodePing("section_blocks_update", S2CSectionBlocksUpdate.V776::decode)
         .drop("select_advancements_tab")
@@ -261,6 +252,7 @@ public final class Protocol776 {
         .decode("start_configuration", S2CStartConfiguration.V776::decode)
         .drop("stop_sound")
         .drop("store_cookie")
+        .drop("swing_animation")
         .drop("system_chat")
         .drop("tab_list")
         .drop("tag_query")
@@ -269,9 +261,6 @@ public final class Protocol776 {
         .drop("test_instance_block_status")
         .ping("ticking_state")
         .ping("ticking_step")
-        // Terminal frames are never fenced: a ping written right before the kick may never be
-        // answered, and a dangling id looks identical to a lagging client. The trace's
-        // tailUnfenced header flag is the honest signal that the final window has no upper bound.
         .keep("transfer")
         .drop("update_advancements")
         .decodePingWhen("update_attributes", S2CUpdateAttributes.V776::decode, SELF)
@@ -288,5 +277,5 @@ public final class Protocol776 {
     public static final PacketTable PACKETS = new PacketTable(HANDSHAKE_C2S, LOGIN_C2S, LOGIN_S2C,
         CONFIGURATION_C2S, CONFIGURATION_S2C, PLAY_C2S, PLAY_S2C);
 
-    private Protocol776() {}
+    private Protocol777() {}
 }

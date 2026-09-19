@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.capture;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.log.*;
 import net.hollowcube.anticheat.protocol.*;
 import net.hollowcube.anticheat.state.StateCache;
@@ -148,11 +149,11 @@ class CaptureFixtureTest {
     /// the prelude already do. The whole fixture is replayed either way, because whether an entity
     /// is a display is only known from the `add_entity` that may precede `from`.
     private static long kept(List<FixtureReader.Frame> frames, int from) {
-        var state = new StateCache();
+        var state = new StateCache(Protocol.V776);
         long kept = 0;
         for (int i = 0; i < frames.size(); i++) {
             var frame = frames.get(i);
-            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
             if (!entry.kept()) continue;
 
             var decoder = entry.decoder();
@@ -168,10 +169,10 @@ class CaptureFixtureTest {
     /// What the capture should have carried, from the model alone: the trimmed chunk count and how
     /// many chunks were loaded at the point the capture opened.
     private static long lastKeptNs(List<FixtureReader.Frame> frames) {
-        var state = new StateCache();
+        var state = new StateCache(Protocol.V776);
         long last = Long.MIN_VALUE;
         for (var frame : frames) {
-            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
             if (!entry.kept()) continue;
 
             var decoder = entry.decoder();
@@ -191,7 +192,7 @@ class CaptureFixtureTest {
     /// chunks of interest after it, and the region the two produce.
     private static Replay replay(FixtureReader capture, int split, TrimPolicy policy) {
         var world = new ChunkMap();
-        var state = new StateCache();
+        var state = new StateCache(Protocol.V776);
         var trim = new Trim();
         var frames = capture.frames();
         WorldView view = null;
@@ -204,7 +205,7 @@ class CaptureFixtureTest {
                 note(trim, state, startNs);
             }
             var frame = frames.get(i);
-            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
             if (!entry.kept()) continue;
 
             var decoder = entry.decoder();

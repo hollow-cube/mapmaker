@@ -1,5 +1,6 @@
 package net.hollowcube.anticheat.world;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.protocol.*;
 import net.hollowcube.anticheat.state.StateCache;
 import net.hollowcube.anticheat.state.StateCacheView;
@@ -38,12 +39,12 @@ class CaptureModelFixtureTest {
             var source = fixture.getFileName().toString();
 
             var world = new ChunkMap();
-            var state = new StateCache();
+            var state = new StateCache(Protocol.V776);
             var loaded = new HashSet<Long>();
             int chunkFrames = 0;
 
             for (var frame : capture.frames()) {
-                var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+                var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
                 if (!entry.kept()) continue;
 
                 var packet = decode(entry, frame);
@@ -79,7 +80,7 @@ class CaptureModelFixtureTest {
         int checked = 0;
 
         for (var frame : capture.frames()) {
-            var entry = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId());
+            var entry = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId());
             if (!entry.kept() || frame.direction() != Direction.S2C) continue;
             var packet = decode(entry, frame);
             if (packet == null) continue;
@@ -129,7 +130,7 @@ class CaptureModelFixtureTest {
             || Math.abs(Positions.chunkZ(pos) - world.viewCenterZ()) > world.storageRadius());
     }
 
-    private static @Nullable Packet decode(Protocol776.Entry entry, FixtureReader.Frame frame) {
+    private static @Nullable Packet decode(PacketTable.Entry entry, FixtureReader.Frame frame) {
         var decoder = entry.decoder();
         return decoder == null ? null : decoder.decode(new ByteReader(frame.body()));
     }

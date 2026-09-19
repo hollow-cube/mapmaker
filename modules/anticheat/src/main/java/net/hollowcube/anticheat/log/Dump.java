@@ -1,7 +1,7 @@
 package net.hollowcube.anticheat.log;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.protocol.Direction;
-import net.hollowcube.anticheat.protocol.Protocol776;
 import net.hollowcube.anticheat.protocol.ProtocolState;
 
 import java.io.Flushable;
@@ -100,11 +100,10 @@ public final class Dump {
         return frame.direction() + " " + frame.state() + " " + name(header, frame);
     }
 
-    /// Only 776 has a registry today; anything else is named by its id, because a wrong name is
-    /// worse than none.
+    /// A version without a packet table is named by its id, because a wrong name is worse than none.
     private static String name(TraceHeader header, Frame frame) {
-        if (header.clientPvn() != Protocol776.PROTOCOL_VERSION) return "id:" + frame.packetId();
-        return Protocol776.lookup(frame.state(), frame.direction(), frame.packetId()).name();
+        if (!Protocol.isSupported(header.clientPvn())) return "id:" + frame.packetId();
+        return Protocol.of(header.clientPvn()).packets().lookup(frame.state(), frame.direction(), frame.packetId()).name();
     }
 
     private static void line(Appendable out, String text) {

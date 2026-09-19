@@ -15,7 +15,7 @@ class EntityTableTest {
 
     @Test
     void testAddEntityRecordsTypeAndPosition() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 10.5, 64.0, -3.25, (byte) 64, (byte) 32));
 
         var entity = table.get(7);
@@ -32,7 +32,7 @@ class EntityTableTest {
     /// the player entry, which has no row in the table.
     @Test
     void testSetEntityDataMergesMetadataPerIndex() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 0, 64, 0, (byte) 0, (byte) 0));
 
         byte[] sneaking = new ByteWriter().u8(0).varInt(0).u8(0x02).u8(Metadata776.TERMINATOR).toByteArray();
@@ -58,7 +58,7 @@ class EntityTableTest {
 
     @Test
     void testMoveEntityAppliesDeltasInQuarterThousandthBlocks() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 10.0, 64.0, -3.0, (byte) 0, (byte) 0));
 
         table.apply(new S2CMoveEntityPos.V776(7, (short) 4096, (short) -2048, (short) 1, true));
@@ -76,7 +76,7 @@ class EntityTableTest {
 
     @Test
     void testRotationOnlyMoveKeepsThePosition() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 10.0, 64.0, -3.0, (byte) 0, (byte) 0));
 
         table.apply(new S2CMoveEntityRot.V776(7, (byte) -128, (byte) 0, true));
@@ -87,7 +87,7 @@ class EntityTableTest {
 
     @Test
     void testTeleportHonoursTheRelativeFlags() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 10.0, 64.0, -3.0, (byte) 0, (byte) 0));
 
         table.apply(new S2CTeleportEntity.V776(7,
@@ -102,7 +102,7 @@ class EntityTableTest {
 
     @Test
     void testPositionSyncIsAlwaysAbsolute() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 10.0, 64.0, -3.0, (byte) 0, (byte) 0));
 
         table.apply(new S2CEntityPositionSync.V776(7,
@@ -114,16 +114,59 @@ class EntityTableTest {
         assertEquals(6.0f, entity.xRot());
     }
 
+    /// A 777 stepped move lands the entity at its last step, however far the steps add up to.
+    @Test
+    void testSteppedMoveLandsOnTheLastStep() {
+        var table = new EntityTable(EntityTypes.V777);
+        table.apply(add(7, ZOMBIE, 0, 64, 0, (byte) 0, (byte) 0));
+
+        var steps = List.of(
+            new VecDelta.Step(1, (short) 32000, (short) 0, (short) 0),
+            new VecDelta.Step(2, (short) 32000, (short) -2048, (short) 0));
+        table.apply(new S2CMoveEntityPos.V777(7, true, new VecDelta.Stepped(steps)));
+
+        var entity = table.get(7);
+        assertEquals(64000 * EntityTable.DELTA_UNIT, entity.x(), 1e-9);
+        assertEquals(63.5, entity.y(), 1e-9);
+        assertTrue(entity.onGround());
+    }
+
+    @Test
+    void testSteppedPositionSyncIsAbsoluteAtTheEndOfThePath() {
+        var table = new EntityTable(EntityTypes.V777);
+        table.apply(add(7, ZOMBIE, 10.0, 64.0, -3.0, (byte) 0, (byte) 0));
+
+        var path = new PositionPath.Stepped(List.of(
+            new PositionPath.Step(1, 2, 3, 1), new PositionPath.Step(4, 5, 6, 2)));
+        table.apply(new S2CEntityPositionSync.V777(7, path, 5.0f, 6.0f, false));
+
+        var entity = table.get(7);
+        assertEquals(4.0, entity.x());
+        assertEquals(6.0, entity.z());
+        assertEquals(6.0f, entity.xRot());
+    }
+
+    /// 26.3 inserted three entity types before the displays, so a 777 text display has a 777 id.
+    @Test
+    void testDisplayIdsAreTheVersions() {
+        var table = new EntityTable(EntityTypes.V777);
+        table.apply(add(7, EntityTypes.V777.textDisplay(), 0, 0, 0, (byte) 0, (byte) 0));
+        table.apply(add(8, EntityTypes.V776.textDisplay(), 0, 0, 0, (byte) 0, (byte) 0));
+        assertTrue(table.isDropped(7));
+        assertFalse(table.isDropped(8));
+        assertEquals(EntityTypes.V777.player(), table.player().typeId());
+    }
+
     @Test
     void testMovesForUnknownEntitiesAreIgnored() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(new S2CMoveEntityPos.V776(99, (short) 4096, (short) 0, (short) 0, true));
         assertEquals(0, table.size());
     }
 
     @Test
     void testRemoveEntitiesDropsTheEntries() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 0, 0, 0, (byte) 0, (byte) 0));
         table.apply(add(8, ZOMBIE, 0, 0, 0, (byte) 0, (byte) 0));
 
@@ -135,8 +178,8 @@ class EntityTableTest {
 
     @Test
     void testDisplayEntitiesAreTrackedButDropped() {
-        var table = new EntityTable();
-        table.apply(add(7, EntityTypes776.TEXT_DISPLAY, 1.0, 2.0, 3.0, (byte) 0, (byte) 0));
+        var table = new EntityTable(EntityTypes.V776);
+        table.apply(add(7, EntityTypes.V776.textDisplay(), 1.0, 2.0, 3.0, (byte) 0, (byte) 0));
 
         assertTrue(table.isDropped(7));
         assertFalse(table.isDropped(404), "an entity we never saw is not dropped");
@@ -150,14 +193,14 @@ class EntityTableTest {
 
     @Test
     void testInteractionEntitiesAreKept() {
-        var table = new EntityTable();
-        table.apply(add(7, EntityTypes776.INTERACTION, 0, 0, 0, (byte) 0, (byte) 0));
+        var table = new EntityTable(EntityTypes.V776);
+        table.apply(add(7, EntityTypes.V776.interaction(), 0, 0, 0, (byte) 0, (byte) 0));
         assertFalse(table.isDropped(7));
     }
 
     @Test
     void testOwnPositionComesFromBothDirections() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(login(42));
         assertEquals(42, table.player().entityId());
 
@@ -180,7 +223,7 @@ class EntityTableTest {
 
     @Test
     void testSnapshotIsUnchangedByLaterWrites() {
-        var table = new EntityTable();
+        var table = new EntityTable(EntityTypes.V776);
         table.apply(add(7, ZOMBIE, 10.0, 64.0, -3.0, (byte) 0, (byte) 0));
 
         var view = table.snapshot();
@@ -201,7 +244,7 @@ class EntityTableTest {
     private static S2CLogin.V776 login(int playerId) {
         return new S2CLogin.V776(playerId, false, List.of("minecraft:overworld"), 20, 8, 8,
             false, true, false,
-            new CommonPlayerSpawnInfo(0, "minecraft:overworld", 0L, 0, (byte) -1, false, false, null, 0, 63),
+            new CommonPlayerSpawnInfo.V776(0, "minecraft:overworld", 0L, 0, (byte) -1, false, false, null, 0, 63),
             false, false);
     }
 }

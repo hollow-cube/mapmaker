@@ -39,14 +39,18 @@ final class TestCapture {
 
     /// The connection fields every trace of one connection carries.
     static TraceHeader identity() {
-        return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, Protocol776.PROTOCOL_VERSION, null,
+        return identity(Protocol776.PROTOCOL_VERSION);
+    }
+
+    static TraceHeader identity(int clientPvn) {
+        return new TraceHeader(TraceFormat.VERSION_LATEST, TraceDictionary.LATEST, clientPvn, null,
             UUID.fromString("00000000-0000-0000-0000-0000000000aa"), "Tester", "connection-1",
             null, null, null, null, null, "proxy-1", "test", null, null, null,
             TraceHeader.Flags.NONE, TraceHeader.Counters.EMPTY, Map.of());
     }
 
     static boolean feed(CaptureEngine engine, long tNs, ProtocolState state, Direction direction, String name, Packet packet) {
-        return engine.frame(tNs, direction, state, Protocol776.packetId(state, direction, name), Frame.NO_PING,
+        return engine.frame(tNs, direction, state, Protocol776.PACKETS.packetId(state, direction, name), Frame.NO_PING,
             packet.toByteArray());
     }
 
@@ -56,7 +60,7 @@ final class TestCapture {
 
     static S2CLogin.V776 login() {
         return new S2CLogin.V776(PLAYER_ID, false, List.of("minecraft:overworld"), 20, 32, 12, false, true, false,
-            new CommonPlayerSpawnInfo(0, "minecraft:overworld", 0L, 0, (byte) -1, false, false, null, 0, 63),
+            new CommonPlayerSpawnInfo.V776(0, "minecraft:overworld", 0L, 0, (byte) -1, false, false, null, 0, 63),
             false, false);
     }
 
@@ -78,7 +82,8 @@ final class TestCapture {
     /// A chunk of single-value air sections, the smallest legal shape.
     static S2CLevelChunkWithLight.V776 chunk(int chunkX, int chunkZ) {
         var sections = new ArrayList<Section>(4);
-        for (int i = 0; i < 4; i++) sections.add(new Section(0, 0, 0, new int[]{0}, new long[0], biomes()));
+        for (int i = 0; i < 4; i++)
+            sections.add(new Section(0, 0, 0, new int[]{0}, new long[0], biomes(), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS));
         return new S2CLevelChunkWithLight.V776(chunkX, chunkZ, ByteSlice.of(new ByteWriter().varInt(0).toByteArray()),
             List.copyOf(sections), ByteSlice.of(new byte[]{0, 0, 0, 0}));
     }

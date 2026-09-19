@@ -18,9 +18,15 @@ public final class EntityTable {
 
     /// Primitive-keyed because the `move_entity_*` family hits it for every tracked entity on
     /// every tick, where a boxed key is an allocation per lookup.
+    private final EntityTypes types;
     private Int2ObjectMap<TrackedEntity> entities = new Int2ObjectOpenHashMap<>();
     private boolean shared;
-    private TrackedEntity player = new TrackedEntity(-1, null, EntityTypes776.PLAYER, 0, 0, 0, 0, 0, false, false);
+    private TrackedEntity player;
+
+    public EntityTable(EntityTypes types) {
+        this.types = types;
+        this.player = new TrackedEntity(-1, null, types.player(), 0, 0, 0, 0, 0, false, false);
+    }
 
     public int size() {
         return entities.size();
@@ -51,7 +57,7 @@ public final class EntityTable {
             packet.entityId(), packet.uuid(), packet.entityTypeId(),
             packet.x(), packet.y(), packet.z(),
             TrackedEntity.rotation(packet.yRot()), TrackedEntity.rotation(packet.xRot()),
-            false, EntityTypes776.isDisplay(packet.entityTypeId())));
+            false, types.isDisplay(packet.entityTypeId())));
     }
 
     void apply(MoveEntity packet) {
@@ -80,10 +86,9 @@ public final class EntityTable {
     void apply(S2CEntityPositionSync packet) {
         var entity = entities.get(packet.entityId());
         if (entity == null) return;
-        var values = packet.values();
         entities().put(entity.entityId(), entity
-            .withPosition(values.x(), values.y(), values.z(), packet.onGround())
-            .withRotation(values.yRot(), values.xRot()));
+            .withPosition(packet.x(), packet.y(), packet.z(), packet.onGround())
+            .withRotation(packet.yRot(), packet.xRot()));
     }
 
     /// Metadata merges last-wins per index, on the player too: their pose and flags arrive the
@@ -107,7 +112,7 @@ public final class EntityTable {
 
     void apply(S2CLogin packet) {
         clear();
-        player = new TrackedEntity(packet.playerId(), null, EntityTypes776.PLAYER, 0, 0, 0, 0, 0, false, false);
+        player = new TrackedEntity(packet.playerId(), null, types.player(), 0, 0, 0, 0, 0, false, false);
     }
 
     /// The server's own-player teleport, applied with the same [Relative] rules the client uses in

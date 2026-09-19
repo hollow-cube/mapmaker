@@ -1,6 +1,8 @@
 package net.hollowcube.anticheat.capture;
 
+import net.hollowcube.anticheat.Protocol;
 import net.hollowcube.anticheat.log.Trace;
+import net.hollowcube.anticheat.log.WorldChunk;
 import net.hollowcube.anticheat.log.TraceHeader;
 import net.hollowcube.anticheat.log.TraceReader;
 import net.hollowcube.anticheat.log.Frame;
@@ -12,6 +14,7 @@ import org.junit.jupiter.api.io.TempDir;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -115,7 +118,7 @@ class CaptureEngineTest {
 
         var trace = TraceReader.read(traces.take().path());
         var stored = trace.frames().stream()
-            .filter(frame -> frame.packetId() == Protocol776.packetId(ProtocolState.PLAY, Direction.S2C,
+            .filter(frame -> frame.packetId() == Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C,
                 "level_chunk_with_light"))
             .findFirst()
             .orElseThrow();
@@ -131,6 +134,61 @@ class CaptureEngineTest {
         // The sections are the whole point of keeping the frame, so they survive intact. Section
         // holds arrays, so they compare as the bytes they were read out of.
         assertArrayEquals(sections(sent), sections(read));
+
+        engine.close();
+    }
+
+    /// A 777 connection goes through the 777 table end to end: a stepped move puts the entity where
+    /// its last step lands, the prelude places it with a 777 `entity_position_sync`, and a direct
+    /// section is written and read back at 26.3's sixteen bits.
+    @Test
+    void testA777ConnectionIsCapturedThroughThe777Table() throws Exception {
+        var clock = new TestCapture.ManualClock();
+        var traces = new TestCapture.Traces();
+        var engine = new CaptureEngine(TestCapture.config(directory), TestCapture.identity(Protocol.PVN_777),
+            () -> null, clock, traces);
+
+        var login = new S2CLogin.V777(PLAYER_ID, false, List.of("minecraft:overworld"), 20, 32, 12, false, true,
+            false, new CommonPlayerSpawnInfo.V777(0, "minecraft:overworld", 0L, 0, -1, false, false, null, 0, 63),
+            false, false);
+        feed777(engine, 0, "login", login);
+        feed777(engine, 0, "add_entity", addEntity(9, 95));
+        feed777(engine, 0, "move_entity_pos", new S2CMoveEntityPos.V777(9, true, new VecDelta.Stepped(List.of(
+            new VecDelta.Step(1, (short) 4096, (short) 0, (short) 0),
+            new VecDelta.Step(2, (short) 4096, (short) 0, (short) 0)))));
+
+        var direct = new long[Section.longCount(16, Section.BLOCK_ENTRY_COUNT)];
+        direct[0] = 35_000;
+        var sections = new ArrayList<Section>();
+        sections.add(new Section(4096, 0, 16, null, direct, new byte[]{0, 0},
+            S2CLevelChunkWithLight.V777.DIRECT_BLOCK_BITS));
+        for (int i = 1; i < 4; i++)
+            sections.add(new Section(0, 0, 0, new int[]{0}, new long[0], new byte[]{0, 0},
+                S2CLevelChunkWithLight.V777.DIRECT_BLOCK_BITS));
+        feed777(engine, 0, "level_chunk_with_light", new S2CLevelChunkWithLight.V777(0, 0,
+            ByteSlice.of(new byte[]{0}), List.copyOf(sections), ByteSlice.of(new byte[]{0})));
+
+        clock.set(SECOND);
+        engine.start("run-777", TraceHeader.Reason.RUN, null, TrimPolicy.EVERYTHING);
+        clock.set(2 * SECOND);
+        engine.stop(TraceHeader.ClosedBy.STOP);
+
+        var trace = TraceReader.read(traces.take().path());
+        assertEquals(Protocol.PVN_777, trace.header().clientPvn());
+
+        int positionSync = Protocol777.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, "entity_position_sync");
+        var sync = trace.prelude().stream()
+            .filter(frame -> frame.packetId() == positionSync)
+            .map(frame -> S2CEntityPositionSync.V777.decode(new ByteReader(frame.bytes())))
+            .filter(packet -> packet.entityId() == 9)
+            .findFirst()
+            .orElseThrow();
+        assertEquals(10.0, sync.x(), "8 plus two one-block steps");
+
+        var chunk = trace.chunks().getFirst();
+        var section = ((WorldChunk.SectionEntry.Inline) chunk.sections().getFirst()).section();
+        assertEquals(16, section.directBits());
+        assertEquals(35_000, section.get(0, 0, 0));
 
         engine.close();
     }
@@ -361,7 +419,7 @@ class CaptureEngineTest {
 
         join(engine, clock, 0);
         engine.start("run-9", TraceHeader.Reason.RUN, null, TrimPolicy.EVERYTHING);
-        int tickEnd = Protocol776.packetId(ProtocolState.PLAY, Direction.C2S, "client_tick_end");
+        int tickEnd = Protocol776.PACKETS.packetId(ProtocolState.PLAY, Direction.C2S, "client_tick_end");
         for (int frame = 1; frame <= 100; frame++) {
             clock.set(frame * SECOND / 10);
             move(engine, frame * SECOND / 10, frame, 64, 0);
@@ -467,7 +525,7 @@ class CaptureEngineTest {
         assertFalse(feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "entity_event",
             new S2CEntityEvent.V776(TestCapture.PLAYER_ID, (byte) 2)), "a cosmetic event on the player");
         assertTrue(feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "animate",
-            new S2CAnimate.V776(99, S2CAnimate.WAKE_UP)), "anyone waking up writes the bed block");
+            new S2CAnimate.V776(99, S2CAnimate.V776.WAKE_UP)), "anyone waking up writes the bed block");
         assertFalse(feed(engine, SECOND, ProtocolState.PLAY, Direction.S2C, "animate",
             new S2CAnimate.V776(99, 0)), "a swing");
 
@@ -551,7 +609,7 @@ class CaptureEngineTest {
 
     /// The entity a frame is keyed on, for the entity packets this test feeds; null for the rest.
     private static @Nullable Integer entityIdOf(TraceHeader header, Frame frame) {
-        var name = Protocol776.lookup(frame.state(), frame.direction(), frame.packetId()).name();
+        var name = Protocol776.PACKETS.lookup(frame.state(), frame.direction(), frame.packetId()).name();
         return switch (name) {
             case "add_entity" -> S2CAddEntity.V776.decode(new ByteReader(frame.bytes())).entityId();
             case "entity_position_sync" -> S2CEntityPositionSync.V776.decode(new ByteReader(frame.bytes())).entityId();
@@ -563,6 +621,11 @@ class CaptureEngineTest {
         var writer = new ByteWriter();
         for (var section : chunk.sections()) section.encode(writer);
         return writer.toByteArray();
+    }
+
+    private static void feed777(CaptureEngine engine, long tNs, String name, Packet packet) {
+        engine.frame(tNs, Direction.S2C, ProtocolState.PLAY,
+            Protocol777.PACKETS.packetId(ProtocolState.PLAY, Direction.S2C, name), Frame.NO_PING, packet.toByteArray());
     }
 
     private CaptureEngine engine(TestCapture.ManualClock clock, TestCapture.Traces traces) {

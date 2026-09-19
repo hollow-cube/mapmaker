@@ -21,8 +21,8 @@ final class TestPackets {
         return new S2CRespawn.V776(spawnInfo(dimension, dimensionTypeId), (byte) 0);
     }
 
-    static CommonPlayerSpawnInfo spawnInfo(String dimension, int dimensionTypeId) {
-        return new CommonPlayerSpawnInfo(dimensionTypeId, dimension, 0L, 0, (byte) -1, false, false, null, 0, 63);
+    static CommonPlayerSpawnInfo.V776 spawnInfo(String dimension, int dimensionTypeId) {
+        return new CommonPlayerSpawnInfo.V776(dimensionTypeId, dimension, 0L, 0, (byte) -1, false, false, null, 0, 63);
     }
 
     /// A chunk of `sectionCount` single-value air sections, which is the smallest legal shape.
@@ -34,13 +34,13 @@ final class TestPackets {
     }
 
     static Section airSection() {
-        return new Section(0, 0, 0, new int[]{0}, new long[0], biomes());
+        return new Section(0, 0, 0, new int[]{0}, new long[0], biomes(), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
     }
 
     /// A four-bit section whose whole storage holds palette index 0.
     static Section palettedSection(int... palette) {
         return new Section(4096, 0, 4, palette.clone(),
-            new long[Section.longCount(4, Section.BLOCK_ENTRY_COUNT)], biomes());
+            new long[Section.longCount(4, Section.BLOCK_ENTRY_COUNT)], biomes(), S2CLevelChunkWithLight.V776.DIRECT_BLOCK_BITS);
     }
 
     static ByteSlice heightmaps() {

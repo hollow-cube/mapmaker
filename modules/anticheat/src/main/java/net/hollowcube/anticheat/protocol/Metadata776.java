@@ -8,8 +8,9 @@ import java.util.List;
 /// all metadata, and merging needs entry boundaries.
 ///
 /// The wire is `u8 index (0xFF ends) | varint serializerId | value`, with the value's length
-/// decided by the serializer (`EntityDataSerializers` registration order = the id). Only shapes
-/// verified against the 26.2 decompile are walked; the first entry whose serializer this cannot
+/// decided by the serializer (`EntityDataSerializers` registration order = the id). 26.3 only
+/// appended to that order, so this reads 777 as well, and `DYE_COLOR` is a 777 id no 776 payload
+/// can carry. Only shapes verified against the decompiles are walked; the first entry whose serializer this cannot
 /// walk (item stacks, particles, the data-driven variant holders) ends the split, and whatever
 /// was walked before it still merges — best effort, never a guess that would misread every entry
 /// after a wrong length.
@@ -42,6 +43,7 @@ public final class Metadata776 {
     private static final int OPTIONAL_GLOBAL_POS = 33;
     private static final int VECTOR3 = 39;
     private static final int QUATERNION = 40;
+    private static final int DYE_COLOR = 43;
 
     /// The entries this could walk, in payload order; empty when the payload opens with something
     /// unwalkable. A short or malformed payload yields what was whole before the cut.
@@ -66,7 +68,7 @@ public final class Metadata776 {
     private static boolean skipValue(ByteReader reader, int serializerId) {
         switch (serializerId) {
             case BYTE, BOOLEAN -> reader.skip(1);
-            case INT, DIRECTION, BLOCK_STATE, OPTIONAL_BLOCK_STATE, OPTIONAL_UNSIGNED_INT, POSE -> reader.varInt();
+            case INT, DIRECTION, BLOCK_STATE, OPTIONAL_BLOCK_STATE, OPTIONAL_UNSIGNED_INT, POSE, DYE_COLOR -> reader.varInt();
             case LONG -> reader.varLong();
             case FLOAT -> reader.skip(4);
             case STRING -> reader.utf();

@@ -20,14 +20,17 @@ final class ChunkSection {
     private final int nonEmptyBlockCount;
     private final int fluidCount;
     private final byte[] biomes;
+    private final int directBits;
     private int bitsPerEntry;
     private int @Nullable [] palette;
     private long[] data;
 
-    private ChunkSection(int nonEmptyBlockCount, int fluidCount, byte[] biomes, int bitsPerEntry, int @Nullable [] palette, long[] data) {
+    private ChunkSection(int nonEmptyBlockCount, int fluidCount, byte[] biomes, int directBits, int bitsPerEntry,
+                         int @Nullable [] palette, long[] data) {
         this.nonEmptyBlockCount = nonEmptyBlockCount;
         this.fluidCount = fluidCount;
         this.biomes = biomes;
+        this.directBits = directBits;
         this.bitsPerEntry = bitsPerEntry;
         this.palette = palette;
         this.data = data;
@@ -35,20 +38,20 @@ final class ChunkSection {
 
     static ChunkSection of(Section section) {
         return new ChunkSection(section.nonEmptyBlockCount(), section.fluidCount(), section.biomes(),
-            section.bitsPerEntry(), section.palette(), section.data());
+            section.directBits(), section.bitsPerEntry(), section.palette(), section.data());
     }
 
     /// A section that may be written without disturbing this one. The arrays are the only mutable
     /// state, so cloning them is the whole copy.
     ChunkSection copy() {
-        return new ChunkSection(nonEmptyBlockCount, fluidCount, biomes,
+        return new ChunkSection(nonEmptyBlockCount, fluidCount, biomes, directBits,
             bitsPerEntry, palette == null ? null : palette.clone(), data.clone());
     }
 
     /// The wire form again. The returned record shares this section's arrays, so the caller must
     /// already hold it through a snapshot (a live write clones before touching them).
     Section toSection() {
-        return new Section(nonEmptyBlockCount, fluidCount, bitsPerEntry, palette, data, biomes);
+        return new Section(nonEmptyBlockCount, fluidCount, bitsPerEntry, palette, data, biomes, directBits);
     }
 
     long[] data() {
@@ -57,7 +60,7 @@ final class ChunkSection {
 
     int get(int x, int y, int z) {
         if (bitsPerEntry == 0) return palette == null ? 0 : palette[0];
-        int value = read(data, Section.blockStorageBits(bitsPerEntry), index(x, y, z));
+        int value = read(data, Section.storageBits(bitsPerEntry, directBits), index(x, y, z));
         return palette == null ? value : palette[value];
     }
 
@@ -79,11 +82,11 @@ final class ChunkSection {
 
         var palette = this.palette;
         if (palette == null) {
-            write(data, Section.DIRECT_BLOCK_BITS, index, stateId);
+            write(data, directBits, index, stateId);
             return;
         }
 
-        int storageBits = Section.blockStorageBits(bitsPerEntry);
+        int storageBits = Section.storageBits(bitsPerEntry, directBits);
         for (int i = 0; i < palette.length; i++) {
             if (palette[i] != stateId) continue;
             write(data, storageBits, index, i);
@@ -101,14 +104,14 @@ final class ChunkSection {
         }
 
         toGlobalPalette(palette, storageBits);
-        write(data, Section.DIRECT_BLOCK_BITS, index, stateId);
+        write(data, directBits, index, stateId);
     }
 
     private void toGlobalPalette(int[] previous, int storageBits) {
-        var direct = new long[Section.longCount(Section.DIRECT_BLOCK_BITS, Section.BLOCK_ENTRY_COUNT)];
+        var direct = new long[Section.longCount(directBits, Section.BLOCK_ENTRY_COUNT)];
         for (int i = 0; i < Section.BLOCK_ENTRY_COUNT; i++)
-            write(direct, Section.DIRECT_BLOCK_BITS, i, previous[read(data, storageBits, i)]);
-        bitsPerEntry = Section.DIRECT_BLOCK_BITS;
+            write(direct, directBits, i, previous[read(data, storageBits, i)]);
+        bitsPerEntry = directBits;
         palette = null;
         data = direct;
     }

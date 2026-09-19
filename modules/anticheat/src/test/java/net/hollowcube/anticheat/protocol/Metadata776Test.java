@@ -48,6 +48,20 @@ class Metadata776Test {
         assertEquals(0, entries.getFirst().index());
     }
 
+    /// `DYE_COLOR` is the serializer 26.3 appended, so a 777 cushion's colour does not end the split.
+    @Test
+    void testDyeColorIsWalked() {
+        var payload = new ByteWriter()
+            .u8(8).varInt(43).varInt(14)
+            .u8(0).varInt(0).u8(0x02)
+            .u8(Metadata776.TERMINATOR)
+            .toByteArray();
+
+        var entries = Metadata776.entries(payload);
+        assertEquals(2, entries.size());
+        assertEquals(43, entries.getFirst().serializerId());
+    }
+
     @Test
     void testOptionalsWithoutAValueAreTheirOwnWholeEntry() {
         var payload = new ByteWriter()
