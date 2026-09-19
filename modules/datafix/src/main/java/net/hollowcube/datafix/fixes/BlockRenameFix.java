@@ -25,8 +25,10 @@ public class BlockRenameFix implements DataFix {
             var blockName = s.substring(0, index);
             return Value.wrap(nameMap.getOrDefault(blockName, blockName) + s.substring(index));
         } else if (value.isMapLike()) { // BLOCK_STATE
-            var oldName = value.get("Name").as(String.class, "");
-            value.put("Name", Value.wrap(nameMap.getOrDefault(oldName, oldName)));
+            // Vanilla renamed Name to id in 5006 (BlockStateFieldNamesFix)
+            var key = value.getValue("id") instanceof String ? "id" : "Name";
+            var oldName = value.get(key).as(String.class, "");
+            value.put(key, Value.wrap(nameMap.getOrDefault(oldName, oldName)));
             return null;
         }
         return null;

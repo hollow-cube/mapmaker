@@ -30,23 +30,32 @@ public final class NbtUtil {
         var propsCompound = props.build();
 
         var builder = CompoundBinaryTag.builder()
-                .putString("Name", value.name());
-        if (propsCompound.size() > 0) builder.put("Properties", propsCompound);
+                .putString("id", value.name());
+        if (propsCompound.size() > 0) builder.put("properties", propsCompound);
         return builder.build();
     }
 
     public static @NotNull Block readBlock(@NotNull BinaryTag tag) {
         if (!(tag instanceof CompoundBinaryTag compound)) return Block.AIR;
 
-        var block = Block.fromKey(compound.getString("Name"));
+        var block = Block.fromKey(blockStateName(compound));
         if (block == null) return Block.AIR;
 
-        for (var entry : compound.getCompound("Properties")) {
+        for (var entry : blockStateProperties(compound)) {
             if (!(entry.getValue() instanceof StringBinaryTag string)) continue;
             block = block.withProperty(entry.getKey(), string.value());
         }
 
         return block;
+    }
+
+    // Name/Properties were renamed to id/properties in 26.3 (data version 5006)
+    public static @NotNull String blockStateName(@NotNull CompoundBinaryTag state) {
+        return state.get("id") != null ? state.getString("id") : state.getString("Name");
+    }
+
+    public static @NotNull CompoundBinaryTag blockStateProperties(@NotNull CompoundBinaryTag state) {
+        return state.get("id") != null ? state.getCompound("properties") : state.getCompound("Properties");
     }
 
     public static @NotNull BinaryTag into(@NotNull Point vec) {

@@ -1,0 +1,7 @@
+{
+    id: "minecraft:map",
+    count: 1,
+    components: {
+        "minecraft:item_name": {translate: "filled_map.buried_treasure"}
+    }
+}

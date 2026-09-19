@@ -1,7 +1,9 @@
 package net.hollowcube.datafix.blockEntity;
 
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.serializer.nbt.NbtComponentSerializer;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -9,6 +11,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class V99_06_Sign extends AbstractBlockEntityUpgradeTest {
     private static final int CURRENT = 4314;
+
+    // NbtComponentSerializer resolves registries from the server process.
+    @BeforeAll
+    static void initServer() {
+        MinecraftServer.updateProcess();
+    }
 
     @Test
     void upgradeId() {

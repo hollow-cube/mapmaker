@@ -1,0 +1,9 @@
+{
+    id: "minecraft:decorated_pot",
+    x: 0, y: 64, z: 0,
+    sherds: ["minecraft:brick", "minecraft:heart_pottery_sherd", "minecraft:brick", "minecraft:skull_pottery_sherd"],
+    item: {
+        id: "minecraft:ocean_explorer_map",
+        count: 1
+    }
+}

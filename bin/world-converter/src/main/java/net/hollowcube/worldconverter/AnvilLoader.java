@@ -1,6 +1,7 @@
 package net.hollowcube.worldconverter;
 
 
+import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.adventure.MinestomAdventure;
@@ -145,14 +146,14 @@ public class AnvilLoader {
         Block[] convertedPalette = new Block[paletteTag.size()];
         for (int i = 0; i < convertedPalette.length; i++) {
             CompoundBinaryTag paletteEntry = paletteTag.getCompound(i);
-            String blockName = paletteEntry.getString("Name");
+            String blockName = NbtUtil.blockStateName(paletteEntry);
             if (blockName.equals("minecraft:air")) {
                 convertedPalette[i] = Block.AIR;
             } else {
                 Block block = Objects.requireNonNull(Block.fromKey(blockName), "Unknown block " + blockName);
                 // Properties
                 final Map<String, String> properties = new HashMap<>();
-                CompoundBinaryTag propertiesNBT = paletteEntry.getCompound("Properties");
+                CompoundBinaryTag propertiesNBT = NbtUtil.blockStateProperties(paletteEntry);
                 for (var property : propertiesNBT) {
                     if (property.getValue() instanceof StringBinaryTag propertyValue) {
                         properties.put(property.getKey(), propertyValue.value());

@@ -1,0 +1,12 @@
+{
+    id: "minecraft:filled_map",
+    count: 1,
+    components: {
+        "minecraft:map_id": 3,
+        "minecraft:map_color": 3830373,
+        "minecraft:item_name": {translate: "filled_map.mansion"},
+        "minecraft:map_decorations": {
+            "+": {type: "mansion", x: 10.0d, z: 20.0d, rotation: 180.0f}
+        }
+    }
+}

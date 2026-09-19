@@ -64,4 +64,23 @@ public final class DataFixUtils {
         return Value.wrap("{\"text\":\"" + raw.replace("\"", "\\\"") + "\"}");
     }
 
+    public static Value deepCopy(Value value) {
+        return switch (value) {
+            case MapValue _ -> {
+                var copy = Value.emptyMap();
+                value.forEachEntry((key, entry) -> copy.put(key, deepCopy(entry)));
+                yield copy;
+            }
+            case ListValue _ -> {
+                var copy = Value.emptyList();
+                for (var entry : value) copy.put(deepCopy(entry));
+                yield copy;
+            }
+            case ByteArrayValue(byte[] array) -> new ByteArrayValue(array.clone());
+            case IntArrayValue(int[] array) -> new IntArrayValue(array.clone());
+            case LongArrayValue(long[] array) -> new LongArrayValue(array.clone());
+            default -> value;
+        };
+    }
+
 }

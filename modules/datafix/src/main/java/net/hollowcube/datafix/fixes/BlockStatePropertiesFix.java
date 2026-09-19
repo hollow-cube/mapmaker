@@ -56,8 +56,12 @@ public class BlockStatePropertiesFix implements DataFix {
 
 
             return Value.wrap(builder.toString());
-        } else if (blockState.getValue("Name") instanceof String s && this.id.equals(s)) {
-            var properties = blockState.get("Properties");
+        } else if (blockState.isMapLike()) {
+            // Vanilla renamed Name/Properties to id/properties in 5006 (BlockStateFieldNamesFix)
+            boolean renamed = blockState.getValue("id") instanceof String;
+            if (!this.id.equals(blockState.getValue(renamed ? "id" : "Name"))) return null;
+
+            var properties = blockState.get(renamed ? "properties" : "Properties");
             if (!properties.isMapLike() || properties.size(0) == 0) return null;
 
             function.accept(properties);

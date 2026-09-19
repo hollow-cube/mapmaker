@@ -1,0 +1,7 @@
+{
+    id: "minecraft:decorated_pot",
+    count: 1,
+    components: {
+        "minecraft:pot_decorations": ["minecraft:angler_pottery_sherd", "minecraft:brick", "minecraft:blade_pottery_sherd"]
+    }
+}

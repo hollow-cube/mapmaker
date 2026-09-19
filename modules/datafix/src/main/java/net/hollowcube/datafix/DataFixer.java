@@ -12,6 +12,7 @@ import net.hollowcube.datafix.versions.v1xxx.*;
 import net.hollowcube.datafix.versions.v2xxx.*;
 import net.hollowcube.datafix.versions.v3xxx.*;
 import net.hollowcube.datafix.versions.v4xxx.*;
+import net.hollowcube.datafix.versions.v5xxx.*;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
@@ -524,7 +525,19 @@ public class DataFixer {
             V4763::new,
             V4881::new,
             V4885::new,
-            V4888::new
+            V4888::new,
+            V4996::new,
+            V4996_1::new,
+            V4997::new
+        ));
+        addFixVersions(List.of( // 5xxx
+            V5000::new,
+            V5002::new,
+            V5006::new,
+            V5007::new,
+            V5008::new,
+            V5012::new,
+            V5016::new
         ));
     }
 }

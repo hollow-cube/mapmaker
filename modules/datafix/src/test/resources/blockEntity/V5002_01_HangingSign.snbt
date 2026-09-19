@@ -1,0 +1,5 @@
+{
+    id: "minecraft:hanging_sign",
+    x: 0, y: 64, z: 0,
+    is_waxed: 0b
+}

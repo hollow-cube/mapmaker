@@ -1,0 +1,10 @@
+{
+    id: "minecraft:stick",
+    count: 1,
+    components: {
+        "minecraft:swing_animation": {
+            type: "stab",
+            duration: 8
+        }
+    }
+}

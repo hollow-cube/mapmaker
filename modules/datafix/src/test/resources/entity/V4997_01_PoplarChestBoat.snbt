@@ -1,0 +1,6 @@
+{
+    id: "minecraft:poplar_chest_boat",
+    Items: [
+        {Slot: 0b, id: "minecraft:trial_explorer_map", count: 1}
+    ]
+}
