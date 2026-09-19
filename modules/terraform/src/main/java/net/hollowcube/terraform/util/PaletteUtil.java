@@ -1,7 +1,6 @@
 package net.hollowcube.terraform.util;
 
-import net.hollowcube.common.util.BlockUtil;
-import net.minestom.server.utils.validate.Check;
+import net.minestom.server.instance.block.Block;
 
 public final class PaletteUtil {
     private PaletteUtil() {
@@ -9,20 +8,7 @@ public final class PaletteUtil {
 
     public static final int BLOCK_PALETTE_SIZE = 4096;
 
-    public static final int MAX_BITS_PER_ENTRY;
-
-    static {
-        int bpe = 0;
-        for (short id = 24134; id < Short.MAX_VALUE; id++) {
-            if (BlockUtil.fromStateIdOrNull(id) == null) {
-                bpe = (int) Math.ceil(Math.log(id) / Math.log(2));
-                break;
-            }
-        }
-
-        Check.stateCondition(bpe == 0, "Could not find max bits per entry");
-        MAX_BITS_PER_ENTRY = bpe;
-    }
+    public static final int MAX_BITS_PER_ENTRY = 32 - Integer.numberOfLeadingZeros(Block.statesCount() - 1);
 
     public static long packPos(int x, int y, int z) {
         return (((long) x & 67108863L) << 38) | ((long) y & 4095L) | (((long) z & 67108863L) << 12);

@@ -525,7 +525,7 @@ public final class SelectionCommands {
                         player.sendMessage("total block count: " + counter.total());
                         for (var entry : counts.int2IntEntrySet()) {
                             var block = flags.contains(Flags.DISPLAY_BY_STATE)
-                                    ? Block.fromStateId((short) entry.getIntKey())
+                                    ? Block.fromStateId(entry.getIntKey())
                                     : Block.fromBlockId(entry.getIntKey());
                             assert block != null;
 

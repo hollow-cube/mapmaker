@@ -17,7 +17,7 @@ public final class NaivePalette implements Palette.Mutable {
         int index = getIndex(x, y, z);
         int stateId = palette[index] - 1;
         if (stateId == UNSET) return null;
-        return cachedBlocks.getOrDefault(index, Block.fromStateId((short) stateId));
+        return cachedBlocks.getOrDefault(index, Block.fromStateId(stateId));
     }
 
     @Override

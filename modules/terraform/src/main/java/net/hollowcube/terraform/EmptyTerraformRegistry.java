@@ -12,7 +12,7 @@ import java.util.Map;
 final class EmptyTerraformRegistry implements TerraformRegistry {
     public static final EmptyTerraformRegistry INSTANCE = new EmptyTerraformRegistry();
 
-    private final Map<String, Block> legacyBlockStates = TerraformRegistryImpl.buildLegacyBlockMap(b -> Block.fromStateId((short) b));
+    private final Map<String, Block> legacyBlockStates = TerraformRegistryImpl.buildLegacyBlockMap(Block::fromStateId);
 
     @Override
     public RegionSelector.@UnknownNullability Factory regionType(@NotNull String id) {
@@ -26,7 +26,7 @@ final class EmptyTerraformRegistry implements TerraformRegistry {
 
     @Override
     public @UnknownNullability Block blockState(int stateId) {
-        return Block.fromStateId((short) stateId);
+        return Block.fromStateId(stateId);
     }
 
     @Override

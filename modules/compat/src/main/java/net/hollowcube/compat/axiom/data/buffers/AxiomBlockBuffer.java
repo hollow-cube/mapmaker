@@ -5,12 +5,11 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectArrayMap;
 import it.unimi.dsi.fastutil.shorts.Short2ObjectMap;
-import net.hollowcube.common.util.BlockUtil;
 import net.hollowcube.common.util.Either;
 import net.hollowcube.compat.axiom.AxiomAPI;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.palette.Palette;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,20 +21,7 @@ public record AxiomBlockBuffer(
 ) implements AxiomBuffer {
 
     private static final long EOD = 0b1000000000000000000000000010000000000000000000000000100000000000L;
-    public static final int MAX_BITS_PER_ENTRY;
-
-    static {
-        int bpe = 0;
-        for (short id = 24134; id < Short.MAX_VALUE; id++) {
-            if (BlockUtil.fromStateIdOrNull(id) == null) {
-                bpe = (int) Math.ceil(Math.log(id) / Math.log(2));
-                break;
-            }
-        }
-
-        Check.stateCondition(bpe == 0, "Could not find max bits per entry");
-        MAX_BITS_PER_ENTRY = bpe;
-    }
+    public static final int MAX_BITS_PER_ENTRY = Palette.BLOCK_PALETTE_DIRECT_BITS;
 
     private void addBlocks(long index, @Nullable Block block) {
         this.updates.put(index, Either.left(block));

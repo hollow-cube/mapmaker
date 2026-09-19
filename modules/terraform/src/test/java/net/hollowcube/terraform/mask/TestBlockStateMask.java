@@ -21,7 +21,7 @@ public class TestBlockStateMask {
         return Stream.of(
                 Arguments.of("no states matches all", Map.of(), Block.STONE, true),
                 Arguments.of("no states matches all 2", Map.of(),
-                        Block.fromStateId((short) (Block.ACACIA_STAIRS.stateId() + 3)), true),
+                        Block.fromStateId((Block.ACACIA_STAIRS.stateId() + 3)), true),
                 Arguments.of("single prop matches block without state", Map.of("waterlogged", "true"), Block.STONE, true),
                 Arguments.of("single prop exact match", Map.of("waterlogged", "true"),
                         Block.STONE_STAIRS.withProperty("waterlogged", "true"), true),
@@ -48,7 +48,7 @@ public class TestBlockStateMask {
         return Stream.of(
                 Arguments.of("no states matches all", Map.of(), Block.STONE, true),
                 Arguments.of("no states matches all 2", Map.of(),
-                        Block.fromStateId((short) (Block.ACACIA_STAIRS.stateId() + 3)), true),
+                        Block.fromStateId((Block.ACACIA_STAIRS.stateId() + 3)), true),
                 Arguments.of("single prop mismatches block without state", Map.of("waterlogged", "true"), Block.STONE, false),
                 Arguments.of("single prop exact match", Map.of("waterlogged", "true"),
                         Block.STONE_STAIRS.withProperty("waterlogged", "true"), true),

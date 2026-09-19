@@ -7,7 +7,7 @@ public record FixedPalette(int value) implements Palette {
     @Override
     public @Nullable Block get(int x, int y, int z) {
         if (value == Palette.UNSET) return null;
-        return Block.fromStateId((short) value);
+        return Block.fromStateId(value);
     }
 
     @Override
