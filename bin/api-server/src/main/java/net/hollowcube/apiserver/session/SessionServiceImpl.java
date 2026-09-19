@@ -1,7 +1,9 @@
 package net.hollowcube.apiserver.session;
 
 import net.hollowcube.apiserver.db.ApiDatabase;
+import net.hollowcube.ipc.session.GameServer;
 import net.hollowcube.ipc.session.SessionService;
+import org.jetbrains.annotations.Nullable;
 
 /// Player sessions, served out of the `player_sessions` table the Go api-server writes.
 public final class SessionServiceImpl implements SessionService {
@@ -16,5 +18,11 @@ public final class SessionServiceImpl implements SessionService {
     public int onlinePlayers() {
         // Every row, hidden players and all, the way the player count graphs count them.
         return (int) db.sessions.countPlayerSessions();
+    }
+
+    @Override
+    public @Nullable GameServer findHub(@Nullable String exclude) {
+        var hub = db.servers.findHub(exclude);
+        return hub == null ? null : new GameServer(hub.id(), hub.clusterIp(), hub.protocolVersion());
     }
 }

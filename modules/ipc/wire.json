@@ -925,6 +925,19 @@
     "session": {
       "interface": "net.hollowcube.ipc.session.SessionService",
       "methods": {
+        "find-hub": {
+          "params": [
+            {
+              "name": "exclude",
+              "type": "String",
+              "nullable": true
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.session.GameServer",
+            "nullable": true
+          }
+        },
         "online-players": {
           "params": [],
           "returns": {
@@ -2992,6 +3005,26 @@
       "constants": [
         "RECORDING",
         "FINISHED"
+      ]
+    },
+    "net.hollowcube.ipc.session.GameServer": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "id",
+          "type": "String"
+        },
+        {
+          "name": "clusterIp",
+          "type": "String"
+        },
+        {
+          "name": "protocolVersion",
+          "type": "int"
+        }
       ]
     },
     "net.hollowcube.ipc.util.Position": {

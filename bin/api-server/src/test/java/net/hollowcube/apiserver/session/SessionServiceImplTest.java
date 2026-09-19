@@ -2,6 +2,7 @@ package net.hollowcube.apiserver.session;
 
 import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.db.ApiDatabase;
+import net.hollowcube.ipc.session.GameServer;
 import net.hollowcube.ipc.session.SessionClient;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.sqlgen.testing.TestDb;
@@ -15,6 +16,7 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /// Sessions end to end, the same way as the head database: a real Postgres under the service, the
 /// generated server over it, and the generated client talking to that over a real socket.
@@ -60,5 +62,30 @@ class SessionServiceImplTest {
         );
 
         assertEquals(3, sessions.onlinePlayers());
+    }
+
+    @Test
+    void findHub_returnsAReadyHubWithItsProtocol() {
+        TEST_DB.seed(
+            """
+            insert into server_states (id, role, status, cluster_ip, protocol_version) values
+                ('hub-starting', 'hub', 0, '10.0.0.1', 0),
+                ('map-a', 'map', 1, '10.0.0.2', 777),
+                ('hub-a', 'hub', 1, '10.0.0.3', 777)"""
+        );
+
+        assertEquals(new GameServer("hub-a", "10.0.0.3", 777), sessions.findHub(null));
+    }
+
+    @Test
+    void findHub_skipsTheExcludedHub() {
+        TEST_DB.seed(
+            """
+            insert into server_states (id, role, status, cluster_ip) values
+                ('hub-a', 'hub', 1, '10.0.0.3')"""
+        );
+
+        assertNull(sessions.findHub("hub-a"));
+        assertEquals(new GameServer("hub-a", "10.0.0.3", 0), sessions.findHub("hub-b"));
     }
 }

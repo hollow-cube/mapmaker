@@ -9,8 +9,8 @@ import net.hollowcube.sqlgen.runtime.Jdbc;
 /**
  * A row of the `server_states` table.
  */
-public record ServerStates(String id, String role, Instant startTime, int status,
-        String clusterIp) {
+public record ServerStates(String id, String role, Instant startTime, int status, String clusterIp,
+        String statusV2, Instant statusSince, int protocolVersion) {
     /**
      * Reads one `server_states` row, its first column at `col`.
      */
@@ -20,6 +20,9 @@ public record ServerStates(String id, String role, Instant startTime, int status
                 rs.getString(col + 1),
                 Jdbc.getInstant(rs, col + 2),
                 rs.getInt(col + 3),
-                rs.getString(col + 4));
+                rs.getString(col + 4),
+                rs.getString(col + 5),
+                Jdbc.getInstant(rs, col + 6),
+                rs.getInt(col + 7));
     }
 }

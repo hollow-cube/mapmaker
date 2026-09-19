@@ -38,6 +38,8 @@ public final class ApiDatabase {
 
     public final SaveStatesQueries saveStates;
 
+    public final ServersQueries servers;
+
     public final SessionsQueries sessions;
 
     public final SocialQueries social;
@@ -57,6 +59,7 @@ public final class ApiDatabase {
         this.players = new PlayersQueriesImpl(source);
         this.replays = new ReplaysQueriesImpl(source);
         this.saveStates = new SaveStatesQueriesImpl(source);
+        this.servers = new ServersQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
         this.social = new SocialQueriesImpl(source);
     }
@@ -75,6 +78,7 @@ public final class ApiDatabase {
         this.players = fake.players;
         this.replays = fake.replays;
         this.saveStates = fake.saveStates;
+        this.servers = fake.servers;
         this.sessions = fake.sessions;
         this.social = fake.social;
     }
@@ -145,6 +149,8 @@ public final class ApiDatabase {
 
         public final SaveStatesQueries saveStates;
 
+        public final ServersQueries servers;
+
         public final SessionsQueries sessions;
 
         public final SocialQueries social;
@@ -164,6 +170,7 @@ public final class ApiDatabase {
             this.players = new PlayersQueriesImpl(source);
             this.replays = new ReplaysQueriesImpl(source);
             this.saveStates = new SaveStatesQueriesImpl(source);
+            this.servers = new ServersQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
             this.social = new SocialQueriesImpl(source);
         }
@@ -210,6 +217,8 @@ public final class ApiDatabase {
         private ReplaysQueries replays = new ReplaysQueries.Stub();
 
         private SaveStatesQueries saveStates = new SaveStatesQueries.Stub();
+
+        private ServersQueries servers = new ServersQueries.Stub();
 
         private SessionsQueries sessions = new SessionsQueries.Stub();
 
@@ -272,6 +281,11 @@ public final class ApiDatabase {
 
         public Fake saveStates(SaveStatesQueries saveStates) {
             this.saveStates = saveStates;
+            return this;
+        }
+
+        public Fake servers(ServersQueries servers) {
+            this.servers = servers;
             return this;
         }
 
