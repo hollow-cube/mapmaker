@@ -11,6 +11,7 @@ import net.hollowcube.mapmaker.map.MapFeatureFlags;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.SaveState;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
+import net.hollowcube.mapmaker.map.event.PlayerSwingEvent;
 import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -22,7 +23,6 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventListener;
 import net.minestom.server.event.inventory.InventoryItemChangeEvent;
 import net.minestom.server.event.player.PlayerChangeHeldSlotEvent;
-import net.minestom.server.event.player.PlayerHandAnimationEvent;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.inventory.PlayerInventory;
 import org.jetbrains.annotations.Blocking;
@@ -93,7 +93,7 @@ public final class ReplayManager {
 
         world.eventNode(ParkourState.Playing2.class)
             .addListener(PlayerChangeHeldSlotEvent.class, this::onHeldSlotChange)
-            .addListener(PlayerHandAnimationEvent.class, this::onPlayerHandAnimation);
+            .addListener(PlayerSwingEvent.class, this::onPlayerSwing);
 
         // This is a hella stupid event. Doesnt tell you the player and isnt an instance event so excluded.
         // We should add our own (and fix this one in Minestom)
@@ -265,11 +265,11 @@ public final class ReplayManager {
         session.submit(new ChangeHeldSlotEvent(ReplaySession.SUBJECT_ENTITY_ID, event.getNewSlot()));
     }
 
-    private void onPlayerHandAnimation(PlayerHandAnimationEvent event) {
-        var session = getActiveSession(event.getPlayer());
+    private void onPlayerSwing(PlayerSwingEvent event) {
+        var session = getActiveSession(event.player());
         if (session == null) return;
 
-        session.submit(new HandAnimationEvent(ReplaySession.SUBJECT_ENTITY_ID, event.getHand()));
+        session.submit(new HandAnimationEvent(ReplaySession.SUBJECT_ENTITY_ID, event.hand(), event.animation()));
     }
 
     /// Records the spawn, movement, and removal of everything the player owns this tick.

@@ -14,6 +14,7 @@ import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.EquipmentHandler;
+import net.minestom.server.item.component.SwingAnimation;
 import net.minestom.server.network.packet.server.play.BlockChangePacket;
 
 import java.util.Collections;
@@ -113,10 +114,9 @@ public final class ReplayScene implements Viewable, Consumer<ReplayEvent>, AutoC
                 if (entities.get(entityId) instanceof PlaybackPlayerEntity entity)
                     entity.setHeldSlot(slot);
             }
-            case HandAnimationEvent(int entityId, PlayerHand hand) -> {
-                if (!(entities.get(entityId) instanceof LivingEntity entity)) return;
-                if (hand == PlayerHand.MAIN) entity.swingMainHand();
-                else entity.swingOffHand();
+            case HandAnimationEvent(int entityId, PlayerHand hand, SwingAnimation animation) -> {
+                if (entities.get(entityId) instanceof LivingEntity entity)
+                    entity.swingHand(hand, animation);
             }
             case SpawnEntityEvent(int entityId, var entityType, Pos position) -> {
                 var existing = entities.remove(entityId);

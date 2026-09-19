@@ -23,6 +23,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.inventory.EquipmentHandler;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.SwingAnimation;
 import net.minestom.server.network.NetworkBuffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -241,7 +242,7 @@ final class ReplaySessionTest {
                 // Enough noise to run the chunk past its byte limit long before its tick limit, so
                 // the next chunk opens somewhere the session never chose.
                 for (var i = 0; i < 20000; i++)
-                    session.submit(new HandAnimationEvent(entityId, PlayerHand.MAIN));
+                    session.submit(new HandAnimationEvent(entityId, PlayerHand.MAIN, SwingAnimation.DEFAULT));
                 session.advance();
             }
         });

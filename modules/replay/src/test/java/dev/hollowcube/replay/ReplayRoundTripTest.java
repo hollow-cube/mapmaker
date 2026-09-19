@@ -16,6 +16,7 @@ import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.SwingAnimation;
 import net.minestom.server.network.NetworkBuffer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -100,7 +101,8 @@ final class ReplayRoundTripTest {
                 SetItemEvent.slotOf(EquipmentSlot.OFF_HAND), ItemStack.AIR
             )),
             new ChangeHeldSlotEvent(0, 4),
-            new HandAnimationEvent(0, PlayerHand.OFF),
+            new HandAnimationEvent(0, PlayerHand.OFF, SwingAnimation.DEFAULT),
+            new HandAnimationEvent(0, PlayerHand.MAIN, new SwingAnimation(SwingAnimation.Type.STAB, 12)),
             new SpawnEntityEvent(1, EntityType.ARMOR_STAND, new Pos(5, 64, 5)),
             new DestroyEntityEvent(1),
             new AbsoluteMoveEvent(0, new Pos(9, 8, 7, 6, 5), new Vec(-1, 1, 0)),
