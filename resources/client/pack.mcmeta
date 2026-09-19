@@ -2,10 +2,10 @@
   "pack": {
     "pack_format": 46,
     "min_format": 46,
-    "max_format": 88,
+    "max_format": 97,
     "supported_formats": {
       "min_inclusive": 46,
-      "max_inclusive": 88
+      "max_inclusive": 97
     },
     "description": "MapMaker Resources"
   },
@@ -46,6 +46,15 @@
           "max_inclusive": 88
         },
         "directory": "pvn_776"
+      },
+      {
+        "min_format": 89,
+        "max_format": 97,
+        "formats": {
+          "min_inclusive": 89,
+          "max_inclusive": 97
+        },
+        "directory": "pvn_777"
       }
     ]
   }

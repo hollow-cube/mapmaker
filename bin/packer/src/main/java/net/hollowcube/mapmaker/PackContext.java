@@ -139,12 +139,24 @@ public class PackContext {
 
     public @NotNull String writeModel(@NotNull String name, @NotNull JsonObject model) throws IOException {
         name = minifyId(name);
+        addShadeDirectionOverrides(model);
 
         Path path = rpMapmakerBase.resolve("models").resolve("item").resolve(name + ".json");
         Files.createDirectories(path.getParent());
         Files.writeString(path, new Gson().toJson(model));
 
         return mapmakerRefBase + "item/" + name;
+    }
+
+    /// 26.3 no longer reads `"shade": false` on model elements and wants `"shade_direction_override": "up"` instead
+    /// (what vanilla migrated its own models to). Older clients ignore the new key, so elements carry both.
+    private static void addShadeDirectionOverrides(@NotNull JsonObject model) {
+        if (!(model.get("elements") instanceof JsonArray elements)) return;
+        for (var element : elements) {
+            if (!(element instanceof JsonObject object)) continue;
+            if (object.has("shade") && !object.get("shade").getAsBoolean() && !object.has("shade_direction_override"))
+                object.addProperty("shade_direction_override", "up");
+        }
     }
 
     public void addFontCharacter(@NotNull JsonObject definition) {
