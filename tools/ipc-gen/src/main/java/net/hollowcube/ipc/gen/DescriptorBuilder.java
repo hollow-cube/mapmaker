@@ -12,7 +12,7 @@ import java.util.TreeMap;
 final class DescriptorBuilder {
 
     static WireDescriptor build(List<IpcModel> models, WireWalker walker,
-                                SortedMap<String, String> subjects, SortedMap<String, String> notifications) {
+                                SortedMap<String, String> payloads) {
         var services = new TreeMap<String, WireDescriptor.Service>();
         for (var model : models) {
             var methods = new TreeMap<String, WireDescriptor.Method>();
@@ -51,7 +51,7 @@ final class DescriptorBuilder {
             types.put(sealed.element().getQualifiedName().toString(), WireDescriptor.Type.sealed(IpcNames.DISCRIMINATOR, variants));
         }
 
-        return new WireDescriptor(services, types, subjects, notifications);
+        return new WireDescriptor(services, types, payloads);
     }
 
     private DescriptorBuilder() {

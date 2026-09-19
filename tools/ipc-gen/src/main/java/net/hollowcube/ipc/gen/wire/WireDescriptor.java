@@ -20,7 +20,7 @@ import java.util.TreeMap;
 
 /// Everything about the wire that a client built from one commit and a server built from another
 /// have to agree on, as `modules/ipc/wire.json` holds it: services and their methods, every record,
-/// enum and sealed type reachable from one, NATS subjects and notification type keys.
+/// enum and sealed type reachable from one, and the key each payload is sent under.
 ///
 /// Written and read here rather than through gson's reflection so that the file's shape is spelled
 /// out in one place and stays byte-for-byte deterministic: maps are sorted, lists keep declaration
@@ -28,10 +28,8 @@ import java.util.TreeMap;
 public record WireDescriptor(
     SortedMap<String, Service> services,
     SortedMap<String, Type> types,
-    /// NATS subject to the record published on it.
-    SortedMap<String, String> subjects,
-    /// Notification `type` key to the record its `data` holds.
-    SortedMap<String, String> notifications
+    /// `@Payload` key (a NATS subject, a plugin message channel) to the record sent under it.
+    SortedMap<String, String> payloads
 ) {
 
     /// @param java the interface, for the reader; the route is what the wire knows
@@ -49,10 +47,10 @@ public record WireDescriptor(
     }
 
     /// How a record is reached, which is who writes it: a client sends a request, a server
-    /// answers a response, either side publishes a message or stores a body. Declared in the order
-    /// they are written, so an `EnumSet` of them is sorted.
+    /// answers a response, either side sends a message. Declared in the order they are written, so
+    /// an `EnumSet` of them is sorted.
     public enum Use {
-        BODY, MESSAGE, REQUEST, RESPONSE;
+        MESSAGE, REQUEST, RESPONSE;
 
         String key() {
             return name().toLowerCase();
@@ -146,12 +144,9 @@ public record WireDescriptor(
         });
         root.add("types", types);
 
-        var subjects = new JsonObject();
-        this.subjects.forEach(subjects::addProperty);
-        root.add("subjects", subjects);
-        var notifications = new JsonObject();
-        this.notifications.forEach(notifications::addProperty);
-        root.add("notifications", notifications);
+        var payloads = new JsonObject();
+        this.payloads.forEach(payloads::addProperty);
+        root.add("payloads", payloads);
 
         var out = new StringWriter();
         try (var writer = new JsonWriter(out)) {
@@ -196,7 +191,10 @@ public record WireDescriptor(
                 uses(type.get("used"))));
         });
 
-        return new WireDescriptor(services, types, stringMap(root, "subjects"), stringMap(root, "notifications"));
+        // Released descriptors from before @Payload keep their NATS subjects under `subjects`.
+        var payloads = stringMap(root, "subjects");
+        payloads.putAll(stringMap(root, "payloads"));
+        return new WireDescriptor(services, types, payloads);
     }
 
     private static JsonArray fields(List<Field> fields) {

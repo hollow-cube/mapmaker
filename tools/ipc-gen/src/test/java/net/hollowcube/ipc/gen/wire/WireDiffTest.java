@@ -28,8 +28,7 @@ class WireDiffTest {
             "test.Color": {"kind": "enum", "constants": ["RED", "GREEN"]},
             "test.Shape": {"kind": "sealed", "discriminator": "type", "variants": {"circle": "test.Circle"}}
           },
-          "subjects": {"point.moved": "test.PointMoved"},
-          "notifications": {"invite": "test.Invite"}
+          "payloads": {"point.moved": "test.PointMoved", "test:invite": "test.Invite"}
         }
         """;
 
@@ -172,11 +171,23 @@ class WireDiffTest {
     }
 
     @Test
-    void subjectsAndNotificationKeysMayBeAddedButNotRemovedOrRetyped() {
-        assertEquals(List.of(), breaks(edited("\"subjects\": {", "\"subjects\": {\"point.deleted\": \"test.PointDeleted\", ")));
-        assertEquals(List.of("subject point.moved: removed"), breaks(edited("\"point.moved\"", "\"point.changed\"")));
-        assertEquals(List.of("subject point.moved: type test.PointMoved -> test.Moved"), breaks(edited("\"test.PointMoved\"", "\"test.Moved\"")));
-        assertEquals(List.of("notification invite: removed"), breaks(edited("\"invite\": \"test.Invite\"", "")));
+    void payloadKeysMayBeAddedButNotRemovedOrRetyped() {
+        assertEquals(List.of(), breaks(edited("\"payloads\": {", "\"payloads\": {\"point.deleted\": \"test.PointDeleted\", ")));
+        assertEquals(List.of("payload point.moved: removed"), breaks(edited("\"point.moved\"", "\"point.changed\"")));
+        assertEquals(List.of("payload point.moved: type test.PointMoved -> test.Moved"), breaks(edited("\"test.PointMoved\"", "\"test.Moved\"")));
+        assertEquals(List.of("payload test:invite: removed"), breaks(edited(", \"test:invite\": \"test.Invite\"", "")));
+    }
+
+    /// A descriptor released before @Payload keeps its NATS subjects under `subjects`.
+    @Test
+    void releasedSubjectsAreReadAsPayloads() {
+        var released = BASE.replace("\"payloads\": {\"point.moved\": \"test.PointMoved\", \"test:invite\": \"test.Invite\"}",
+            "\"subjects\": {\"point.moved\": \"test.PointMoved\"}, \"notifications\": {}");
+        assertTrue(released.contains("subjects"), "fixture not rewritten");
+        assertEquals(List.of(), WireDiff.diff(WireDescriptor.parse(released), WireDescriptor.parse(BASE)).stream()
+            .map(WireDiff.Break::toString).toList());
+        assertEquals(List.of("payload point.moved: removed"), WireDiff.diff(WireDescriptor.parse(released),
+            WireDescriptor.parse(BASE.replace("\"point.moved\"", "\"point.changed\""))).stream().map(WireDiff.Break::toString).toList());
     }
 
     @Test

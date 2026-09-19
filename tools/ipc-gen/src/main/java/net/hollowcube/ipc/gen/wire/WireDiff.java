@@ -75,8 +75,7 @@ public final class WireDiff {
             }
         });
 
-        keyed(out, "subject", old.subjects(), current.subjects());
-        keyed(out, "notification", old.notifications(), current.notifications());
+        keyed(out, "payload", old.payloads(), current.payloads());
         return out;
     }
 
@@ -123,8 +122,8 @@ public final class WireDiff {
     /// a notification body — may only gain nullable fields, because the old side will never send
     /// the new one. A record whose use is not recorded is held to both rules.
     private static void fields(List<Break> out, String path, WireDescriptor.Type oldType, WireDescriptor.Type type) {
-        var oldWrites = oldType.used().isEmpty() || oldType.usedAs(Use.REQUEST) || oldType.usedAs(Use.MESSAGE) || oldType.usedAs(Use.BODY);
-        var oldReads = oldType.used().isEmpty() || oldType.usedAs(Use.RESPONSE) || oldType.usedAs(Use.MESSAGE) || oldType.usedAs(Use.BODY);
+        var oldWrites = oldType.used().isEmpty() || oldType.usedAs(Use.REQUEST) || oldType.usedAs(Use.MESSAGE);
+        var oldReads = oldType.used().isEmpty() || oldType.usedAs(Use.RESPONSE) || oldType.usedAs(Use.MESSAGE);
 
         var now = byName(type.fields());
         for (var oldField : oldType.fields()) {

@@ -3069,9 +3069,8 @@
       ]
     }
   },
-  "subjects": {
+  "payloads": {
     "chat.message": "net.hollowcube.ipc.chat.ChatMessage",
     "notification.\u003e": "net.hollowcube.ipc.notification.NotificationUpdate"
-  },
-  "notifications": {}
+  }
 }

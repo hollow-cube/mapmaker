@@ -17,8 +17,7 @@ class WireWalkerTest {
         package test;
 
         import net.hollowcube.ipc.util.Ipc;
-        import net.hollowcube.ipc.util.NatsMessage;
-        import net.hollowcube.ipc.util.NotificationBody;
+        import net.hollowcube.ipc.util.Payload;
         import org.jetbrains.annotations.Nullable;
         import java.util.List;
         import java.util.Map;
@@ -207,25 +206,25 @@ class WireWalkerTest {
     }
 
     @Test
-    void rejectsDuplicateSubjects() {
+    void rejectsDuplicatePayloadKeys() {
         var compilation = compile("""
 
-            @NatsMessage(subject = "invite.rejected")
+            @Payload("invite.rejected")
             public record Rejected(String id) {
             }
             """, """
-            @NatsMessage(subject = "invite.rejected")
+            @Payload("invite.rejected")
             public record Declined(String id) {
             }
             """);
 
         assertThat(compilation).failed();
-        assertThat(compilation).hadErrorContaining("subject 'invite.rejected' is claimed by both");
+        assertThat(compilation).hadErrorContaining("payload key 'invite.rejected' is claimed by both");
     }
 
     /// The descriptor is what the compatibility check reads, so its shape is pinned here in full
     /// for one small wire: a service, a nullable param, a record used both ways, an enum, a sealed
-    /// type, a subject and a notification key.
+    /// type and two payloads.
     @Test
     void writesTheWireDescriptor() {
         var compilation = compile("""
@@ -249,11 +248,11 @@ class WireWalkerTest {
             public record Circle(int radius) implements Shape {
             }
             """, """
-            @NatsMessage(subject = "point.moved")
+            @Payload("point.moved")
             public record PointMoved(Point point) {
             }
             """, """
-            @NotificationBody(type = "invite")
+            @Payload("test:invite")
             public record Invite(String from) {
             }
             """);
@@ -316,7 +315,7 @@ class WireWalkerTest {
                     "test.Invite": {
                       "kind": "record",
                       "used": [
-                        "body"
+                        "message"
                       ],
                       "fields": [
                         {
@@ -364,11 +363,9 @@ class WireWalkerTest {
                       }
                     }
                   },
-                  "subjects": {
-                    "point.moved": "test.PointMoved"
-                  },
-                  "notifications": {
-                    "invite": "test.Invite"
+                  "payloads": {
+                    "point.moved": "test.PointMoved",
+                    "test:invite": "test.Invite"
                   }
                 }
                 """);

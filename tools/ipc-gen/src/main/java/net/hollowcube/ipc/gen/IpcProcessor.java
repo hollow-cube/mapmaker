@@ -29,8 +29,8 @@ import java.util.*;
 ///   arguments as named fields of a JSON object and the return value as the whole response body.
 /// - `FooServer implements HttpHandler` — the same routing read backwards, over any implementation.
 ///
-/// Then, for the wire as a whole — every method signature, every `@NatsMessage` and
-/// `@NotificationBody` record, and every type reachable from one:
+/// Then, for the wire as a whole — every method signature, every `@Payload` record, and every type
+/// reachable from one:
 /// - `net.hollowcube.ipc.WireAdapters`, the gson adapters `Wire.gson()` carries, one per enum
 ///   and sealed interface.
 /// - `wire.json`, the descriptor `wireCheck` and `wireCompat` hold this build to.
@@ -56,9 +56,8 @@ public final class IpcProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         var elements = processingEnv.getElementUtils();
         var services = annotated(roundEnv, elements.getTypeElement(IpcNames.IPC_ANNOTATION));
-        var messages = annotated(roundEnv, elements.getTypeElement(IpcNames.NATS_MESSAGE_ANNOTATION));
-        var bodies = annotated(roundEnv, elements.getTypeElement(IpcNames.NOTIFICATION_BODY_ANNOTATION));
-        if (services.isEmpty() && messages.isEmpty() && bodies.isEmpty()) return false;
+        var payloadRoots = annotated(roundEnv, elements.getTypeElement(IpcNames.PAYLOAD_ANNOTATION));
+        if (services.isEmpty() && payloadRoots.isEmpty()) return false;
 
         var messager = processingEnv.getMessager();
         if (emitted) {
@@ -91,12 +90,11 @@ public final class IpcProcessor extends AbstractProcessor {
         }
         models.sort(Comparator.comparing(IpcModel::path));
 
-        var subjects = keyed(walker, messages, IpcNames.NATS_MESSAGE_ANNOTATION, "subject", Use.MESSAGE);
-        var notifications = keyed(walker, bodies, IpcNames.NOTIFICATION_BODY_ANNOTATION, "type", Use.BODY);
-        if (!walker.ok() || subjects == null || notifications == null) return false;
+        var payloads = payloads(walker, payloadRoots);
+        if (!walker.ok() || payloads == null) return false;
 
         write(IpcNames.WIRE_ADAPTERS, AdaptersEmitter.factory(walker));
-        writeResource(DESCRIPTOR_RESOURCE, DescriptorBuilder.build(models, walker, subjects, notifications).toJson());
+        writeResource(DESCRIPTOR_RESOURCE, DescriptorBuilder.build(models, walker, payloads).toJson());
         writeResource(METADATA_RESOURCE, MetadataEmitter.json(elements, walker));
         return false;
     }
@@ -108,28 +106,26 @@ public final class IpcProcessor extends AbstractProcessor {
         return out;
     }
 
-    /// Walks the records marked with one keyed root annotation, answering key to record — or null
-    /// having reported a problem.
-    private @Nullable SortedMap<String, String> keyed(WireWalker walker, List<? extends Element> roots,
-                                                      String annotation, String member, Use use) {
+    /// Walks the `@Payload` records, answering key to record — or null having reported a problem.
+    private @Nullable SortedMap<String, String> payloads(WireWalker walker, List<? extends Element> roots) {
         var messager = processingEnv.getMessager();
         var out = new TreeMap<String, String>();
         var ok = true;
         for (var root : roots) {
             var element = (TypeElement) root;
-            var key = annotationValue(element, annotation, member);
-            var path = "@" + annotation.substring(annotation.lastIndexOf('.') + 1) + "(\"" + key + "\") " + element.getSimpleName();
+            var key = annotationValue(element, IpcNames.PAYLOAD_ANNOTATION, "value");
+            var path = "@Payload(\"" + key + "\") " + element.getSimpleName();
             if (key.isBlank()) {
-                messager.printError("ipc: " + member + " cannot be blank", element);
+                messager.printError("ipc: a payload key cannot be blank", element);
                 ok = false;
             }
             var previous = out.put(key, element.getQualifiedName().toString());
             if (previous != null) {
-                messager.printError("ipc: " + member + " '" + key + "' is claimed by both " + previous + " and "
+                messager.printError("ipc: payload key '" + key + "' is claimed by both " + previous + " and "
                     + element.getQualifiedName(), element);
                 ok = false;
             }
-            if (!walker.rootRecord(element, use, path)) ok = false;
+            if (!walker.rootRecord(element, Use.MESSAGE, path)) ok = false;
         }
         return ok ? out : null;
     }
@@ -260,7 +256,7 @@ public final class IpcProcessor extends AbstractProcessor {
 
     @Override
     public Set<String> getSupportedAnnotationTypes() {
-        return Set.of(IpcNames.IPC_ANNOTATION, IpcNames.NATS_MESSAGE_ANNOTATION, IpcNames.NOTIFICATION_BODY_ANNOTATION);
+        return Set.of(IpcNames.IPC_ANNOTATION, IpcNames.PAYLOAD_ANNOTATION);
     }
 
     @Override

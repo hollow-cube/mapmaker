@@ -9,8 +9,7 @@ import com.palantir.javapoet.ClassName;
 final class IpcNames {
 
     static final String IPC_ANNOTATION = "net.hollowcube.ipc.util.Ipc";
-    static final String NATS_MESSAGE_ANNOTATION = "net.hollowcube.ipc.util.NatsMessage";
-    static final String NOTIFICATION_BODY_ANNOTATION = "net.hollowcube.ipc.util.NotificationBody";
+    static final String PAYLOAD_ANNOTATION = "net.hollowcube.ipc.util.Payload";
     static final String SERIALIZED_NAME_ANNOTATION = "com.google.gson.annotations.SerializedName";
     static final String JSON_ADAPTER_ANNOTATION = "com.google.gson.annotations.JsonAdapter";
     /// Where sql-gen writes. The schema and the wire are versioned apart, so nothing from here is
