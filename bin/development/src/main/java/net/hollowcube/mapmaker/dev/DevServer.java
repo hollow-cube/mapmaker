@@ -31,6 +31,7 @@ import net.hollowcube.ipc.notification.NotificationServer;
 import net.hollowcube.ipc.player.PlayerServer;
 import net.hollowcube.ipc.player.SocialServer;
 import net.hollowcube.ipc.replay.ReplayServer;
+import net.hollowcube.ipc.session.GameServer;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
@@ -64,6 +65,7 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.http.HttpClient;
 import java.nio.file.Path;
@@ -174,7 +176,8 @@ public class DevServer extends AbstractMultiMapServer {
             new ChatServiceImpl(db, nats),
             new ReplayServiceImpl(db, s3),
             new MapServiceImpl(db, mapWorlds, nats, redis, PostHog.getClient(), Duration.ZERO),
-            new PlayerServiceImpl(db), new SocialServiceImpl(db, notifications), notifications);
+            new PlayerServiceImpl(db), new SocialServiceImpl(db, notifications), notifications,
+            new DevSessionService(new SessionServiceImpl(db)));
         return ipc;
     }
 
@@ -187,7 +190,7 @@ public class DevServer extends AbstractMultiMapServer {
             MAX_TRACE_BYTES);
         http.addRoute(HeadDatabaseServer.PATH, new HeadDatabaseServer(ipc.headDatabase()));
         http.addRoute(ChatServer.PATH, new ChatServer(ipc.chat()));
-        http.addRoute(SessionServer.PATH, new SessionServer(new SessionServiceImpl(db)));
+        http.addRoute(SessionServer.PATH, new SessionServer(ipc.sessions()));
         http.addRoute(AnticheatServer.PATH, new AnticheatServer(new AnticheatServiceImpl(db, store)));
         http.addRoute(MapServer.PATH, new MapServer(ipc.maps()));
         http.addRoute(ReplayServer.PATH, new ReplayServer(ipc.replays()));
@@ -313,4 +316,23 @@ public class DevServer extends AbstractMultiMapServer {
             .build());
     }
 
+
+    /// The dev server is its own hub, and nothing tracks it in `server_states` as one, so a proxy in
+    /// front of it (`runProxy`) is always handed this server.
+    private record DevSessionService(SessionServiceImpl sessions) implements net.hollowcube.ipc.session.SessionService {
+        @Override
+        public int onlinePlayers() {
+            return sessions.onlinePlayers();
+        }
+
+        @Override
+        public GameServer findHub(@Nullable String exclude) {
+            return new GameServer("devserver", "127.0.0.1", MinecraftServer.PROTOCOL_VERSION);
+        }
+
+        @Override
+        public @Nullable GameServer findServer(String id) {
+            return "devserver".equals(id) ? findHub(null) : null;
+        }
+    }
 }

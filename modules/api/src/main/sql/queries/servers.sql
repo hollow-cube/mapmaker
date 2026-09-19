@@ -6,3 +6,10 @@ where role = 'hub'
   and status = 1
   and ($exclude::text is null or id != $exclude)
 limit 1;
+
+-- name: findServer :one
+-- The tracker deletes a row once its pod is gone.
+select id, cluster_ip, protocol_version
+from server_states
+where id = $id
+  and cluster_ip != '';

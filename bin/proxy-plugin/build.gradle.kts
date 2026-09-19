@@ -21,6 +21,8 @@ dependencies {
     // VelocityInternals reaches ConnectedPlayer#getConnection()#getChannel() through MethodHandles.
     annotationProcessor(libs.velocity.api)
     compileOnly(libs.velocity.api)
+    // The api of the very jar the proxy image ships, so what compiles is what runs.
+    compileOnly(files("proxy/plugins/ViaVersion-5.12.0.jar"))
 
     // The session count on the server list ping and the trace store the shipper puts to are ipc
     // services, so the generated SessionClient and AnticheatClient ride along. They drag in
@@ -41,6 +43,9 @@ dependencies {
     // The same simpleclient the backend servers use; ProxyHttpServer serves it on /metrics.
     implementation(libs.prometheus)
     implementation(libs.prometheus.httpserver)
+
+    // BackendsTest stands a fake ProxyServer up in front of Backends.
+    testImplementation(libs.velocity.api)
 
     // Tap tests drive an EmbeddedChannel; velocity-api brings no netty of its own.
     testImplementation(libs.netty.transport)
@@ -163,11 +168,12 @@ val stageProxy = tasks.register<Sync>("stageProxy") {
     from(tasks.shadowJar) { into("plugins") }
 }
 
-// A local run of the very thing that ships, differing only in what has to differ: the hub to
-// forward to, the bind port, and the forwarding secret, each of which is a gradle property.
+// A local run of the very thing that ships, differing only in what has to differ: the bind port
+// and the forwarding secret, each of which is a gradle property. The hub comes from the ipc
+// session service like it does in production; DevServer answers with itself.
 // Velocity's own state (logs, lang, plugin data) is left alone between runs.
 //
-//   ./gradlew :bin:proxy-plugin:runProxy -PproxyHub=127.0.0.1:25565 -PproxySecret=abcdef
+//   ./gradlew :bin:proxy-plugin:runProxy -PproxySecret=abcdef
 val proxyRunDir = layout.buildDirectory.dir("proxy/run")
 val prepareProxyRun = tasks.register<Sync>("prepareProxyRun") {
     group = "proxy"
@@ -179,11 +185,9 @@ val prepareProxyRun = tasks.register<Sync>("prepareProxyRun") {
         include("plugins/*/**")
     }
 
-    val hub = providers.gradleProperty("proxyHub").getOrElse("127.0.0.1:25565")
     val bind = providers.gradleProperty("proxyBind").getOrElse("0.0.0.0:25577")
     val secret = providers.gradleProperty("proxySecret").getOrElse("abcdef")
     val cookieSecret = providers.gradleProperty("proxyCookieSecret").getOrElse("local dev")
-    inputs.property("hub", hub)
     inputs.property("bind", bind)
     inputs.property("secret", secret)
     inputs.property("cookieSecret", cookieSecret)
@@ -192,8 +196,7 @@ val prepareProxyRun = tasks.register<Sync>("prepareProxyRun") {
         val dir = runDir.get().asFile
         val config = dir.resolve("velocity.toml")
         config.writeText(config.readText()
-            .replace(Regex("(?m)^bind = \".*\"$"), "bind = \"$bind\"")
-            .replace(Regex("(?m)^anyhub = \".*\"$"), "anyhub = \"$hub\""))
+            .replace(Regex("(?m)^bind = \".*\"$"), "bind = \"$bind\""))
         dir.resolve("forwarding.secret").writeText(secret)
         dir.resolve("cookie.secret").writeText(cookieSecret)
     }
@@ -201,7 +204,7 @@ val prepareProxyRun = tasks.register<Sync>("prepareProxyRun") {
 
 tasks.register<JavaExec>("runProxy") {
     group = "proxy"
-    description = "Runs the staged proxy locally, in front of -PproxyHub (127.0.0.1:25565)."
+    description = "Runs the staged proxy locally, in front of whatever hub the ipc session service names."
     dependsOn(prepareProxyRun)
     workingDir = proxyRunDir.get().asFile
     classpath = files(proxyRunDir.map { it.file("velocity.jar") })

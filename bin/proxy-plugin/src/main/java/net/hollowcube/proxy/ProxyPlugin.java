@@ -23,6 +23,7 @@ import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
 import com.velocitypowered.api.network.HandshakeIntent;
 import com.velocitypowered.api.network.ProtocolVersion;
 import com.velocitypowered.api.permission.Tristate;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
@@ -30,7 +31,6 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.proxy.server.ServerInfo;
 import com.velocitypowered.api.proxy.server.ServerPing;
 import com.velocitypowered.api.util.GameProfile;
 import io.prometheus.client.CollectorRegistry;
@@ -69,7 +69,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube")
+@Plugin(id = "hc-proxy", name = "hollowcube proxy plugin", version = "1.0", authors = "hollow cube",
+    dependencies = @Dependency(id = "viaversion", optional = true))
 public class ProxyPlugin {
     private static final ChannelIdentifier PROTOCOL_VERSION_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "pvn");
     private static final ChannelIdentifier TRANSFER_MESSAGE_ID = MinecraftChannelIdentifier.create("mapmaker", "transfer");
@@ -84,10 +85,13 @@ public class ProxyPlugin {
         ProtocolVersion.MINECRAFT_1_21_9,
         ProtocolVersion.MINECRAFT_1_21_11,
         ProtocolVersion.MINECRAFT_26_1,
-        ProtocolVersion.MINECRAFT_26_2
+        ProtocolVersion.MINECRAFT_26_2,
+        ProtocolVersion.MINECRAFT_26_3
     );
-    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_2;
-    private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.2";
+    private static final ProtocolVersion RECOMMEND_VERSION = ProtocolVersion.MINECRAFT_26_3;
+    private static final String PROTOCOL_VERSION_STRING = "1.21.7-26.3";
+    private static final Component NO_HUB_MESSAGE = Component.text("No hub is available right now, please try again in a moment.");
+    private static final int MAX_HUB_REROUTES = 5;
     // Lands in every capture trace header and store row, so a trace can be tied back to the build
     // that wrote it; the commit hash, stamped into the jar by the writeBuildStamp task.
     private static final String PROXY_VERSION = readBuildStamp();
@@ -128,7 +132,7 @@ public class ProxyPlugin {
     private final AnticheatConnections anticheatConnections;
     private final TraceShipper anticheatShipper;
 
-    private final RegisteredServer anyhubServer;
+    private final Backends backends;
 
     private @Nullable ProxyHttpServer http;
     // Set by /drain and never cleared: a draining proxy is one being replaced, and it takes no
@@ -147,7 +151,7 @@ public class ProxyPlugin {
     // PostLoginEvent share, and an ip:port is exactly one tcp connection.
     private final Map<InetSocketAddress, Long> transferIntents = new ConcurrentHashMap<>();
     private final Map<UUID, CompletableFuture<byte[]>> drainCookieWaiters = new ConcurrentHashMap<>();
-    private final Map<UUID, String> drainTargets = new ConcurrentHashMap<>();
+    private final Map<UUID, DrainCookie.Transfer> drainTargets = new ConcurrentHashMap<>();
 
     private final Set<UUID> playersJustJoined = new CopyOnWriteArraySet<>();
     private final Map<UUID, Integer> playerConnectAttempts = new ConcurrentHashMap<>();
@@ -169,7 +173,7 @@ public class ProxyPlugin {
         proxy.getChannelRegistrar().register(DISCONNECT_MESSAGE_ID);
         proxy.getChannelRegistrar().register(ANTICHEAT_MESSAGE_ID);
 
-        anyhubServer = proxy.getServer("anyhub").orElseThrow();
+        backends = new Backends(logger, proxy, sessions);
         drainCookie = DrainCookie.load(logger, COOKIE_SECRET_FILE);
 
         anticheatConfig = AnticheatConfig.fromEnv(logger);
@@ -229,6 +233,7 @@ public class ProxyPlugin {
     public void handleShutdown(@NotNull ProxyShutdownEvent event) {
         var deadline = System.nanoTime() + anticheatConfig.shutdownGrace().toNanos();
         if (http != null) http.close();
+        backends.close();
         anticheatConnections.close();
         anticheatShipper.close(Duration.ofNanos(Math.max(0, deadline - System.nanoTime())));
     }
@@ -291,18 +296,38 @@ public class ProxyPlugin {
         var transfer = drainCookie.open(playerId, Instant.now(), data);
         if (transfer == null) return;
 
-        logger.info("drain: {} arrived carrying a transfer to {}", player.getUsername(), transfer.address());
-        drainTargets.put(playerId, transfer.address());
+        logger.info("drain: {} arrived carrying a transfer to {}", player.getUsername(),
+            transfer.server() != null ? transfer.server() : transfer.address());
+        drainTargets.put(playerId, transfer);
         if (transfer.transferData().length > 0) transferData.put(playerId, transfer.transferData());
         player.storeCookie(DRAIN_TRANSFER_COOKIE, new byte[0]);
     }
 
     @Subscribe
-    public void handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
-        var target = drainTargets.remove(event.getPlayer().getUniqueId());
-        if (target == null) return;
-        var si = new ServerInfo("map-server", new InetSocketAddress(target, 25565));
-        event.setInitialServer(proxy.createRawRegisteredServer(si));
+    public @Nullable EventTask handleChooseInitialServer(@NotNull PlayerChooseInitialServerEvent event) {
+        var player = event.getPlayer();
+        var transfer = drainTargets.remove(player.getUniqueId());
+        CompletableFuture<@Nullable RegisteredServer> initial;
+        if (transfer != null && transfer.server() != null) {
+            // Gone since the cookie was sealed: the hub is where they would have been sent anyway.
+            initial = backends.findServer(transfer.server()).thenCompose(server ->
+                server != null ? CompletableFuture.completedFuture(server) : backends.findHub(null));
+        } else if (transfer != null && transfer.address() != null) {
+            event.setInitialServer(backends.server(new Backends.Target(null, transfer.address(), 0)));
+            return null;
+        } else {
+            initial = backends.findHub(null);
+        }
+
+        return EventTask.resumeWhenComplete(initial.handle((hub, error) -> {
+            if (hub != null) {
+                event.setInitialServer(hub);
+            } else {
+                logger.error("no hub for {} to join", player.getUsername(), error);
+                player.disconnect(NO_HUB_MESSAGE);
+            }
+            return null;
+        }));
     }
 
     private void drain() {
@@ -465,18 +490,17 @@ public class ProxyPlugin {
         if (!(event.getSource() instanceof ServerConnection serverConn)) return;
         var player = serverConn.getPlayer();
 
-        var serverName = new String(event.getData());
-        logger.info("transfering {} to {}", player.getUsername(), serverName);
+        var target = Backends.Target.parse(event.getData());
+        logger.info("transfering {} to {}", player.getUsername(), target);
 
-        if (draining.get() && optimisticTransfer(player, serverName)) return;
+        if (draining.get() && optimisticTransfer(player, target)) return;
 
-        var si = new ServerInfo("map-server", new InetSocketAddress(serverName, 25565));
-        player.createConnectionRequest(proxy.createRawRegisteredServer(si)).connect().thenAccept(result -> {
+        player.createConnectionRequest(backends.server(target)).connect().thenAccept(result -> {
             switch (result.getStatus()) {
                 case SUCCESS, ALREADY_CONNECTED ->
-                    logger.info("transfer success: {} -> {}", player.getUsername(), serverName);
+                    logger.info("transfer success: {} -> {}", player.getUsername(), target);
                 case SERVER_DISCONNECTED, CONNECTION_CANCELLED -> {
-                    logger.info("transfer failed: {} -> {}", player.getUsername(), serverName);
+                    logger.info("transfer failed: {} -> {}", player.getUsername(), target);
                     serverConn.sendPluginMessage(TRANSFER_MESSAGE_ID, "fail".getBytes(StandardCharsets.UTF_8));
                 }
             }
@@ -490,8 +514,8 @@ public class ProxyPlugin {
     /// open by a player who never logs off.
     ///
     /// False when the transfer has to happen the ordinary way, and the caller falls through to it.
-    private boolean optimisticTransfer(@NotNull Player player, @NotNull String address) {
-        if (drainCookie == null) return false;
+    private boolean optimisticTransfer(@NotNull Player player, @NotNull Backends.Target target) {
+        if (drainCookie == null || target.server() == null) return false;
         // Vanilla puts the srv-resolved target in the handshake, so this is directly connectable.
         var host = player.getVirtualHost().orElse(null);
         if (host == null) return false;
@@ -499,7 +523,7 @@ public class ProxyPlugin {
 
         var playerId = player.getUniqueId();
         var pendingData = transferData.getOrDefault(playerId, new byte[0]);
-        var cookie = drainCookie.seal(playerId, Instant.now().plus(DRAIN_COOKIE_TTL), address, pendingData);
+        var cookie = drainCookie.seal(playerId, Instant.now().plus(DRAIN_COOKIE_TTL), target.server(), pendingData);
         if (cookie.length > DrainCookie.MAX_COOKIE_BYTES) {
             logger.warn("drain: {} bytes of transfer data will not fit a cookie, transferring {} in place",
                 pendingData.length, player.getUsername());
@@ -513,7 +537,7 @@ public class ProxyPlugin {
         proxy.getScheduler().buildTask(this, () -> player.transferToHost(host))
             .delay(DRAIN_TRANSFER_SETTLE)
             .schedule();
-        logger.info("drain: transferring {} off this proxy, to {} via {}", player.getUsername(), address, host);
+        logger.info("drain: transferring {} off this proxy, to {} via {}", player.getUsername(), target, host);
         return true;
     }
 
@@ -535,8 +559,6 @@ public class ProxyPlugin {
         // A previous server means a switch, which ends the run whatever capture is open was opened
         // for. Null is the first connect of the session, where there is nothing to close.
         if (event.getPreviousServer() != null) anticheatConnections.switchedServer(playerId);
-
-        if (!playersJustJoined.contains(playerId)) return;
 
         playersJustJoined.remove(playerId);
         playerConnectAttempts.remove(playerId);
@@ -584,36 +606,35 @@ public class ProxyPlugin {
         transferIntents.values().removeIf(deadline -> now - deadline >= 0);
     }
 
+    /// Anybody left without a server is sent to a hub: kicked off the one they were on, or failing
+    /// to reach the first one of their session (a hub that went away first, or a backend a drain
+    /// cookie named that is gone). A failed switch leaves them where they are, velocity's default.
     @Subscribe
-    public void handleKickedFromServer(@NotNull KickedFromServerEvent event) {
+    public @Nullable EventTask handleKickedFromServer(@NotNull KickedFromServerEvent event) {
+        var player = event.getPlayer();
+        if (event.kickedDuringServerConnect() && player.getCurrentServer().isPresent()) return null;
+
+        int attempts = playerConnectAttempts.merge(player.getUniqueId(), 1, Integer::sum);
+        if (attempts > MAX_HUB_REROUTES) {
+            event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Unable to recover. Please try again")));
+            return null;
+        }
+
         var serverName = event.getServer().getServerInfo().getName();
-
-        // If they were leaving the limbo, they should be disconnected completely no redirect.
-        if (event.kickedDuringServerConnect()) {
-            // A drain cookie sent them straight at a backend that is not there any more, and they
-            // have no server to be put back on.
-            if (event.getPlayer().getCurrentServer().isEmpty() && !"anyhub".equals(serverName)) {
-                logger.info("drain: {} could not reach {}, sending them to the hub",
-                    event.getPlayer().getUsername(), serverName);
-                event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
+        var fromHub = backends.hubId(serverName);
+        // Shown on arrival, the way velocity shows it when it redirects on its own. A hub kicking
+        // is the hub going away, which is not worth telling anybody.
+        var reason = fromHub != null ? Component.empty() : event.getServerKickReason().orElse(Component.empty());
+        logger.info("sending {} to a hub after losing {}", player.getUsername(), serverName);
+        return EventTask.resumeWhenComplete(backends.findHub(fromHub).handle((hub, error) -> {
+            if (hub != null) {
+                event.setResult(KickedFromServerEvent.RedirectPlayer.create(hub, reason));
+            } else {
+                logger.error("no hub for {} to fall back to", player.getUsername(), error);
+                event.setResult(KickedFromServerEvent.DisconnectPlayer.create(NO_HUB_MESSAGE));
             }
-            return;
-        }
-
-        // 'anyhub' points to the clusterip service for all the hub instances, so if you are kicked from it
-        // velocity assumes it cannot immediately reconnect to it. In reality, reconnecting will point to another
-        // ready instance, so it is totally safe to do so.
-        if ("anyhub".equals(serverName)) {
-            int attempts = playerConnectAttempts.merge(event.getPlayer().getUniqueId(), 1, Integer::sum);
-            if (attempts > 5) {
-                event.setResult(KickedFromServerEvent.DisconnectPlayer.create(Component.text("Unable to recover. Please try again")));
-                return;
-            }
-
-            logger.info("reconnecting {} to hub", event.getPlayer().getUsername());
-            event.setResult(KickedFromServerEvent.RedirectPlayer.create(anyhubServer, Component.empty()));
-        }
-
+            return null;
+        }));
     }
 
     private static String readBuildStamp() {

@@ -23,6 +23,13 @@ final class ServersQueriesImpl implements ServersQueries {
           and (?::text is null or id != ?)
         limit 1""";
 
+    private static final String FIND_SERVER = """
+        -- The tracker deletes a row once its pod is gone.
+        select id, cluster_ip, protocol_version
+        from server_states
+        where id = ?
+          and cluster_ip != ''""";
+
     private final ConnectionSource source;
 
     ServersQueriesImpl(ConnectionSource source) {
@@ -39,6 +46,24 @@ final class ServersQueriesImpl implements ServersQueries {
                 ps.setString(2, exclude);
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next() ? new ServersQueries.FindHubRow(rs.getString(1), rs.getString(2), rs.getInt(3)) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public ServersQueries.FindServerRow findServer(String id) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(FIND_SERVER)) {
+                ps.setString(1, id);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? new ServersQueries.FindServerRow(rs.getString(1), rs.getString(2), rs.getInt(3)) : null;
                 }
             } finally {
                 source.release(conn);

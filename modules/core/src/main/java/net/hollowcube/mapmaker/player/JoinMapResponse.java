@@ -8,6 +8,7 @@ import org.jetbrains.annotations.NotNull;
 public record JoinMapResponse(
         @NotNull String server,
         @SerializedName("serverClusterIP")
-        @NotNull String serverClusterIp
+        @NotNull String serverClusterIp,
+        int protocolVersion
 ) {
 }

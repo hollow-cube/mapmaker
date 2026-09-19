@@ -25,4 +25,10 @@ public final class SessionServiceImpl implements SessionService {
         var hub = db.servers.findHub(exclude);
         return hub == null ? null : new GameServer(hub.id(), hub.clusterIp(), hub.protocolVersion());
     }
+
+    @Override
+    public @Nullable GameServer findServer(String id) {
+        var server = db.servers.findServer(id);
+        return server == null ? null : new GameServer(server.id(), server.clusterIp(), server.protocolVersion());
+    }
 }

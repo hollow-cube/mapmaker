@@ -3,7 +3,10 @@ package net.hollowcube.proxy.drain;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.time.Instant;
@@ -29,17 +32,44 @@ class DrainCookieTest {
     @Test
     void testRoundTrip() {
         var data = "{\"HubTransferData\":{}}".getBytes(StandardCharsets.UTF_8);
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", data);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", data);
 
         var transfer = cookie.open(PLAYER, NOW, sealed);
         assertNotNull(transfer);
+        assertEquals("map-isolate-7f2k9", transfer.server());
+        assertArrayEquals(data, transfer.transferData());
+    }
+
+    /// What the previous build seals while it drains into this one.
+    @Test
+    void testOpensAVersionOneCookieAsAnAddress() throws Exception {
+        var data = "{\"HubTransferData\":{}}".getBytes(StandardCharsets.UTF_8);
+        var address = "10.42.0.7".getBytes(StandardCharsets.UTF_8);
+        var plain = ByteBuffer.allocate(4 + address.length + 4 + data.length)
+            .putInt(address.length).put(address)
+            .putInt(data.length).put(data)
+            .array();
+        var nonce = new byte[12];
+        var cipher = Cipher.getInstance("AES/GCM/NoPadding");
+        cipher.init(Cipher.ENCRYPT_MODE, key(1), new GCMParameterSpec(128, nonce));
+        cipher.updateAAD(ByteBuffer.allocate(25).put((byte) 1)
+            .putLong(PLAYER.getMostSignificantBits()).putLong(PLAYER.getLeastSignificantBits())
+            .putLong(EXPIRY.toEpochMilli()).array());
+        var sealed = cipher.doFinal(plain);
+        var v1 = ByteBuffer.allocate(21 + sealed.length)
+            .put((byte) 1).putLong(EXPIRY.toEpochMilli()).put(nonce).put(sealed)
+            .array();
+
+        var transfer = cookie.open(PLAYER, NOW, v1);
+        assertNotNull(transfer);
+        assertNull(transfer.server());
         assertEquals("10.42.0.7", transfer.address());
         assertArrayEquals(data, transfer.transferData());
     }
 
     @Test
     void testRoundTripWithoutTransferData() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
 
         var transfer = cookie.open(PLAYER, NOW, sealed);
         assertNotNull(transfer);
@@ -48,8 +78,8 @@ class DrainCookieTest {
 
     @Test
     void testNonceIsFreshPerSeal() {
-        var first = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
-        var second = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var first = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
+        var second = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         assertFalse(Arrays.equals(first, second));
     }
 
@@ -61,21 +91,21 @@ class DrainCookieTest {
 
     @Test
     void testTruncated() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         assertNull(cookie.open(PLAYER, NOW, Arrays.copyOf(sealed, 8)));
         assertNull(cookie.open(PLAYER, NOW, Arrays.copyOf(sealed, 30)));
     }
 
     @Test
     void testUnknownVersion() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         sealed[0] = 99;
         assertNull(cookie.open(PLAYER, NOW, sealed));
     }
 
     @Test
     void testTamperedCiphertext() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         sealed[sealed.length - 1] ^= 0x01;
         assertNull(cookie.open(PLAYER, NOW, sealed));
     }
@@ -84,34 +114,34 @@ class DrainCookieTest {
     /// by it, because the uuid is bound into the tag.
     @Test
     void testAnotherPlayer() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         assertNull(cookie.open(UUID.randomUUID(), NOW, sealed));
     }
 
     /// Moving the expiry forward is the obvious way to make a cookie last; it is in the tag.
     @Test
     void testMovedExpiry() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         sealed[1] ^= 0x40;
         assertNull(cookie.open(PLAYER, NOW, sealed));
     }
 
     @Test
     void testExpired() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         assertNull(cookie.open(PLAYER, EXPIRY, sealed));
         assertNull(cookie.open(PLAYER, EXPIRY.plusSeconds(1), sealed));
     }
 
     @Test
     void testAnotherProxysKey() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0]);
         assertNull(new DrainCookie(key(2)).open(PLAYER, NOW, sealed));
     }
 
     @Test
     void testOversizeIsVisibleToTheCaller() {
-        var sealed = cookie.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[DrainCookie.MAX_COOKIE_BYTES]);
+        var sealed = cookie.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[DrainCookie.MAX_COOKIE_BYTES]);
         assertTrue(sealed.length > DrainCookie.MAX_COOKIE_BYTES);
     }
 
@@ -126,7 +156,7 @@ class DrainCookieTest {
             var two = DrainCookie.load(logger, file.toString());
             assertNotNull(one);
             assertNotNull(two);
-            assertNotNull(two.open(PLAYER, NOW, one.seal(PLAYER, EXPIRY, "10.42.0.7", new byte[0])));
+            assertNotNull(two.open(PLAYER, NOW, one.seal(PLAYER, EXPIRY, "map-isolate-7f2k9", new byte[0])));
         } finally {
             Files.delete(file);
         }

@@ -35,8 +35,6 @@ public interface SessionService {
 
     @NotNull JoinMapResponse joinMapV2(@NotNull JoinMapRequest req);
 
-    @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req);
-
     @NotNull List<String> getIsolateOverrides();
 
     default @NotNull JoinMapResponse findMapServer(@NotNull String mapId) {

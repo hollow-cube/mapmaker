@@ -138,23 +138,6 @@ public class SessionServiceImpl extends AbstractHttpService implements SessionSe
     }
 
     @Override
-    public @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest body) {
-        logger.log(System.Logger.Level.INFO, "sending hub join request {0}", body);
-        var reqBody = GSON.toJson(body);
-        var req = HttpRequest.newBuilder()
-                .method("POST", HttpRequest.BodyPublishers.ofString(reqBody))
-                .uri(url("%s/join_hub", baseUrl))
-                .build();
-        var res = doRequest(req, HttpResponse.BodyHandlers.ofString());
-        return switch (res.statusCode()) {
-            case 200 -> GSON.fromJson(res.body(), JoinMapResponse.class);
-            case 401 -> throw createUnauthorizedError(res);
-            case 503 -> throw new NoAvailableServerException();
-            default -> throw new InternalError("Failed to join hub (" + res.statusCode() + "): " + res.body());
-        };
-    }
-
-    @Override
     public @NotNull JoinMapResponse findMapServer(@NotNull String mapId) {
         var req = HttpRequest.newBuilder()
                 .GET()

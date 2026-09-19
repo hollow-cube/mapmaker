@@ -7,6 +7,7 @@ import net.hollowcube.ipc.notification.NotificationService;
 import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.ipc.replay.ReplayService;
+import net.hollowcube.ipc.session.SessionService;
 import org.jetbrains.annotations.NotNull;
 
 /// Everything this server calls on the api over ipc.
@@ -21,6 +22,7 @@ public record IpcServices(
     @NotNull MapService maps,
     @NotNull PlayerService players,
     @NotNull SocialService social,
-    @NotNull NotificationService notifications
+    @NotNull NotificationService notifications,
+    @NotNull SessionService sessions
 ) {
 }

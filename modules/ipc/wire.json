@@ -938,6 +938,18 @@
             "nullable": true
           }
         },
+        "find-server": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.session.GameServer",
+            "nullable": true
+          }
+        },
         "online-players": {
           "params": [],
           "returns": {

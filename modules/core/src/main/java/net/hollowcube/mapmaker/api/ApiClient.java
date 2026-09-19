@@ -7,6 +7,7 @@ import net.hollowcube.ipc.notification.NotificationService;
 import net.hollowcube.ipc.player.PlayerService;
 import net.hollowcube.ipc.player.SocialService;
 import net.hollowcube.ipc.replay.ReplayService;
+import net.hollowcube.ipc.session.SessionService;
 import net.hollowcube.mapmaker.api.auth.AuthClient;
 import net.hollowcube.mapmaker.api.interaction.InteractionClient;
 import net.hollowcube.mapmaker.api.maps.MapClient;
@@ -26,13 +27,14 @@ public final class ApiClient {
     public final ChatService chat;
     public final InteractionClient interactions;
     public final NotificationService notifications;
+    public final SessionService sessions;
     public final AuthClient auth;
 
     /// Everything the Go api-server still serves comes off `http`; everything the java api-server
     /// serves is an ipc client built against its own base url, and so is passed in.
     public ApiClient(HttpClientWrapper http, HeadDatabaseService headDatabase, ChatService chat,
                      ReplayService replays, MapService maps, PlayerService players, SocialService social,
-                     NotificationService notifications) {
+                     NotificationService notifications, SessionService sessions) {
         this.players = new LocalPlayerService(players);
         this.social = social;
         this.mapService = maps;
@@ -42,6 +44,7 @@ public final class ApiClient {
         this.chat = chat;
         this.interactions = new InteractionClient.Http(http);
         this.notifications = notifications;
+        this.sessions = sessions;
         this.auth = new AuthClient.Http(http);
     }
 

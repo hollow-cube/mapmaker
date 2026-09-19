@@ -26,8 +26,6 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.setting.TimeOfDay;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
-import net.hollowcube.mapmaker.player.JoinHubRequest;
-import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
@@ -205,13 +203,14 @@ public class HubServer extends AbstractMapServer {
         var stranded = 0;
         for (var player : players) {
             try {
-                var hub = sessionService().joinHubV2(new JoinHubRequest(
-                    player.getUuid().toString(), AbstractHttpService.hostname));
+                var hub = api().sessions.findHub(AbstractHttpService.hostname);
+                if (hub == null) {
+                    stranded++;
+                    continue;
+                }
 
                 var state = new HubTransferData(player.getPosition(), player.getHeldSlot());
-                ProxySupport.transferWithData(player, hub.serverClusterIp(), state);
-            } catch (SessionService.NoAvailableServerException ignored) {
-                stranded++;
+                ProxySupport.transferWithData(player, hub, state);
             } catch (Exception e) {
                 ExceptionReporter.reportException(e, player);
             }

@@ -7,7 +7,6 @@ import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ProxySupport;
-import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.CompletableFuture;
 
 import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
-import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class MapIsolateBridge implements ServerBridge {
     private static final Logger logger = LoggerFactory.getLogger(MapIsolateBridge.class);
@@ -59,7 +57,7 @@ public class MapIsolateBridge implements ServerBridge {
             var response = sessionService.joinMapV2(new JoinMapRequest(playerId, joinConfig.mapId(), targetState, joinConfig.source(), joinConfig.isolateOverride()));
             logger.info("join map result: {}", response);
 
-            ProxySupport.transfer(player, response.serverClusterIp());
+            ProxySupport.transfer(player, response);
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.text("An error occurred while trying to join the map. Please try again later."));
@@ -69,13 +67,17 @@ public class MapIsolateBridge implements ServerBridge {
     @Override
     public void joinHub(Player player) {
         try {
+            var hub = api.sessions.findHub(null);
+            if (hub == null) {
+                player.sendMessage("No hub server is available!");
+                return;
+            }
+
             var future = new CompletableFuture<Void>();
             onConfigOrDisconnect(player, () -> future.complete(null));
 
-            var playerData = localPlayer(player);
-            var res = sessionService.joinHubV2(new JoinHubRequest(playerData.id().toString()));
-            logger.info("join hub result: {}", res);
-            ProxySupport.transfer(player, res.serverClusterIp());
+            logger.info("join hub result: {}", hub);
+            ProxySupport.transfer(player, hub);
 
             FutureUtil.getUnchecked(future); // Wait until not in instance
         } catch (Exception e) {

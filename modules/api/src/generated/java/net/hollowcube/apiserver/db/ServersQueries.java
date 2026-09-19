@@ -11,10 +11,19 @@ public interface ServersQueries {
     @Nullable
     FindHubRow findHub(String exclude);
 
+    @Nullable
+    FindServerRow findServer(String id);
+
     /**
      * A row of `findHub`.
      */
     record FindHubRow(String id, String clusterIp, int protocolVersion) {
+    }
+
+    /**
+     * A row of `findServer`.
+     */
+    record FindServerRow(String id, String clusterIp, int protocolVersion) {
     }
 
     /**
@@ -25,6 +34,12 @@ public interface ServersQueries {
         @Override
         public FindHubRow findHub(String exclude) {
             throw new UnsupportedOperationException("ServersQueries.findHub is not stubbed on this fake");
+        }
+
+        @Nullable
+        @Override
+        public FindServerRow findServer(String id) {
+            throw new UnsupportedOperationException("ServersQueries.findServer is not stubbed on this fake");
         }
     }
 }

@@ -20,8 +20,12 @@ import java.util.UUID;
 
 /// The cookie a draining proxy hands the client on its way out, holding the transfer it was in the
 /// middle of. It has to live on the client to survive the reconnect, and a client can rewrite
-/// anything it holds, so it is sealed: the payload names a backend address the receiving proxy will
-/// connect the player to, and a forgeable one would let anybody reach any address in the cluster.
+/// anything it holds, so it is sealed: the payload names the backend the receiving proxy will
+/// connect the player to, and a forgeable one would let anybody reach any server in the cluster.
+///
+/// The backend is named by its server id, not its address: the receiving proxy looks it up, which
+/// both confirms it still exists and says what protocol it speaks. Version 1 held the address, and
+/// is still opened for the proxy rollout that replaces the builds sealing it.
 ///
 /// AES-256-GCM, `[version:1][expiry:8][nonce:12][ciphertext + tag]`, with `version || playerId ||
 /// expiry` as the additional data so a cookie replayed under another player or with the expiry
@@ -30,12 +34,15 @@ public final class DrainCookie {
     /// Vanilla's cap on a cookie payload; a sealed cookie over this cannot be stored at all.
     public static final int MAX_COOKIE_BYTES = 5120;
 
-    private static final byte VERSION = 1;
+    private static final byte VERSION = 2;
+    private static final byte VERSION_ADDRESS = 1;
     private static final int NONCE_BYTES = 12;
     private static final int TAG_BITS = 128;
     private static final int HEADER_BYTES = 1 + Long.BYTES + NONCE_BYTES;
 
-    public record Transfer(String address, byte[] transferData) {
+    /// @param server  the `server_states` id of the backend, or null in a version 1 cookie
+    /// @param address the backend's address in a version 1 cookie, or null
+    public record Transfer(@Nullable String server, @Nullable String address, byte[] transferData) {
     }
 
     private final SecretKey key;
@@ -66,10 +73,10 @@ public final class DrainCookie {
     }
 
     /// Check the result against [#MAX_COOKIE_BYTES] before storing it.
-    public byte[] seal(UUID playerId, Instant expiry, String address, byte[] transferData) {
-        var addressBytes = address.getBytes(StandardCharsets.UTF_8);
-        var plain = ByteBuffer.allocate(Integer.BYTES + addressBytes.length + Integer.BYTES + transferData.length)
-            .putInt(addressBytes.length).put(addressBytes)
+    public byte[] seal(UUID playerId, Instant expiry, String server, byte[] transferData) {
+        var serverBytes = server.getBytes(StandardCharsets.UTF_8);
+        var plain = ByteBuffer.allocate(Integer.BYTES + serverBytes.length + Integer.BYTES + transferData.length)
+            .putInt(serverBytes.length).put(serverBytes)
             .putInt(transferData.length).put(transferData)
             .array();
 
@@ -77,7 +84,7 @@ public final class DrainCookie {
         random.nextBytes(nonce);
         long expiryMillis = expiry.toEpochMilli();
         try {
-            var cipher = cipher(Cipher.ENCRYPT_MODE, playerId, nonce, expiryMillis);
+            var cipher = cipher(Cipher.ENCRYPT_MODE, VERSION, playerId, nonce, expiryMillis);
             var sealed = cipher.doFinal(plain);
             return ByteBuffer.allocate(HEADER_BYTES + sealed.length)
                 .put(VERSION).putLong(expiryMillis).put(nonce).put(sealed)
@@ -90,7 +97,9 @@ public final class DrainCookie {
     /// Null for anything that does not open as this player's live cookie. Never throws: it is all
     /// client input, and a rejected cookie only means the player is routed as a fresh login.
     public @Nullable Transfer open(UUID playerId, Instant now, byte @Nullable [] cookie) {
-        if (cookie == null || cookie.length <= HEADER_BYTES || cookie[0] != VERSION) return null;
+        if (cookie == null || cookie.length <= HEADER_BYTES) return null;
+        var version = cookie[0];
+        if (version != VERSION && version != VERSION_ADDRESS) return null;
 
         var buffer = ByteBuffer.wrap(cookie);
         buffer.get();
@@ -101,23 +110,26 @@ public final class DrainCookie {
         buffer.get(sealed);
 
         try {
-            var plain = ByteBuffer.wrap(cipher(Cipher.DECRYPT_MODE, playerId, nonce, expiryMillis).doFinal(sealed));
+            var plain = ByteBuffer.wrap(cipher(Cipher.DECRYPT_MODE, version, playerId, nonce, expiryMillis).doFinal(sealed));
             if (!now.isBefore(Instant.ofEpochMilli(expiryMillis))) return null;
-            var address = new byte[plain.getInt()];
-            plain.get(address);
+            var target = new byte[plain.getInt()];
+            plain.get(target);
             var transferData = new byte[plain.getInt()];
             plain.get(transferData);
-            return new Transfer(new String(address, StandardCharsets.UTF_8), transferData);
+            var targetString = new String(target, StandardCharsets.UTF_8);
+            return version == VERSION
+                ? new Transfer(targetString, null, transferData)
+                : new Transfer(null, targetString, transferData);
         } catch (GeneralSecurityException | RuntimeException e) {
             return null;
         }
     }
 
-    private Cipher cipher(int mode, UUID playerId, byte[] nonce, long expiryMillis) throws GeneralSecurityException {
+    private Cipher cipher(int mode, byte version, UUID playerId, byte[] nonce, long expiryMillis) throws GeneralSecurityException {
         var cipher = Cipher.getInstance("AES/GCM/NoPadding");
         cipher.init(mode, key, new GCMParameterSpec(TAG_BITS, nonce));
         cipher.updateAAD(ByteBuffer.allocate(1 + 3 * Long.BYTES)
-            .put(VERSION)
+            .put(version)
             .putLong(playerId.getMostSignificantBits())
             .putLong(playerId.getLeastSignificantBits())
             .putLong(expiryMillis)

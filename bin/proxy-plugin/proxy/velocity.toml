@@ -71,17 +71,12 @@ bytes-per-second = -1
 # Increased to allow bigger Axiom pastes.
 decompressed-bytes-per-second = 67108864
 
+# Backends are never configured here: ProxyPlugin connects every player to a server the session
+# service hands it, hub included.
 [servers]
-# Configure your servers here. Each key represents the server's name, and the value
-# represents the IP address of the server to connect to.
-anyhub = "mapmaker-hub.mapmaker.svc.cluster.local:25565"
-
-# In what order we should try servers when a player logs in or is kicked from a server.
-try = ["anyhub"]
+try = []
 
 [forced-hosts]
-# Configure your forced hosts here.
-"hollowcube.dev" = ["anyhub"]
 
 [advanced]
 # How large a Minecraft packet has to be before we compress it. Setting this to zero will

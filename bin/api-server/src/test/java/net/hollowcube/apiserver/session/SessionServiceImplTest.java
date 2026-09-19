@@ -88,4 +88,18 @@ class SessionServiceImplTest {
         assertNull(sessions.findHub("hub-a"));
         assertEquals(new GameServer("hub-a", "10.0.0.3", 0), sessions.findHub("hub-b"));
     }
+
+    @Test
+    void findServer_isNullOnceThePodIsGone() {
+        TEST_DB.seed(
+            """
+            insert into server_states (id, role, status, cluster_ip, protocol_version) values
+                ('isolate-a', 'map-isolate', 0, '10.0.0.4', 777),
+                ('isolate-b', 'map-isolate', 0, '', 0)"""
+        );
+
+        assertEquals(new GameServer("isolate-a", "10.0.0.4", 777), sessions.findServer("isolate-a"));
+        assertNull(sessions.findServer("isolate-b"));
+        assertNull(sessions.findServer("isolate-c"));
+    }
 }

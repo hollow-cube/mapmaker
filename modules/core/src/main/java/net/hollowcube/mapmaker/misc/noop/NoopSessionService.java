@@ -62,11 +62,6 @@ public class NoopSessionService implements SessionService {
     }
 
     @Override
-    public @NotNull JoinMapResponse joinHubV2(@NotNull JoinHubRequest req) {
-        return new JoinMapResponse("1", "2");
-    }
-
-    @Override
     public @NotNull List<String> getIsolateOverrides() {
         return List.of();
     }

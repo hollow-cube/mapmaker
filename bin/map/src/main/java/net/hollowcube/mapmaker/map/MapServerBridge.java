@@ -6,9 +6,7 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ProxySupport;
-import net.hollowcube.mapmaker.player.JoinHubRequest;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
-import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
@@ -67,7 +65,7 @@ public class MapServerBridge implements ServerBridge {
                 this.moveBetweenMapsOnThisServer(player, joinConfig.mapId(), targetState);
             } else {
                 logger.info("moving to other server");
-                ProxySupport.transfer(player, response.serverClusterIp());
+                ProxySupport.transfer(player, response);
             }
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
@@ -78,17 +76,19 @@ public class MapServerBridge implements ServerBridge {
     @Override
     public void joinHub(@NotNull Player player) {
         try {
+            var hub = server.api().sessions.findHub(null);
+            if (hub == null) {
+                player.sendMessage("No hub server is available!");
+                return;
+            }
+
             var future = new CompletableFuture<Void>();
             onConfigOrDisconnect(player, () -> future.complete(null));
 
-            var playerData = localPlayer(player);
-            var res = server.sessionService().joinHubV2(new JoinHubRequest(playerData.id().toString()));
-            logger.info("join hub result: {}", res);
-            ProxySupport.transfer(player, res.serverClusterIp());
+            logger.info("join hub result: {}", hub);
+            ProxySupport.transfer(player, hub);
 
             FutureUtil.getUnchecked(future); // Wait until not in instance
-        } catch (SessionService.NoAvailableServerException ignored) {
-            player.sendMessage("No hub server is available!");
         } catch (Exception e) {
             ExceptionReporter.reportException(e, player);
             player.sendMessage(Component.text("An error occurred while trying to return to the hub. Please try again later."));

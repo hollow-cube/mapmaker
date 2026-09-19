@@ -53,7 +53,7 @@ public class HubServerBridge implements ServerBridge {
                 case SPECTATING -> MapPresence.STATE_SPECTATING;
             }, joinConfig.source(), joinConfig.isolateOverride()));
             logger.info("join map result: {}", res);
-            ProxySupport.transfer(player, res.serverClusterIp());
+            ProxySupport.transfer(player, res);
         } catch (Exception e) {
             if (!(e instanceof SessionService.NoAvailableServerException))
                 ExceptionReporter.reportException(e, player);
