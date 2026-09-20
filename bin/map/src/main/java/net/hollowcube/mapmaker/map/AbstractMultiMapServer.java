@@ -528,7 +528,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 return;
             }
 
-            player.sendMessage(Component.text("Map: ").append(Component.text(world.map().id().toString())));
+            player.sendMessage(Component.text("Map: ")
+                .append(ComponentUtil.createBasicCopy(world.map().id().toString())));
             player.sendMessage("Type: " + world.getClass().getSimpleName());
         }, "Shows information about the world you are in");
 
