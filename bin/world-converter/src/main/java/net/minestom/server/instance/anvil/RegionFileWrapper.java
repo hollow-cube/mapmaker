@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public class RegionFileWrapper {
+public class RegionFileWrapper implements AutoCloseable {
     private final RegionFile regionFile;
 
     public RegionFileWrapper(Path path) throws IOException {
@@ -15,5 +15,14 @@ public class RegionFileWrapper {
 
     public @Nullable CompoundBinaryTag readChunkData(int chunkX, int chunkZ) throws IOException {
         return regionFile.readChunkData(chunkX, chunkZ);
+    }
+
+    public void writeChunkData(int chunkX, int chunkZ, CompoundBinaryTag data) throws IOException {
+        regionFile.writeChunkData(chunkX, chunkZ, data);
+    }
+
+    @Override
+    public void close() throws IOException {
+        regionFile.close();
     }
 }

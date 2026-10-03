@@ -24,8 +24,11 @@ import java.util.stream.Collectors;
 public class ReadWriteWorldAccess extends ReadWorldAccess {
     private static final Logger logger = LoggerFactory.getLogger(ReadWriteWorldAccess.class);
 
+    private final AbstractMapWorld<?, ?> mapWorld;
+
     public ReadWriteWorldAccess(AbstractMapWorld<?, ?> mapWorld) {
         super(mapWorld);
+        this.mapWorld = mapWorld;
     }
 
     @Override
@@ -62,7 +65,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         heightmaps[WORLD_BOTTOM] = chunk.saveHeightmap(Heightmaps.WORLD_BOTTOM);
     }
 
-    private ListBinaryTag saveEntities(Chunk chunk) {
+    public static ListBinaryTag saveEntities(Chunk chunk) {
         ListBinaryTag.Builder<CompoundBinaryTag> entitiesTag = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
 
         for (var entity : getRootEntities(chunk)) {
@@ -76,7 +79,7 @@ public class ReadWriteWorldAccess extends ReadWorldAccess {
         return entitiesTag.build();
     }
 
-    private Set<MapEntity<?>> getRootEntities(Chunk chunk) {
+    private static Set<MapEntity<?>> getRootEntities(Chunk chunk) {
         var entities = chunk.getInstance().getChunkEntities(chunk);
         return entities.stream()
                 .filter(e -> e instanceof MapEntity<?> && e.getVehicle() == null)

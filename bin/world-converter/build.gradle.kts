@@ -8,7 +8,9 @@ dependencies {
     implementation(libs.polar)
     implementation(libs.fastutil)
 
+    implementation(project(":modules:datafix"))
     implementation(project(":modules:map-core"))
+    implementation(project(":modules:terraform"))
 }
 
 application {

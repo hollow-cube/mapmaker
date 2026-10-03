@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.polar;
 
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
+import net.hollowcube.mapmaker.map.biome.BiomeContainer;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
@@ -34,6 +35,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ReadWorldAccess implements PolarWorldAccess {
@@ -43,17 +45,23 @@ public class ReadWorldAccess implements PolarWorldAccess {
     public static final int VERSION_PRE_WORLD_NBT = 3;
     public static final int VERSION_PRE_CHUNK_NBT = 4;
 
-    protected final AbstractMapWorld<?, ?> mapWorld;
+    private final Consumer<TagReadable> worldTagLoader;
+    private final BiomeContainer biomes;
 
     private int dataVersion = -1;
 
     public ReadWorldAccess(AbstractMapWorld<?, ?> mapWorld) {
-        this.mapWorld = mapWorld;
+        this(mapWorld::loadWorldTag, mapWorld.biomes());
+    }
+
+    public ReadWorldAccess(Consumer<TagReadable> worldTagLoader, BiomeContainer biomes) {
+        this.worldTagLoader = worldTagLoader;
+        this.biomes = biomes;
     }
 
     @Override
     public void loadWorldData(Instance instance, @Nullable NetworkBuffer buffer) {
-        mapWorld.loadWorldTag(loadWorldTag(buffer));
+        worldTagLoader.accept(loadWorldTag(buffer));
     }
 
     private TagReadable loadWorldTag(@Nullable NetworkBuffer buffer) {
@@ -136,13 +144,13 @@ public class ReadWorldAccess implements PolarWorldAccess {
     @Override
     public int getBiomeId(String name) {
         var key = RegistryKey.<Biome>unsafeOf(name);
-        var id = mapWorld.biomes().getId(key);
+        var id = biomes.getId(key);
         return id == -1 ? 0 : id;
     }
 
     @Override
     public String getBiomeName(int id) {
-        return Objects.requireNonNullElse(mapWorld.biomes().getKey(id), Biome.PLAINS).name();
+        return Objects.requireNonNullElse(biomes.getKey(id), Biome.PLAINS).name();
     }
 
     private void loadEntityWithPassengers(Chunk chunk, CompoundBinaryTag tag) {

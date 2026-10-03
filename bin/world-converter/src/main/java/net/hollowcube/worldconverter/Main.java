@@ -41,12 +41,19 @@ public class Main {
 
     static void main(String[] args) throws Exception {
         if (args.length < 2) {
-            System.out.println("Usage: java -jar world-converter.jar <input_world_path> <output_world_path>");
+            System.out.println("Usage: java -jar world-converter.jar <anvil_world_dir> <output.polar>");
+            System.out.println("       java -jar world-converter.jar <input.polar> <anvil_world_dir>");
             return;
         }
 
         var inputWorldPath = Path.of(args[0]);
         var outputWorldPath = Path.of(args[1]);
+
+        if (Files.isRegularFile(inputWorldPath)) {
+            PolarToAnvil.convert(inputWorldPath, outputWorldPath);
+            logger.info("Done!");
+            System.exit(0);
+        }
 
         var instance = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD);
         findCustomBiomes(inputWorldPath);
