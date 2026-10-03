@@ -11,7 +11,15 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.packet.server.ServerPacket;
+import net.minestom.server.network.packet.server.play.EntityPositionAndRotationPacket;
+import net.minestom.server.network.packet.server.play.EntityPositionPacket;
+import net.minestom.server.network.packet.server.play.EntityPositionSyncPacket;
+import net.minestom.server.network.packet.server.play.data.PositionPath;
+import net.minestom.server.network.packet.server.play.data.VecDelta;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import org.jetbrains.annotations.NotNull;
@@ -23,12 +31,16 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import static net.hollowcube.mapmaker.map.entity.PhysicsTestEnv.FLOOR_Y;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -318,8 +330,19 @@ class SulfurCubeEntityTest {
     // Player push
 
     private static final class FakePlayerConnection extends PlayerConnection {
+        private final List<ServerPacket> sent;
+
+        FakePlayerConnection() {
+            this(new ArrayList<>());
+        }
+
+        FakePlayerConnection(List<ServerPacket> sent) {
+            this.sent = sent;
+        }
+
         @Override
         public void sendPacket(@NotNull SendablePacket packet) {
+            sent.add(SendablePacket.extractServerPacket(ConnectionState.PLAY, packet));
         }
 
         @Override
@@ -388,5 +411,84 @@ class SulfurCubeEntityTest {
         player.refreshPosition(player.getPosition()); // no movement this tick
         cube.tick(0);
         assertEquals(0.0, cube.getVelocity().x(), 1e-9);
+    }
+
+    // Position sync
+
+    @Test
+    void steppedSyncReplaysEveryServerPositionAndReportsLandingsAtTheFloor() {
+        var instance = PhysicsTestEnv.createFlatInstance();
+        var cube = spawnCube(instance, new Pos(0.5, FLOOR_Y, 0.5), Material.DIRT);
+        cube.setAutoViewable(false);
+        tick(cube, 25); // past the linear sync Minestom schedules at spawn
+        var packets = new ArrayList<ServerPacket>();
+        var player = new Player(new FakePlayerConnection(packets), new GameProfile(UUID.randomUUID(), "TestPlayer"));
+        player.setInstance(instance, new Pos(4.5, FLOOR_Y, 0.5)).join();
+        cube.addViewer(player);
+        packets.clear();
+
+        Point base = cube.getPosition(); // where the viewer last saw it, resting on the floor
+        cube.setVelocity(new Vec(10, 15, 0));
+        var serverPositions = new ArrayList<Pos>();
+        for (int i = 0; i < 30; i++) {
+            cube.tick(50L * i);
+            serverPositions.add(cube.getPosition());
+        }
+        tick(cube, 3); // flush the steps still pending
+
+        var replayed = new ArrayList<Point>();
+        int movePackets = 0;
+        int landingsReported = 0;
+        for (var packet : packets) {
+            Point previousEnd = base;
+            boolean onGround;
+            switch (packet) {
+                case EntityPositionSyncPacket sync when sync.entityId() == cube.getEntityId() -> {
+                    var path = assertInstanceOf(PositionPath.Stepped.class, sync.position());
+                    path.steps().forEach(step -> replayed.add(step.position()));
+                    base = path.endPosition();
+                    onGround = sync.onGround();
+                }
+                case EntityPositionPacket move when move.entityId() == cube.getEntityId() -> {
+                    base = replaySteps(assertInstanceOf(VecDelta.Stepped.class, move.delta()), base, replayed);
+                    onGround = move.onGround();
+                }
+                case EntityPositionAndRotationPacket move when move.entityId() == cube.getEntityId() -> {
+                    base = replaySteps(assertInstanceOf(VecDelta.Stepped.class, move.delta()), base, replayed);
+                    onGround = move.onGround();
+                }
+                default -> {
+                    continue;
+                }
+            }
+            movePackets++;
+            // The client is drawing the end of the previous batch when it applies onGround.
+            if (onGround) {
+                assertNotNull(previousEnd);
+                assertEquals(FLOOR_Y, previousEnd.y(), 1e-3, "ground reported while drawn in the air");
+                landingsReported++;
+            }
+        }
+
+        // One batch per STEP_FLUSH_TICKS, plus one cut short by each landing.
+        long landings = serverPositions.stream().filter(pos -> Math.abs(pos.y() - FLOOR_Y) < 1e-4).count();
+        assertTrue(landings > 0, "never bounced");
+        assertEquals(landings + 1, landingsReported); // + the rest it was launched from
+        assertEquals(11 + landings, movePackets);
+        for (var pos : serverPositions) {
+            assertTrue(replayed.stream().anyMatch(point -> point.distance(pos) < 1e-3), "not replayed: " + pos);
+        }
+    }
+
+    private static Point replaySteps(VecDelta.Stepped delta, Point base, List<Point> replayed) {
+        assertNotNull(base, "relative move before any absolute position");
+        for (var step : delta.steps()) {
+            base = new Vec(
+                (Math.round(base.x() * 4096) + step.deltaX()) / 4096.0,
+                (Math.round(base.y() * 4096) + step.deltaY()) / 4096.0,
+                (Math.round(base.z() * 4096) + step.deltaZ()) / 4096.0);
+            replayed.add(base);
+        }
+        return base;
     }
 }

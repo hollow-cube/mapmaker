@@ -32,4 +32,8 @@ public final class MathUtil {
         return toMin + t * (toMax - toMin);
     }
 
+    public static long quantize4096(double coordinate) {
+        return Math.round(coordinate * 4096);
+    }
+
 }
