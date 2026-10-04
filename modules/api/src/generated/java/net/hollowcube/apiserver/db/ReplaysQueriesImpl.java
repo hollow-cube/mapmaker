@@ -127,6 +127,33 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         from replay_segments
         where replay_id = ?""";
 
+    private static final String LIST_IDLE_RECORDINGS = """
+        -- Keyset over recordings untouched since $before, with the lowest segment each still has.
+        select id,
+               version,
+               current_preamble,
+               (select min(segment_index) from replay_segments where replay_id = replays.id) as first_segment
+        from replays
+        where state = 'recording'
+          and updated_at < ?
+          and id > ?
+        order by id
+        limit ?""";
+
+    private static final String LIST_REPLAY_SEGMENT_OBJECTS_BEFORE = """
+        select segment_index, object_reference
+        from replay_segments
+        where replay_id = ?
+          and segment_index < ?
+        order by segment_index""";
+
+    private static final String DELETE_REPLAY_SEGMENTS_BEFORE = """
+        -- After the objects are gone, never before, as with deleteReplaySegments.
+        delete
+        from replay_segments
+        where replay_id = ?
+          and segment_index < ?""";
+
     private static final String DELETE_EXPIRED_REPLAY_IDEMPOTENCY = """
         -- A record only has to outlive the retries of the request it recorded, which is minutes.
         delete
@@ -397,6 +424,65 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(DELETE_REPLAY_SEGMENTS)) {
                 ps.setString(1, replayId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<ReplaysQueries.ListIdleRecordingsRow> listIdleRecordings(Instant before,
+            String after, long limit) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_IDLE_RECORDINGS)) {
+                Jdbc.setInstant(ps, 1, before);
+                ps.setString(2, after);
+                ps.setLong(3, limit);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<ReplaysQueries.ListIdleRecordingsRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new ReplaysQueries.ListIdleRecordingsRow(rs.getString(1), rs.getLong(2), rs.getBytes(3), rs.getObject(4, Long.class)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<ReplaysQueries.ListReplaySegmentObjectsBeforeRow> listReplaySegmentObjectsBefore(
+            String replayId, long before) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_REPLAY_SEGMENT_OBJECTS_BEFORE)) {
+                ps.setString(1, replayId);
+                ps.setLong(2, before);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<ReplaysQueries.ListReplaySegmentObjectsBeforeRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new ReplaysQueries.ListReplaySegmentObjectsBeforeRow(rs.getLong(1), rs.getString(2)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long deleteReplaySegmentsBefore(String replayId, long before) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_REPLAY_SEGMENTS_BEFORE)) {
+                ps.setString(1, replayId);
+                ps.setLong(2, before);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);

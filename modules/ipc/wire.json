@@ -841,6 +841,25 @@
             "type": "int"
           }
         },
+        "drop-segments-before": {
+          "params": [
+            {
+              "name": "id",
+              "type": "String"
+            },
+            {
+              "name": "expectedRevision",
+              "type": "long"
+            },
+            {
+              "name": "segmentIndex",
+              "type": "int"
+            }
+          ],
+          "returns": {
+            "type": "int"
+          }
+        },
         "get-compacted": {
           "params": [
             {

@@ -222,6 +222,11 @@ final class ApiSegmentedReplayStorageTest {
         }
 
         @Override
+        public int dropSegmentsBefore(String id, long expectedRevision, int segmentIndex) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public ReplayInfo commit(ReplayCommit meta, Blob body) {
             try {
                 commits.add(new Sent(meta, body.readAllBytes()));

@@ -1,5 +1,7 @@
 package net.hollowcube.apiworker.jobs;
 
+import dev.hollowcube.replay.data.ChunkIndex;
+import dev.hollowcube.replay.data.ReplayHeader;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.Jobs;
 import net.hollowcube.apiserver.job.JobSpec;
@@ -10,6 +12,8 @@ import net.hollowcube.ipc.replay.ReplayInfo;
 import net.hollowcube.ipc.replay.ReplayService;
 import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.sqlgen.testing.TestDb;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.network.NetworkBuffer;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
@@ -17,15 +21,17 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HexFormat;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/// The two timed jobs that stand behind the per-commit enqueue: the one that finds the replays
-/// nothing asked to compact, and the one that removes what compaction made redundant.
+/// The timed jobs that stand behind the per-commit enqueue: the one that finds the replays nothing
+/// asked to compact, and the ones that remove what compaction and rewriting made redundant.
 class ReplaySweepsTest {
 
     @RegisterExtension
@@ -103,6 +109,38 @@ class ReplaySweepsTest {
         assertNotNull(db.replays.getReplayIdempotency("compacted", "recent"));
     }
 
+    @Test
+    void recordingSweep_dropsTheSegmentsBelowTheFirstOneThePreambleReferences() throws Exception {
+        // Rewritten in place into segment 2, so 0 and 1 are dead.
+        recording("rewritten", 2, Duration.ofDays(2));
+        segment("rewritten", 0, "replays/ab/segments/0/a");
+        segment("rewritten", 1, "replays/ab/segments/1/b");
+        segment("rewritten", 2, "replays/ab/segments/2/c");
+        recording("ordinary", 0, Duration.ofDays(2));
+        segment("ordinary", 0, "replays/cd/segments/0/d");
+        // Rewritten, but still inside the grace.
+        recording("fresh", 1, Duration.ofHours(1));
+        segment("fresh", 0, "replays/ef/segments/0/e");
+        segment("fresh", 1, "replays/ef/segments/1/f");
+        var replays = new FakeReplayService();
+
+        new SweepRecordingSourcesRunner(db, replays, true).run(null);
+
+        assertEquals(List.of("rewritten@2"), replays.cut);
+    }
+
+    @Test
+    void recordingSweep_withDeletingOffTouchesNothing() throws Exception {
+        recording("rewritten", 1, Duration.ofDays(2));
+        segment("rewritten", 0, "replays/ab/segments/0/a");
+        segment("rewritten", 1, "replays/ab/segments/1/b");
+        var replays = new FakeReplayService();
+
+        new SweepRecordingSourcesRunner(db, replays, false).run(null);
+
+        assertEquals(List.of(), replays.cut);
+    }
+
     private List<String> enqueued() {
         return db.jobs.listJobs()
             .stream()
@@ -136,6 +174,30 @@ class ReplaySweepsTest {
         );
     }
 
+    /// A recording whose one chunk is in `segment`.
+    private void recording(String id, int segment, Duration ago) {
+        var header = new ReplayHeader(UUID.randomUUID(), new byte[0]);
+        var metadata = NetworkBuffer.makeArray(NetworkBuffer.NBT_COMPOUND, CompoundBinaryTag.empty());
+        var index = NetworkBuffer.makeArray(
+            new ChunkIndex(0, 1, ChunkIndex.FLAG_HAS_SNAPSHOT, (long) segment << 32, 8, 8)::write
+        );
+        header.update(metadata.length, index.length, 1, 1);
+        var preamble = NetworkBuffer.makeArray(buffer -> {
+            header.write(buffer);
+            buffer.write(NetworkBuffer.RAW_BYTES, metadata);
+            buffer.write(NetworkBuffer.RAW_BYTES, index);
+        });
+        TEST_DB.seed(
+            """
+            insert into replays (id, version, recording_revision, state, representation, next_segment_index,
+                                 current_preamble, current_preamble_digest, updated_at)
+            values ('%s', 2, 2, 'recording', 'segmented', %d, decode('%s', 'hex'),
+                    decode(repeat('11', 32), 'hex'), now() - interval '%d seconds')
+            """
+                .formatted(id, segment + 1, HexFormat.of().formatHex(preamble), ago.toSeconds())
+        );
+    }
+
     private void segment(String replayId, int index, String object) {
         TEST_DB.seed(
             """
@@ -162,11 +224,18 @@ class ReplaySweepsTest {
     /// else asserts, because a sweep that reads a replay is a sweep doing something it should not.
     private static final class FakeReplayService implements ReplayService {
         private final List<String> dropped = new ArrayList<>();
+        private final List<String> cut = new ArrayList<>();
 
         @Override
         public int dropSegments(String id) {
             dropped.add(id);
             return 1;
+        }
+
+        @Override
+        public int dropSegmentsBefore(String id, long expectedRevision, int segmentIndex) {
+            cut.add(id + "@" + segmentIndex);
+            return segmentIndex;
         }
 
         @Override

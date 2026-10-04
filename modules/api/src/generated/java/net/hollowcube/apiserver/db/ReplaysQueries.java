@@ -43,6 +43,13 @@ public interface ReplaysQueries {
 
     long deleteReplaySegments(String replayId);
 
+    List<ListIdleRecordingsRow> listIdleRecordings(Instant before, String after, long limit);
+
+    List<ListReplaySegmentObjectsBeforeRow> listReplaySegmentObjectsBefore(String replayId,
+            long before);
+
+    long deleteReplaySegmentsBefore(String replayId, long before);
+
     long deleteExpiredReplayIdempotency(Instant before);
 
     List<String> listReferencedReplayObjects(List<String> keys);
@@ -87,6 +94,19 @@ public interface ReplaysQueries {
      * A row of `listReplaySegmentObjects`.
      */
     record ListReplaySegmentObjectsRow(long segmentIndex, @Nullable String objectReference) {
+    }
+
+    /**
+     * A row of `listIdleRecordings`.
+     */
+    record ListIdleRecordingsRow(String id, long version, byte[] currentPreamble,
+            @Nullable Long firstSegment) {
+    }
+
+    /**
+     * A row of `listReplaySegmentObjectsBefore`.
+     */
+    record ListReplaySegmentObjectsBeforeRow(long segmentIndex, @Nullable String objectReference) {
     }
 
     /**
@@ -163,6 +183,23 @@ public interface ReplaysQueries {
         @Override
         public long deleteReplaySegments(String replayId) {
             throw new UnsupportedOperationException("ReplaysQueries.deleteReplaySegments is not stubbed on this fake");
+        }
+
+        @Override
+        public List<ListIdleRecordingsRow> listIdleRecordings(Instant before, String after,
+                long limit) {
+            throw new UnsupportedOperationException("ReplaysQueries.listIdleRecordings is not stubbed on this fake");
+        }
+
+        @Override
+        public List<ListReplaySegmentObjectsBeforeRow> listReplaySegmentObjectsBefore(
+                String replayId, long before) {
+            throw new UnsupportedOperationException("ReplaysQueries.listReplaySegmentObjectsBefore is not stubbed on this fake");
+        }
+
+        @Override
+        public long deleteReplaySegmentsBefore(String replayId, long before) {
+            throw new UnsupportedOperationException("ReplaysQueries.deleteReplaySegmentsBefore is not stubbed on this fake");
         }
 
         @Override

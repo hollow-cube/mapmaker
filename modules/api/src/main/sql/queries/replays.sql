@@ -107,6 +107,33 @@ delete
 from replay_segments
 where replay_id = $replayId;
 
+-- name: listIdleRecordings :many
+-- Keyset over recordings untouched since $before, with the lowest segment each still has.
+select id,
+       version,
+       current_preamble,
+       (select min(segment_index) from replay_segments where replay_id = replays.id) as first_segment
+from replays
+where state = 'recording'
+  and updated_at < $before
+  and id > $after
+order by id
+limit $limit;
+
+-- name: listReplaySegmentObjectsBefore :many
+select segment_index, object_reference
+from replay_segments
+where replay_id = $replayId
+  and segment_index < $before
+order by segment_index;
+
+-- name: deleteReplaySegmentsBefore :exec
+-- After the objects are gone, never before, as with deleteReplaySegments.
+delete
+from replay_segments
+where replay_id = $replayId
+  and segment_index < $before;
+
 -- name: deleteExpiredReplayIdempotency :exec
 -- A record only has to outlive the retries of the request it recorded, which is minutes.
 delete

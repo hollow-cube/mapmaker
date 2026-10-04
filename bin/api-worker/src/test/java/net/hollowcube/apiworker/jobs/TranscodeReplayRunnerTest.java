@@ -295,6 +295,11 @@ class TranscodeReplayRunnerTest {
         }
 
         @Override
+        public int dropSegmentsBefore(String id, long expectedRevision, int segmentIndex) {
+            throw new AssertionError("the sweeper does that, not a rewrite");
+        }
+
+        @Override
         public ReplayInfo publishCompacted(ReplayCompaction meta, Blob body) {
             try {
                 published.add(new Published(meta, body.readAllBytes()));

@@ -52,6 +52,12 @@ public record JobSpec<D>(
         "17 * * * *"
     );
 
+    /// Drops the segments a recording's preamble no longer references, which an in-place rewrite
+    /// leaves behind. Daily, because it reads every idle recording's preamble.
+    public static final JobSpec<Void> SWEEP_RECORDING_SOURCES = timed(
+        "sweep-recording-sources",
+        "43 4 * * *"
+    );
     /// Removes the objects in one shard of the replay bucket that no replay points at. Enqueued by
     /// hand, see [SweepReplayObjects].
     public static final JobSpec<SweepReplayObjects> SWEEP_REPLAY_OBJECTS = queued(

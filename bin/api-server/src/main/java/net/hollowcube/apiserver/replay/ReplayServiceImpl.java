@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 
 import static net.hollowcube.apiserver.replay.ReplayCompat.COMPACTED;
 import static net.hollowcube.apiserver.replay.ReplayCompat.FINISHED;
+import static net.hollowcube.apiserver.replay.ReplayCompat.RECORDING;
 import static net.hollowcube.apiserver.replay.ReplayCompat.info;
 import static net.hollowcube.apiserver.replay.ReplayCompat.validate;
 
@@ -176,6 +177,28 @@ public final class ReplayServiceImpl implements ReplayService {
         db.replays.deleteReplaySegments(id);
 
         logger.info("dropped {} source segments of compacted replay {}", segments.size(), id);
+        return segments.size();
+    }
+
+    @Override
+    public int dropSegmentsBefore(String id, long expectedRevision, int segmentIndex) {
+        var row = db.replays.getReplay(id);
+        if (row == null) throw new IpcException(404, "no replay " + id);
+        if (!RECORDING.equals(row.state())) throw new IpcException(409, "replay_not_recording");
+        if (row.version() != expectedRevision)
+            throw new IpcException(412, "replay " + id + " is at revision " + row.version());
+        if (segmentIndex >= row.nextSegmentIndex())
+            throw new IpcException(400, "segment " + segmentIndex + " has not been committed");
+
+        // Unlocked: a commit after the check can only append at nextSegmentIndex with a preamble
+        // read at this revision or later, so nothing can come to reference the segments below.
+        var segments = db.replays.listReplaySegmentObjectsBefore(id, segmentIndex);
+        for (var segment : segments) {
+            if (segment.objectReference() != null) s3.delete(segment.objectReference());
+        }
+        db.replays.deleteReplaySegmentsBefore(id, segmentIndex);
+
+        logger.info("dropped {} unreferenced segments of recording {}", segments.size(), id);
         return segments.size();
     }
 

@@ -3,6 +3,7 @@ package net.hollowcube.apiserver.replay;
 import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.Jobs;
+import net.hollowcube.apiserver.db.ReplaysQueries;
 import net.hollowcube.apiserver.job.CompactReplay;
 import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.s3.MemoryS3Client;
@@ -489,6 +490,24 @@ class ReplayServiceImplTest {
         try (var stream = replays.getCompacted(ID, null, null)) {
             assertArrayEquals(second, stream.readAllBytes());
         }
+    }
+
+    @Test
+    void dropSegmentsBefore_removesTheObjectsAndRowsBelowTheCut() {
+        var first = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
+        var dead = db.replays.getReplaySegment(ID, 0).objectReference();
+        var second = commit(first.revision(), "k-1", 1, false, null, seg(EXTERNAL_SEGMENT));
+
+        assertEquals(412, failure(() -> replays.dropSegmentsBefore(ID, first.revision(), 1)).status());
+        assertEquals(1, replays.dropSegmentsBefore(ID, second.revision(), 1));
+
+        assertNull(s3.objects().get(dead));
+        assertEquals(
+            List.of(1L),
+            db.replays.listReplaySegmentObjects(ID).stream()
+                .map(ReplaysQueries.ListReplaySegmentObjectsRow::segmentIndex)
+                .toList()
+        );
     }
 
     @Test

@@ -43,6 +43,14 @@ public interface ReplayService {
     /// @return how many segment rows were dropped
     int dropSegments(String id);
 
+    /// Drops a recording's segments below `segmentIndex`, which its preamble at `expectedRevision`
+    /// no longer references: a recording rewritten in place keeps resuming from the one new segment
+    /// the rewrite committed, and everything before it is dead. Storage cannot read the preamble,
+    /// so the caller says where the cut is and the revision is what makes that still true.
+    ///
+    /// @return how many segment rows were dropped
+    int dropSegmentsBefore(String id, long expectedRevision, int segmentIndex);
+
     /// Finds the objects under one shard of the bucket that no replay points at — staged writes
     /// whose commit was refused or lost, and compacted objects replaced before publication removed
     /// them — and deletes them when `deleting`. Objects younger than a day are left alone, since an
