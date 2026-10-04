@@ -72,7 +72,6 @@ public final class CompactReplayRunner implements JobRunner<CompactReplay> {
         }
 
         var start = System.nanoTime();
-        // Compacted as is, older chunks would get a current header the backfill scan cannot see past.
         var compacted = StoredReplay.needsRewrite(preamble)
             ? ReplayCompactor.transcode(
                 ReplayPreamble.read(preamble),

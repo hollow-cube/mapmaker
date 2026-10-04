@@ -109,7 +109,7 @@ public record ReplayPreamble(
             long indexStart = buffer.readIndex();
             var index = new ArrayList<ChunkIndex>(header.chunkCount());
             for (int i = 0; i < header.chunkCount(); i++)
-                index.add(ChunkIndex.read(buffer, header));
+                index.add(ChunkIndex.read(buffer));
             if (buffer.readIndex() - indexStart != header.indexLength())
                 throw new IllegalArgumentException("replay index length does not match header:"
                     + " expected " + header.indexLength() + " bytes, read "
@@ -130,7 +130,7 @@ public record ReplayPreamble(
         buffer.read(NetworkBuffer.NBT_COMPOUND);
         var index = new ArrayList<ChunkIndex>(header.chunkCount());
         for (var i = 0; i < header.chunkCount(); i++)
-            index.add(ChunkIndex.read(buffer, header));
+            index.add(ChunkIndex.read(buffer));
         return index;
     }
 

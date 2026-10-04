@@ -45,8 +45,6 @@ public interface ReplaysQueries {
 
     long deleteExpiredReplayIdempotency(Instant before);
 
-    List<String> listLegacyFormatReplays(Instant idleBefore, String after, String job, long limit);
-
     /**
      * The arguments of `createReplayIfAbsent`.
      */
@@ -168,12 +166,6 @@ public interface ReplaysQueries {
         @Override
         public long deleteExpiredReplayIdempotency(Instant before) {
             throw new UnsupportedOperationException("ReplaysQueries.deleteExpiredReplayIdempotency is not stubbed on this fake");
-        }
-
-        @Override
-        public List<String> listLegacyFormatReplays(Instant idleBefore, String after, String job,
-                long limit) {
-            throw new UnsupportedOperationException("ReplaysQueries.listLegacyFormatReplays is not stubbed on this fake");
         }
     }
 }

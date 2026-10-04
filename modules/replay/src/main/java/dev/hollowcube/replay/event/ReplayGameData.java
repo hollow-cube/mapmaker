@@ -15,7 +15,6 @@ import net.minestom.server.registry.Registries;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
 /// Game data is stored by name rather than protocol ID, since an update can renumber a registry,
@@ -38,11 +37,11 @@ public final class ReplayGameData {
     }
 
     public static Block readBlock(NetworkBuffer buffer, ChunkIndex chunk) {
-        return readName(buffer, chunk, LegacyIds::blockState, () -> Fixer.BLOCK_STATE, Block::fromState, "block state");
+        return readName(buffer, chunk, () -> Fixer.BLOCK_STATE, Block::fromState, "block state");
     }
 
     public static EntityType readEntityType(NetworkBuffer buffer, ChunkIndex chunk) {
-        return readName(buffer, chunk, LegacyIds::entityType, () -> Fixer.ENTITY_TYPE, EntityType::fromKey, "entity type");
+        return readName(buffer, chunk, () -> Fixer.ENTITY_TYPE, EntityType::fromKey, "entity type");
     }
 
     public static CompoundBinaryTag upgradeItemStack(CompoundBinaryTag item, ChunkIndex chunk) {
@@ -52,12 +51,9 @@ public final class ReplayGameData {
 
     // fixerType is a supplier so that a current chunk never initializes Fixer.
     private static <T> T readName(
-        NetworkBuffer buffer, ChunkIndex chunk, IntFunction<String> legacyLookup,
-        Supplier<DataType> fixerType, Function<String, @Nullable T> resolve, String kind
+        NetworkBuffer buffer, ChunkIndex chunk, Supplier<DataType> fixerType, Function<String, @Nullable T> resolve, String kind
     ) {
-        var name = chunk.legacyIds()
-            ? legacyLookup.apply(buffer.read(NetworkBuffer.VAR_INT))
-            : buffer.read(NetworkBuffer.STRING);
+        var name = buffer.read(NetworkBuffer.STRING);
         var upgraded = chunk.dataVersion() >= MinecraftServer.DATA_VERSION ? name
             : Fixer.upgrade(fixerType.get(), name, chunk.dataVersion());
         var value = resolve.apply(upgraded);

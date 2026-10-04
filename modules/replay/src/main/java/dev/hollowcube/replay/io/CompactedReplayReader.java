@@ -49,7 +49,7 @@ public final class CompactedReplayReader implements ReplayReader {
 
         var index = new ArrayList<ChunkIndex>(header.chunkCount());
         for (var i = 0; i < header.chunkCount(); i++)
-            index.add(ChunkIndex.read(buffer, header));
+            index.add(ChunkIndex.read(buffer));
         this.index = List.copyOf(index);
     }
 

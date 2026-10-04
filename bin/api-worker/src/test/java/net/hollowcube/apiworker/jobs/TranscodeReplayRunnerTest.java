@@ -38,8 +38,8 @@ class TranscodeReplayRunnerTest {
     static final Duration IDLE = Duration.ofDays(7);
 
     @Test
-    void run_rewritesACompactedFormat4ReplayAsOneThatPlaysBackTheSame() throws Exception {
-        var original = LegacyReplays.compacted();
+    void run_rewritesACompactedStaleReplayAsOneThatPlaysBackTheSame() throws Exception {
+        var original = StaleReplays.compacted();
         var storage = FakeStorage.compacted(original);
 
         new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
@@ -48,14 +48,14 @@ class TranscodeReplayRunnerTest {
         assertEquals("transcode:" + ID + ":3", published.meta().idempotencyKey());
         assertEquals(3, published.meta().expectedRevision());
         assertCurrent(published.body());
-        assertEquals(LegacyReplays.play(original), LegacyReplays.play(published.body()));
-        assertEquals(LegacyReplays.EVENTS, LegacyReplays.play(published.body()).subList(0, 2));
-        assertEquals(LegacyReplays.play(original), LegacyReplays.events(published.body()));
+        assertEquals(StaleReplays.play(original), StaleReplays.play(published.body()));
+        assertEquals(StaleReplays.EVENTS, StaleReplays.play(published.body()).subList(0, 2));
+        assertEquals(StaleReplays.play(original), StaleReplays.events(published.body()));
     }
 
     @Test
-    void run_rewritesASegmentedFormat4ReplayAsOneThatPlaysBackTheSame() throws Exception {
-        var recording = LegacyReplays.recording();
+    void run_rewritesASegmentedStaleReplayAsOneThatPlaysBackTheSame() throws Exception {
+        var recording = StaleReplays.recording();
         var storage = FakeStorage.segmented(recording);
 
         new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
@@ -68,15 +68,15 @@ class TranscodeReplayRunnerTest {
             untranscoded.getReplay(ID),
             recording.preamble()
         );
-        var legacy = stored.untranscoded();
-        assertEquals(LegacyReplays.play(legacy), LegacyReplays.play(published.body()));
-        assertEquals(LegacyReplays.EVENTS, LegacyReplays.play(published.body()).subList(0, 2));
-        assertEquals(LegacyReplays.play(legacy), LegacyReplays.events(published.body()));
+        var stale = stored.untranscoded();
+        assertEquals(StaleReplays.play(stale), StaleReplays.play(published.body()));
+        assertEquals(StaleReplays.EVENTS, StaleReplays.play(published.body()).subList(0, 2));
+        assertEquals(StaleReplays.play(stale), StaleReplays.events(published.body()));
     }
 
     @Test
-    void compaction_transcodesAFormat4Recording() throws Exception {
-        var storage = FakeStorage.segmented(LegacyReplays.recording());
+    void compaction_transcodesAStaleRecording() throws Exception {
+        var storage = FakeStorage.segmented(StaleReplays.recording());
 
         new CompactReplayRunner(storage).run(new CompactReplay(ID, "reconcile"));
 
@@ -85,16 +85,16 @@ class TranscodeReplayRunnerTest {
 
     @Test
     void run_leavesAReplayRecordedIntoRecentlyAlreadyCurrentOrGoneAlone() throws Exception {
-        var recording = FakeStorage.segmented(LegacyReplays.recording());
+        var recording = FakeStorage.segmented(StaleReplays.recording());
         recording.state = ReplayState.RECORDING;
         recording.updatedAt = System.currentTimeMillis();
         new TranscodeReplayRunner(recording, IDLE).run(new TranscodeReplay(ID, "backfill"));
         assertEquals(List.of(), recording.published);
         assertEquals(List.of(), recording.committed);
 
-        var legacy = FakeStorage.compacted(LegacyReplays.compacted());
-        new TranscodeReplayRunner(legacy, IDLE).run(new TranscodeReplay(ID, "backfill"));
-        var current = FakeStorage.compacted(legacy.published.getFirst().body());
+        var stale = FakeStorage.compacted(StaleReplays.compacted());
+        new TranscodeReplayRunner(stale, IDLE).run(new TranscodeReplay(ID, "backfill"));
+        var current = FakeStorage.compacted(stale.published.getFirst().body());
         new TranscodeReplayRunner(current, IDLE).run(new TranscodeReplay(ID, "backfill"));
         assertEquals(List.of(), current.published);
 
@@ -104,8 +104,8 @@ class TranscodeReplayRunnerTest {
     }
 
     @Test
-    void run_rewritesAnIdleFormat4RecordingInPlace() throws Exception {
-        var recording = LegacyReplays.recording();
+    void run_rewritesAnIdleStaleRecordingInPlace() throws Exception {
+        var recording = StaleReplays.recording();
         var storage = FakeStorage.segmented(recording);
         storage.state = ReplayState.RECORDING;
 
@@ -138,17 +138,17 @@ class TranscodeReplayRunnerTest {
             assertEquals(segmentIndex, index);
             return segment;
         });
-        var legacy = StoredReplay
+        var stale = StoredReplay
             .read(FakeStorage.segmented(recording), storage.getReplay(ID), recording.preamble())
             .untranscoded();
-        assertEquals(LegacyReplays.play(legacy), LegacyReplays.play(rewritten.data()));
-        assertEquals(LegacyReplays.EVENTS, LegacyReplays.play(rewritten.data()).subList(0, 2));
+        assertEquals(StaleReplays.play(stale), StaleReplays.play(rewritten.data()));
+        assertEquals(StaleReplays.EVENTS, StaleReplays.play(rewritten.data()).subList(0, 2));
     }
 
     @Test
     void run_returnsQuietlyWhenARecordingMovedOnUnderTheRewrite() throws Exception {
         for (var status : List.of(412, 409)) {
-            var storage = FakeStorage.segmented(LegacyReplays.recording());
+            var storage = FakeStorage.segmented(StaleReplays.recording());
             storage.state = ReplayState.RECORDING;
             storage.commitStatus = status;
 
@@ -160,7 +160,7 @@ class TranscodeReplayRunnerTest {
 
     @Test
     void run_returnsQuietlyWhenItLosesThePublication() throws Exception {
-        var storage = FakeStorage.compacted(LegacyReplays.compacted());
+        var storage = FakeStorage.compacted(StaleReplays.compacted());
         storage.publishStatus = 412;
 
         new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
@@ -170,7 +170,7 @@ class TranscodeReplayRunnerTest {
 
     @Test
     void run_returnsQuietlyWhenTheReplayMovedOnBeforeItsPreambleWasRead() throws Exception {
-        var storage = FakeStorage.compacted(LegacyReplays.compacted());
+        var storage = FakeStorage.compacted(StaleReplays.compacted());
         storage.preambleStatus = 412;
 
         new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
@@ -180,7 +180,7 @@ class TranscodeReplayRunnerTest {
 
     @Test
     void run_letsAnythingElseTheStoreSaysFailTheRow() {
-        var storage = FakeStorage.compacted(LegacyReplays.compacted());
+        var storage = FakeStorage.compacted(StaleReplays.compacted());
         storage.publishStatus = 500;
 
         assertThrows(
@@ -196,7 +196,7 @@ class TranscodeReplayRunnerTest {
             assertEquals(MinecraftServer.DATA_VERSION, chunk.dataVersion(), chunk.toString());
         }
         assertEquals(
-            LegacyReplays.TICKS.size(),
+            StaleReplays.TICKS.size(),
             ReplayPreamble.index(compacted).stream().mapToInt(ChunkIndex::tickCount).sum()
         );
     }
@@ -224,7 +224,7 @@ class TranscodeReplayRunnerTest {
             this.compacted = compacted;
         }
 
-        static FakeStorage segmented(LegacyReplays.Recording recording) {
+        static FakeStorage segmented(StaleReplays.Recording recording) {
             return new FakeStorage(recording.preamble(), recording.segments(), null);
         }
 

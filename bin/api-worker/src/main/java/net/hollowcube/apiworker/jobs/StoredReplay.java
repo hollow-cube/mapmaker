@@ -1,7 +1,6 @@
 package net.hollowcube.apiworker.jobs;
 
 import dev.hollowcube.replay.ReplayCompactor;
-import dev.hollowcube.replay.data.ChunkIndex;
 import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.data.ReplayPreamble;
 import net.hollowcube.ipc.replay.ReplayInfo;
@@ -10,6 +9,7 @@ import net.hollowcube.ipc.replay.ReplayService;
 import net.hollowcube.mapmaker.runtime.parkour.replay.ReplayManager;
 import net.minestom.server.MinecraftServer;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -70,16 +70,6 @@ record StoredReplay(
         return total;
     }
 
-    long rawBytes() {
-        return rawBytes(ReplayPreamble.index(preamble));
-    }
-
-    static long rawBytes(List<ChunkIndex> index) {
-        var total = 0L;
-        for (var chunk : index) total += chunk.uncompressedLength();
-        return total;
-    }
-
     ReplayCompactor.Result transcode() {
         if (compacted != null)
             return ReplayCompactor.transcode(compacted, null, ReplayManager.REGISTRY);
@@ -91,7 +81,7 @@ record StoredReplay(
         );
     }
 
-    /// For the sample, to separate what compaction saves from what transcoding costs.
+    @TestOnly
     byte[] untranscoded() {
         if (compacted != null) return compacted;
         return ReplayCompactor

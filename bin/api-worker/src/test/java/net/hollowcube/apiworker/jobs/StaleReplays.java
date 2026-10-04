@@ -23,36 +23,30 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-/// Format 4 replays, built by hand since nothing can write one any more.
-final class LegacyReplays {
+/// Replays recorded at an older data version, built by hand so their names predate a rename.
+final class StaleReplays {
 
     /// Event IDs in `ReplayEvents#builder()`.
     private static final int SET_ITEM = 5, SET_BLOCK = 7, SPAWN_ENTITY = 8;
-    /// As 26.2 assigned them.
-    private static final int STRAY_26_2 = 128;
-    private static final int OAK_STAIRS_NORTH_TOP_STRAIGHT_WATERLOGGED_26_2 = 3907;
+    /// Before chain became iron_chain.
+    private static final int DATA_VERSION = 4540;
 
     static final List<ReplayEvent> EVENTS = List.of(
         new SpawnEntityEvent(1, EntityType.STRAY, new Pos(5, 64, 5)),
-        new SetBlockEvent(
-            new BlockVec(1, 2, 3),
-            Block.OAK_STAIRS.withProperties(
-                Map.of("facing", "north", "half", "top", "shape", "straight", "waterlogged", "true")
-            )
-        )
+        new SetBlockEvent(new BlockVec(1, 2, 3), Block.IRON_CHAIN.withProperty("axis", "y"))
     );
 
     static final List<byte[]> TICKS = List.of(
         tick(0, buffer -> {
             buffer.write(NetworkBuffer.VAR_INT, SPAWN_ENTITY);
             buffer.write(NetworkBuffer.VAR_INT, 1);
-            buffer.write(NetworkBuffer.VAR_INT, STRAY_26_2);
+            buffer.write(NetworkBuffer.STRING, "minecraft:stray");
             buffer.write(NetworkBuffer.POS, new Pos(5, 64, 5));
         }),
         tick(1, buffer -> {
             buffer.write(NetworkBuffer.VAR_INT, SET_BLOCK);
             buffer.write(NetworkBuffer.BLOCK_POSITION, new BlockVec(1, 2, 3));
-            buffer.write(NetworkBuffer.VAR_INT, OAK_STAIRS_NORTH_TOP_STRAIGHT_WATERLOGGED_26_2);
+            buffer.write(NetworkBuffer.STRING, "minecraft:chain[axis=y,waterlogged=false]");
         }, buffer -> {
             buffer.write(NetworkBuffer.VAR_INT, SET_ITEM);
             buffer.write(NetworkBuffer.VAR_INT, 0);
@@ -61,7 +55,7 @@ final class LegacyReplays {
                 Map.of(
                     4,
                     CompoundBinaryTag.builder()
-                        .putString("id", "minecraft:diamond")
+                        .putString("id", "minecraft:chain")
                         .putInt("count", 12)
                         .build()
                 )
@@ -69,7 +63,7 @@ final class LegacyReplays {
         })
     );
 
-    private LegacyReplays() {}
+    private StaleReplays() {}
 
     static Recording recording() {
         var segments = TICKS.stream().map(Zstd::compress).toList();
@@ -154,11 +148,13 @@ final class LegacyReplays {
                 buffer.write(NetworkBuffer.LONG, chunk[1]);
                 buffer.write(NetworkBuffer.VAR_INT, (int) chunk[2]);
                 buffer.write(NetworkBuffer.VAR_INT, (int) chunk[3]);
+                buffer.write(NetworkBuffer.VAR_INT, (int) ReplayHeader.VERSION_LATEST);
+                buffer.write(NetworkBuffer.VAR_INT, DATA_VERSION);
             }
         });
         return NetworkBuffer.makeArray(buffer -> {
             buffer.write(NetworkBuffer.INT, ReplayHeader.MAGIC);
-            buffer.write(NetworkBuffer.SHORT, ReplayHeader.VERSION_LEGACY_IDS);
+            buffer.write(NetworkBuffer.SHORT, ReplayHeader.VERSION_LATEST);
             buffer.write(NetworkBuffer.SHORT, (short) 0);
             buffer.write(NetworkBuffer.UUID, UUID.randomUUID());
             buffer.write(NetworkBuffer.BYTE, (byte) 0);
@@ -168,7 +164,7 @@ final class LegacyReplays {
             buffer.write(NetworkBuffer.INT, index.length);
             buffer.write(NetworkBuffer.INT, chunks.size());
             buffer.write(NetworkBuffer.INT, chunks.size());
-            buffer.write(NetworkBuffer.INT, ReplayHeader.LEGACY_IDS_DATA_VERSION);
+            buffer.write(NetworkBuffer.INT, DATA_VERSION);
             buffer.advanceWrite(ReplayHeader.HEADER_LENGTH - buffer.writeIndex());
             buffer.write(NetworkBuffer.RAW_BYTES, metadata);
             buffer.write(NetworkBuffer.RAW_BYTES, index);

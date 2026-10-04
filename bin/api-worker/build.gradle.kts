@@ -36,7 +36,7 @@ dependencies {
     implementation(libs.logback)
 
     testImplementation(project(":tools:sql-gen:testing"))
-    // The transcode tests build format 4 replays by hand, which nothing in main can write any more.
+    // The transcode tests build replays at an older data version by hand.
     testImplementation(libs.zstd)
     testImplementation(libs.junit.api)
     testImplementation(libs.junit.engine)

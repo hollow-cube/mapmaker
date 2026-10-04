@@ -13,12 +13,10 @@ public final class ReplayHeader {
 
     /// Any incompatible change to the header layout, or to anything laid out after it, bumps this.
     ///
+    /// There is no back-compat: a replay written at any other version is refused outright, because
+    /// reading an old layout as if it were this one silently misparses every field after the point
+    /// the two diverge.
     public static final short VERSION_LATEST = 5;
-
-    /// Wrote block states and entity types by protocol ID. Every format 4 replay was recorded at
-    /// [#LEGACY_IDS_DATA_VERSION].
-    public static final short VERSION_LEGACY_IDS = 4;
-    public static final int LEGACY_IDS_DATA_VERSION = 4903;
 
     /// The world version is opaque to the format, so the cap is just a sanity bound: whatever is
     /// large enough for the identity schemes a host might want. 32 bytes fits a SHA-256 digest (and
@@ -42,7 +40,7 @@ public final class ReplayHeader {
     }
 
     public static boolean readable(int version) {
-        return version == VERSION_LATEST || version == VERSION_LEGACY_IDS;
+        return version == VERSION_LATEST;
     }
 
     public static final int RECORD_COMPRESSION_LEVEL = 3;
