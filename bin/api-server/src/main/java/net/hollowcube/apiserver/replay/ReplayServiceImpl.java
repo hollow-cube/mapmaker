@@ -442,6 +442,7 @@ public final class ReplayServiceImpl implements ReplayService {
                 expectedDigest
             );
             referenced = result.objectReferenced();
+            dropReplaced(result.replaced());
             return result.info();
         } finally {
             if (!referenced) discard(object);
@@ -492,7 +493,7 @@ public final class ReplayServiceImpl implements ReplayService {
                 throw new IpcException(500, "replay " + meta.id() + " vanished under its own lock");
 
             recordResponse(tx, meta.id(), meta.idempotencyKey(), fingerprint, 200, published);
-            return new Applied(info(published), true);
+            return new Applied(info(published), true, row.compactedObject());
         });
     }
 
@@ -614,6 +615,17 @@ public final class ReplayServiceImpl implements ReplayService {
         }
     }
 
+    /// After the swap has committed, so a failure here can only leave an orphan, never a row
+    /// pointing at nothing.
+    private void dropReplaced(@Nullable String key) {
+        if (key == null) return;
+        try {
+            s3.delete(key);
+        } catch (RuntimeException e) {
+            logger.warn("could not remove the replaced compacted replay object {}", key, e);
+        }
+    }
+
     private void discard(@Nullable String key) {
         if (key == null) return;
         try {
@@ -650,7 +662,13 @@ public final class ReplayServiceImpl implements ReplayService {
 
     /// Whether the object staging uploaded is now pointed at by a row decides whether staging
     /// deletes it: an idempotency hit under the lock succeeds without referencing this upload.
-    private record Applied(ReplayInfo info, boolean objectReferenced) {}
+    ///
+    /// `replaced` is the compacted object a publication pointed the row away from.
+    private record Applied(ReplayInfo info, boolean objectReferenced, @Nullable String replaced) {
+        Applied(ReplayInfo info, boolean objectReferenced) {
+            this(info, objectReferenced, null);
+        }
+    }
 
     private record Segment(
         int index,

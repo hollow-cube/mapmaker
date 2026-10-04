@@ -469,6 +469,25 @@ class ReplayServiceImplTest {
         assertEquals(puts + 1, s3.puts());
     }
 
+    @Test
+    void publishCompacted_overACompactedReplayRemovesTheObjectItReplaced() throws IOException {
+        var first = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
+        compacted(first, 17);
+        var replaced = db.replays.getReplay(ID).compactedObject();
+        var current = replays.getReplay(ID);
+        var second = "COMPACTEDPREAMBLE-transcoded-chunks".getBytes(StandardCharsets.UTF_8);
+
+        replays.publishCompacted(
+            new ReplayCompaction(ID, current.revision(), "t-0", 17, digest(second)),
+            Blob.of(second)
+        );
+
+        assertNull(s3.objects().get(replaced));
+        try (var stream = replays.getCompacted(ID, null, null)) {
+            assertArrayEquals(second, stream.readAllBytes());
+        }
+    }
+
     /// The sweep, which is where compaction's storage win is actually realised. Objects go first,
     /// so an interruption leaves rows pointing at nothing rather than objects nothing points at.
     @Test
