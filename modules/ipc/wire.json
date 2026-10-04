@@ -919,6 +919,21 @@
           "returns": {
             "type": "net.hollowcube.ipc.replay.ReplayInfo"
           }
+        },
+        "sweep-orphaned-objects": {
+          "params": [
+            {
+              "name": "shard",
+              "type": "String"
+            },
+            {
+              "name": "deleting",
+              "type": "boolean"
+            }
+          ],
+          "returns": {
+            "type": "int"
+          }
         }
       }
     },

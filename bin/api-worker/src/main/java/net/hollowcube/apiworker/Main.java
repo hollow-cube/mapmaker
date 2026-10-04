@@ -12,6 +12,7 @@ import net.hollowcube.apiworker.jobs.CompactReplayRunner;
 import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.apiworker.jobs.ReconcileReplaysRunner;
+import net.hollowcube.apiworker.jobs.SweepReplayObjectsRunner;
 import net.hollowcube.apiworker.jobs.SweepReplaySourcesRunner;
 import net.hollowcube.apiworker.jobs.TranscodeReplayRunner;
 import net.hollowcube.ipc.replay.ReplayClient;
@@ -115,6 +116,15 @@ public final class Main {
                 ),
                 Boolean.parseBoolean(
                     secrets.get("replay.sweep_sources", "REPLAY_SWEEP_SOURCES", "false")
+                )
+            )
+        );
+        worker.handle(
+            JobSpec.SWEEP_REPLAY_OBJECTS,
+            new SweepReplayObjectsRunner(
+                replays,
+                Boolean.parseBoolean(
+                    secrets.get("replay.sweep_objects", "REPLAY_SWEEP_OBJECTS", "false")
                 )
             )
         );

@@ -25,8 +25,12 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.SequenceInputStream;
 import java.io.UncheckedIOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.regex.Pattern;
 
 import static net.hollowcube.apiserver.replay.ReplayCompat.COMPACTED;
 import static net.hollowcube.apiserver.replay.ReplayCompat.FINISHED;
@@ -63,6 +67,12 @@ public final class ReplayServiceImpl implements ReplayService {
     /// What the `replays.id` and `idempotency_key` constraints accept, checked here so an oversized
     /// one is a bad request naming the field rather than a constraint violation naming the table.
     private static final int MAX_ID_LENGTH = 512;
+
+    /// Leading hex digits of `sha256(id)` in [ReplayCompat#objectKey]. At least two so one call
+    /// never lists more than a 256th of the bucket.
+    private static final Pattern SHARD = Pattern.compile("[0-9a-f]{2,4}");
+    /// Far past the longest a staged upload waits for its row.
+    private static final Duration ORPHAN_GRACE = Duration.ofDays(1);
 
     private final ApiDatabase db;
     private final S3Client s3;
@@ -167,6 +177,33 @@ public final class ReplayServiceImpl implements ReplayService {
 
         logger.info("dropped {} source segments of compacted replay {}", segments.size(), id);
         return segments.size();
+    }
+
+    @Override
+    public int sweepOrphanedObjects(String shard, boolean deleting) {
+        if (!SHARD.matcher(shard).matches()) throw new IpcException(400, "not a shard: " + shard);
+
+        var before = Instant.now().minus(ORPHAN_GRACE);
+        var listed = s3.list("replays/" + shard).stream()
+            .filter(object -> object.lastModified().isBefore(before))
+            .toList();
+        if (listed.isEmpty()) return 0;
+        var referenced = new HashSet<>(db.replays.listReferencedReplayObjects(
+            listed.stream().map(S3Client.Listed::key).toList()
+        ));
+
+        var orphans = 0;
+        var bytes = 0L;
+        for (var object : listed) {
+            if (referenced.contains(object.key())) continue;
+            if (deleting) s3.delete(object.key());
+            orphans++;
+            bytes += object.size();
+        }
+        if (orphans > 0)
+            logger.info("{} {} orphaned replay objects ({} bytes) in shard {}",
+                deleting ? "deleted" : "found", orphans, bytes, shard);
+        return orphans;
     }
 
     @Override

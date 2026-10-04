@@ -193,8 +193,8 @@ public final class HttpS3Client implements S3Client {
     }
 
     @Override
-    public List<String> list(String prefix) {
-        var keys = new ArrayList<String>();
+    public List<Listed> list(String prefix) {
+        var listed = new ArrayList<Listed>();
         String token = null;
         do {
             var query = new TreeMap<String, String>();
@@ -211,13 +211,22 @@ public final class HttpS3Client implements S3Client {
             require(response, "LIST", prefix, response.body());
 
             var body = response.body();
-            keys.addAll(tags(body, "Key"));
+            // Every <Contents> carries all three, so the lists line up.
+            var keys = tags(body, "Key");
+            var sizes = tags(body, "Size");
+            var modified = tags(body, "LastModified");
+            for (var i = 0; i < keys.size(); i++)
+                listed.add(new Listed(
+                    keys.get(i),
+                    Long.parseLong(sizes.get(i)),
+                    Instant.parse(modified.get(i))
+                ));
             var truncated = tags(body, "IsTruncated");
             token = truncated.isEmpty() || !"true".equals(truncated.getFirst())
                 ? null
                 : tags(body, "NextContinuationToken").stream().findFirst().orElse(null);
         } while (token != null);
-        return List.copyOf(keys);
+        return List.copyOf(listed);
     }
 
     /// For a local run against a MinIO that came up empty; the Go api-server does this on startup

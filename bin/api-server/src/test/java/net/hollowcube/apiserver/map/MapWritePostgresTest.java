@@ -392,7 +392,7 @@ class MapWritePostgresTest {
         }
 
         @Override
-        public List<String> list(String prefix) {
+        public List<Listed> list(String prefix) {
             return delegate.list(prefix);
         }
     }

@@ -52,6 +52,14 @@ public record JobSpec<D>(
         "17 * * * *"
     );
 
+    /// Removes the objects in one shard of the replay bucket that no replay points at. Enqueued by
+    /// hand, see [SweepReplayObjects].
+    public static final JobSpec<SweepReplayObjects> SWEEP_REPLAY_OBJECTS = queued(
+        "sweep-replay-objects",
+        SweepReplayObjects.class,
+        SweepReplayObjects::shard
+    );
+
     /// Rewrites one replay at this build's format and data version.
     public static final JobSpec<TranscodeReplay> TRANSCODE_REPLAY = queued(
         "transcode-replay",

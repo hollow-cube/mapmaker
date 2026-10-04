@@ -3,6 +3,7 @@ package net.hollowcube.apiserver.s3;
 import net.hollowcube.ipc.Blob;
 
 import java.io.InputStream;
+import java.time.Instant;
 import java.util.List;
 
 /// One bucket, as the six operations the api needs of it.
@@ -26,8 +27,11 @@ public interface S3Client {
     /// simply run again.
     void delete(String key);
 
-    /// Every key under `prefix`, following the continuation tokens.
-    List<String> list(String prefix);
+    /// Every object under `prefix`, following the continuation tokens.
+    List<Listed> list(String prefix);
+
+    record Listed(String key, long size, Instant lastModified) {
+    }
 
     /// Raised only by [#get], [#getRange] and [#stat]; whether a missing object is a 404 or a corruption is
     /// the caller's to decide.

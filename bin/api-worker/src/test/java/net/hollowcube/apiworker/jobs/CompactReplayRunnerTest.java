@@ -283,6 +283,11 @@ class CompactReplayRunnerTest {
         }
 
         @Override
+        public int sweepOrphanedObjects(String shard, boolean deleting) {
+            throw new UnsupportedOperationException("the sweeper does that, not this runner");
+        }
+
+        @Override
         public ReplayInfo publishCompacted(ReplayCompaction meta, Blob body) {
             try {
                 published.add(new Published(meta, body.readAllBytes()));

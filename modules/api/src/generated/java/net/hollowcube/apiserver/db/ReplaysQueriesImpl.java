@@ -133,6 +133,14 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         from replay_idempotency
         where created_at < ?""";
 
+    private static final String LIST_REFERENCED_REPLAY_OBJECTS = """
+        -- Which of `keys` a replay still points at. Uses replays_compacted_object_idx and the unique
+        -- constraint on replay_segments.object_reference.
+        select key
+        from unnest(?::text[]) as listed(key)
+        where exists (select 1 from replays where compacted_object = listed.key)
+           or exists (select 1 from replay_segments where object_reference = listed.key)""";
+
     private final ConnectionSource source;
 
     ReplaysQueriesImpl(ConnectionSource source) {
@@ -405,6 +413,25 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
             try (PreparedStatement ps = conn.prepareStatement(DELETE_EXPIRED_REPLAY_IDEMPOTENCY)) {
                 Jdbc.setInstant(ps, 1, before);
                 return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<String> listReferencedReplayObjects(List<String> keys) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_REFERENCED_REPLAY_OBJECTS)) {
+                Jdbc.setList(ps, 1, "text", keys);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<String> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(rs.getString(1));
+                    return rows;
+                }
             } finally {
                 source.release(conn);
             }

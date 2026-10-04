@@ -45,6 +45,8 @@ public interface ReplaysQueries {
 
     long deleteExpiredReplayIdempotency(Instant before);
 
+    List<String> listReferencedReplayObjects(List<String> keys);
+
     /**
      * The arguments of `createReplayIfAbsent`.
      */
@@ -166,6 +168,11 @@ public interface ReplaysQueries {
         @Override
         public long deleteExpiredReplayIdempotency(Instant before) {
             throw new UnsupportedOperationException("ReplaysQueries.deleteExpiredReplayIdempotency is not stubbed on this fake");
+        }
+
+        @Override
+        public List<String> listReferencedReplayObjects(List<String> keys) {
+            throw new UnsupportedOperationException("ReplaysQueries.listReferencedReplayObjects is not stubbed on this fake");
         }
     }
 }

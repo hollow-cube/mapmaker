@@ -113,3 +113,10 @@ delete
 from replay_idempotency
 where created_at < $before;
 
+-- name: listReferencedReplayObjects :many
+-- Which of `keys` a replay still points at. Uses replays_compacted_object_idx and the unique
+-- constraint on replay_segments.object_reference.
+select key
+from unnest($keys::text[]) as listed(key)
+where exists (select 1 from replays where compacted_object = listed.key)
+   or exists (select 1 from replay_segments where object_reference = listed.key);

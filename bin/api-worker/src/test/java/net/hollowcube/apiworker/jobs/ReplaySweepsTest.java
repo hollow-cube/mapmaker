@@ -170,6 +170,11 @@ class ReplaySweepsTest {
         }
 
         @Override
+        public int sweepOrphanedObjects(String shard, boolean deleting) {
+            throw new AssertionError("the sweeper only drops segments");
+        }
+
+        @Override
         public @Nullable ReplayInfo getReplay(String id) {
             throw new AssertionError("the sweeper only drops segments");
         }

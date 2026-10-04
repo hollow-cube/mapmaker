@@ -7,7 +7,9 @@ import org.jetbrains.annotations.TestOnly;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
+import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,6 +22,7 @@ import java.util.Map;
 public final class MemoryS3Client implements S3Client {
 
     private final Map<String, byte[]> objects = new LinkedHashMap<>();
+    private final Map<String, Instant> modified = new HashMap<>();
     private int puts;
     private @Nullable Runnable afterPut;
 
@@ -48,6 +51,7 @@ public final class MemoryS3Client implements S3Client {
                     "announced " + length + " bytes but wrote " + bytes.length
                 );
             objects.put(key, bytes);
+            modified.put(key, Instant.now());
             var action = afterPut;
             afterPut = null;
             if (action != null) action.run();
@@ -82,10 +86,20 @@ public final class MemoryS3Client implements S3Client {
     @Override
     public void delete(String key) {
         objects.remove(key);
+        modified.remove(key);
     }
 
     @Override
-    public List<String> list(String prefix) {
-        return objects.keySet().stream().filter(key -> key.startsWith(prefix)).sorted().toList();
+    public List<Listed> list(String prefix) {
+        return objects.keySet().stream()
+            .filter(key -> key.startsWith(prefix))
+            .sorted()
+            .map(key -> new Listed(key, objects.get(key).length, modified.get(key)))
+            .toList();
+    }
+
+    @TestOnly
+    public void lastModified(String key, Instant at) {
+        modified.put(key, at);
     }
 }

@@ -26,6 +26,7 @@ import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
@@ -33,6 +34,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HexFormat;
@@ -486,6 +489,35 @@ class ReplayServiceImplTest {
         try (var stream = replays.getCompacted(ID, null, null)) {
             assertArrayEquals(second, stream.readAllBytes());
         }
+    }
+
+    @Test
+    void sweepOrphanedObjects_deletesOnlyOldObjectsNoReplayPointsAt() throws IOException {
+        var created = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
+        var segmentObject = db.replays.getReplaySegment(ID, 0).objectReference();
+        var orphan = ReplayCompat.objectKey(ID, ReplayCompat.COMPACTED);
+        var young = ReplayCompat.objectKey(ID, ReplayCompat.COMPACTED);
+        s3.put(orphan, new ByteArrayInputStream(new byte[3]), 3);
+        s3.put(young, new ByteArrayInputStream(new byte[3]), 3);
+        var old = Instant.now().minus(Duration.ofDays(2));
+        s3.lastModified(segmentObject, old);
+        s3.lastModified(orphan, old);
+        var shard = orphan.substring("replays/".length(), "replays/".length() + 4);
+
+        assertEquals(1, replays.sweepOrphanedObjects(shard, false));
+        assertNotNull(s3.objects().get(orphan));
+
+        assertEquals(1, replays.sweepOrphanedObjects(shard, true));
+        assertNull(s3.objects().get(orphan));
+        assertNotNull(s3.objects().get(young));
+        assertNotNull(s3.objects().get(segmentObject));
+        assertEquals(created.revision(), replays.getReplay(ID).revision());
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"a", "abcde", "ABCD", "zz"})
+    void sweepOrphanedObjects_refusesAnythingButAShard(String shard) {
+        assertEquals(400, failure(() -> replays.sweepOrphanedObjects(shard, false)).status());
     }
 
     /// The sweep, which is where compaction's storage win is actually realised. Objects go first,

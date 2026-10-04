@@ -43,6 +43,15 @@ public interface ReplayService {
     /// @return how many segment rows were dropped
     int dropSegments(String id);
 
+    /// Finds the objects under one shard of the bucket that no replay points at — staged writes
+    /// whose commit was refused or lost, and compacted objects replaced before publication removed
+    /// them — and deletes them when `deleting`. Objects younger than a day are left alone, since an
+    /// upload whose row has not landed yet looks the same.
+    ///
+    /// @param shard leading hex digits of the hashed replay id, the unit the sweep is split into
+    /// @return how many orphans the shard held
+    int sweepOrphanedObjects(String shard, boolean deleting);
+
     /// Publishes a compacted recording over a finished segmented one.
     ///
     /// A call rather than a direct write by the worker so that the api-server stays the one process

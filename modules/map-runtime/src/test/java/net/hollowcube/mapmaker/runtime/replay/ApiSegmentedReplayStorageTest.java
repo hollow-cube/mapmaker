@@ -217,6 +217,11 @@ final class ApiSegmentedReplayStorageTest {
         }
 
         @Override
+        public int sweepOrphanedObjects(String shard, boolean deleting) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
         public ReplayInfo commit(ReplayCommit meta, Blob body) {
             try {
                 commits.add(new Sent(meta, body.readAllBytes()));
