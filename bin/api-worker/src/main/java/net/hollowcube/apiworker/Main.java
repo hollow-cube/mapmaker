@@ -12,6 +12,7 @@ import net.hollowcube.apiworker.jobs.CompactReplayRunner;
 import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.apiworker.jobs.ReconcileReplaysRunner;
+import net.hollowcube.apiworker.jobs.SweepReplaySourcesRunner;
 import net.hollowcube.apiworker.jobs.TranscodeReplayRunner;
 import net.hollowcube.ipc.replay.ReplayClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
@@ -104,8 +105,19 @@ public final class Main {
                 Integer.parseInt(secrets.get("replay.batch", "REPLAY_BATCH", "1000"))
             )
         );
-        // SWEEP_REPLAY_SOURCES is deliberately not bound: nothing has been compacted to sweep yet,
-        // and binding it is the switch. An unbound spec creates no row.
+        worker.handle(
+            JobSpec.SWEEP_REPLAY_SOURCES,
+            new SweepReplaySourcesRunner(
+                db,
+                replays,
+                Integer.parseInt(
+                    secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")
+                ),
+                Boolean.parseBoolean(
+                    secrets.get("replay.sweep_sources", "REPLAY_SWEEP_SOURCES", "false")
+                )
+            )
+        );
         var recordingIdle = Duration.parse(
             secrets.get("replay.transcode.recording_idle", "REPLAY_TRANSCODE_RECORDING_IDLE", "P7D")
         );

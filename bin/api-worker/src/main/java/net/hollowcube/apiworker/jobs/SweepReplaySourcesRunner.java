@@ -18,9 +18,8 @@ import java.util.List;
 /// Compaction on its own *increases* storage — the compacted object is added and every source
 /// segment stays — so this is the pass that realises the win.
 ///
-/// **Not bound in `Main` yet**: nothing has been compacted to sweep. Binding it is the switch and
-/// [#deleting] is the second one, both guarding the same thing — a bad compaction found after its
-/// sources are gone is not recoverable.
+/// [#deleting] starts off: a bad compaction found after its sources are gone is not recoverable,
+/// so a pass is read in the logs before it is turned on.
 public final class SweepReplaySourcesRunner implements JobRunner<Void> {
 
     /// Long enough to cover a compaction that raced the sweep and any reader holding a segment,
