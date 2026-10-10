@@ -61,6 +61,9 @@ graalvmNative {
                     // looked up through at runtime.
                     "--initialize-at-build-time=ch.qos.logback.classic.spi.LogbackServiceProvider",
 
+                    // FFM with onnx runtime
+                    "--enable-native-access=ALL-UNNAMED",
+
                     // A request-serving process wants G1's pauses over the serial collector's, and
                     // the heap it sizes itself against is the container memory limit the chart sets.
                     // G1 also raises the glibc the binary needs to 2.38, which is what pins the

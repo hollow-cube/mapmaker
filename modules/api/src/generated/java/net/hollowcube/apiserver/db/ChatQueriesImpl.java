@@ -5,8 +5,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
+import net.hollowcube.sqlgen.runtime.Jdbc;
 import net.hollowcube.sqlgen.runtime.Sneaky;
 import org.jetbrains.annotations.Nullable;
 
@@ -20,8 +22,9 @@ final class ChatQueriesImpl implements ChatQueries {
         -- `channel` keeps Go's convention — 'global'/'local'/'staff', or the target's uuid for a direct
         -- message — so a row written here and a row written by Go read alike. `target` is Go's "unused,
         -- should delete" column and stays unwritten.
-        insert into chat_messages (timestamp, server_id, channel, sender, content, censored_by, censored_detail)
-        values (now(), ?, ?, ?, ?, ?, ?)""";
+        insert into chat_messages (timestamp, server_id, channel, sender, content, censored_by, censored_detail,
+                                   filter_version, filter_scores)
+        values (now(), ?, ?, ?, ?, ?, ?, ?, ?)""";
 
     private static final String GET_REPLY_TARGET = """
         -- Null for a player with nobody to reply to and for one with no session at all, which want the
@@ -58,8 +61,10 @@ final class ChatQueriesImpl implements ChatQueries {
                 ps.setString(2, params.channel());
                 ps.setString(3, params.sender());
                 ps.setString(4, params.content());
-                ps.setString(5, params.censoredBy());
-                ps.setString(6, params.censoredDetail());
+                ps.setObject(5, params.censoredBy(), Types.VARCHAR);
+                ps.setObject(6, params.censoredDetail(), Types.VARCHAR);
+                ps.setObject(7, params.filterVersion(), Types.VARCHAR);
+                Jdbc.setList(ps, 8, "float4", params.filterScores());
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);

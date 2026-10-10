@@ -66,6 +66,26 @@ jobs:
         with:
           submodules: 'recursive'
 
+      - name: Fetch chat filter
+        env:
+          CHAT_FILTER_VERSION: 2026-10-09-v3b
+          ONNXRUNTIME_VERSION: 1.31.0
+          AWS_ACCESS_KEY_ID: ${{ env.R2_PRIVATE_ASSETS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ env.R2_PRIVATE_ASSETS_SECRET_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          set -euo pipefail
+          image="$GITHUB_WORKSPACE/bin/api-server/build/image"
+          mkdir -p "$image/lib"
+          aws s3 cp --recursive --no-progress \
+            --endpoint-url https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com \
+            "s3://assets-private/models/chat-filter/$CHAT_FILTER_VERSION/" "$image/chat-filter/"
+
+          ort="onnxruntime-linux-x64-$ONNXRUNTIME_VERSION"
+          curl -fsSL "https://github.com/microsoft/onnxruntime/releases/download/v$ONNXRUNTIME_VERSION/$ort.tgz" \
+            | tar -xz -C "$RUNNER_TEMP"
+          cp "$RUNNER_TEMP/$ort/lib/libonnxruntime.so.$ONNXRUNTIME_VERSION" "$image/lib/libonnxruntime.so"
+
       # --static-nolibc needs the static glibc that only the native-image image has.
       - name: Build standalone binary
         run: |

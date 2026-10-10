@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
 import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
+import net.hollowcube.apiserver.chatfilter.ChatFilter;
 import net.hollowcube.apiserver.common.Drain;
 import net.hollowcube.apiserver.common.Health;
 import net.hollowcube.apiserver.common.NatsPublisher;
@@ -32,12 +33,14 @@ import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.session.SessionServer;
 import net.hollowcube.ipc.util.IpcFailures;
 import net.hollowcube.posthog.PostHog;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Duration;
 import java.util.List;
@@ -63,6 +66,9 @@ public final class Main {
     /// truncation: half a trace is not evidence, and the proxy that shipped it keeps its copy.
     private static final String TRACE_DIR = "/data/anticheat";
     private static final long MAX_TRACE_BYTES = 512L << 20;
+
+    private static final String CHAT_FILTER_DIR = "/app/chat-filter";
+    private static final String ONNXRUNTIME_LIBRARY = "/app/lib/libonnxruntime.so";
 
     /// Hardcoded in the Go api-server too; both write the same objects into it.
     private static final String REPLAY_BUCKET = "mapmaker-replays";
@@ -92,6 +98,8 @@ public final class Main {
         });
         // A 500 is already in the log; this is what puts it in front of someone.
         IpcFailures.reportTo((path, e) -> PostHog.captureException(e, null, Map.of("ipc", path)));
+
+        var chatFilter = loadChatFilter(secrets);
 
         // One pool for what Go opens three on: `postgres.uri`, `postgres.maps_uri` and
         // `postgres.players_uri` are the same url, so head_db, jobs, chat_messages, player_sessions,
@@ -163,7 +171,10 @@ public final class Main {
                 new HeadDatabaseServer(new HeadDatabaseServiceImpl(db))
             ),
             server.createContext(SessionServer.PATH, new SessionServer(new SessionServiceImpl(db))),
-            server.createContext(ChatServer.PATH, new ChatServer(new ChatServiceImpl(db, nats))),
+            server.createContext(
+                ChatServer.PATH,
+                new ChatServer(new ChatServiceImpl(db, nats, chatFilter))
+            ),
             server.createContext(
                 AnticheatServer.PATH,
                 new AnticheatServer(
@@ -211,6 +222,26 @@ public final class Main {
         );
         server.start();
         logger.info("api-server listening on {}", port);
+    }
+
+    /// Optional for local, not in prod.
+    private static @Nullable ChatFilter loadChatFilter(VaultSecrets secrets) throws IOException {
+        var dir = Path.of(secrets.get("chat_filter.dir", "CHAT_FILTER_DIR", CHAT_FILTER_DIR));
+        if (!secrets.present() && !Files.isDirectory(dir)) {
+            logger.info("no chat filter at {}, so chat is not scored", dir);
+            return null;
+        }
+        var library = Path.of(
+            secrets.get("chat_filter.onnxruntime", "ONNXRUNTIME_LIBRARY", ONNXRUNTIME_LIBRARY)
+        );
+        var started = System.nanoTime();
+        var filter = ChatFilter.load(library, dir);
+        logger.info(
+            "chat filter {} loaded in {}ms",
+            filter.version(),
+            (System.nanoTime() - started) / 1_000_000
+        );
+        return filter;
     }
 
     private Main() {}

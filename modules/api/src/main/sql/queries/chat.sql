@@ -1,10 +1,12 @@
 -- name: insertChatMessage :exec
+-- nullable: $censoredBy, $censoredDetail, $filterVersion, $filterScores
 -- Every message, censored or not: a message nobody saw is the one a moderator most wants to read.
 -- `channel` keeps Go's convention — 'global'/'local'/'staff', or the target's uuid for a direct
 -- message — so a row written here and a row written by Go read alike. `target` is Go's "unused,
 -- should delete" column and stays unwritten.
-insert into chat_messages (timestamp, server_id, channel, sender, content, censored_by, censored_detail)
-values (now(), $serverId, $channel, $sender, $content, $censoredBy, $censoredDetail);
+insert into chat_messages (timestamp, server_id, channel, sender, content, censored_by, censored_detail,
+                           filter_version, filter_scores)
+values (now(), $serverId, $channel, $sender, $content, $censoredBy, $censoredDetail, $filterVersion, $filterScores);
 
 -- name: getReplyTarget :one
 -- Null for a player with nobody to reply to and for one with no session at all, which want the

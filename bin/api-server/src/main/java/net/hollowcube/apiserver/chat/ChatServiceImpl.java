@@ -2,6 +2,7 @@ package net.hollowcube.apiserver.chat;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import net.hollowcube.apiserver.chatfilter.ChatFilter;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.ChatQueries;
@@ -12,6 +13,8 @@ import net.hollowcube.apiserver.text.ProfanityFilter;
 import net.hollowcube.ipc.chat.*;
 import net.hollowcube.ipc.util.IpcException;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
@@ -28,6 +31,7 @@ import static net.hollowcube.ipc.util.IpcArgs.uuid;
 /// is one call now, and the rejections are its return value.
 ///
 public final class ChatServiceImpl implements ChatService {
+    private static final Logger logger = LoggerFactory.getLogger(ChatServiceImpl.class);
 
     /// What a message that mentions a map is written with.
     private static final String MAP_TAG = "[map]";
@@ -51,10 +55,12 @@ public final class ChatServiceImpl implements ChatService {
 
     private final ApiDatabase db;
     private final NatsPublisher nats;
+    private final @Nullable ChatFilter filter;
 
-    public ChatServiceImpl(ApiDatabase db, NatsPublisher nats) {
+    public ChatServiceImpl(ApiDatabase db, NatsPublisher nats, @Nullable ChatFilter filter) {
         this.db = db;
         this.nats = nats;
+        this.filter = filter;
     }
 
     @Override
@@ -110,6 +116,7 @@ public final class ChatServiceImpl implements ChatService {
             return new ChatResult.MapNotPublished();
 
         var censor = ProfanityFilter.test(text);
+        var scores = score(text);
         db.chat.insertChatMessage(
             new ChatQueries.InsertChatMessageParams(
                 serverId,
@@ -122,7 +129,9 @@ public final class ChatServiceImpl implements ChatService {
                         .stream()
                         .map(ProfanityFilter.Match::term)
                         .collect(Collectors.joining(","))
-                    : null
+                    : null,
+                scores == null ? null : scores.version(),
+                scores == null ? null : scores.values()
             )
         );
         if (censor.matched()) return new ChatResult.Censored();
@@ -168,6 +177,17 @@ public final class ChatServiceImpl implements ChatService {
                 execution.durationMs()
             )
         );
+    }
+
+    /// Never fail here just return null
+    private ChatFilter.@Nullable Scores score(String text) {
+        if (filter == null) return null;
+        try {
+            return filter.score(text);
+        } catch (RuntimeException e) {
+            logger.warn("chat filter failed to score a message", e);
+            return null;
+        }
     }
 
     /// The check constraint's spelling of an outcome.

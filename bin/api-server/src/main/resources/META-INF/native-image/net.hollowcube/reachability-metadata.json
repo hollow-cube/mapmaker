@@ -1,9 +1,4 @@
 {
-  "comment": [
-    "The wire records are registered by the metadata modules/ipc generates, since a hand-written",
-    "list of them goes stale the moment one is added and every call that touches the missing record",
-    "answers 500. What is left here is what only this binary reaches."
-  ],
   "reflection": [
     {
       "type": "net.hollowcube.apiserver.job.CompactReplay",
@@ -34,5 +29,20 @@
     { "glob": "META-INF/services/java.nio.channels.spi.SelectorProvider" },
     { "glob": "META-INF/services/java.time.zone.ZoneRulesProvider" },
     { "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider" }
-  ]
+  ],
+  "foreign": {
+    "downcalls": [
+      {"returnType": "void*", "parameterTypes": []},
+      {"returnType": "void*", "parameterTypes": ["jint"]},
+      {"returnType": "void*", "parameterTypes": ["void*"]},
+      {"returnType": "void", "parameterTypes": ["void*"]},
+      {"returnType": "void*", "parameterTypes": ["void*", "jint"]},
+      {"returnType": "void*", "parameterTypes": ["void*", "void*"]},
+      {"returnType": "void*", "parameterTypes": ["jint", "void*", "void*"]},
+      {"returnType": "void*", "parameterTypes": ["jint", "jint", "void*"]},
+      {"returnType": "void*", "parameterTypes": ["void*", "void*", "void*", "void*"]},
+      {"returnType": "void*", "parameterTypes": ["void*", "void*", "jlong", "void*", "jlong", "jint", "void*"]},
+      {"returnType": "void*", "parameterTypes": ["void*", "void*", "void*", "void*", "jlong", "void*", "jlong", "void*"]}
+    ]
+  }
 }

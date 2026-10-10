@@ -173,7 +173,7 @@ public class DevServer extends AbstractMultiMapServer {
         var notifications = new NotificationServiceImpl(db, nats);
         this.ipc = new IpcServices(
             new HeadDatabaseServiceImpl(db),
-            new ChatServiceImpl(db, nats),
+            new ChatServiceImpl(db, nats, null),
             new ReplayServiceImpl(db, s3),
             new MapServiceImpl(db, mapWorlds, nats, redis, PostHog.getClient(), Duration.ZERO),
             new PlayerServiceImpl(db), new SocialServiceImpl(db, notifications), notifications,

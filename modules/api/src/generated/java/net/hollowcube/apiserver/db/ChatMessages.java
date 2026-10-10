@@ -4,6 +4,7 @@ package net.hollowcube.apiserver.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
 import net.hollowcube.sqlgen.runtime.Jdbc;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +13,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public record ChatMessages(Instant timestamp, String serverId, String channel, String sender,
         @Nullable String target, String content, @Nullable String censoredBy,
-        @Nullable String censoredDetail) {
+        @Nullable String censoredDetail, @Nullable String filterVersion,
+        @Nullable List<Float> filterScores) {
     /**
      * Reads one `chat_messages` row, its first column at `col`.
      */
@@ -25,6 +27,8 @@ public record ChatMessages(Instant timestamp, String serverId, String channel, S
                 rs.getString(col + 4),
                 rs.getString(col + 5),
                 rs.getString(col + 6),
-                rs.getString(col + 7));
+                rs.getString(col + 7),
+                rs.getString(col + 8),
+                Jdbc.getList(rs, col + 9, Float.class));
     }
 }

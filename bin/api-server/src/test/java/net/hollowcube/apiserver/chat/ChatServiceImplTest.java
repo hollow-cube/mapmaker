@@ -3,6 +3,7 @@ package net.hollowcube.apiserver.chat;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import net.hollowcube.apiserver.chatfilter.ChatFilter;
 import net.hollowcube.apiserver.common.RecordingNats;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.ipc.Wire;
@@ -20,6 +21,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 /// The chat pipeline end to end: a real Postgres under the service, the generated server over it,
 /// and the generated client talking to that over a real socket.
@@ -71,7 +74,7 @@ class ChatServiceImplTest {
         );
 
         var db = TEST_DB.database(ApiDatabase::new);
-        var service = new ChatServiceImpl(db, nats.publisher);
+        var service = new ChatServiceImpl(db, nats.publisher, null);
         server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext(ChatServer.PATH, new ChatServer(service));
         server.start();
@@ -652,6 +655,65 @@ class ChatServiceImplTest {
                 player
             )
         );
+    }
+
+    //region Filter
+
+    @Test
+    void send_logsNoScoresWithoutAFilter() throws SQLException {
+        chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hello world", null);
+
+        assertEquals(List.of("null|null"), filterRows());
+    }
+
+    /// Against the real model, so only where `CHAT_FILTER_DIR` and `ONNXRUNTIME_LIBRARY` say
+    /// where it is (see ChatFilterTest).
+    @Test
+    void send_logsWhatTheFilterScored() throws IOException, SQLException {
+        var dir = System.getenv("CHAT_FILTER_DIR");
+        var library = System.getenv("ONNXRUNTIME_LIBRARY");
+        assumeTrue(
+            dir != null && library != null,
+            "CHAT_FILTER_DIR or ONNXRUNTIME_LIBRARY not set"
+        );
+
+        try (var filter = ChatFilter.load(Path.of(library), Path.of(dir))) {
+            var service = new ChatServiceImpl(
+                TEST_DB.database(ApiDatabase::new),
+                nats.publisher,
+                filter
+            );
+            service.send(
+                SENDER,
+                "server-1",
+                ChatChannel.GLOBAL,
+                null,
+                "kys you stupid idiot",
+                null
+            );
+
+            var row = filterRows().getFirst().split("\\|");
+            assertEquals(filter.version(), row[0]);
+            var scores = row[1].substring(1, row[1].length() - 1).split(",");
+            assertEquals(filter.outputs().size(), scores.length);
+            assertTrue(Float.parseFloat(scores[0]) > 0.7, row[1]);
+        }
+    }
+
+    //endregion
+
+    /// Every logged message as `filterVersion|filterScores`.
+    private List<String> filterRows() throws SQLException {
+        var out = new ArrayList<String>();
+        try (
+            var st = TEST_DB.conn().createStatement();
+            var rs = st.executeQuery(
+                "select filter_version, filter_scores from chat_messages order by timestamp"
+            )
+        ) {
+            while (rs.next()) out.add(rs.getString(1) + "|" + rs.getString(2));
+        }
+        return out;
     }
 
     /// Every logged message as `channel|sender|content|censoredBy|censoredDetail`.
