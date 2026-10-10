@@ -191,7 +191,7 @@ class HttpS3ClientTest {
 
         assertEquals(
             List.of("replays/0", "replays/1", "replays/2", "replays/3", "replays/4"),
-            s3.list("replays/")
+            s3.list("replays/").stream().map(S3Client.Listed::key).toList()
         );
     }
 
@@ -344,7 +344,13 @@ class HttpS3ClientTest {
 
             var body = new StringBuilder("<ListBucketResult>");
             for (var key : matching.subList(from, to))
-                body.append("<Contents><Key>").append(key).append("</Key></Contents>");
+                body.append("<Contents><Key>")
+                    .append(key)
+                    .append("</Key><Size>")
+                    .append(objects.get(key).length)
+                    .append(
+                        "</Size><LastModified>2026-10-01T00:00:00.000Z</LastModified></Contents>"
+                    );
             body.append("<IsTruncated>").append(to < matching.size()).append("</IsTruncated>");
             if (to < matching.size())
                 body.append("<NextContinuationToken>")

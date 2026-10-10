@@ -63,7 +63,7 @@ class ChatFilterTest {
                     .toArray();
                 var actual = filter.score(row.get("text").getAsString()).values();
                 for (int i = 0; i < expected.length; i++) {
-                    var diff = Math.abs(expected[i] - actual[i]);
+                    var diff = Math.abs(expected[i] - actual.get(i));
                     worst = Math.max(worst, diff);
                     if (diff > TOLERANCE) {
                         failures.add(
@@ -71,7 +71,7 @@ class ChatFilterTest {
                                 + "\n  expected "
                                 + Arrays.toString(expected)
                                 + "\n  actual   "
-                                + Arrays.toString(actual)
+                                + actual
                         );
                         break;
                     }

@@ -498,13 +498,17 @@ class ReplayServiceImplTest {
         var dead = db.replays.getReplaySegment(ID, 0).objectReference();
         var second = commit(first.revision(), "k-1", 1, false, null, seg(EXTERNAL_SEGMENT));
 
-        assertEquals(412, failure(() -> replays.dropSegmentsBefore(ID, first.revision(), 1)).status());
+        assertEquals(
+            412,
+            failure(() -> replays.dropSegmentsBefore(ID, first.revision(), 1)).status()
+        );
         assertEquals(1, replays.dropSegmentsBefore(ID, second.revision(), 1));
 
         assertNull(s3.objects().get(dead));
         assertEquals(
             List.of(1L),
-            db.replays.listReplaySegmentObjects(ID).stream()
+            db.replays.listReplaySegmentObjects(ID)
+                .stream()
                 .map(ReplaysQueries.ListReplaySegmentObjectsRow::segmentIndex)
                 .toList()
         );

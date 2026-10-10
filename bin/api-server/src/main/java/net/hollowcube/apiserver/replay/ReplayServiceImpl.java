@@ -207,13 +207,16 @@ public final class ReplayServiceImpl implements ReplayService {
         if (!SHARD.matcher(shard).matches()) throw new IpcException(400, "not a shard: " + shard);
 
         var before = Instant.now().minus(ORPHAN_GRACE);
-        var listed = s3.list("replays/" + shard).stream()
+        var listed = s3.list("replays/" + shard)
+            .stream()
             .filter(object -> object.lastModified().isBefore(before))
             .toList();
         if (listed.isEmpty()) return 0;
-        var referenced = new HashSet<>(db.replays.listReferencedReplayObjects(
-            listed.stream().map(S3Client.Listed::key).toList()
-        ));
+        var referenced = new HashSet<>(
+            db.replays.listReferencedReplayObjects(
+                listed.stream().map(S3Client.Listed::key).toList()
+            )
+        );
 
         var orphans = 0;
         var bytes = 0L;
@@ -224,8 +227,13 @@ public final class ReplayServiceImpl implements ReplayService {
             bytes += object.size();
         }
         if (orphans > 0)
-            logger.info("{} {} orphaned replay objects ({} bytes) in shard {}",
-                deleting ? "deleted" : "found", orphans, bytes, shard);
+            logger.info(
+                "{} {} orphaned replay objects ({} bytes) in shard {}",
+                deleting ? "deleted" : "found",
+                orphans,
+                bytes,
+                shard
+            );
         return orphans;
     }
 

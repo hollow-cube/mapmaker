@@ -216,11 +216,13 @@ public final class HttpS3Client implements S3Client {
             var sizes = tags(body, "Size");
             var modified = tags(body, "LastModified");
             for (var i = 0; i < keys.size(); i++)
-                listed.add(new Listed(
-                    keys.get(i),
-                    Long.parseLong(sizes.get(i)),
-                    Instant.parse(modified.get(i))
-                ));
+                listed.add(
+                    new Listed(
+                        keys.get(i),
+                        Long.parseLong(sizes.get(i)),
+                        Instant.parse(modified.get(i))
+                    )
+                );
             var truncated = tags(body, "IsTruncated");
             token = truncated.isEmpty() || !"true".equals(truncated.getFirst())
                 ? null

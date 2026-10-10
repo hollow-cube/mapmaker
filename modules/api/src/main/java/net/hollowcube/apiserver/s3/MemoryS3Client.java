@@ -91,7 +91,8 @@ public final class MemoryS3Client implements S3Client {
 
     @Override
     public List<Listed> list(String prefix) {
-        return objects.keySet().stream()
+        return objects.keySet()
+            .stream()
             .filter(key -> key.startsWith(prefix))
             .sorted()
             .map(key -> new Listed(key, objects.get(key).length, modified.get(key)))

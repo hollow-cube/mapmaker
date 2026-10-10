@@ -115,9 +115,7 @@ public final class Main {
             new SweepReplaySourcesRunner(
                 db,
                 replays,
-                Integer.parseInt(
-                    secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")
-                ),
+                Integer.parseInt(secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")),
                 sweepSources
             )
         );

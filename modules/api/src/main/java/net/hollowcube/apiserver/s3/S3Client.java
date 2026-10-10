@@ -30,8 +30,7 @@ public interface S3Client {
     /// Every object under `prefix`, following the continuation tokens.
     List<Listed> list(String prefix);
 
-    record Listed(String key, long size, Instant lastModified) {
-    }
+    record Listed(String key, long size, Instant lastModified) {}
 
     /// Raised only by [#get], [#getRange] and [#stat]; whether a missing object is a 404 or a corruption is
     /// the caller's to decide.

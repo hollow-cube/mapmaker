@@ -59,14 +59,20 @@ public final class SweepRecordingSourcesRunner implements JobRunner<Void> {
                     dropped += replays.dropSegmentsBefore(recording.id(), recording.version(), cut);
                 } catch (IpcException e) {
                     // Resumed or finished since the page was read; the next pass sees it as it is.
-                    logger.warn("could not drop the old segments of recording {}: {}",
-                        recording.id(), e.getMessage());
+                    logger.warn(
+                        "could not drop the old segments of recording {}: {}",
+                        recording.id(),
+                        e.getMessage()
+                    );
                 }
             }
         }
         if (found > 0)
-            logger.info("{} recordings have segments their preamble no longer references{}",
-                found, deleting ? "; dropped " + dropped : "; deleting is off");
+            logger.info(
+                "{} recordings have segments their preamble no longer references{}",
+                found,
+                deleting ? "; dropped " + dropped : "; deleting is off"
+            );
     }
 
     /// The lowest segment any chunk is in, or -1 for a preamble with nothing to cut by.

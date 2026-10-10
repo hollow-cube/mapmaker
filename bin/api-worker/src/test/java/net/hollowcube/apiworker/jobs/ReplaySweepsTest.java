@@ -177,7 +177,10 @@ class ReplaySweepsTest {
     /// A recording whose one chunk is in `segment`.
     private void recording(String id, int segment, Duration ago) {
         var header = new ReplayHeader(UUID.randomUUID(), new byte[0]);
-        var metadata = NetworkBuffer.makeArray(NetworkBuffer.NBT_COMPOUND, CompoundBinaryTag.empty());
+        var metadata = NetworkBuffer.makeArray(
+            NetworkBuffer.NBT_COMPOUND,
+            CompoundBinaryTag.empty()
+        );
         var index = NetworkBuffer.makeArray(
             new ChunkIndex(0, 1, ChunkIndex.FLAG_HAS_SNAPSHOT, (long) segment << 32, 8, 8)::write
         );
