@@ -19,12 +19,6 @@ repositories {
     }
 
     mavenCentral()
-
-    maven(url = "https://maven.noxcrew.com/public") {
-        content {
-            includeGroup("com.noxcrew.noxesium")
-        }
-    }
 }
 
 dependencies {

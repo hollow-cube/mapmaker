@@ -15,7 +15,7 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SpanExporter;
-import io.opentelemetry.semconv.ResourceAttributes;
+import io.opentelemetry.semconv.ServiceAttributes;
 import net.hollowcube.command.CommandExecutedEvent;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
@@ -537,8 +537,8 @@ public abstract class AbstractMapServer implements MapServer {
 
     private @NotNull OpenTelemetry initTracing(@NotNull ConfigLoaderV3 config) {
         Resource resource = Resource.getDefault().toBuilder()
-            .put(ResourceAttributes.SERVICE_NAME, name())
-            .put(ResourceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
+            .put(ServiceAttributes.SERVICE_NAME, name())
+            .put(ServiceAttributes.SERVICE_VERSION, ServerRuntime.getRuntime().version())
             .build();
 
         var tracingConfig = config.get(TracingConfig.class);

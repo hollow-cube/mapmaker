@@ -7,7 +7,8 @@ import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapSetter;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.ipc.map.MapData;
@@ -131,8 +132,8 @@ public abstract class AbstractHttpService {
             // Append propagation headers to the request
             otel.getPropagators().getTextMapPropagator().inject(context, reqBuilder, CONTEXT_PROPAGATOR);
             var req = reqBuilder.build();
-            span.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, req.method());
-            span.setAttribute(SemanticAttributes.URL_FULL, req.uri().toString());
+            span.setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, req.method());
+            span.setAttribute(UrlAttributes.URL_FULL, req.uri().toString());
 
             logger.log(System.Logger.Level.DEBUG, "{0} {1}", req.method(), req.uri());
             var res = httpClient.send(req, handler);

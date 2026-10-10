@@ -6,7 +6,7 @@ import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.HttpAttributes;
 import net.hollowcube.apiserver.common.Digest;
 import net.hollowcube.ipc.Blob;
 import org.jetbrains.annotations.Nullable;
@@ -377,7 +377,7 @@ public final class HttpS3Client implements S3Client {
             try (var ignored = span.makeCurrent()) {
                 var response = http.send(request.build(), handler);
                 span.setAttribute(
-                    SemanticAttributes.HTTP_RESPONSE_STATUS_CODE,
+                    HttpAttributes.HTTP_RESPONSE_STATUS_CODE,
                     (long) response.statusCode()
                 );
                 if (response.statusCode() < 200 || response.statusCode() >= 300)

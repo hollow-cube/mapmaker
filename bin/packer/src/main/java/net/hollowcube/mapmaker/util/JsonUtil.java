@@ -22,10 +22,10 @@ public class JsonUtil {
                 }
                 yield ret;
             }
-            case Json5String str -> new JsonPrimitive(str.getAsString());
-            case Json5Number num -> new JsonPrimitive(num.getAsNumber());
-            case Json5Boolean bool -> new JsonPrimitive(bool.getAsBoolean());
             case Json5Null ignored -> JsonNull.INSTANCE;
+            case Json5Primitive str when str.isString() -> new JsonPrimitive(str.getAsString());
+            case Json5Primitive num when num.isNumber() -> new JsonPrimitive(num.getAsNumber());
+            case Json5Primitive bool when bool.isBoolean() -> new JsonPrimitive(bool.getAsBoolean());
             default -> throw new IllegalStateException("Unexpected value: " + element);
         };
     }

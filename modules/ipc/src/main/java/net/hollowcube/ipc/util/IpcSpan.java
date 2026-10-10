@@ -3,7 +3,7 @@ package net.hollowcube.ipc.util;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.StatusCode;
 import io.opentelemetry.context.Scope;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.HttpAttributes;
 
 /// One ipc call's span, current for as long as it is open.
 ///
@@ -21,7 +21,7 @@ public final class IpcSpan implements AutoCloseable {
     /// Records the status the call answered with. Anything outside 2xx also ends the span in error,
     /// which is what makes a failing ipc route visible without reading every span's attributes.
     public void status(int status) {
-        span.setAttribute(SemanticAttributes.HTTP_RESPONSE_STATUS_CODE, (long) status);
+        span.setAttribute(HttpAttributes.HTTP_RESPONSE_STATUS_CODE, (long) status);
         if (status < 200 || status >= 300) span.setStatus(StatusCode.ERROR);
     }
 

@@ -17,9 +17,9 @@ import java.util.Objects;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
-/// Holds [ChatTokenizer] to the ids huggingface tokenizers gives, written by the training repo's
-/// `deploy/golden.py`. A tokenizer that is off by one id still runs and still scores, just worse,
-/// so nothing else would catch it.
+/// Holds [ChatTokenizer] to the ids huggingface tokenizers gives, written by `chat_filter.golden`
+/// in hollow-cube/models. A tokenizer that is off by one id still runs and still scores, just
+/// worse, so nothing else would catch it.
 ///
 /// Needs a chat filter version directory in `CHAT_FILTER_DIR`; `CHAT_FILTER_GOLDEN` adds a
 /// golden file of real chat, which is only ever generated locally.

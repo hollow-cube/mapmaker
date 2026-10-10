@@ -8,7 +8,8 @@ import io.opentelemetry.api.trace.Tracer;
 import io.opentelemetry.context.Context;
 import io.opentelemetry.context.propagation.TextMapGetter;
 import io.opentelemetry.context.propagation.TextMapSetter;
-import io.opentelemetry.semconv.SemanticAttributes;
+import io.opentelemetry.semconv.HttpAttributes;
+import io.opentelemetry.semconv.UrlAttributes;
 import net.hollowcube.ipc.Wire;
 import org.jetbrains.annotations.Nullable;
 
@@ -64,8 +65,8 @@ public final class IpcTracing {
             .startSpan();
         var scope = span.makeCurrent();
         otel.getPropagators().getTextMapPropagator().inject(Context.current(), request, SETTER);
-        span.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, "POST");
-        span.setAttribute(SemanticAttributes.URL_FULL, url);
+        span.setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, "POST");
+        span.setAttribute(UrlAttributes.URL_FULL, url);
         return new IpcSpan(span, scope);
     }
 
@@ -78,8 +79,8 @@ public final class IpcTracing {
             .setSpanKind(SpanKind.SERVER)
             .setParent(caller)
             .startSpan();
-        span.setAttribute(SemanticAttributes.HTTP_REQUEST_METHOD, exchange.getRequestMethod());
-        span.setAttribute(SemanticAttributes.URL_PATH, exchange.getRequestURI().getPath());
+        span.setAttribute(HttpAttributes.HTTP_REQUEST_METHOD, exchange.getRequestMethod());
+        span.setAttribute(UrlAttributes.URL_PATH, exchange.getRequestURI().getPath());
         var client = exchange.getRequestHeaders().getFirst(Wire.CLIENT_HEADER);
         if (client != null) span.setAttribute(CLIENT_VERSION, client);
         return new IpcSpan(span, span.makeCurrent());

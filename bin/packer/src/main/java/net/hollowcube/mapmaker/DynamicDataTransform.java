@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import de.marhali.json5.Json5;
 import de.marhali.json5.Json5Object;
-import de.marhali.json5.Json5Options;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -16,7 +15,7 @@ import java.util.stream.Stream;
 
 public class DynamicDataTransform {
     private static final Json5 json5 = new Json5();
-    private static final Json5 json5Conversion = new Json5(new Json5Options(false, false, false, 0));
+    private static final Json5 json5Conversion = Json5.builder(options -> options.indentFactor(0).build());
     private static final Gson gson = new Gson();
 
     private final String name;

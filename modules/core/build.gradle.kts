@@ -2,10 +2,6 @@ plugins {
     id("mapmaker.java-library")
 }
 
-repositories {
-    maven(url = "https://maven.noxcrew.com/public")
-}
-
 dependencies {
     implementation(project(":modules:command"))
     implementation(project(":modules:compat"))

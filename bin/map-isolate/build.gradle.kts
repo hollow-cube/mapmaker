@@ -56,7 +56,6 @@ application {
 graalvmNative {
     binaries {
         named("main") {
-            fallback.set(false)
             buildArgs(
                 listOf(
                     "--enable-native-access=ALL-UNNAMED", "--enable-monitoring=jfr",

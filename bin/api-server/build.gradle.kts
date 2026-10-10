@@ -49,7 +49,6 @@ graalvmNative {
 
     binaries {
         named("main") {
-            fallback = false
             buildArgs(
                 listOfNotNull(
                     // Oracle GraalVM only, which is what CI builds in; community edition does not
