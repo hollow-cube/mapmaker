@@ -94,7 +94,7 @@ jobs:
             -w /work \
             --entrypoint /bin/bash \
             container-registry.oracle.com/graalvm/native-image:25 \
-            -c "./gradlew :bin:api-server:nativeCompile --no-configuration-cache --no-daemon"
+            -c "./gradlew :bin:api-server:nativeCompile --no-isolated-projects --no-configuration-cache --no-daemon"
       - name: Upload build report
         uses: actions/upload-artifact@v4
         with:

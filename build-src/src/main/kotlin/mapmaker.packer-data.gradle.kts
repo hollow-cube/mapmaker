@@ -4,7 +4,7 @@ plugins {
     java
 }
 
-val packer by configurations.creating
+val packer = configurations.create("packer")
 
 dependencies {
     packer(project(":bin:packer", "packer"))

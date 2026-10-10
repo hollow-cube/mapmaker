@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.blossom)
 }
 
-val isRelease = rootProject.properties.getOrDefault("isRelease", "false").toString().toBoolean()
-val loadAnticheat = rootProject.properties.getOrDefault("ac", "false").toString().toBoolean()
+val isRelease = providers.gradleProperty("isRelease").map(String::toBoolean).getOrElse(false)
+val loadAnticheat = providers.gradleProperty("ac").map(String::toBoolean).getOrElse(false)
 
 dependencies {
     implementation(project(":modules:common"))

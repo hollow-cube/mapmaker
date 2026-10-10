@@ -32,7 +32,7 @@ dependencies {
     testImplementation(project(":tools:sql-gen:testing"))
 }
 
-val sqlGenTool: Configuration by configurations.creating {
+val sqlGenTool = configurations.create("sqlGenTool") {
     isCanBeConsumed = false
     isCanBeResolved = true
 }

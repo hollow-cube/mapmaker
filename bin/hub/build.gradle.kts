@@ -29,7 +29,7 @@ dependencies {
 
 val outPath = layout.buildDirectory.dir("resources/main/net.hollowcube.scripting")
 
-val scriptBundlerClasspath: Configuration by configurations.creating {
+val scriptBundlerClasspath = configurations.create("scriptBundlerClasspath") {
     isCanBeConsumed = false
     isCanBeResolved = true
 }

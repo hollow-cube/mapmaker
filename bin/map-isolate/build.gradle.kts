@@ -33,7 +33,7 @@ dependencies {
     }
 }
 
-val extractMinestomData by tasks.registering(Copy::class) {
+val extractMinestomData = tasks.register<Copy>("extractMinestomData") {
     val jarFile = configurations.runtimeClasspath.get()
         .resolvedConfiguration
         .resolvedArtifacts

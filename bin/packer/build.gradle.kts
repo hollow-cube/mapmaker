@@ -52,14 +52,14 @@ tasks.register<JavaExec>("runPacker") {
 
     classpath = sourceSets["main"].runtimeClasspath
     mainClass = application.mainClass
-    workingDir = rootProject.layout.projectDirectory.asFile
+    workingDir = isolated.rootProject.projectDirectory.asFile
     args = listOf(
         file(packerOut).absolutePath,
         minecraftCacheDirectory.absolutePath,
         mcVersions.map { "${it.key}:${it.value}" }.joinToString(","),
     )
 
-    inputs.dir(file(rootProject.layout.projectDirectory.dir("resources")))
+    inputs.dir(file(isolated.rootProject.projectDirectory.dir("resources")))
     outputs.dir(packerOut)
 
     javaLauncher = javaToolchains.launcherFor {
@@ -73,7 +73,7 @@ tasks.register<Zip>("buildClient") {
     dependsOn("runPacker")
     from(packerOut.get().dir("client"))
 
-    destinationDirectory = rootProject.layout.buildDirectory
+    destinationDirectory = isolated.rootProject.projectDirectory.dir("build")
     archiveFileName = "client.zip"
 }
 

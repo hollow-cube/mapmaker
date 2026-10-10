@@ -22,7 +22,7 @@ dependencies {
 // wire into the class output on every compile; `wireGen` commits it, `wireCheck` fails when the
 // committed copy has drifted, and `wireCompat` fails when a client at any release tag from
 // `wire-baseline` up could not survive this build.
-val wireTool: Configuration by configurations.creating {
+val wireTool = configurations.create("wireTool") {
     isCanBeConsumed = false
     isCanBeResolved = true
 }
@@ -93,7 +93,7 @@ tasks.register<JavaExec>("wireCompat") {
     args(
         "--current", wireDescriptor.get().asFile.path,
         "--baseline", wireBaseline.asFile.path,
-        "--repo", rootProject.layout.projectDirectory.asFile.path,
+        "--repo", isolated.rootProject.projectDirectory.asFile.path,
         "--path", "modules/ipc/wire.json",
     )
 }
