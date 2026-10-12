@@ -203,7 +203,8 @@ public final class ChatServiceImpl implements ChatService {
     /// but perform significantly worse and likely flag some names. Thanks WeGay!).
     @NonBlocking
     private void refreshNames(NameMask names) {
-        if (System.nanoTime() - namesLoadedAt < NAMES_TTL || !loadingNames.compareAndSet(false, true))
+        if (System.nanoTime() - namesLoadedAt < NAMES_TTL
+            || !loadingNames.compareAndSet(false, true))
             return;
         Thread.startVirtualThread(() -> {
             try {

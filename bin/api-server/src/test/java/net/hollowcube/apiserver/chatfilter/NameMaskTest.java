@@ -20,7 +20,19 @@ class NameMaskTest {
         var words = dir.resolve("words.txt");
         Files.writeString(words, "castle\nplace\nrun\ngay\ngoon\nlol\n");
         mask = NameMask.load("@player", words);
-        mask.setNames(List.of("WeGay", "castle", "placing", "ab", "Patua", "runners", "goon", "Skeptikql", "x_Y_z"));
+        mask.setNames(
+            List.of(
+                "WeGay",
+                "castle",
+                "placing",
+                "ab",
+                "Patua",
+                "runners",
+                "goon",
+                "Skeptikql",
+                "x_Y_z"
+            )
+        );
     }
 
     @Test

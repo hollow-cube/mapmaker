@@ -18,7 +18,17 @@ public final class NameMask {
 
     /// This is a port of the Python version in training and Python `\w` is unicode-aware.
     private static final Pattern TOKEN = Pattern.compile("@?\\w+", Pattern.UNICODE_CHARACTER_CLASS);
-    private static final String[] SUFFIXES = {"s", "es", "ed", "d", "ing", "ly", "er", "ers", "est"};
+    private static final String[] SUFFIXES = {
+        "s",
+        "es",
+        "ed",
+        "d",
+        "ing",
+        "ly",
+        "er",
+        "ers",
+        "est",
+    };
 
     private final String placeholder;
     private final Set<String> words;
@@ -47,11 +57,14 @@ public final class NameMask {
     public String mask(String text) {
         var known = names;
         if (known.isEmpty()) return text;
-        return TOKEN.matcher(text).replaceAll(m -> {
-            var token = m.group();
-            var name = token.startsWith("@") ? token.substring(1) : token;
-            return Matcher.quoteReplacement(known.contains(name.toLowerCase(Locale.ROOT)) ? placeholder : token);
-        });
+        return TOKEN.matcher(text)
+            .replaceAll(m -> {
+                var token = m.group();
+                var name = token.startsWith("@") ? token.substring(1) : token;
+                return Matcher.quoteReplacement(
+                    known.contains(name.toLowerCase(Locale.ROOT)) ? placeholder : token
+                );
+            });
     }
 
     boolean isWord(String name) {

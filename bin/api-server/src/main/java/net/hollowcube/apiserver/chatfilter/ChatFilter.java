@@ -2,6 +2,7 @@ package net.hollowcube.apiserver.chatfilter;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -9,7 +10,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import org.jetbrains.annotations.Nullable;
 
 public final class ChatFilter implements AutoCloseable {
 
@@ -62,7 +62,13 @@ public final class ChatFilter implements AutoCloseable {
             );
         }
 
-        return new ChatFilter(manifest.get("version").getAsString(), outputs, tokenizer, model, names);
+        return new ChatFilter(
+            manifest.get("version").getAsString(),
+            outputs,
+            tokenizer,
+            model,
+            names
+        );
     }
 
     public String version() {
