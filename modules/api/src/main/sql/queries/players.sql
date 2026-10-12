@@ -44,6 +44,13 @@ select id, username, role, hypercube_end
 from player_data
 where id = any ($ids::uuid[]);
 
+-- name: getActiveUsernames :many
+-- The names a message is likely to mention, for the chat filter to mask before scoring. Anyone
+-- gone longer is left unmasked, which costs little: the model also trained on raw names.
+select username
+from player_data
+where last_online > now() - interval '90 days';
+
 -- name: updatePlayerSettings :exec
 -- One statement rather than read-modify-write, so two servers patching different keys both land.
 -- Null deletes only a top-level key; nested objects remain opaque.

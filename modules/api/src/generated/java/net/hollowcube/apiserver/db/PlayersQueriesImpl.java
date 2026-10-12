@@ -61,6 +61,13 @@ final class PlayersQueriesImpl implements PlayersQueries {
         from player_data
         where id = any (?::uuid[])""";
 
+    private static final String GET_ACTIVE_USERNAMES = """
+        -- The names a message is likely to mention, for the chat filter to mask before scoring. Anyone
+        -- gone longer is left unmasked, which costs little: the model also trained on raw names.
+        select username
+        from player_data
+        where last_online > now() - interval '90 days'""";
+
     private static final String UPDATE_PLAYER_SETTINGS = """
         -- One statement rather than read-modify-write, so two servers patching different keys both land.
         -- Null deletes only a top-level key; nested objects remain opaque.
@@ -164,6 +171,24 @@ final class PlayersQueriesImpl implements PlayersQueries {
                 try (ResultSet rs = ps.executeQuery()) {
                     List<PlayersQueries.GetPlayerNamesRow> rows = new ArrayList<>();
                     while (rs.next()) rows.add(new PlayersQueries.GetPlayerNamesRow(rs.getObject(1, UUID.class), rs.getString(2), RoleType.fromPg(rs.getString(3)), Jdbc.getInstant(rs, 4)));
+                    return rows;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<String> getActiveUsernames() {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_ACTIVE_USERNAMES)) {
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<String> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(rs.getString(1));
                     return rows;
                 }
             } finally {

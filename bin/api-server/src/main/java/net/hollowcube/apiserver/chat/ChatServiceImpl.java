@@ -3,6 +3,7 @@ package net.hollowcube.apiserver.chat;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.hollowcube.apiserver.chatfilter.ChatFilter;
+import net.hollowcube.apiserver.chatfilter.NameMask;
 import net.hollowcube.apiserver.common.NatsPublisher;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.db.ChatQueries;
@@ -12,14 +13,17 @@ import net.hollowcube.apiserver.text.ChatText;
 import net.hollowcube.apiserver.text.ProfanityFilter;
 import net.hollowcube.ipc.chat.*;
 import net.hollowcube.ipc.util.IpcException;
+import org.jetbrains.annotations.NonBlocking;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static net.hollowcube.ipc.util.IpcArgs.uuid;
@@ -52,10 +56,13 @@ public final class ChatServiceImpl implements ChatService {
     /// Go's name for this filter, in `censored_by`. The Java one is a port of that engine, so a
     /// moderator reading old rows and new ones is reading the same thing.
     private static final String CENSOR_ENGINE = "static-v2";
+    private static final long NAMES_TTL = Duration.ofMinutes(10).toNanos();
 
     private final ApiDatabase db;
     private final NatsPublisher nats;
     private final @Nullable ChatFilter filter;
+    private final AtomicBoolean loadingNames = new AtomicBoolean();
+    private volatile long namesLoadedAt = System.nanoTime() - NAMES_TTL;
 
     public ChatServiceImpl(ApiDatabase db, NatsPublisher nats, @Nullable ChatFilter filter) {
         this.db = db;
@@ -182,12 +189,32 @@ public final class ChatServiceImpl implements ChatService {
     /// Never fail here just return null
     private ChatFilter.@Nullable Scores score(String text) {
         if (filter == null) return null;
+        var names = filter.names();
+        if (names != null) refreshNames(names);
         try {
             return filter.score(text);
         } catch (RuntimeException e) {
             logger.warn("chat filter failed to score a message", e);
             return null;
         }
+    }
+
+    /// Async reload occasionally, using stale values otherwise (it will still work even without,
+    /// but perform significantly worse and likely flag some names. Thanks WeGay!).
+    @NonBlocking
+    private void refreshNames(NameMask names) {
+        if (System.nanoTime() - namesLoadedAt < NAMES_TTL || !loadingNames.compareAndSet(false, true))
+            return;
+        Thread.startVirtualThread(() -> {
+            try {
+                names.setNames(db.players.getActiveUsernames());
+            } catch (RuntimeException e) {
+                logger.warn("failed to load player names for the chat filter", e);
+            } finally {
+                namesLoadedAt = System.nanoTime();
+                loadingNames.set(false);
+            }
+        });
     }
 
     /// The check constraint's spelling of an outcome.

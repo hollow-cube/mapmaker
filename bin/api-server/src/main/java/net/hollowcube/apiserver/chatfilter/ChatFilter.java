@@ -9,6 +9,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.jetbrains.annotations.Nullable;
 
 public final class ChatFilter implements AutoCloseable {
 
@@ -19,17 +20,20 @@ public final class ChatFilter implements AutoCloseable {
     private final List<String> outputs;
     private final ChatTokenizer tokenizer;
     private final OnnxModel model;
+    private final @Nullable NameMask names;
 
     private ChatFilter(
         String version,
         List<String> outputs,
         ChatTokenizer tokenizer,
-        OnnxModel model
+        OnnxModel model,
+        @Nullable NameMask names
     ) {
         this.version = version;
         this.outputs = outputs;
         this.tokenizer = tokenizer;
         this.model = model;
+        this.names = names;
     }
 
     public static ChatFilter load(Path onnxRuntime, Path dir) throws IOException {
@@ -47,7 +51,18 @@ public final class ChatFilter implements AutoCloseable {
             manifest.get("output").getAsString(),
             outputs.size()
         );
-        return new ChatFilter(manifest.get("version").getAsString(), outputs, tokenizer, model);
+
+        // Load names only if the model manifest asks for them
+        NameMask names = null;
+        if (manifest.has("names")) {
+            var spec = manifest.getAsJsonObject("names");
+            names = NameMask.load(
+                spec.get("placeholder").getAsString(),
+                dir.resolve(spec.get("words").getAsString())
+            );
+        }
+
+        return new ChatFilter(manifest.get("version").getAsString(), outputs, tokenizer, model, names);
     }
 
     public String version() {
@@ -58,8 +73,12 @@ public final class ChatFilter implements AutoCloseable {
         return outputs;
     }
 
+    public @Nullable NameMask names() {
+        return names;
+    }
+
     public Scores score(String text) {
-        var ids = tokenizer.encode(text);
+        var ids = tokenizer.encode(names == null ? text : names.mask(text));
         var mask = new long[ids.length];
         Arrays.fill(mask, 1);
         var logits = model.run(ids, mask, 1, ids.length);

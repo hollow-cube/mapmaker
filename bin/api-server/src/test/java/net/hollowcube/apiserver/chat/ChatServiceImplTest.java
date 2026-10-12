@@ -696,7 +696,8 @@ class ChatServiceImplTest {
             assertEquals(filter.version(), row[0]);
             var scores = row[1].substring(1, row[1].length() - 1).split(",");
             assertEquals(filter.outputs().size(), scores.length);
-            assertTrue(Float.parseFloat(scores[0]) > 0.7, row[1]);
+            var threat = filter.outputs().indexOf("threat_selfharm");
+            assertTrue(Float.parseFloat(scores[threat]) > 0.7, row[1]);
         }
     }
 

@@ -21,6 +21,8 @@ public interface PlayersQueries {
 
     List<GetPlayerNamesRow> getPlayerNames(List<UUID> ids);
 
+    List<String> getActiveUsernames();
+
     long updatePlayerSettings(String patch, UUID id);
 
     List<PlayerData> searchPlayers(List<UUID> exclude, String query, long limit);
@@ -65,6 +67,11 @@ public interface PlayersQueries {
         @Override
         public List<GetPlayerNamesRow> getPlayerNames(List<UUID> ids) {
             throw new UnsupportedOperationException("PlayersQueries.getPlayerNames is not stubbed on this fake");
+        }
+
+        @Override
+        public List<String> getActiveUsernames() {
+            throw new UnsupportedOperationException("PlayersQueries.getActiveUsernames is not stubbed on this fake");
         }
 
         @Override

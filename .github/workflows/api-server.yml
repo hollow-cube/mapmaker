@@ -68,7 +68,7 @@ jobs:
 
       - name: Fetch chat filter
         env:
-          CHAT_FILTER_VERSION: 2026-10-09-v3b
+          CHAT_FILTER_VERSION: 2026-10-12-v4
           ONNXRUNTIME_VERSION: 1.31.0
           AWS_ACCESS_KEY_ID: ${{ env.R2_PRIVATE_ASSETS_ACCESS_KEY }}
           AWS_SECRET_ACCESS_KEY: ${{ env.R2_PRIVATE_ASSETS_SECRET_KEY }}
