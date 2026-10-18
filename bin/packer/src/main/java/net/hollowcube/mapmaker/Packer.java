@@ -71,6 +71,8 @@ public class Packer {
         hub5x5Transform.init(ctx);
         hub5x5Transform.process(ctx);
 
+        new WireFontTransform().process(ctx);
+
         new LangCloner().process(ctx);
 
         ctx.cleanup();

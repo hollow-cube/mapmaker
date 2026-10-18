@@ -8,18 +8,13 @@ import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
-import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.OpUtils;
-import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
-import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
-import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderRemovePacket;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
-import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.entity.OwnedEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.event.PlayerJumpEvent;
@@ -31,7 +26,6 @@ import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -329,27 +323,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         }
 
         if (newPose != oldPose) setPose(newPose);
-
-        if (this.hasTag(DebugRenderersCommand.DEBUG_PLAYER_BOUNDING_BOX)) {
-            var box = getBoundingBox();
-            var center = this.getPosition().add(0, box.height() / 2.0, 0);
-            var id = Key.key("player_bounding_box");
-
-            try {
-                this.sendPacket(new BundlePacket());
-                new ClientboundDebugRenderRemovePacket(id).send(this);
-                new ClientboundDebugRenderAddPacket(
-                    id,
-                    new DebugShape.Box(
-                        center, new Vec(box.width(), box.height(), box.depth()), Quaternion.ZERO,
-                        0, 0xFFFF0000, 5
-                    ),
-                    DebugShape.FLAG_WIREFRAME, 10
-                ).send(this);
-            } finally {
-                this.sendPacket(new BundlePacket());
-            }
-        }
     }
 
     @Override
@@ -546,7 +519,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
     private void physicsTick() {
         if (needsPhysicsPrediction()) {
-            var velocity = Vec.fromPoint(position.sub(previousPosition));
+            var velocity = position.sub(previousPosition).asVec();
 
             final Block.Getter chunkCache = new ChunkCache(instance, currentChunk, Block.STONE);
             nextPhysicsResult = PhysicsUtils.simulateMovement(position, velocity, boundingBox,
@@ -577,7 +550,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             // incorrectly in MinestomDataGenerator.
             if (block.id() == Block.SCAFFOLDING.id()) continue;
 
-            var collisionShape = block.registry().collisionShape();
+            var collisionShape = block.collisionShape();
             var hit = collisionShape != null && collisionShape.intersectBox(
                 position.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
             if (hit) return false;
@@ -847,7 +820,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
             if (posMut.y() >= selfPos.y()) continue;
 
-            var hit = block.registry().collisionShape().intersectBox(
+            var hit = block.collisionShape().intersectBox(
                 selfPos.sub(pos.blockX(), pos.blockY(), pos.blockZ()), bb);
             if (hit) {
                 double distance = pos.add(0.5).distanceSquared(selfPos);
@@ -924,7 +897,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             var hit = bb.intersectBox(position.sub(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5),
                 collidableBlock.collisionBox());
             if (hit) newBlocks.put(
-                new CollisionKey(collidableBlock, new BlockVec(pos)),
+                new CollisionKey(collidableBlock, pos),
                 new CollidableBlock.Collision(world, this, pos, block)
             );
         }

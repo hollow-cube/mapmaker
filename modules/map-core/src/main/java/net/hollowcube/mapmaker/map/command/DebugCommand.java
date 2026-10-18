@@ -7,11 +7,8 @@ import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.command.util.CommandCategory;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.hud.PlayerHud;
-import net.hollowcube.common.math.Quaternion;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.compat.moulberrytweaks.debugrender.DebugShape;
-import net.hollowcube.compat.moulberrytweaks.packets.ClientboundDebugRenderAddPacket;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.command.arg.CoreArgument;
@@ -26,13 +23,16 @@ import net.hollowcube.mapmaker.map.entity.MapEntityType;
 import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoRegistry;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
+import net.hollowcube.mapmaker.map.util.debug.DebugDraw;
+import net.hollowcube.mapmaker.map.util.debug.WireColor;
+import net.hollowcube.mapmaker.map.util.debug.DebugShape;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.ComponentUtil;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.Player;
@@ -42,14 +42,18 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import static net.hollowcube.common.math.MathConstants.TICKS_PER_SECOND;
 import static net.hollowcube.mapmaker.command.CoreCommandCondition.staffPerm;
 import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class DebugCommand extends CommandDsl {
+    private static final String TREE_PREFIX = "debug_tree/";
+    private static final int TREE_LIFETIME = 20 * TICKS_PER_SECOND;
 
     private final CommandCondition adminCondition;
     private final CommandCondition localCondition;
@@ -256,21 +260,21 @@ public class DebugCommand extends CommandDsl {
             var boundingBoxes = world.collisionTree().debugBoundingBoxes();
             player.sendMessage("Found " + boundingBoxes.size() + " bounding boxes in octree.");
 
+            var draw = DebugDraw.of(player);
+            draw.clear(TREE_PREFIX);
             int i = 0;
-            for (var bb : boundingBoxes) {
-                var color = bb.isObject() ? 0x00FF00 : 0x0000FF; // Green for objects, blue for tree
-                var size = bb.boundingBox().size();
-                if (size.isZero()) {
-                    size = new Vec(0.5);
+            for (var debug : boundingBoxes) {
+                var bb = debug.boundingBox();
+                Point min = new Vec(bb.minX(), bb.minY(), bb.minZ()), max = new Vec(bb.maxX(), bb.maxY(), bb.maxZ());
+                if (bb.size().isZero()) {
+                    min = min.sub(0.25);
+                    max = max.add(0.25);
                 }
-                new ClientboundDebugRenderAddPacket(
-                    Key.key("octree", String.valueOf(i++)),
-                    new DebugShape.Box(bb.boundingBox().center(), size, Quaternion.ZERO,
-                        0, color | 0xFF000000, 5),
-                    0, 20 * 20).send(player); // 20s
+                var color = debug.isObject() ? WireColor.LIGHT_BLUE : WireColor.DARK_GRAY;
+                draw.draw(TREE_PREFIX + i++,
+                    new DebugShape.Box(min, max, color, false, debug.isObject()), TREE_LIFETIME);
             }
         });
-
     }
 
     private void relightWorld(@NotNull Player player, @NotNull CommandContext context) {

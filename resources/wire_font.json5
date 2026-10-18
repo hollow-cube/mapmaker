@@ -1,0 +1,12 @@
+// Colors for the line/box wires drawable by the server
+// NOTE: Order must stay in-sync with WireLine.Style.
+{
+  "styles": [
+    { "name": "white", "color": "#F2F2F2" },
+    { "name": "light_gray", "color": "#B0B0B0" },
+    { "name": "dark_gray", "color": "#696969" },
+    { "name": "light_blue", "color": "#30FBFF" },
+    { "name": "yellow", "color": "#FFE11C" },
+    { "name": "red", "color": "#FA4141" },
+  ],
+}

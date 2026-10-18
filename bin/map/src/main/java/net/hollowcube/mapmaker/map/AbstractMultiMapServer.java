@@ -552,12 +552,6 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             }
         }, "Enables progress index add mode for the current map");
 
-        cmd.createPermissionedSubcommand(
-            "boundingbox",
-            DebugRenderersCommand::handleDebugBoundingBox,
-            "Shows the bounding box of the player"
-        );
-
         cmd.createPermissionlessSubcommand(
             "poi",
             DebugRenderersCommand::handleDebugRegions,
