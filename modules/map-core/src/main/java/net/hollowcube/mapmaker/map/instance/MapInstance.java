@@ -19,7 +19,6 @@ import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.utils.chunk.ChunkSupplier;
 import net.minestom.server.world.DimensionType;
 import org.jetbrains.annotations.Blocking;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -41,12 +40,13 @@ public class MapInstance extends InstanceContainer {
 
     private final LightingMode lightingMode;
     private final ChunkSupplier chunkSupplier;
+    private final WorldIndex index = new WorldIndex();
 
-    public MapInstance(@NotNull String dimensionName, @NotNull LightingMode lightingMode) {
+    public MapInstance(String dimensionName, LightingMode lightingMode) {
         this(dimensionName, lightingMode == LightingMode.FULL_BRIGHT ? DimensionTypes.FULL_BRIGHT : DimensionType.OVERWORLD, lightingMode);
     }
 
-    public MapInstance(@NotNull String dimensionName, @NotNull RegistryKey<DimensionType> dimensionType, @NotNull LightingMode lightingMode) {
+    public MapInstance(String dimensionName, RegistryKey<DimensionType> dimensionType, LightingMode lightingMode) {
         super(UUID.randomUUID(), dimensionType, null, Key.key(dimensionName));
         this.lightingMode = lightingMode;
 
@@ -71,11 +71,15 @@ public class MapInstance extends InstanceContainer {
         MinecraftServer.getInstanceManager().registerInstance(this);
     }
 
-    public void load(byte @NotNull [] worldData, @Nullable PolarWorldAccess worldAccess) {
+    public WorldIndex index() {
+        return index;
+    }
+
+    public void load(byte[] worldData, @Nullable PolarWorldAccess worldAccess) {
         load(PolarReader.read(worldData, PolarDataFixer.INSTANCE), worldAccess);
     }
 
-    public void load(@NotNull PolarWorld world, @Nullable PolarWorldAccess worldAccess) {
+    public void load(PolarWorld world, @Nullable PolarWorldAccess worldAccess) {
         var loader = new PolarLoader(world);
         if (worldAccess != null) loader.setWorldAccess(worldAccess);
         if (lightingMode == LightingMode.FULL_BRIGHT) loader.setLoadLighting(false);
@@ -93,7 +97,7 @@ public class MapInstance extends InstanceContainer {
         setChunkLoader(ChunkLoader.noop());
     }
 
-    public void loadStream(@NotNull ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
+    public void loadStream(ReadableMapData data, @Nullable PolarWorldAccess worldAccess) {
         FutureUtil.getUnchecked(PolarLoader.streamLoad(this, data.data(), data.length(),
                 PolarDataFixer.INSTANCE, worldAccess, lightingMode != LightingMode.FULL_BRIGHT));
         // Chunks inside the border must be editable even without world data (eg unloaded chunks),
@@ -113,7 +117,7 @@ public class MapInstance extends InstanceContainer {
     }
 
     @Blocking
-    public byte @NotNull [] save(@NotNull PolarWorldAccess worldAccess) {
+    public byte[] save(PolarWorldAccess worldAccess) {
         // Save through a local loader without installing it on the instance, so a chunk load
         // racing the save can never read from (or write into) the partially written world.
         var polarWorld = new PolarWorld(getCachedDimensionType());
@@ -138,7 +142,7 @@ public class MapInstance extends InstanceContainer {
         MinecraftServer.getInstanceManager().unregisterInstance(this);
     }
 
-    private void handleEntityRemoved(@NotNull RemoveEntityFromInstanceEvent event) {
+    private void handleEntityRemoved(RemoveEntityFromInstanceEvent event) {
         if (event.getEntity() instanceof Player player) {
             EventDispatcher.call(new PlayerInstanceLeaveEvent(player, event.getInstance()));
         }

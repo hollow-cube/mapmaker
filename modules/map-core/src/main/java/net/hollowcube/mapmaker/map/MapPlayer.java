@@ -9,7 +9,6 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
-import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.block.BlockTags;
@@ -23,6 +22,7 @@ import net.hollowcube.mapmaker.map.event.PlayerSwingEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
+import net.hollowcube.mapmaker.map.instance.WorldIndex;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -845,8 +845,71 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     }
 
     public void updateTouchingState(MapWorld world, boolean callEvents) {
-        updateTouchingBlocks(world, callEvents);
-        updateTouchingMarkerEntities(world, callEvents);
+        var position = getPosition();
+        var bb = getBoundingBox();
+        var query = new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
+            (float) (position.x() + bb.minX()),
+            (float) (position.y() + bb.minY()),
+            (float) (position.z() + bb.minZ()),
+            (float) (position.x() + bb.maxX()),
+            (float) (position.y() + bb.maxY()),
+            (float) (position.z() + bb.maxZ())
+        );
+
+        var instance = getInstance();
+        boolean inInstance = instance != null && isActive();
+        var newBlocks = new HashMap<CollisionKey, CollidableBlock.Collision>();
+        var newObjects = new ArrayList<SpatialObject>();
+        for (var object : world.collisionTree().intersectingObjects(query)) {
+            if (object instanceof Entity) {
+                newObjects.add(object);
+                continue;
+            }
+            if (!inInstance || !(object instanceof WorldIndex.IndexedBlock node)) continue;
+
+            var pos = node.position();
+            if (!instance.isChunkLoaded(pos)) continue;
+            // The index applies block changes at the next safe point, so a block changed since then is skipped
+            // until it catches up.
+            var block = instance.getBlock(pos);
+            if (block.handler() != node.handler()) continue;
+
+            if (node.touches(position, bb)) newBlocks.put(
+                new CollisionKey(node.handler(), pos),
+                new CollidableBlock.Collision(world, this, pos, block)
+            );
+        }
+
+        if (inInstance) {
+            for (var entry : newBlocks.entrySet()) {
+                var removed = blocksTouching.remove(entry.getKey());
+                if (removed == null && callEvents) {
+                    entry.getKey().block.onEnter(entry.getValue());
+                }
+            }
+            for (var entry : blocksTouching.entrySet()) {
+                if (callEvents) entry.getKey().block.onExit(entry.getValue());
+            }
+            blocksTouching.clear();
+            blocksTouching.putAll(newBlocks);
+        }
+
+        for (var newObject : newObjects) {
+            if (!objectsTouching.remove(newObject) && newObject instanceof Entity entity && callEvents) {
+                world.callEvent(new Map2PlayerEnterEntityEvent(world, this, entity));
+                if (entity instanceof MarkerEntity marker)
+                    marker.onPlayerEntered2NoEventTemp(this);
+            }
+        }
+        for (var object : objectsTouching) {
+            if (object instanceof Entity entity && callEvents) {
+                world.callEvent(new Map2PlayerExitEntityEvent(world, this, entity));
+                if (entity instanceof MarkerEntity marker)
+                    marker.onPlayerExited2NoEventTemp(this);
+            }
+        }
+        objectsTouching.clear();
+        objectsTouching.addAll(newObjects);
     }
 
     @Override
@@ -871,80 +934,6 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             var world = MapWorld.forPlayer(this);
             if (world != null) updateTouchingState(world, true);
         }
-    }
-
-    private void updateTouchingBlocks(MapWorld world, boolean callEvents) {
-        var instance = getInstance();
-        if (instance == null || !isActive()) return; // Sanity check not in an instance
-
-        final BoundingBox bb = this.getBoundingBox();
-        if (bb == null) return;
-
-        var newBlocks = new HashMap<CollisionKey, CollidableBlock.Collision>();
-
-        var position = getPosition();
-        var iter = bb.getBlocks(getPosition());
-        while (iter.hasNext()) {
-            var posMut = iter.next();
-            var pos = new BlockVec(posMut.x(), posMut.y(), posMut.z());
-            var chunk = instance.getChunkAt(pos);
-            if (chunk == null || !chunk.isLoaded()) continue;
-            var block = chunk.getBlock(pos, Block.Getter.Condition.CACHED);
-            var handler = OpUtils.map(block, Block::handler);
-            if (!(handler instanceof CollidableBlock collidableBlock))
-                continue;
-
-            var hit = bb.intersectBox(position.sub(pos.blockX() + 0.5, pos.blockY(), pos.blockZ() + 0.5),
-                collidableBlock.collisionBox());
-            if (hit) newBlocks.put(
-                new CollisionKey(collidableBlock, pos),
-                new CollidableBlock.Collision(world, this, pos, block)
-            );
-        }
-
-        // Diff the new players with the old players
-        for (var entry : newBlocks.entrySet()) {
-            var removed = blocksTouching.remove(entry.getKey());
-            if (removed == null && callEvents) {
-                entry.getKey().block.onEnter(entry.getValue());
-            }
-        }
-        for (var entry : blocksTouching.entrySet()) {
-            if (callEvents) entry.getKey().block.onExit(entry.getValue());
-        }
-        blocksTouching.clear();
-        blocksTouching.putAll(newBlocks);
-    }
-
-    private void updateTouchingMarkerEntities(@NotNull MapWorld world, boolean callEvents) {
-        var position = getPosition();
-        var minestomBoundingBox = getBoundingBox();
-        var physicsBoundingBox = new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
-            (float) (position.x() + minestomBoundingBox.minX()),
-            (float) (position.y() + minestomBoundingBox.minY()),
-            (float) (position.z() + minestomBoundingBox.minZ()),
-            (float) (position.x() + minestomBoundingBox.maxX()),
-            (float) (position.y() + minestomBoundingBox.maxY()),
-            (float) (position.z() + minestomBoundingBox.maxZ())
-        );
-
-        var newObjects = world.collisionTree().intersectingObjects(physicsBoundingBox);
-        for (var newObject : newObjects) {
-            if (!objectsTouching.remove(newObject) && newObject instanceof Entity entity && callEvents) {
-                world.callEvent(new Map2PlayerEnterEntityEvent(world, this, entity));
-                if (entity instanceof MarkerEntity marker)
-                    marker.onPlayerEntered2NoEventTemp(this);
-            }
-        }
-        for (var object : objectsTouching) {
-            if (object instanceof Entity entity && callEvents) {
-                world.callEvent(new Map2PlayerExitEntityEvent(world, this, entity));
-                if (entity instanceof MarkerEntity marker)
-                    marker.onPlayerExited2NoEventTemp(this);
-            }
-        }
-        objectsTouching.clear();
-        objectsTouching.addAll(newObjects);
     }
 
     //endregion

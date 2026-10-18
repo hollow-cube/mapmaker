@@ -17,7 +17,6 @@ import net.minestom.server.network.packet.server.play.data.ChunkData;
 import net.minestom.server.network.packet.server.play.data.LightData;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -48,17 +47,17 @@ public class EmptyChunk extends Chunk {
         LIGHT_DATA = createLightData(sections);
     }
 
-    public EmptyChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+    public EmptyChunk(Instance instance, int chunkX, int chunkZ) {
         super(instance, chunkX, chunkZ, false);
     }
 
     @Override
-    protected void setBlock(int x, int y, int z, @NotNull Block block, BlockHandler.@Nullable Placement placement, BlockHandler.@Nullable Destroy destroy) {
+    protected void setBlock(int x, int y, int z, Block block, BlockHandler.@Nullable Placement placement, BlockHandler.@Nullable Destroy destroy) {
 
     }
 
     @Override
-    public @NotNull List<Section> getSections() {
+    public List<Section> getSections() {
         // new set of empty sections in case someone mutates for some reason. we always return the stored chunk data anyway.
         var sections = new ArrayList<Section>(maxSection - minSection);
         for (int i = minSection; i < maxSection; i++) {
@@ -68,17 +67,17 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public @NotNull Section getSection(int section) {
+    public Section getSection(int section) {
         return new Section();
     }
 
     @Override
-    public @NotNull Heightmap motionBlockingHeightmap() {
+    public Heightmap motionBlockingHeightmap() {
         throw new UnsupportedOperationException("Not implemented");
     }
 
     @Override
-    public @NotNull Heightmap worldSurfaceHeightmap() {
+    public Heightmap worldSurfaceHeightmap() {
         throw new UnsupportedOperationException("Not implemented");
     }
 
@@ -93,21 +92,21 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public @NotNull SendablePacket getFullDataPacket() {
+    public SendablePacket getFullDataPacket() {
         return createChunkPacket();
     }
 
 
-    private @NotNull ChunkDataPacket createChunkPacket() {
+    private ChunkDataPacket createChunkPacket() {
         return new ChunkDataPacket(chunkX, chunkZ, CHUNK_DATA, LIGHT_DATA);
     }
 
-    @NotNull UpdateLightPacket createLightPacket() {
+    UpdateLightPacket createLightPacket() {
         return new UpdateLightPacket(chunkX, chunkZ, LIGHT_DATA);
     }
 
     @Override
-    public @NotNull Chunk copy(@NotNull Instance instance, int chunkX, int chunkZ) {
+    public Chunk copy(Instance instance, int chunkX, int chunkZ) {
         return new EmptyChunk(instance, chunkX, chunkZ);
     }
 
@@ -122,17 +121,17 @@ public class EmptyChunk extends Chunk {
     }
 
     @Override
-    public @UnknownNullability Block getBlock(int x, int y, int z, @NotNull Condition condition) {
+    public @UnknownNullability Block getBlock(int x, int y, int z, Condition condition) {
         return Block.AIR;
     }
 
     @Override
-    public @NotNull RegistryKey<Biome> getBiome(int x, int y, int z) {
+    public RegistryKey<Biome> getBiome(int x, int y, int z) {
         return Biome.PLAINS;
     }
 
     @Override
-    public void setBiome(int x, int y, int z, @NotNull RegistryKey<Biome> biome) {
+    public void setBiome(int x, int y, int z, RegistryKey<Biome> biome) {
 
     }
 

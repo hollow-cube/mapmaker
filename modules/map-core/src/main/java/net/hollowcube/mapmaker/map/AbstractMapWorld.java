@@ -16,10 +16,10 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.monitoring.MapCoreJFR;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
+import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
-import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.mapmaker.util.NumberUtil;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -47,8 +47,6 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
-
-import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
 @NotNullByDefault
 public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W extends AbstractMapWorld<S, W>> implements MapWorld {
@@ -83,9 +81,6 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     private final BiomeContainer biomeContainer = new BiomeContainer();
     private final ItemRegistry itemRegistry = new ItemRegistry();
     private final ObjectEntityHandlerRegistry objectEntityHandlerRegistry = new ObjectEntityHandlerRegistry();
-
-    private Octree octree = Octree.emptyOctree();
-    private boolean octreeDirty = true;
 
     private PlayerHud.@Nullable Module titleHud;
 
@@ -128,6 +123,10 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         return worldId;
     }
 
+    public MapSize size() {
+        return OpUtils.mapOr(map().settings(), MapData.Settings::size, MapSize.NORMAL);
+    }
+
     @Override
     public MapServer server() {
         return server;
@@ -157,12 +156,12 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
     @Override
     public Octree collisionTree() {
-        return this.octree;
+        return instance.index().tree();
     }
 
     @Override
     public void queueCollisionTreeRebuild() {
-        this.octreeDirty = true;
+        instance.index().queueTreeRebuild();
     }
 
     @Override
@@ -299,21 +298,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
         MapWorld.super.safePointTick();
 
-        // Rebuild octree for new entities.
-        if (octreeDirty) {
-            List<SpatialObject> allObjects = new ArrayList<>();
-            for (var entity : instance().getEntities()) {
-                if (entity.isRemoved() || !(entity instanceof SpatialObject spatial)) continue;
-                if (spatial.boundingBox().size().isZero()) continue;
-                allObjects.add(spatial);
-            }
-
-            var size = OpUtils.mapOr(map().settings().size(),
-                MapSize::size, MapSize.NORMAL.size());
-            var powerOfTwo = (int) Math.ceil(Math.log(Math.min(size, 4096)) / Math.log(2));
-            this.octree = simpleOctree(powerOfTwo, allObjects);
-            this.octreeDirty = false;
-        }
+        instance.index().update(instance, size());
 
         var pendingRemoveIter = pendingRemovals.entrySet().iterator();
         while (pendingRemoveIter.hasNext()) {

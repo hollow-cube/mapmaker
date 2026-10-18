@@ -3,7 +3,6 @@ package net.hollowcube.mapmaker.map.instance;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.MathUtils;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Predicate;
@@ -22,9 +21,9 @@ public class Heightmap {
 
     // Note that in data, 0 is a missing value.
     // null == ungenerated, length 0 == no stored data, length DATA_SIZE == data
-    private short[] data = null;
+    private short @Nullable [] data = null;
 
-    public Heightmap(@NotNull Chunk chunk, boolean type, @NotNull Predicate<Block> filter) {
+    public Heightmap(Chunk chunk, boolean type, Predicate<Block> filter) {
         this.chunk = chunk;
         this.type = type;
         var dimensionType = chunk.getInstance().getCachedDimensionType();
@@ -38,7 +37,7 @@ public class Heightmap {
         return data[(z & 0xF) << 4 | (x & 0xF)] + worldMin - 1;
     }
 
-    public void update(int x, int y, int z, @NotNull Block block) {
+    public void update(int x, int y, int z, Block block) {
         int current = get(x, z);
         if (current >= worldMin && (type ? y <= current - 2 : y >= current + 2)) {
             return;
@@ -79,7 +78,7 @@ public class Heightmap {
         }
     }
 
-    public int[] save() {
+    public int @Nullable [] save() {
         if (data == null) return null;
         if (data.length == 0) return new int[0];
 
@@ -121,7 +120,7 @@ public class Heightmap {
         }
     }
 
-    public long[] encode() {
+    public long @Nullable [] encode() {
         if (this.data == null) recalculate();
         short[] heightmap = this.data;
         if (heightmap.length == 0) return null; // No data, client will init to zero.

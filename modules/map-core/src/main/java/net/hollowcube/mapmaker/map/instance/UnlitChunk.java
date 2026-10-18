@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.terraform.instance.TerraformBiomeChunk;
+import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -8,7 +9,6 @@ import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.network.packet.server.play.data.LightData;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.world.biome.Biome;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
@@ -17,13 +17,13 @@ import java.util.*;
 public class UnlitChunk extends DynamicChunk implements ChunkExt {
 
     private final Heightmaps heightmaps;
-    private final LightData light;
+    private final @Nullable LightData light;
 
-    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+    public UnlitChunk(Instance instance, int chunkX, int chunkZ) {
         this(instance, chunkX, chunkZ, null);
     }
 
-    public UnlitChunk(@NotNull Instance instance, int chunkX, int chunkZ, @Nullable LightData light) {
+    public UnlitChunk(Instance instance, int chunkX, int chunkZ, @Nullable LightData light) {
         super(instance, chunkX, chunkZ);
         this.light = light;
         this.heightmaps = new Heightmaps(this);
@@ -35,28 +35,36 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     }
 
     @Override
-    public @NotNull Heightmap heightmap(int heightmap) {
+    public Heightmap heightmap(int heightmap) {
         return Objects.requireNonNull(heightmaps.heightmap(heightmap), "no such heightmap: " + heightmap);
     }
 
     @Override
-    public void loadHeightmap(int heightmap, int[] data) {
+    public void loadHeightmap(int heightmap, int @Nullable [] data) {
         heightmaps.load(heightmap, data);
     }
 
     @Override
-    public int[] saveHeightmap(int heightmap) {
+    public int @Nullable [] saveHeightmap(int heightmap) {
         return heightmaps.save(heightmap);
     }
 
     @Override
     public void setBlock(
-            int x, int y, int z, @NotNull Block block,
+            int x, int y, int z, Block block,
             @Nullable BlockHandler.Placement placement,
             @Nullable BlockHandler.Destroy destroy
     ) {
+        var previous = entries.get(CoordConversion.chunkBlockIndex(x, y, z));
         super.setBlock(x, y, z, block, placement, destroy);
         heightmaps.update(x, y, z, block);
+        WorldIndex.blockChanged(instance, x, y, z, previous, block);
+    }
+
+    @Override
+    protected void onLoad() {
+        super.onLoad();
+        WorldIndex.chunkLoaded(this, entries);
     }
 
     public Heightmaps heightmaps() {
@@ -74,13 +82,13 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     }
 
     @Override
-    public @NotNull RegistryKey<Biome> getBiome(int x, int y, int z) {
+    public RegistryKey<Biome> getBiome(int x, int y, int z) {
         var key = TerraformBiomeChunk.getBiome(this, x, y, z);
         return key != null ? key : super.getBiome(x, y, z);
     }
 
     @Override
-    public void setBiome(int x, int y, int z, @NotNull RegistryKey<Biome> biome) {
+    public void setBiome(int x, int y, int z, RegistryKey<Biome> biome) {
         if (!TerraformBiomeChunk.setBiome(this, x, y, z, biome)) {
             super.setBiome(x, y, z, biome);
         }
@@ -88,7 +96,7 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
 
     @SuppressWarnings("UnstableApiUsage")
     public static LightData createStaticLightData(
-            @NotNull Instance instance,
+            Instance instance,
             @Range(from = 0, to = 15) int skyLight,
             @Range(from = 0, to = 15) int blockLight
     ) {

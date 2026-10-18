@@ -1,0 +1,115 @@
+package net.hollowcube.mapmaker.map.instance;
+
+import net.hollowcube.mapmaker.map.MapPlayer;
+import net.hollowcube.mapmaker.map.block.CollidableBlock;
+import net.hollowcube.mapmaker.test.AbstractMapWorldTest;
+import net.hollowcube.mapmaker.test.TestMapWorld;
+import net.kyori.adventure.key.Key;
+import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.instance.block.Block;
+import net.minestom.testing.Env;
+import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
+    private static final BlockVec PLATE_POS = new BlockVec(5, 40, 5);
+    private static final Pos ON_PLATE = new Pos(5.5, 40, 5.5);
+    private static final Pos OFF_PLATE = new Pos(0.5, 40, 0.5);
+
+    private final RecordingPlate plate = new RecordingPlate();
+
+    @Override
+    protected @NotNull TestMapWorld createWorld(@NotNull Env env) {
+        var world = new TestMapWorld();
+        world.instance().loadChunk(0, 0).join();
+        return world;
+    }
+
+    @Test
+    void entersAndExitsIndexedPlate() {
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate));
+        env.tick();
+        var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
+        plate.events.clear();
+
+        moveTo(player, ON_PLATE);
+        moveTo(player, ON_PLATE.add(0.1, 0, 0));
+        moveTo(player, OFF_PLATE);
+        assertEquals(List.of("enter " + PLATE_POS, "exit " + PLATE_POS), plate.events);
+    }
+
+    @Test
+    void silentUpdatesDoNotFire() {
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate));
+        env.tick();
+        var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
+        plate.events.clear();
+
+        player.teleport(ON_PLATE).join();
+        player.updateTouchingState(world, false);
+        moveTo(player, ON_PLATE);
+        assertEquals(List.of(), plate.events);
+    }
+
+    @Test
+    void placedPlateTriggersAfterSafePoint() {
+        var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate));
+
+        moveTo(player, ON_PLATE);
+        assertEquals(List.of(), plate.events);
+
+        env.tick();
+        moveTo(player, ON_PLATE);
+        assertEquals(List.of("enter " + PLATE_POS), plate.events);
+    }
+
+    @Test
+    void removedPlateExitsBeforeSafePoint() {
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate));
+        env.tick();
+        var player = (MapPlayer) spawnTestPlayer(ON_PLATE);
+        moveTo(player, ON_PLATE);
+        plate.events.clear();
+
+        world.instance().setBlock(PLATE_POS, Block.AIR);
+        moveTo(player, ON_PLATE);
+        assertEquals(List.of("exit " + PLATE_POS), plate.events);
+    }
+
+    private void moveTo(MapPlayer player, Pos pos) {
+        player.teleport(pos).join();
+        player.updateTouchingState(world, true);
+    }
+
+    private static final class RecordingPlate implements CollidableBlock {
+        final List<String> events = new ArrayList<>();
+
+        @Override
+        public Key getKey() {
+            return Key.key("test:recording_plate");
+        }
+
+        @Override
+        public BoundingBox collisionBox() {
+            return new BoundingBox(14.0 / 16.0, 4.0 / 16.0, 14.0 / 16.0);
+        }
+
+        @Override
+        public void onEnter(Collision collision) {
+            events.add("enter " + collision.blockPosition());
+        }
+
+        @Override
+        public void onExit(Collision collision) {
+            events.add("exit " + collision.blockPosition());
+        }
+    }
+}
