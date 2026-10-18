@@ -397,6 +397,10 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         } catch (ApiClient.NotFoundError _) {
             // No world is fine, we will add the default blocks
         }
+
+        // A player can join before the first safe point, and joining an existing save state seeds the touching state
+        // without firing, so the plates they are standing on must already be indexed.
+        instance().index().update(instance(), size());
     }
 
     public void loadWorldTag(TagReadable tag) {

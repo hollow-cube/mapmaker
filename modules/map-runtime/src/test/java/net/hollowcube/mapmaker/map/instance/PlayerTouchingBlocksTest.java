@@ -1,13 +1,17 @@
 package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.mapmaker.map.MapPlayer;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
+import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.test.AbstractMapWorldTest;
 import net.hollowcube.mapmaker.test.TestMapWorld;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.testing.Env;
 import org.jetbrains.annotations.NotNull;
@@ -84,6 +88,34 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
         assertEquals(List.of("exit " + PLATE_POS), plate.events);
     }
 
+    @Test
+    void touchesReuseTheIndexedTrigger() {
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate));
+        env.tick();
+        var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
+        int created = plate.triggersCreated;
+
+        moveTo(player, ON_PLATE);
+        moveTo(player, OFF_PLATE);
+        moveTo(player, ON_PLATE);
+        assertEquals(created, plate.triggersCreated);
+    }
+
+    @Test
+    void changedDataIsLiveBeforeSafePoint() {
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate)
+            .withNbt(CompoundBinaryTag.builder().putString("data", "old").build()));
+        env.tick();
+        var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
+        plate.events.clear();
+
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate)
+            .withNbt(CompoundBinaryTag.builder().putString("data", "new").build()));
+        moveTo(player, ON_PLATE);
+        moveTo(player, OFF_PLATE);
+        assertEquals(List.of("enter " + PLATE_POS + " new", "exit " + PLATE_POS + " new"), plate.events);
+    }
+
     private void moveTo(MapPlayer player, Pos pos) {
         player.teleport(pos).join();
         player.updateTouchingState(world, true);
@@ -91,6 +123,7 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
 
     private static final class RecordingPlate implements CollidableBlock {
         final List<String> events = new ArrayList<>();
+        int triggersCreated = 0;
 
         @Override
         public Key getKey() {
@@ -103,13 +136,21 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
         }
 
         @Override
-        public void onEnter(Collision collision) {
-            events.add("enter " + collision.blockPosition());
-        }
+        public Trigger createTrigger(BlockVec position, Block block) {
+            triggersCreated++;
+            var nbt = block.nbt();
+            var label = nbt == null || !nbt.keySet().contains("data") ? "" : " " + nbt.getString("data");
+            return new Trigger() {
+                @Override
+                public void onEnter(MapWorld world, Player player) {
+                    events.add("enter " + position + label);
+                }
 
-        @Override
-        public void onExit(Collision collision) {
-            events.add("exit " + collision.blockPosition());
+                @Override
+                public void onExit(MapWorld world, Player player) {
+                    events.add("exit " + position + label);
+                }
+            };
         }
     }
 }

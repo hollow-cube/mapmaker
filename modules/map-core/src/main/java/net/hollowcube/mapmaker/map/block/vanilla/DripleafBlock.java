@@ -1,10 +1,12 @@
 package net.hollowcube.mapmaker.map.block.vanilla;
 
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
+import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.map.block.ghost.BlockUpdateTask;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.collision.BoundingBox;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
@@ -34,12 +36,12 @@ public class DripleafBlock implements BlockHandler, CollidableBlock {
     }
 
     @Override
-    public void onEnter(Collision collision) {
-        if (!collision.world().shouldTriggerDripleaf(collision.player()))
-            return;
+    public Trigger createTrigger(BlockVec position, Block block) {
+        return (world, player) -> {
+            if (!world.shouldTriggerDripleaf(player)) return;
 
-        GhostBlockHolder ghostBlocks = GhostBlockHolder.forPlayer(collision.player());
-        ghostBlocks.submitTask(collision.blockPosition(), new DecayTask(), false);
+            GhostBlockHolder.forPlayer(player).submitTask(position, new DecayTask(), false);
+        };
     }
 
     public void handleProjectileCollision(Collision collision) {

@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.block;
 
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.instance.WorldIndex;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.Player;
@@ -9,7 +10,7 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import org.jetbrains.annotations.NotNullByDefault;
 
-/// A block handler which can receive collision triggers from a [MapPlayer].
+/// A block handler whose [Trigger] fires when a [MapPlayer] touches it.
 ///
 /// Collision is tested relative to the center of the bounding box. The [BoundingBox] constructor will
 /// create an appropriate bounding box for this purpose.
@@ -24,10 +25,7 @@ public interface CollidableBlock extends BlockHandler {
 
     BoundingBox collisionBox();
 
-    default void onEnter(Collision collision) {
-    }
-
-    default void onExit(Collision collision) {
-    }
+    /// Called when added to world and cached by [WorldIndex], called on touch.
+    Trigger createTrigger(BlockVec position, Block block);
 
 }

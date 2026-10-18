@@ -2,11 +2,13 @@ package net.hollowcube.mapmaker.runtime.parkour.block;
 
 import net.hollowcube.common.util.JsonUtil;
 import net.hollowcube.common.util.dfu.DFU;
+import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.runtime.parkour.TempEffectApplicator;
+import net.hollowcube.mapmaker.runtime.parkour.action.ActionTrigger;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
@@ -30,10 +32,8 @@ public class StatusPlateBlock implements BlockHandler, PressurePlateBlock, Debug
     }
 
     @Override
-    public void onEnter(Collision collision) {
-        final var player = collision.player();
-        final var data = collision.block().getTag(DATA_TAG);
-        TempEffectApplicator.applyStatus(data, player, createId(collision.blockPosition()));
+    public Trigger createTrigger(BlockVec position, Block block) {
+        return new ActionTrigger(ActionTrigger.Kind.STATUS, createId(position), position, block.getTag(DATA_TAG));
     }
 
     @Override

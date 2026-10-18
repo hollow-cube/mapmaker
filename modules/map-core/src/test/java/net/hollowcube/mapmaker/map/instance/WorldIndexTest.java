@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
+import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.map.entity.PhysicsTestEnv;
 import net.hollowcube.mapmaker.map.util.spatial.BoundingBox;
 import net.hollowcube.ipc.map.MapSize;
@@ -10,6 +12,7 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.world.DimensionType;
 import org.junit.jupiter.api.AfterEach;
@@ -128,6 +131,7 @@ class WorldIndexTest {
         var node = loaded.index().block(new BlockVec(3, 41, 5));
         assertNotNull(node);
         assertSame(PLATE, node.handler());
+        assertEquals(new DataTrigger("x"), node.trigger());
     }
 
     @Test
@@ -142,6 +146,34 @@ class WorldIndexTest {
         var block = loaded.index().block(new BlockVec(3, 41, 5));
         assertNotNull(block);
         assertSame(PLATE, block.handler());
+        assertEquals(new DataTrigger("x"), block.trigger());
+    }
+
+    @Test
+    void rebuildsTriggerWhenDataChanges() {
+        var instance = createInstance();
+        instance.setBlock(1, 41, 2, PLATE_BLOCK.withNbt(CompoundBinaryTag.builder().putString("data", "a").build()));
+        instance.index().update(instance, MapSize.NORMAL);
+        instance.setBlock(1, 41, 2, PLATE_BLOCK.withNbt(CompoundBinaryTag.builder().putString("data", "b").build()));
+        instance.index().update(instance, MapSize.NORMAL);
+
+        var node = instance.index().block(new BlockVec(1, 41, 2));
+        assertNotNull(node);
+        assertEquals(new DataTrigger("b"), node.trigger());
+    }
+
+    @Test
+    void skipsBlocksWhoseTriggerFails() {
+        var instance = createInstance();
+        instance.setBlock(1, 41, 2, PLATE_BLOCK);
+        instance.index().update(instance, MapSize.NORMAL);
+        instance.setBlock(1, 41, 2, PLATE_BLOCK.withNbt(CompoundBinaryTag.builder().putBoolean("broken", true).build()));
+        instance.setBlock(4, 41, 4, PLATE_BLOCK);
+        instance.index().update(instance, MapSize.NORMAL);
+
+        assertNull(instance.index().block(new BlockVec(1, 41, 2)));
+        assertNotNull(instance.index().block(new BlockVec(4, 41, 4)));
+        assertEquals(1, instance.index().tree().intersectingObjects(new BoundingBox(0, 40, 0, 16, 50, 16)).size());
     }
 
     MapInstance createInstance() {
@@ -159,6 +191,19 @@ class WorldIndexTest {
         @Override
         public Key getKey() {
             return key;
+        }
+
+        @Override
+        public Trigger createTrigger(BlockVec position, Block block) {
+            var nbt = block.nbt();
+            if (nbt != null && nbt.getBoolean("broken")) throw new IllegalStateException("broken plate data");
+            return new DataTrigger(nbt == null ? "" : nbt.getString("data"));
+        }
+    }
+
+    record DataTrigger(String data) implements Trigger {
+        @Override
+        public void onEnter(MapWorld world, Player player) {
         }
     }
 }

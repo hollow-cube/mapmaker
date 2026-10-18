@@ -1,13 +1,17 @@
 package net.hollowcube.mapmaker.runtime.parkour.block;
 
-import net.hollowcube.mapmaker.map.MapPlayer;
+import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.entity.Player;
+import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 
-public class FinishPlateBlock implements BlockHandler, PressurePlateBlock {
+public class FinishPlateBlock implements BlockHandler, PressurePlateBlock, Trigger {
     private static final Key KEY = Key.key("mapmaker:finish_plate");
 
     public static final FinishPlateBlock INSTANCE = new FinishPlateBlock();
@@ -21,9 +25,13 @@ public class FinishPlateBlock implements BlockHandler, PressurePlateBlock {
     }
 
     @Override
-    public void onEnter(Collision collision) {
-        final var player = collision.player();
-        if (!(collision.world() instanceof ParkourMapWorld world)) return;
+    public Trigger createTrigger(BlockVec position, Block block) {
+        return this;
+    }
+
+    @Override
+    public void onEnter(MapWorld mapWorld, Player player) {
+        if (!(mapWorld instanceof ParkourMapWorld world)) return;
 
         var nextState = switch (world.getPlayerState(player)) {
             case ParkourState.Playing2(var saveState) -> {

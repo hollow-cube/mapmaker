@@ -13,6 +13,7 @@ import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
+import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.map.block.ghost.GhostBlockHolder;
 import net.hollowcube.mapmaker.map.entity.OwnedEntity;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
@@ -161,7 +162,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     record CollisionKey(CollidableBlock block, BlockVec pos) {
     }
 
-    private final Map<CollisionKey, CollidableBlock.Collision> blocksTouching = new HashMap<>();
+    private final Map<CollisionKey, Trigger> blocksTouching = new HashMap<>();
     private final Set<SpatialObject> objectsTouching = new HashSet<>();
 
     public MapPlayer(@NotNull PlayerConnection playerConnection, @NotNull GameProfile gameProfile) {
@@ -858,7 +859,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
         var instance = getInstance();
         boolean inInstance = instance != null && isActive();
-        var newBlocks = new HashMap<CollisionKey, CollidableBlock.Collision>();
+        var newBlocks = new HashMap<CollisionKey, Trigger>();
         var newObjects = new ArrayList<SpatialObject>();
         for (var object : world.collisionTree().intersectingObjects(query)) {
             if (object instanceof Entity) {
@@ -869,26 +870,24 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
 
             var pos = node.position();
             if (!instance.isChunkLoaded(pos)) continue;
-            // The index applies block changes at the next safe point, so a block changed since then is skipped
-            // until it catches up.
+            // The index applies block changes at the next safe point. Until it catches up a replaced block is
+            // skipped, and a block whose data changed gets its trigger from the live block.
             var block = instance.getBlock(pos);
-            if (block.handler() != node.handler()) continue;
+            if (block.handler() != node.handler() || !node.touches(position, bb)) continue;
 
-            if (node.touches(position, bb)) newBlocks.put(
-                new CollisionKey(node.handler(), pos),
-                new CollidableBlock.Collision(world, this, pos, block)
-            );
+            var trigger = block == node.block() ? node.trigger() : node.handler().createTrigger(pos, block);
+            newBlocks.put(new CollisionKey(node.handler(), pos), trigger);
         }
 
         if (inInstance) {
             for (var entry : newBlocks.entrySet()) {
                 var removed = blocksTouching.remove(entry.getKey());
                 if (removed == null && callEvents) {
-                    entry.getKey().block.onEnter(entry.getValue());
+                    entry.getValue().onEnter(world, this);
                 }
             }
             for (var entry : blocksTouching.entrySet()) {
-                if (callEvents) entry.getKey().block.onExit(entry.getValue());
+                if (callEvents) entry.getValue().onExit(world, this);
             }
             blocksTouching.clear();
             blocksTouching.putAll(newBlocks);
