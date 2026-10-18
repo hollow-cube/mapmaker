@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.runtime;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.HTTPServer;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.HttpConfig;
@@ -9,6 +10,7 @@ import net.hollowcube.mapmaker.config.MinestomConfig;
 import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.instance.dimension.DimensionTypes;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
+import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
 import net.hollowcube.mapmaker.util.telemetry.CustomJVMPrometheus;
 import net.hollowcube.mapmaker.util.telemetry.MinestomPrometheus;
 import net.hollowcube.posthog.PostHog;
@@ -59,9 +61,18 @@ public final class MapServerInitializer {
             logger.error("Uncaught exception in thread {}", t, e);
         });
 
-        // Init tasks (minestom server, map server components, web server)
+        try {
+            init(serverFactory, loadConfig.get(), start);
+        } catch (Exception e) {
+            // Without an explicit exit the non-daemon threads started so far (db pools, nats, the
+            // job worker) keep the jvm alive after main dies. Exiting runs the shutdowner's hook.
+            logger.error("server start failed, shutting down", e);
+            System.exit(1);
+        }
+    }
 
-        var config = loadConfig.get();
+    private static void init(@NotNull Function<ConfigLoaderV3, ? extends AbstractMapServer> serverFactory, @NotNull ConfigLoaderV3 config, long start) {
+        // Init tasks (minestom server, map server components, web server)
 
         FutureUtil.markShutdown(true);
 
@@ -103,14 +114,7 @@ public final class MapServerInitializer {
         logger.info("Web server is running at {}:{}", httpConfig.host(), httpServer.port());
         // We add the web server shutdown task last so that it is the last thing to shut down.
 
-        try {
-            server.start();
-        } catch (Exception e) {
-            logger.error("server start failed, shutting down", e);
-            server.shutdowner().performShutdown();
-            httpServer.shutdown();
-            System.exit(1);
-        }
+        server.start();
 
         FutureUtil.markShutdown(false);
 
@@ -127,6 +131,15 @@ public final class MapServerInitializer {
         server.shutdowner().queue("minestom-stop", MinecraftServer::stopCleanly);
 
         server.shutdowner().queue("http-server", httpServer::shutdown);
+
+        if (ServerRuntime.getRuntime().isDevelopment()) {
+            // The ports are otherwise only released by the last hooks, and a rerun from the IDE
+            // starts as soon as gradle reports the old build cancelled, not when the old jvm exits.
+            MinecraftServer.getGlobalEventHandler().addListener(ServerBeginShutdownEvent.class, _ -> {
+                MinecraftServer.getServer().stop();
+                httpServer.shutdown();
+            });
+        }
         logger.info("Server started in {}ms", (System.nanoTime() - start) / 1_000_000);
     }
 
