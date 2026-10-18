@@ -80,6 +80,7 @@ import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.command.BugReportCommand;
 import net.hollowcube.mapmaker.map.command.CommandLogReporter;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
+import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.entity.MapEntities;
 import net.hollowcube.mapmaker.map.util.ACHook;
 import net.hollowcube.mapmaker.map.util.AnonHealthCheck;
@@ -567,10 +568,18 @@ public abstract class AbstractMapServer implements MapServer {
 
     protected @NotNull DebugCommand createDebugCommand() {
         var cmd = new DebugCommand(api(), bridge());
+
+        cmd.createPermissionlessSubcommand(
+                "poi",
+                DebugRenderersCommand::handleDebugRegions,
+                "Shows the location information about nearby pois"
+        );
+
         cmd.createPermissionedSubcommand("reload-commands", (player, _) -> {
             loadRemoteCommands();
             player.sendMessage(Component.text("Reloaded commands"));
         }, "reload remote commands");
+
         return cmd;
     }
 

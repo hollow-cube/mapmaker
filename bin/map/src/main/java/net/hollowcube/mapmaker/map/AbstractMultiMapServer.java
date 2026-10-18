@@ -552,12 +552,6 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             }
         }, "Enables progress index add mode for the current map");
 
-        cmd.createPermissionlessSubcommand(
-            "poi",
-            DebugRenderersCommand::handleDebugRegions,
-            "Shows the location information about nearby pois"
-        );
-
         cmd.createPermissionedSubcommand(
             "save",
             (player, _) -> {
