@@ -35,7 +35,9 @@ public class GhostBlockHolder implements Block.Getter, Block.Setter {
     public static @Nullable GhostBlockHolder forPlayerOptional(@NotNull Player player) {
         var existing = player.getTag(TAG);
         if (existing != null) {
-            if (existing.instance.equals(player.getInstance())) {
+            // A disconnected player has no instance by the time the world removes them and saves their state.
+            var instance = player.getInstance();
+            if (instance == null || existing.instance.equals(instance)) {
                 return existing;
             }
 
