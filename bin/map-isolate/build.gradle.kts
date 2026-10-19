@@ -54,6 +54,12 @@ application {
 }
 
 graalvmNative {
+    // The repository's zstd-jni entry is the JNI binding's. 1.5.7-22+ is a multi-release jar whose
+    // 22+ classes call libzstd over FFM, so bin/config carries the metadata instead.
+    metadataRepository {
+        excludedModules.add("com.github.luben:zstd-jni")
+    }
+
     binaries {
         named("main") {
             buildArgs(
