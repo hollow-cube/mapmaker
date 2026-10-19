@@ -36,6 +36,7 @@ import net.hollowcube.ipc.player.PlayerClient;
 import net.hollowcube.ipc.player.SocialClient;
 import net.hollowcube.ipc.replay.ReplayClient;
 import net.hollowcube.ipc.session.SessionClient;
+import net.hollowcube.ipc.util.FailureGroups;
 import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
@@ -716,7 +717,7 @@ public abstract class AbstractMapServer implements MapServer {
         if (t.getStackTrace() == null || t.getStackTrace().length == 0)
             return false;
 
-        // todo fancier exception grouping
+        FailureGroups.apply(t, message);
 
         var runtime = ServerRuntime.getRuntime();
         message.addProperty("$app_version", runtime.version());

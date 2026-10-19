@@ -31,6 +31,7 @@ import net.hollowcube.ipc.player.PlayerServer;
 import net.hollowcube.ipc.player.SocialServer;
 import net.hollowcube.ipc.replay.ReplayServer;
 import net.hollowcube.ipc.session.SessionServer;
+import net.hollowcube.ipc.util.FailureGroups;
 import net.hollowcube.ipc.util.IpcFailures;
 import net.hollowcube.posthog.PostHog;
 import org.jetbrains.annotations.Nullable;
@@ -87,7 +88,10 @@ public final class Main {
                 PostHogIds.PROJECT_KEY,
                 config -> config.endpoint(
                     secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT", POSTHOG_PROXY)
-                )
+                ).exceptionMiddleware((thrown, event) -> {
+                    FailureGroups.apply(thrown, event);
+                    return true;
+                })
             );
         } else {
             logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");

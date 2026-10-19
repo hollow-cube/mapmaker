@@ -148,17 +148,17 @@ final class ClientEmitter {
                 HttpResponse.class, StandardCharsets.class)
             .nextControlFlow("catch ($T e)", IOException.class)
             .addStatement("span.failed(e)")
-            .addStatement("throw new $T(0, url + $S + e, e)", IpcNames.IPC_EXCEPTION, " failed: ")
+            .addStatement("throw new $T(0, PATH + $S + method, url + $S + e, e)", IpcNames.IPC_EXCEPTION, "/", " failed: ")
             .nextControlFlow("catch ($T e)", InterruptedException.class)
             .addStatement("$T.currentThread().interrupt()", Thread.class)
             .addStatement("span.failed(e)")
-            .addStatement("throw new $T(0, url + $S, e)", IpcNames.IPC_EXCEPTION, " interrupted")
+            .addStatement("throw new $T(0, PATH + $S + method, url + $S, e)", IpcNames.IPC_EXCEPTION, "/", " interrupted")
             .endControlFlow()
             .addStatement("span.status(response.statusCode())")
             .endControlFlow()
             .beginControlFlow("if (response.statusCode() < 200 || response.statusCode() >= 300)")
-            .addStatement("throw new $T(response.statusCode(), url + $S + response.statusCode() + $S + response.body())",
-                IpcNames.IPC_EXCEPTION, " answered ", ": ")
+            .addStatement("throw new $T(response.statusCode(), PATH + $S + method, url + $S + response.statusCode() + $S + response.body(), null)",
+                IpcNames.IPC_EXCEPTION, "/", " answered ", ": ")
             .endControlFlow()
             .addStatement("String body = response.body()")
             .addStatement("return body == null || body.isBlank() ? $T.INSTANCE : $T.parseString(body)",
@@ -207,17 +207,17 @@ final class ClientEmitter {
                 HttpResponse.class)
             .nextControlFlow("catch ($T e)", IOException.class)
             .addStatement("span.failed(e)")
-            .addStatement("throw new $T(0, url + $S + e, e)", IpcNames.IPC_EXCEPTION, " failed: ")
+            .addStatement("throw new $T(0, PATH + $S + method, url + $S + e, e)", IpcNames.IPC_EXCEPTION, "/", " failed: ")
             .nextControlFlow("catch ($T e)", InterruptedException.class)
             .addStatement("$T.currentThread().interrupt()", Thread.class)
             .addStatement("span.failed(e)")
-            .addStatement("throw new $T(0, url + $S, e)", IpcNames.IPC_EXCEPTION, " interrupted")
+            .addStatement("throw new $T(0, PATH + $S + method, url + $S, e)", IpcNames.IPC_EXCEPTION, "/", " interrupted")
             .endControlFlow()
             .addStatement("span.status(response.statusCode())")
             .endControlFlow()
             .beginControlFlow("if (response.statusCode() < 200 || response.statusCode() >= 300)")
-            .addStatement("throw new $T(response.statusCode(), url + $S + response.statusCode() + $S + text(response))",
-                IpcNames.IPC_EXCEPTION, " answered ", ": ")
+            .addStatement("throw new $T(response.statusCode(), PATH + $S + method, url + $S + response.statusCode() + $S + text(response), null)",
+                IpcNames.IPC_EXCEPTION, "/", " answered ", ": ")
             .endControlFlow()
             .addStatement("return response")
             .build();

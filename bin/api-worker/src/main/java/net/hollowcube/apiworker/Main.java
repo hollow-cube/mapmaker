@@ -17,6 +17,7 @@ import net.hollowcube.apiworker.jobs.SweepReplayObjectsRunner;
 import net.hollowcube.apiworker.jobs.SweepReplaySourcesRunner;
 import net.hollowcube.apiworker.jobs.TranscodeReplayRunner;
 import net.hollowcube.ipc.replay.ReplayClient;
+import net.hollowcube.ipc.util.FailureGroups;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.maps.MapClient;
 import net.hollowcube.posthog.PostHog;
@@ -68,7 +69,10 @@ public final class Main {
                 PostHogIds.PROJECT_KEY,
                 config -> config.endpoint(
                     secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT", POSTHOG_PROXY)
-                )
+                ).exceptionMiddleware((thrown, event) -> {
+                    FailureGroups.apply(thrown, event);
+                    return true;
+                })
             );
         } else {
             logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");
