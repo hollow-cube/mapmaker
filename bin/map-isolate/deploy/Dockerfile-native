@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/cc-debian12
+FROM gcr.io/distroless/cc-debian13
 
 USER 65532:65532
 
