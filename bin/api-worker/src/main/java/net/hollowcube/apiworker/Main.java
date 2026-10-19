@@ -67,12 +67,12 @@ public final class Main {
         if (secrets.present() || System.getenv("POSTHOG_ENDPOINT") != null) {
             PostHog.init(
                 PostHogIds.PROJECT_KEY,
-                config -> config.endpoint(
-                    secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT", POSTHOG_PROXY)
-                ).exceptionMiddleware((thrown, event) -> {
-                    FailureGroups.apply(thrown, event);
-                    return true;
-                })
+                config -> config
+                    .endpoint(secrets.get("posthog.endpoint", "POSTHOG_ENDPOINT", POSTHOG_PROXY))
+                    .exceptionMiddleware((thrown, event) -> {
+                        FailureGroups.apply(thrown, event);
+                        return true;
+                    })
             );
         } else {
             logger.info("no vault secret and no POSTHOG_ENDPOINT, so posthog events go nowhere");
