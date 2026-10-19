@@ -264,7 +264,12 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         // See note on pendingTeleports
         pendingTeleports.incrementAndGet();
         return super.teleport(position, velocity, chunks, flags, shouldConfirm)
-            .thenRun(pendingTeleports::decrementAndGet)
+            .thenRun(() -> {
+                pendingTeleports.decrementAndGet();
+                // Fluid state is otherwise only refreshed by the next tick or move, so a reset that teleports the
+                // player out of water or lava would see them still in it on the next tick and reset them again.
+                updateBlockTouchState();
+            })
             .exceptionally(ex -> {
                 pendingTeleports.decrementAndGet();
                 throw new RuntimeException("Failed to teleport player " + getUsername(), ex);

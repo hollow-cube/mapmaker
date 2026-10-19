@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
     private static final BlockVec PLATE_POS = new BlockVec(5, 40, 5);
@@ -137,6 +139,18 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
 
         moveTo(player, ON_PLATE);
         assertEquals(List.of(marker), entered);
+    }
+
+    @Test
+    void teleportOutOfWaterClearsInWater() {
+        world.instance().setBlock(PLATE_POS, Block.WATER);
+        world.instance().setBlock(PLATE_POS.add(0, 1, 0), Block.WATER);
+        var player = (MapPlayer) spawnTestPlayer(ON_PLATE);
+        env.tick();
+        assertTrue(player.isInWater());
+
+        player.teleport(OFF_PLATE).join();
+        assertFalse(player.isInWater());
     }
 
     private record TeleportPlate(Pos destination) implements CollidableBlock {
