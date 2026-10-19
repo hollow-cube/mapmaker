@@ -13,6 +13,7 @@ public record JoinMapRequest(
         @Nullable Isolate isolate
 ) {
 
+    @RuntimeGson
     public record Isolate(
             @Nullable String override
     ) {
