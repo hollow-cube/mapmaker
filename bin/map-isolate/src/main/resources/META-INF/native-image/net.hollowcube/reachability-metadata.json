@@ -37,6 +37,9 @@
       "glob": "META-INF/services/net.hollowcube.mapmaker.map.feature.FeatureProvider"
     },
     {
+      "glob": "META-INF/services/net.hollowcube.mapmaker.map.util.ACHook"
+    },
+    {
       "glob": "META-INF/services/net.kyori.adventure.text.logger.slf4j.ComponentLoggerProvider"
     },
     {

@@ -13,9 +13,6 @@
   },
   {
     "name": "ch.qos.logback.classic.PatternLayout",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.LayoutBase"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -50,9 +47,6 @@
   },
   {
     "name": "ch.qos.logback.classic.log4j.XMLLayout",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.LayoutBase"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -411,9 +405,6 @@
   },
   {
     "name": "ch.qos.logback.core.ConsoleAppender",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -426,9 +417,6 @@
   },
   {
     "name": "ch.qos.logback.core.FileAppender",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -463,9 +451,6 @@
   },
   {
     "name": "ch.qos.logback.core.Layout",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.LayoutBase"
-    },
     "methods": [
       {
         "name": "valueOf",
@@ -497,9 +482,6 @@
   },
   {
     "name": "ch.qos.logback.core.encoder.LayoutWrappingEncoder",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.joran.util.PropertySetter"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -772,9 +754,6 @@
   },
   {
     "name": "ch.qos.logback.core.rolling.RollingFileAppender",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -803,9 +782,6 @@
   },
   {
     "name": "ch.qos.logback.core.rolling.RollingPolicy",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "methods": [
       {
         "name": "valueOf",
@@ -837,9 +813,6 @@
   },
   {
     "name": "ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -856,9 +829,6 @@
   },
   {
     "name": "ch.qos.logback.core.rolling.SizeBasedTriggeringPolicy",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "queryAllPublicMethods": true,
     "methods": [
       {
@@ -901,9 +871,6 @@
   },
   {
     "name": "ch.qos.logback.core.rolling.TriggeringPolicy",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "methods": [
       {
         "name": "valueOf",
@@ -939,9 +906,6 @@
   },
   {
     "name": "ch.qos.logback.core.spi.ContextAware",
-    "condition": {
-      "typeReachable": "ch.qos.logback.core.util.OptionHelper"
-    },
     "methods": [
       {
         "name": "valueOf",

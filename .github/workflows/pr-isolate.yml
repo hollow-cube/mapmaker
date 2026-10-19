@@ -76,5 +76,15 @@ jobs:
           context: .
           file: "bin/map-isolate/deploy/Dockerfile-native"
           platforms: linux/amd64
-          push: true
+          load: true
           tags: mworzala/mapmaker-map-isolate:preview-${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Smoke test map-isolate image
+        run: |
+          set -o pipefail
+          docker run --rm mworzala/mapmaker-map-isolate:preview-${{ github.event.pull_request.head.sha || github.sha }} ./map-isolate smoke 2>&1 | tee smoke.log
+          if grep -qE 'Missing[A-Za-z]*RegistrationError' smoke.log; then
+            echo "::error::map-isolate native image is missing reachability metadata, see the smoke log"
+            exit 1
+          fi
+      - name: Push docker image
+        run: docker push mworzala/mapmaker-map-isolate:preview-${{ github.event.pull_request.head.sha || github.sha }}

@@ -18,6 +18,8 @@ dependencies {
     implementation(project(":modules:map-runtime"))
 
     implementation(libs.minestom)
+    implementation(libs.polar)
+    implementation(libs.luau.core)
     implementation(libs.bundles.adventure)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
@@ -58,6 +60,13 @@ graalvmNative {
     // 22+ classes call libzstd over FFM, so bin/config carries the metadata instead.
     metadataRepository {
         excludedModules.add("com.github.luben:zstd-jni")
+        // These entries are for older versions and register (conditionally) methods that no longer exist,
+        // which --exact-reachability-metadata refuses to parse. bin/config carries copies without those conditions.
+        excludedModules.addAll(
+            "ch.qos.logback:logback-classic",
+            "io.opentelemetry:opentelemetry-sdk-metrics",
+            "io.opentelemetry:opentelemetry-sdk-trace",
+        )
     }
 
     binaries {
@@ -78,6 +87,12 @@ graalvmNative {
                     "--enable-url-protocols=http,https",
 
                     "--initialize-at-build-time=net.hollowcube.mapmaker.isolate.IsolateMain",
+
+                    // Without exact metadata an unregistered lookup silently returns nothing (eg gson
+                    // writing a record as {}). Warn logs each miss as a Missing*RegistrationError instead of
+                    // throwing, which is what the CI smoke run fails on and what to search prod logs for.
+                    "--exact-reachability-metadata",
+                    "-R:MissingRegistrationReportingMode=Warn",
 
                     "--report-unsupported-elements-at-runtime",
                     "--initialize-at-build-time=it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap",

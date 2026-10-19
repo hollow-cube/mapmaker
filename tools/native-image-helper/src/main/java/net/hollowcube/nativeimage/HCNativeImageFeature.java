@@ -97,6 +97,7 @@ public class HCNativeImageFeature implements Feature {
             RuntimeReflection.register(ctor);
         for (var comp : recordClass.getRecordComponents())
             RuntimeReflection.register(comp.getAccessor());
+        RuntimeReflection.registerAllRecordComponents(recordClass);
     }
 
     private void processRuntimeGsonClass(BeforeAnalysisAccess access, ClassInfo info) {
@@ -110,6 +111,12 @@ public class HCNativeImageFeature implements Feature {
             RuntimeReflection.register(field);
         for (var field : gsonClass.getDeclaredMethods())
             RuntimeReflection.register(field);
+        // gson enumerates with getDeclaredFields() and friends, which exact reachability metadata only
+        // answers for classes registered for the bulk query, not just for each member.
+        RuntimeReflection.registerAllDeclaredConstructors(gsonClass);
+        RuntimeReflection.registerAllDeclaredFields(gsonClass);
+        RuntimeReflection.registerAllDeclaredMethods(gsonClass);
+        if (gsonClass.isRecord()) RuntimeReflection.registerAllRecordComponents(gsonClass);
     }
 
     private void processViewClass(@NotNull BeforeAnalysisAccess access, @NotNull CanvasClasses classes, @NotNull ClassInfo ci) {

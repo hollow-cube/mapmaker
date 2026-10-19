@@ -26,6 +26,9 @@ public class IsolateMain {
             System.out.println("Exiting because of noop argument.");
             System.exit(0);
         }
+        if (args.length > 0 && "smoke".equals(args[0])) {
+            System.exit(IsolateSmoke.run());
+        }
 
         IsolateMain.args = args;
         MapServerInitializer.run(MapIsolateServer::new, args);

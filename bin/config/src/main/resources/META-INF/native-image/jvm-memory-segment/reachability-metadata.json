@@ -1,0 +1,60 @@
+{
+  "reflection": [
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsBooleans",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsBytes",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsChars",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsCharsAligned",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsDoubles",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsDoublesAligned",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsFloats",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsFloatsAligned",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsInts",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsIntsAligned",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsLongs",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsLongsAligned",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsShorts",
+      "allDeclaredMethods": true
+    },
+    {
+      "type": "java.lang.invoke.VarHandleSegmentAsShortsAligned",
+      "allDeclaredMethods": true
+    }
+  ]
+}
