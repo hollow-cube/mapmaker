@@ -183,7 +183,11 @@ public class ReadWorldAccess implements PolarWorldAccess {
             logger.warn("Unknown entity type {}", tag.getString("id"));
             return null;
         }
-        UUID uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UUIDUtils.fromNbt(uuidTag) : UUID.randomUUID();
+        // MapEntity#writeData has written "uuid" since 2025-01; worlds from before that use vanilla's "UUID".
+        UUID uuid;
+        if (tag.get("uuid") instanceof IntArrayBinaryTag uuidTag) uuid = UUIDUtils.fromNbt(uuidTag);
+        else if (tag.get("UUID") instanceof IntArrayBinaryTag uuidTag) uuid = UUIDUtils.fromNbt(uuidTag);
+        else uuid = UUID.randomUUID();
 
         var entity = MapEntityType.create(entityType, uuid);
         if (entity instanceof MapEntity<?> mapEntity) mapEntity.readData(tag);
