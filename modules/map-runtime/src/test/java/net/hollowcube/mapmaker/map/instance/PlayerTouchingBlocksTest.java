@@ -4,6 +4,8 @@ import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.CollidableBlock;
 import net.hollowcube.mapmaker.map.block.Trigger;
+import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
+import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.test.AbstractMapWorldTest;
 import net.hollowcube.mapmaker.test.TestMapWorld;
 import net.kyori.adventure.key.Key;
@@ -11,6 +13,8 @@ import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.collision.BoundingBox;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.testing.Env;
@@ -114,6 +118,42 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
         moveTo(player, ON_PLATE);
         moveTo(player, OFF_PLATE);
         assertEquals(List.of("enter " + PLATE_POS + " new", "exit " + PLATE_POS + " new"), plate.events);
+    }
+
+    @Test
+    void plateTeleportEntersMarkerInSameUpdate() {
+        // A plate that teleports into a marker region enters that marker in the same update; maps depend on it.
+        var markerPos = new Pos(10.5, 40, 10.5);
+        var marker = new MarkerEntity();
+        marker.setRegion(new Vec(-1, 0, -1), new Vec(1, 1, 1));
+        marker.setInstance(world.instance(), markerPos).join();
+        world.queueCollisionTreeRebuild();
+        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(new TeleportPlate(markerPos)));
+        env.tick();
+
+        var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
+        var entered = new ArrayList<Entity>();
+        world.eventNode().addListener(Map2PlayerEnterEntityEvent.class, event -> entered.add(event.enteredEntity()));
+
+        moveTo(player, ON_PLATE);
+        assertEquals(List.of(marker), entered);
+    }
+
+    private record TeleportPlate(Pos destination) implements CollidableBlock {
+        @Override
+        public Key getKey() {
+            return Key.key("test:teleport_plate");
+        }
+
+        @Override
+        public BoundingBox collisionBox() {
+            return new BoundingBox(14.0 / 16.0, 4.0 / 16.0, 14.0 / 16.0);
+        }
+
+        @Override
+        public Trigger createTrigger(BlockVec position, Block block) {
+            return (_, player) -> player.teleport(destination).join();
+        }
     }
 
     private void moveTo(MapPlayer player, Pos pos) {

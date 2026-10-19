@@ -848,25 +848,25 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
     public void updateTouchingState(MapWorld world, boolean callEvents) {
         var position = getPosition();
         var bb = getBoundingBox();
-        var query = new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
-            (float) (position.x() + bb.minX()),
-            (float) (position.y() + bb.minY()),
-            (float) (position.z() + bb.minZ()),
-            (float) (position.x() + bb.maxX()),
-            (float) (position.y() + bb.maxY()),
-            (float) (position.z() + bb.maxZ())
-        );
+        var touching = world.collisionTree().intersectingObjects(touchQuery(position, bb));
 
         var instance = getInstance();
-        boolean inInstance = instance != null && isActive();
+        if (instance != null && isActive()) updateTouchingBlocks(world, instance, touching, position, bb, callEvents);
+
+        // Before blocks and entities shared an index, markers were looked up after the block triggers had run, at
+        // wherever those triggers left the player. A plate that teleports into a marker therefore entered it in the
+        // same update, and published maps depend on that, so the lookup is repeated when a block trigger moved or
+        // resized the player.
+        if (!getPosition().samePoint(position) || !getBoundingBox().equals(bb))
+            touching = world.collisionTree().intersectingObjects(touchQuery(getPosition(), getBoundingBox()));
+        updateTouchingEntities(world, touching, callEvents);
+    }
+
+    private void updateTouchingBlocks(MapWorld world, Instance instance, List<SpatialObject> touching, Pos position,
+                                      BoundingBox bb, boolean callEvents) {
         var newBlocks = new HashMap<CollisionKey, Trigger>();
-        var newObjects = new ArrayList<SpatialObject>();
-        for (var object : world.collisionTree().intersectingObjects(query)) {
-            if (object instanceof Entity) {
-                newObjects.add(object);
-                continue;
-            }
-            if (!inInstance || !(object instanceof WorldIndex.IndexedBlock node)) continue;
+        for (var object : touching) {
+            if (!(object instanceof WorldIndex.IndexedBlock node)) continue;
 
             var pos = node.position();
             if (!instance.isChunkLoaded(pos)) continue;
@@ -879,18 +879,23 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             newBlocks.put(new CollisionKey(node.handler(), pos), trigger);
         }
 
-        if (inInstance) {
-            for (var entry : newBlocks.entrySet()) {
-                var removed = blocksTouching.remove(entry.getKey());
-                if (removed == null && callEvents) {
-                    entry.getValue().onEnter(world, this);
-                }
+        for (var entry : newBlocks.entrySet()) {
+            var removed = blocksTouching.remove(entry.getKey());
+            if (removed == null && callEvents) {
+                entry.getValue().onEnter(world, this);
             }
-            for (var entry : blocksTouching.entrySet()) {
-                if (callEvents) entry.getValue().onExit(world, this);
-            }
-            blocksTouching.clear();
-            blocksTouching.putAll(newBlocks);
+        }
+        for (var entry : blocksTouching.entrySet()) {
+            if (callEvents) entry.getValue().onExit(world, this);
+        }
+        blocksTouching.clear();
+        blocksTouching.putAll(newBlocks);
+    }
+
+    private void updateTouchingEntities(MapWorld world, List<SpatialObject> touching, boolean callEvents) {
+        var newObjects = new ArrayList<SpatialObject>();
+        for (var object : touching) {
+            if (object instanceof Entity) newObjects.add(object);
         }
 
         for (var newObject : newObjects) {
@@ -909,6 +914,17 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         }
         objectsTouching.clear();
         objectsTouching.addAll(newObjects);
+    }
+
+    private static net.hollowcube.mapmaker.map.util.spatial.BoundingBox touchQuery(Pos position, BoundingBox bb) {
+        return new net.hollowcube.mapmaker.map.util.spatial.BoundingBox(
+            (float) (position.x() + bb.minX()),
+            (float) (position.y() + bb.minY()),
+            (float) (position.z() + bb.minZ()),
+            (float) (position.x() + bb.maxX()),
+            (float) (position.y() + bb.maxY()),
+            (float) (position.z() + bb.maxZ())
+        );
     }
 
     @Override
