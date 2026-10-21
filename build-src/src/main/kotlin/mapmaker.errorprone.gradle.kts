@@ -13,7 +13,7 @@ tasks.withType<JavaCompile>().configureEach {
     options.compilerArgs.add("-Werror")
     // exports and missing-explicit-ctor produce mostly boilerplate,
     // automatic module requires cannot be suppressed in source (fastutil and friends lack module-info)
-    options.compilerArgs.add("-Xlint:all,-requires-automatic,-requires-transitive-automatic,-exports,-missing-explicit-ctor")
+    options.compilerArgs.add("-Xlint:all,-processing,-requires-automatic,-requires-transitive-automatic,-exports,-missing-explicit-ctor")
     options.errorprone {
         excludedPaths = ".*/build/generated/.*"
         option("UnnamedVariable:OnlyRenameVariablesNamedUnused", "false") // otherwise only checks "unnamed"

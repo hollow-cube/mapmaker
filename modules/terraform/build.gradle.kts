@@ -7,4 +7,6 @@ plugins {
 dependencies {
     implementation(libs.minestom)
     implementation(libs.fastutil)
+
+    testImplementation(libs.jol.core)
 }
