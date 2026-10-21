@@ -1,5 +1,7 @@
 plugins {
+    alias(libs.plugins.javafmt)
     id("mapmaker.java-library")
+    id("mapmaker.errorprone")
 }
 
 dependencies {

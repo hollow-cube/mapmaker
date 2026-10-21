@@ -30,6 +30,7 @@ javapoet = "0.20.0"
 luau = "1.1.0"
 nats = "2.26.4"
 compile-testing = "0.24.0"
+errorprone = "2.50.0"
 pglite4j = "0.0.3"
 postgresql = "42.7.7"
 hikari = "7.1.0"
@@ -99,6 +100,7 @@ junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.r
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 compile-testing = { group = "com.google.testing.compile", name = "compile-testing", version.ref = "compile-testing" }
+errorprone-core = { group = "com.google.errorprone", name = "error_prone_core", version.ref = "errorprone" }
 
 [bundles]
 adventure = ["adventure-api", "adventure-key", "adventure-text-minimessage", "adventure-text-serializer-plain", "adventure-nbt"]
@@ -107,5 +109,6 @@ otel = ["otel-api", "otel-context", "otel-sdk", "otel-sdk-common", "otel-sdk-tra
 
 [plugins]
 javafmt = { id = "dev.javafmt.gradle", version = "0.3.1" }
+errorprone = { id = "net.ltgt.errorprone", version = "5.1.1" }
 graalvm-native = { id = "org.graalvm.buildtools.native", version = "1.1.14" }
 blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
