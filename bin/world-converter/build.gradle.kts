@@ -10,7 +10,7 @@ dependencies {
 
     implementation(project(":modules:datafix"))
     implementation(project(":modules:map-core"))
-    implementation(project(":modules:terraform"))
+    implementation(project(":modules:terraform-legacy"))
 }
 
 application {

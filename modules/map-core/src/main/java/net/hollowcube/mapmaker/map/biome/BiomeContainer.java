@@ -4,7 +4,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.common.util.dfu.DFU;
-import net.hollowcube.terraform.instance.TerraformInstanceBiomes;
+import net.hollowcube.terraform.legacy.instance.TerraformInstanceBiomes;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;

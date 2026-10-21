@@ -5,8 +5,8 @@ import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.schem.Schematic;
 import net.hollowcube.schem.reader.SchematicReader;
 import net.hollowcube.schem.writer.SchematicWriter;
-import net.hollowcube.terraform.schem.SchematicHeader;
-import net.hollowcube.terraform.storage.TerraformStorage;
+import net.hollowcube.terraform.legacy.schem.SchematicHeader;
+import net.hollowcube.terraform.legacy.storage.TerraformStorage;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;

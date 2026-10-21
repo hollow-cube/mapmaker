@@ -1,0 +1,35 @@
+package net.hollowcube.terraform.legacy.command.terraform;
+
+import net.hollowcube.command.CommandContext;
+import net.hollowcube.command.dsl.CommandDsl;
+import net.hollowcube.mapmaker.PlayerSettings;
+import net.hollowcube.terraform.legacy.session.PlayerSession;
+import net.kyori.adventure.text.Component;
+import net.minestom.server.entity.Player;
+import org.jetbrains.annotations.NotNull;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
+
+public class TerraformToggleCuiCommand extends CommandDsl {
+    public TerraformToggleCuiCommand() {
+        super("cui");
+        description = "Toggles the default cui implementation.";
+
+        addSyntax(playerOnly(this::execute));
+    }
+
+    private void execute(@NotNull Player player, @NotNull CommandContext context) {
+        var playerData = localPlayer(player);
+        boolean setting = playerData.getSetting(PlayerSettings.ENABLE_WE_CUI);
+        playerData.setSetting(PlayerSettings.ENABLE_WE_CUI, !setting);
+        //todo save
+
+        if (!setting) {
+            player.sendMessage(Component.translatable("terraform.command.tf.cui.on"));
+        } else {
+            player.sendMessage(Component.translatable("terraform.command.tf.cui.off"));
+        }
+
+        PlayerSession.forPlayer(player).updateRenderer();
+    }
+}

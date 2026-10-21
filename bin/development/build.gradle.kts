@@ -16,7 +16,7 @@ dependencies {
     implementation(project(":modules:map-editor"))
 
     implementation(project(":modules:datafix"))
-    implementation(project(":modules:terraform"))
+    implementation(project(":modules:terraform-legacy"))
     implementation(project(":modules:compat"))
 
     implementation(libs.minestom)

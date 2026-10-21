@@ -1,0 +1,36 @@
+package net.hollowcube.terraform.legacy;
+
+import net.hollowcube.terraform.legacy.selection.region.RegionSelector;
+import net.hollowcube.terraform.legacy.storage.TerraformStorage;
+import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+
+import java.util.Map;
+
+final class EmptyTerraformRegistry implements TerraformRegistry {
+    public static final EmptyTerraformRegistry INSTANCE = new EmptyTerraformRegistry();
+
+    private final Map<String, Block> legacyBlockStates = TerraformRegistryImpl.buildLegacyBlockMap(Block::fromStateId);
+
+    @Override
+    public RegionSelector.@UnknownNullability Factory regionType(@NotNull String id) {
+        return null;
+    }
+
+    @Override
+    public @Nullable TerraformStorage storage(@NotNull String name) {
+        return null;
+    }
+
+    @Override
+    public @UnknownNullability Block blockState(int stateId) {
+        return Block.fromStateId(stateId);
+    }
+
+    @Override
+    public @UnknownNullability Block legacyBlockState(int id, int data) {
+        return legacyBlockStates.get(String.format("%d:%d", id, data));
+    }
+}

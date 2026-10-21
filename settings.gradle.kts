@@ -39,6 +39,7 @@ include(
     "modules:nbs",
     "modules:replay",
     "modules:terraform",
+    "modules:terraform-legacy",
 
     "modules:test",
 )

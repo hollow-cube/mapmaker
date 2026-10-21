@@ -11,7 +11,7 @@ dependencies {
     implementation(project(":modules:datafix"))
 
     // TODO: This is a gross dependency but currently necessary for some terraform related events
-    implementation(project(":modules:terraform"))
+    implementation(project(":modules:terraform-legacy"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)

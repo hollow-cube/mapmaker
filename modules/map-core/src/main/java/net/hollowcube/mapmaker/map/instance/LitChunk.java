@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.instance;
 
-import net.hollowcube.terraform.instance.TerraformBiomeChunk;
+import net.hollowcube.terraform.legacy.instance.TerraformBiomeChunk;
 import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.LightingChunk;

@@ -14,7 +14,7 @@ dependencies {
 
     implementation(project(":modules:core"))
     implementation(project(":modules:datafix"))
-    implementation(project(":modules:terraform"))
+    implementation(project(":modules:terraform-legacy"))
     implementation(project(":modules:map-runtime"))
 
     implementation(libs.minestom)

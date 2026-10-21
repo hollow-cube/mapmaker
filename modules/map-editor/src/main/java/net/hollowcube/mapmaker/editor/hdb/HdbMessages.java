@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.editor.hdb;
 
-import net.hollowcube.terraform.util.MessageSet;
+import net.hollowcube.terraform.legacy.util.MessageSet;
 import org.jetbrains.annotations.NotNull;
 
 public enum HdbMessages implements MessageSet {

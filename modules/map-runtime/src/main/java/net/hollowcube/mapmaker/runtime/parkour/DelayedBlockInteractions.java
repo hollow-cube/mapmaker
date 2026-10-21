@@ -7,7 +7,7 @@ import net.hollowcube.common.util.PlayerUtil;
 import net.hollowcube.mapmaker.map.MapPlayer;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.BlockTags;
-import net.hollowcube.terraform.util.math.DirectionUtil;
+import net.hollowcube.terraform.legacy.util.math.DirectionUtil;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;

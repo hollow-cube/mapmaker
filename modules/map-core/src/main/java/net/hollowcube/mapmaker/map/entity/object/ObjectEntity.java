@@ -8,7 +8,7 @@ import net.hollowcube.compat.axiom.events.AxiomMarkerDataRequestEvent;
 import net.hollowcube.compat.axiom.packets.clientbound.AxiomClientboundMarkerDataPacket;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.MapEntity;
-import net.hollowcube.terraform.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
+import net.hollowcube.terraform.legacy.compat.axiom.event.TerraformAxiomUpdateCustomEntityDataEvent;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.MinecraftServer;

@@ -6,7 +6,7 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
-import net.hollowcube.terraform.entity.TerraformEntity;
+import net.hollowcube.terraform.legacy.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;

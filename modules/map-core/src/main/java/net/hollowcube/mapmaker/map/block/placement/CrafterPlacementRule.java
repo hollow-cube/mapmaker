@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.placement;
 
-import net.hollowcube.terraform.util.math.DirectionUtil;
+import net.hollowcube.terraform.legacy.util.math.DirectionUtil;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.rule.BlockPlacementRule;
 import org.jetbrains.annotations.NotNull;

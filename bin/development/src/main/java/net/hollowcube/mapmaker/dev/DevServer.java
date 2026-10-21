@@ -53,7 +53,7 @@ import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.posthog.PostHog;
-import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.legacy.Terraform;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;

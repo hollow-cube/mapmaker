@@ -1,0 +1,22 @@
+package net.hollowcube.terraform.legacy;
+
+import net.hollowcube.terraform.legacy.selection.region.RegionSelector;
+import net.hollowcube.terraform.legacy.storage.TerraformStorage;
+import net.minestom.server.instance.block.Block;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
+import org.jetbrains.annotations.UnknownNullability;
+
+public sealed interface TerraformRegistry permits EmptyTerraformRegistry, TerraformRegistryImpl {
+    @TestOnly
+    @NotNull TerraformRegistry EMPTY = EmptyTerraformRegistry.INSTANCE;
+
+    RegionSelector.@UnknownNullability Factory regionType(@NotNull String id);
+
+    @Nullable TerraformStorage storage(@NotNull String name);
+
+    @UnknownNullability Block blockState(int stateId);
+
+    @UnknownNullability Block legacyBlockState(int id, int data);
+}

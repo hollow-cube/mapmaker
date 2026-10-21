@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.block.handler;
 
 import net.hollowcube.common.util.ExtraTags;
 import net.hollowcube.mapmaker.map.item.ItemTags;
-import net.hollowcube.terraform.util.math.DirectionUtil;
+import net.hollowcube.terraform.legacy.util.math.DirectionUtil;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.instance.block.BlockHandler;

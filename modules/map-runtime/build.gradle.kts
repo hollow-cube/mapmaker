@@ -11,7 +11,7 @@ dependencies {
     api(project(":modules:anticheat"))
     implementation(libs.gson)
     implementation(libs.posthog)
-    api(project(":modules:terraform")) //TODO: this exists for entity implementations, but it shouldn't.
+    api(project(":modules:terraform-legacy")) //TODO: this exists for entity implementations, but it shouldn't.
     implementation(project(":modules:datafix"))
     implementation(project(":modules:compat"))
     implementation(project(":modules:replay"))

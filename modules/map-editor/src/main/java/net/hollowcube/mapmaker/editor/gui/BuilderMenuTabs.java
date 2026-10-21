@@ -10,7 +10,7 @@ import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
 import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
-import net.hollowcube.terraform.session.LocalSession;
+import net.hollowcube.terraform.legacy.session.LocalSession;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.Player;
 import net.minestom.server.item.ItemStack;

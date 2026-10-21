@@ -20,7 +20,7 @@ import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
-import net.hollowcube.terraform.Terraform;
+import net.hollowcube.terraform.legacy.Terraform;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;

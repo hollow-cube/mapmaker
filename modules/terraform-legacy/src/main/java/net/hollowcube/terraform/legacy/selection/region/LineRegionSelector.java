@@ -1,0 +1,94 @@
+package net.hollowcube.terraform.legacy.selection.region;
+
+import net.hollowcube.common.util.NetworkBufferTypes;
+import net.hollowcube.terraform.legacy.cui.ClientInterface;
+import net.hollowcube.terraform.legacy.cui.ClientRenderer;
+import net.hollowcube.terraform.legacy.util.math.CoordinateUtil;
+import net.minestom.server.coordinate.Point;
+import net.minestom.server.network.NetworkBuffer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+@SuppressWarnings("UnstableApiUsage")
+public class LineRegionSelector implements RegionSelector {
+    private final ClientInterface cui;
+    private final String selectionId;
+
+    private Point pos1 = null;
+    private Point pos2 = null;
+
+    public LineRegionSelector(@NotNull ClientInterface cui, @NotNull String selectionId) {
+        this.cui = cui;
+        this.selectionId = selectionId;
+    }
+
+    @Override
+    public boolean selectPrimary(@NotNull Point point, boolean explain) {
+        if (pos1 != null && point.sameBlock(pos1)) return false;
+        pos1 = CoordinateUtil.floor(point);
+
+        updateRender();
+        if (explain) {
+            cui.sendMessage(
+                    "terraform.line.explain.primary",
+                    point.blockX(), point.blockY(), point.blockZ()
+            );
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean selectSecondary(@NotNull Point point, boolean explain) {
+        if (pos2 != null && point.sameBlock(pos2)) return false;
+        pos2 = CoordinateUtil.floor(point);
+
+        updateRender();
+        if (explain) {
+            cui.sendMessage(
+                    "terraform.line.explain.secondary",
+                    point.blockX(), point.blockY(), point.blockZ()
+            );
+        }
+
+        return true;
+    }
+
+    @Override
+    public void clear() {
+        pos1 = null;
+        pos2 = null;
+        updateRender();
+    }
+
+    @Override
+    public @Nullable Region region() {
+        if (pos1 == null || pos2 == null) return null;
+        return new LineRegion(pos1, pos2);
+    }
+
+    private void updateRender() {
+        var renderer = cui.renderer();
+
+        renderer.begin(selectionId);
+        if (pos1 != null) renderer.point(pos1.add(0.5), 0.55);
+        if (pos2 != null) renderer.point(pos2.add(0.5), 0.55);
+        if (pos1 != null && pos2 != null) {
+            renderer.line(pos1.add(0.5), pos2.add(0.5), ClientRenderer.RenderType.PRIMARY);
+        }
+        renderer.end(selectionId);
+    }
+
+    @Override
+    public void write(@NotNull NetworkBuffer buffer) {
+        buffer.write(NetworkBufferTypes.OPT_VECTOR3, pos1);
+        buffer.write(NetworkBufferTypes.OPT_VECTOR3, pos2);
+    }
+
+    @Override
+    public void read(@NotNull NetworkBuffer buffer) {
+        pos1 = buffer.read(NetworkBufferTypes.OPT_VECTOR3);
+        pos2 = buffer.read(NetworkBufferTypes.OPT_VECTOR3);
+    }
+
+}

@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.editor.terraform;
 
-import net.hollowcube.terraform.storage.TerraformInstanceStorage;
+import net.hollowcube.terraform.legacy.storage.TerraformInstanceStorage;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.tag.Tag;

@@ -101,7 +101,7 @@ public final class WorldIndex {
         treeDirty = false;
 
         List<SpatialObject> objects = new ArrayList<>(blocks.values());
-        for (var entity : instance.getEntities()) {
+        for (var entity : instance.getEntities().stream().sorted(java.util.Comparator.<net.minestom.server.entity.Entity>comparingDouble(e -> e.getPosition().x()).thenComparingDouble(e -> e.getPosition().y()).thenComparingDouble(e -> e.getPosition().z()).thenComparing(net.minestom.server.entity.Entity::getUuid)).toList()) {
             if (entity.isRemoved() || !(entity instanceof SpatialObject spatial)) continue;
             if (spatial.boundingBox().size().isZero()) continue;
             objects.add(spatial);

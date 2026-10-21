@@ -1,0 +1,144 @@
+package net.hollowcube.terraform.legacy.instance;
+
+import net.hollowcube.terraform.legacy.util.ProtocolUtil;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.instance.Chunk;
+import net.minestom.server.instance.LegacyChunkHack;
+import net.minestom.server.instance.Section;
+import net.minestom.server.instance.palette.Palette;
+import net.minestom.server.network.packet.server.play.ChunkBiomesPacket;
+import net.minestom.server.registry.RegistryKey;
+import net.minestom.server.world.biome.Biome;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.*;
+
+import static net.minestom.server.coordinate.CoordConversion.globalToSectionRelative;
+
+public final class TerraformBiomeChunk {
+
+    private TerraformBiomeChunk() {
+    }
+
+    public static @Nullable RegistryKey<Biome> getBiome(
+            @NotNull Chunk chunk,
+            int x, int y, int z
+    ) {
+        var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
+        if (biomes != null) {
+            var section = chunk.getSectionAt(y);
+            var palette = section.biomePalette();
+            var index = palette.get(globalToSectionRelative(x) / 4,
+                    globalToSectionRelative(y) / 4,
+                    globalToSectionRelative(z) / 4);
+            return Objects.requireNonNull(biomes.getKey(index), "no such biome for index: " + index);
+        }
+        return null;
+    }
+
+    public static boolean setBiome(
+            @NotNull Chunk chunk,
+            int x, int y, int z,
+            @NotNull RegistryKey<Biome> biome
+    ) {
+        assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
+        LegacyChunkHack.invalidateChunk(chunk);
+
+        var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
+        if (biomes != null) {
+            var section = chunk.getSectionAt(y);
+            var palette = section.biomePalette();
+            var index = biomes.getId(biome);
+
+            if (index != -1) {
+                palette.set(
+                        globalToSectionRelative(x) / 4,
+                        globalToSectionRelative(y) / 4,
+                        globalToSectionRelative(z) / 4,
+                        index
+                );
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void fillBiome(
+            @NotNull Chunk chunk,
+            @NotNull RegistryKey<Biome> biome
+    ) {
+        assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
+        LegacyChunkHack.invalidateChunk(chunk);
+
+        var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
+        int id = biomes != null ? biomes.getId(biome) : -1;
+        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.key());
+
+        for (Section section : chunk.getSections()) {
+            section.biomePalette().fill(id);
+        }
+    }
+
+    public static void fillBiome(
+            @NotNull Chunk chunk,
+            @NotNull RegistryKey<Biome> biome,
+            @NotNull BiomePredicate predicate
+    ) {
+        assert Thread.holdsLock(chunk) : "Chunk must be locked before access";
+        LegacyChunkHack.invalidateChunk(chunk);
+
+        var biomes = TerraformInstanceBiomes.forInstance(chunk.getInstance());
+        int id = biomes != null ? biomes.getId(biome) : -1;
+        if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.key());
+
+        int xOffset = chunk.getChunkX() * 16;
+        int yOffset = chunk.getMinSection();
+        int zOffset = chunk.getChunkZ() * 16;
+
+        int i = 0;
+        for (Section section : chunk.getSections()) {
+            final int index = i;
+            section.biomePalette().replaceAll((x, y, z, old) -> {
+                x *= 4;
+                y *= 4;
+                z *= 4;
+
+                var oldBiome = biomes.getKey(old);
+                return predicate.test(x + xOffset, y + (index + yOffset) * 16, z + zOffset, oldBiome) ? id : old;
+            });
+            i++;
+        }
+    }
+
+    public static void sendBiomeUpdates(@NotNull TerraformInstanceBiomes biomes, @NotNull List<Chunk> chunks) {
+        List<ChunkBiomesPacket.ChunkBiomeData> data = new ArrayList<>();
+        var serializer = Palette.biomeSerializer(MinecraftServer.getBiomeRegistry().size() + biomes.size());
+        for (Chunk chunk : chunks) {
+            data.add(new ChunkBiomesPacket.ChunkBiomeData(
+                    chunk.getChunkX(), chunk.getChunkZ(),
+                    ProtocolUtil.makeArray(1024, buffer -> {
+                        for (Section section : chunk.getSections()) {
+                            buffer.write(serializer, section.biomePalette());
+                        }
+                    })
+            ));
+        }
+
+        var packet = new ChunkBiomesPacket(data);
+
+        Set<UUID> hasSent = new HashSet<>();
+
+        for (Chunk chunk : chunks) {
+            for (var viewer : chunk.getViewers()) {
+                if (!hasSent.add(viewer.getUuid())) continue;
+                viewer.sendPacket(packet);
+            }
+        }
+    }
+
+    @FunctionalInterface
+    public interface BiomePredicate {
+        boolean test(int x, int y, int z, @Nullable RegistryKey<Biome> old);
+    }
+}
