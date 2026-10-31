@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.hollowcube.terraform.apply.HeightmapView;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.MathUtils;
@@ -8,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.function.Predicate;
 
 @SuppressWarnings("UnstableApiUsage")
-public class Heightmap {
+public class Heightmap implements HeightmapView {
     private static final int DATA_SIZE = Chunk.CHUNK_SIZE_X * Chunk.CHUNK_SIZE_Z;
 
     public static final boolean SURFACE = true;
@@ -37,9 +38,37 @@ public class Heightmap {
         return data[(z & 0xF) << 4 | (x & 0xF)] + worldMin - 1;
     }
 
+    /**
+     * Computes the heightmap if it never was, so incremental updates start from real heights.
+     */
+    public void ensureComputed() {
+        if (data == null) recalculate();
+    }
+
+    @Override
+    public boolean bottomUp() {
+        return type == BOTTOM;
+    }
+
+    @Override
+    public boolean matches(int stateId) {
+        return filter.test(Block.fromStateId(stateId));
+    }
+
+    @Override
+    public int height(int x, int z) {
+        return get(x, z);
+    }
+
+    @Override
+    public void setHeight(int x, int z, int y) {
+        ensureData()[z << 4 | x] = (short) (y - worldMin + 1);
+    }
+
     public void update(int x, int y, int z, Block block) {
         int current = get(x, z);
-        if (current >= worldMin && (type ? y <= current - 2 : y >= current + 2)) {
+        // A change beneath the surface can't move it.
+        if (current >= worldMin && (type ? y < current : y > current)) {
             return;
         }
 

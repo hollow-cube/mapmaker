@@ -1,11 +1,13 @@
 package net.hollowcube.mapmaker.map.instance;
 
+import net.hollowcube.terraform.apply.HeightmapView;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
@@ -35,6 +37,15 @@ public class Heightmaps {
         for (var heightmap : heightmaps) {
             heightmap.update(x & 0xF, y, z & 0xF, block);
         }
+    }
+
+    /**
+     * Returns the heightmaps for a Terraform apply to update, each computed first if it never was: the apply only
+     * adjusts the columns it writes.
+     */
+    public List<HeightmapView> asTerraformViews() {
+        for (var heightmap : heightmaps) heightmap.ensureComputed();
+        return List.of(heightmaps);
     }
 
     public void load(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap, int @Nullable [] data) {

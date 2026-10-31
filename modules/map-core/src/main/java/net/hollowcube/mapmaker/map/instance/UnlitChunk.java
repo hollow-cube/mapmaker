@@ -1,7 +1,6 @@
 package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.terraform.legacy.instance.TerraformBiomeChunk;
-import net.minestom.server.coordinate.CoordConversion;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
@@ -55,10 +54,8 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
             @Nullable BlockHandler.Placement placement,
             @Nullable BlockHandler.Destroy destroy
     ) {
-        var previous = entries.get(CoordConversion.chunkBlockIndex(x, y, z));
         super.setBlock(x, y, z, block, placement, destroy);
         heightmaps.update(x, y, z, block);
-        WorldIndex.blockChanged(instance, x, y, z, previous, block);
     }
 
     @Override
@@ -67,6 +64,7 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
         WorldIndex.chunkLoaded(this, entries);
     }
 
+    @Override
     public Heightmaps heightmaps() {
         return heightmaps;
     }

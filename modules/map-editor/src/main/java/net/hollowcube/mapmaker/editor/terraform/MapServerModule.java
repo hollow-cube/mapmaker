@@ -4,6 +4,8 @@ import net.hollowcube.mapmaker.map.block.BlockTags;
 import net.hollowcube.mapmaker.map.block.handler.BlockHandlers;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.entity.MapEntityType;
+import net.hollowcube.mapmaker.map.instance.ChunkExt;
+import net.hollowcube.terraform.apply.HeightmapView;
 import net.hollowcube.terraform.legacy.TerraformModule;
 import net.hollowcube.terraform.legacy.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.legacy.storage.TerraformStorage;
@@ -11,10 +13,12 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class MapServerModule implements TerraformModule {
 
@@ -59,6 +63,13 @@ public class MapServerModule implements TerraformModule {
         register(overrides, Block.BIG_DRIPLEAF, DripleafBlock.INSTANCE);
 
         return overrides;
+    }
+
+    @Override
+    public Function<Chunk, Collection<HeightmapView>> heightmaps() {
+        return chunk -> chunk instanceof ChunkExt ext
+                ? ext.heightmaps().asTerraformViews()
+                : List.of();
     }
 
     private void register(Map<Integer, Block> overrides, Block block, BlockHandler handler) {

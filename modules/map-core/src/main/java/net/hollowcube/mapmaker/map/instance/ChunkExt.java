@@ -20,4 +20,6 @@ public interface ChunkExt {
     void loadHeightmap(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap, int @Nullable [] data);
     int @Nullable [] saveHeightmap(@MagicConstant(valuesFromClass = Heightmaps.class) int heightmap);
 
+    Heightmaps heightmaps();
+
 }
