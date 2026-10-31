@@ -81,6 +81,7 @@ public interface Task {
 
         private boolean dry = false;
         private boolean ephemeral = false;
+        private boolean captureAll = false;
 
         private ComputeFunc computeFunc = null;
         private BlockBuffer buffer = null;
@@ -117,6 +118,15 @@ public interface Task {
             return this;
         }
 
+        /**
+         * Records the prior block of every cell the task sets in the result's undo buffer, including cells the
+         * apply leaves unchanged. For callers that read the undo buffer as a copy of the region (cut).
+         */
+        public @NotNull Builder captureAll() {
+            this.captureAll = true;
+            return this;
+        }
+
         public @Nullable Task dryRunIfCapacity() {
             this.dry = true;
             return submitIfCapacity();
@@ -127,7 +137,7 @@ public interface Task {
             Check.argCondition(computeFunc != null && buffer != null, "Cannot provide both a compute function and a buffer");
 
             try {
-                var task = new TaskImpl(session, tag, dry, ephemeral, computeFunc, buffer, postApplyFunc);
+                var task = new TaskImpl(session, tag, dry, ephemeral, captureAll, computeFunc, buffer, postApplyFunc);
                 session.submitTask(task);
                 return task;
             } catch (TooManyTasksException ignored) {
@@ -141,7 +151,7 @@ public interface Task {
             Check.argCondition(computeFunc != null && buffer != null,
                                "Cannot provide both a compute function and a buffer");
 
-            var task = new TaskImpl(session, tag, dry, ephemeral, computeFunc, buffer, postApplyFunc);
+            var task = new TaskImpl(session, tag, dry, ephemeral, captureAll, computeFunc, buffer, postApplyFunc);
             session.submitTaskForce(task);
             return task;
         }

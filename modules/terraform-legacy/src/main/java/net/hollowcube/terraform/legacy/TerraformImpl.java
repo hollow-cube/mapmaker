@@ -1,10 +1,11 @@
 package net.hollowcube.terraform.legacy;
 
-import it.unimi.dsi.fastutil.longs.LongArrayList;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.schem.util.GameDataProvider;
-import net.hollowcube.terraform.legacy.buffer.BlockBuffer;
+import net.hollowcube.terraform.apply.*;
+import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
 import net.hollowcube.terraform.legacy.schem.SchemUpgrader;
 import net.hollowcube.terraform.legacy.session.LocalSession;
 import net.hollowcube.terraform.legacy.session.PlayerSession;
@@ -17,20 +18,18 @@ import net.hollowcube.terraform.legacy.task.edit.WorldView;
 import net.hollowcube.terraform.legacy.tool.ToolHandler;
 import net.hollowcube.terraform.legacy.util.Format;
 import net.hollowcube.terraform.legacy.util.ThreadUtil;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
-import net.minestom.server.instance.LegacyChunkHack;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
-import net.minestom.server.network.packet.server.play.MultiBlockChangePacket;
+import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
-import net.minestom.server.utils.block.BlockUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
@@ -38,13 +37,13 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Supplier;
 
 @SuppressWarnings("UnstableApiUsage")
@@ -53,7 +52,7 @@ public final class TerraformImpl implements Terraform {
     private static final Logger logger = LoggerFactory.getLogger(Terraform.class);
 
     final EventNode<InstanceEvent> eventNode;
-    private final TerraformRegistry registry;
+    private final TerraformRegistryImpl registry;
     private final TerraformStorage storage;
 
     private final ToolHandler toolHandler;
@@ -63,6 +62,7 @@ public final class TerraformImpl implements Terraform {
     // Tasks
     private final ExecutorService threadPoolCompute;
     private final ExecutorService threadPoolApply;
+    private final ApplyEngine applyEngine;
 
     TerraformImpl(
             @NotNull Collection<Supplier<TerraformModule>> modules,
@@ -81,6 +81,11 @@ public final class TerraformImpl implements Terraform {
 
         // Construct the registry immediately
         this.registry = new TerraformRegistryImpl(modules, this.eventNode, commandManager, commandCondition);
+
+        this.applyEngine = ApplyEngine.builder()
+                .blockHandlers(blockHandlers(this.registry))
+                .heightmap(this.registry.heightmaps())
+                .build();
 
         this.storage = Objects.requireNonNull(this.registry.storage(storage),
                 "No matching storage implementation: " + storage);
@@ -229,116 +234,52 @@ public final class TerraformImpl implements Terraform {
                 task.setState(Task.State.APPLY, null);
                 long start = System.nanoTime();
 
-                var buffer = task.buffer();
-                final var changeCount = new AtomicLong();
-
                 var instance = task.session().instance();
+                var edit = clipToBorder(instance, EditBlockBuffer.toEditBuffer(task.buffer()));
 
-                final var sectionChangeCache = new LongArrayList();
-                final var paletteData = new int[4096]; // Reused buffer
-                final var indexCache = new AtomicInteger(0);
-                final var blockEntityUpdates = new ArrayList<SendablePacket>();
-
-                final var undoBufferBuilder = BlockBuffer.builder(null); //todo add compute buffer min + max here
-
-                buffer.forEachSection((chunkX, chunkY, chunkZ, palette) -> {
-                    var chunk = instance.getChunk(chunkX, chunkZ);
-                    if (chunk == null) {
-                        // Chunk is not loaded
-                        logger.warn("{}: reference to unloaded chunk at {}, {}", task, chunkX, chunkZ);
-                        chunk = instance.loadChunk(chunkX, chunkZ).join(); // We are in apply thread, its fine to block
+                EditBuffer undo;
+                long changed;
+                if (task.isDryRun()) {
+                    var read = EditBuffer.builder();
+                    changed = readTouched(instance, edit, read);
+                    undo = read.build();
+                } else {
+                    EditBuffer before = null;
+                    if (task.capturesAll()) {
+                        var read = EditBuffer.builder();
+                        readTouched(instance, edit, read);
+                        before = read.build();
                     }
-                    final var chunkRef = chunk; // Final var for lambda
 
-                    sectionChangeCache.clear();
-                    blockEntityUpdates.clear();
-
-                    int totalSections = chunk.getMaxSection() - chunk.getMinSection();
-                    if (chunkY > totalSections) {
-                        logger.warn("{}: reference to invalid section at {}, {}: {}", task, chunkX, chunkZ, chunkY);
-                        return;
-                    }
-                    var section = chunk.getSection(chunkY);
-                    synchronized (chunk) { // Synchronized is OK, we always run this on one of the dedicated threads.
-                        //todo optimize palette apply, if the palette is a full chunk of the same block we can do a single fill.
-                        //todo replaceall is not working, but that would be ideal. instead we do a get then set.
-
-                        indexCache.set(0);
-                        section.blockPalette().getAll((sx, sy, sz, stateId) -> {
-                            try {
-                                var paletteIndex = indexCache.getAndIncrement();
-                                var newBlockState = palette.get(sx, sy, sz);
-
-                                if (newBlockState == null) {
-                                    paletteData[paletteIndex] = stateId;
-                                } else {
-                                    var chunkOldBlock = chunkRef.getBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
-                                    //todo bad bad very bad
-                                    if (!task.isDryRun())
-                                        chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, Block.AIR);
-
-                                    paletteData[paletteIndex] = newBlockState.stateId();
-                                    if (!task.isDryRun() && (newBlockState.handler() != null || newBlockState.hasNbt())) {
-                                        var blockPosition = new Vec(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz);
-                                        chunkRef.setBlock(chunkX * 16 + sx, chunkY * 16 + sy, chunkZ * 16 + sz, newBlockState);
-
-                                        var registry = newBlockState.registry();
-                                        if (registry.isBlockEntity()) {
-                                            var clientData = BlockUtils.extractClientNbt(newBlockState);
-                                            blockEntityUpdates.add(new BlockEntityDataPacket(blockPosition, registry.blockEntityId(), clientData));
-                                        }
-                                    }
-
-                                    // Only send a client update if the block was actually modified (and for change counter)
-                                    if (stateId != newBlockState.stateId()) {
-                                        changeCount.incrementAndGet();
-                                        sectionChangeCache.add(((long) newBlockState.stateId() << 12) | ((long) sx << 8 | (long) sz << 4 | sy));
-                                    }
-
-                                    // Save old state for undo batch
-                                    // Note that we save regardless of whether the block was actually modified,
-                                    // this is because undo-ing should change it in case the block changed after
-                                    // the apply.
-                                    //todo we need to save block entities here too
-                                    undoBufferBuilder.set(
-                                            (chunkX << 4) + sx,
-                                            (chunkY << 4) + sy,
-                                            (chunkZ << 4) + sz,
-                                            chunkOldBlock
-                                    );
-                                }
-                            } catch (InterruptedException interrupt) {
-                                Thread.currentThread().interrupt();
-                            }
-                        });
-
-                        if (!task.isDryRun()) {
-                            indexCache.set(0);
-                            section.blockPalette().setAll((sx, sy, sz) -> paletteData[indexCache.getAndIncrement()]);
+                    // Loading blocks this apply thread, as legacy always has.
+                    ApplyEngine.ApplyResult result;
+                    try {
+                        result = applyEngine.apply(instance, edit, UnloadedChunkPolicy.LOAD, !task.isEphemeral());
+                    } catch (PartialApplyException e) {
+                        // Keep what was written undoable, then fail the task.
+                        var partial = e.partial();
+                        relight(instance, partial.chunks());
+                        if (!task.isEphemeral()) {
+                            var partialUndo = new EditBlockBuffer(before != null ? before : partial.undo());
+                            task.session().remember(Change.of(partialUndo, new EditBlockBuffer(edit)));
                         }
+                        throw e;
                     }
+                    undo = before != null ? before : result.undo();
+                    changed = result.changed();
+                    relight(instance, result.chunks());
+                }
 
-                    if (!task.isDryRun()) {
-                        var updateIndex = (((long) chunkX & 0x3FFFFF) << 42) | ((long) chunkY & 0xFFFFF) | (((long) chunkZ & 0x3FFFFF) << 20);
-                        var packet = new MultiBlockChangePacket(updateIndex, sectionChangeCache.toLongArray());
-                        chunk.sendPacketToViewers(packet); //todo these could be batched perhaps, maybe minestom does it on its own?
-                        chunk.sendPacketsToViewers(blockEntityUpdates);
-                        LegacyChunkHack.invalidateChunk(chunk);
-                    }
-
-                    //todo the client is super laggy when sending many of these, perhaps this should be iterated by vertical chunk and resend the entire chunk if there are enough sections changed
-                });
-
-                // Append to history
-                var undoBuffer = undoBufferBuilder.build();
+                var undoBuffer = new EditBlockBuffer(undo);
+                var redoBuffer = new EditBlockBuffer(edit);
                 if (!task.isDryRun() && !task.isEphemeral()) {
-                    task.session().remember(Change.of(undoBuffer, buffer));
+                    task.session().remember(Change.of(undoBuffer, redoBuffer));
                 }
 
                 task.setState(Task.State.COMPLETE, null);
                 logger.debug("{}: apply complete in {}ms", task, (System.nanoTime() - start) / 1_000_000d);
 
-                var result = new TaskResult(undoBuffer, buffer, changeCount.get(), task.attributes());
+                var result = new TaskResult(undoBuffer, redoBuffer, changed, task.attributes());
                 if (result.hasAttribute(Task.ATT_BORDER_TAINT)) {
                     var cui = task.session().cui();
                     cui.sendMessage("terraform.warn.border_exceeded");
@@ -353,6 +294,74 @@ public final class TerraformImpl implements Terraform {
                 task.setState(Task.State.FAILED, null);
             }
         };
+    }
+
+    /**
+     * Drops every cell outside the world border and height, the box {@code WorldViewInstance#fastBorderTest}
+     * accepts ({@code <} on the positive side).
+     */
+    private static @NotNull EditBuffer clipToBorder(@NotNull Instance instance, @NotNull EditBuffer edit) {
+        var border = instance.getWorldBorder();
+        var dimension = instance.getCachedDimensionType();
+        double radius = border.diameter() / 2d;
+        return edit.clipToBox(
+                (int) Math.ceil(border.centerX() - radius),
+                dimension.minY(),
+                (int) Math.ceil(border.centerZ() - radius),
+                (int) Math.ceil(border.centerX() + radius) - 1,
+                dimension.maxY() - 1,
+                (int) Math.ceil(border.centerZ() + radius) - 1
+        );
+    }
+
+    /**
+     * Reads the world's current block at every cell the edit sets into {@code out}, returning how many of
+     * them the edit would change. A dry run's stand-in for the undo buffer.
+     */
+    private static long readTouched(@NotNull Instance instance, @NotNull EditBuffer edit, @NotNull EditBuffer.Builder out) {
+        long[] changed = {0};
+        edit.forEachSection((sectionX, sectionY, sectionZ, section) -> {
+            var chunk = instance.getChunk(sectionX, sectionZ);
+            if (chunk == null) chunk = instance.loadChunk(sectionX, sectionZ).join();
+            if (chunk == null || sectionY < chunk.getMinSection() || sectionY >= chunk.getMaxSection()) return;
+
+            final var chunkRef = chunk;
+            int baseX = sectionX << 4, baseY = sectionY << 4, baseZ = sectionZ << 4;
+            chunk.lockReadLock();
+            try {
+                section.forEachBlockState((x, y, z, stateId) -> {
+                    var old = chunkRef.getBlock(baseX + x, baseY + y, baseZ + z);
+                    out.setBlockState(baseX + x, baseY + y, baseZ + z, old);
+                    if (old.stateId() != stateId) changed[0]++;
+                });
+            } finally {
+                chunk.unlockReadLock();
+            }
+        });
+        return changed[0];
+    }
+
+    private static @NotNull Map<Key, BlockHandler> blockHandlers(@NotNull TerraformRegistry registry) {
+        var handlers = new HashMap<Key, BlockHandler>();
+        for (int stateId = 0; stateId < Block.statesCount(); stateId++) {
+            var block = registry.blockState(stateId);
+            if (block != null && block.handler() != null) handlers.putIfAbsent(block.key(), block.handler());
+        }
+        return handlers;
+    }
+
+    /**
+     * Relights the chunks an apply wrote, below {@code setBlock}, and resends their light. Runs on the apply
+     * thread, never the tick. A failure only leaves light stale, so it is logged rather than failing the task.
+     */
+    private static void relight(@NotNull Instance instance, @NotNull List<Chunk> chunks) {
+        try {
+            for (Chunk chunk : LightingChunk.relight(instance, chunks)) {
+                if (chunk instanceof LightingChunk lighting) lighting.sendLighting();
+            }
+        } catch (RuntimeException e) {
+            logger.warn("relight failed for instance {}", instance.getUuid(), e);
+        }
     }
 
 }

@@ -311,6 +311,7 @@ public final class SchematicCommands {
             var task = session.buildTask("we-cut")
                     .metadata() //todo
                     .compute(RegionFunctions.replace(region, mask, pattern))
+                    .captureAll()
                     .post(result -> {
                         var offset = new Vec(-origin.blockX(), -origin.blockY(), -origin.blockZ());
                         clipboard.setData(result.undoBuffer().toSchematic(offset));

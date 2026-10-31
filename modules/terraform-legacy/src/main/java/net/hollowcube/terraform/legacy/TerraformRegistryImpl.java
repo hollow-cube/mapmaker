@@ -4,12 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.terraform.apply.HeightmapView;
 import net.hollowcube.terraform.legacy.selection.region.RegionSelector;
 import net.hollowcube.terraform.legacy.storage.TerraformStorage;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentBlockState;
 import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.collection.ObjectArray;
 import org.jetbrains.annotations.NotNull;
@@ -19,9 +21,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Supplier;
 
@@ -40,6 +44,7 @@ final class TerraformRegistryImpl implements TerraformRegistry {
     private final Map<String, TerraformStorage> storageTypes;
 
     private final CommandManager commandManager;
+    private final Function<Chunk, Collection<HeightmapView>> heightmaps;
 
     // Vanilla block registry, kept to allow overriding of vanilla blocks to add a block handler to them
     private final ObjectArray<Block> blocksByState = ObjectArray.singleThread(16384);
@@ -52,6 +57,7 @@ final class TerraformRegistryImpl implements TerraformRegistry {
     ) {
         var regionTypes = new HashMap<String, RegionSelector.Factory>();
         var storageTypes = new HashMap<String, TerraformStorage>();
+        var heightmaps = new ArrayList<Function<Chunk, Collection<HeightmapView>>>();
 
         // Copy vanilla blocks by their state IDs
         for (int i = 0; i < Block.statesCount(); i++)
@@ -86,10 +92,16 @@ final class TerraformRegistryImpl implements TerraformRegistry {
                     blocksByState.set(state.getKey(), state.getValue());
                     stateOverrides++;
                 }
+
+                var moduleHeightmaps = module.heightmaps();
+                if (moduleHeightmaps != null) heightmaps.add(moduleHeightmaps);
             } catch (Exception e) {
                 logger.error("Failed to load module: {}", moduleFunc, e);
             }
         }
+
+        if (heightmaps.size() > 1) throw new IllegalStateException("More than one module provides heightmaps");
+        this.heightmaps = heightmaps.isEmpty() ? HeightmapView.MINESTOM : heightmaps.getFirst();
 
         this.regionTypes = Map.copyOf(regionTypes);
         this.storageTypes = Map.copyOf(storageTypes);
@@ -98,6 +110,10 @@ final class TerraformRegistryImpl implements TerraformRegistry {
         blocksByState.trim();
         legacyBlockStates = buildLegacyBlockMap(blocksByState::get);
         logger.debug("Loaded {} block state overrides", stateOverrides);
+    }
+
+    @NotNull Function<Chunk, Collection<HeightmapView>> heightmaps() {
+        return heightmaps;
     }
 
     @Override

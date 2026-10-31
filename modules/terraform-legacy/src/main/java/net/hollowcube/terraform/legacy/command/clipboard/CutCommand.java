@@ -43,6 +43,7 @@ public class CutCommand extends CommandDsl {
         var task = localSession.buildTask("cut")
                 .metadata() //todo
                 .compute(ComputeFunc.set(region, Pattern.block(Block.AIR)))
+                .captureAll()
                 .post(result -> {
                     player.sendMessage(Component.translatable("terraform.cut", Component.translatable(String.valueOf(result.blocksChanged()))));
                     clipboard.setData(result.undoBuffer().toSchematic(new Vec(-pos.blockX(), -pos.blockY(), -pos.blockZ())));

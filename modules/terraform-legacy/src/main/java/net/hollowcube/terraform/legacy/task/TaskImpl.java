@@ -23,6 +23,7 @@ public class TaskImpl implements Task {
     private final Instant created = Instant.now();
     private final boolean dry;
     private final boolean ephemeral;
+    private final boolean captureAll;
 
     private volatile State state = State.INIT;
     private @Nullable Future<?> future;
@@ -38,6 +39,7 @@ public class TaskImpl implements Task {
             @NotNull String tag,
             boolean dry,
             boolean ephemeral,
+            boolean captureAll,
             @Nullable ComputeFunc computeFunc,
             @Nullable BlockBuffer buffer,
             @Nullable PostApplyFunc postApplyFunc
@@ -47,6 +49,7 @@ public class TaskImpl implements Task {
         this.tag = tag;
         this.dry = dry;
         this.ephemeral = ephemeral;
+        this.captureAll = captureAll;
 
         this.computeFunc = computeFunc;
         this.buffer = buffer;
@@ -80,6 +83,10 @@ public class TaskImpl implements Task {
 
     public boolean isEphemeral() {
         return ephemeral;
+    }
+
+    public boolean capturesAll() {
+        return captureAll;
     }
 
     @Override

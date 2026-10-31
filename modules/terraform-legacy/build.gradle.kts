@@ -8,6 +8,7 @@ dependencies {
     implementation(project(":modules:core")) // TODO: This is a terrible dependency, but need the action bar stuff for debug stick.
     implementation(project(":modules:compat"))
     implementation(project(":modules:datafix"))
+    api(project(":modules:terraform"))
 
     implementation(libs.minestom)
     implementation(libs.bundles.adventure)
