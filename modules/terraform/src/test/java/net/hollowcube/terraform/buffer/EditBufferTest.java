@@ -1,6 +1,8 @@
 package net.hollowcube.terraform.buffer;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.coordinate.Area;
+import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.palette.Palette;
 import org.junit.jupiter.api.Test;
@@ -285,5 +287,40 @@ class EditBufferTest {
         assertEquals(chest, buffer.getBlock(3, 4, 5));
         assertEquals(Block.CHEST.stateId(), buffer.getBlockState(3, 4, 5));
         assertEquals(Block.CHEST, buffer.getBlock(0, 0, 0));
+    }
+
+    @Test
+    void blockBoundsCoverSetCellsAndFilledSections() {
+        var buffer = EditBuffer.builder()
+            .setBlockState(-3, 70, 5, Block.STONE.stateId())
+            .setBlockState(40, 64, 2, Block.DIRT)
+            .fillSection(1, 5, -1, Block.STONE.stateId())
+            .setBiome(500, 0, 500, 1)
+            .build();
+
+        assertEquals(
+            Area.cuboid(new BlockVec(-3, 64, -16), new BlockVec(40, 95, 5)),
+            buffer.blockBounds()
+        );
+    }
+
+    @Test
+    void blockBoundsAreNullWithoutBlocks() {
+        assertNull(EditBuffer.empty().blockBounds());
+        assertNull(EditBuffer.builder().setBiome(0, 0, 0, 1).build().blockBounds());
+    }
+
+    @Test
+    void clipToBoxClipsBlockBounds() {
+        var buffer = EditBuffer.builder()
+            .setBlockState(0, 0, 0, Block.STONE.stateId())
+            .setBlockState(40, 30, 40, Block.STONE.stateId())
+            .build();
+
+        assertEquals(
+            Area.cuboid(new BlockVec(0, 0, 0), new BlockVec(20, 20, 20)),
+            buffer.clipToBox(-5, -5, -5, 20, 20, 20).blockBounds()
+        );
+        assertNull(buffer.clipToBox(100, 100, 100, 120, 120, 120).blockBounds());
     }
 }

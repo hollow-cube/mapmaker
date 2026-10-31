@@ -1,7 +1,10 @@
 package net.hollowcube.terraform.util;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockEntityType;
 import net.minestom.server.instance.block.BlockHandler;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -21,6 +24,15 @@ public final class BlockUtil {
         BlockHandler ha = a.handler(), hb = b.handler();
         if (ha == null || hb == null) return ha == hb;
         return ha.getKey().equals(hb.getKey());
+    }
+
+    /// The id a block's entity is saved under: its handler's key, else its vanilla block-entity type. Null for
+    /// a block with neither.
+    public static @Nullable Key blockEntityId(Block block) {
+        @Nullable BlockHandler handler = block.handler();
+        if (handler != null) return handler.getKey();
+        @Nullable BlockEntityType type = block.blockEntityType();
+        return type != null ? type.key() : null;
     }
 
     /// Absolute xyz packed into a long. Stores up to −33,554,432 to 33,554,431 on x/z, −2,048 to 2,047 on y

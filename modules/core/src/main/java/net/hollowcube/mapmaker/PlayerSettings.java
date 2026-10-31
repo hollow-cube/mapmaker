@@ -26,6 +26,7 @@ public final class PlayerSettings {
 
     public static final PlayerSetting<VisibilityRule> NEARBY_PLAYER_VISIBILITY = PlayerSetting.Enum("nearby_player_visibility", VisibilityRule.GHOST);
     public static final PlayerSetting<Boolean> PARKOUR_DEBUG_HUD = PlayerSetting.Bool("parkour_debug_hud", false);
+    public static final PlayerSetting<Boolean> TERRAFORM_STATS = PlayerSetting.Bool("terraform_stats", false);
 
 
     // Moderation

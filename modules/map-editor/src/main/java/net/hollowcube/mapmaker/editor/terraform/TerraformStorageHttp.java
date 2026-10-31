@@ -2,11 +2,9 @@ package net.hollowcube.mapmaker.editor.terraform;
 
 import com.google.gson.reflect.TypeToken;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
-import net.hollowcube.schem.Schematic;
-import net.hollowcube.schem.reader.SchematicReader;
-import net.hollowcube.schem.writer.SchematicWriter;
 import net.hollowcube.terraform.legacy.schem.SchematicHeader;
 import net.hollowcube.terraform.legacy.storage.TerraformStorage;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.Nullable;
 
 import java.net.URI;
@@ -90,19 +88,13 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
     }
 
     @Override
-    public @Nullable Schematic loadSchematicData(String playerId, String name) {
+    public byte @Nullable [] loadSchematicData(String playerId, String name) {
         var req = HttpRequest.newBuilder()
             .GET().uri(URI.create(url + "/schem/" + playerId + "/" + name))
             .build();
         var res = doRequest(req, HttpResponse.BodyHandlers.ofByteArray());
         return switch (res.statusCode()) {
-            case 200 -> {
-                try {
-                    yield SchematicReader.detecting().read(res.body());
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to read schem data: " + e.getMessage());
-                }
-            }
+            case 200 -> res.body();
             case 404 -> null;
             default ->
                 throw new RuntimeException("Failed to fetch schem data (" + res.statusCode() + "): " + new String(res.body()));
@@ -110,14 +102,13 @@ public class TerraformStorageHttp extends AbstractHttpService implements Terrafo
     }
 
     @Override
-    public SchematicCreateResult createSchematic(String playerId, String name, Schematic schematic, boolean overwrite) {
-        var schemData = SchematicWriter.sponge().write(schematic);
+    public SchematicCreateResult createSchematic(String playerId, String name, byte[] data, Point dimensions, boolean overwrite) {
         var endpoint = String.format("%s/schem/%s/%s?dimx=%d&dimy=%d&dimz=%d&size=%d&overwrite=%b",
             this.url, playerId, name,
-            schematic.size().blockX(), schematic.size().blockY(), schematic.size().blockZ(),
-            schemData.length, overwrite
+            dimensions.blockX(), dimensions.blockY(), dimensions.blockZ(),
+            data.length, overwrite
         );
-        var reqBody = HttpRequest.BodyPublishers.ofByteArray(schemData);
+        var reqBody = HttpRequest.BodyPublishers.ofByteArray(data);
         var req = HttpRequest.newBuilder()
             .POST(reqBody).uri(URI.create(endpoint))
             .build();

@@ -31,6 +31,9 @@ import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.ServerLatencyHud;
 import net.hollowcube.mapmaker.player.Permission;
 import net.hollowcube.mapmaker.util.ComponentUtil;
+import net.hollowcube.terraform.legacy.session.LocalSession;
+import net.hollowcube.terraform.legacy.session.PlayerSession;
+import net.hollowcube.terraform.legacy.util.Format;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -85,6 +88,10 @@ public class DebugCommand extends CommandDsl {
             "toggle the parkour state debug hud");
         createPermissionedSubcommand("gc", (ignored1, ignored2) -> System.gc(),
             "Force a garbage collection");
+        createPermissionlessSubcommand("terraform", this::handleTerraformDebug,
+            "Show the memory used by your terraform history and clipboards");
+        createPermissionlessSubcommand("tfstats", this::handleTerraformStats,
+            "Toggle timing and size stats after each of your terraform operations");
 
         // Minestom stuff
         createPermissionlessSubcommand("commands", this::handleCommandsDebug,
@@ -145,6 +152,41 @@ public class DebugCommand extends CommandDsl {
         player.sendMessage(Component.text("Settings: " + (rawSettings.isEmpty() ? "empty" : "")));
         for (var entry : rawSettings) {
             player.sendMessage(Component.text("  " + entry.getKey() + ": " + entry.getValue()));
+        }
+    }
+
+    private void handleTerraformDebug(@NotNull Player player, @NotNull CommandContext context) {
+        var localSession = LocalSession.forPlayerOptional(player);
+        if (localSession == null) {
+            player.sendMessage("No terraform session in this world");
+        } else {
+            long[] entries = localSession.historyEntryBytes();
+            long total = 0;
+            for (long bytes : entries) total += bytes;
+            player.sendMessage("History: " + localSession.undoCount() + " undo, " + localSession.redoCount()
+                + " redo, " + Format.formatBytes(total));
+            for (int i = 0; i < entries.length; i++) {
+                String marker = i < localSession.undoCount() ? "undo" : "redo";
+                player.sendMessage("  #" + (i + 1) + " (" + marker + "): " + Format.formatBytes(entries[i]));
+            }
+        }
+
+        var playerSession = PlayerSession.forPlayer(player);
+        var names = playerSession.clipboardNames();
+        player.sendMessage("Clipboards: " + (names.isEmpty() ? "none" : names.size()));
+        for (String name : names) {
+            var data = playerSession.clipboard(name).data();
+            if (data == null) continue;
+            var buffer = data.buffer();
+            var bounds = buffer.blockBounds();
+            String size = "empty";
+            if (bounds != null) {
+                var extent = bounds.max().sub(bounds.min()).add(1);
+                size = extent.blockX() + "x" + extent.blockY() + "x" + extent.blockZ();
+            }
+            player.sendMessage("  " + name + ": " + Format.formatBytes(buffer.sizeBytes()) + ", "
+                + buffer.sectionCount() + " sections, " + size
+                + (data.hasTransform() ? ", transformed" : ""));
         }
     }
 
@@ -307,6 +349,13 @@ public class DebugCommand extends CommandDsl {
 
     private void handleLatency(@NotNull Player player, @NotNull CommandContext context) {
         player.scheduleNextTick(_ -> PlayerHud.forPlayer(player).toggleModule(new ServerLatencyHud()));
+    }
+
+    private void handleTerraformStats(@NotNull Player player, @NotNull CommandContext context) {
+        var playerData = localPlayer(player);
+        boolean enabled = !playerData.getSetting(PlayerSettings.TERRAFORM_STATS);
+        playerData.setSetting(PlayerSettings.TERRAFORM_STATS, enabled);
+        player.sendMessage(Component.text("Terraform stats " + (enabled ? "enabled" : "disabled")));
     }
 
     private void handleParkourHud(@NotNull Player player, @NotNull CommandContext context) {
