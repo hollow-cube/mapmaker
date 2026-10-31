@@ -1,6 +1,9 @@
 package net.hollowcube.terraform.util;
 
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.block.BlockHandler;
+
+import java.util.Objects;
 
 public final class BlockUtil {
     private static final int XZ_MAX = 1 << 25; // 26 signed bits
@@ -10,6 +13,14 @@ public final class BlockUtil {
     /// type. Anything else has to be stored as the full [Block], not just its state id.
     public static boolean isPlainState(Block block) {
         return !block.hasNbt() && block.handler() == null && block.blockEntityType() == null;
+    }
+
+    /// Checks block equality looking at just the handler ids not the object instances
+    public static boolean sameBlock(Block a, Block b) {
+        if (a.stateId() != b.stateId() || !Objects.equals(a.nbt(), b.nbt())) return false;
+        BlockHandler ha = a.handler(), hb = b.handler();
+        if (ha == null || hb == null) return ha == hb;
+        return ha.getKey().equals(hb.getKey());
     }
 
     /// Absolute xyz packed into a long. Stores up to −33,554,432 to 33,554,431 on x/z, −2,048 to 2,047 on y

@@ -7,10 +7,11 @@ import net.hollowcube.terraform.util.PosIntConsumer;
 import net.hollowcube.terraform.util.PosPredicate;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.palette.Palette;
-import net.minestom.server.instance.palette.PaletteHack;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
+import java.util.function.IntPredicate;
 
 import static net.minestom.server.coordinate.CoordConversion.*;
 
@@ -125,6 +126,31 @@ public final class BufferSection {
         Block previous = blockEntities.remove(sectionBlockIndex(x, y, z));
         //noinspection ConstantValue intellij dumb
         if (previous != null) blockEntityBytes -= HeapSize.block(previous);
+    }
+
+    /// Copies a full-cover section's blocks into a world palette, decoding the offset and sharing no
+    /// mutable data. Throws when the section does not cover every cell.
+    @ApiStatus.Internal
+    public void copyBlocksInto(Palette world) {
+        PaletteHack.applyFromOffset(
+            Objects.requireNonNull(blockPalette, "full-cover section is dense"),
+            world
+        );
+    }
+
+    /// Whether any set block state may match. Can report a state no cell holds any more, never misses one.
+    public boolean containsBlockState(IntPredicate predicate) {
+        if (blockPalette != null) {
+            return PaletteHack.contains(
+                blockPalette,
+                value -> value != LEAVE && predicate.test(value - 1)
+            );
+        }
+
+        for (Int2ShortMap.Entry entry : Int2ShortMaps.fastIterable(sparse())) {
+            if (predicate.test((entry.getShortValue() & 0xFFFF) - 1)) return true;
+        }
+        return false;
     }
 
     /// Runs for every present block (ie [#LEAVE] ignored), coordinates are section-local.

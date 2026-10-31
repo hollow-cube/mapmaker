@@ -6,7 +6,9 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.hollowcube.terraform.util.BlockUtil;
 import net.hollowcube.terraform.util.PosConsumer;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.palette.Palette;
 import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
@@ -203,6 +205,46 @@ public final class EditBuffer {
         public Builder setBiome(int x, int y, int z, int biomeId) {
             section(x, y, z).setBiome((x & 15) >> 2, (y & 15) >> 2, (z & 15) >> 2, biomeId);
             return this;
+        }
+
+        /// Captures a whole world section's blocks (air included) as the builder's section at the key and
+        /// returns it read-only (its mutators are not public). Throws if the builder already holds that
+        /// section, since capturing would discard what it recorded. Add the section's block entities with
+        /// [#captureBlockEntity].
+        @ApiStatus.Internal
+        public BufferSection captureSection(
+            int sectionX,
+            int sectionY,
+            int sectionZ,
+            Palette worldBlocks
+        ) {
+            assertNotBuilt();
+            long key = packBlockPos(sectionX, sectionY, sectionZ);
+            if (sections.containsKey(key)) {
+                throw new IllegalStateException(
+                    "section %d, %d, %d was already captured".formatted(
+                        sectionX,
+                        sectionY,
+                        sectionZ
+                    )
+                );
+            }
+            var section = new BufferSection(PaletteHack.copyWithOffset(worldBlocks));
+            replaceSection(key, section);
+            return section;
+        }
+
+        /// Records block-entity data at a cell of a section the builder already holds (one from
+        /// [#captureSection]), leaving the cell's block state alone. Throws if no section holds the cell.
+        @ApiStatus.Internal
+        public void captureBlockEntity(int x, int y, int z, Block block) {
+            assertNotBuilt();
+            BufferSection section = sections.get(packBlockPos(x >> 4, y >> 4, z >> 4));
+            //noinspection ConstantValue fastutil get is nullable
+            if (section == null) {
+                throw new IllegalStateException("no section holds " + x + ", " + y + ", " + z);
+            }
+            section.setBlockEntity(x & 15, y & 15, z & 15, block);
         }
 
         @Contract(" -> new")

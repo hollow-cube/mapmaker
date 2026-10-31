@@ -8,5 +8,6 @@ dependencies {
     implementation(libs.minestom)
     implementation(libs.fastutil)
 
+    testImplementation(libs.minestomTesting)
     testImplementation(libs.jol.core)
 }

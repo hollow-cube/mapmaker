@@ -2,6 +2,7 @@ package net.hollowcube.terraform.buffer;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.instance.palette.Palette;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
@@ -45,10 +46,7 @@ class EditBufferTest {
     void setThenGet() {
         EditBuffer buffer = build(sampleEdits());
         sampleEdits().forEach(
-            (
-                pos,
-                state
-            ) -> assertEquals(
+            (pos, state) -> assertEquals(
                 state.intValue(),
                 buffer.getBlockState(pos.get(0), pos.get(1), pos.get(2))
             )
@@ -246,6 +244,46 @@ class EditBufferTest {
         assertThrows(IllegalStateException.class, () -> builder.setBiome(0, 0, 0, 1));
         assertThrows(IllegalStateException.class, () -> builder.fillSection(1, 0, 0, 1));
         assertThrows(IllegalStateException.class, builder::build);
+        assertThrows(
+            IllegalStateException.class,
+            () -> builder.captureSection(0, 0, 0, Palette.blocks())
+        );
+        assertThrows(
+            IllegalStateException.class,
+            () -> builder.captureBlockEntity(0, 0, 0, Block.CHEST)
+        );
         assertEquals(EditBuffer.NONE, buffer.getBlockState(1, 0, 0));
+    }
+
+    @Test
+    void captureSectionRefusesAHeldSection() {
+        var builder = EditBuffer.builder().setBlockState(1, 2, 3, Block.STONE);
+        assertThrows(
+            IllegalStateException.class,
+            () -> builder.captureSection(0, 0, 0, Palette.blocks())
+        );
+        assertEquals(Block.STONE.stateId(), builder.build().getBlockState(1, 2, 3));
+    }
+
+    @Test
+    void captureBlockEntityRequiresAHeldSection() {
+        var builder = EditBuffer.builder();
+        assertThrows(
+            IllegalStateException.class,
+            () -> builder.captureBlockEntity(0, 0, 0, Block.CHEST)
+        );
+
+        Palette world = Palette.blocks();
+        world.fill(Block.CHEST.stateId());
+        builder.captureSection(0, 0, 0, world);
+        Block chest = Block.CHEST.withNbt(
+            CompoundBinaryTag.builder().putString("Lock", "k").build()
+        );
+        builder.captureBlockEntity(3, 4, 5, chest);
+        EditBuffer buffer = builder.build();
+
+        assertEquals(chest, buffer.getBlock(3, 4, 5));
+        assertEquals(Block.CHEST.stateId(), buffer.getBlockState(3, 4, 5));
+        assertEquals(Block.CHEST, buffer.getBlock(0, 0, 0));
     }
 }
