@@ -32,8 +32,9 @@ record StoredReplay(
         return ReplayPreamble.index(preamble)
             .stream()
             .anyMatch(
-                chunk -> chunk.formatVersion() != ReplayHeader.VERSION_LATEST
-                    || chunk.dataVersion() != MinecraftServer.DATA_VERSION
+                chunk ->
+                    chunk.formatVersion() != ReplayHeader.VERSION_LATEST
+                        || chunk.dataVersion() != MinecraftServer.DATA_VERSION
             );
     }
 
