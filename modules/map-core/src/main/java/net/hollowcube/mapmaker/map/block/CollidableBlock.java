@@ -17,6 +17,9 @@ import org.jetbrains.annotations.NotNullByDefault;
 ///
 /// **Note:** The [#collisionBox()] may not extend outside of a single block bounding box. This is a
 /// limitation of the current collision logic. It could be lifted in the future if necessary.
+///
+/// The [WorldIndex] learns of placed and removed blocks through [#onPlace] and [#onDestroy], so an
+/// implementation overriding either must call the default.
 @NotNullByDefault
 public interface CollidableBlock extends BlockHandler {
 
@@ -27,5 +30,15 @@ public interface CollidableBlock extends BlockHandler {
 
     /// Called when added to world and cached by [WorldIndex], called on touch.
     Trigger createTrigger(BlockVec position, Block block);
+
+    @Override
+    default void onPlace(Placement placement) {
+        WorldIndex.blockChanged(placement.getInstance(), placement.getBlockPosition());
+    }
+
+    @Override
+    default void onDestroy(Destroy destroy) {
+        WorldIndex.blockChanged(destroy.getInstance(), destroy.getBlockPosition());
+    }
 
 }

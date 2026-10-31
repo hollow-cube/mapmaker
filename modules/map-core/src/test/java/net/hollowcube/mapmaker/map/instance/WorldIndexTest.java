@@ -8,6 +8,8 @@ import net.hollowcube.mapmaker.map.util.spatial.BoundingBox;
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.polar.PolarWorldAccess;
+import net.hollowcube.terraform.apply.ApplyEngine;
+import net.hollowcube.terraform.buffer.EditBuffer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
@@ -95,6 +97,29 @@ class WorldIndexTest {
         instance.setBlock(0, 41, 0, PLATE_BLOCK.withNbt(CompoundBinaryTag.builder().putInt("restored", 1).build()));
         index.update(instance, MapSize.NORMAL);
         assertNotNull(index.block(new BlockVec(0, 41, 0)));
+    }
+
+    @Test
+    void tracksTerraformApplies() {
+        var instance = createInstance();
+        var index = instance.index();
+        instance.setBlock(1, 41, 1, PLATE_BLOCK);
+        index.update(instance, MapSize.NORMAL);
+
+        // Written below setBlock, so only the handler lifecycle tells the index.
+        var result = ApplyEngine.DEFAULT.apply(instance, EditBuffer.builder()
+            .setBlockState(1, 41, 1, Block.AIR)
+            .setBlockState(4, 41, 4, PLATE_BLOCK)
+            .build());
+        index.update(instance, MapSize.NORMAL);
+        assertNull(index.block(new BlockVec(1, 41, 1)));
+        assertNotNull(index.block(new BlockVec(4, 41, 4)));
+        assertTrue(index.tree().intersectingObjects(new BoundingBox(1, 41, 1, 2, 42, 2)).isEmpty());
+
+        ApplyEngine.DEFAULT.apply(instance, result.undo());
+        index.update(instance, MapSize.NORMAL);
+        assertNotNull(index.block(new BlockVec(1, 41, 1)));
+        assertNull(index.block(new BlockVec(4, 41, 4)));
     }
 
     @Test

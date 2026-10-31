@@ -18,40 +18,32 @@ import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnmodifiableView;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static net.hollowcube.mapmaker.map.util.spatial.Octree.simpleOctree;
 
 public final class WorldIndex {
-    static void blockChanged(Instance instance, int x, int y, int z, @Nullable Block previous, Block block) {
-        var handler = block.handler() instanceof CollidableBlock collidable ? collidable : null;
-        if (handler == null && (previous == null || !(previous.handler() instanceof CollidableBlock))) return;
+    /// Marks a position whose collidable block was placed or removed. The next [#update] indexes whatever block
+    /// is there by then.
+    public static void blockChanged(Instance instance, Point position) {
         if (instance instanceof MapInstance mapInstance)
-            mapInstance.index().pendingBlocks.add(new BlockChange(x, y, z, handler, block));
+            mapInstance.index().pendingBlocks.add(position.asBlockVec());
     }
 
     static void chunkLoaded(Chunk chunk, Int2ObjectMap<Block> entries) {
         if (!(chunk.getInstance() instanceof MapInstance mapInstance)) return;
         Int2ObjectMaps.fastForEach(entries, entry -> {
-            var block = entry.getValue();
-            if (!(block.handler() instanceof CollidableBlock handler)) return;
+            if (!(entry.getValue().handler() instanceof CollidableBlock)) return;
             int index = entry.getIntKey();
-            mapInstance.index().pendingBlocks.add(new BlockChange(
+            mapInstance.index().pendingBlocks.add(new BlockVec(
                 chunk.getChunkX() * Chunk.CHUNK_SIZE_X + CoordConversion.chunkBlockIndexGetX(index),
                 CoordConversion.chunkBlockIndexGetY(index),
-                chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z + CoordConversion.chunkBlockIndexGetZ(index),
-                handler, block));
+                chunk.getChunkZ() * Chunk.CHUNK_SIZE_Z + CoordConversion.chunkBlockIndexGetZ(index)));
         });
     }
 
-    private final Queue<BlockChange> pendingBlocks = new ConcurrentLinkedQueue<>();
+    private final Queue<BlockVec> pendingBlocks = new ConcurrentLinkedQueue<>();
     private final Map<BlockVec, IndexedBlock> blocks = new HashMap<>();
     private final Collection<IndexedBlock> blocksView = Collections.unmodifiableCollection(blocks.values());
     private volatile boolean treeDirty = true;
@@ -76,26 +68,10 @@ public final class WorldIndex {
     public void update(Instance instance, MapSize mapSize) {
         int scalePowerOfTwo = (int) Math.ceil(Math.log(Math.min(mapSize.size(), 4096)) / Math.log(2));
 
-        BlockChange change;
-        while ((change = pendingBlocks.poll()) != null) {
-            var position = new BlockVec(change.x, change.y, change.z);
-            if (change.handler == null) {
-                if (blocks.remove(position) != null) treeDirty = true;
-                continue;
-            }
-
-            Trigger trigger;
-            try {
-                trigger = change.handler.createTrigger(position, change.block);
-            } catch (Exception e) {
-                ExceptionReporter.reportException(e);
-                if (blocks.remove(position) != null) treeDirty = true;
-                continue;
-            }
-
-            var node = new IndexedBlock(position, change.handler, change.block, trigger);
-            if (!node.equals(blocks.put(position, node))) treeDirty = true;
-        }
+        Set<BlockVec> changed = new HashSet<>();
+        BlockVec pending;
+        while ((pending = pendingBlocks.poll()) != null) changed.add(pending);
+        for (var position : changed) reindex(instance, position);
 
         if (!treeDirty) return;
         treeDirty = false;
@@ -109,7 +85,35 @@ public final class WorldIndex {
         this.tree = simpleOctree(scalePowerOfTwo, objects);
     }
 
-    private record BlockChange(int x, int y, int z, @Nullable CollidableBlock handler, Block block) {
+    private void reindex(Instance instance, BlockVec position) {
+        var block = entryAt(instance, position);
+        if (block == null || !(block.handler() instanceof CollidableBlock handler)) {
+            if (blocks.remove(position) != null) treeDirty = true;
+            return;
+        }
+
+        Trigger trigger;
+        try {
+            trigger = handler.createTrigger(position, block);
+        } catch (Exception e) {
+            ExceptionReporter.reportException(e);
+            if (blocks.remove(position) != null) treeDirty = true;
+            return;
+        }
+
+        var node = new IndexedBlock(position, handler, block, trigger);
+        if (!node.equals(blocks.put(position, node))) treeDirty = true;
+    }
+
+    private static @Nullable Block entryAt(Instance instance, BlockVec position) {
+        var chunk = instance.getChunkAt(position);
+        if (chunk == null) return null;
+        chunk.lockReadLock();
+        try {
+            return chunk.getBlock(position, Block.Getter.Condition.CACHED);
+        } finally {
+            chunk.unlockReadLock();
+        }
     }
 
     public record IndexedBlock(BlockVec position, CollidableBlock handler, Block block, Trigger trigger) implements SpatialObject {
