@@ -701,6 +701,52 @@ class ChatServiceImplTest {
         }
     }
 
+    @Test
+    void send_censorsWhatOnlyTheFilterCatches() throws IOException, SQLException {
+        var dir = System.getenv("CHAT_FILTER_DIR");
+        var library = System.getenv("ONNXRUNTIME_LIBRARY");
+        assumeTrue(
+            dir != null && library != null,
+            "CHAT_FILTER_DIR or ONNXRUNTIME_LIBRARY not set"
+        );
+
+        try (var filter = ChatFilter.load(Path.of(library), Path.of(dir))) {
+            var service = new ChatServiceImpl(
+                TEST_DB.database(ApiDatabase::new),
+                nats.publisher,
+                filter
+            );
+            var censored = service.send(
+                SENDER,
+                "server-1",
+                ChatChannel.GLOBAL,
+                null,
+                "ja to już kurwa jestem zrezygnowany",
+                null
+            );
+            var sent = service.send(
+                SENDER,
+                "server-1",
+                ChatChannel.GLOBAL,
+                null,
+                "damn this jump is hard",
+                null
+            );
+
+            assertEquals(new ChatResult.Censored(), censored);
+            assertEquals(new ChatResult.Sent(), sent);
+            assertEquals(
+                List.of(
+                    "global|"
+                        + SENDER
+                        + "|ja to już kurwa jestem zrezygnowany|chat-filter|strong_swear",
+                    "global|" + SENDER + "|damn this jump is hard|null|null"
+                ),
+                rows()
+            );
+        }
+    }
+
     //endregion
 
     /// Every logged message as `filterVersion|filterScores`.

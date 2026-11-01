@@ -19,9 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -56,6 +54,13 @@ public final class ChatServiceImpl implements ChatService {
     /// Go's name for this filter, in `censored_by`. The Java one is a port of that engine, so a
     /// moderator reading old rows and new ones is reading the same thing.
     private static final String CENSOR_ENGINE = "static-v2";
+    private static final String FILTER_ENGINE = "chat-filter";
+    private static final Map<String, Float> FILTER_CENSOR = Map.of(
+        "slur",
+        0.9f,
+        "strong_swear",
+        0.9f
+    );
     private static final long NAMES_TTL = Duration.ofMinutes(10).toNanos();
 
     private final ApiDatabase db;
@@ -124,24 +129,25 @@ public final class ChatServiceImpl implements ChatService {
 
         var censor = ProfanityFilter.test(text);
         var scores = score(text);
+        var filterHeads = censor.matched() || scores == null ? null : filterCensor(scores);
         db.chat.insertChatMessage(
             new ChatQueries.InsertChatMessageParams(
                 serverId,
                 channelColumn(channel, target),
                 senderId,
                 message,
-                censor.matched() ? CENSOR_ENGINE : null,
+                censor.matched() ? CENSOR_ENGINE : filterHeads != null ? FILTER_ENGINE : null,
                 censor.matched()
                     ? censor.matches()
                         .stream()
                         .map(ProfanityFilter.Match::term)
                         .collect(Collectors.joining(","))
-                    : null,
+                    : filterHeads,
                 scores == null ? null : scores.version(),
                 scores == null ? null : scores.values()
             )
         );
-        if (censor.matched()) return new ChatResult.Censored();
+        if (censor.matched() || filterHeads != null) return new ChatResult.Censored();
 
         publish(
             new ChatMessage(
@@ -197,6 +203,16 @@ public final class ChatServiceImpl implements ChatService {
             logger.warn("chat filter failed to score a message", e);
             return null;
         }
+    }
+
+    private @Nullable String filterCensor(ChatFilter.Scores scores) {
+        var outputs = Objects.requireNonNull(filter).outputs();
+        var heads = new ArrayList<String>();
+        for (int i = 0; i < outputs.size(); i++) {
+            var threshold = FILTER_CENSOR.get(outputs.get(i));
+            if (threshold != null && scores.values().get(i) >= threshold) heads.add(outputs.get(i));
+        }
+        return heads.isEmpty() ? null : String.join(",", heads);
     }
 
     /// Async reload occasionally, using stale values otherwise (it will still work even without,
