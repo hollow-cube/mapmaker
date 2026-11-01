@@ -4,7 +4,9 @@ import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.schem.util.GameDataProvider;
-import net.hollowcube.terraform.apply.*;
+import net.hollowcube.terraform.apply.ApplyEngine;
+import net.hollowcube.terraform.apply.PartialApplyException;
+import net.hollowcube.terraform.apply.UnloadedChunkPolicy;
 import net.hollowcube.terraform.buffer.EditBuffer;
 import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
 import net.hollowcube.terraform.legacy.schem.SchemUpgrader;
@@ -40,11 +42,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
@@ -185,6 +184,11 @@ public final class TerraformImpl implements Terraform {
     }
 
 
+    @Override
+    public @NotNull CompletableFuture<Void> closeInstance(@NotNull Instance instance) {
+        return applyEngine.close(instance);
+    }
+
     // Internal Task API
 
     /**
@@ -233,75 +237,36 @@ public final class TerraformImpl implements Terraform {
     }
 
     private @NotNull Runnable applyTask(@NotNull TaskImpl task) {
-        Check.notNull(task.buffer(), "Task buffer must not be null when applying");
+        Objects.requireNonNull(task.buffer(), "Task buffer must not be null when applying");
         return () -> {
             try {
                 logger.debug("{}: apply started", task);
                 task.setState(Task.State.APPLY, null);
-                long start = System.nanoTime();
+                var timings = new ApplyTimings(System.nanoTime());
 
                 var instance = task.session().instance();
                 var edit = clipToBorder(instance, EditBlockBuffer.toEditBuffer(task.buffer()));
-                long converted = System.nanoTime();
-                long captured = converted, applied = converted;
+                timings.converted = System.nanoTime();
 
-                EditBuffer undo;
-                long changed;
                 if (task.isDryRun()) {
                     var read = EditBuffer.builder();
-                    changed = readTouched(instance, edit, read);
-                    undo = read.build();
-                    captured = applied = System.nanoTime();
-                } else {
-                    EditBuffer before = null;
-                    if (task.capturesAll()) {
-                        var read = EditBuffer.builder();
-                        readTouched(instance, edit, read);
-                        before = read.build();
-                    }
-                    captured = System.nanoTime();
-
-                    // Loading blocks this apply thread, as legacy always has.
-                    ApplyEngine.ApplyResult result;
-                    try {
-                        result = applyEngine.apply(instance, edit, UnloadedChunkPolicy.LOAD, !task.isEphemeral());
-                    } catch (PartialApplyException e) {
-                        // Keep what was written undoable, then fail the task.
-                        var partial = e.partial();
-                        relight(instance, partial.chunks());
-                        if (!task.isEphemeral()) {
-                            var partialUndo = new EditBlockBuffer(before != null ? before : partial.undo());
-                            task.session().remember(Change.of(partialUndo, new EditBlockBuffer(edit)));
-                        }
-                        throw e;
-                    }
-                    undo = before != null ? before : result.undo();
-                    changed = result.changed();
-                    applied = System.nanoTime();
-                    relight(instance, result.chunks());
-                }
-                long relit = System.nanoTime();
-
-                var undoBuffer = new EditBlockBuffer(undo);
-                var redoBuffer = new EditBlockBuffer(edit);
-                if (!task.isDryRun() && !task.isEphemeral()) {
-                    task.session().remember(Change.of(undoBuffer, redoBuffer));
+                    long changed = readTouched(instance, edit, read);
+                    timings.captured = timings.applied = timings.relit = System.nanoTime();
+                    complete(task, new EditBlockBuffer(read.build()), new EditBlockBuffer(edit), changed, timings);
+                    return;
                 }
 
-                task.setState(Task.State.COMPLETE, null);
-                logger.debug("{}: apply complete in {}ms", task, (System.nanoTime() - start) / 1_000_000d);
-                reportStats(task, edit, undo, changed, start, converted, captured, applied, relit);
-
-                var result = new TaskResult(undoBuffer, redoBuffer, changed, task.attributes());
-                if (result.hasAttribute(Task.ATT_BORDER_TAINT)) {
-                    var cui = task.session().cui();
-                    cui.sendMessage("terraform.warn.border_exceeded");
+                EditBuffer before = null;
+                if (task.capturesAll()) {
+                    var read = EditBuffer.builder();
+                    readTouched(instance, edit, read);
+                    before = read.build();
                 }
+                timings.captured = System.nanoTime();
 
-                var postApplyFunc = task.postApplyFunc();
-                if (postApplyFunc != null) {
-                    postApplyFunc.exec(result);
-                }
+                var capturedBefore = before;
+                applyEngine.submit(instance, edit, UnloadedChunkPolicy.LOAD, !task.isEphemeral())
+                        .whenComplete((result, error) -> onApplied(task, instance, edit, capturedBefore, result, error, timings));
             } catch (Throwable t) {
                 logger.error("{}: apply failed", task, t);
                 task.setState(Task.State.FAILED, null);
@@ -310,13 +275,95 @@ public final class TerraformImpl implements Terraform {
     }
 
     /**
+     * Runs on the instance tick (or the submitting thread if the apply failed before queueing). History is
+     * recorded here, on the same thread as {@code //undo}. Relighting and the task's callbacks go back to the
+     * apply pool, keeping light off the tick.
+     */
+    private void onApplied(
+            @NotNull TaskImpl task, @NotNull Instance instance, @NotNull EditBuffer edit, @Nullable EditBuffer before,
+            @Nullable ApplyEngine.ApplyResult result, @Nullable Throwable error, @NotNull ApplyTimings timings
+    ) {
+        try {
+            timings.applied = System.nanoTime();
+            if (error != null) {
+                // Keep what was written undoable, then fail the task.
+                var partial = error instanceof PartialApplyException e ? e.partial() : null;
+                if (partial != null && !task.isEphemeral()) {
+                    var partialUndo = new EditBlockBuffer(before != null ? before : partial.undo());
+                    task.session().remember(Change.of(partialUndo, new EditBlockBuffer(edit)));
+                }
+                threadPoolApply.execute(() -> {
+                    if (partial != null) relight(instance, partial.chunks());
+                    logger.error("{}: apply failed", task, error);
+                    task.setState(Task.State.FAILED, null);
+                });
+                return;
+            }
+
+            var undoBuffer = new EditBlockBuffer(before != null ? before : Objects.requireNonNull(result).undo());
+            var redoBuffer = new EditBlockBuffer(edit);
+            if (!task.isEphemeral()) {
+                task.session().remember(Change.of(undoBuffer, redoBuffer));
+            }
+            threadPoolApply.execute(() -> {
+                try {
+                    relight(instance, result.chunks());
+                    timings.relit = System.nanoTime();
+                    complete(task, undoBuffer, redoBuffer, result.changed(), timings);
+                } catch (Throwable t) {
+                    logger.error("{}: apply failed", task, t);
+                    task.setState(Task.State.FAILED, null);
+                }
+            });
+        } catch (Throwable t) {
+            logger.error("{}: apply failed", task, t);
+            task.setState(Task.State.FAILED, null);
+        }
+    }
+
+    private void complete(
+            @NotNull TaskImpl task, @NotNull EditBlockBuffer undoBuffer, @NotNull EditBlockBuffer redoBuffer,
+            long changed, @NotNull ApplyTimings timings
+    ) {
+        task.setState(Task.State.COMPLETE, null);
+        logger.debug("{}: apply complete in {}ms", task, (System.nanoTime() - timings.start) / 1_000_000d);
+        reportStats(task, redoBuffer.edit(), undoBuffer.edit(), changed, timings);
+
+        var result = new TaskResult(undoBuffer, redoBuffer, changed, task.attributes());
+        if (result.hasAttribute(Task.ATT_BORDER_TAINT)) {
+            var cui = task.session().cui();
+            cui.sendMessage("terraform.warn.border_exceeded");
+        }
+
+        var postApplyFunc = task.postApplyFunc();
+        if (postApplyFunc != null) {
+            postApplyFunc.exec(result);
+        }
+    }
+
+    /**
+     * When each stage of an apply ended, in {@link System#nanoTime()}. Written by one thread at a time, handed on
+     * through the executors.
+     */
+    private static final class ApplyTimings {
+        final long start;
+        long converted, captured, applied, relit;
+
+        ApplyTimings(long start) {
+            this.start = start;
+        }
+    }
+
+    /**
      * Tells a player who turned on {@link PlayerSettings#TERRAFORM_STATS} how long each stage of the task took
      * and how much it changed.
      */
     private static void reportStats(
             @NotNull TaskImpl task, @NotNull EditBuffer edit, @NotNull EditBuffer undo, long changed,
-            long applyStart, long converted, long captured, long applied, long relit
+            @NotNull ApplyTimings timings
     ) {
+        long applyStart = timings.start, converted = timings.converted, captured = timings.captured;
+        long applied = timings.applied, relit = timings.relit;
         var player = task.session().parent().player();
         if (!localPlayer(player).getSetting(PlayerSettings.TERRAFORM_STATS)) return;
 

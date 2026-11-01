@@ -15,8 +15,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 import static net.minestom.server.coordinate.CoordConversion.*;
@@ -51,54 +53,125 @@ public final class ApplyEngine {
 
     private final BlockHandlerRegistry handlers;
     private final Function<Chunk, Collection<HeightmapView>> heightmaps;
+    private final long tickTargetNanos;
 
     private ApplyEngine(Builder builder) {
         this.handlers = Objects.requireNonNullElseGet(builder.handlers, BlockHandlerRegistry::new);
         this.heightmaps = builder.heightmaps;
+        this.tickTargetNanos = builder.tickTargetNanos;
     }
 
+    /// Applies the whole buffer now, on the calling thread. Waits for any chunk loads and block handler
+    /// callbacks fire on the calling thread.
+    ///
+    /// Not ordered wrt [#submit].
     public ApplyResult apply(Instance instance, EditBuffer buffer) {
         return apply(instance, buffer, UnloadedChunkPolicy.FAIL);
     }
 
+    /// Applies the whole buffer now, on the calling thread. Waits for any chunk loads and block handler
+    /// callbacks fire on the calling thread.
+    ///
+    /// Not ordered wrt [#submit].
     public ApplyResult apply(Instance instance, EditBuffer buffer, UnloadedChunkPolicy policy) {
         return apply(instance, buffer, policy, true);
     }
 
-    /// Without `captureUndo` the result's undo is empty, so an edit nobody will undo skips copying everything
-    /// it overwrites.
+    /// Applies the whole buffer now, on the calling thread. Waits for any chunk loads and block handler
+    /// callbacks fire on the calling thread.
+    ///
+    /// Not ordered wrt [#submit].
     public ApplyResult apply(
         Instance instance,
         EditBuffer buffer,
         UnloadedChunkPolicy policy,
         boolean captureUndo
     ) {
-        var work = prepareChunkWork(instance, buffer, policy);
+        var work = chunkWork(instance, buffer, policy);
+        checkStorage(work); // Waits for every load (all started above, so they run concurrently)
 
-        var context = new ApplyContext(handlers, instance, captureUndo);
-        for (ChunkWork chunkWork : work) {
-            var chunk = chunkWork.chunk();
-            try {
-                var chunkContext = new ChunkApplyContext(context, chunk, heightmaps);
-                boolean dirty = chunkContext.applyChunk(chunkWork.sections());
-                if (dirty || chunkWork.loaded()) context.chunks.add(chunk);
-            } catch (RuntimeException e) {
-                context.chunks.add(chunk);
-                // The column that threw may be partly written but not sent, so send the whole thing as is
-                if (context.anyViewers && chunk.isLoaded())
-                    chunk.sendPacketToViewers(chunk.getFullDataPacket());
-                throw new PartialApplyException(context.result(), e);
-            }
-        }
-
+        var context = newContext(instance, captureUndo);
+        for (ChunkWork chunkWork : work) applyColumn(context, chunkWork);
         return context.result();
     }
 
-    /// Group the buffer work into chunks, sorted by z-then-x. And load any unloaded chunks depending on
-    /// the [UnloadedChunkPolicy].
+    /// Queues the buffer to be applied on the instance's tick thread within [Builder#tickTarget].
     ///
-    /// Returns with all chunks loaded or an exception if something went wrong.
-    static List<ChunkWork> prepareChunkWork(
+    /// Unloaded chunks under [UnloadedChunkPolicy#LOAD] are loaded prior to any application starting.
+    ///
+    /// The future completes on the instance's tick thread, fails may happen off-thread.
+    public CompletableFuture<ApplyResult> submit(Instance instance, EditBuffer buffer) {
+        return submit(instance, buffer, UnloadedChunkPolicy.FAIL);
+    }
+
+    /// Queues the buffer to be applied on the instance's tick thread within [Builder#tickTarget].
+    ///
+    /// Unloaded chunks under [UnloadedChunkPolicy#LOAD] are loaded prior to any application starting.
+    ///
+    /// The future completes on the instance's tick thread, fails may happen off-thread.
+    public CompletableFuture<ApplyResult> submit(
+        Instance instance,
+        EditBuffer buffer,
+        UnloadedChunkPolicy policy
+    ) {
+        return submit(instance, buffer, policy, true);
+    }
+
+    /// Queues the buffer to be applied on the instance's tick thread within [Builder#tickTarget].
+    ///
+    /// Unloaded chunks under [UnloadedChunkPolicy#LOAD] are loaded prior to any application starting.
+    ///
+    /// The future completes on the instance's tick thread, fails may happen off-thread.
+    public CompletableFuture<ApplyResult> submit(
+        Instance instance,
+        EditBuffer buffer,
+        UnloadedChunkPolicy policy,
+        boolean captureUndo
+    ) {
+        ApplyQueue.Operation operation;
+        try {
+            operation = new ApplyQueue.Operation(this, instance, buffer, policy, captureUndo);
+        } catch (RuntimeException e) {
+            return CompletableFuture.failedFuture(e);
+        }
+        if (!ApplyQueue.forInstance(instance, tickTargetNanos).submit(operation)) {
+            return CompletableFuture.failedFuture(
+                new IllegalStateException("instance closed to applies: " + instance.getUuid())
+            );
+        }
+        return operation.result();
+    }
+
+    /// Stops accepting [submitted][#submit] applies to the instance and completes when the already submitted
+    /// applications have finished.
+    ///
+    /// The instance must keep ticking for application to happen.
+    public CompletableFuture<Void> close(Instance instance) {
+        return ApplyQueue.forInstance(instance, tickTargetNanos).close();
+    }
+
+    ApplyContext newContext(Instance instance, boolean captureUndo) {
+        return new ApplyContext(handlers, instance, captureUndo);
+    }
+
+    void applyColumn(ApplyContext context, ChunkWork work) {
+        var chunk = work.chunk();
+        try {
+            var chunkContext = new ChunkApplyContext(context, chunk, heightmaps);
+            boolean dirty = chunkContext.applyChunk(work.sections());
+            if (dirty || work.loaded()) context.chunks.add(chunk);
+        } catch (RuntimeException e) {
+            context.chunks.add(chunk);
+            // The column that threw may be partly written but not sent, so send the whole thing as is
+            if (context.anyViewers && chunk.isLoaded())
+                chunk.sendPacketToViewers(chunk.getFullDataPacket());
+            throw new PartialApplyException(context.result(), e);
+        }
+    }
+
+    /// Group the buffer work into chunks, sorted by z-then-x, and start loading any unloaded chunks depending
+    /// on the [UnloadedChunkPolicy]. Does not wait for the loads, see [#checkStorage].
+    static List<ChunkWork> chunkWork(
         Instance instance,
         EditBuffer buffer,
         UnloadedChunkPolicy policy
@@ -131,8 +204,10 @@ public final class ApplyEngine {
                 work.add(new ChunkWork(instance.loadChunk(chunkX, chunkZ), true, entry.getValue()));
             }
         }
+        return work;
+    }
 
-        // Waits for every load (all started above, so they run concurrently) before the first write.
+    static void checkStorage(List<ChunkWork> work) {
         for (ChunkWork chunkWork : work) {
             Chunk chunk = chunkWork.chunk();
             if (!(chunk instanceof DynamicChunk)) {
@@ -145,7 +220,6 @@ public final class ApplyEngine {
                 );
             }
         }
-        return work;
     }
 
     /// Per-apply state
@@ -232,6 +306,7 @@ public final class ApplyEngine {
     public static final class Builder {
         private @Nullable BlockHandlerRegistry handlers = null;
         private Function<Chunk, Collection<HeightmapView>> heightmaps = HeightmapView.MINESTOM;
+        private long tickTargetNanos = TimeUnit.MILLISECONDS.toNanos(45);
 
         /// Handlers to attach, by block key, to written blocks that carry none.
         public Builder blockHandlers(Map<Key, ? extends BlockHandler> handlers) {
@@ -243,6 +318,14 @@ public final class ApplyEngine {
         @ApiStatus.Internal
         public Builder heightmap(Function<Chunk, Collection<HeightmapView>> heightmaps) {
             this.heightmaps = heightmaps;
+            return this;
+        }
+
+        /// How long a server tick may run with [#submit]ted applies writing in it, counting what the rest of the
+        /// last tick took after them. Each instance still writes at least one chunk column per tick. The first
+        /// engine to submit to an instance sets it there.
+        public Builder tickTarget(Duration target) {
+            this.tickTargetNanos = target.toNanos();
             return this;
         }
 

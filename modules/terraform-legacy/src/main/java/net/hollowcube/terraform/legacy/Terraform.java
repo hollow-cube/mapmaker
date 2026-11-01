@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
 /**
@@ -88,6 +89,12 @@ public sealed interface Terraform permits TerraformImpl {
 
     @Blocking
     void saveLocalSession(@NotNull Player player, @NotNull Instance instance, boolean drop);
+
+    /**
+     * Stops applying edits to the instance. The future completes once the edits already queued have been
+     * written, so a save after it can't catch one half-applied. The instance must keep ticking until then.
+     */
+    @NotNull CompletableFuture<Void> closeInstance(@NotNull Instance instance);
 
     //todo rework how tools are handled completely
     @NotNull ToolHandler toolHandler();

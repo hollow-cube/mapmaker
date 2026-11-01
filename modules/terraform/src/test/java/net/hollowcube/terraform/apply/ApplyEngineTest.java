@@ -55,7 +55,7 @@ class ApplyEngineTest {
             .build();
 
         var order = ApplyEngine
-            .prepareChunkWork(env.createFlatInstance(), buffer, UnloadedChunkPolicy.LOAD)
+            .chunkWork(env.createFlatInstance(), buffer, UnloadedChunkPolicy.LOAD)
             .stream()
             .map(work -> List.of(work.chunk().getChunkX(), work.chunk().getChunkZ()))
             .toList();

@@ -242,6 +242,16 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
         var future = new CompletableFuture<Void>();
         FutureUtil.submitVirtual(() -> {
+            // Let queued terraform edits finish, so the last save doesn't catch one half-written.
+            if (terraform != null) {
+                terraform.closeInstance(instance())
+                    .orTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .exceptionally(e -> {
+                        logger.warn("terraform edits still applying at close of {}", map().id(), e);
+                        return null;
+                    })
+                    .join();
+            }
             save(false);
 
             MinecraftServer.getSchedulerManager()
