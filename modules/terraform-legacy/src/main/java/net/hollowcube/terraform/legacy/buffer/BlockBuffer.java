@@ -1,8 +1,5 @@
 package net.hollowcube.terraform.legacy.buffer;
 
-import net.hollowcube.mapmaker.util.CoordinateUtil;
-import net.hollowcube.schem.Schematic;
-import net.hollowcube.schem.builder.SchematicBuilder;
 import net.hollowcube.terraform.legacy.buffer.palette.Palette;
 import net.hollowcube.terraform.legacy.task.edit.WorldView;
 import net.minestom.server.coordinate.Point;
@@ -23,7 +20,7 @@ public interface BlockBuffer {
     }
 
     static @NotNull Builder builder(@Nullable WorldView world) {
-        return new NaiveBlockBufferBuilder(world);
+        return new EditBlockBufferBuilder(world);
     }
 
     /**
@@ -31,39 +28,19 @@ public interface BlockBuffer {
      * so the buffer will contain all blocks between and including the two positions. The positions do not need
      * to be ordered.
      *
-     * <p>A bounded builder is significantly more performant and should be preferred over an unbounded builder.</p>
-     *
-     * <p>An exception will be thrown if setting a block or palette outside of the bounds of the builder.</p>
+     * <p>An exception will be thrown if setting a block outside of the bounds of the builder.</p>
      *
      * @param pos1 The first position (inclusive)
      * @param pos2 The second position (inclusive)
      * @return A new block buffer builder
      */
     static @NotNull Builder builder(@Nullable WorldView world, @NotNull Point pos1, @NotNull Point pos2) {
-        return new BoundedBlockBufferBuilder(world, pos1, pos2);
+        return new EditBlockBufferBuilder(world, pos1, pos2);
     }
 
     void forEachSection(@NotNull SectionConsumer consumer);
 
     long sizeBytes();
-
-    default @NotNull Schematic toSchematic(@NotNull Point offset) {
-        final var builder = SchematicBuilder.builder();
-        builder.offset(CoordinateUtil.floor(offset));
-        forEachSection((cx, cy, cz, palette) -> {
-            for (int y = 0; y < 16; y++) {
-                for (int z = 0; z < 16; z++) {
-                    for (int x = 0; x < 16; x++) {
-                        var blockState = palette.get(x, y, z);
-                        if (blockState != null) {
-                            builder.block(cx * 16 + x, cy * 16 + y, cz * 16 + z, blockState);
-                        }
-                    }
-                }
-            }
-        });
-        return builder.build();
-    }
 
     @FunctionalInterface
     interface SectionConsumer {
@@ -73,7 +50,7 @@ public interface BlockBuffer {
     /**
      * WARNING: Builder implementations are NOT thread safe.
      */
-    sealed interface Builder permits BoundedBlockBufferBuilder, NaiveBlockBufferBuilder {
+    sealed interface Builder permits EditBlockBufferBuilder {
 
         /**
          * Set the block at the given (absolute) coordinate to the given value
@@ -98,11 +75,6 @@ public interface BlockBuffer {
         default void set(@NotNull Point point, @NotNull Block value) throws InterruptedException {
             set(point.blockX(), point.blockY(), point.blockZ(), value);
         }
-
-        //todo does this break a bad boundary/limit the implementations in any way?
-        //     for example if there is an adaptive palette being used, what do we do with the given palette? copy it?
-        //     an alternative is a consumer for all positions, eg: `setSection(int chunkX, int chunkY, int chunkZ, @NotNull Function<XYZ, short>)
-        // void setSection(int chunkX, int chunkY, int chunkZ, @NotNull Palette palette);
 
         @NotNull BlockBuffer build() throws InterruptedException;
 

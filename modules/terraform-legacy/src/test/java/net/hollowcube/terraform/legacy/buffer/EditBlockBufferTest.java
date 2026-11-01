@@ -1,11 +1,8 @@
 package net.hollowcube.terraform.legacy.buffer;
 
-import it.unimi.dsi.fastutil.longs.Long2ObjectArrayMap;
 import net.hollowcube.terraform.buffer.EditBuffer;
-import net.hollowcube.terraform.legacy.buffer.palette.FixedPalette;
-import net.hollowcube.terraform.legacy.buffer.palette.Palette;
-import net.hollowcube.terraform.legacy.util.PaletteUtil;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import org.junit.jupiter.api.Test;
 
@@ -14,28 +11,33 @@ import static org.junit.jupiter.api.Assertions.*;
 class EditBlockBufferTest {
 
     @Test
-    void convertsCellsAndBlockEntities() throws InterruptedException {
+    void builderBuildsAnEditBufferDirectly() throws InterruptedException {
         var chest = Block.CHEST.withNbt(CompoundBinaryTag.builder().putString("CustomName", "loot").build());
         var builder = BlockBuffer.builder(null);
         builder.set(-1, 5, 17, Block.STONE);
         builder.set(3, -20, 4, chest);
-        var edit = EditBlockBuffer.toEditBuffer(builder.build());
+        builder.set(40, 0, 0, Block.DIRT.stateId());
+        var built = builder.build();
 
+        var edit = assertInstanceOf(EditBlockBuffer.class, built).edit();
+        assertSame(edit, EditBlockBuffer.toEditBuffer(built));
         assertEquals(Block.STONE, edit.getBlock(-1, 5, 17));
         assertEquals(chest, edit.getBlock(3, -20, 4));
+        assertEquals(Block.DIRT, edit.getBlock(40, 0, 0));
         assertNull(edit.getBlock(0, 5, 17));
     }
 
     @Test
-    void convertsFixedPalettesToFilledSections() {
-        var sections = new Long2ObjectArrayMap<Palette>();
-        sections.put(PaletteUtil.packPos(1, 2, 3), new FixedPalette(Block.DIRT.stateId()));
-        sections.put(PaletteUtil.packPos(4, 5, 6), new FixedPalette(Palette.UNSET));
-        var edit = EditBlockBuffer.toEditBuffer(new BlockBufferImpl(sections));
+    void boundedBuilderRejectsCellsOutsideItsBounds() throws InterruptedException {
+        var builder = BlockBuffer.builder(null, new Vec(2, 2, 2), new Vec(-2, -2, -2));
+        builder.set(-2, 2, 0, 1);
+        builder.set(2, -2, 2, Block.STONE);
 
-        assertEquals(1, edit.sectionCount());
-        assertEquals(Block.DIRT.stateId(), edit.getBlockState(16, 32, 48));
-        assertEquals(Block.DIRT.stateId(), edit.getBlockState(31, 47, 63));
+        assertThrows(IllegalArgumentException.class, () -> builder.set(3, 0, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> builder.set(0, -3, 0, Block.STONE));
+        var edit = EditBlockBuffer.toEditBuffer(builder.build());
+        assertEquals(1, edit.getBlockState(-2, 2, 0));
+        assertEquals(Block.STONE, edit.getBlock(2, -2, 2));
     }
 
     @Test

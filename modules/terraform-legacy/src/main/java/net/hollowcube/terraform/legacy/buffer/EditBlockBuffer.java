@@ -2,7 +2,6 @@ package net.hollowcube.terraform.legacy.buffer;
 
 import net.hollowcube.terraform.buffer.BufferSection;
 import net.hollowcube.terraform.buffer.EditBuffer;
-import net.hollowcube.terraform.legacy.buffer.palette.FixedPalette;
 import net.hollowcube.terraform.legacy.buffer.palette.Palette;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.NotNull;
@@ -15,18 +14,14 @@ import org.jetbrains.annotations.Nullable;
 public record EditBlockBuffer(@NotNull EditBuffer edit) implements BlockBuffer {
 
     /**
-     * The buffer as an {@link EditBuffer}: unwrapped when it already is one, else converted cell by cell.
+     * The buffer as an {@link EditBuffer}: unwrapped when it already is one (every built buffer), else converted
+     * cell by cell (Axiom's).
      */
     public static @NotNull EditBuffer toEditBuffer(@NotNull BlockBuffer buffer) {
         if (buffer instanceof EditBlockBuffer(EditBuffer edit)) return edit;
 
         var builder = EditBuffer.builder();
         buffer.forEachSection((sectionX, sectionY, sectionZ, palette) -> {
-            if (palette instanceof FixedPalette(int value)) {
-                if (value != Palette.UNSET) builder.fillSection(sectionX, sectionY, sectionZ, value);
-                return;
-            }
-
             int baseX = sectionX << 4, baseY = sectionY << 4, baseZ = sectionZ << 4;
             for (int y = 0; y < 16; y++) {
                 for (int z = 0; z < 16; z++) {
