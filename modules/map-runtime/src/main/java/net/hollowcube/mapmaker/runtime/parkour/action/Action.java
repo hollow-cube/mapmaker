@@ -3,22 +3,18 @@ package net.hollowcube.mapmaker.runtime.parkour.action;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.player.Permission;
-import net.hollowcube.mapmaker.runtime.PlayState;
+import net.hollowcube.mapmaker.runtime.io.PlayerInput;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.minestom.server.codec.StructCodec;
-import net.minestom.server.entity.Player;
 import org.intellij.lang.annotations.MagicConstant;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 import java.util.function.Function;
 
-public interface Action {
+public interface Action extends PlayerInput {
     StructCodec<? extends Action> codec();
-
-    default void applyTo(Player player, PlayState state) {
-    }
 
     enum Type {
         SPAWN("Spawn"),

@@ -1,6 +1,8 @@
 package net.hollowcube.mapmaker.runtime.parkour.action;
 
 import net.hollowcube.mapmaker.runtime.PlayState;
+import net.hollowcube.mapmaker.runtime.io.Connection;
+import net.hollowcube.mapmaker.runtime.io.Dispatch;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
 import net.minestom.server.entity.Player;
@@ -11,6 +13,8 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ActionList {
+    private static final String CALLER = "action_list";
+
     private final List<Ref> actions = new ArrayList<>();
 
     public ActionList() {
@@ -29,9 +33,13 @@ public class ActionList {
     }
 
     public void applyTo(Player player, PlayState state) {
-        for (var action : actions) {
-            action.action().applyTo(player, state);
-        }
+        var dispatch = new Dispatch(player, state);
+        dispatch.fire(CALLER, connections());
+        dispatch.drain();
+    }
+
+    public List<Connection> connections() {
+        return actions.stream().map(ref -> new Connection(ref.key(), ref.action())).toList();
     }
 
     public boolean has(Key actionKey) {
