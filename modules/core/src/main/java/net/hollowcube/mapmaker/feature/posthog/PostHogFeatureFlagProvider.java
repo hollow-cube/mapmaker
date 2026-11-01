@@ -43,10 +43,9 @@ public class PostHogFeatureFlagProvider implements FeatureFlagProvider {
                                     "is_hypercube", String.valueOf(playerData.isHypercube())
                             ))
                             .build()).isEnabled();
-            case MapData map -> {
-                log.warn("Map context is not supported: {}", map);
-                yield false;
-            }
+            case MapData map -> PostHog.getFeatureFlag(transformedName, NO_USER, FeatureFlagContext.newBuilder()
+                    .personProperties(Map.of("map_id", map.id().toString()))
+                    .build()).isEnabled();
             default -> {
                 log.warn("Unknown context: {}", context[0]);
                 yield false;
