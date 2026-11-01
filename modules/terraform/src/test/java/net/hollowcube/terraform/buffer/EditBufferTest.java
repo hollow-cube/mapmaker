@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -322,5 +323,36 @@ class EditBufferTest {
             buffer.clipToBox(-5, -5, -5, 20, 20, 20).blockBounds()
         );
         assertNull(buffer.clipToBox(100, 100, 100, 120, 120, 120).blockBounds());
+    }
+
+    @Test
+    void fillSetsEveryCellOfTheBoxAndNothingElse() {
+        var box = Area.cuboid(new BlockVec(-3, 10, -3), new BlockVec(33, 40, 20));
+        EditBuffer buffer = EditBuffer.builder().fill(box, Block.STONE.stateId()).build();
+
+        assertEquals(box, buffer.blockBounds());
+        for (int x = -5; x <= 35; x++) {
+            for (int y = 8; y <= 42; y++) {
+                for (int z = -5; z <= 22; z++) {
+                    int expected = box.contains(x, y, z) ? Block.STONE.stateId() : EditBuffer.NONE;
+                    assertEquals(expected, buffer.getBlockState(x, y, z), x + ", " + y + ", " + z);
+                }
+            }
+        }
+        BufferSection whole = Objects.requireNonNull(buffer.section(0, 1, 0));
+        assertEquals(Block.STONE.stateId() + 1, whole.uniformBlockValue());
+    }
+
+    @Test
+    void fillOfAThinBoxCountsOnlyItsCells() {
+        var box = Area.cuboid(new BlockVec(3, 64, -20), new BlockVec(40, 64, 20));
+        EditBuffer buffer = EditBuffer.builder().fill(box, Block.STONE.stateId()).build();
+
+        long[] count = {0};
+        buffer.forEachSection((_, _, _, section) -> count[0] += section.count());
+        assertEquals(38L * 41, count[0]);
+        assertEquals(Block.STONE.stateId(), buffer.getBlockState(3, 64, -20));
+        assertEquals(EditBuffer.NONE, buffer.getBlockState(2, 64, 0));
+        assertEquals(EditBuffer.NONE, buffer.getBlockState(10, 65, 0));
     }
 }

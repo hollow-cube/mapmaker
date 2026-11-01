@@ -236,6 +236,38 @@ public final class EditBuffer {
             return section == null ? NONE : section.getBlockState(x & 15, y & 15, z & 15);
         }
 
+        /// Sets every cell of `box` (inclusive), replacing anything set before in each section it touches.
+        @Contract("_, _ -> this")
+        public Builder fill(Area.Cuboid box, int stateId) {
+            BlockVec min = box.min(), max = box.max();
+            for (int sx = min.blockX() >> 4; sx <= max.blockX() >> 4; sx++) {
+                for (int sy = min.blockY() >> 4; sy <= max.blockY() >> 4; sy++) {
+                    for (int sz = min.blockZ() >> 4; sz <= max.blockZ() >> 4; sz++) {
+                        int bx = sx << 4, by = sy << 4, bz = sz << 4;
+                        var section = BufferSection.box(
+                            Math.max(min.blockX(), bx) - bx,
+                            Math.max(min.blockY(), by) - by,
+                            Math.max(min.blockZ(), bz) - bz,
+                            Math.min(max.blockX(), bx + 15) - bx,
+                            Math.min(max.blockY(), by + 15) - by,
+                            Math.min(max.blockZ(), bz + 15) - bz,
+                            stateId
+                        );
+                        replaceSection(packBlockPos(sx, sy, sz), section);
+                    }
+                }
+            }
+            include(
+                min.blockX(),
+                min.blockY(),
+                min.blockZ(),
+                max.blockX(),
+                max.blockY(),
+                max.blockZ()
+            );
+            return this;
+        }
+
         @Contract("_, _, _, _ -> this")
         public Builder fillSection(int sectionX, int sectionY, int sectionZ, int stateId) {
             replaceSection(

@@ -20,12 +20,10 @@ import net.hollowcube.terraform.legacy.task.ComputeFunc;
 import net.hollowcube.terraform.legacy.util.Messages;
 import net.hollowcube.terraform.legacy.util.math.DirectionUtil;
 import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.utils.Direction;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumSet;
@@ -54,7 +52,7 @@ public final class RegionCommands {
                 return;
             }
 
-            var generator = RegionFunctions.replace(region, Mask.always(), pattern);
+            var generator = RegionFunctions.set(region, pattern);
             var task = session.buildTask("we-set")
                     .metadata() //todo
                     .compute(generator)
@@ -219,7 +217,7 @@ public final class RegionCommands {
             CommandPreviewHelper.debounceContext(player, renderer);
 
             renderer.begin("center");
-            renderer.cuboid(new BlockVec(center.min()), new BlockVec(center.max()), ClientRenderer.RenderType.PRIMARY);
+            renderer.cuboid(center.min().asBlockVec(), center.max().asBlockVec(), ClientRenderer.RenderType.PRIMARY);
             renderer.end("center");
 
             renderer.begin("selection");
@@ -459,7 +457,7 @@ public final class RegionCommands {
             var mask = context.get(maskArg);
 
             if (flags.contains(Flags.MASK)) {
-                Check.notNull(mask, "mask is required with the mask flag");
+                Objects.requireNonNull(mask, "mask is required with the mask flag");
             } else {
                 mask = Mask.always();
             }
@@ -548,13 +546,13 @@ public final class RegionCommands {
                         var buffer = BlockBuffer.builder(world);
                         for (var pos : region) {
                             var block = world.getBlock(pos);
-                            if (block.isAir()) continue;
+                            if (block.air()) continue;
 
                             for (int i = 0; i < count; i++) {
                                 var blockOffset = pos.add(offset.mul(i + 1));
                                 var otherBlock = world.getBlock(blockOffset, Block.Getter.Condition.TYPE);
                                 // If we reach a non-air block, stop smearing
-                                if (!otherBlock.isAir()) break;
+                                if (!otherBlock.air()) break;
 
                                 buffer.set(blockOffset, block);
                             }

@@ -58,6 +58,30 @@ public final class BufferSection {
         return new BufferSection(palette);
     }
 
+    /// A section setting `stateId` in the inclusive section-local box (0..15) and leaving every other cell.
+    static BufferSection box(int x0, int y0, int z0, int x1, int y1, int z1, int stateId) {
+        if (x0 == 0 && y0 == 0 && z0 == 0 && x1 == 15 && y1 == 15 && z1 == 15)
+            return uniform(stateId);
+
+        // Two values, so one bit per cell, packed in the palette's y, z, x order. A row of x lies within one long.
+        long row = ((1L << (x1 - x0 + 1)) - 1) << x0;
+        long[] bits = new long[BLOCK_CELLS / Long.SIZE];
+        for (int y = y0; y <= y1; y++) {
+            for (int z = z0; z <= z1; z++) {
+                int index = y << 8 | z << 4;
+                bits[index >> 6] |= row << (index & 63);
+            }
+        }
+        Palette palette = Palette.empty(
+            BLOCK_DIM,
+            BLOCK_MIN_BITS,
+            BLOCK_MAX_BITS,
+            BLOCK_DIRECT_BITS
+        );
+        palette.load(new int[] {LEAVE, stateId + 1}, bits);
+        return new BufferSection(palette);
+    }
+
     BufferSection() {
         var sparse = new Int2ShortOpenHashMap();
         sparse.defaultReturnValue((short) LEAVE); // absent cell reads as "leave"

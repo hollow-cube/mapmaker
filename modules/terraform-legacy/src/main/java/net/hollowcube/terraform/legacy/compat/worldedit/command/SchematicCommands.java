@@ -3,6 +3,8 @@ package net.hollowcube.terraform.legacy.compat.worldedit.command;
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.schem.util.Rotation;
+import net.hollowcube.terraform.apply.CaptureEngine;
+import net.hollowcube.terraform.buffer.EditBuffer;
 import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
 import net.hollowcube.terraform.legacy.command.util.ArgumentRotation;
 import net.hollowcube.terraform.legacy.command.util.CommandPreviewHelper;
@@ -15,13 +17,16 @@ import net.hollowcube.terraform.legacy.mask.Mask;
 import net.hollowcube.terraform.legacy.pattern.Pattern;
 import net.hollowcube.terraform.legacy.schem.Schematics;
 import net.hollowcube.terraform.legacy.selection.Selection;
+import net.hollowcube.terraform.legacy.selection.region.CuboidRegion;
 import net.hollowcube.terraform.legacy.selection.region.Region;
 import net.hollowcube.terraform.legacy.session.Clipboard;
 import net.hollowcube.terraform.legacy.session.LocalSession;
 import net.hollowcube.terraform.legacy.session.PlayerSession;
+import net.hollowcube.terraform.legacy.task.Task;
 import net.hollowcube.terraform.legacy.util.Format;
 import net.hollowcube.terraform.legacy.util.Messages;
 import net.hollowcube.terraform.util.Transform;
+import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -33,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public final class SchematicCommands {
 
@@ -253,19 +259,37 @@ public final class SchematicCommands {
                 return;
             }
 
-            var origin = player.getPosition();
-            var task = session.buildTask("we-copy")
-                    .metadata() //todo
-                    .compute(RegionFunctions.replace(region, mask, Pattern.air()))
-                    .post(result -> {
-                        Point anchor = flags.contains(Flags.CENTER)
-                                ? region.min().add(region.max()).div(2)
-                                : origin;
-                        var copied = EditBlockBuffer.toEditBuffer(result.undoBuffer());
-                        clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(copied, anchor));
-                        player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
-                    })
-                    .dryRunIfCapacity();
+            Point anchor = flags.contains(Flags.CENTER)
+                    ? region.min().add(region.max()).div(2)
+                    : player.getPosition();
+            Task task;
+            if (!flags.contains(Flags.MASK) && region instanceof CuboidRegion) {
+                // Captures the box straight from the world, a palette copy per whole section, and applies nothing.
+                var instance = session.instance();
+                var box = Area.cuboid(region.min(), region.max().sub(1, 1, 1));
+                var copied = new AtomicReference<EditBuffer>();
+                task = session.buildTask("we-copy")
+                        .metadata() //todo
+                        .compute((_, _) -> {
+                            copied.set(CaptureEngine.capture(instance, box));
+                            return new EditBlockBuffer(EditBuffer.empty());
+                        })
+                        .post(_ -> {
+                            clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(copied.get(), anchor));
+                            player.sendMessage(Messages.CLIPBOARD_COPY.with(region.volume()));
+                        })
+                        .dryRunIfCapacity();
+            } else {
+                task = session.buildTask("we-copy")
+                        .metadata() //todo
+                        .compute(RegionFunctions.replace(region, mask, Pattern.air()))
+                        .post(result -> {
+                            var copied = EditBlockBuffer.toEditBuffer(result.undoBuffer());
+                            clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(copied, anchor));
+                            player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
+                        })
+                        .dryRunIfCapacity();
+            }
             if (task == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }
@@ -320,16 +344,37 @@ public final class SchematicCommands {
             }
 
             var origin = player.getPosition();
-            var task = session.buildTask("we-cut")
-                    .metadata() //todo
-                    .compute(RegionFunctions.replace(region, mask, pattern))
-                    .captureAll()
-                    .post(result -> {
-                        var cut = EditBlockBuffer.toEditBuffer(result.undoBuffer());
-                        clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(cut, origin));
-                        player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
-                    })
-                    .submitIfCapacity();
+            Task task;
+            if (region instanceof CuboidRegion) {
+                // Captures the box straight from the world before clearing it, so the clipboard needs no read of
+                // the cells the clear touched.
+                var instance = session.instance();
+                var box = Area.cuboid(region.min(), region.max().sub(1, 1, 1));
+                var clear = RegionFunctions.set(region, pattern);
+                var cut = new AtomicReference<EditBuffer>();
+                task = session.buildTask("we-cut")
+                        .metadata() //todo
+                        .compute((computeTask, world) -> {
+                            cut.set(CaptureEngine.capture(instance, box));
+                            return clear.exec(computeTask, world);
+                        })
+                        .post(result -> {
+                            clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(cut.get(), origin));
+                            player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
+                        })
+                        .submitIfCapacity();
+            } else {
+                task = session.buildTask("we-cut")
+                        .metadata() //todo
+                        .compute(RegionFunctions.replace(region, mask, pattern))
+                        .captureAll()
+                        .post(result -> {
+                            var cut = EditBlockBuffer.toEditBuffer(result.undoBuffer());
+                            clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(cut, origin));
+                            player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
+                        })
+                        .submitIfCapacity();
+            }
             if (task == null) {
                 player.sendMessage(Messages.GENERIC_QUEUE_FULL);
             }

@@ -1,14 +1,18 @@
 package net.hollowcube.terraform.legacy.compute;
 
+import net.hollowcube.terraform.buffer.EditBuffer;
 import net.hollowcube.terraform.legacy.buffer.BlockBuffer;
+import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
 import net.hollowcube.terraform.legacy.mask.Mask;
+import net.hollowcube.terraform.legacy.pattern.BlockPattern;
 import net.hollowcube.terraform.legacy.pattern.Pattern;
 import net.hollowcube.terraform.legacy.selection.region.CuboidRegion;
 import net.hollowcube.terraform.legacy.selection.region.Region;
 import net.hollowcube.terraform.legacy.task.ComputeFunc;
 import net.hollowcube.terraform.legacy.task.edit.WorldView;
 import net.hollowcube.terraform.legacy.util.math.DirectionUtil;
-import net.minestom.server.coordinate.BlockVec;
+import net.hollowcube.terraform.util.BlockUtil;
+import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
@@ -21,6 +25,18 @@ import java.util.*;
 public final class RegionFunctions {
 
     private RegionFunctions() {
+    }
+
+    /**
+     * Sets every block of the region to the pattern. A single plain block over a cuboid fills whole sections
+     * in one step, anything else goes block by block.
+     */
+    public static @NotNull ComputeFunc set(@NotNull Region region, @NotNull Pattern pattern) {
+        if (region instanceof CuboidRegion && pattern instanceof BlockPattern(Block block) && BlockUtil.isPlainState(block)) {
+            var box = Area.cuboid(region.min(), region.max().sub(1, 1, 1));
+            return (_, _) -> new EditBlockBuffer(EditBuffer.builder().fill(box, block.stateId()).build());
+        }
+        return replace(region, Mask.always(), pattern);
     }
 
     public static @NotNull ComputeFunc replace(@NotNull Region region, @NotNull Mask mask, @NotNull Pattern pattern) {
@@ -170,7 +186,7 @@ public final class RegionFunctions {
             @NotNull Mask mask,
             @Range(from = 1, to = 10) int steps
     ) throws InterruptedException {
-        var line = Vec.fromPoint(pos2.sub(pos1));
+        var line = pos2.sub(pos1).asVec();
 
         var step = line.normalize().div(steps);
         var current = Vec.ZERO;
@@ -178,7 +194,7 @@ public final class RegionFunctions {
         var points = new HashSet<Point>();
 
         while (current.length() < line.length()) {
-            points.add(new BlockVec(pos1.add(current)));
+            points.add(pos1.add(current).asBlockVec());
             current = current.add(step);
         }
 
@@ -230,14 +246,14 @@ public final class RegionFunctions {
     ) {
         var queue = new LinkedList<Point>();
 
-        queue.add(new BlockVec(center));
+        queue.add(center.asBlockVec());
         var positions = new HashSet<>(queue);
 
         final Direction[] values = Direction.values();
         while (!queue.isEmpty()) {
             var current = queue.pop();
             for (Direction value : values) {
-                final Point add = new BlockVec(current.add(value.vec()));
+                final Point add = current.add(value.vec()).asBlockVec();
                 if (!positions.contains(add) && add.distance(center) <= radius && mask.test(world, add, world.getBlock(add))) {
                     queue.add(add);
                     positions.add(add);
@@ -281,7 +297,7 @@ public final class RegionFunctions {
 
             for (Point position : floodFill(center, radius, mask, world)) {
                 final Block block = world.getBlock(position);
-                if (block.isLiquid()) {
+                if (block.liquid()) {
                     builder.set(position, Block.AIR);
                 } else if ("true".equals(block.getProperty("waterlogged"))) {
                     builder.set(position, block.withProperty("waterlogged", "false"));
