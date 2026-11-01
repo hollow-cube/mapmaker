@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.legacy.storage;
 
-import net.hollowcube.schem.Schematic;
 import net.hollowcube.terraform.legacy.schem.SchematicHeader;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -54,7 +54,10 @@ public interface TerraformStorage {
 
     @NotNull List<@NotNull SchematicHeader> listSchematics(@NotNull String playerId);
 
-    @Nullable Schematic loadSchematicData(@NotNull String playerId, @NotNull String name);
+    /**
+     * The stored schematic bytes, or null if there is no schematic with that name.
+     */
+    byte @Nullable [] loadSchematicData(@NotNull String playerId, @NotNull String name);
 
     enum SchematicCreateResult {
         //this is lazy i guess
@@ -64,8 +67,13 @@ public interface TerraformStorage {
         ENTRY_LIMIT_EXCEEDED, // Player has too many schematics
     }
 
+    /**
+     * Stores encoded schematic bytes.
+     *
+     * @param dimensions The width, height and length of the schematic.
+     */
     @NotNull
-    SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, @NotNull Schematic schematic, boolean overwrite);
+    SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, byte @NotNull [] data, @NotNull Point dimensions, boolean overwrite);
 
     enum SchematicDeleteResult {
         SUCCESS,

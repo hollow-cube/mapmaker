@@ -21,6 +21,8 @@ public class TaskImpl implements Task {
     private final String id = generateId();
     private final String tag;
     private final Instant created = Instant.now();
+    private final long createdNanos = System.nanoTime();
+    private volatile long computeNanos;
     private final boolean dry;
     private final boolean ephemeral;
     private final boolean captureAll;
@@ -74,6 +76,18 @@ public class TaskImpl implements Task {
     @Override
     public @NotNull Instant created() {
         return created;
+    }
+
+    public long createdNanos() {
+        return createdNanos;
+    }
+
+    public long computeNanos() {
+        return computeNanos;
+    }
+
+    public void setComputeNanos(long computeNanos) {
+        this.computeNanos = computeNanos;
     }
 
     @Override

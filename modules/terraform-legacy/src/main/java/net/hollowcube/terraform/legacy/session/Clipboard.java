@@ -1,10 +1,7 @@
 package net.hollowcube.terraform.legacy.session;
 
-import net.hollowcube.schem.Schematic;
-import net.hollowcube.schem.builder.SchematicBuilder;
-import net.hollowcube.schem.reader.SchematicReader;
-import net.hollowcube.schem.writer.SchematicWriter;
-import net.hollowcube.terraform.legacy.util.transformations.SchematicTransformation;
+import net.hollowcube.terraform.legacy.schem.Schematics;
+import net.hollowcube.terraform.util.Transform;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.NetworkBufferTemplate;
 import org.intellij.lang.annotations.RegExp;
@@ -12,9 +9,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
+import java.io.UncheckedIOException;
 
+/**
+ * A named clipboard slot. Holds the new engine's {@link net.hollowcube.terraform.clipboard.Clipboard}, saved
+ * as a Sponge schematic (any pending transform applied).
+ */
 public class Clipboard {
 
     public static final NetworkBuffer.Type<Clipboard> NETWORK_TYPE = NetworkBufferTemplate.template(
@@ -22,13 +22,13 @@ public class Clipboard {
             NetworkBuffer.BYTE_ARRAY.transform(
                     bytes -> {
                         try {
-                            return SchematicReader.sponge().read(bytes);
+                            return new net.hollowcube.terraform.clipboard.Clipboard(Schematics.read(bytes));
                         } catch (IOException e) {
-                            throw new RuntimeException(e);
+                            throw new UncheckedIOException(e);
                         }
                     },
-                    schematic -> SchematicWriter.sponge().write(schematic)
-            ).optional(), Clipboard::getInitialSchematic,
+                    data -> Schematics.write(data.toSchematic())
+            ).optional(), Clipboard::data,
             Clipboard::new
     );
 
@@ -37,72 +37,43 @@ public class Clipboard {
     public static final @NotNull String NAME_REGEX = "[a-z0-9_]+";
 
     private final String name;
-    private final List<SchematicTransformation> transformations = new ArrayList<>();
 
-    private Schematic schematic; // The current block data stored in this clipboard.
+    private volatile net.hollowcube.terraform.clipboard.@Nullable Clipboard data;
 
     public Clipboard(@NotNull String name) {
         this(name, null);
     }
 
-    private Clipboard(@NotNull String name, @Nullable Schematic schematic) {
+    private Clipboard(@NotNull String name, net.hollowcube.terraform.clipboard.@Nullable Clipboard data) {
         this.name = name;
-        this.schematic = schematic;
+        this.data = data;
     }
 
     public @NotNull String name() {
         return name;
     }
 
-    public @Nullable Schematic getInitialSchematic() {
-        return schematic;
+    public net.hollowcube.terraform.clipboard.@Nullable Clipboard data() {
+        return data;
     }
 
     public boolean isEmpty() {
-        return schematic == null;
+        return data == null;
     }
 
-    public void setData(@Nullable Schematic schematic) {
-        clear();
-        this.schematic = schematic;
+    public void setData(net.hollowcube.terraform.clipboard.@Nullable Clipboard data) {
+        this.data = data;
     }
 
     public void clear() {
-        this.schematic = null;
-        this.transformations.clear();
+        this.data = null;
     }
 
-    public @Nullable Schematic getTransformedSchematic() {
-        if (this.isEmpty()) {
-            // Nothing in the clipboard
-            return null;
-        }
-        if (this.transformations.isEmpty()) {
-            // No transformations to apply
-            return this.schematic;
-        }
-
-        var builder = SchematicBuilder.builder();
-
-        schematic.forEachBlock((pos, block) -> {
-            for (SchematicTransformation transformation : transformations) {
-                pos = transformation.apply(pos, schematic.size(), schematic.offset());
-                block = transformation.apply(block);
-            }
-            // Check why this needs its offset subtracted
-            builder.block(pos.sub(schematic.offset()), block);
-        });
-
-        var offset = schematic.offset();
-        for (SchematicTransformation transformation : transformations) {
-            offset = transformation.apply(offset, schematic.size());
-        }
-        builder.offset(offset);
-
-        return builder.build();
-    }
-
-    public void transform(@NotNull SchematicTransformation transformation) {
-        this.transformations.add(transformation);
+    /**
+     * Applies {@code transform} after any pending one. Does nothing to an empty clipboard.
+     */
+    public void applyTransform(@NotNull Transform transform) {
+        var current = data;
+        if (current != null) data = current.withTransform(transform);
     }
 }

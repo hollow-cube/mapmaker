@@ -235,6 +235,16 @@ public class LocalSession {
         return history.size() - historyPointer;
     }
 
+    /**
+     * The resident bytes of each history entry, oldest first.
+     */
+    public long @NotNull [] historyEntryBytes() {
+        var entries = List.copyOf(history);
+        var bytes = new long[entries.size()];
+        for (int i = 0; i < bytes.length; i++) bytes[i] = entries.get(i).sizeBytes();
+        return bytes;
+    }
+
     public void clearHistory() {
         historyPointer = 0;
         history.clear();

@@ -2,9 +2,8 @@ package net.hollowcube.terraform.legacy.compat.worldedit.command;
 
 import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
-import net.hollowcube.schem.util.Axis;
 import net.hollowcube.schem.util.Rotation;
-import net.hollowcube.terraform.legacy.buffer.BlockBuffer;
+import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
 import net.hollowcube.terraform.legacy.command.util.ArgumentRotation;
 import net.hollowcube.terraform.legacy.command.util.CommandPreviewHelper;
 import net.hollowcube.terraform.legacy.compat.worldedit.command.arg.WEArgument;
@@ -14,15 +13,15 @@ import net.hollowcube.terraform.legacy.compute.RegionFunctions;
 import net.hollowcube.terraform.legacy.cui.ClientRenderer;
 import net.hollowcube.terraform.legacy.mask.Mask;
 import net.hollowcube.terraform.legacy.pattern.Pattern;
+import net.hollowcube.terraform.legacy.schem.Schematics;
 import net.hollowcube.terraform.legacy.selection.Selection;
 import net.hollowcube.terraform.legacy.selection.region.Region;
 import net.hollowcube.terraform.legacy.session.Clipboard;
 import net.hollowcube.terraform.legacy.session.LocalSession;
 import net.hollowcube.terraform.legacy.session.PlayerSession;
-import net.hollowcube.terraform.legacy.task.edit.WorldView;
 import net.hollowcube.terraform.legacy.util.Format;
 import net.hollowcube.terraform.legacy.util.Messages;
-import net.hollowcube.terraform.legacy.util.transformations.SchematicTransformation;
+import net.hollowcube.terraform.util.Transform;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -31,7 +30,9 @@ import net.minestom.server.utils.Direction;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.EnumSet;
+import java.util.Objects;
 
 public final class SchematicCommands {
 
@@ -127,7 +128,11 @@ public final class SchematicCommands {
                     return;
                 }
 
-                clipboard.setData(schemData);
+                try {
+                    clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(Schematics.read(schemData)));
+                } catch (IOException e) {
+                    throw new RuntimeException("failed to read schematic " + name, e);
+                }
                 player.sendMessage(Messages.SCHEM_LOADED.with(name));
             }
         }
@@ -174,16 +179,25 @@ public final class SchematicCommands {
                 var name = context.get(nameArg);
 
                 var session = PlayerSession.forPlayer(player);
-                var clipboard = session.clipboard(Clipboard.DEFAULT);
-
-                if (clipboard.isEmpty()) {
+                var data = session.clipboard(Clipboard.DEFAULT).data();
+                if (data == null) {
                     player.sendMessage(Messages.GENERIC_NO_CLIPBOARD);
                     return;
                 }
 
-                var schemData = clipboard.getTransformedSchematic();
+                var schematic = data.toSchematic();
+                byte[] bytes;
+                try {
+                    bytes = Schematics.write(schematic);
+                } catch (IllegalArgumentException e) {
+                    player.sendMessage(Messages.SCHEM_SIZE_LIMIT_EXCEEDED);
+                    return;
+                }
+
+                var bounds = Objects.requireNonNull(schematic.buffer().blockBounds());
+                var size = bounds.max().sub(bounds.min()).add(1);
                 var storage = session.terraform().storage();
-                var result = storage.createSchematic(session.id(), name, schemData, flags.contains(Flags.FORCE));
+                var result = storage.createSchematic(session.id(), name, bytes, size, flags.contains(Flags.FORCE));
 
                 player.sendMessage(switch (result) {
                     case SUCCESS -> Messages.SCHEM_SAVED.with(name);
@@ -244,13 +258,11 @@ public final class SchematicCommands {
                     .metadata() //todo
                     .compute(RegionFunctions.replace(region, mask, Pattern.air()))
                     .post(result -> {
-                        Point offset;
-                        if (flags.contains(Flags.CENTER)) {
-                            offset = region.min().add(region.max()).div(-2);
-                        } else {
-                            offset = new Vec(-origin.blockX(), -origin.blockY(), -origin.blockZ());
-                        }
-                        clipboard.setData(result.undoBuffer().toSchematic(offset));
+                        Point anchor = flags.contains(Flags.CENTER)
+                                ? region.min().add(region.max()).div(2)
+                                : origin;
+                        var copied = EditBlockBuffer.toEditBuffer(result.undoBuffer());
+                        clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(copied, anchor));
                         player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
                     })
                     .dryRunIfCapacity();
@@ -313,8 +325,8 @@ public final class SchematicCommands {
                     .compute(RegionFunctions.replace(region, mask, pattern))
                     .captureAll()
                     .post(result -> {
-                        var offset = new Vec(-origin.blockX(), -origin.blockY(), -origin.blockZ());
-                        clipboard.setData(result.undoBuffer().toSchematic(offset));
+                        var cut = EditBlockBuffer.toEditBuffer(result.undoBuffer());
+                        clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(cut, origin));
                         player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
                     })
                     .submitIfCapacity();
@@ -348,15 +360,14 @@ public final class SchematicCommands {
 
         private void suggest(@NotNull Player player, @NotNull CommandContext context) {
             var playerSession = PlayerSession.forPlayer(player);
-            var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
-            var schem = clipboard.getTransformedSchematic();
+            var data = playerSession.clipboard(Clipboard.DEFAULT).data();
+            if (data == null) return;
+            var bounds = data.pasteBounds(player.getPosition());
+            if (bounds == null) return;
 
             var session = LocalSession.forPlayer(player);
-
-            // Compute the region for the block buffer and to select the region if that flag is set
-            var origin = new BlockVec(player.getPosition());
-            var min = origin.add(schem.offset());
-            var max = min.add(schem.size());
+            var min = bounds.min();
+            var max = bounds.max();
 
             var renderer = session.cui().renderer();
 
@@ -372,14 +383,9 @@ public final class SchematicCommands {
 
         private void execute(@NotNull Player player, @NotNull CommandContext context) {
             var flags = context.get(flagsArg);
-            var mask = context.get(maskArg);
-
             if (flags.contains(Flags.MASK)) {
                 player.sendMessage("Mask is required when using the mask flag");
                 return;
-            } else mask = Mask.always();
-            if (flags.contains(Flags.AIR_SKIP)) {
-                mask = Mask.and(mask, Mask.not(Mask.air()));
             }
 
             // Warnings for currently unsupported flags
@@ -391,21 +397,20 @@ public final class SchematicCommands {
                 player.sendMessage(Messages.PASTE_ORIGINAL_POS_UNSUPPORTED);
 
             var playerSession = PlayerSession.forPlayer(player);
-            var clipboard = playerSession.clipboard(Clipboard.DEFAULT);
-            if (clipboard.isEmpty()) {
+            var data = playerSession.clipboard(Clipboard.DEFAULT).data();
+            var origin = player.getPosition();
+            var bounds = data != null ? data.pasteBounds(origin) : null;
+            if (data == null || bounds == null) {
                 player.sendMessage(Messages.GENERIC_NO_CLIPBOARD);
                 return;
             }
 
-            var schem = clipboard.getTransformedSchematic();
-
             var session = LocalSession.forPlayer(player);
             var selection = session.selection(Selection.DEFAULT);
 
-            // Compute the region for the block buffer and to select the region if that flag is set
-            var origin = player.getPosition();
-            var min = origin.add(schem.offset());
-            var max = min.add(schem.size());
+            // The pasted box, to select it if that flag is set
+            var min = bounds.min();
+            var max = bounds.max();
             session.cui().renderer().switchTo(ClientRenderer.RenderContext.NORMAL, false);
 
             if (flags.contains(Flags.NO_PASTE)) {
@@ -416,25 +421,11 @@ public final class SchematicCommands {
                 return;
             }
 
-            var sourceMask = mask;
+            boolean skipAir = flags.contains(Flags.AIR_SKIP);
             var submitted = session.buildTask("we-paste")
                     .metadata() //todo
-                    .compute((task, world) -> {
-                        var buffer = BlockBuffer.builder(world); //, min, max);
-
-                        var schemWorld = WorldView.empty(task);
-                        schem.forEachBlock((p, block) -> {
-                            try {
-                                // Test the mask against the schematic
-                                if (!sourceMask.test(schemWorld, p, block)) return;
-                                buffer.set(origin.add(p), block);
-                            } catch (InterruptedException interrupt) {
-                                Thread.currentThread().interrupt();
-                            }
-                        });
-
-                        return buffer.build();
-                    }).post(result -> {
+                    .compute((task, world) -> new EditBlockBuffer(data.pasteBuffer(origin, skipAir)))
+                    .post(result -> {
                         if (flags.contains(Flags.SELECT_REGION)) {
                             selection.setType(Region.Type.CUBOID);
                             selection.selectPrimary(min, false);
@@ -474,12 +465,14 @@ public final class SchematicCommands {
                 return;
             }
 
-            clipboard.transform(SchematicTransformation.of(
-                    SchematicTransformation.rotate(Axis.X, xRot),
-                    SchematicTransformation.rotate(Axis.Y, yRot),
-                    SchematicTransformation.rotate(Axis.Z, zRot)
-            ));
+            clipboard.applyTransform(Transform.rotateZ(degrees(zRot))
+                    .compose(Transform.rotateY(degrees(yRot)))
+                    .compose(Transform.rotateX(degrees(xRot))));
             player.sendMessage(Messages.CLIPBOARD_ROTATED);
+        }
+
+        private static int degrees(@NotNull Rotation rotation) {
+            return rotation.ordinal() * 90;
         }
     }
 
@@ -503,7 +496,8 @@ public final class SchematicCommands {
                 return;
             }
 
-            clipboard.transform(SchematicTransformation.flip(direction.normalX() != 0, direction.normalY() != 0, direction.normalZ() != 0));
+            clipboard.applyTransform(Transform.mirror(direction.normalX() != 0 ? Transform.Axis.X
+                    : direction.normalY() != 0 ? Transform.Axis.Y : Transform.Axis.Z));
             player.sendMessage(Messages.CLIPBOARD_FLIPPED);
         }
     }

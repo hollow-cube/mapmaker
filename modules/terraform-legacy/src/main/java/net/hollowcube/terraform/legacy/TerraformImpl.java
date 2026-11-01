@@ -2,6 +2,7 @@ package net.hollowcube.terraform.legacy;
 
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
+import net.hollowcube.mapmaker.PlayerSettings;
 import net.hollowcube.schem.util.GameDataProvider;
 import net.hollowcube.terraform.apply.*;
 import net.hollowcube.terraform.buffer.EditBuffer;
@@ -19,6 +20,8 @@ import net.hollowcube.terraform.legacy.tool.ToolHandler;
 import net.hollowcube.terraform.legacy.util.Format;
 import net.hollowcube.terraform.legacy.util.ThreadUtil;
 import net.kyori.adventure.key.Key;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
@@ -45,6 +48,8 @@ import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
+
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 @SuppressWarnings("UnstableApiUsage")
 @ApiStatus.Internal
@@ -93,7 +98,7 @@ public final class TerraformImpl implements Terraform {
         this.threadPoolCompute = Executors.newFixedThreadPool(3, new ThreadUtil.NamedThreadFactory("tf-compute"));
         this.threadPoolApply = Executors.newFixedThreadPool(3, new ThreadUtil.NamedThreadFactory("tf-apply"));
 
-        GameDataProvider.replaceGlobals(new SchemUpgrader());
+        GameDataProvider.replaceGlobals(SchemUpgrader.INSTANCE);
     }
 
     @Override
@@ -213,7 +218,8 @@ public final class TerraformImpl implements Terraform {
                 task.setBuffer(buffer);
                 ThreadUtil.testInterrupt(); // Stop before submitting the apply task
 
-                logger.debug("{}: compute complete in {}ms ({})", task, (System.nanoTime() - start) / 1_000_000d, Format.formatBytes(buffer.sizeBytes()));
+                task.setComputeNanos(System.nanoTime() - start);
+                logger.debug("{}: compute complete in {}ms ({})", task, task.computeNanos() / 1_000_000d, Format.formatBytes(buffer.sizeBytes()));
                 task.setState(Task.State.QUEUED, threadPoolApply.submit(applyTask(task)));
             } catch (InterruptedException interrupt) {
                 task.setState(Task.State.CANCELLED, null);
@@ -236,6 +242,8 @@ public final class TerraformImpl implements Terraform {
 
                 var instance = task.session().instance();
                 var edit = clipToBorder(instance, EditBlockBuffer.toEditBuffer(task.buffer()));
+                long converted = System.nanoTime();
+                long captured = converted, applied = converted;
 
                 EditBuffer undo;
                 long changed;
@@ -243,6 +251,7 @@ public final class TerraformImpl implements Terraform {
                     var read = EditBuffer.builder();
                     changed = readTouched(instance, edit, read);
                     undo = read.build();
+                    captured = applied = System.nanoTime();
                 } else {
                     EditBuffer before = null;
                     if (task.capturesAll()) {
@@ -250,6 +259,7 @@ public final class TerraformImpl implements Terraform {
                         readTouched(instance, edit, read);
                         before = read.build();
                     }
+                    captured = System.nanoTime();
 
                     // Loading blocks this apply thread, as legacy always has.
                     ApplyEngine.ApplyResult result;
@@ -267,8 +277,10 @@ public final class TerraformImpl implements Terraform {
                     }
                     undo = before != null ? before : result.undo();
                     changed = result.changed();
+                    applied = System.nanoTime();
                     relight(instance, result.chunks());
                 }
+                long relit = System.nanoTime();
 
                 var undoBuffer = new EditBlockBuffer(undo);
                 var redoBuffer = new EditBlockBuffer(edit);
@@ -278,6 +290,7 @@ public final class TerraformImpl implements Terraform {
 
                 task.setState(Task.State.COMPLETE, null);
                 logger.debug("{}: apply complete in {}ms", task, (System.nanoTime() - start) / 1_000_000d);
+                reportStats(task, edit, undo, changed, start, converted, captured, applied, relit);
 
                 var result = new TaskResult(undoBuffer, redoBuffer, changed, task.attributes());
                 if (result.hasAttribute(Task.ATT_BORDER_TAINT)) {
@@ -294,6 +307,31 @@ public final class TerraformImpl implements Terraform {
                 task.setState(Task.State.FAILED, null);
             }
         };
+    }
+
+    /**
+     * Tells a player who turned on {@link PlayerSettings#TERRAFORM_STATS} how long each stage of the task took
+     * and how much it changed.
+     */
+    private static void reportStats(
+            @NotNull TaskImpl task, @NotNull EditBuffer edit, @NotNull EditBuffer undo, long changed,
+            long applyStart, long converted, long captured, long applied, long relit
+    ) {
+        var player = task.session().parent().player();
+        if (!localPlayer(player).getSetting(PlayerSettings.TERRAFORM_STATS)) return;
+
+        long wall = relit - task.createdNanos();
+        long compute = task.computeNanos();
+        long queued = wall - compute - (relit - applyStart);
+        double seconds = Math.max(wall, 1) / 1e9;
+        var message = String.format(
+                "[tf] %s: %dms wall (queued %d, compute %d, convert %d, capture %d, apply %d, relight %d) | %,d changed, %,.0f/s | edit %s, undo %s",
+                task.tag(), wall / 1_000_000, queued / 1_000_000, compute / 1_000_000,
+                (converted - applyStart) / 1_000_000, (captured - converted) / 1_000_000,
+                (applied - captured) / 1_000_000, (relit - applied) / 1_000_000,
+                changed, changed / seconds, Format.formatBytes(edit.sizeBytes()), Format.formatBytes(undo.sizeBytes())
+        );
+        player.sendMessage(Component.text(message, NamedTextColor.GRAY));
     }
 
     /**

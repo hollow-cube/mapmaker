@@ -9,7 +9,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 
-public class SchemUpgrader implements GameDataProvider {
+public class SchemUpgrader implements GameDataProvider, net.hollowcube.terraform.util.GameDataProvider {
+    public static final SchemUpgrader INSTANCE = new SchemUpgrader();
 
     @Override
     public int dataVersion() {
@@ -25,6 +26,12 @@ public class SchemUpgrader implements GameDataProvider {
     @Override
     public @NotNull CompoundBinaryTag upgradeBlockEntity(int fromVersion, int toVersion, @NotNull String id, @NotNull CompoundBinaryTag data) {
         return (CompoundBinaryTag) DataFixer.upgrade(DataTypes.BLOCK_ENTITY, Transcoder.NBT, data.putString("id", id), fromVersion, toVersion);
+    }
+
+    @Override
+    public @NotNull TypedData upgradeBlockEntity(int fromVersion, int toVersion, @NotNull TypedData blockEntity) {
+        var upgraded = upgradeBlockEntity(fromVersion, toVersion, blockEntity.type(), blockEntity.nbt());
+        return new TypedData(upgraded.getString("id", blockEntity.type()), upgraded.remove("id"));
     }
 
     @Override

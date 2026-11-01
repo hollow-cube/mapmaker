@@ -18,6 +18,11 @@ public interface Change {
             }
 
             @Override
+            public long sizeBytes() {
+                return undo.sizeBytes() + redo.sizeBytes();
+            }
+
+            @Override
             public void redo(@NotNull LocalSession session) {
                 session.buildTask("redo")
                         .metadata()
@@ -31,5 +36,10 @@ public interface Change {
     void undo(@NotNull LocalSession session);
 
     void redo(@NotNull LocalSession session);
+
+    /**
+     * The resident bytes of the undo and redo buffers.
+     */
+    long sizeBytes();
 
 }

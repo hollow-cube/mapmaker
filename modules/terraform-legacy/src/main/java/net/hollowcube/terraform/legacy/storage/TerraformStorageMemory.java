@@ -1,7 +1,7 @@
 package net.hollowcube.terraform.legacy.storage;
 
-import net.hollowcube.schem.Schematic;
 import net.hollowcube.terraform.legacy.schem.SchematicHeader;
+import net.minestom.server.coordinate.Point;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +14,7 @@ public class TerraformStorageMemory implements TerraformStorage {
     private final Map<String, byte[]> sessionData = new ConcurrentHashMap<>();
     private final Map<String, byte[]> localSessionData = new ConcurrentHashMap<>();
 
-    private record Schem(@NotNull SchematicHeader header, Schematic data) {
+    private record Schem(@NotNull SchematicHeader header, byte @NotNull [] data) {
     }
 
     private final Map<String, List<Schem>> schematics = new ConcurrentHashMap<>();
@@ -50,14 +50,14 @@ public class TerraformStorageMemory implements TerraformStorage {
     }
 
     @Override
-    public @NotNull Schematic loadSchematicData(@NotNull String playerId, @NotNull String name) {
+    public byte @Nullable [] loadSchematicData(@NotNull String playerId, @NotNull String name) {
         var playerSchems = schematics.get(playerId);
-        if (playerSchems.isEmpty()) throw new RuntimeException("schematic not found for " + playerId + ": " + name);
-        return playerSchems.stream().filter(s -> s.header().name().equals(name)).findFirst().orElseThrow().data();
+        if (playerSchems == null) return null;
+        return playerSchems.stream().filter(s -> s.header().name().equals(name)).findFirst().map(Schem::data).orElse(null);
     }
 
     @Override
-    public @NotNull SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, @NotNull Schematic schematic, boolean overwrite) {
+    public @NotNull SchematicCreateResult createSchematic(@NotNull String playerId, @NotNull String name, byte @NotNull [] data, @NotNull Point dimensions, boolean overwrite) {
         var playerSchems = schematics.computeIfAbsent(playerId, k -> new CopyOnWriteArrayList<>());
         for (var schem : playerSchems) {
             if (schem.header.name().equalsIgnoreCase(name)) {
@@ -74,8 +74,8 @@ public class TerraformStorageMemory implements TerraformStorage {
             return SchematicCreateResult.ENTRY_LIMIT_EXCEEDED;
         }
 
-        var header = new SchematicHeader(name, 0, schematic.size(), "unknown");
-        playerSchems.add(new Schem(header, schematic));
+        var header = new SchematicHeader(name, data.length, dimensions, "sponge");
+        playerSchems.add(new Schem(header, data));
         return SchematicCreateResult.SUCCESS;
     }
 
