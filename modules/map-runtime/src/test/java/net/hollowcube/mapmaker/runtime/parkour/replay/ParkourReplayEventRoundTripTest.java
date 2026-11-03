@@ -40,8 +40,7 @@ final class ParkourReplayEventRoundTripTest {
             storage.writer("run", null),
             UUID.randomUUID(),
             ReplayHeader.worldVersion(UUID.randomUUID()),
-            () -> {
-            }
+            () -> {}
         );
 
         // Interleaved with a generic event, because the point of appending is that both halves of
@@ -71,8 +70,13 @@ final class ParkourReplayEventRoundTripTest {
         );
 
         var played = new ArrayList<ReplayEvent>();
-        try (var player = new ReplayPlayer(
-            new CompactedReplayReader(compacted.data()), ReplayManager.REGISTRY, played::add)) {
+        try (
+            var player = new ReplayPlayer(
+                new CompactedReplayReader(compacted.data()),
+                ReplayManager.REGISTRY,
+                played::add
+            )
+        ) {
             while (player.advance() == ReplayPlayer.Advance.ADVANCED) ;
         }
 

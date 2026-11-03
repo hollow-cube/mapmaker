@@ -19,8 +19,9 @@ public record MaceCheckpointItem(int windBurst) implements CheckpointItem {
 
     public static final Key ID = Key.key("mace");
     public static final StructCodec<MaceCheckpointItem> CODEC = StructCodec.struct(
-            "wind_burst", ExtraCodecs.clamppedInt(MIN_WIND_BURST, MAX_WIND_BURST).optional(MIN_WIND_BURST), MaceCheckpointItem::windBurst,
-            MaceCheckpointItem::new);
+        "wind_burst", ExtraCodecs.clamppedInt(MIN_WIND_BURST, MAX_WIND_BURST).optional(MIN_WIND_BURST), MaceCheckpointItem::windBurst,
+        MaceCheckpointItem::new
+    );
 
     public MaceCheckpointItem withWindBurst(int windBurst) {
         return new MaceCheckpointItem(windBurst);
@@ -38,9 +39,10 @@ public record MaceCheckpointItem(int windBurst) implements CheckpointItem {
 
     @Override
     public TranslatableComponent thumbnail() {
-        return Component.translatable("gui.action.give_item.mace.thumbnail", List.of(
-                Component.text(this.windBurst)
-        ));
+        return Component.translatable(
+            "gui.action.give_item.mace.thumbnail",
+            List.of(Component.text(this.windBurst))
+        );
     }
 
     @Override
@@ -54,9 +56,15 @@ public record MaceCheckpointItem(int windBurst) implements CheckpointItem {
         public Editor(ActionList.Ref ref) {
             super(ref);
 
-            this.windBurstInput = add(1, 3, new ControlledNumberInput("give_item.mace.wind_burst",
-                    updateItem(MaceCheckpointItem::withWindBurst))
-                    .range(MIN_WIND_BURST, MAX_WIND_BURST));
+            this.windBurstInput = add(
+                1,
+                3,
+                new ControlledNumberInput(
+                    "give_item.mace.wind_burst",
+                    updateItem(MaceCheckpointItem::withWindBurst)
+                )
+                    .range(MIN_WIND_BURST, MAX_WIND_BURST)
+            );
         }
 
         @Override

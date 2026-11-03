@@ -14,7 +14,8 @@ public enum LuaSlot {
     CHESTPLATE(EquipmentSlot.CHESTPLATE),
     HELMET(EquipmentSlot.HELMET),
     BODY(EquipmentSlot.BODY),
-    SADDLE(EquipmentSlot.SADDLE);
+    SADDLE(EquipmentSlot.SADDLE),
+    ;
 
     private static final LuaSlot[] BY_EQUIPMENT_SLOT = new LuaSlot[EquipmentSlot.values().length];
 

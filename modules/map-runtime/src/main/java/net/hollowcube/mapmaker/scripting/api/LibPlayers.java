@@ -75,10 +75,8 @@ public final class LibPlayers {
     public static int getOnAttackPlayer(LuaState state) {
         class Impl {
             static int pushArgs(LuaState state, EntityAttackEvent event) {
-                if (!(event.getEntity() instanceof MapPlayer attacker))
-                    return -1;
-                if (!(event.getTarget() instanceof MapPlayer victim))
-                    return -1;
+                if (!(event.getEntity() instanceof MapPlayer attacker)) return -1;
+                if (!(event.getTarget() instanceof MapPlayer victim)) return -1;
 
                 pushPlayer(state, attacker);
                 pushPlayer(state, victim);
@@ -90,22 +88,22 @@ public final class LibPlayers {
         return 1;
     }
 
-//    /// Fires when a player right-clicks a block. Receives the player and the block position.
-//    /// @luaReturn EventSource<@ mapmaker / player.Player, vector>
-//    @LuaProperty
-//    public static int getOnBlockInteract(LuaState state) {
-//        class Impl {
-//            static int pushArgs(LuaState state, PlayerBlockInteractEvent event) {
-//                if (!(event.getPlayer() instanceof MapPlayer mp) || event.getHand() != PlayerHand.MAIN) return -1;
-//
-//                pushPlayer(state, mp);
-//                LuaVector.push(state, event.getBlockPosition());
-//                return 2;
-//            }
-//        }
-//
-//        LibBase.pushEventSource(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
-//        return 1;
-//    }
+    //    /// Fires when a player right-clicks a block. Receives the player and the block position.
+    //    /// @luaReturn EventSource<@ mapmaker / player.Player, vector>
+    //    @LuaProperty
+    //    public static int getOnBlockInteract(LuaState state) {
+    //        class Impl {
+    //            static int pushArgs(LuaState state, PlayerBlockInteractEvent event) {
+    //                if (!(event.getPlayer() instanceof MapPlayer mp) || event.getHand() != PlayerHand.MAIN) return -1;
+    //
+    //                pushPlayer(state, mp);
+    //                LuaVector.push(state, event.getBlockPosition());
+    //                return 2;
+    //            }
+    //        }
+    //
+    //        LibBase.pushEventSource(state, PlayerBlockInteractEvent.class, Impl::pushArgs);
+    //        return 1;
+    //    }
 
 }

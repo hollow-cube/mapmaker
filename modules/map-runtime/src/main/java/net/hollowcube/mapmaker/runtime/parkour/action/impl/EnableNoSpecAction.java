@@ -17,10 +17,15 @@ public record EnableNoSpecAction() implements Action {
     private static final Sprite SPRITE = new Sprite("icon2/1_1/tv_off_x", 1, 1);
 
     public static final Key KEY = Key.key("mapmaker:enable_no_spec");
-    public static final StructCodec<EnableNoSpecAction> CODEC = StructCodec.struct(EnableNoSpecAction::new);
+    public static final StructCodec<EnableNoSpecAction> CODEC = StructCodec.struct(
+        EnableNoSpecAction::new
+    );
     public static final Editor<EnableNoSpecAction> EDITOR = new Editor<>(
-        null, _ -> SPRITE, EnableNoSpecAction::makeThumbnail,
-        Set.of(EnableNoSpecAction.KEY), Permission.GENERIC_STAFF
+        null,
+        _ -> SPRITE,
+        EnableNoSpecAction::makeThumbnail,
+        Set.of(EnableNoSpecAction.KEY),
+        Permission.GENERIC_STAFF
     );
 
     @Override

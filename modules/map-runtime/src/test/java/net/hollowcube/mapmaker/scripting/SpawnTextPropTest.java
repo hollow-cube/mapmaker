@@ -41,11 +41,15 @@ public class SpawnTextPropTest extends AbstractScriptTest {
         // before assertions run. Reaching the assertions is itself the regression check.
         // Plus a sanity check that the entity actually landed in the instance, so a future
         // refactor that "silently passes" by skipping the spawn altogether also fails.
-        var displayEntities = world.instance().getEntities().stream()
+        var displayEntities = world.instance()
+            .getEntities()
+            .stream()
             .filter(DisplayEntity.Text.class::isInstance)
             .toList();
-        assertEquals(1, displayEntities.size(),
-            "expected exactly one text display spawned by the script — got " + displayEntities);
+        assertEquals(
+            1, displayEntities.size(),
+            "expected exactly one text display spawned by the script — got " + displayEntities
+        );
         var pos = displayEntities.getFirst().getPosition();
         assertEquals(10, pos.blockX());
         assertEquals(60, pos.blockY());
@@ -71,8 +75,9 @@ public class SpawnTextPropTest extends AbstractScriptTest {
         // whose textual content isn't easily queryable from Lua — `pcall` returning false
         // is enough to prove the path errors cleanly. The Java assertion confirms no entity
         // was accidentally spawned by the failing call.
-        assertTrue(world.instance().getEntities().stream()
-                .noneMatch(DisplayEntity.Text.class::isInstance),
-            "no text display should have been spawned for the failing call");
+        assertTrue(
+            world.instance().getEntities().stream().noneMatch(DisplayEntity.Text.class::isInstance),
+            "no text display should have been spawned for the failing call"
+        );
     }
 }

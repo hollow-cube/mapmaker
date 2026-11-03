@@ -3,9 +3,9 @@ package net.hollowcube.mapmaker.runtime.parkour.replay;
 import dev.hollowcube.replay.io.SegmentedReplay;
 import dev.hollowcube.replay.io.SegmentedReplayStorage;
 import dev.hollowcube.replay.io.SegmentedReplayWriter;
+import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.feature.FeatureFlagProvider;
 import net.hollowcube.mapmaker.map.SaveState;
-import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.mapmaker.player.LocalPlayer;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import org.jetbrains.annotations.Nullable;
@@ -34,7 +34,9 @@ final class ReplayManagerTest {
     void aRecordingStorageCannotReadDisablesRecordingRatherThanFailing() {
         var saveState = saveState();
         var recordings = recordings(() -> {
-            throw new IllegalArgumentException("replay preamble header contains negative lengths: metadata=-1");
+            throw new IllegalArgumentException(
+                "replay preamble header contains negative lengths: metadata=-1"
+            );
         });
 
         // Preparation runs during player configuration, so anything thrown here denies the join.
@@ -92,22 +94,36 @@ final class ReplayManagerTest {
         return new LocalPlayer(UUID.randomUUID(), "tester");
     }
 
-    private static ReplayManager.PreparedRecordings recordings(Supplier<@Nullable SegmentedReplay> load) {
-        return new ReplayManager.PreparedRecordings(new SegmentedReplayStorage() {
-            @Override
-            public @Nullable SegmentedReplay load(String replayId) {
-                return load.get();
-            }
+    private static ReplayManager.PreparedRecordings recordings(
+        Supplier<@Nullable SegmentedReplay> load
+    ) {
+        return new ReplayManager.PreparedRecordings(
+            new SegmentedReplayStorage() {
+                @Override
+                public @Nullable SegmentedReplay load(String replayId) {
+                    return load.get();
+                }
 
-            @Override
-            public SegmentedReplayWriter writer(String replayId, @Nullable SegmentedReplay base) {
-                throw new AssertionError("nothing should be written");
-            }
-        }, UUID.randomUUID());
+                @Override
+                public SegmentedReplayWriter writer(
+                    String replayId,
+                    @Nullable SegmentedReplay base
+                ) {
+                    throw new AssertionError("nothing should be written");
+                }
+            },
+            UUID.randomUUID()
+        );
     }
 
     private static SaveState saveState() {
-        return new SaveState(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
-            UUID.randomUUID().toString(), SaveStateType.PLAYING, PlayState.SERIALIZER, new PlayState());
+        return new SaveState(
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            UUID.randomUUID().toString(),
+            SaveStateType.PLAYING,
+            PlayState.SERIALIZER,
+            new PlayState()
+        );
     }
 }

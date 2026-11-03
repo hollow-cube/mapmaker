@@ -16,7 +16,9 @@ import org.jetbrains.annotations.Nullable;
 import static net.hollowcube.mapmaker.util.NumberUtil.formatMapPlaytime;
 
 public class ParkourTimerHud implements PlayerHud.Module {
-    private static final BackgroundSpriteSet BACKGROUND = new BackgroundSpriteSet("hud/bossbar/line1");
+    private static final BackgroundSpriteSet BACKGROUND = new BackgroundSpriteSet(
+        "hud/bossbar/line1"
+    );
     private static final BadSprite TIMER = BadSprite.SPRITE_MAP.get("hud/timer");
     private static final int BACKGROUND_PADDING = 2;
     // The old actionbar row relative to the bottom anchor; text adds the old bossbar_ascii_1 font shift.
@@ -25,8 +27,7 @@ public class ParkourTimerHud implements PlayerHud.Module {
 
     public static final ParkourTimerHud INSTANCE = new ParkourTimerHud();
 
-    private ParkourTimerHud() {
-    }
+    private ParkourTimerHud() {}
 
     @Override
     public @Nullable HudNode.Anchored render(Player player) {
@@ -35,8 +36,10 @@ public class ParkourTimerHud implements PlayerHud.Module {
             return null;
 
         long time = p.saveState().getRealPlaytime();
-        var startingTimer = OpUtils.map(world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS),
-            checkpoint -> checkpoint.actions().findLast(EditTimerAction.class));
+        var startingTimer = OpUtils.map(
+            world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS),
+            checkpoint -> checkpoint.actions().findLast(EditTimerAction.class)
+        );
 
         // Append the countdown timer, but only if it's not a testing map.
         // We should not show the normal timer in testing mode.
@@ -54,7 +57,8 @@ public class ParkourTimerHud implements PlayerHud.Module {
         }
 
         // Gap keeps the extra pixel the old drawInPlace advance (width + 1) put after the sprite.
-        return HudNode.hstack(
+        return HudNode
+            .hstack(
                 BACKGROUND_PADDING + 1,
                 HudNode.sprite(TIMER),
                 HudNode.text(formatMapPlaytime(time, true)).offset(0, TEXT_OFFSET_Y)

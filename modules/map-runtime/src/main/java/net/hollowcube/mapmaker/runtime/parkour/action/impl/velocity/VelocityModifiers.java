@@ -21,10 +21,18 @@ import java.util.stream.Collectors;
 
 public class VelocityModifiers {
 
-    public record DirectionPower(RelativeField yaw, RelativeField pitch, double power) implements VelocityModifier {
+    public record DirectionPower(
+        RelativeField yaw,
+        RelativeField pitch,
+        double power
+    ) implements VelocityModifier {
 
         public static final double DEFAULT_POWER = 25;
-        public static final DirectionPower DEFAULT = new DirectionPower(RelativeField.ORIGIN, RelativeField.ORIGIN, DEFAULT_POWER);
+        public static final DirectionPower DEFAULT = new DirectionPower(
+            RelativeField.ORIGIN,
+            RelativeField.ORIGIN,
+            DEFAULT_POWER
+        );
         public static final StructCodec<DirectionPower> CODEC = StructCodec.struct(
             "yaw", RelativeField.CODEC.optional(RelativeField.ORIGIN), DirectionPower::yaw,
             "pitch", RelativeField.CODEC.optional(RelativeField.ORIGIN), DirectionPower::pitch,
@@ -66,22 +74,25 @@ public class VelocityModifiers {
         MolangExpression<Player> dz
     ) implements VelocityModifier {
 
-        private static final MolangEnvironment<Player> ENVIRONMENT = MolangEnvironment.<Player>builder()
-            .query(q -> q
-                .bool("isSneaking", Player::isSneaking)
-                .bool("isSwimming", player -> player.getPose() == EntityPose.SWIMMING)
-                .bool("isSprinting", Player::isSprinting)
-                .bool("isGliding", Player::isFlyingWithElytra))
-            .variables(v -> v
-                .number("x", player -> player.getPosition().x())
-                .number("y", player -> player.getPosition().y())
-                .number("z", player -> player.getPosition().z())
-                .number("dx", player -> player.getVelocity().x())
-                .number("dy", player -> player.getVelocity().y())
-                .number("dz", player -> player.getVelocity().z())
-                .number("yaw", player -> player.getPosition().yaw())
-                .number("pitch", player -> player.getPosition().pitch()))
-            .build();
+        private static final MolangEnvironment<Player> ENVIRONMENT =
+            MolangEnvironment.<Player>builder()
+                .query(
+                    q -> q.bool("isSneaking", Player::isSneaking)
+                        .bool("isSwimming", player -> player.getPose() == EntityPose.SWIMMING)
+                        .bool("isSprinting", Player::isSprinting)
+                        .bool("isGliding", Player::isFlyingWithElytra)
+                )
+                .variables(
+                    v -> v.number("x", player -> player.getPosition().x())
+                        .number("y", player -> player.getPosition().y())
+                        .number("z", player -> player.getPosition().z())
+                        .number("dx", player -> player.getVelocity().x())
+                        .number("dy", player -> player.getVelocity().y())
+                        .number("dz", player -> player.getVelocity().z())
+                        .number("yaw", player -> player.getPosition().yaw())
+                        .number("pitch", player -> player.getPosition().pitch())
+                )
+                .build();
 
         public static final StructCodec<Molang> CODEC = StructCodec.struct(
             "dx", MolangExpression.codec(ENVIRONMENT), Molang::dx,
@@ -99,8 +110,12 @@ public class VelocityModifiers {
 
             var world = MapWorld.forPlayer(player);
             if (world != null && !world.map().isPublished() && !errors.isEmpty()) {
-                var error = errors.stream().map(ContentError::toString).collect(Collectors.joining("\n"));
-                player.sendMessage(Component.text("Errors evaluating velocity expression:\n" + error));
+                var error = errors.stream()
+                    .map(ContentError::toString)
+                    .collect(Collectors.joining("\n"));
+                player.sendMessage(
+                    Component.text("Errors evaluating velocity expression:\n" + error)
+                );
             }
 
             if (dx != null && dy != null && dz != null) {
@@ -111,7 +126,10 @@ public class VelocityModifiers {
         }
 
         private static @Nullable Double evaluate(
-            List<ContentError> errors, Player player, MolangExpression<Player> expression) {
+            List<ContentError> errors,
+            Player player,
+            MolangExpression<Player> expression
+        ) {
             var program = expression.program();
             var error = expression.error();
 
@@ -130,7 +148,11 @@ public class VelocityModifiers {
                 return program.eval(state, player);
             } catch (Exception exception) {
                 ExceptionReporter.reportException(exception, player);
-                errors.add(new ContentError("Internal Server Error, please report to administrators if persistent."));
+                errors.add(
+                    new ContentError(
+                        "Internal Server Error, please report to administrators if persistent."
+                    )
+                );
             } finally {
                 errors.addAll(state.getErrors());
             }

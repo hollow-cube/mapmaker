@@ -10,9 +10,8 @@ import java.util.Map;
 @SuppressWarnings("UnstableApiUsage")
 public class AttributeMap {
 
-    public static final Codec<AttributeMap> CODEC = Attribute.CODEC
-            .mapValue(Codec.DOUBLE)
-            .transform(AttributeMap::new, it -> it.data);
+    public static final Codec<AttributeMap> CODEC = Attribute.CODEC.mapValue(Codec.DOUBLE)
+        .transform(AttributeMap::new, it -> it.data);
     public static final AttributeMap EMPTY = new AttributeMap(Object2DoubleMaps.emptyMap());
 
     private final Object2DoubleArrayMap<Attribute> data = new Object2DoubleArrayMap<>();
@@ -21,8 +20,7 @@ public class AttributeMap {
         this.data.putAll(m);
     }
 
-    public AttributeMap() {
-    }
+    public AttributeMap() {}
 
     public AttributeMap with(Attribute attribute, double value) {
         AttributeMap copy = new AttributeMap(this.data);

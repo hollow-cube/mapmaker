@@ -109,7 +109,13 @@ public final class LibEntity {
         /// @luaReturn "fixed" | "vertical" | "horizontal" | "center"
         @LuaProperty
         public int getBillboard(LuaState state) {
-            state.pushString(delegate().getEntityMeta().getBillboardRenderConstraints().name().toLowerCase(Locale.ROOT));
+            state.pushString(
+                delegate()
+                    .getEntityMeta()
+                    .getBillboardRenderConstraints()
+                    .name()
+                    .toLowerCase(Locale.ROOT)
+            );
             return 1;
         }
 
@@ -125,10 +131,15 @@ public final class LibEntity {
             //       the errors will be pretty gross tho (referencing arg #-1)
             var billboardString = state.checkString(index);
             try {
-                var billboard = AbstractDisplayMeta.BillboardConstraints.valueOf(billboardString.toUpperCase(Locale.ROOT));
+                var billboard = AbstractDisplayMeta.BillboardConstraints.valueOf(
+                    billboardString.toUpperCase(Locale.ROOT)
+                );
                 delegate().getEntityMeta().setBillboardRenderConstraints(billboard);
             } catch (IllegalArgumentException e) {
-                state.argError(index, "Invalid billboard value, must be one of 'fixed', 'vertical', 'horizontal', or 'center'");
+                state.argError(
+                    index,
+                    "Invalid billboard value, must be one of 'fixed', 'vertical', 'horizontal', or 'center'"
+                );
             }
         }
 
@@ -158,7 +169,7 @@ public final class LibEntity {
                 if (meta.getTransformationInterpolationDuration() != duration)
                     meta.setTransformationInterpolationDuration(duration);
 
-                LuaHelpers.tableForEach(state, 2, (key) -> {
+                LuaHelpers.tableForEach(state, 2, key -> {
                     if (!readInterpField(state, key, -1)) {
                         throw state.error("Unknown interpolation property: " + key);
                     }
@@ -171,8 +182,7 @@ public final class LibEntity {
         /// Removes the entity from the world. Has no effect if the entity is already removed.
         @LuaMethod
         public void remove(LuaState state) {
-            if (delegate.isRemoved())
-                return;
+            if (delegate.isRemoved()) return;
 
             delegate.remove();
         }
@@ -211,8 +221,7 @@ public final class LibEntity {
         @Override
         public boolean readInterpField(LuaState state, String key, int index) {
             switch (key) {
-                case "$$$TEMP" -> {
-                }
+                case "$$$TEMP" -> {}
                 default -> {
                     return super.readInterpField(state, key, index);
                 }

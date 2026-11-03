@@ -31,15 +31,28 @@ public class VelocityEditor extends AbstractActionEditorPanel<EditVelocityAction
 
         background("action/editor/velocity_container", -10, -31);
 
-        this.yawInput = add(1, 1, new RelativeFieldInput("velocity.yaw", updateField(EditVelocityAction::withYaw)));
-        this.pitchInput = add(5, 1, new RelativeFieldInput("velocity.pitch", updateField(EditVelocityAction::withPitch)));
-        this.powerInput = add(1, 3, new ControlledDecimalInput("velocity.power", update(EditVelocityAction::withPower)));
+        this.yawInput = add(
+            1,
+            1,
+            new RelativeFieldInput("velocity.yaw", updateField(EditVelocityAction::withYaw))
+        );
+        this.pitchInput = add(
+            5,
+            1,
+            new RelativeFieldInput("velocity.pitch", updateField(EditVelocityAction::withPitch))
+        );
+        this.powerInput = add(
+            1,
+            3,
+            new ControlledDecimalInput("velocity.power", update(EditVelocityAction::withPower))
+        );
     }
 
     public static TranslatableComponent thumbnail(@Nullable EditVelocityAction action) {
         if (action != null && action.modifier() instanceof VelocityModifiers.Molang) {
             return Component.translatable("gui.action.velocity.thumbnail.invalid");
-        } else if (action != null && action.modifier() instanceof VelocityModifiers.DirectionPower modifier) {
+        } else if (action != null
+            && action.modifier() instanceof VelocityModifiers.DirectionPower modifier) {
             var yaw = modifier.yaw();
             var pitch = modifier.pitch();
             var power = modifier.power();
@@ -54,7 +67,9 @@ public class VelocityEditor extends AbstractActionEditorPanel<EditVelocityAction
         }
     }
 
-    private Consumer<String> updateField(BiFunction<EditVelocityAction, RelativeField, EditVelocityAction> updateFunc) {
+    private Consumer<String> updateField(
+        BiFunction<EditVelocityAction, RelativeField, EditVelocityAction> updateFunc
+    ) {
         return update((data, value) -> {
             try {
                 return updateFunc.apply(data, RelativeField.fromString(value));
@@ -66,9 +81,12 @@ public class VelocityEditor extends AbstractActionEditorPanel<EditVelocityAction
 
     @Override
     protected void update(EditVelocityAction data) {
-        if (data.modifier() instanceof VelocityModifiers.DirectionPower(
-            RelativeField yaw, RelativeField pitch, double power
-        )) {
+        if (data.modifier()
+            instanceof VelocityModifiers.DirectionPower(
+                RelativeField yaw,
+                RelativeField pitch,
+                double power
+            )) {
             this.yawInput.update(yaw.toString());
             this.pitchInput.update(pitch.toString());
             this.powerInput.update(power);
@@ -111,11 +129,15 @@ public class VelocityEditor extends AbstractActionEditorPanel<EditVelocityAction
         }
 
         private void handleEditValue() {
-            host.pushView(simpleAnvil(
-                "generic2/anvil/field_container",
-                "action/anvil/coordinates_icon",
-                anvilTitle, onChange, value
-            ));
+            host.pushView(
+                simpleAnvil(
+                    "generic2/anvil/field_container",
+                    "action/anvil/coordinates_icon",
+                    anvilTitle,
+                    onChange,
+                    value
+                )
+            );
         }
 
         private String normalizeForDisplay(String value) {

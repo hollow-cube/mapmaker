@@ -38,15 +38,28 @@ final class ApiSegmentedReplayWriter implements SegmentedReplayWriter {
     public void commit(SegmentedReplayCommit commit) {
         var body = new byte[commit.preamble().length + commit.segment().length];
         System.arraycopy(commit.preamble(), 0, body, 0, commit.preamble().length);
-        System.arraycopy(commit.segment(), 0, body, commit.preamble().length, commit.segment().length);
+        System.arraycopy(
+            commit.segment(),
+            0,
+            body,
+            commit.preamble().length,
+            commit.segment().length
+        );
 
         // Identical across attempts, which is what makes retrying safe: the backend returns the
         // original result rather than installing a second copy of the same segment.
-        var meta = new ReplayCommit(replayId, revision, commit.idempotencyKey().toString(),
-            commit.preamble().length, commit.segmentIndex(), commit.finished(),
-            outcome(commit.outcome()), digest(body));
+        var meta = new ReplayCommit(
+            replayId,
+            revision,
+            commit.idempotencyKey().toString(),
+            commit.preamble().length,
+            commit.segmentIndex(),
+            commit.finished(),
+            outcome(commit.outcome()),
+            digest(body)
+        );
 
-        for (var attempt = 1; ; attempt++) {
+        for (var attempt = 1;; attempt++) {
             try {
                 revision = replays.commit(meta, Blob.of(body)).revision();
                 return;
@@ -54,7 +67,10 @@ final class ApiSegmentedReplayWriter implements SegmentedReplayWriter {
                 // Someone else advanced this recording. Commits cannot be merged, so this recorder
                 // has to stop rather than reload and try to reconcile.
                 if (e.status() == 409 || e.status() == 412)
-                    throw new IllegalStateException("replay " + replayId + " was committed to concurrently", e);
+                    throw new IllegalStateException(
+                        "replay " + replayId + " was committed to concurrently",
+                        e
+                    );
                 if (attempt == MAX_ATTEMPTS) throw e;
                 sleepBeforeRetry(e);
             }
@@ -78,7 +94,9 @@ final class ApiSegmentedReplayWriter implements SegmentedReplayWriter {
 
     private static String digest(byte[] body) {
         try {
-            return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(body));
+            return Base64.getEncoder().encodeToString(
+                MessageDigest.getInstance("SHA-256").digest(body)
+            );
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError("SHA-256 is unavailable", e);
         }

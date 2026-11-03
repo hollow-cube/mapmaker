@@ -19,18 +19,21 @@ public class AttributesEditor extends AbstractActionEditorPanel<EditAttributeAct
         for (var entry : ActionAttributes.ENTRIES.values()) {
             int x = i % 7, y = i / 7;
 
-            add(x + 1, y + 2, new Button("gui.action.attribute." + entry.id(), 1, 1)
+            add(
+                x + 1,
+                y + 2,
+                new Button("gui.action.attribute." + entry.id(), 1, 1)
                     .onLeftClick(() -> {
-                        this.ref.<EditAttributeAction>update(data -> data.withAttribute(entry.attribute()));
+                        this.ref.<EditAttributeAction>update(
+                            data -> data.withAttribute(entry.attribute())
+                        );
                         this.host.replaceView(new AttributeEditor(this.ref, entry));
-                    }))
-                    .background(entry.sprite());
+                    })
+            ).background(entry.sprite());
             i++;
         }
     }
 
     @Override
-    protected void update(EditAttributeAction data) {
-
-    }
+    protected void update(EditAttributeAction data) {}
 }

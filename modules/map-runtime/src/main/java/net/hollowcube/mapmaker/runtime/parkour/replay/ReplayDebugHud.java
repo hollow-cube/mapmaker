@@ -30,8 +30,14 @@ public class ReplayDebugHud implements PlayerHud.Module {
             // recording" is itself the answer being asked for most of the time.
             lines.add(HudNode.text("replay: not recording"));
         } else {
-            lines.add(HudNode.text("replay " + formatBytes(stats.bytes()) + " // " + stats.chunks() + " chunks"));
-            lines.add(HudNode.text(stats.events() + " events // " + stats.chunkEvents() + " in chunk"));
+            lines.add(
+                HudNode.text(
+                    "replay " + formatBytes(stats.bytes()) + " // " + stats.chunks() + " chunks"
+                )
+            );
+            lines.add(
+                HudNode.text(stats.events() + " events // " + stats.chunkEvents() + " in chunk")
+            );
             lines.add(HudNode.text("tick " + stats.tick()));
         }
 

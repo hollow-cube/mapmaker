@@ -29,11 +29,18 @@ public record SetWeatherAction(WeatherType weather) implements Action {
     public static final Key KEY = key("mapmaker:set_weather");
     public static final StructCodec<SetWeatherAction> CODEC = StructCodec.struct(
         "weather", WeatherType.CODEC.optional(WeatherType.CLEAR), SetWeatherAction::weather,
-        SetWeatherAction::new);
+        SetWeatherAction::new
+    );
     public static final Action.Editor<SetWeatherAction> EDITOR = new Action.Editor<>(
-        SetWeatherAction.Editor::new, SetWeatherAction::makeSprite,
-        SetWeatherAction::makeThumbnail, Set.of(KEY));
-    public static final PlayState.Attachment<WeatherType> SAVE_DATA = PlayState.attachment(key("mapmaker:weather"), WeatherType.CODEC);
+        SetWeatherAction.Editor::new,
+        SetWeatherAction::makeSprite,
+        SetWeatherAction::makeThumbnail,
+        Set.of(KEY)
+    );
+    public static final PlayState.Attachment<WeatherType> SAVE_DATA = PlayState.attachment(
+        key("mapmaker:weather"),
+        WeatherType.CODEC
+    );
 
     public SetWeatherAction withWeather(WeatherType weather) {
         return new SetWeatherAction(weather);
@@ -56,9 +63,14 @@ public record SetWeatherAction(WeatherType weather) implements Action {
 
     private static TranslatableComponent makeThumbnail(@Nullable SetWeatherAction action) {
         if (action == null) return translatable("gui.action.set_weather.thumbnail.empty");
-        return translatable("gui.action.set_weather.thumbnail", List.of(
-            translatable("gui.action.set_weather." + action.weather.name().toLowerCase() + ".label")
-        ));
+        return translatable(
+            "gui.action.set_weather.thumbnail",
+            List.of(
+                translatable(
+                    "gui.action.set_weather." + action.weather.name().toLowerCase() + ".label"
+                )
+            )
+        );
     }
 
     private static Sprite iconSprite(WeatherType weather) {
@@ -80,11 +92,19 @@ public record SetWeatherAction(WeatherType weather) implements Action {
 
             add(1, 1, groupText(7, "weather"));
 
-            this.weatherSwitch = add(1, 2, new Switch(7, 1, List.of(
-                new Row(WeatherType.CLEAR, update(SetWeatherAction::withWeather)),
-                new Row(WeatherType.RAINING, update(SetWeatherAction::withWeather)),
-                new Row(WeatherType.THUNDERSTORM, update(SetWeatherAction::withWeather))
-            )));
+            this.weatherSwitch = add(
+                1,
+                2,
+                new Switch(
+                    7,
+                    1,
+                    List.of(
+                        new Row(WeatherType.CLEAR, update(SetWeatherAction::withWeather)),
+                        new Row(WeatherType.RAINING, update(SetWeatherAction::withWeather)),
+                        new Row(WeatherType.THUNDERSTORM, update(SetWeatherAction::withWeather))
+                    )
+                )
+            );
         }
 
         @Override
@@ -100,16 +120,24 @@ public record SetWeatherAction(WeatherType weather) implements Action {
 
                 var translationKey = "gui.action.set_weather." + value.name().toLowerCase();
                 var name = LanguageProviderV2.translateToPlain(translationKey + ".label");
-                add(0, 0, new Button(translationKey, 1, 1)
-                    .background("generic2/btn/tristate/icon", -1, -1)
-                    .sprite(iconSprite(value))
-                    .onLeftClick(() -> onChange.accept(value.next()))
-                    .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE));
-                add(1, 0, new Text(translationKey, 6, 1, name)
-                    .align(4, Text.CENTER)
-                    .background("generic2/btn/default/6_1")
-                    .onLeftClick(() -> onChange.accept(value.next()))
-                    .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE));
+                add(
+                    0,
+                    0,
+                    new Button(translationKey, 1, 1)
+                        .background("generic2/btn/tristate/icon", -1, -1)
+                        .sprite(iconSprite(value))
+                        .onLeftClick(() -> onChange.accept(value.next()))
+                        .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE)
+                );
+                add(
+                    1,
+                    0,
+                    new Text(translationKey, 6, 1, name)
+                        .align(4, Text.CENTER)
+                        .background("generic2/btn/default/6_1")
+                        .onLeftClick(() -> onChange.accept(value.next()))
+                        .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE)
+                );
             }
         }
     }

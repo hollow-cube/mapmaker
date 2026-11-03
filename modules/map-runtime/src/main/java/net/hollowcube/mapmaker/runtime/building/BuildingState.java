@@ -10,9 +10,13 @@ import org.jetbrains.annotations.Nullable;
 public sealed interface BuildingState extends PlayerState<BuildingState, BuildingMapWorld> {
 
     record Building() implements BuildingState {
-        
+
         @Override
-        public void configurePlayer(BuildingMapWorld world, Player player, @Nullable BuildingState lastState) {
+        public void configurePlayer(
+            BuildingMapWorld world,
+            Player player,
+            @Nullable BuildingState lastState
+        ) {
             BuildingState.super.configurePlayer(world, player, lastState);
             player.setAllowFlying(true);
 

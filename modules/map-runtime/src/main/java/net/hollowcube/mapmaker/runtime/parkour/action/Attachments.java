@@ -10,24 +10,44 @@ import net.minestom.server.codec.Codec;
 public class Attachments {
 
     public static final PlayState.Attachment<Integer> PROGRESS_INDEX = PlayState.attachment(
-            Key.key("mapmaker:progress_index"), Codec.INT);
+        Key.key("mapmaker:progress_index"),
+        Codec.INT
+    );
     public static final PlayState.Attachment<Integer> RESET_HEIGHT = PlayState.attachment(
-            Key.key("mapmaker:reset_height"), Codec.INT);
-    public static final PlayState.Attachment<PotionEffectList> POTION_EFFECTS = PlayState.attachment(
-            Key.key("mapmaker:potion_effects"), PotionEffectList.CODEC, PotionEffectList::copy);
+        Key.key("mapmaker:reset_height"),
+        Codec.INT
+    );
+    public static final PlayState.Attachment<PotionEffectList> POTION_EFFECTS =
+        PlayState.attachment(
+            Key.key("mapmaker:potion_effects"),
+            PotionEffectList.CODEC,
+            PotionEffectList::copy
+        );
     public static final PlayState.Attachment<Boolean> ELYTRA = PlayState.attachment(
-            Key.key("mapmaker:elytra"), Codec.BOOLEAN);
+        Key.key("mapmaker:elytra"),
+        Codec.BOOLEAN
+    );
     public static final PlayState.Attachment<HotbarItems> HOTBAR_ITEMS = PlayState.attachment(
-            Key.key("mapmaker:hotbar_items"), HotbarItems.CODEC);
+        Key.key("mapmaker:hotbar_items"),
+        HotbarItems.CODEC
+    );
     public static final PlayState.Attachment<SavedMapSettings> SETTINGS = PlayState.attachment(
-            Key.key("mapmaker:settings"), SavedMapSettings.CODEC);
+        Key.key("mapmaker:settings"),
+        SavedMapSettings.CODEC
+    );
     public static final PlayState.Attachment<VariableStorage> VARIABLES = PlayState.attachment(
-            Key.key("mapmaker:variables"), VariableStorage.CODEC);
+        Key.key("mapmaker:variables"),
+        VariableStorage.CODEC
+    );
     public static final PlayState.Attachment<OwnedEntityList> OWNED_ENTITIES = PlayState.attachment(
-        Key.key("mapmaker:owned_entities"), OwnedEntityList.CODEC);
+        Key.key("mapmaker:owned_entities"),
+        OwnedEntityList.CODEC
+    );
 
     // If set, indicates that the start plate actions have been applied.
     public static final PlayState.Attachment<Boolean> START_ACTIONS_APPLIED = PlayState.attachment(
-            Key.key("mapmaker:start_actions_applied"), Codec.BOOLEAN);
+        Key.key("mapmaker:start_actions_applied"),
+        Codec.BOOLEAN
+    );
 
 }

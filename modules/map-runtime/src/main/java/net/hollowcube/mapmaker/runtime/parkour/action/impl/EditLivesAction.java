@@ -24,9 +24,9 @@ import java.util.Set;
 
 @SuppressWarnings("UnstableApiUsage")
 public record EditLivesAction(
-        Operation operation,
-        int lives,
-        @Nullable RelativePos deathPosition
+    Operation operation,
+    int lives,
+    @Nullable RelativePos deathPosition
 ) implements Action {
     private static final int DEFAULT_LIVES = 0; // Disables the lives mechanic.
 
@@ -37,21 +37,28 @@ public record EditLivesAction(
 
     public static final Key KEY = Key.key("mapmaker:lives");
     public static final StructCodec<EditLivesAction> CODEC = StructCodec.struct(
-            "operation", Operation.CODEC.optional(Operation.SET), EditLivesAction::operation,
-            "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), EditLivesAction::lives,
-            "deathPosition", RelativePos.STRUCT_CODEC.optional(), EditLivesAction::deathPosition,
-            EditLivesAction::new
+        "operation", Operation.CODEC.optional(Operation.SET), EditLivesAction::operation,
+        "value", ExtraCodecs.clamppedInt(0, 10).optional(DEFAULT_LIVES), EditLivesAction::lives,
+        "deathPosition", RelativePos.STRUCT_CODEC.optional(), EditLivesAction::deathPosition,
+        EditLivesAction::new
     );
     public static final Action.Editor<EditLivesAction> EDITOR = new Action.Editor<>(
-            Editor::new, EditLivesAction::makeSprite, EditLivesAction::makeThumbnail, Set.of());
-    public static final PlayState.Attachment<Data> SAVE_DATA = PlayState.attachment(KEY, Data.CODEC);
+        Editor::new,
+        EditLivesAction::makeSprite,
+        EditLivesAction::makeThumbnail,
+        Set.of()
+    );
+    public static final PlayState.Attachment<Data> SAVE_DATA = PlayState.attachment(
+        KEY,
+        Data.CODEC
+    );
 
     public record Data(int value, int max, @Nullable RelativePos deathPosition) {
         public static final Codec<Data> CODEC = StructCodec.struct(
-                "value", ExtraCodecs.clamppedInt(0, 20), Data::value,
-                "max", ExtraCodecs.clamppedInt(0, 20), Data::max,
-                "deathPosition", RelativePos.STRUCT_CODEC.optional(), Data::deathPosition,
-                Data::new
+            "value", ExtraCodecs.clamppedInt(0, 20), Data::value,
+            "max", ExtraCodecs.clamppedInt(0, 20), Data::max,
+            "deathPosition", RelativePos.STRUCT_CODEC.optional(), Data::deathPosition,
+            Data::new
         );
 
         public Data withValue(int value) {
@@ -79,16 +86,27 @@ public record EditLivesAction(
     @Override
     public void applyTo(Player player, PlayState state) {
         switch (this.operation) {
-            case SET -> state.set(EditLivesAction.SAVE_DATA, this.lives == 0
-                    ? null : new EditLivesAction.Data(lives, lives, this.deathPosition));
+            case SET -> state.set(
+                EditLivesAction.SAVE_DATA,
+                this.lives == 0 ? null : new EditLivesAction.Data(lives, lives, this.deathPosition)
+            );
             case ADD -> {
                 var data = state.get(SAVE_DATA);
-                if (data == null) state.set(SAVE_DATA, new EditLivesAction.Data(lives, lives, this.deathPosition));
-                else state.set(SAVE_DATA, data.withValue(Math.min(data.value() + lives, data.max + lives)));
+                if (data == null)
+                    state.set(
+                        SAVE_DATA,
+                        new EditLivesAction.Data(lives, lives, this.deathPosition)
+                    );
+                else
+                    state.set(
+                        SAVE_DATA,
+                        data.withValue(Math.min(data.value() + lives, data.max + lives))
+                    );
             }
             case SUBTRACT -> {
                 var data = state.get(SAVE_DATA);
-                if (data != null) state.set(SAVE_DATA, data.withValue(Math.max(data.value() - lives, 0)));
+                if (data != null)
+                    state.set(SAVE_DATA, data.withValue(Math.max(data.value() - lives, 0)));
             }
         }
     }
@@ -104,10 +122,20 @@ public record EditLivesAction(
 
     private static TranslatableComponent makeThumbnail(@Nullable EditLivesAction action) {
         if (action == null) return Component.translatable("gui.action.lives.thumbnail.empty");
-        return Component.translatable("gui.action.lives.thumbnail", List.of(
-                Component.translatable("gui.action.lives." + action.operation.name().toLowerCase(Locale.ROOT) + ".label"),
-                Component.text(action.lives == 0 ? (action.operation == Operation.SET ? "Disable" : "-") : String.valueOf(action.lives))
-        ));
+        return Component.translatable(
+            "gui.action.lives.thumbnail",
+            List.of(
+                Component.translatable(
+                    "gui.action.lives." + action.operation.name().toLowerCase(Locale.ROOT)
+                        + ".label"
+                ),
+                Component.text(
+                    action.lives == 0
+                        ? (action.operation == Operation.SET ? "Disable" : "-")
+                        : String.valueOf(action.lives)
+                )
+            )
+        );
     }
 
     private static class Editor extends AbstractActionEditorPanel<EditLivesAction> {
@@ -117,13 +145,29 @@ public record EditLivesAction(
         public Editor(ActionList.Ref ref) {
             super(ref);
 
-            this.operationInput = add(1, 1, new ControlledTriStateInput<>("lives", Operation.class, update(EditLivesAction::withOperation))
-                    .label("operation").labels("set", "add", "subtract")
-                    .sprites(SPRITE_SET.withOffset(1, 3),
-                            SPRITE_ADD.withOffset(1, 3),
-                            SPRITE_SUBTRACT.withOffset(1, 3)));
-            this.valueInput = add(1, 3, new ControlledNumberInput("lives.value", update(EditLivesAction::withLives))
-                    .range(0, 20).formatted(i -> i == 0 ? "Disable" : String.valueOf(i)));
+            this.operationInput = add(
+                1,
+                1,
+                new ControlledTriStateInput<>(
+                    "lives",
+                    Operation.class,
+                    update(EditLivesAction::withOperation)
+                )
+                    .label("operation")
+                    .labels("set", "add", "subtract")
+                    .sprites(
+                        SPRITE_SET.withOffset(1, 3),
+                        SPRITE_ADD.withOffset(1, 3),
+                        SPRITE_SUBTRACT.withOffset(1, 3)
+                    )
+            );
+            this.valueInput = add(
+                1,
+                3,
+                new ControlledNumberInput("lives.value", update(EditLivesAction::withLives))
+                    .range(0, 20)
+                    .formatted(i -> i == 0 ? "Disable" : String.valueOf(i))
+            );
         }
 
         @Override

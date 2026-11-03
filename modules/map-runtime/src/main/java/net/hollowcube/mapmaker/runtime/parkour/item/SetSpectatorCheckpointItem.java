@@ -19,7 +19,9 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
     public static final Key ID = Key.key("mapmaker:set_spectator_checkpoint");
     public static final SetSpectatorCheckpointItem INSTANCE = new SetSpectatorCheckpointItem(ID);
 
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/set_checkpoint"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/set_checkpoint")
+    );
 
     private SetSpectatorCheckpointItem(Key id) {
         super(id, RIGHT_CLICK_ANY);
@@ -39,13 +41,13 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
         var added = switch (world.getPlayerState(player)) {
             case ParkourState.Testing(var saveState, var _) -> {
                 TempEffectApplicator.applyCheckpoint(
-                        world,
-                        new ActionTriggerData(),
-                        player,
-                        saveState,
-                        "temp-spec-" + UUID.randomUUID(),
-                        player.getPosition(),
-                        true
+                    world,
+                    new ActionTriggerData(),
+                    player,
+                    saveState,
+                    "temp-spec-" + UUID.randomUUID(),
+                    player.getPosition(),
+                    true
                 );
                 yield true;
             }

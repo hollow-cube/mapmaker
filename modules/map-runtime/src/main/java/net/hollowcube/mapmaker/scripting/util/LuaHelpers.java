@@ -64,8 +64,9 @@ public final class LuaHelpers {
         if (index > 0 && index > state.top())
             throw new IllegalArgumentException(
                 helper + " called with stack index " + index + " but top is " + state.top()
-                + " — usually a sign that the caller forgot the `self` slot was removed by"
-                + " namecall dispatch, or that an argument check failed silently.");
+                    + " — usually a sign that the caller forgot the `self` slot was removed by"
+                    + " namecall dispatch, or that an argument check failed silently."
+            );
     }
 
     public static @Nullable Key checkOptKey(LuaState state, int index) {
@@ -133,7 +134,9 @@ public final class LuaHelpers {
                     state.pushString(primitive.getAsString());
                 }
             }
-            default -> throw new IllegalArgumentException("Unknown JsonElement type: " + element.getClass());
+            default -> throw new IllegalArgumentException(
+                "Unknown JsonElement type: " + element.getClass()
+            );
         }
     }
 
@@ -151,7 +154,9 @@ public final class LuaHelpers {
             }
             // todo support vector type, some userdata types, and buffer type (probably)
             case NONE, FUNCTION, LIGHTUSERDATA, USERDATA, VECTOR, THREAD, BUFFER -> {
-                throw new IllegalArgumentException("Cannot read JSON from type " + state.typeName(index));
+                throw new IllegalArgumentException(
+                    "Cannot read JSON from type " + state.typeName(index)
+                );
             }
         };
     }

@@ -59,7 +59,7 @@ final class ReplaySession {
     private enum State {
         RECORDING,
         PAUSED,
-        TERMINATED
+        TERMINATED,
     }
 
     private final ReplayRecorder recorder;
@@ -71,7 +71,8 @@ final class ReplaySession {
     private final Int2ObjectMap<Map<Integer, ItemStack>> lastItems = new Int2ObjectOpenHashMap<>();
     /// The item slots this tick has touched, held until [#advance()] so that everything a tick did
     /// to an inventory arrives as one event.
-    private final Int2ObjectMap<Map<Integer, ItemStack>> pendingItems = new Int2ObjectOpenHashMap<>();
+    private final Int2ObjectMap<Map<Integer, ItemStack>> pendingItems =
+        new Int2ObjectOpenHashMap<>();
     private final Int2ObjectMap<ItemUseEvent> lastItemUse = new Int2ObjectOpenHashMap<>();
     private final Long2ObjectMap<Block> lastBlocks = new Long2ObjectOpenHashMap<>();
     /// Minestom entity IDs are server-global, unstable across sessions, and share a namespace with
@@ -104,7 +105,13 @@ final class ReplaySession {
         lastPositions.clear();
         lastVelocities.clear();
         for (var entry : entityIds.entrySet())
-            recorder.submit(new SpawnEntityEvent(entry.getValue(), entry.getKey().getEntityType(), entry.getKey().getPosition()));
+            recorder.submit(
+                new SpawnEntityEvent(
+                    entry.getValue(),
+                    entry.getKey().getEntityType(),
+                    entry.getKey().getPosition()
+                )
+            );
 
         for (var event : lastStates.values()) recorder.submit(event);
         for (var entry : lastItems.int2ObjectEntrySet())
@@ -116,7 +123,9 @@ final class ReplaySession {
         // ghost blocks a previous playback position set are dropped rather than left behind.
         recorder.submit(new ClearGhostBlocksEvent());
         for (var entry : lastBlocks.long2ObjectEntrySet())
-            recorder.submit(new SetBlockEvent(PositionUtil.unpackPosition(entry.getLongKey()), entry.getValue()));
+            recorder.submit(
+                new SetBlockEvent(PositionUtil.unpackPosition(entry.getLongKey()), entry.getValue())
+            );
     }
 
     boolean recording() {
@@ -144,7 +153,8 @@ final class ReplaySession {
             lastPositions.put(entityId, position);
         } else {
             var delta = ReplayTypes.quantizeCoordinates(position.sub(last));
-            var stillness = delta.isZero() && position.sameView(last)
+            var stillness = delta.isZero()
+                && position.sameView(last)
                 && velocity.equals(lastVelocities.get(entityId));
             if (!stillness) {
                 recorder.submit(new DeltaMoveEvent(entityId, delta.withView(position), velocity));
@@ -161,11 +171,16 @@ final class ReplaySession {
 
         var meta = entity.getEntityMeta();
         var event = new EntityStateEvent(
-            entityId, entity.getPose(),
-            meta.isOnFire(), entity.isSneaking(),
+            entityId,
+            entity.getPose(),
+            meta.isOnFire(),
+            entity.isSneaking(),
             meta instanceof LivingEntityMeta living && living.isInRiptideSpinAttack(),
-            entity.isSprinting(), meta.isSwimming(),
-            entity.isInvisible(), entity.isGlowing(), meta.isFlyingWithElytra()
+            entity.isSprinting(),
+            meta.isSwimming(),
+            entity.isInvisible(),
+            entity.isGlowing(),
+            meta.isFlyingWithElytra()
         );
         if (event.equals(lastStates.get(entityId))) return;
 
@@ -233,7 +248,9 @@ final class ReplaySession {
             if (blocks.containsKey(position)) continue;
 
             var point = PositionUtil.unpackPosition(position);
-            recorder.submit(new SetBlockEvent(point, world.getBlock(point, Block.Getter.Condition.TYPE)));
+            recorder.submit(
+                new SetBlockEvent(point, world.getBlock(point, Block.Getter.Condition.TYPE))
+            );
             known.remove();
         }
 
@@ -241,7 +258,9 @@ final class ReplaySession {
             var position = (long) entry.getKey();
             if (entry.getValue().equals(lastBlocks.get(position))) continue;
 
-            recorder.submit(new SetBlockEvent(PositionUtil.unpackPosition(position), entry.getValue()));
+            recorder.submit(
+                new SetBlockEvent(PositionUtil.unpackPosition(position), entry.getValue())
+            );
             lastBlocks.put(position, entry.getValue());
         }
     }
@@ -349,12 +368,18 @@ final class ReplaySession {
     /// @param outcome      why the run is over, which storage cannot work out for itself
     /// @param minimumTicks the shortest run worth a replay, or 0 to keep every run
     CompletableFuture<Void> complete(RunOutcome outcome, int minimumTicks) {
-        return terminate(recorder.tick() >= minimumTicks || recorder.committed()
-            ? Termination.FINISHED
-            : Termination.DISCARDED, outcome);
+        return terminate(
+            recorder.tick() >= minimumTicks || recorder.committed()
+                ? Termination.FINISHED
+                : Termination.DISCARDED,
+            outcome
+        );
     }
 
-    private CompletableFuture<Void> terminate(Termination termination, @Nullable RunOutcome outcome) {
+    private CompletableFuture<Void> terminate(
+        Termination termination,
+        @Nullable RunOutcome outcome
+    ) {
         if (terminateFuture != null) return terminateFuture;
 
         state = State.TERMINATED;
@@ -369,6 +394,6 @@ final class ReplaySession {
     private enum Termination {
         STOPPED,
         FINISHED,
-        DISCARDED
+        DISCARDED,
     }
 }

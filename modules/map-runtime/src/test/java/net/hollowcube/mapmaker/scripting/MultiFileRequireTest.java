@@ -9,9 +9,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class MultiFileRequireTest extends AbstractScriptTest {
 
     @Test
-    @TestScript(path = "/lib/coords.luau", value = """
+    @TestScript(
+        path = "/lib/coords.luau",
+        value = """
             return { home = vec(7, 50, 3) }
-        """)
+        """
+    )
     @TestScript("""
             local coords = require("./lib/coords")
             local players = require("@mapmaker/players")

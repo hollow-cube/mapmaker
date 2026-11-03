@@ -18,8 +18,10 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class TickRateSetting {
 
-    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, TickRateSetting::updatePlayer);
+    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode().addListener(
+        ParkourMapPlayerUpdateStateEvent.class,
+        TickRateSetting::updatePlayer
+    );
 
     public static int getTickRate(ParkourMapWorld world, Player player) {
         if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
@@ -29,15 +31,20 @@ public class TickRateSetting {
     }
 
     public static int getTickRate(ParkourMapWorld world, PlayState playState) {
-        return Objects.requireNonNullElse(playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.TICK_RATE, world.map().settings()), ServerFlag.SERVER_TICKS_PER_SECOND);
+        return Objects.requireNonNullElse(
+            playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.TICK_RATE, world.map().settings()),
+            ServerFlag.SERVER_TICKS_PER_SECOND
+        );
     }
 
     private static void updatePlayer(ParkourMapPlayerUpdateStateEvent event) {
         final var world = event.world();
         final var player = event.player();
 
-        final int tickRate = event.isReset() ? ServerFlag.SERVER_TICKS_PER_SECOND : getTickRate(world, player);
+        final int tickRate = event.isReset()
+            ? ServerFlag.SERVER_TICKS_PER_SECOND
+            : getTickRate(world, player);
         player.sendPacket(new SetTickStatePacket(tickRate, false));
     }
 

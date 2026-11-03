@@ -31,8 +31,10 @@ public record PlaySoundAction(
         PlaySoundAction::new
     );
     public static final Editor<PlaySoundAction> EDITOR = new Editor<>(
-        PlaySoundEditor::new, _ -> SPRITE,
-        PlaySoundEditor::makeThumbnail, Set.of()
+        PlaySoundEditor::new,
+        _ -> SPRITE,
+        PlaySoundEditor::makeThumbnail,
+        Set.of()
     );
 
     public PlaySoundAction {
@@ -64,7 +66,10 @@ public record PlaySoundAction(
         if (this.event == null) return;
 
         player.stopSound(SoundStop.named(this.event));
-        player.playSound(Sound.sound(this.event, getSoundSource(this.event), this.volume, this.pitch), Sound.Emitter.self());
+        player.playSound(
+            Sound.sound(this.event, getSoundSource(this.event), this.volume, this.pitch),
+            Sound.Emitter.self()
+        );
     }
 
     public static Sound.Source getSoundSource(SoundEvent event) {

@@ -19,23 +19,26 @@ import net.minestom.server.tag.Tag;
 import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class OnlySprintSetting {
-    private static final Tag<Point> ONLY_SPRINT_START_POSITION = Tag.Transient("mapmaker:parkour/os/play");
+    private static final Tag<Point> ONLY_SPRINT_START_POSITION = Tag.Transient(
+        "mapmaker:parkour/os/play"
+    );
 
     public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, OnlySprintSetting::updatePlayer)
-            .addListener(PlayerStopSprintingEvent.class, OnlySprintSetting::onStopSprinting)
-            .addListener(PlayerMoveEvent.class, OnlySprintSetting::onPlayerMove);
+        .addListener(ParkourMapPlayerUpdateStateEvent.class, OnlySprintSetting::updatePlayer)
+        .addListener(PlayerStopSprintingEvent.class, OnlySprintSetting::onStopSprinting)
+        .addListener(PlayerMoveEvent.class, OnlySprintSetting::onPlayerMove);
 
     public static boolean canSprint(ParkourMapWorld world, Player player) {
         if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return true; // Sanity check, allow sprinting by default.
+            // Sanity check, allow sprinting by default.
+            return true;
 
         return canSprint(world, p.saveState().state(PlayState.class));
     }
 
     public static boolean canSprint(ParkourMapWorld world, PlayState state) {
         return !state.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.ONLY_SPRINT, world.map().settings());
+            .get(MapSettings.ONLY_SPRINT, world.map().settings());
     }
 
     private static void updatePlayer(ParkourMapPlayerUpdateStateEvent event) {
@@ -67,8 +70,7 @@ public class OnlySprintSetting {
         if ((player.isSprinting() && !player.isSneaking()) || startPosition == null) return;
 
         var startPos = player.getTag(ONLY_SPRINT_START_POSITION);
-        if (startPos.distanceSquared(event.getNewPosition()) < 1)
-            return;
+        if (startPos.distanceSquared(event.getNewPosition()) < 1) return;
 
         // They moved >1 block before starting sprinting, reset them
         player.removeTag(ONLY_SPRINT_START_POSITION);

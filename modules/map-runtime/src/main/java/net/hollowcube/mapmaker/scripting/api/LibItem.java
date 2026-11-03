@@ -51,7 +51,10 @@ public final class LibItem {
         @LuaProperty
         public int getId(LuaState state) {
             var itemRegistry = ScriptContext.get(state).runtime().world().itemRegistry();
-            var itemId = Objects.requireNonNullElse(itemRegistry.getItemId(value), value.material().name());
+            var itemId = Objects.requireNonNullElse(
+                itemRegistry.getItemId(value),
+                value.material().name()
+            );
             state.pushString(itemId);
             return 1;
         }

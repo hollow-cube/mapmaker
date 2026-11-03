@@ -3,7 +3,10 @@ package net.hollowcube.mapmaker.runtime.parkour.action.util;
 import net.minestom.server.codec.Codec;
 
 public enum Operation {
-    SET, ADD, SUBTRACT;
+    SET,
+    ADD,
+    SUBTRACT,
+    ;
 
     public static final Codec<Operation> CODEC = Codec.Enum(Operation.class);
 
@@ -14,5 +17,4 @@ public enum Operation {
             case SUBTRACT -> current - value;
         };
     }
-
 }

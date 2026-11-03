@@ -24,9 +24,10 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
 
     public static final Key ID = Key.key("ender_pearl");
     public static final StructCodec<EnderPearlCheckpointItem> CODEC = StructCodec.struct(
-            "amount", ExtraCodecs.clamppedInt(INFINITE_AMOUNT, MAX_AMOUNT).optional(INFINITE_AMOUNT), EnderPearlCheckpointItem::amount,
-            "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), EnderPearlCheckpointItem::cooldown,
-            EnderPearlCheckpointItem::new);
+        "amount", ExtraCodecs.clamppedInt(INFINITE_AMOUNT, MAX_AMOUNT).optional(INFINITE_AMOUNT), EnderPearlCheckpointItem::amount,
+        "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), EnderPearlCheckpointItem::cooldown,
+        EnderPearlCheckpointItem::new
+    );
 
     public EnderPearlCheckpointItem withAmount(int amount) {
         return new EnderPearlCheckpointItem(amount, this.cooldown);
@@ -43,7 +44,10 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
 
     @Override
     public ItemStack createItemStack() {
-        return EnderPearlItem.get(this.amount, this.cooldown > 0 ? new UseCooldown(this.cooldown / 20f, ID.asString()) : null);
+        return EnderPearlItem.get(
+            this.amount,
+            this.cooldown > 0 ? new UseCooldown(this.cooldown / 20f, ID.asString()) : null
+        );
     }
 
     @Override
@@ -54,10 +58,19 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
 
     @Override
     public TranslatableComponent thumbnail() {
-        return Component.translatable("gui.action.give_item.ender_pearl.thumbnail", List.of(
-                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
-                Component.text(this.cooldown > 0 ? NumberUtil.formatDuration(this.cooldown * 50L) : "No Cooldown")
-        ));
+        return Component.translatable(
+            "gui.action.give_item.ender_pearl.thumbnail",
+            List.of(
+                Component.text(
+                    this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)
+                ),
+                Component.text(
+                    this.cooldown > 0
+                        ? NumberUtil.formatDuration(this.cooldown * 50L)
+                        : "No Cooldown"
+                )
+            )
+        );
     }
 
     @Override
@@ -74,8 +87,16 @@ public record EnderPearlCheckpointItem(int amount, int cooldown) implements Chec
 
             background("action/editor/container_lg", -10, -31);
 
-            this.amountInput = add(1, 3, makeGenericAmount(EnderPearlCheckpointItem::withAmount, MAX_AMOUNT));
-            this.cooldownInput = add(1, 5, makeGenericCooldown(EnderPearlCheckpointItem::withCooldown, true));
+            this.amountInput = add(
+                1,
+                3,
+                makeGenericAmount(EnderPearlCheckpointItem::withAmount, MAX_AMOUNT)
+            );
+            this.cooldownInput = add(
+                1,
+                5,
+                makeGenericCooldown(EnderPearlCheckpointItem::withCooldown, true)
+            );
         }
 
         @Override

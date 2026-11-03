@@ -7,9 +7,9 @@ import net.minestom.server.codec.Codec;
 import org.jetbrains.annotations.Nullable;
 
 public record MolangExpression<T>(
-        String text,
-        @Nullable MolangProgram<T> program,
-        @Nullable Throwable error
+    String text,
+    @Nullable MolangProgram<T> program,
+    @Nullable Throwable error
 ) {
 
     public static <T> Codec<MolangExpression<T>> codec(MolangEnvironment<T> environment) {

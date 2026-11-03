@@ -89,7 +89,9 @@ final class ApiSegmentedReplayStorageTest {
     void commit_sendsTheBodyItsLengthAndItsDigest() {
         var writer = storage.writer(ID, null);
 
-        writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null));
+        writer.commit(
+            new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null)
+        );
 
         var sent = service.commits.getFirst();
         assertNull(sent.meta().expectedRevision());
@@ -107,8 +109,26 @@ final class ApiSegmentedReplayStorageTest {
     void commit_carriesWhyTheRecordingIsBeingFinished() {
         var writer = storage.writer(ID, null);
 
-        writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, true, RunOutcome.COMPLETED));
-        writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 1, SEGMENT, true, RunOutcome.RESET));
+        writer.commit(
+            new SegmentedReplayCommit(
+                UUID.randomUUID(),
+                PREAMBLE,
+                0,
+                SEGMENT,
+                true,
+                RunOutcome.COMPLETED
+            )
+        );
+        writer.commit(
+            new SegmentedReplayCommit(
+                UUID.randomUUID(),
+                PREAMBLE,
+                1,
+                SEGMENT,
+                true,
+                RunOutcome.RESET
+            )
+        );
 
         assertEquals(ReplayOutcome.FINISHED, service.commits.get(0).meta().outcome());
         assertEquals(ReplayOutcome.RESET, service.commits.get(1).meta().outcome());
@@ -118,8 +138,12 @@ final class ApiSegmentedReplayStorageTest {
     void commit_carriesTheRevisionTheLastOneAnswered() {
         var writer = resumingWriter();
 
-        writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null));
-        writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 1, SEGMENT, false, null));
+        writer.commit(
+            new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null)
+        );
+        writer.commit(
+            new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 1, SEGMENT, false, null)
+        );
 
         assertEquals(4L, service.commits.get(0).meta().expectedRevision());
         assertEquals(5L, service.commits.get(1).meta().expectedRevision());
@@ -132,8 +156,12 @@ final class ApiSegmentedReplayStorageTest {
         service.status = 409;
         var writer = resumingWriter();
 
-        assertThrows(IllegalStateException.class, () ->
-            writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null)));
+        assertThrows(
+            IllegalStateException.class,
+            () -> writer.commit(
+                new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null)
+            )
+        );
         assertEquals(1, service.commits.size());
     }
 
@@ -142,8 +170,12 @@ final class ApiSegmentedReplayStorageTest {
         service.status = 500;
         var writer = resumingWriter();
 
-        assertThrows(IpcException.class, () ->
-            writer.commit(new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null)));
+        assertThrows(
+            IpcException.class,
+            () -> writer.commit(
+                new SegmentedReplayCommit(UUID.randomUUID(), PREAMBLE, 0, SEGMENT, false, null)
+            )
+        );
 
         assertEquals(3, service.commits.size());
         // Byte for byte the same request every time, which is what makes the retry safe.
@@ -157,9 +189,21 @@ final class ApiSegmentedReplayStorageTest {
         return storage.writer(ID, storage.load(ID));
     }
 
-    private static ReplayInfo info(ReplayState state, ReplayRepresentation representation,
-                                   @Nullable Integer nextSegmentIndex) {
-        return new ReplayInfo(ID, 4, state, representation, nextSegmentIndex, PREAMBLE.length, null, 0);
+    private static ReplayInfo info(
+        ReplayState state,
+        ReplayRepresentation representation,
+        @Nullable Integer nextSegmentIndex
+    ) {
+        return new ReplayInfo(
+            ID,
+            4,
+            state,
+            representation,
+            nextSegmentIndex,
+            PREAMBLE.length,
+            null,
+            0
+        );
     }
 
     private static byte[] concat(byte[] head, byte[] tail) {
@@ -171,7 +215,9 @@ final class ApiSegmentedReplayStorageTest {
 
     private static String digest(byte[] body) {
         try {
-            return Base64.getEncoder().encodeToString(MessageDigest.getInstance("SHA-256").digest(body));
+            return Base64.getEncoder().encodeToString(
+                MessageDigest.getInstance("SHA-256").digest(body)
+            );
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }
@@ -185,8 +231,7 @@ final class ApiSegmentedReplayStorageTest {
         private int status = 200;
         private long version = 4;
 
-        private record Sent(ReplayCommit meta, byte[] body) {
-        }
+        private record Sent(ReplayCommit meta, byte[] body) {}
 
         @Override
         public @Nullable ReplayInfo getReplay(String id) {
@@ -235,8 +280,16 @@ final class ApiSegmentedReplayStorageTest {
             }
             if (status != 200) throw new IpcException(status, "answered " + status);
             version++;
-            return new ReplayInfo(meta.id(), version, ReplayState.RECORDING,
-                ReplayRepresentation.SEGMENTED, 0, meta.preambleLength(), meta.outcome(), 0);
+            return new ReplayInfo(
+                meta.id(),
+                version,
+                ReplayState.RECORDING,
+                ReplayRepresentation.SEGMENTED,
+                0,
+                meta.preambleLength(),
+                meta.outcome(),
+                0
+            );
         }
 
         @Override
@@ -250,7 +303,10 @@ final class ApiSegmentedReplayStorageTest {
     private static byte[] emptyPreamble() {
         return NetworkBuffer.makeArray(buffer -> {
             var header = new ReplayHeader(new UUID(0, 0), new byte[0]);
-            var metadata = NetworkBuffer.makeArray(NetworkBuffer.NBT_COMPOUND, CompoundBinaryTag.empty());
+            var metadata = NetworkBuffer.makeArray(
+                NetworkBuffer.NBT_COMPOUND,
+                CompoundBinaryTag.empty()
+            );
             header.update(metadata.length, 0, 0, 0);
             header.write(buffer);
             buffer.write(NetworkBuffer.RAW_BYTES, metadata);

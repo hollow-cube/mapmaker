@@ -13,15 +13,24 @@ import java.util.*;
 
 @SuppressWarnings("UnstableApiUsage")
 public final class ActionRegistry {
-    private static final DynamicRegistry<StructCodec<? extends Action>> REGISTRY = DynamicRegistry.create(Key.key("mapmaker:action"));
-    private static final DynamicRegistry<Action.Editor<? extends Action>> EDITOR_REGISTRY = DynamicRegistry.create(Key.key("mapmaker:action_editor"));
+    private static final DynamicRegistry<StructCodec<? extends Action>> REGISTRY =
+        DynamicRegistry.create(Key.key("mapmaker:action"));
+    private static final DynamicRegistry<Action.Editor<? extends Action>> EDITOR_REGISTRY =
+        DynamicRegistry.create(Key.key("mapmaker:action_editor"));
     private static final Map<Action.Type, List<Key>> KEYS = new HashMap<>();
 
-    public static final Codec<RegistryKey<StructCodec<? extends Action>>> KEY_CODEC = RegistryKey.codec(_ -> REGISTRY);
-    public static final Codec<Action> CODEC = Codec.RegistryTaggedUnion(_ -> REGISTRY, Action::codec, "type");
+    public static final Codec<RegistryKey<StructCodec<? extends Action>>> KEY_CODEC =
+        RegistryKey.codec(_ -> REGISTRY);
+    public static final Codec<Action> CODEC = Codec.RegistryTaggedUnion(
+        _ -> REGISTRY,
+        Action::codec,
+        "type"
+    );
 
     public static Codec<ActionList> listCodec(int maxSize) {
-        return CODEC.list(maxSize).transform(ActionList::new, ActionList::actions).optional(new ActionList());
+        return CODEC.list(maxSize)
+            .transform(ActionList::new, ActionList::actions)
+            .optional(new ActionList());
     }
 
     public static Key getKey(Action action) {
@@ -38,8 +47,7 @@ public final class ActionRegistry {
 
     public static Action createDefault(Key key) {
         var codec = REGISTRY.get(key);
-        if (codec == null)
-            throw new IllegalArgumentException("No action found for key: " + key);
+        if (codec == null) throw new IllegalArgumentException("No action found for key: " + key);
         return codec.decode(Transcoder.NBT, CompoundBinaryTag.empty()).orElseThrow();
     }
 
@@ -55,7 +63,11 @@ public final class ActionRegistry {
         register(TeleportAction.KEY, TeleportAction.CODEC, TeleportAction.EDITOR);
         register(EnableSettingAction.KEY, EnableSettingAction.CODEC, EnableSettingAction.EDITOR);
         register(DisableSettingAction.KEY, DisableSettingAction.CODEC, DisableSettingAction.EDITOR);
-        register(SetProgressIndexAction.KEY, SetProgressIndexAction.CODEC, SetProgressIndexAction.EDITOR);
+        register(
+            SetProgressIndexAction.KEY,
+            SetProgressIndexAction.CODEC,
+            SetProgressIndexAction.EDITOR
+        );
         register(ResetHeightAction.KEY, ResetHeightAction.CODEC, ResetHeightAction.EDITOR);
         register(GiveElytraAction.KEY, GiveElytraAction.CODEC, GiveElytraAction.EDITOR);
         register(TakeElytraAction.KEY, TakeElytraAction.CODEC, TakeElytraAction.EDITOR);
@@ -63,18 +75,38 @@ public final class ActionRegistry {
         register(TakeItemAction.KEY, TakeItemAction.CODEC, TakeItemAction.EDITOR);
         register(EditAttributeAction.KEY, EditAttributeAction.CODEC, EditAttributeAction.EDITOR);
         register(ChatAction.KEY, ChatAction.CODEC, ChatAction.EDITOR);
-        register(RespawnPosAction.KEY, RespawnPosAction.CODEC, RespawnPosAction.EDITOR, Action.Type.CHECKPOINT);
+        register(
+            RespawnPosAction.KEY,
+            RespawnPosAction.CODEC,
+            RespawnPosAction.EDITOR,
+            Action.Type.CHECKPOINT
+        );
         register(EditVariableAction.KEY, EditVariableAction.CODEC, EditVariableAction.EDITOR);
-        register(EditVelocityAction.KEY, EditVelocityAction.CODEC, EditVelocityAction.EDITOR, Action.Type.STATUS);
+        register(
+            EditVelocityAction.KEY,
+            EditVelocityAction.CODEC,
+            EditVelocityAction.EDITOR,
+            Action.Type.STATUS
+        );
         register(PlaySoundAction.KEY, PlaySoundAction.CODEC, PlaySoundAction.EDITOR);
         register(StopSoundAction.KEY, StopSoundAction.CODEC, StopSoundAction.EDITOR);
-        register(EnableNoSpecAction.KEY, EnableNoSpecAction.CODEC, EnableNoSpecAction.EDITOR, Action.Type.SPAWN);
+        register(
+            EnableNoSpecAction.KEY,
+            EnableNoSpecAction.CODEC,
+            EnableNoSpecAction.EDITOR,
+            Action.Type.SPAWN
+        );
         register(SetTimeAction.KEY, SetTimeAction.CODEC, SetTimeAction.EDITOR);
         register(SetWeatherAction.KEY, SetWeatherAction.CODEC, SetWeatherAction.EDITOR);
         register(ClearBlocksAction.KEY, ClearBlocksAction.CODEC, ClearBlocksAction.EDITOR);
     }
 
-    private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(Key name, StructCodec<T> codec, Action.Editor<T> editor, Action.Type... types) {
+    private static <T extends Action> RegistryKey<StructCodec<? extends Action>> register(
+        Key name,
+        StructCodec<T> codec,
+        Action.Editor<T> editor,
+        Action.Type... types
+    ) {
         var key = REGISTRY.register(name, codec);
         EDITOR_REGISTRY.register(name, editor);
         if (types.length == 0) types = Action.Type.values();

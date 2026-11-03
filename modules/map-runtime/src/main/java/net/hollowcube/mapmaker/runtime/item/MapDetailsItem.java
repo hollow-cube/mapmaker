@@ -14,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public class MapDetailsItem extends ItemHandler {
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/map_details"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/map_details")
+    );
     public static final Key ID = Key.key("mapmaker:map_details");
     public static final MapDetailsItem INSTANCE = new MapDetailsItem();
 
@@ -50,8 +52,16 @@ public class MapDetailsItem extends ItemHandler {
 
             // TODO(v4 api): we refetch the map so it includes leaderboard info
             var map = world.server().api().maps.get(world.map().id().toString());
-            Panel.open(player, new MapDetailsView(world.server().api(),
-                world.server().bridge(), map, finalAuthorName, false));
+            Panel.open(
+                player,
+                new MapDetailsView(
+                    world.server().api(),
+                    world.server().bridge(),
+                    map,
+                    finalAuthorName,
+                    false
+                )
+            );
         });
     }
 

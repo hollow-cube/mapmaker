@@ -21,10 +21,10 @@ public class StatusPlateBlock implements BlockHandler, PressurePlateBlock, Debug
     public static final StatusPlateBlock INSTANCE = new StatusPlateBlock();
 
     public static final Tag<ActionTriggerData> DATA_TAG = DFU.View(ActionTriggerData.CODEC);
-    public static final Tag<ActionTriggerData> ENTITY_DATA_TAG = DFU.Tag(ActionTriggerData.CODEC, "status").path("data");
+    public static final Tag<ActionTriggerData> ENTITY_DATA_TAG =
+        DFU.Tag(ActionTriggerData.CODEC, "status").path("data");
 
-    private StatusPlateBlock() {
-    }
+    private StatusPlateBlock() {}
 
     @Override
     public Key getKey() {
@@ -33,7 +33,12 @@ public class StatusPlateBlock implements BlockHandler, PressurePlateBlock, Debug
 
     @Override
     public Trigger createTrigger(BlockVec position, Block block) {
-        return new ActionTrigger(ActionTrigger.Kind.STATUS, createId(position), position, block.getTag(DATA_TAG));
+        return new ActionTrigger(
+            ActionTrigger.Kind.STATUS,
+            createId(position),
+            position,
+            block.getTag(DATA_TAG)
+        );
     }
 
     @Override
@@ -49,8 +54,12 @@ public class StatusPlateBlock implements BlockHandler, PressurePlateBlock, Debug
 
     private static String createId(Point blockPosition) {
         // This is a legacy formatting, but was stored in save states so its relevant to preserve.
-        return String.format("mapmaker:status_plate/%d_%d_%d",
-                blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
+        return String.format(
+            "mapmaker:status_plate/%d_%d_%d",
+            blockPosition.blockX(),
+            blockPosition.blockY(),
+            blockPosition.blockZ()
+        );
     }
 
 }

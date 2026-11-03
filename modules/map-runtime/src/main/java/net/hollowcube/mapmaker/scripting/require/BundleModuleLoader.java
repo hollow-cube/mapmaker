@@ -39,8 +39,7 @@ public class BundleModuleLoader extends AbstractModuleLoader {
         var vfs = new HashMap<String, byte[]>();
         byte[] metadataBytes = null;
 
-        try (var is = zip.toURL().openStream();
-             var zis = new ZipInputStream(is)) {
+        try (var is = zip.toURL().openStream(); var zis = new ZipInputStream(is)) {
             ZipEntry entry;
             while ((entry = zis.getNextEntry()) != null) {
                 if (entry.isDirectory()) continue;
@@ -60,21 +59,33 @@ public class BundleModuleLoader extends AbstractModuleLoader {
 
         if (metadataBytes == null)
             throw new IOException("bundle zip is missing required `metadata.json` entry: " + zip);
-        validate(zip, AbstractHttpService.GSON.fromJson(new String(metadataBytes, StandardCharsets.UTF_8), BundleMetadata.class));
+        validate(
+            zip,
+            AbstractHttpService.GSON.fromJson(
+                new String(metadataBytes, StandardCharsets.UTF_8),
+                BundleMetadata.class
+            )
+        );
 
         return Map.copyOf(vfs);
     }
 
     private static void validate(URI zip, BundleMetadata md) throws IOException {
         if (md.bundleFormatVersion() != BundleMetadata.LATEST_VERSION) {
-            var msg = "bundle %s has format version %d but this runtime expects %d."
-                .formatted(zip, md.bundleFormatVersion(), BundleMetadata.LATEST_VERSION);
+            var msg = "bundle %s has format version %d but this runtime expects %d.".formatted(
+                zip,
+                md.bundleFormatVersion(),
+                BundleMetadata.LATEST_VERSION
+            );
             throw new IOException(msg);
         }
 
         if (md.luauBytecodeVersion() != BundleMetadata.LUAU_BYTECODE_VERSION) {
-            var msg = "bundle %s was built with luau bytecode version %d but this runtime supports %d."
-                .formatted(zip, md.luauBytecodeVersion(), BundleMetadata.LUAU_BYTECODE_VERSION);
+            var msg = "bundle %s was built with luau bytecode version %d but this runtime supports %d.".formatted(
+                zip,
+                md.luauBytecodeVersion(),
+                BundleMetadata.LUAU_BYTECODE_VERSION
+            );
             throw new IOException(msg);
         }
     }

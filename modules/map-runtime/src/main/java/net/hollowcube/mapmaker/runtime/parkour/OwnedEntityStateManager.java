@@ -14,12 +14,21 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 public class OwnedEntityStateManager {
 
     public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerStateUpdateEvent.class, OwnedEntityStateManager::handleUpdateStateFromPlayer)
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, OwnedEntityStateManager::handleUpdatePlayerFromState);
+        .addListener(
+            ParkourMapPlayerStateUpdateEvent.class,
+            OwnedEntityStateManager::handleUpdateStateFromPlayer
+        )
+        .addListener(
+            ParkourMapPlayerUpdateStateEvent.class,
+            OwnedEntityStateManager::handleUpdatePlayerFromState
+        );
 
     private static void handleUpdateStateFromPlayer(ParkourMapPlayerStateUpdateEvent event) {
         final var player = (MapPlayer) event.player();
-        event.playState().set(Attachments.OWNED_ENTITIES, OwnedEntityList.save(player.ownedEntities()));
+        event.playState().set(
+            Attachments.OWNED_ENTITIES,
+            OwnedEntityList.save(player.ownedEntities())
+        );
     }
 
     private static void handleUpdatePlayerFromState(ParkourMapPlayerUpdateStateEvent event) {

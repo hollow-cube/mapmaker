@@ -15,8 +15,16 @@ public class V4326 extends DataVersion implements ExternalDataFix {
     public V4326() {
         super(4326);
 
-        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate", V4326::updateCheckpointPlateBlockEntity);
-        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate", V4326::updateStatusPlateBlockEntity);
+        addFix(
+            DataTypes.BLOCK_ENTITY,
+            "mapmaker:checkpoint_plate",
+            V4326::updateCheckpointPlateBlockEntity
+        );
+        addFix(
+            DataTypes.BLOCK_ENTITY,
+            "mapmaker:status_plate",
+            V4326::updateStatusPlateBlockEntity
+        );
         addFix(DataTypes.ENTITY, "minecraft:marker", V4326::updateEffectMarker);
         addFix(HCDataTypes.WORLD, V4326::updateWorldSpawnCheckpoint);
         addFix(HCDataTypes.PLAY_STATE, V4326::fixPlayStateToActionMap);
@@ -59,8 +67,7 @@ public class V4326 extends DataVersion implements ExternalDataFix {
         var lives = Value.emptyMap();
         lives.put("max", playState.remove("maxLives"));
         lives.put("value", playState.remove("lives"));
-        if (lives.size(0) > 0)
-            playState.put("mapmaker:lives", lives);
+        if (lives.size(0) > 0) playState.put("mapmaker:lives", lives);
         var items = playState.remove("items"); // was {item1,item2,item3,elytra}
         if (playState.get("elytra").as(Boolean.class, false))
             playState.put("mapmaker:elytra", true);
@@ -68,8 +75,7 @@ public class V4326 extends DataVersion implements ExternalDataFix {
         newItems.put("item0", fixItem(items.remove("item1")));
         newItems.put("item1", fixItem(items.remove("item2")));
         newItems.put("item2", fixItem(items.remove("item3")));
-        if (newItems.size(0) > 0)
-            playState.put("mapmaker:hotbar_items", newItems);
+        if (newItems.size(0) > 0) playState.put("mapmaker:hotbar_items", newItems);
         playState.put("mapmaker:settings", playState.remove("settings"));
 
         var lastState = playState.get("lastState");
@@ -85,7 +91,10 @@ public class V4326 extends DataVersion implements ExternalDataFix {
                 var firework = Value.emptyMap();
                 firework.put("item", "minecraft:firework_rocket");
                 firework.put("amount", item.remove("quantity"));
-                firework.put("duration", item.remove("duration").as(Number.class, 0).intValue() / 50);
+                firework.put(
+                    "duration",
+                    item.remove("duration").as(Number.class, 0).intValue() / 50
+                );
                 yield firework;
             }
             case "trident" -> {
@@ -147,7 +156,10 @@ public class V4326 extends DataVersion implements ExternalDataFix {
             for (var effect : potionEffects) {
                 effect.put("effect", effect.remove("type"));
                 effect.put("type", "mapmaker:add_potion");
-                effect.put("duration", effect.remove("duration").as(Number.class, 0).intValue() / 50);
+                effect.put(
+                    "duration",
+                    effect.remove("duration").as(Number.class, 0).intValue() / 50
+                );
                 // level is OK
                 actions.put(effect);
             }
@@ -162,8 +174,12 @@ public class V4326 extends DataVersion implements ExternalDataFix {
             var elytra = items.remove("elytra");
             if (!elytra.isNull()) {
                 var action = Value.emptyMap();
-                action.put("type", elytra.as(Boolean.class, false)
-                        ? "mapmaker:give_elytra" : "mapmaker:take_elytra");
+                action.put(
+                    "type",
+                    elytra.as(Boolean.class, false)
+                        ? "mapmaker:give_elytra"
+                        : "mapmaker:take_elytra"
+                );
                 actions.put(action);
             }
             for (int i = 1; i <= 3; i++) {
@@ -179,7 +195,10 @@ public class V4326 extends DataVersion implements ExternalDataFix {
                         action.put("type", "mapmaker:give_item");
                         action.put("item", Key.key(type).asString());
                         action.put("amount", item.remove("quantity"));
-                        action.put("duration", item.remove("duration").as(Number.class, 0).intValue() / 50);
+                        action.put(
+                            "duration",
+                            item.remove("duration").as(Number.class, 0).intValue() / 50
+                        );
                         action.put("riptide", item.remove("riptideLevel"));
                     }
                     actions.put(action);
@@ -204,7 +223,6 @@ public class V4326 extends DataVersion implements ExternalDataFix {
             actions.put(action);
         }
 
-        if (actions.size(0) > 0)
-            container.put("actions", actions);
+        if (actions.size(0) > 0) container.put("actions", actions);
     }
 }

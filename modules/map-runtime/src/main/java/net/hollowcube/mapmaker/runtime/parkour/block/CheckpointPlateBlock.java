@@ -14,17 +14,23 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.tag.Tag;
 
-public class CheckpointPlateBlock implements BlockHandler, PressurePlateBlock, DebugCommand.BlockDebug {
+public class CheckpointPlateBlock implements
+    BlockHandler,
+    PressurePlateBlock,
+    DebugCommand.BlockDebug {
     private static final Key KEY = Key.key("mapmaker:checkpoint_plate");
 
     public static final CheckpointPlateBlock INSTANCE = new CheckpointPlateBlock();
 
     public static final Tag<ActionTriggerData> DATA_TAG = DFU.View(ActionTriggerData.CODEC);
-    public static final Tag<ActionTriggerData> SIGN_DATA_TAG = DFU.Tag(ActionTriggerData.CODEC, "checkpoint");
-    public static final Tag<ActionTriggerData> ENTITY_DATA_TAG = DFU.Tag(ActionTriggerData.CODEC, "checkpoint").path("data");
+    public static final Tag<ActionTriggerData> SIGN_DATA_TAG = DFU.Tag(
+        ActionTriggerData.CODEC,
+        "checkpoint"
+    );
+    public static final Tag<ActionTriggerData> ENTITY_DATA_TAG =
+        DFU.Tag(ActionTriggerData.CODEC, "checkpoint").path("data");
 
-    private CheckpointPlateBlock() {
-    }
+    private CheckpointPlateBlock() {}
 
     @Override
     public Key getKey() {
@@ -33,7 +39,12 @@ public class CheckpointPlateBlock implements BlockHandler, PressurePlateBlock, D
 
     @Override
     public Trigger createTrigger(BlockVec position, Block block) {
-        return new ActionTrigger(ActionTrigger.Kind.CHECKPOINT, createId(position), position, block.getTag(DATA_TAG));
+        return new ActionTrigger(
+            ActionTrigger.Kind.CHECKPOINT,
+            createId(position),
+            position,
+            block.getTag(DATA_TAG)
+        );
     }
 
     @Override
@@ -49,8 +60,12 @@ public class CheckpointPlateBlock implements BlockHandler, PressurePlateBlock, D
 
     private static String createId(Point blockPosition) {
         // This is a legacy formatting, but was stored in save states so its relevant to preserve.
-        return String.format("mapmaker:checkpoint_plate/%d_%d_%d",
-                blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ());
+        return String.format(
+            "mapmaker:checkpoint_plate/%d_%d_%d",
+            blockPosition.blockX(),
+            blockPosition.blockY(),
+            blockPosition.blockZ()
+        );
     }
 
 }

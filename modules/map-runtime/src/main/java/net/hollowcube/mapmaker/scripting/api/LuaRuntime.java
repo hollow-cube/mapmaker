@@ -66,8 +66,6 @@ public final class LuaRuntime {
     /// Controls for hot-reloading scripts.
     // TODO: this could all be static, should support singletons somehow somewhere in slopgen
     @LuaExport
-    public record Hot() {
-
-    }
+    public record Hot() {}
 
 }

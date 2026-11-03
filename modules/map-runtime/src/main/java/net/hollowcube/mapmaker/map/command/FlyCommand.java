@@ -22,7 +22,6 @@ public class FlyCommand extends CommandDsl {
     }
 
     private void handleToggleFly(Player player, CommandContext context) {
-
         var world = ParkourMapWorld.forPlayer(player);
         if (world != null) {
             SpectateHelper.toggleSpectatorFlight(world, player);
@@ -34,21 +33,23 @@ public class FlyCommand extends CommandDsl {
             player.setAllowFlying(!canFly);
             player.setFlying(!canFly);
 
-            player.sendMessage(translatable(!canFly ? "command.fly.enabled" : "command.fly.disabled"));
+            player.sendMessage(
+                translatable(!canFly ? "command.fly.enabled" : "command.fly.disabled")
+            );
         }
     }
 
     // This should not be in the editor module but i dont have an immediate way to move it
     static CommandCondition playingOrSpectatingFilter() {
         return (sender, _) -> {
-            if (!(sender instanceof Player player))
-                return CommandCondition.HIDE;
+            if (!(sender instanceof Player player)) return CommandCondition.HIDE;
 
             var world = ParkourMapWorld.forPlayer(player);
             if (world == null) return CommandCondition.HIDE;
 
             return world.getPlayerState(player) instanceof ParkourState.Spectating
-                ? CommandCondition.ALLOW : CommandCondition.HIDE;
+                ? CommandCondition.ALLOW
+                : CommandCondition.HIDE;
         };
     }
 }

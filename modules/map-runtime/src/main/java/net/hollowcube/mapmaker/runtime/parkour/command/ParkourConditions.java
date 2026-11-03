@@ -10,7 +10,9 @@ public final class ParkourConditions {
     public static CommandCondition parkourWorld() {
         return (sender, _) -> {
             if (!(sender instanceof Player player)) return CommandCondition.HIDE;
-            return ParkourMapWorld.forPlayer(player) != null ? CommandCondition.ALLOW : CommandCondition.HIDE;
+            return ParkourMapWorld.forPlayer(player) != null
+                ? CommandCondition.ALLOW
+                : CommandCondition.HIDE;
         };
     }
 
@@ -20,7 +22,8 @@ public final class ParkourConditions {
             var world = ParkourMapWorld.forPlayer(player);
             if (world == null) return CommandCondition.HIDE;
             return world.getPlayerState(player) instanceof ParkourState.AnyPlaying
-                    ? CommandCondition.ALLOW : CommandCondition.HIDE;
+                ? CommandCondition.ALLOW
+                : CommandCondition.HIDE;
         };
     }
 
@@ -46,7 +49,8 @@ public final class ParkourConditions {
             var world = ParkourMapWorld.forPlayer(player);
             if (world == null) return CommandCondition.HIDE;
             return world.getPlayerState(player) instanceof ParkourState.Finished
-                    ? CommandCondition.ALLOW : CommandCondition.HIDE;
+                ? CommandCondition.ALLOW
+                : CommandCondition.HIDE;
         };
     }
 }

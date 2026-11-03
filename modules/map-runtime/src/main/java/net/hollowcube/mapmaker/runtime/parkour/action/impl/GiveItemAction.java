@@ -33,18 +33,22 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
 public record GiveItemAction(
-        @Nullable CheckpointItem item,
-        int slot // 0-2 for now
+    @Nullable CheckpointItem item,
+    int slot // 0-2 for now
 ) implements Action {
     private static final Sprite SPRITE_ADD = new Sprite("action/icon/hand_plus", 2, 3);
 
     public static final Key KEY = Key.key("mapmaker:give_item");
     public static final StructCodec<GiveItemAction> CODEC = StructCodec.struct(
-            StructCodec.INLINE, CheckpointItems.CODEC.optional(), GiveItemAction::item,
-            "slot", ExtraCodecs.clamppedInt(0, 2).optional(0), GiveItemAction::slot,
-            GiveItemAction::new);
+        StructCodec.INLINE, CheckpointItems.CODEC.optional(), GiveItemAction::item,
+        "slot", ExtraCodecs.clamppedInt(0, 2).optional(0), GiveItemAction::slot,
+        GiveItemAction::new
+    );
     public static final Editor<GiveItemAction> EDITOR = new Editor<>(
-            GiveItemAction::createEditor, SPRITE_ADD, GiveItemAction::thumbnail);
+        GiveItemAction::createEditor,
+        SPRITE_ADD,
+        GiveItemAction::thumbnail
+    );
 
     public GiveItemAction withItem(@Nullable CheckpointItem item) {
         return new GiveItemAction(item, this.slot);
@@ -87,7 +91,6 @@ public record GiveItemAction(
             background("action/editor/list_container", -10, -31);
 
             add(1, 1, AbstractActionEditorPanel.groupText(7, "choose item"));
-
         }
 
         @Override
@@ -96,8 +99,9 @@ public record GiveItemAction(
 
             if (!isInitial) return;
 
-            Consumer<Key> innerUpdateFunc = update((data, item) ->
-                    data.withItem(CheckpointItems.createDefault(item)));
+            Consumer<Key> innerUpdateFunc = update(
+                (data, item) -> data.withItem(CheckpointItems.createDefault(item))
+            );
             Consumer<Key> updateFunc = key -> {
                 innerUpdateFunc.accept(key);
                 host.replaceView(ref.<GiveItemAction>cast().item.createEditor(ref));
@@ -105,15 +109,25 @@ public record GiveItemAction(
 
             int i = 0;
             for (var itemType : CheckpointItems.keys()) {
-                if (MaceCheckpointItem.ID.equals(itemType) && !MapFeatureFlags.MACE_ITEM.test(host.player()))
+                if (MaceCheckpointItem.ID.equals(itemType)
+                    && !MapFeatureFlags.MACE_ITEM.test(host.player()))
                     continue;
 
                 int x = i % 7, y = i / 7;
 
-                add(x + 1, y + 2, new Button("gui.action.give_item." + itemType.value(), 1, 1)
+                add(
+                    x + 1,
+                    y + 2,
+                    new Button("gui.action.give_item." + itemType.value(), 1, 1)
                         // TODO: generalize this handling rather than hardcoding to this specific behavior for block items
-                        .model(itemType.equals(BlockCheckpointItem.ID) ? "minecraft:stone" : itemType.asString(), null)
-                        .onLeftClick(() -> updateFunc.accept(itemType)));
+                        .model(
+                            itemType.equals(BlockCheckpointItem.ID)
+                                ? "minecraft:stone"
+                                : itemType.asString(),
+                            null
+                        )
+                        .onLeftClick(() -> updateFunc.accept(itemType))
+                );
                 i++;
             }
         }
@@ -127,7 +141,9 @@ public record GiveItemAction(
     public static abstract class AbstractItemEditor<T extends CheckpointItem> extends AbstractActionEditorPanel<GiveItemAction> {
 
         private enum Slot {
-            ONE, TWO, THREE; // We just use indices but multi select uses an enum for something idk
+            ONE,
+            TWO,
+            THREE, // We just use indices but multi select uses an enum for something idk
         }
 
         protected final ControlledTriStateInput<Slot> slotInput;
@@ -140,15 +156,31 @@ public record GiveItemAction(
             super(ref, oneSlotLessHack);
 
             // Should be non-null now because we otherwise open the picker
-            var key = CheckpointItems.getKey(Objects.requireNonNull(ref.<GiveItemAction>cast().item));
-            subtitleText.text(LanguageProviderV2.translateToPlain("gui.action.give_item." + key.value() + ".title"));
+            var key = CheckpointItems.getKey(
+                Objects.requireNonNull(ref.<GiveItemAction>cast().item)
+            );
+            subtitleText.text(
+                LanguageProviderV2.translateToPlain(
+                    "gui.action.give_item." + key.value() + ".title"
+                )
+            );
 
-            this.slotInput = add(1, 1, new ControlledTriStateInput<>("give_item", Slot.class,
-                    update((data, op) -> data.withSlot(op.ordinal())))
-                    .label("choose slot").labels("slot0", "slot1", "slot2"));
+            this.slotInput = add(
+                1,
+                1,
+                new ControlledTriStateInput<>(
+                    "give_item",
+                    Slot.class,
+                    update((data, op) -> data.withSlot(op.ordinal()))
+                )
+                    .label("choose slot")
+                    .labels("slot0", "slot1", "slot2")
+            );
             this.slotInput.update(Slot.ONE);
             this.slotInput.iconButton().onLeftClick(() -> host.replaceView(new ItemPicker(ref)));
-            this.slotInput.iconButton().onShiftLeftClick(() -> host.replaceView(new ItemPicker(ref)));
+            this.slotInput.iconButton().onShiftLeftClick(
+                () -> host.replaceView(new ItemPicker(ref))
+            );
         }
 
         @Override
@@ -168,18 +200,32 @@ public record GiveItemAction(
             return update((data, value) -> data.withItem(setter.apply((T) data.item, value)));
         }
 
-        protected ControlledNumberInput makeGenericAmount(BiFunction<T, Integer, T> setter, int maxAmount) {
+        protected ControlledNumberInput makeGenericAmount(
+            BiFunction<T, Integer, T> setter,
+            int maxAmount
+        ) {
             return new ControlledNumberInput("give_item.generic.amount", updateItem(setter))
-                    .formatted(i -> i == 0 ? "Infinite" : String.valueOf(i))
-                    .range(0, 99).stepped(1, 5);
+                .formatted(i -> i == 0 ? "Infinite" : String.valueOf(i))
+                .range(0, 99)
+                .stepped(1, 5);
         }
 
-        protected ControlledNumberInput makeGenericCooldown(BiFunction<T, Integer, T> setter, boolean oneSlotHack) {
-            return new ControlledNumberInput("give_item.generic.cooldown", updateItem(setter), oneSlotHack)
-                    .parsed(dur -> NumberUtil.formatDuration(dur * 50L), NumberUtil::parseDurationToTicks)
-                    .formatted(dur -> NumberUtil.formatDuration(dur * 50L))
-                    .range(1, 24 * 60 * 60 * 20) // 1h in ticks
-                    .stepped(10, 20); // 0.5s, 1s steps
+        protected ControlledNumberInput makeGenericCooldown(
+            BiFunction<T, Integer, T> setter,
+            boolean oneSlotHack
+        ) {
+            return new ControlledNumberInput(
+                "give_item.generic.cooldown",
+                updateItem(setter),
+                oneSlotHack
+            )
+                .parsed(
+                    dur -> NumberUtil.formatDuration(dur * 50L),
+                    NumberUtil::parseDurationToTicks
+                )
+                .formatted(dur -> NumberUtil.formatDuration(dur * 50L))
+                .range(1, 24 * 60 * 60 * 20) // 1h in ticks
+                .stepped(10, 20); // 0.5s, 1s steps
         }
     }
 }

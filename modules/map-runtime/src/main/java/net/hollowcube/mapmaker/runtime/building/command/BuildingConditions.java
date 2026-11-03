@@ -9,7 +9,9 @@ public final class BuildingConditions {
     public static CommandCondition buildingWorld() {
         return (sender, _) -> {
             if (!(sender instanceof Player player)) return CommandCondition.HIDE;
-            return BuildingMapWorld.forPlayer(player) != null ? CommandCondition.ALLOW : CommandCondition.HIDE;
+            return BuildingMapWorld.forPlayer(player) != null
+                ? CommandCondition.ALLOW
+                : CommandCondition.HIDE;
         };
     }
 }

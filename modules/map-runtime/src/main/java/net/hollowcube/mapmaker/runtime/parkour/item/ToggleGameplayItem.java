@@ -16,8 +16,12 @@ public class ToggleGameplayItem extends ItemHandler {
     public static final ToggleGameplayItem INSTANCE_ON = new ToggleGameplayItem(true);
     public static final ToggleGameplayItem INSTANCE_OFF = new ToggleGameplayItem(false);
 
-    private static final BadSprite SPRITE_OFF = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/gameplay_off"));
-    private static final BadSprite SPRITE_ON = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/gameplay_on"));
+    private static final BadSprite SPRITE_OFF = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/gameplay_off")
+    );
+    private static final BadSprite SPRITE_ON = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/gameplay_on")
+    );
 
     private final boolean enableGameplay;
 
@@ -42,9 +46,15 @@ public class ToggleGameplayItem extends ItemHandler {
             return;
         }
 
-        SpectateHelper.changeGameplaySettingsState(world, player, enableGameplay ? TriState.TRUE : TriState.FALSE);
-        click.update(enableGameplay
+        SpectateHelper.changeGameplaySettingsState(
+            world,
+            player,
+            enableGameplay ? TriState.TRUE : TriState.FALSE
+        );
+        click.update(
+            enableGameplay
                 ? ToggleGameplayItem.INSTANCE_OFF.getItemStack()
-                : ToggleGameplayItem.INSTANCE_ON.getItemStack());
+                : ToggleGameplayItem.INSTANCE_ON.getItemStack()
+        );
     }
 }

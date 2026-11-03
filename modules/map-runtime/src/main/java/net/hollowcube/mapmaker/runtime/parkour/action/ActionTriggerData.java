@@ -8,18 +8,22 @@ import org.jetbrains.annotations.Nullable;
 
 // Note that while both checkpoints and status plates use this struct, repeatable is not currently supported on checkpoints.
 public record ActionTriggerData(
-        ActionList actions,
-        boolean repeatable,
-        ActionTriggerCondition condition
+    ActionList actions,
+    boolean repeatable,
+    ActionTriggerCondition condition
 ) {
-    public static final ActionTriggerData EMPTY = new ActionTriggerData(new ActionList(), false, ActionTriggerCondition.DEFAULT);
+    public static final ActionTriggerData EMPTY = new ActionTriggerData(
+        new ActionList(),
+        false,
+        ActionTriggerCondition.DEFAULT
+    );
 
     private static final int MAX_ACTIONS = 21;
     public static final StructCodec<ActionTriggerData> CODEC = StructCodec.struct(
-            "actions", ActionRegistry.listCodec(MAX_ACTIONS), ActionTriggerData::actions,
-            "repeatable", Codec.BOOLEAN.optional(false), ActionTriggerData::repeatable,
-            "condition", ActionTriggerCondition.CODEC.optional(ActionTriggerCondition.DEFAULT), ActionTriggerData::condition,
-            ActionTriggerData::new
+        "actions", ActionRegistry.listCodec(MAX_ACTIONS), ActionTriggerData::actions,
+        "repeatable", Codec.BOOLEAN.optional(false), ActionTriggerData::repeatable,
+        "condition", ActionTriggerCondition.CODEC.optional(ActionTriggerCondition.DEFAULT), ActionTriggerData::condition,
+        ActionTriggerData::new
     );
 
     public ActionTriggerData {
@@ -51,7 +55,12 @@ public record ActionTriggerData(
         }
 
         public void setConditionExpression(@Nullable String condition) {
-            this.condition = this.condition.withCondition(OpUtils.map(condition, text -> MolangExpression.from(VariableQueries.ENVIRONMENT, text)));
+            this.condition = this.condition.withCondition(
+                OpUtils.map(
+                    condition,
+                    text -> MolangExpression.from(VariableQueries.ENVIRONMENT, text)
+                )
+            );
         }
 
         public void setConditionMessage(String message) {

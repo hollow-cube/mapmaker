@@ -32,23 +32,33 @@ public class ConditionEditorView extends Panel {
 
         add(0, 0, backOrClose());
         add(1, 0, info("condition"));
-        add(2, 0, new Text(null, 5, 1, "")
+        add(
+            2,
+            0,
+            new Text(null, 5, 1, "")
                 .align(Text.CENTER, Text.CENTER)
                 .background("generic2/btn/default/5_1")
         );
-        this.messageButton = add(7, 0, new Button("gui.action.condition.message", 2, 1)
+        this.messageButton = add(
+            7,
+            0,
+            new Button("gui.action.condition.message", 2, 1)
                 .background("generic2/btn/default/2_1")
                 .sprite("action/icon/chat", 12, 3)
-                .onLeftClick(() -> this.host.pushView(simpleAnvil(
-                        "generic2/anvil/field_container",
-                        "action/anvil/chat_icon",
-                        LanguageProviderV2.translateToPlain("gui.action.condition.name"),
-                        message -> {
-                            data.setConditionMessage(message);
-                            this.onChange();
-                        },
-                        data.condition().message()
-                )))
+                .onLeftClick(
+                    () -> this.host.pushView(
+                        simpleAnvil(
+                            "generic2/anvil/field_container",
+                            "action/anvil/chat_icon",
+                            LanguageProviderV2.translateToPlain("gui.action.condition.name"),
+                            message -> {
+                                data.setConditionMessage(message);
+                                this.onChange();
+                            },
+                            data.condition().message()
+                        )
+                    )
+                )
                 .onRightClick(() -> {
                     data.setShowConditionMessage(!data.condition().showMessage());
                     this.onChange();
@@ -59,18 +69,28 @@ public class ConditionEditorView extends Panel {
                 })
         );
 
-        this.expressionInput = add(1, 1, new ControlledStringInput("condition.expression", expr -> {
-            data.setConditionExpression(expr.isBlank() ? null : expr);
-            var expression = data.condition().expression();
-            if (expression != null && expression.error() != null) {
-                ToastManager.showNotification(
-                        this.host.player(),
-                        Component.text("Molang Expression Error"),
-                        Component.text("Invalid expression, please check your syntax.", NamedTextColor.RED)
-                );
-            }
-            this.onChange();
-        }));
+        this.expressionInput = add(
+            1,
+            1,
+            new ControlledStringInput(
+                "condition.expression",
+                expr -> {
+                    data.setConditionExpression(expr.isBlank() ? null : expr);
+                    var expression = data.condition().expression();
+                    if (expression != null && expression.error() != null) {
+                        ToastManager.showNotification(
+                            this.host.player(),
+                            Component.text("Molang Expression Error"),
+                            Component.text(
+                                "Invalid expression, please check your syntax.",
+                                NamedTextColor.RED
+                            )
+                        );
+                    }
+                    this.onChange();
+                }
+            )
+        );
     }
 
     @Override
@@ -82,10 +102,16 @@ public class ConditionEditorView extends Panel {
     protected void onChange() {
         var condition = this.data.condition();
         this.messageButton.translationKey(
-                "gui.action.condition.message",
-                condition.showMessage() ? Component.translatable("gui.action.condition.message.yes") : Component.translatable("gui.action.condition.message.no"),
-                condition.message().isBlank() ? Component.translatable("gui.action.condition.message.empty") : Component.text(condition.message())
+            "gui.action.condition.message",
+            condition.showMessage()
+                ? Component.translatable("gui.action.condition.message.yes")
+                : Component.translatable("gui.action.condition.message.no"),
+            condition.message().isBlank()
+                ? Component.translatable("gui.action.condition.message.empty")
+                : Component.text(condition.message())
         );
-        this.expressionInput.update(OpUtils.mapOr(condition.expression(), MolangExpression::text, ""));
+        this.expressionInput.update(
+            OpUtils.mapOr(condition.expression(), MolangExpression::text, "")
+        );
     }
 }

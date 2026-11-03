@@ -17,7 +17,13 @@ public class ActionAttributes {
         register(Attribute.GRAVITY, 2, 2, 2, 0);
     }
 
-    private static void register(Attribute attribute, int offsetX, int offsetY, int secondaryOffsetX, int secondaryOffsetY) {
+    private static void register(
+        Attribute attribute,
+        int offsetX,
+        int offsetY,
+        int secondaryOffsetX,
+        int secondaryOffsetY
+    ) {
         var entry = Entry.of(attribute, offsetX, offsetY, secondaryOffsetX, secondaryOffsetY);
         ENTRIES.put(attribute, entry);
     }
@@ -27,25 +33,43 @@ public class ActionAttributes {
     }
 
     public record Entry(
-            Attribute attribute,
-            Sprite sprite,
-            Sprite setSprite,
-            Sprite addSprite,
-            Sprite subSprite
+        Attribute attribute,
+        Sprite sprite,
+        Sprite setSprite,
+        Sprite addSprite,
+        Sprite subSprite
     ) {
 
         public String id() {
             return attribute.key().value();
         }
 
-        private static Entry of(Attribute attribute, int offsetX, int offsetY, int secondaryOffsetX, int secondaryOffsetY) {
+        private static Entry of(
+            Attribute attribute,
+            int offsetX,
+            int offsetY,
+            int secondaryOffsetX,
+            int secondaryOffsetY
+        ) {
             var id = attribute.key().value();
             return new Entry(
-                    attribute,
-                    new Sprite("action/icon/attribute/" + id, offsetX, offsetY),
-                    new Sprite("action/icon/attribute/" + id + "_set", secondaryOffsetX, secondaryOffsetY),
-                    new Sprite("action/icon/attribute/" + id + "_add", secondaryOffsetX, secondaryOffsetY),
-                    new Sprite("action/icon/attribute/" + id + "_sub", secondaryOffsetX, secondaryOffsetY)
+                attribute,
+                new Sprite("action/icon/attribute/" + id, offsetX, offsetY),
+                new Sprite(
+                    "action/icon/attribute/" + id + "_set",
+                    secondaryOffsetX,
+                    secondaryOffsetY
+                ),
+                new Sprite(
+                    "action/icon/attribute/" + id + "_add",
+                    secondaryOffsetX,
+                    secondaryOffsetY
+                ),
+                new Sprite(
+                    "action/icon/attribute/" + id + "_sub",
+                    secondaryOffsetX,
+                    secondaryOffsetY
+                )
             );
         }
     }

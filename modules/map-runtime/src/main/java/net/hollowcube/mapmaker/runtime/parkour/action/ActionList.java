@@ -17,8 +17,7 @@ public class ActionList {
 
     private final List<Ref> actions = new ArrayList<>();
 
-    public ActionList() {
-    }
+    public ActionList() {}
 
     public ActionList(List<Action> actions) {
         for (var action : actions) {

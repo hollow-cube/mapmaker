@@ -21,19 +21,23 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 public record RemovePotionAction(
-        // Null means to remove all effects
-        @Nullable PotionInfo effect
+    // Null means to remove all effects
+    @Nullable PotionInfo effect
 ) implements Action {
     private static final Sprite SPRITE_SUBTRACT = new Sprite("action/icon/potion_subtract", 2, 2);
     private static final Sprite SPRITE_CLEAR = new Sprite("action/icon/potion_clear", 2, 2);
 
     public static final Key KEY = Key.key("mapmaker:remove_potion");
     public static final StructCodec<RemovePotionAction> CODEC = StructCodec.struct(
-            "effect", PotionInfo.CODEC.optional(), RemovePotionAction::effect,
-            RemovePotionAction::new);
+        "effect", PotionInfo.CODEC.optional(), RemovePotionAction::effect,
+        RemovePotionAction::new
+    );
     public static final Action.Editor<RemovePotionAction> EDITOR = new Action.Editor<>(
-            RemovePotionAction.Editor::new, RemovePotionAction::makeSprite,
-            RemovePotionAction::makeThumbnail, Set.of());
+        RemovePotionAction.Editor::new,
+        RemovePotionAction::makeSprite,
+        RemovePotionAction::makeThumbnail,
+        Set.of()
+    );
 
     public RemovePotionAction withEffect(@Nullable PotionInfo effect) {
         return new RemovePotionAction(effect);
@@ -56,16 +60,16 @@ public record RemovePotionAction(
     }
 
     private static Sprite makeSprite(@Nullable RemovePotionAction action) {
-        return action == null || action.effect != null
-                ? SPRITE_SUBTRACT : SPRITE_CLEAR;
+        return action == null || action.effect != null ? SPRITE_SUBTRACT : SPRITE_CLEAR;
     }
 
     private static TranslatableComponent makeThumbnail(@Nullable RemovePotionAction action) {
         return action == null || action.effect == null
-                ? Component.translatable("gui.action.remove_potion.thumbnail.clear")
-                : Component.translatable("gui.action.remove_potion.thumbnail", List.of(
-                Component.translatable(action.effect.translationKey() + ".name")
-        ));
+            ? Component.translatable("gui.action.remove_potion.thumbnail.clear")
+            : Component.translatable(
+                "gui.action.remove_potion.thumbnail",
+                List.of(Component.translatable(action.effect.translationKey() + ".name"))
+            );
     }
 
     private static class Editor extends AbstractActionEditorPanel<RemovePotionAction> {
@@ -86,15 +90,23 @@ public record RemovePotionAction(
                 var potionInfo = potionTypes.get(i);
                 int x = i % 7, y = i / 7;
 
-                add(x + 1, y + 2, new Button(potionInfo.translationKey(), 1, 1)
+                add(
+                    x + 1,
+                    y + 2,
+                    new Button(potionInfo.translationKey(), 1, 1)
                         .model(potionInfo.itemModel(), null)
-                        .onLeftClick(() -> updateFunc.accept(potionInfo)));
+                        .onLeftClick(() -> updateFunc.accept(potionInfo))
+                );
             }
 
             // Add the remove button at the end
-            add(7, 3, new Button("gui.action.remove_potion.clear", 1, 1)
+            add(
+                7,
+                3,
+                new Button("gui.action.remove_potion.clear", 1, 1)
                     .sprite("action/icon/milk_bucket", 3, 2)
-                    .onLeftClick(() -> updateFunc.accept(null)));
+                    .onLeftClick(() -> updateFunc.accept(null))
+            );
         }
 
         @Override

@@ -15,8 +15,12 @@ public class ToggleSpectatorModeItem extends ItemHandler {
     public static final ToggleSpectatorModeItem INSTANCE_ON = new ToggleSpectatorModeItem(true);
     public static final ToggleSpectatorModeItem INSTANCE_OFF = new ToggleSpectatorModeItem(false);
 
-    private static final BadSprite SPRITE_OFF = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/exit_spectator"));
-    private static final BadSprite SPRITE_ON = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/enter_spectator"));
+    private static final BadSprite SPRITE_OFF = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/exit_spectator")
+    );
+    private static final BadSprite SPRITE_ON = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/enter_spectator")
+    );
 
     private final boolean activeSpectator;
 

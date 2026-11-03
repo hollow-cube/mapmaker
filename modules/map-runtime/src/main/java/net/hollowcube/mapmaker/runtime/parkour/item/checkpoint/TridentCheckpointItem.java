@@ -19,8 +19,9 @@ public record TridentCheckpointItem(int riptide) implements CheckpointItem {
 
     public static final Key ID = Key.key("trident");
     public static final StructCodec<TridentCheckpointItem> CODEC = StructCodec.struct(
-            "riptide", ExtraCodecs.clamppedInt(MIN_RIPTIDE, MAX_RIPTIDE).optional(MIN_RIPTIDE), TridentCheckpointItem::riptide,
-            TridentCheckpointItem::new);
+        "riptide", ExtraCodecs.clamppedInt(MIN_RIPTIDE, MAX_RIPTIDE).optional(MIN_RIPTIDE), TridentCheckpointItem::riptide,
+        TridentCheckpointItem::new
+    );
 
     public TridentCheckpointItem withRiptide(int riptide) {
         return new TridentCheckpointItem(riptide);
@@ -38,9 +39,10 @@ public record TridentCheckpointItem(int riptide) implements CheckpointItem {
 
     @Override
     public TranslatableComponent thumbnail() {
-        return Component.translatable("gui.action.give_item.trident.thumbnail", List.of(
-                Component.text(this.riptide)
-        ));
+        return Component.translatable(
+            "gui.action.give_item.trident.thumbnail",
+            List.of(Component.text(this.riptide))
+        );
     }
 
     @Override
@@ -54,9 +56,15 @@ public record TridentCheckpointItem(int riptide) implements CheckpointItem {
         public Editor(ActionList.Ref ref) {
             super(ref);
 
-            this.riptideInput = add(1, 3, new ControlledNumberInput("give_item.trident.riptide",
-                    updateItem(TridentCheckpointItem::withRiptide))
-                    .range(MIN_RIPTIDE, MAX_RIPTIDE));
+            this.riptideInput = add(
+                1,
+                3,
+                new ControlledNumberInput(
+                    "give_item.trident.riptide",
+                    updateItem(TridentCheckpointItem::withRiptide)
+                )
+                    .range(MIN_RIPTIDE, MAX_RIPTIDE)
+            );
         }
 
         @Override

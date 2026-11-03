@@ -36,17 +36,24 @@ public final class PlayState {
     }
 
     private static final StructCodec<Map<Long, Block>> GHOST_BLOCKS_CODEC = StructCodec.struct(
-            "ghostBlocks", ExtraCodecs.LONG_STRING.mapValue(ExtraCodecs.BLOCK_STATE_STRING).optional(Map.of()), Function.identity(),
-            it -> it);
-    public static Codec<PlayState> CODEC = net.minestom.server.codec.Codec.Recursive(codec -> StructCodec.struct(
+        "ghostBlocks", ExtraCodecs.LONG_STRING.mapValue(ExtraCodecs.BLOCK_STATE_STRING).optional(Map.of()), Function.identity(),
+        it -> it
+    );
+    public static Codec<PlayState> CODEC = net.minestom.server.codec.Codec.Recursive(
+        codec -> StructCodec.struct(
             "lastState", codec.optional(), PlayState::lastState,
             "history", net.minestom.server.codec.Codec.STRING.list().optional(List.of()), PlayState::history,
             "pos", ExtraCodecs.POS.optional(), PlayState::pos,
             StructCodec.INLINE, GHOST_BLOCKS_CODEC.optional(), PlayState::ghostBlocks,
             StructCodec.INLINE, new ActionDataCodec(Integer.MAX_VALUE), PlayState::actionData,
-            PlayState::new));
+            PlayState::new
+        )
+    );
 
-    public static final SaveState.Serializer<PlayState> SERIALIZER = SaveState.serializer(CODEC, HCDataTypes.PLAY_STATE);
+    public static final SaveState.Serializer<PlayState> SERIALIZER = SaveState.serializer(
+        CODEC,
+        HCDataTypes.PLAY_STATE
+    );
 
     private @Nullable PlayState lastState; // The previous state of the player (ie at the last checkpoint)
     // Has two meanings:
@@ -62,9 +69,11 @@ public final class PlayState {
     }
 
     public PlayState(
-            @Nullable PlayState lastState, @Nullable List<String> statusEffects,
-            @Nullable Pos pos, @Nullable Map<Long, Block> ghostBlocks,
-            @Nullable Map<Attachment<?>, Object> actionData
+        @Nullable PlayState lastState,
+        @Nullable List<String> statusEffects,
+        @Nullable Pos pos,
+        @Nullable Map<Long, Block> ghostBlocks,
+        @Nullable Map<Attachment<?>, Object> actionData
     ) {
         this.lastState = lastState;
         this.history = new ArrayList<>(Objects.requireNonNullElse(statusEffects, List.of()));
@@ -148,7 +157,10 @@ public final class PlayState {
         var newActionData = new HashMap<Attachment<?>, Object>(actionData.size());
         for (var entry : actionData.entrySet()) {
             //noinspection unchecked
-            newActionData.put(entry.getKey(), ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue()));
+            newActionData.put(
+                entry.getKey(),
+                ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue())
+            );
         }
         return new PlayState(lastState, history, pos, new HashMap<>(ghostBlocks), newActionData);
     }
@@ -162,7 +174,10 @@ public final class PlayState {
         this.actionData = new HashMap<>();
         for (var entry : other.actionData.entrySet()) {
             //noinspection unchecked
-            this.actionData.put(entry.getKey(), ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue()));
+            this.actionData.put(
+                entry.getKey(),
+                ((Attachment<Object>) entry.getKey()).copyValue(entry.getValue())
+            );
         }
     }
 
@@ -172,19 +187,19 @@ public final class PlayState {
     }
 
     public String toString(boolean includeLast) {
-        return "PlayState{" +
-                "lastState=" + String.valueOf(lastState != null) +
-                ", statusEffects=" + (history.size() > 1 ? history.size() : history) +
-                ", pos=" + pretty(pos) +
-                '}';
+        return "PlayState{" + "lastState=" + String.valueOf(lastState != null) + ", statusEffects="
+            + (history.size() > 1 ? history.size() : history) + ", pos=" + pretty(pos) + '}';
     }
 
     private String pretty(Object optional) {
         return String.valueOf(optional);
     }
 
-    private record AttachmentImpl<T>(Key key, Codec<T> codec,
-                                     Function<T, T> copy) implements Attachment<T> {
+    private record AttachmentImpl<T>(
+        Key key,
+        Codec<T> codec,
+        Function<T, T> copy
+    ) implements Attachment<T> {
         private static final Map<Key, AttachmentImpl<?>> REGISTRY = new HashMap<>();
 
         public AttachmentImpl {
@@ -198,10 +213,16 @@ public final class PlayState {
     }
 
     private record ActionDataCodec(int maxSize) implements StructCodec<Map<Attachment<?>, Object>> {
-        private static final Codec<AttachmentImpl<?>> KEY_CODEC = Codec.KEY.transform(AttachmentImpl.REGISTRY::get, Keyed::key);
+        private static final Codec<AttachmentImpl<?>> KEY_CODEC = Codec.KEY.transform(
+            AttachmentImpl.REGISTRY::get,
+            Keyed::key
+        );
 
         @Override
-        public <D> Result<Map<Attachment<?>, Object>> decodeFromMap(Transcoder<D> coder, Transcoder.MapLike<D> map) {
+        public <D> Result<Map<Attachment<?>, Object>> decodeFromMap(
+            Transcoder<D> coder,
+            Transcoder.MapLike<D> map
+        ) {
             if (map.size() > maxSize)
                 return new Result.Error<>("Map size exceeds maximum allowed size: " + maxSize);
             if (map.isEmpty()) return new Result.Ok<>(Map.of());
@@ -213,12 +234,18 @@ public final class PlayState {
                 } catch (InvalidKeyException ignored) {
                     continue;
                 }
-                final Result<AttachmentImpl<?>> keyResult = KEY_CODEC.decode(coder, coder.createString(key));
+                final Result<AttachmentImpl<?>> keyResult = KEY_CODEC.decode(
+                    coder,
+                    coder.createString(key)
+                );
                 if (!(keyResult instanceof Result.Ok(AttachmentImpl<?> decodedKey)))
                     return keyResult.cast();
                 if (decodedKey == null) continue;
                 // The throwing decode here is fine since we are already iterating over known keys.
-                final Result<?> valueResult = decodedKey.codec.decode(coder, map.getValue(key).orElseThrow());
+                final Result<?> valueResult = decodedKey.codec.decode(
+                    coder,
+                    map.getValue(key).orElseThrow()
+                );
                 if (!(valueResult instanceof Result.Ok(Object decodedValue)))
                     return valueResult.cast();
                 decodedMap.put(decodedKey, decodedValue);
@@ -227,7 +254,11 @@ public final class PlayState {
         }
 
         @Override
-        public <D> Result<D> encodeToMap(Transcoder<D> coder, Map<Attachment<?>, Object> value, Transcoder.MapBuilder<D> map) {
+        public <D> Result<D> encodeToMap(
+            Transcoder<D> coder,
+            Map<Attachment<?>, Object> value,
+            Transcoder.MapBuilder<D> map
+        ) {
             if (value.size() > maxSize)
                 return new Result.Error<>("Map size exceeds maximum allowed size: " + maxSize);
             if (value.isEmpty()) return new Result.Ok<>(coder.createMap().build());
@@ -235,11 +266,9 @@ public final class PlayState {
             for (final Map.Entry<Attachment<?>, Object> entry : value.entrySet()) {
                 final AttachmentImpl<Object> attachment = (AttachmentImpl<Object>) entry.getKey();
                 final Result<D> keyResult = KEY_CODEC.encode(coder, attachment);
-                if (!(keyResult instanceof Result.Ok(D encodedKey)))
-                    return keyResult.cast();
+                if (!(keyResult instanceof Result.Ok(D encodedKey))) return keyResult.cast();
                 final Result<D> valueResult = attachment.codec.encode(coder, entry.getValue());
-                if (!(valueResult instanceof Result.Ok(D encodedValue)))
-                    return valueResult.cast();
+                if (!(valueResult instanceof Result.Ok(D encodedValue))) return valueResult.cast();
                 map.put(encodedKey, encodedValue);
             }
 

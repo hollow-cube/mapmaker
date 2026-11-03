@@ -89,7 +89,10 @@ public final class ReplayManager {
     ReplayManager(ParkourMapWorld world, SegmentedReplayStorage storage) {
         this.world = world;
         this.storage = storage;
-        this.recordings = new PreparedRecordings(storage, UUID.fromString(world.map().id().toString()));
+        this.recordings = new PreparedRecordings(
+            storage,
+            UUID.fromString(world.map().id().toString())
+        );
 
         world.eventNode(ParkourState.Playing2.class)
             .addListener(PlayerChangeHeldSlotEvent.class, this::onHeldSlotChange)
@@ -97,9 +100,11 @@ public final class ReplayManager {
 
         // This is a hella stupid event. Doesnt tell you the player and isnt an instance event so excluded.
         // We should add our own (and fix this one in Minestom)
-        this.inventoryItemChangeListener = EventListener.of(InventoryItemChangeEvent.class, this::onInventoryItemChange);
-        MinecraftServer.getGlobalEventHandler()
-            .addListener(inventoryItemChangeListener);
+        this.inventoryItemChangeListener = EventListener.of(
+            InventoryItemChangeEvent.class,
+            this::onInventoryItemChange
+        );
+        MinecraftServer.getGlobalEventHandler().addListener(inventoryItemChangeListener);
     }
 
     /// Loads an existing committed recording before the save state is handed to the tick thread.
@@ -130,9 +135,18 @@ public final class ReplayManager {
             var replay = recordings.take(saveState.id());
             var writer = storage.writer(saveState.id(), replay);
             var worldId = UUID.fromString(world.map().id().toString());
-            session = new ReplaySession(snapshot -> replay == null
-                ? ReplayRecorder.create(REGISTRY, writer, worldId, WORLD_VERSION, snapshot)
-                : ReplayRecorder.resume(REGISTRY, writer, replay.requirePreamble(), worldId, WORLD_VERSION, snapshot));
+            session = new ReplaySession(
+                snapshot -> replay == null
+                    ? ReplayRecorder.create(REGISTRY, writer, worldId, WORLD_VERSION, snapshot)
+                    : ReplayRecorder.resume(
+                        REGISTRY,
+                        writer,
+                        replay.requirePreamble(),
+                        worldId,
+                        WORLD_VERSION,
+                        snapshot
+                    )
+            );
             sessions.put(saveState.id(), session);
             finalizations.remove(saveState.id());
         }
@@ -185,7 +199,11 @@ public final class ReplayManager {
 
             // Movement is diffed here rather than hooked off position changes: a tick may set a
             // position several times, and a hook only ever sees the moves it was told about.
-            session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, player.getPosition(), player.getVelocity());
+            session.captureMovement(
+                ReplaySession.SUBJECT_ENTITY_ID,
+                player.getPosition(),
+                player.getVelocity()
+            );
             // Item use before state, because applying it on playback recomputes the pose, so the
             // recorded pose has to be the last word.
             session.captureItemUse(ReplaySession.SUBJECT_ENTITY_ID, player.getItemUseHand());
@@ -198,7 +216,10 @@ public final class ReplayManager {
     }
 
     /// Applies replay lifecycle changes for an accepted state transition.
-    public CompletableFuture<Void> applyTransition(SaveState saveState, @Nullable ParkourState nextState) {
+    public CompletableFuture<Void> applyTransition(
+        SaveState saveState,
+        @Nullable ParkourState nextState
+    ) {
         if (nextState instanceof ParkourState.Playing2 nextPlaying
             && saveState.id().equals(nextPlaying.saveState().id())) {
             // Checkpoint/soft resets retain the same durable replay reference.
@@ -209,12 +230,15 @@ public final class ReplayManager {
             // The player left, but the run itself is not over. They may rejoin and resume this
             // exact recording, so stop without finalizing it.
             return endSession(saveState.id(), null, 0);
-        } else if (nextState instanceof ParkourState.Playing2 || nextState instanceof ParkourState.Finished) {
+        } else if (nextState instanceof ParkourState.Playing2
+            || nextState instanceof ParkourState.Finished) {
             // Either the run completed or a hard reset abandoned it; neither is appended to again.
             // This is the only place the difference between the two is known.
             var completed = nextState instanceof ParkourState.Finished;
-            return endSession(saveState.id(), completed ? RunOutcome.COMPLETED : RunOutcome.RESET,
-                completed ? 0 : MINIMUM_RECORDED_TICKS);
+            return endSession(
+                saveState.id(), completed ? RunOutcome.COMPLETED : RunOutcome.RESET,
+                completed ? 0 : MINIMUM_RECORDED_TICKS
+            );
         } else {
             // Spectating and testing may resume this run while the world remains alive.
             var session = sessions.get(saveState.id());
@@ -233,8 +257,7 @@ public final class ReplayManager {
         MinecraftServer.getGlobalEventHandler().removeListener(inventoryItemChangeListener);
 
         // The world is going away, but these runs are not over; leave them resumable.
-        for (var saveStateId : new ArrayList<>(sessions.keySet()))
-            endSession(saveStateId, null, 0);
+        for (var saveStateId : new ArrayList<>(sessions.keySet())) endSession(saveStateId, null, 0);
         recordings.clear();
 
         closeFuture = CompletableFuture.allOf(
@@ -244,8 +267,7 @@ public final class ReplayManager {
     }
 
     private void onInventoryItemChange(InventoryItemChangeEvent event) {
-        if (!(event.getInventory() instanceof PlayerInventory inventory))
-            return;
+        if (!(event.getInventory() instanceof PlayerInventory inventory)) return;
         if (inventory.getViewers().isEmpty()) return;
         var player = inventory.getViewers().iterator().next();
 
@@ -262,14 +284,18 @@ public final class ReplayManager {
         var session = getActiveSession(event.getPlayer());
         if (session == null) return;
 
-        session.submit(new ChangeHeldSlotEvent(ReplaySession.SUBJECT_ENTITY_ID, event.getNewSlot()));
+        session.submit(
+            new ChangeHeldSlotEvent(ReplaySession.SUBJECT_ENTITY_ID, event.getNewSlot())
+        );
     }
 
     private void onPlayerSwing(PlayerSwingEvent event) {
         var session = getActiveSession(event.player());
         if (session == null) return;
 
-        session.submit(new HandAnimationEvent(ReplaySession.SUBJECT_ENTITY_ID, event.hand(), event.animation()));
+        session.submit(
+            new HandAnimationEvent(ReplaySession.SUBJECT_ENTITY_ID, event.hand(), event.animation())
+        );
     }
 
     /// Records the spawn, movement, and removal of everything the player owns this tick.
@@ -329,19 +355,28 @@ public final class ReplayManager {
         recordings.disable(saveState.id());
         sessions.remove(saveState.id());
         ExceptionReporter.reportException(
-            new RuntimeException("replay recording failed for save state " + saveState.id(), failure),
+            new RuntimeException(
+                "replay recording failed for save state " + saveState.id(),
+                failure
+            ),
             player
         );
     }
 
     /// @param outcome null to stop a recording that is not over, which stays resumable
-    private CompletableFuture<Void> endSession(String saveStateId, @Nullable RunOutcome outcome, int minimumTicks) {
+    private CompletableFuture<Void> endSession(
+        String saveStateId,
+        @Nullable RunOutcome outcome,
+        int minimumTicks
+    ) {
         var session = sessions.remove(saveStateId);
         if (session == null) {
             return finalizations.getOrDefault(saveStateId, CompletableFuture.completedFuture(null));
         }
 
-        var finalization = outcome != null ? session.complete(outcome, minimumTicks) : session.stop();
+        var finalization = outcome != null
+            ? session.complete(outcome, minimumTicks)
+            : session.stop();
         finalizations.put(saveStateId, finalization);
         // Otherwise every run this world ever hosted stays pinned for its lifetime. Anything asking
         // after removal gets a completed future, which is the right answer once it has landed.
@@ -402,8 +437,13 @@ public final class ReplayManager {
                 // This runs during player configuration, where anything thrown denies the join. A
                 // recording nobody can read is not worth that, so the run goes unrecorded instead.
                 unrecordable.add(saveState.id());
-                ExceptionReporter.reportException(new RuntimeException(
-                    "replay recording unavailable for save state " + saveState.id(), e), saveState.playerId());
+                ExceptionReporter.reportException(
+                    new RuntimeException(
+                        "replay recording unavailable for save state " + saveState.id(),
+                        e
+                    ),
+                    saveState.playerId()
+                );
             }
         }
 

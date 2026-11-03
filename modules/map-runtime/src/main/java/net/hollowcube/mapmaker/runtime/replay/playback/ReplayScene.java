@@ -100,7 +100,8 @@ public final class ReplayScene implements Viewable, Consumer<ReplayEvent>, AutoC
             }
             case SetItemEvent(int entityId, var items) -> {
                 if (entities.get(entityId) instanceof PlaybackPlayerEntity entity) {
-                    for (var item : items.entrySet()) entity.setItemStack(item.getKey(), item.getValue());
+                    for (var item : items.entrySet())
+                        entity.setItemStack(item.getKey(), item.getValue());
                 } else if (entities.get(entityId) instanceof EquipmentHandler entity) {
                     // Anything that is not a player has no inventory to put a slot in, so only the
                     // slots that are worn mean anything to it.
@@ -143,7 +144,8 @@ public final class ReplayScene implements Viewable, Consumer<ReplayEvent>, AutoC
                 entity.setInvisible(state.invisible());
                 entity.setGlowing(state.glowing());
                 meta.setFlyingWithElytra(state.flyingWithElytra());
-                if (meta instanceof LivingEntityMeta living) living.setInRiptideSpinAttack(state.riptideSpinAttack());
+                if (meta instanceof LivingEntityMeta living)
+                    living.setInRiptideSpinAttack(state.riptideSpinAttack());
                 // Last, because everything above derives a pose of its own.
                 entity.setPose(state.pose());
             }

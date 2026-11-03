@@ -34,13 +34,15 @@ public final class ReplayPlayback implements AutoCloseable {
     /// built here because a scene is worth nothing until a host has given it viewers, and closing
     /// this closes it either way.
     public ReplayPlayback(
-        byte[] replay, ReplayEventRegistry registry,
+        byte[] replay,
+        ReplayEventRegistry registry,
         ReplayScene scene,
         @Nullable Consumer<ReplayEvent> handler
     ) {
         this.scene = scene;
         this.player = new ReplayPlayer(
-            new CompactedReplayReader(replay), registry,
+            new CompactedReplayReader(replay),
+            registry,
             handler == null ? scene : scene.andThen(handler)
         );
     }
@@ -60,8 +62,7 @@ public final class ReplayPlayback implements AutoCloseable {
             budget -= 1;
             buffering = false;
             switch (player.advance()) {
-                case ADVANCED -> {
-                }
+                case ADVANCED -> {}
                 case STALLED -> {
                     stall();
                     return;

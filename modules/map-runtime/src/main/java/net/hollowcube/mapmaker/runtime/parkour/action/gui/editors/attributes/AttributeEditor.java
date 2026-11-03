@@ -17,17 +17,39 @@ public class AttributeEditor extends AbstractActionEditorPanel<EditAttributeActi
     public AttributeEditor(ActionList.Ref ref, ActionAttributes.Entry entry) {
         super(ref);
 
-        this.subtitleText.text(LanguageProviderV2.translateToPlain("gui.action.attribute.%s.name".formatted(entry.attribute().key().value())));
+        this.subtitleText.text(
+            LanguageProviderV2.translateToPlain(
+                "gui.action.attribute.%s.name".formatted(entry.attribute().key().value())
+            )
+        );
 
-        this.operation = add(1, 1, new ControlledTriStateInput<>("attribute", Operation.class, update(EditAttributeAction::withOperation))
-                .label("operation").labels("set", "add", "subtract")
-                .sprites(entry.setSprite().withOffset(1, 3),
-                        entry.addSprite().withOffset(1, 3),
-                        entry.subSprite().withOffset(1, 3)));
+        this.operation = add(
+            1,
+            1,
+            new ControlledTriStateInput<>(
+                "attribute",
+                Operation.class,
+                update(EditAttributeAction::withOperation)
+            )
+                .label("operation")
+                .labels("set", "add", "subtract")
+                .sprites(
+                    entry.setSprite().withOffset(1, 3),
+                    entry.addSprite().withOffset(1, 3),
+                    entry.subSprite().withOffset(1, 3)
+                )
+        );
         this.operation.update(Operation.SET);
-        this.operation.iconButton().onLeftClick(() -> this.host.replaceView(new AttributesEditor(ref)));
+        this.operation.iconButton().onLeftClick(
+            () -> this.host.replaceView(new AttributesEditor(ref))
+        );
 
-        this.value = add(1, 3, new ControlledDecimalInput("attribute", update(EditAttributeAction::withValue)).label("value"));
+        this.value = add(
+            1,
+            3,
+            new ControlledDecimalInput("attribute", update(EditAttributeAction::withValue))
+                .label("value")
+        );
     }
 
     @Override
@@ -39,8 +61,10 @@ public class AttributeEditor extends AbstractActionEditorPanel<EditAttributeActi
 
         switch (data.operation()) {
             case SET -> this.value.range(data.attribute().minValue(), data.attribute().maxValue());
-            case ADD, SUBTRACT ->
-                    this.value.range(0.0, Math.abs(data.attribute().minValue()) + Math.abs(data.attribute().maxValue()));
+            case ADD, SUBTRACT -> this.value.range(
+                0.0,
+                Math.abs(data.attribute().minValue()) + Math.abs(data.attribute().maxValue())
+            );
         }
     }
 }

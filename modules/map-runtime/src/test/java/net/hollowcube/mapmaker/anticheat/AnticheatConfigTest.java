@@ -51,6 +51,9 @@ class AnticheatConfigTest {
     void aBadRateOrCapIsCorrectedRatherThanCarried() {
         assertEquals(1, new AnticheatConfig(true, 4, "", true, 600).rate());
         assertEquals(0, new AnticheatConfig(true, -1, "", true, 600).rate());
-        assertEquals(AnticheatConfig.DEFAULT_MAX_SECONDS, new AnticheatConfig(true, 1, "", true, 0).maxSeconds());
+        assertEquals(
+            AnticheatConfig.DEFAULT_MAX_SECONDS,
+            new AnticheatConfig(true, 1, "", true, 0).maxSeconds()
+        );
     }
 }

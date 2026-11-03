@@ -24,9 +24,10 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
 
     public static final Key ID = Key.key("wind_charge");
     public static final StructCodec<WindChargeCheckpointItem> CODEC = StructCodec.struct(
-            "amount", ExtraCodecs.clamppedInt(INFINITE_AMOUNT, MAX_AMOUNT).optional(INFINITE_AMOUNT), WindChargeCheckpointItem::amount,
-            "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), WindChargeCheckpointItem::cooldown,
-            WindChargeCheckpointItem::new);
+        "amount", ExtraCodecs.clamppedInt(INFINITE_AMOUNT, MAX_AMOUNT).optional(INFINITE_AMOUNT), WindChargeCheckpointItem::amount,
+        "cooldown", ExtraCodecs.clamppedInt(MIN_COOLDOWN, MAX_COOLDOWN).optional(DEFAULT_COOLDOWN), WindChargeCheckpointItem::cooldown,
+        WindChargeCheckpointItem::new
+    );
 
     public WindChargeCheckpointItem withAmount(int amount) {
         return new WindChargeCheckpointItem(amount, this.cooldown);
@@ -38,7 +39,10 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
 
     @Override
     public ItemStack createItemStack() {
-        return WindChargeItem.get(this.amount, this.cooldown > 0 ? new UseCooldown(this.cooldown / 20f, ID.asString()) : null);
+        return WindChargeItem.get(
+            this.amount,
+            this.cooldown > 0 ? new UseCooldown(this.cooldown / 20f, ID.asString()) : null
+        );
     }
 
     @Override
@@ -54,10 +58,19 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
 
     @Override
     public TranslatableComponent thumbnail() {
-        return Component.translatable("gui.action.give_item.wind_charge.thumbnail", List.of(
-                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
-                Component.text(this.cooldown > 0 ? NumberUtil.formatDuration(this.cooldown * 50L) : "No Cooldown")
-        ));
+        return Component.translatable(
+            "gui.action.give_item.wind_charge.thumbnail",
+            List.of(
+                Component.text(
+                    this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)
+                ),
+                Component.text(
+                    this.cooldown > 0
+                        ? NumberUtil.formatDuration(this.cooldown * 50L)
+                        : "No Cooldown"
+                )
+            )
+        );
     }
 
     @Override
@@ -74,8 +87,16 @@ public record WindChargeCheckpointItem(int amount, int cooldown) implements Chec
 
             background("action/editor/container_lg", -10, -31);
 
-            this.amountInput = add(1, 3, makeGenericAmount(WindChargeCheckpointItem::withAmount, MAX_AMOUNT));
-            this.cooldownInput = add(1, 5, makeGenericCooldown(WindChargeCheckpointItem::withCooldown, true));
+            this.amountInput = add(
+                1,
+                3,
+                makeGenericAmount(WindChargeCheckpointItem::withAmount, MAX_AMOUNT)
+            );
+            this.cooldownInput = add(
+                1,
+                5,
+                makeGenericCooldown(WindChargeCheckpointItem::withCooldown, true)
+            );
         }
 
         @Override

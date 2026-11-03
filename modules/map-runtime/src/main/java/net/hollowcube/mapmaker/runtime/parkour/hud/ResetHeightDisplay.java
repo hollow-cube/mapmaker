@@ -26,8 +26,10 @@ public class ResetHeightDisplay {
 
     // TODO: the display is no longer preserved when entering spec and exiting.
     //       it should become a player setting and always be preserved.
-    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, ResetHeightDisplay::onPlayerStateChange);
+    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode().addListener(
+        ParkourMapPlayerUpdateStateEvent.class,
+        ResetHeightDisplay::onPlayerStateChange
+    );
 
     public static void toggle(Player player) {
         var display = player.getAndSetTag(DISPLAY_TAG, null);
@@ -56,7 +58,6 @@ public class ResetHeightDisplay {
         if (display == null || !display.isViewer(player)) return;
         display.update(player, event.world());
     }
-
 
     @SuppressWarnings("UnstableApiUsage")
     private static class Display extends Entity {
@@ -94,9 +95,7 @@ public class ResetHeightDisplay {
         }
 
         @Override
-        public void updateOldViewer(Player player) {
-
-        }
+        public void updateOldViewer(Player player) {}
 
         public void hide(Player player) {
             if (removeViewer(player)) {
@@ -111,8 +110,7 @@ public class ResetHeightDisplay {
         }
 
         public void update(Player player, ParkourMapWorld world) {
-            if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-                return;
+            if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return;
 
             var pos = player.getPosition();
             var playState = p.saveState().state(PlayState.class);

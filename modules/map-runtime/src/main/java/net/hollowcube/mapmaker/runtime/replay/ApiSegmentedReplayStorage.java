@@ -37,7 +37,10 @@ public final class ApiSegmentedReplayStorage implements SegmentedReplayStorage {
         try (var blob = replays.getPreamble(replayId, info.revision())) {
             preambleBytes = blob.readAllBytes();
         } catch (IOException e) {
-            throw new UncheckedIOException("reading the preamble of replay " + replayId + " failed", e);
+            throw new UncheckedIOException(
+                "reading the preamble of replay " + replayId + " failed",
+                e
+            );
         }
 
         var preamble = ReplayPreamble.read(preambleBytes);
@@ -49,13 +52,20 @@ public final class ApiSegmentedReplayStorage implements SegmentedReplayStorage {
             );
         }
 
-        return new SegmentedReplay(preamble, token(info.revision()), info.state() == ReplayState.FINISHED);
+        return new SegmentedReplay(
+            preamble,
+            token(info.revision()),
+            info.state() == ReplayState.FINISHED
+        );
     }
 
     @Override
     public SegmentedReplayWriter writer(String replayId, @Nullable SegmentedReplay base) {
-        return new ApiSegmentedReplayWriter(replays, replayId,
-            base == null || base.token() == null ? null : Long.parseLong(base.token()));
+        return new ApiSegmentedReplayWriter(
+            replays,
+            replayId,
+            base == null || base.token() == null ? null : Long.parseLong(base.token())
+        );
     }
 
     /// [SegmentedReplay#token] is opaque to the replay format; storage's is the revision.

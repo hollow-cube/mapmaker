@@ -16,31 +16,31 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class ResetLiquidSetting {
 
-    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(PlayerTickEvent.class, ResetLiquidSetting::handlePlayerTick);
+    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode().addListener(
+        PlayerTickEvent.class,
+        ResetLiquidSetting::handlePlayerTick
+    );
 
     public static boolean canGoInWater(ParkourMapWorld world, Player player) {
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return true;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return true;
 
         return canGoInWater(world, p.saveState().state(PlayState.class));
     }
 
     public static boolean canGoInWater(ParkourMapWorld world, PlayState playState) {
         return !playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.RESET_IN_WATER, world.map().settings());
+            .get(MapSettings.RESET_IN_WATER, world.map().settings());
     }
 
     public static boolean canGoInLava(ParkourMapWorld world, Player player) {
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return true;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return true;
 
         return canGoInLava(world, p.saveState().state(PlayState.class));
     }
 
     public static boolean canGoInLava(ParkourMapWorld world, PlayState playState) {
         return !playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.RESET_IN_LAVA, world.map().settings());
+            .get(MapSettings.RESET_IN_LAVA, world.map().settings());
     }
 
     private static void handlePlayerTick(PlayerTickEvent event) {
@@ -54,7 +54,8 @@ public class ResetLiquidSetting {
         var playState = p.saveState().state(PlayState.class);
         boolean isWaterReset = !canGoInWater(world, playState) && player.isInWater();
         boolean isLavaReset = isWaterReset || !canGoInLava(world, playState) && player.isInLava();
-        if (isWaterReset || isLavaReset) world.softResetPlayer(player, CheckpointResetEvent.Reason.LIQUID);
+        if (isWaterReset || isLavaReset)
+            world.softResetPlayer(player, CheckpointResetEvent.Reason.LIQUID);
     }
 
 }

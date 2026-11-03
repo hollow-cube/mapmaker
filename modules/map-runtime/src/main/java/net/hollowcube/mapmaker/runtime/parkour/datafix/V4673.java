@@ -18,11 +18,9 @@ public class V4673 extends DataVersion implements ExternalDataFix {
             var existingActions = data.get("status").get("actions");
             var existingAction = existingActions.get(0);
 
-            if (
-                bouncePadData.isMapLike() &&
-                    existingActions.size(0) == 1 &&
-                    existingAction.get("type").as(String.class, "").equals("mapmaker:velocity")
-            ) {
+            if (bouncePadData.isMapLike()
+                && existingActions.size(0) == 1
+                && existingAction.get("type").as(String.class, "").equals("mapmaker:velocity")) {
                 var status = Value.emptyMap();
                 var actions = Value.emptyList();
                 var action = Value.emptyMap();

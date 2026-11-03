@@ -20,7 +20,11 @@ import org.jetbrains.annotations.Nullable;
 @LuaLibrary(name = "@mapmaker")
 public final class LibBase {
 
-    public static <E extends EntityEvent> void pushSignal(LuaState state, Class<E> event, LuaMarshaller<E> pusher) {
+    public static <E extends EntityEvent> void pushSignal(
+        LuaState state,
+        Class<E> event,
+        LuaMarshaller<E> pusher
+    ) {
         LibBase$luau.pushSignal(state, new Signal(event, pusher));
     }
 
@@ -41,7 +45,10 @@ public final class LibBase {
         private final Class<? extends Event> eventClass;
         private final LuaMarshaller<? extends Event> marshaller;
 
-        private Signal(Class<? extends Event> eventClass, LuaMarshaller<? extends Event> marshaller) {
+        private Signal(
+            Class<? extends Event> eventClass,
+            LuaMarshaller<? extends Event> marshaller
+        ) {
             this.eventClass = eventClass;
             this.marshaller = marshaller;
         }
@@ -85,10 +92,10 @@ public final class LibBase {
         @LuaMethod
         public int wait(LuaState state) {
             throw new UnsupportedOperationException("not implemented"); // todo
-//            var handle = new Connection(eventClass, marshaller, null);
-//            handle.singleShot = true;
-//            handle.registerAndTrack(state);
-//            return state.yield(0);
+            //            var handle = new Connection(eventClass, marshaller, null);
+            //            handle.singleShot = true;
+            //            handle.registerAndTrack(state);
+            //            return state.yield(0);
         }
     }
 
@@ -141,8 +148,7 @@ public final class LibBase {
 
         @Override
         public Result run(Event event) {
-            if (disposed || handler.isDisposed())
-                return Result.EXPIRED;
+            if (disposed || handler.isDisposed()) return Result.EXPIRED;
 
             int nargs = marshaller.marshal(handler.state(), event);
             if (nargs < 0) return Result.INVALID; // marshaller ignored this event.

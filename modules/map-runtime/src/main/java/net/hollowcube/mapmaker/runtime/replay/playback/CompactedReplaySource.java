@@ -34,7 +34,10 @@ public interface CompactedReplaySource {
                 if (e.status() == 404 || e.status() == 409) return null;
                 throw e;
             } catch (IOException e) {
-                throw new UncheckedIOException("reading compacted replay " + replayId + " failed", e);
+                throw new UncheckedIOException(
+                    "reading compacted replay " + replayId + " failed",
+                    e
+                );
             }
         };
     }
@@ -44,11 +47,14 @@ public interface CompactedReplaySource {
         return replayId -> {
             var recording = new SegmentedFileReplayStorage(root).load(replayId);
             if (recording == null) return null;
-            return ReplayCompactor.compact(
-                recording.requirePreamble(),
-                new SegmentedFileReplaySource(root.resolve(replayId)),
-                null, ReplayManager.REGISTRY
-            ).data();
+            return ReplayCompactor
+                .compact(
+                    recording.requirePreamble(),
+                    new SegmentedFileReplaySource(root.resolve(replayId)),
+                    null,
+                    ReplayManager.REGISTRY
+                )
+                .data();
         };
     }
 }

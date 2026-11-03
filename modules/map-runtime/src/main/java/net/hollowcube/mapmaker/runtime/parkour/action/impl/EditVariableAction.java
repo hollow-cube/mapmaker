@@ -25,22 +25,24 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public record EditVariableAction(
-        @Nullable String variable,
-        MolangExpression<VariableQueries.Context> expression
+    @Nullable String variable,
+    MolangExpression<VariableQueries.Context> expression
 ) implements Action {
 
     public static final Key KEY = Key.key("mapmaker:variable");
     public static final StructCodec<EditVariableAction> CODEC = StructCodec.struct(
-            "variable", Codec.STRING.optional(), EditVariableAction::variable,
-            "expression", MolangExpression.codec(VariableQueries.ENVIRONMENT).optional(MolangExpression.from(VariableQueries.ENVIRONMENT, "0")), EditVariableAction::expression,
-            EditVariableAction::new
+        "variable", Codec.STRING.optional(), EditVariableAction::variable,
+        "expression", MolangExpression.codec(VariableQueries.ENVIRONMENT).optional(MolangExpression.from(VariableQueries.ENVIRONMENT, "0")), EditVariableAction::expression,
+        EditVariableAction::new
     );
 
     private static final Pattern VARIABLE_NAME_PATTERN = Pattern.compile("^[a-z_]{3,25}$");
     private static final Sprite SPRITE = new Sprite("action/icon/variable", 1, 2);
 
     public static final Editor<EditVariableAction> EDITOR = new Editor<>(
-            VariableEditor::new, SPRITE, VariableEditor::thumbnail
+        VariableEditor::new,
+        SPRITE,
+        VariableEditor::thumbnail
     );
 
     public EditVariableAction withVariable(String variable) {
@@ -48,7 +50,10 @@ public record EditVariableAction(
     }
 
     public EditVariableAction withExpression(String expression) {
-        return new EditVariableAction(this.variable, MolangExpression.from(VariableQueries.ENVIRONMENT, expression));
+        return new EditVariableAction(
+            this.variable,
+            MolangExpression.from(VariableQueries.ENVIRONMENT, expression)
+        );
     }
 
     public boolean isValidVariableName() {
@@ -70,21 +75,35 @@ public record EditVariableAction(
         List<ContentError> errors;
 
         try {
-            var variables = Objects.requireNonNullElseGet(state.get(Attachments.VARIABLES), VariableStorage::new);
+            var variables = Objects.requireNonNullElseGet(
+                state.get(Attachments.VARIABLES),
+                VariableStorage::new
+            );
             var molangState = new MolangState();
-            var value = this.expression.program().eval(molangState, new VariableQueries.Context(player, variables));
+            var value = this.expression.program().eval(
+                molangState,
+                new VariableQueries.Context(player, variables)
+            );
             state.set(Attachments.VARIABLES, variables.with(this.variable, value));
             errors = molangState.getErrors();
         } catch (Exception exception) {
             // Sanity check for unexpected errors, but molang should handle errors gracefully
             ExceptionReporter.reportException(exception, player);
-            errors = List.of(new ContentError("Internal Server Error, please report to administrators if persistent."));
+            errors = List.of(
+                new ContentError(
+                    "Internal Server Error, please report to administrators if persistent."
+                )
+            );
         }
 
         var world = MapWorld.forPlayer(player);
         if (world != null && !world.map().isPublished() && !errors.isEmpty()) {
-            var error = errors.stream().map(ContentError::toString).collect(Collectors.joining("\n"));
-            player.sendMessage(Component.text("Errors setting variable '" + this.variable + "':\n" + error));
+            var error = errors.stream()
+                .map(ContentError::toString)
+                .collect(Collectors.joining("\n"));
+            player.sendMessage(
+                Component.text("Errors setting variable '" + this.variable + "':\n" + error)
+            );
         }
     }
 }

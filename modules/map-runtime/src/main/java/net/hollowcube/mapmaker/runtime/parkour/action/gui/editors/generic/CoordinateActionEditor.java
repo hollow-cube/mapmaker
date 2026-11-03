@@ -35,14 +35,37 @@ public class CoordinateActionEditor<T extends CoordinateAction<T>> extends Abstr
 
         subtitleText.text("Set Coords");
 
-        this.xInput = add(1, 1, new TexturelessNumberInput(2, 0, "x", safeUpdate(RelativePos::withX)));
-        this.yInput = add(3, 1, new TexturelessNumberInput(2, 6, "y", safeUpdate(RelativePos::withY)));
-        this.zInput = add(5, 1, new TexturelessNumberInput(3, 12, "z", safeUpdate(RelativePos::withZ)));
+        this.xInput = add(
+            1,
+            1,
+            new TexturelessNumberInput(2, 0, "x", safeUpdate(RelativePos::withX))
+        );
+        this.yInput = add(
+            3,
+            1,
+            new TexturelessNumberInput(2, 6, "y", safeUpdate(RelativePos::withY))
+        );
+        this.zInput = add(
+            5,
+            1,
+            new TexturelessNumberInput(3, 12, "z", safeUpdate(RelativePos::withZ))
+        );
 
-        this.yawInput = add(1, 3, new TexturelessNumberInput(2, 0, "yaw", safeUpdate(RelativePos::withYaw)));
-        this.pitchInput = add(3, 3, new TexturelessNumberInput(2, 6, "pitch", safeUpdate(RelativePos::withPitch)));
-        this.commandButton = add(5, 4, new Button("gui.action.coordinates.command", 3, 1)
-            .onLeftClick(this::beginCommandUpdate));
+        this.yawInput = add(
+            1,
+            3,
+            new TexturelessNumberInput(2, 0, "yaw", safeUpdate(RelativePos::withYaw))
+        );
+        this.pitchInput = add(
+            3,
+            3,
+            new TexturelessNumberInput(2, 6, "pitch", safeUpdate(RelativePos::withPitch))
+        );
+        this.commandButton = add(
+            5,
+            4,
+            new Button("gui.action.coordinates.command", 3, 1).onLeftClick(this::beginCommandUpdate)
+        );
     }
 
     @Override
@@ -53,8 +76,11 @@ public class CoordinateActionEditor<T extends CoordinateAction<T>> extends Abstr
         this.yawInput.update(action.target().yaw());
         this.pitchInput.update(action.target().pitch());
 
-        commandButton.lorePostfix(host.hasTag(CoordinateAction.SPC_TARGET_TAG)
-            ? LORE_POSTFIX_CLICKEDIT : LORE_POSTFIX_NOT_AVAILABLE);
+        commandButton.lorePostfix(
+            host.hasTag(CoordinateAction.SPC_TARGET_TAG)
+                ? LORE_POSTFIX_CLICKEDIT
+                : LORE_POSTFIX_NOT_AVAILABLE
+        );
     }
 
     private void beginCommandUpdate() {
@@ -84,7 +110,12 @@ public class CoordinateActionEditor<T extends CoordinateAction<T>> extends Abstr
 
         private String value = "";
 
-        public TexturelessNumberInput(int width, int xOffset, String key, Consumer<String> onChange) {
+        public TexturelessNumberInput(
+            int width,
+            int xOffset,
+            String key,
+            Consumer<String> onChange
+        ) {
             super(width, 2);
             this.onChange = onChange;
 
@@ -93,9 +124,16 @@ public class CoordinateActionEditor<T extends CoordinateAction<T>> extends Abstr
             this.anvilTitle = LanguageProviderV2.translateToPlain(translationKey + ".name");
 
             // TODO fix that the labels actually dont have a small font variant
-            add(0, 0, new Text(translationKey, width, 1, label).font("small").align(1 + xOffset, 6));
-            this.inputText = add(0, 1, new Text(translationKey, width, 1, "")
-                .align(xOffset + 6, 5));
+            add(
+                0,
+                0,
+                new Text(translationKey, width, 1, label).font("small").align(1 + xOffset, 6)
+            );
+            this.inputText = add(
+                0,
+                1,
+                new Text(translationKey, width, 1, "").align(xOffset + 6, 5)
+            );
             this.inputText.onLeftClick(this::handleEditValue);
         }
 
@@ -107,11 +145,15 @@ public class CoordinateActionEditor<T extends CoordinateAction<T>> extends Abstr
         }
 
         private void handleEditValue() {
-            host.pushView(simpleAnvil(
-                "generic2/anvil/field_container",
-                "action/anvil/coordinates_icon",
-                anvilTitle, onChange, value
-            ));
+            host.pushView(
+                simpleAnvil(
+                    "generic2/anvil/field_container",
+                    "action/anvil/coordinates_icon",
+                    anvilTitle,
+                    onChange,
+                    value
+                )
+            );
         }
 
         private String normalizeForDisplay(String value) {

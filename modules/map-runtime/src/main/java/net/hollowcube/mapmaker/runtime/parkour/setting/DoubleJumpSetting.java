@@ -24,12 +24,13 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class DoubleJumpSetting {
     private static final int DEFAULT_COUNT = 0;
-    private static final Tag<Integer> DOUBLE_JUMP_COUNT = Tag.Integer("mapmaker:player/double_jump_count").defaultValue(DEFAULT_COUNT);
+    private static final Tag<Integer> DOUBLE_JUMP_COUNT =
+        Tag.Integer("mapmaker:player/double_jump_count").defaultValue(DEFAULT_COUNT);
 
     public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, DoubleJumpSetting::updatePlayer)
-            .addListener(PlayerMoveEvent.class, DoubleJumpSetting::handlePlayerMove)
-            .addListener(PlayerStartFlyingEvent.class, DoubleJumpSetting::handleStartFlying);
+        .addListener(ParkourMapPlayerUpdateStateEvent.class, DoubleJumpSetting::updatePlayer)
+        .addListener(PlayerMoveEvent.class, DoubleJumpSetting::handlePlayerMove)
+        .addListener(PlayerStartFlyingEvent.class, DoubleJumpSetting::handleStartFlying);
 
     public static int getDoubleJumpCount(ParkourMapWorld world, Player player) {
         if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
@@ -39,8 +40,11 @@ public class DoubleJumpSetting {
     }
 
     public static int getDoubleJumpCount(ParkourMapWorld world, PlayState playState) {
-        return Objects.requireNonNullElse(playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.DOUBLE_JUMP, world.map().settings()), DEFAULT_COUNT);
+        return Objects.requireNonNullElse(
+            playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
+                .get(MapSettings.DOUBLE_JUMP, world.map().settings()),
+            DEFAULT_COUNT
+        );
     }
 
     private static void updatePlayer(ParkourMapPlayerUpdateStateEvent event) {
@@ -49,8 +53,8 @@ public class DoubleJumpSetting {
 
         var doubleJumpCount = event.isReset() ? 0 : getDoubleJumpCount(world, player);
         if (event.isMapJoin() && doubleJumpCount > 0) {
-            player.sendMessage(TranslatableBuilder
-                    .of("map.join.warning.setting.double_jump")
+            player.sendMessage(
+                TranslatableBuilder.of("map.join.warning.setting.double_jump")
                     .with(doubleJumpCount)
                     .build()
             );
@@ -76,7 +80,8 @@ public class DoubleJumpSetting {
 
     private static void handleStartFlying(PlayerStartFlyingEvent event) {
         var player = event.getPlayer();
-        if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE) return;
+        if (player.getGameMode() != GameMode.SURVIVAL && player.getGameMode() != GameMode.ADVENTURE)
+            return;
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
 
@@ -90,7 +95,10 @@ public class DoubleJumpSetting {
         }
 
         var randomPitch = ThreadLocalRandom.current().nextFloat(0.9f, 1f);
-        player.playSound(Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch), Sound.Emitter.self());
+        player.playSound(
+            Sound.sound(SoundEvent.ENTITY_BAT_TAKEOFF, Sound.Source.PLAYER, 0.4f, randomPitch),
+            Sound.Emitter.self()
+        );
     }
 
 }

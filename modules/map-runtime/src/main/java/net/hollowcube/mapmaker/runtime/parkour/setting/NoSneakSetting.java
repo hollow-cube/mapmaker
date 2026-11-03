@@ -19,25 +19,23 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 public class NoSneakSetting {
 
     public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, NoSneakSetting::initPlayer)
-            .addListener(PlayerMoveEvent.class, NoSneakSetting::playerMoved);
+        .addListener(ParkourMapPlayerUpdateStateEvent.class, NoSneakSetting::initPlayer)
+        .addListener(PlayerMoveEvent.class, NoSneakSetting::playerMoved);
 
     public static boolean canSneak(ParkourMapWorld world, Player player) {
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return true;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return true;
 
         return canSneak(world, p.saveState().state(PlayState.class));
     }
 
     public static boolean canSneak(ParkourMapWorld world, PlayState playState) {
         return !playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.NO_SNEAK, world.map().settings());
+            .get(MapSettings.NO_SNEAK, world.map().settings());
     }
 
     private static void initPlayer(ParkourMapPlayerUpdateStateEvent event) {
         var player = event.player();
-        if (!event.isMapJoin() || canSneak(event.world(), player))
-            return; // Nothing to warn
+        if (!event.isMapJoin() || canSneak(event.world(), player)) return; // Nothing to warn
 
         player.sendMessage(Component.translatable("map.join.warning.setting.no_sneak"));
     }

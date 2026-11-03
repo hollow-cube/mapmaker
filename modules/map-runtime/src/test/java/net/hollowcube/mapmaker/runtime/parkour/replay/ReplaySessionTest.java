@@ -15,8 +15,8 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityPose;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.EquipmentSlot;
+import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.PlayerHand;
 import net.minestom.server.entity.metadata.LivingEntityMeta;
 import net.minestom.server.instance.block.Block;
@@ -181,7 +181,9 @@ final class ReplaySessionTest {
     }
 
     @Test
-    void trackedEntitiesSpawnBeforeTheyMoveAndAreDestroyedWhenTheyGoAway(@TempDir Path temporaryDirectory) {
+    void trackedEntitiesSpawnBeforeTheyMoveAndAreDestroyedWhenTheyGoAway(
+        @TempDir Path temporaryDirectory
+    ) {
         var entity = new Entity(EntityType.ARMOR_STAND);
 
         var recorded = record(temporaryDirectory, session -> {
@@ -209,7 +211,11 @@ final class ReplaySessionTest {
         var replay = compact(temporaryDirectory, session -> {
             var entityId = session.trackEntity(entity);
             for (var tick = 0; tick < 300; tick++) {
-                session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, new Pos(tick, 64, 0), Vec.ZERO);
+                session.captureMovement(
+                    ReplaySession.SUBJECT_ENTITY_ID,
+                    new Pos(tick, 64, 0),
+                    Vec.ZERO
+                );
                 session.captureMovement(entityId, new Pos(0, 64, tick), Vec.ZERO);
                 session.advance();
             }
@@ -230,19 +236,27 @@ final class ReplaySessionTest {
     }
 
     @Test
-    void seekingIntoAChunkTruncatedByItsByteLimitStillReconstructsEntities(@TempDir Path temporaryDirectory) {
+    void seekingIntoAChunkTruncatedByItsByteLimitStillReconstructsEntities(
+        @TempDir Path temporaryDirectory
+    ) {
         var entity = new Entity(EntityType.ARMOR_STAND);
 
         var replay = compact(temporaryDirectory, session -> {
             var entityId = session.trackEntity(entity);
             for (var tick = 0; tick < 40; tick++) {
-                session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, new Pos(tick, 64, 0), Vec.ZERO);
+                session.captureMovement(
+                    ReplaySession.SUBJECT_ENTITY_ID,
+                    new Pos(tick, 64, 0),
+                    Vec.ZERO
+                );
                 session.captureMovement(entityId, new Pos(0, 64, tick), Vec.ZERO);
 
                 // Enough noise to run the chunk past its byte limit long before its tick limit, so
                 // the next chunk opens somewhere the session never chose.
                 for (var i = 0; i < 20000; i++)
-                    session.submit(new HandAnimationEvent(entityId, PlayerHand.MAIN, SwingAnimation.DEFAULT));
+                    session.submit(
+                        new HandAnimationEvent(entityId, PlayerHand.MAIN, SwingAnimation.DEFAULT)
+                    );
                 session.advance();
             }
         });
@@ -250,7 +264,10 @@ final class ReplaySessionTest {
         var index = indexOf(replay);
         assertTrue(index.size() > 1, "expected the byte limit to close a chunk early");
         var chunk = index.get(1);
-        assertTrue(chunk.startTick() < 100, "expected the first chunk to be shorter than the tick limit");
+        assertTrue(
+            chunk.startTick() < 100,
+            "expected the first chunk to be shorter than the tick limit"
+        );
         assertTrue(chunk.hasSnapshot());
 
         assertEquals(
@@ -296,19 +313,44 @@ final class ReplaySessionTest {
             List.of(
                 new ClearGhostBlocksEvent(), // the snapshot opening the first chunk
                 // The opening tick has nothing to diff against, so it describes everything.
-                new EntityStateEvent(0, EntityPose.STANDING, false, false, false, false, false, false, false, false),
+                new EntityStateEvent(
+                    0,
+                    EntityPose.STANDING,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+                ),
                 new ItemUseEvent(0, null),
                 new SetBlockEvent(GHOST_POINT, Block.SLIME_BLOCK),
                 // Every recorded equipment slot at once, because they all changed on the same tick.
-                new SetItemEvent(0, Map.of(
-                    SetItemEvent.slotOf(EquipmentSlot.HELMET), ItemStack.AIR,
-                    SetItemEvent.slotOf(EquipmentSlot.CHESTPLATE), ItemStack.AIR,
-                    SetItemEvent.slotOf(EquipmentSlot.LEGGINGS), ItemStack.AIR,
-                    SetItemEvent.slotOf(EquipmentSlot.BOOTS), ItemStack.AIR,
-                    SetItemEvent.slotOf(EquipmentSlot.OFF_HAND), ItemStack.AIR
-                )),
+                new SetItemEvent(
+                    0,
+                    Map.of(
+                        SetItemEvent.slotOf(EquipmentSlot.HELMET), ItemStack.AIR,
+                        SetItemEvent.slotOf(EquipmentSlot.CHESTPLATE), ItemStack.AIR,
+                        SetItemEvent.slotOf(EquipmentSlot.LEGGINGS), ItemStack.AIR,
+                        SetItemEvent.slotOf(EquipmentSlot.BOOTS), ItemStack.AIR,
+                        SetItemEvent.slotOf(EquipmentSlot.OFF_HAND), ItemStack.AIR
+                    )
+                ),
 
-                new EntityStateEvent(0, EntityPose.SNEAKING, false, true, false, false, false, false, false, false),
+                new EntityStateEvent(
+                    0,
+                    EntityPose.SNEAKING,
+                    false,
+                    true,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+                ),
                 new ItemUseEvent(0, PlayerHand.OFF),
                 // A ghost block that goes away is recorded as the world's own block returning.
                 new SetBlockEvent(GHOST_POINT, Block.STONE),
@@ -335,7 +377,10 @@ final class ReplaySessionTest {
         assertEquals(
             List.of(
                 new ClearGhostBlocksEvent(), // the snapshot opening the first chunk
-                new SetItemEvent(0, Map.of(3, ItemStack.of(Material.DIAMOND), 4, ItemStack.of(Material.DIRT)))
+                new SetItemEvent(
+                    0,
+                    Map.of(3, ItemStack.of(Material.DIAMOND), 4, ItemStack.of(Material.DIRT))
+                )
             ),
             recorded
         );
@@ -344,14 +389,26 @@ final class ReplaySessionTest {
     @Test
     void velocityIsRecordedEvenWhenNothingMoved(@TempDir Path temporaryDirectory) {
         var recorded = record(temporaryDirectory, session -> {
-            session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, new Pos(0, 64, 0), new Vec(1, 0, -1));
+            session.captureMovement(
+                ReplaySession.SUBJECT_ENTITY_ID,
+                new Pos(0, 64, 0),
+                new Vec(1, 0, -1)
+            );
             session.advance();
 
             // Standing on the spot with a velocity is exactly the sort of thing worth having.
-            session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, new Pos(0, 64, 0), new Vec(0, 1, 0));
+            session.captureMovement(
+                ReplaySession.SUBJECT_ENTITY_ID,
+                new Pos(0, 64, 0),
+                new Vec(0, 1, 0)
+            );
             session.advance();
 
-            session.captureMovement(ReplaySession.SUBJECT_ENTITY_ID, new Pos(0, 64, 0), new Vec(0, 1, 0));
+            session.captureMovement(
+                ReplaySession.SUBJECT_ENTITY_ID,
+                new Pos(0, 64, 0),
+                new Vec(0, 1, 0)
+            );
             session.advance();
         });
 
@@ -373,7 +430,10 @@ final class ReplaySessionTest {
         var recorded = record(temporaryDirectory, session -> {
             for (var tick = 0; tick <= ticks; tick++) {
                 session.captureMovement(
-                    ReplaySession.SUBJECT_ENTITY_ID, new Pos(step * tick, 64, -step * tick), Vec.ZERO);
+                    ReplaySession.SUBJECT_ENTITY_ID,
+                    new Pos(step * tick, 64, -step * tick),
+                    Vec.ZERO
+                );
                 session.advance();
             }
         });
@@ -382,7 +442,8 @@ final class ReplaySessionTest {
         var rebuilt = Pos.ZERO;
         for (var event : recorded) {
             if (event instanceof AbsoluteMoveEvent(var _, var position, var _)) rebuilt = position;
-            else if (event instanceof DeltaMoveEvent(var _, var delta, var _)) rebuilt = rebuilt.add(delta);
+            else if (event instanceof DeltaMoveEvent(var _, var delta, var _))
+                rebuilt = rebuilt.add(delta);
         }
 
         // Half a step off, after a hundred ticks of it. Diffing against the true position instead
@@ -414,7 +475,18 @@ final class ReplaySessionTest {
         assertEquals(
             List.of(
                 new ClearGhostBlocksEvent(),
-                new EntityStateEvent(0, entity.getPose(), true, true, true, true, true, true, true, true)
+                new EntityStateEvent(
+                    0,
+                    entity.getPose(),
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true,
+                    true
+                )
             ),
             recorded
         );
@@ -442,20 +514,51 @@ final class ReplaySessionTest {
         assertTrue(chunk.hasSnapshot());
 
         var seen = new ArrayList<ReplayEvent>();
-        try (var player = new ReplayPlayer(new CompactedReplayReader(replay), ReplayManager.REGISTRY, seen::add)) {
+        try (
+            var player = new ReplayPlayer(
+                new CompactedReplayReader(replay),
+                ReplayManager.REGISTRY,
+                seen::add
+            )
+        ) {
             player.seek(chunk.startTick() + 1);
         }
 
-        assertTrue(seen.contains(
-            new EntityStateEvent(0, EntityPose.FALL_FLYING, false, false, false, false, false, false, false, false)));
-        assertTrue(seen.stream().anyMatch(event -> event instanceof SetItemEvent(var _, var items)
-            && ItemStack.of(Material.DIAMOND_HELMET).equals(items.get(SetItemEvent.slotOf(EquipmentSlot.HELMET)))));
+        assertTrue(
+            seen.contains(
+                new EntityStateEvent(
+                    0,
+                    EntityPose.FALL_FLYING,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false,
+                    false
+                )
+            )
+        );
+        assertTrue(
+            seen.stream().anyMatch(
+                event ->
+                    event instanceof SetItemEvent(var _, var items)
+                        && ItemStack.of(Material.DIAMOND_HELMET)
+                            .equals(items.get(SetItemEvent.slotOf(EquipmentSlot.HELMET)))
+            )
+        );
         assertTrue(seen.contains(new ItemUseEvent(0, PlayerHand.MAIN)));
         // The clear has to come first, or ghost blocks an earlier playback position set would
         // survive it.
         assertEquals(
             List.of(new ClearGhostBlocksEvent(), new SetBlockEvent(GHOST_POINT, Block.SLIME_BLOCK)),
-            seen.stream().filter(event -> event instanceof ClearGhostBlocksEvent || event instanceof SetBlockEvent).toList()
+            seen.stream()
+                .filter(
+                    event ->
+                        event instanceof ClearGhostBlocksEvent || event instanceof SetBlockEvent
+                )
+                .toList()
         );
     }
 
@@ -475,15 +578,23 @@ final class ReplaySessionTest {
 
         var handler = (Consumer<ReplayEvent>) event -> {
             switch (event) {
-                case SpawnEntityEvent(int entityId, var _, Pos position) -> positions.put(entityId, position);
-                case AbsoluteMoveEvent(int entityId, Pos position, var _) -> positions.put(entityId, position);
-                case DeltaMoveEvent(int entityId, Pos delta, var _) -> positions.computeIfPresent(entityId, (_, last) -> last.add(delta));
+                case SpawnEntityEvent(int entityId, var _, Pos position) ->
+                    positions.put(entityId, position);
+                case AbsoluteMoveEvent(int entityId, Pos position, var _) ->
+                    positions.put(entityId, position);
+                case DeltaMoveEvent(int entityId, Pos delta, var _) ->
+                    positions.computeIfPresent(entityId, (_, last) -> last.add(delta));
                 case DestroyEntityEvent(int entityId) -> positions.remove(entityId);
-                default -> {
-                }
+                default -> {}
             }
         };
-        try (var player = new ReplayPlayer(new CompactedReplayReader(replay), ReplayManager.REGISTRY, handler)) {
+        try (
+            var player = new ReplayPlayer(
+                new CompactedReplayReader(replay),
+                ReplayManager.REGISTRY,
+                handler
+            )
+        ) {
             player.seek(tick);
         }
         return positions;
@@ -494,7 +605,13 @@ final class ReplaySessionTest {
     private static List<ReplayEvent> record(Path root, Consumer<ReplaySession> script) {
         var events = new ArrayList<ReplayEvent>();
         var recorded = compact(root, script);
-        try (var player = new ReplayPlayer(new CompactedReplayReader(recorded), ReplayManager.REGISTRY, events::add)) {
+        try (
+            var player = new ReplayPlayer(
+                new CompactedReplayReader(recorded),
+                ReplayManager.REGISTRY,
+                events::add
+            )
+        ) {
             while (player.advance() == ReplayPlayer.Advance.ADVANCED) ;
         }
         return events;
@@ -504,13 +621,15 @@ final class ReplaySessionTest {
     /// want to seek rather than play the whole thing.
     private static byte[] compact(Path root, Consumer<ReplaySession> script) {
         var storage = new SegmentedFileReplayStorage(root);
-        var session = new ReplaySession(snapshot -> ReplayRecorder.create(
-            ReplayManager.REGISTRY,
-            storage.writer("run", null),
-            UUID.randomUUID(),
-            ReplayHeader.worldVersion(UUID.randomUUID()),
-            snapshot
-        ));
+        var session = new ReplaySession(
+            snapshot -> ReplayRecorder.create(
+                ReplayManager.REGISTRY,
+                storage.writer("run", null),
+                UUID.randomUUID(),
+                ReplayHeader.worldVersion(UUID.randomUUID()),
+                snapshot
+            )
+        );
 
         script.accept(session);
         session.complete(RunOutcome.COMPLETED, 0).join();
@@ -518,13 +637,20 @@ final class ReplaySessionTest {
         var recording = storage.load("run");
         assertNotNull(recording);
         // Keep the source snapshots as seek anchors instead of merging the whole short recording.
-        return ReplayCompactor.compact(
-            recording.requirePreamble(),
-            new SegmentedFileReplaySource(root.resolve("run")),
-            null,
-            recording.requirePreamble().index().stream().mapToInt(chunk -> chunk.uncompressedLength()).max().orElse(1),
-            ReplayManager.REGISTRY
-        ).data();
+        return ReplayCompactor
+            .compact(
+                recording.requirePreamble(),
+                new SegmentedFileReplaySource(root.resolve("run")),
+                null,
+                recording.requirePreamble()
+                    .index()
+                    .stream()
+                    .mapToInt(chunk -> chunk.uncompressedLength())
+                    .max()
+                    .orElse(1),
+                ReplayManager.REGISTRY
+            )
+            .data();
     }
 
     private static ReplayRecorder newRecorder(SegmentedReplayWriter writer, Runnable snapshot) {

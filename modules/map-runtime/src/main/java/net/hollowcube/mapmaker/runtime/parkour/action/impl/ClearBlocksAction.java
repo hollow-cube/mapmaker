@@ -17,9 +17,15 @@ public record ClearBlocksAction() implements Action {
     private static final Sprite SPRITE = new Sprite("action/icon/trash", 3, 3);
 
     public static final Key KEY = Key.key("mapmaker:clear_blocks");
-    public static final StructCodec<ClearBlocksAction> CODEC = StructCodec.struct(ClearBlocksAction::new);
-    public static final Editor<ClearBlocksAction> EDITOR = new Editor<>(null, _ -> SPRITE,
-            ClearBlocksAction::makeThumbnail, Set.of(ClearBlocksAction.KEY));
+    public static final StructCodec<ClearBlocksAction> CODEC = StructCodec.struct(
+        ClearBlocksAction::new
+    );
+    public static final Editor<ClearBlocksAction> EDITOR = new Editor<>(
+        null,
+        _ -> SPRITE,
+        ClearBlocksAction::makeThumbnail,
+        Set.of(ClearBlocksAction.KEY)
+    );
 
     @Override
     public StructCodec<? extends Action> codec() {

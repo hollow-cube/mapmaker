@@ -38,31 +38,58 @@ import static net.kyori.adventure.text.Component.translatable;
 /// Temp while a bunch of pk stuff is still in the `map` module
 /// Once it is moved to map runtime these can just live in their associated `data` classes.
 public class TempEffectApplicator {
-    private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown("mapmaker:play/progress_index_warning", 5000);
+    private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown(
+        "mapmaker:play/progress_index_warning",
+        5000
+    );
 
-    private static final Sound CHECKPOINT_SOUND = Sound.sound(SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP, Sound.Source.MASTER, 0.1f, 0f);
+    private static final Sound CHECKPOINT_SOUND = Sound.sound(
+        SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP,
+        Sound.Source.MASTER,
+        0.1f,
+        0f
+    );
 
     private static final Instant LEGACY_STATUS_PLATE_DATE = Instant.ofEpochMilli(1776387977716L); // 2026-04-16 ish
-    private static final TagCooldown LEGACY_STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 250);
-    private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown("mapmaker:status_plate_cooldown", 1);
+    private static final TagCooldown LEGACY_STATUS_APPLY_COOLDOWN = new TagCooldown(
+        "mapmaker:status_plate_cooldown",
+        250
+    );
+    private static final TagCooldown STATUS_APPLY_COOLDOWN = new TagCooldown(
+        "mapmaker:status_plate_cooldown",
+        1
+    );
 
-    public static void applyCheckpoint(ActionTriggerData data, Player player, String checkpointId, Point position) {
+    public static void applyCheckpoint(
+        ActionTriggerData data,
+        Player player,
+        String checkpointId,
+        Point position
+    ) {
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return;
 
         applyCheckpoint(world, data, player, p.saveState(), checkpointId, position, false);
     }
 
     // TODO: does this all need to be applied at a safe point or does it matter at all?
-    public static void applyCheckpoint(ParkourMapWorld world, ActionTriggerData data, Player player, SaveState saveState, String checkpointId, Point position, boolean isTemporary) {
+    public static void applyCheckpoint(
+        ParkourMapWorld world,
+        ActionTriggerData data,
+        Player player,
+        SaveState saveState,
+        String checkpointId,
+        Point position,
+        boolean isTemporary
+    ) {
         var playState = saveState.state(PlayState.class);
 
         // Ensure the event should trigger a checkpoint change for the current players state
         if (checkProgressIndex(player, world.map(), playState, data.actions())) return;
         if (playState.lastState() != null && playState.lastState().hasStatus(checkpointId))
-            return; // Player already has this checkpoint in their history (they are backtracking)
+            // Player already has this checkpoint in their history (they are backtracking)
+            return;
         if (checkCondition(player, world.map(), playState, data.condition())) return;
 
         // Apply the checkpoint/effect changes
@@ -73,20 +100,20 @@ public class TempEffectApplicator {
         // its present the teleport position, or the first
         // position the player touched the checkpoint otherwise.
         var respawnPosition = OpUtils.mapOr(
-                data.actions().findLast(RespawnPosAction.class),
-                action -> {
-                    float yaw = player.getPosition().yaw();
-                    float pitch = player.getPosition().pitch();
-                    Pos origin;
-                    if (position instanceof BlockVec(int x, int y, int z)) {
-                        // If the position is a block vector then we want to center the player on the block
-                        origin = new Pos(x + 0.5, y, z + 0.5, yaw, pitch);
-                    } else {
-                        origin = new Pos(position, yaw, pitch);
-                    }
-                    return action.target().resolve(origin);
-                },
-                player.getPosition()
+            data.actions().findLast(RespawnPosAction.class),
+            action -> {
+                float yaw = player.getPosition().yaw();
+                float pitch = player.getPosition().pitch();
+                Pos origin;
+                if (position instanceof BlockVec(int x, int y, int z)) {
+                    // If the position is a block vector then we want to center the player on the block
+                    origin = new Pos(x + 0.5, y, z + 0.5, yaw, pitch);
+                } else {
+                    origin = new Pos(position, yaw, pitch);
+                }
+                return action.target().resolve(origin);
+            },
+            player.getPosition()
         );
 
         List<String> newHistory;
@@ -101,42 +128,61 @@ public class TempEffectApplicator {
         }
 
         // Cache the last state so that we can reset back here.
-        playState.setLastState(new PlayState(
+        playState.setLastState(
+            new PlayState(
                 null,
                 newHistory,
                 respawnPosition,
                 Map.copyOf(playState.ghostBlocks()),
                 Map.copyOf(playState.actionData())
-        ));
+            )
+        );
 
         // Update the player based on the new state
-        world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState, playState, false, false, false));
+        world.callEvent(
+            new ParkourMapPlayerUpdateStateEvent(
+                world,
+                player,
+                saveState,
+                playState,
+                false,
+                false,
+                false
+            )
+        );
 
         // A spectator checkpoint is a viewing convenience rather than progress through a run, so
         // only a real one is recorded.
         if (!isTemporary)
-            world.recordReplayEvent(player, new CheckpointReachedEvent(checkpointId, saveState.getRealPlaytime()));
+            world.recordReplayEvent(
+                player,
+                new CheckpointReachedEvent(checkpointId, saveState.getRealPlaytime())
+            );
 
-        player.sendMessage(translatable(isTemporary ? "spec.checkpoint.set" : "play.checkpoint.reached"));
+        player.sendMessage(
+            translatable(isTemporary ? "spec.checkpoint.set" : "play.checkpoint.reached")
+        );
         player.playSound(CHECKPOINT_SOUND);
     }
 
     public static void applyStatus(ActionTriggerData data, Player player, String statusId) {
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return;
         var saveState = p.saveState();
         var playState = saveState.state(PlayState.class);
 
         // Ensure the event should trigger a status change for the current players state
         if (!data.repeatable() && playState.hasStatus(statusId))
-            return; // Player already has the status plate in this checkpoint.
+            // Player already has the status plate in this checkpoint.
+            return;
         if (checkProgressIndex(player, world.map(), playState, data.actions())) return;
         if (checkCondition(player, world.map(), playState, data.condition())) return;
 
-        var statusCooldown = !world.map().isPublished() || world.map().publishedAt().isAfter(LEGACY_STATUS_PLATE_DATE)
-            ? STATUS_APPLY_COOLDOWN : LEGACY_STATUS_APPLY_COOLDOWN;
+        var statusCooldown = !world.map().isPublished()
+                || world.map().publishedAt().isAfter(LEGACY_STATUS_PLATE_DATE)
+            ? STATUS_APPLY_COOLDOWN
+            : LEGACY_STATUS_APPLY_COOLDOWN;
         if (!statusCooldown.test(player)) return;
 
         // Update the play state from the player's current view of the world.
@@ -147,14 +193,27 @@ public class TempEffectApplicator {
         playState.addStatus(statusId);
 
         // Update the player based on the new state
-        world.callEvent(new ParkourMapPlayerUpdateStateEvent(world, player, saveState, playState, false, false, false));
+        world.callEvent(
+            new ParkourMapPlayerUpdateStateEvent(
+                world,
+                player,
+                saveState,
+                playState,
+                false,
+                false,
+                false
+            )
+        );
     }
 
-    public static void handleCheckpointExit(Player player, ActionTriggerData data, String checkpointId) {
+    public static void handleCheckpointExit(
+        Player player,
+        ActionTriggerData data,
+        String checkpointId
+    ) {
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return;
         var saveState = p.saveState();
         var state = saveState.state(PlayState.class);
         var pos = state.pos();
@@ -166,9 +225,9 @@ public class TempEffectApplicator {
         if (pos == null) return;
 
         var respawnView = OpUtils.mapOr(
-                data.actions().findLast(RespawnPosAction.class),
-                action -> action.target().resolve(player.getPosition()),
-                player.getPosition()
+            data.actions().findLast(RespawnPosAction.class),
+            action -> action.target().resolve(player.getPosition()),
+            player.getPosition()
         );
 
         float yaw = respawnView.yaw();
@@ -183,7 +242,12 @@ public class TempEffectApplicator {
         }
     }
 
-    private static boolean checkCondition(Player player, MapData map, PlayState state, ActionTriggerCondition condition) {
+    private static boolean checkCondition(
+        Player player,
+        MapData map,
+        PlayState state,
+        ActionTriggerCondition condition
+    ) {
         var expression = condition.expression();
         if (expression == null) return false;
         if (expression.error() != null) return true;
@@ -194,16 +258,25 @@ public class TempEffectApplicator {
 
         try {
             var molangState = new MolangState();
-            result = expression.program().evalBool(molangState, new VariableQueries.Context(player, state.get(Attachments.VARIABLES)));
+            result = expression.program().evalBool(
+                molangState,
+                new VariableQueries.Context(player, state.get(Attachments.VARIABLES))
+            );
             errors = molangState.getErrors();
         } catch (Exception exception) {
             // Sanity check for unexpected errors, but molang should handle errors gracefully
             ExceptionReporter.reportException(exception, player);
-            errors = List.of(new ContentError("Internal Server Error, please report to administrators if persistent."));
+            errors = List.of(
+                new ContentError(
+                    "Internal Server Error, please report to administrators if persistent."
+                )
+            );
         }
 
         if (!map.isPublished() && !errors.isEmpty()) {
-            var error = errors.stream().map(ContentError::toString).collect(Collectors.joining("\n"));
+            var error = errors.stream()
+                .map(ContentError::toString)
+                .collect(Collectors.joining("\n"));
             player.sendMessage(Component.text("Errors evaluating condition:\n" + error));
         }
 
@@ -215,8 +288,8 @@ public class TempEffectApplicator {
                 message = translatable("action.condition.not_acceptable");
             } else {
                 message = translatable(
-                        "action.condition.not_acceptable.custom",
-                        List.of(Component.text(condition.message()))
+                    "action.condition.not_acceptable.custom",
+                    List.of(Component.text(condition.message()))
                 );
             }
             player.sendMessage(message);
@@ -225,19 +298,33 @@ public class TempEffectApplicator {
         return true;
     }
 
-    private static boolean checkProgressIndex(Player player, MapData map, PlayState state, ActionList actionList) {
-        int progressIndex = OpUtils.mapOr(actionList.findLast(SetProgressIndexAction.class), SetProgressIndexAction::value, -1);
+    private static boolean checkProgressIndex(
+        Player player,
+        MapData map,
+        PlayState state,
+        ActionList actionList
+    ) {
+        int progressIndex = OpUtils.mapOr(
+            actionList.findLast(SetProgressIndexAction.class),
+            SetProgressIndexAction::value,
+            -1
+        );
         if (progressIndex > 0) {
             int currentIndex = state.get(Attachments.PROGRESS_INDEX, 0);
             boolean isFail = MapSettings.get(map.settings(), MapSettings.PROGRESS_INDEX_ADDITION)
-                    // With additive index you can get anything <= current + 1
-                    ? (progressIndex > currentIndex + 1)
-                    // Without additive progress index you must be at the prior index or the current one
-                    : (progressIndex != currentIndex && progressIndex != currentIndex + 1);
+                // With additive index you can get anything <= current + 1
+                ? (progressIndex > currentIndex + 1)
+                // Without additive progress index you must be at the prior index or the current one
+                : (progressIndex != currentIndex && progressIndex != currentIndex + 1);
             if (isFail) {
                 if (PROGRESS_INDEX_WARNING.test(player)) {
-                    player.sendMessage(translatable("action.progress_index.not_acceptable",
-                            Component.text(currentIndex), Component.text(progressIndex - 1)));
+                    player.sendMessage(
+                        translatable(
+                            "action.progress_index.not_acceptable",
+                            Component.text(currentIndex),
+                            Component.text(progressIndex - 1)
+                        )
+                    );
                 }
                 return true;
             }

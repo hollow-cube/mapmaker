@@ -26,5 +26,4 @@ public final class LibWorld {
         return 1;
     }
 
-
 }

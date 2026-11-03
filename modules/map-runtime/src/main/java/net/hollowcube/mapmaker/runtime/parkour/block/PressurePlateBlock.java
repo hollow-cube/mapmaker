@@ -33,11 +33,22 @@ public interface PressurePlateBlock extends CollidableBlock {
         if (world == null || !world.canEdit(null)) return;
 
         final var blockPosition = tick.getBlockPosition();
-        PacketSendingUtils.sendGroupedPacket(world.players(), new ParticlePacket(
-                DUST_PARTICLE, false, true,
-                blockPosition.x() + 0.5, blockPosition.y() + 0.5, blockPosition.z() + 0.5,
-                0.25f, 0.25f, 0.25f, 0, 5
-        ));
+        PacketSendingUtils.sendGroupedPacket(
+            world.players(),
+            new ParticlePacket(
+                DUST_PARTICLE,
+                false,
+                true,
+                blockPosition.x() + 0.5,
+                blockPosition.y() + 0.5,
+                blockPosition.z() + 0.5,
+                0.25f,
+                0.25f,
+                0.25f,
+                0,
+                5
+            )
+        );
     }
 
 }

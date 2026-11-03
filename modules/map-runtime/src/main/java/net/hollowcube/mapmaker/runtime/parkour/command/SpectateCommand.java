@@ -20,10 +20,16 @@ public class SpectateCommand extends CommandDsl {
         category = CommandCategories.MAP;
         description = "Spectate the current map";
 
-        setCondition(and(
+        setCondition(
+            and(
                 parkourWorld(),
-                mapPlayer((world, player) -> world instanceof ParkourMapWorld parkour && SpectateHelper.canSpectate(parkour, player))
-        ));
+                mapPlayer(
+                    (world, player) ->
+                        world instanceof ParkourMapWorld parkour
+                            && SpectateHelper.canSpectate(parkour, player)
+                )
+            )
+        );
         addSyntax(playerOnly(this::execute));
     }
 

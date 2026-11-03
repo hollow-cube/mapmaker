@@ -27,22 +27,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public record BlockCheckpointItem(Block block, int amount, List<Block> placeableOn) implements CheckpointItem {
+public record BlockCheckpointItem(
+    Block block,
+    int amount,
+    List<Block> placeableOn
+) implements CheckpointItem {
     private static final int INFINITE_AMOUNT = 0;
     private static final int MAX_AMOUNT = 98;
 
-    private static final List<Block> DEFAULT_PLACEABLE_ON = List.of(
-            Block.STONE, Block.TARGET
-    );
+    private static final List<Block> DEFAULT_PLACEABLE_ON = List.of(Block.STONE, Block.TARGET);
 
     public static final Key ID = Key.key("mapmaker:block");
     public static final StructCodec<BlockCheckpointItem> CODEC = StructCodec.struct(
-            "block", ExtraCodecs.BLOCK_NAME_STRING.optional(Block.STONE), BlockCheckpointItem::block,
-            "amount", Codec.INT.optional(INFINITE_AMOUNT), BlockCheckpointItem::amount,
-            // we allow 8 here for historical reasons (we changed from always including the chosen block
-            // to never including it, and a migration can result in 8 blocks in the list. The UI does not allow this.)
-            "placeable_on", ExtraCodecs.BLOCK_NAME_STRING.list(8).optional(DEFAULT_PLACEABLE_ON), BlockCheckpointItem::placeableOn,
-            BlockCheckpointItem::new);
+        "block",
+        ExtraCodecs.BLOCK_NAME_STRING.optional(Block.STONE),
+        BlockCheckpointItem::block,
+        "amount",
+        Codec.INT.optional(INFINITE_AMOUNT),
+        BlockCheckpointItem::amount,
+        // we allow 8 here for historical reasons (we changed from always including the chosen block
+        // to never including it, and a migration can result in 8 blocks in the list. The UI does not allow this.)
+        "placeable_on",
+        ExtraCodecs.BLOCK_NAME_STRING.list(8).optional(DEFAULT_PLACEABLE_ON),
+        BlockCheckpointItem::placeableOn,
+        BlockCheckpointItem::new
+    );
 
     public BlockCheckpointItem withBlock(Block block) {
         return new BlockCheckpointItem(block, this.amount, List.of(block, Block.TARGET));
@@ -57,7 +66,8 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
     }
 
     public boolean isValid() {
-        return ItemUtils.PLACEABLE_BLOCKS.contains(this.block()) && ItemUtils.PLACEABLE_ON_BLOCKS.containsAll(this.placeableOn());
+        return ItemUtils.PLACEABLE_BLOCKS.contains(this.block())
+            && ItemUtils.PLACEABLE_ON_BLOCKS.containsAll(this.placeableOn());
     }
 
     @Override
@@ -72,8 +82,12 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
         var canPlaceOn = new ArrayList<RegistryKey<Block>>(this.placeableOn);
         var material = Objects.requireNonNullElse(this.block.registry().material(), Material.STONE);
         int amount = this.amount == INFINITE_AMOUNT ? MAX_AMOUNT + 1 : this.amount;
-        return ItemStack.of(material, amount).with(DataComponents.MAX_STACK_SIZE, amount)
-                .with(DataComponents.CAN_PLACE_ON, new BlockPredicates(new BlockPredicate(RegistryTag.direct(canPlaceOn))));
+        return ItemStack.of(material, amount)
+            .with(DataComponents.MAX_STACK_SIZE, amount)
+            .with(
+                DataComponents.CAN_PLACE_ON,
+                new BlockPredicates(new BlockPredicate(RegistryTag.direct(canPlaceOn)))
+            );
     }
 
     @Override
@@ -85,11 +99,16 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
     @Override
     public TranslatableComponent thumbnail() {
         if (this.isValid()) {
-            return Component.translatable("gui.action.give_item.block.thumbnail", List.of(
+            return Component.translatable(
+                "gui.action.give_item.block.thumbnail",
+                List.of(
                     LanguageProviderV2.getVanillaTranslation(this.block),
-                    Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
+                    Component.text(
+                        this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)
+                    ),
                     Component.text(this.placeableOn.size())
-            ));
+                )
+            );
         }
 
         return Component.translatable("gui.action.give_item.block.thumbnail.invalid");
@@ -109,17 +128,30 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
 
             background("action/editor/container_lg", -10, -31);
 
-            this.slotInput.iconButton()
-                    .onLeftClick(() -> {
-                        host.pushView(AnvilSearchView.simple("action/anvil/search_icon", "Search Blocks",
-                                Autocompletors::searchBlocks, ControlledBlockListInput::makeBlockButton, block -> {
+            this.slotInput.iconButton().onLeftClick(() -> {
+                host.pushView(
+                    AnvilSearchView.simple(
+                        "action/anvil/search_icon",
+                        "Search Blocks",
+                        Autocompletors::searchBlocks,
+                        ControlledBlockListInput::makeBlockButton,
+                        block -> {
                             updateItem(BlockCheckpointItem::withBlock).accept(block);
-                        }));
-                    });
+                        }
+                    )
+                );
+            });
 
-            this.amountInput = add(1, 3, makeGenericAmount(BlockCheckpointItem::withAmount, MAX_AMOUNT));
-            this.placeableOnInput = add(1, 5, new ControlledBlockListInput(7,
-                    updateItem(BlockCheckpointItem::withPlaceableOn)));
+            this.amountInput = add(
+                1,
+                3,
+                makeGenericAmount(BlockCheckpointItem::withAmount, MAX_AMOUNT)
+            );
+            this.placeableOnInput = add(
+                1,
+                5,
+                new ControlledBlockListInput(7, updateItem(BlockCheckpointItem::withPlaceableOn))
+            );
         }
 
         @Override
@@ -130,8 +162,11 @@ public record BlockCheckpointItem(Block block, int amount, List<Block> placeable
 
             if (!item.isValid()) {
                 this.slotInput.iconButton().text(
-                        Component.translatable("gui.action.give_item.block.invalid.name"),
-                        LanguageProviderV2.translateMulti("gui.action.give_item.block.invalid.lore", List.of())
+                    Component.translatable("gui.action.give_item.block.invalid.name"),
+                    LanguageProviderV2.translateMulti(
+                        "gui.action.give_item.block.invalid.lore",
+                        List.of()
+                    )
                 );
             }
         }

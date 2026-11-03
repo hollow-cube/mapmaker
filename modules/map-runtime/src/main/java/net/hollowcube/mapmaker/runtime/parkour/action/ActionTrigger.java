@@ -6,7 +6,12 @@ import net.hollowcube.mapmaker.runtime.parkour.TempEffectApplicator;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.entity.Player;
 
-public record ActionTrigger(Kind kind, String id, Point position, ActionTriggerData data) implements Trigger {
+public record ActionTrigger(
+    Kind kind,
+    String id,
+    Point position,
+    ActionTriggerData data
+) implements Trigger {
 
     public enum Kind {
         CHECKPOINT,
@@ -23,8 +28,7 @@ public record ActionTrigger(Kind kind, String id, Point position, ActionTriggerD
 
     @Override
     public void onExit(MapWorld world, Player player) {
-        if (kind == Kind.CHECKPOINT)
-            TempEffectApplicator.handleCheckpointExit(player, data, id);
+        if (kind == Kind.CHECKPOINT) TempEffectApplicator.handleCheckpointExit(player, data, id);
     }
 
 }

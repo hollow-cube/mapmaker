@@ -25,12 +25,15 @@ public final class OwnedEntityRegistry {
         REGISTRY = Map.copyOf(registry);
     }
 
-    public static <E extends Entity & OwnedEntity> @Nullable E restore(Key kind, MapPlayer owner, CompoundBinaryTag nbt) {
+    public static <E extends Entity & OwnedEntity> @Nullable E restore(
+        Key kind,
+        MapPlayer owner,
+        CompoundBinaryTag nbt
+    ) {
         var restorer = REGISTRY.get(kind);
         //noinspection unchecked
         return restorer == null ? null : (E) restorer.apply(owner, nbt);
     }
 
-    private OwnedEntityRegistry() {
-    }
+    private OwnedEntityRegistry() {}
 }

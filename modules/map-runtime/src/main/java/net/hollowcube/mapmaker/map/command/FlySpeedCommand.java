@@ -13,7 +13,8 @@ import static net.hollowcube.mapmaker.map.command.FlyCommand.playingOrSpectating
 public class FlySpeedCommand extends CommandDsl {
     private static final float DEFAULT_SPEED = 0.05f;
 
-    private final Argument<Float> speedArg = Argument.Float("flyspeed").clamp(0f, 10f)
+    private final Argument<Float> speedArg = Argument.Float("flyspeed")
+        .clamp(0f, 10f)
         .description("How fast to fly (from 0 to 10)");
 
     public FlySpeedCommand() {
@@ -21,10 +22,7 @@ public class FlySpeedCommand extends CommandDsl {
 
         description = "Changes how fast you fly when building";
 
-        setCondition(or(
-            playingOrSpectatingFilter(),
-            BuildingConditions.buildingWorld()
-        ));
+        setCondition(or(playingOrSpectatingFilter(), BuildingConditions.buildingWorld()));
 
         addSyntax(playerOnly(this::handleSetFlySpeed), speedArg);
     }

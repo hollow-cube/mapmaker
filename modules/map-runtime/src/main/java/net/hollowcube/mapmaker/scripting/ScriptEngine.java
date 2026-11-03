@@ -91,8 +91,7 @@ public final class ScriptEngine {
             } finally {
                 try {
                     loader.close();
-                } catch (Exception ignored) {
-                }
+                } catch (Exception ignored) {}
             }
         }
     }
@@ -133,7 +132,6 @@ public final class ScriptEngine {
     /// explicitly and have no parent here.
     private static void propagateThreadData(@Nullable LuaState parent, LuaState thread) {
         if (parent == null) return; // Destruction, dont care
-        if (parent.getThreadData() instanceof ScriptContext frame)
-            thread.setThreadData(frame);
+        if (parent.getThreadData() instanceof ScriptContext frame) thread.setThreadData(frame);
     }
 }

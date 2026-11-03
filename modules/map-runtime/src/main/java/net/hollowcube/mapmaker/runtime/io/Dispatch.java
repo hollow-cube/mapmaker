@@ -15,8 +15,7 @@ public final class Dispatch {
 
     static final int MAX_SIGNALS = 256; // per drain
 
-    private record Signal(String caller, Connection connection) {
-    }
+    private record Signal(String caller, Connection connection) {}
 
     private final Player activator;
     private final PlayState state;
@@ -28,8 +27,7 @@ public final class Dispatch {
     }
 
     public void fire(String caller, List<Connection> output) {
-        for (var connection : output)
-            queue.add(new Signal(caller, connection));
+        for (var connection : output) queue.add(new Signal(caller, connection));
     }
 
     public void drain() {
@@ -37,8 +35,12 @@ public final class Dispatch {
         while (!queue.isEmpty()) {
             var signal = queue.poll();
             if (++delivered > MAX_SIGNALS) {
-                logger.warn("signal limit hit for {}, dropped {} signals (loop through {}?)",
-                    activator.getUsername(), queue.size() + 1, signal.caller());
+                logger.warn(
+                    "signal limit hit for {}, dropped {} signals (loop through {}?)",
+                    activator.getUsername(),
+                    queue.size() + 1,
+                    signal.caller()
+                );
                 queue.clear();
                 return;
             }

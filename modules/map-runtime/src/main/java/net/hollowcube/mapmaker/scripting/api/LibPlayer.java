@@ -102,12 +102,12 @@ public final class LibPlayer {
         @LuaProperty
         public int getSidebar(LuaState state) {
             throw new UnsupportedOperationException("TODO");
-//            if (sidebar == null) {
-//                sidebar = new Sidebar(this);
-//                ScriptContext.track(state, sidebar);
-//            }
-//            LibPlayer$luau.pushSidebar(state, sidebar);
-//            return 1;
+            //            if (sidebar == null) {
+            //                sidebar = new Sidebar(this);
+            //                ScriptContext.track(state, sidebar);
+            //            }
+            //            LibPlayer$luau.pushSidebar(state, sidebar);
+            //            return 1;
         }
 
         /// The world as the player sees it. Use this to apply effects only this player can
@@ -247,12 +247,9 @@ public final class LibPlayer {
             var source = top > 1 ? checkOptSoundCategory(state, 2) : null;
 
             SoundStop stop;
-            if (sound != null && source != null)
-                stop = SoundStop.namedOnSource(sound, source);
-            else if (sound != null)
-                stop = SoundStop.named(sound);
-            else if (source != null)
-                stop = SoundStop.source(source);
+            if (sound != null && source != null) stop = SoundStop.namedOnSource(sound, source);
+            else if (sound != null) stop = SoundStop.named(sound);
+            else if (source != null) stop = SoundStop.source(source);
             else stop = SoundStop.all();
             player.stopSound(stop);
         }
@@ -302,7 +299,8 @@ public final class LibPlayer {
                     case 'z' -> relativeFlags |= RelativeFlags.Z;
                     case 'r' -> relativeFlags |= RelativeFlags.YAW;
                     case 'w' -> relativeFlags |= RelativeFlags.PITCH;
-                    default -> throw state.error("Invalid relative flag '" + c + "', expected 'xyzrw'");
+                    default ->
+                        throw state.error("Invalid relative flag '" + c + "', expected 'xyzrw'");
                 }
             }
             // If yaw or pitch were provided, dont change them (aka 0 relative to current)
@@ -381,7 +379,6 @@ public final class LibPlayer {
             player.clearEffects();
         }
 
-
         //endregion
 
         //region Meta Methods
@@ -391,8 +388,8 @@ public final class LibPlayer {
         @LuaMethod(meta = "__eq")
         public int luaEq(LuaState state) {
             var result = state.isUserData(1)
-                         && state.toUserData(1) instanceof Player p
-                         && p.player.getUuid().equals(player.getUuid());
+                && state.toUserData(1) instanceof Player p
+                && p.player.getUuid().equals(player.getUuid());
             state.pushBoolean(result);
             return 1;
         }
@@ -420,16 +417,16 @@ public final class LibPlayer {
             entity.setAutoViewable(false);
 
             var prop = new LibEntity.TextProp(entity);
-            LuaHelpers.tableForEach(state, 1, (key) -> {
+            LuaHelpers.tableForEach(state, 1, key -> {
                 if ("position".equals(key) || "yaw".equals(key) || "pitch".equals(key))
-                    return; // Special handling below
+                    // Special handling below
+                    return;
                 if (!prop.readField(state, key, -1)) {
                     state.argError(1, "Unknown property: " + key);
                 }
             });
 
-            if (!tableGet(state, 1, "position"))
-                state.argError(1, "Missing position");
+            if (!tableGet(state, 1, "position")) state.argError(1, "Missing position");
             Point point = LuaVector.check(state, -1);
             state.pop(1); // remove position
             float yaw = 0, pitch = 0;
@@ -468,81 +465,81 @@ public final class LibPlayer {
 
     }
 
-//    /// A scoreboard sidebar shown on the right side of the player's screen.
-//    @LuaExport
-//    public static final class Sidebar implements Disposable {
-//        private final Player player;
-//        private final net.minestom.server.scoreboard.Sidebar delegate;
-//        private boolean disposed = false;
-//
-//        private @Nullable LuaCallback cb;
-//        private @Nullable ScheduledCallback scheduled;
-//
-//        public Sidebar(Player player) {
-//            this.player = player;
-//            delegate = new net.minestom.server.scoreboard.Sidebar(Component.empty());
-//            delegate.addViewer(player.player);
-//        }
-//
-//        /// Sets the sidebar's contents. The render function is called each tick and must
-//        /// return a table containing `title` and an array of `lines`.
-//        ///
-//        /// ```luau
-//        /// player.sidebar:set(function(p)
-//        ///     return {
-//        ///         title = "<gold>Stats</gold>",
-//        ///         lines = { "Name: " .. p.name },
-//        ///     }
-//        /// end)
-//        /// ```
-//        ///
-//        /// @luaParam render (player: @mapmaker/player.Player) -> { title: AnyText, lines: { AnyText } }
-//        @LuaMethod
-//        public void set(LuaState state) {
-//            state.checkType(1, LuaType.FUNCTION);
-//
-//            // Replacing an existing render: tear down the old callback + task.
-//            if (scheduled != null) scheduled.dispose();
-//
-//            var cb = LuaCallback.of(state, 1);
-//            this.cb = cb;
-//            this.scheduled = ScheduledCallback.recurring(state, cb, () -> {
-//                var s = cb.state();
-//                LibPlayer$luau.pushPlayer(s, player); // the single render arg
-//                cb.call(1, 1);                        // -> [result table]
-//
-//                s.checkType(-1, LuaType.TABLE);
-//                if (tableGet(s, -1, "title")) {
-//                    var title = LuaText.checkAnyText(s, -1);
-//                    s.pop(1);
-//                    delegate.setTitle(title);
-//                }
-//
-//                for (var line : Set.copyOf(delegate.getLines())) {
-//                    delegate.removeLine(line.getId());
-//                }
-//                if (tableGet(s, -1, "lines")) {
-//                    s.checkType(-1, LuaType.TABLE);
-//                    arrayForEach(s, -1, (index) -> {
-//                        var line = LuaText.checkAnyText(s, -1);
-//                        delegate.createLine(new net.minestom.server.scoreboard.Sidebar.ScoreboardLine(
-//                            String.valueOf(index), line, index, net.minestom.server.scoreboard.Sidebar.NumberFormat.blank()));
-//                    });
-//                    s.pop(1);
-//                }
-//
-//                s.pop(1);
-//            });
-//        }
-//
-//        @Override
-//        public void dispose() {
-//            if (disposed) return;
-//            disposed = true;
-//            delegate.removeViewer(player.player);
-//            if (scheduled != null) scheduled.dispose(); // cancels task + disposes cb
-//        }
-//    }
+    //    /// A scoreboard sidebar shown on the right side of the player's screen.
+    //    @LuaExport
+    //    public static final class Sidebar implements Disposable {
+    //        private final Player player;
+    //        private final net.minestom.server.scoreboard.Sidebar delegate;
+    //        private boolean disposed = false;
+    //
+    //        private @Nullable LuaCallback cb;
+    //        private @Nullable ScheduledCallback scheduled;
+    //
+    //        public Sidebar(Player player) {
+    //            this.player = player;
+    //            delegate = new net.minestom.server.scoreboard.Sidebar(Component.empty());
+    //            delegate.addViewer(player.player);
+    //        }
+    //
+    //        /// Sets the sidebar's contents. The render function is called each tick and must
+    //        /// return a table containing `title` and an array of `lines`.
+    //        ///
+    //        /// ```luau
+    //        /// player.sidebar:set(function(p)
+    //        ///     return {
+    //        ///         title = "<gold>Stats</gold>",
+    //        ///         lines = { "Name: " .. p.name },
+    //        ///     }
+    //        /// end)
+    //        /// ```
+    //        ///
+    //        /// @luaParam render (player: @mapmaker/player.Player) -> { title: AnyText, lines: { AnyText } }
+    //        @LuaMethod
+    //        public void set(LuaState state) {
+    //            state.checkType(1, LuaType.FUNCTION);
+    //
+    //            // Replacing an existing render: tear down the old callback + task.
+    //            if (scheduled != null) scheduled.dispose();
+    //
+    //            var cb = LuaCallback.of(state, 1);
+    //            this.cb = cb;
+    //            this.scheduled = ScheduledCallback.recurring(state, cb, () -> {
+    //                var s = cb.state();
+    //                LibPlayer$luau.pushPlayer(s, player); // the single render arg
+    //                cb.call(1, 1);                        // -> [result table]
+    //
+    //                s.checkType(-1, LuaType.TABLE);
+    //                if (tableGet(s, -1, "title")) {
+    //                    var title = LuaText.checkAnyText(s, -1);
+    //                    s.pop(1);
+    //                    delegate.setTitle(title);
+    //                }
+    //
+    //                for (var line : Set.copyOf(delegate.getLines())) {
+    //                    delegate.removeLine(line.getId());
+    //                }
+    //                if (tableGet(s, -1, "lines")) {
+    //                    s.checkType(-1, LuaType.TABLE);
+    //                    arrayForEach(s, -1, (index) -> {
+    //                        var line = LuaText.checkAnyText(s, -1);
+    //                        delegate.createLine(new net.minestom.server.scoreboard.Sidebar.ScoreboardLine(
+    //                            String.valueOf(index), line, index, net.minestom.server.scoreboard.Sidebar.NumberFormat.blank()));
+    //                    });
+    //                    s.pop(1);
+    //                }
+    //
+    //                s.pop(1);
+    //            });
+    //        }
+    //
+    //        @Override
+    //        public void dispose() {
+    //            if (disposed) return;
+    //            disposed = true;
+    //            delegate.removeViewer(player.player);
+    //            if (scheduled != null) scheduled.dispose(); // cancels task + disposes cb
+    //        }
+    //    }
 
     public static void pushPlayer(LuaState state, net.minestom.server.entity.Player player) {
         // We want to reuse the lua player within a script runtime since it stores some extra state

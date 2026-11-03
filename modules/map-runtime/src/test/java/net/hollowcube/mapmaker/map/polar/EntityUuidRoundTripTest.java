@@ -33,8 +33,10 @@ class EntityUuidRoundTripTest extends AbstractMapWorldTest<TestMapWorld> {
 
         var bytes = world.instance().save(new ReadWriteWorldAccess(world));
         var loaded = new TestMapWorld();
-        loaded.instance().loadStream(new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(bytes)), bytes.length),
-            new ReadWorldAccess(loaded));
+        loaded.instance().loadStream(
+            new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(bytes)), bytes.length),
+            new ReadWorldAccess(loaded)
+        );
         env.tick();
 
         assertNotNull(loaded.instance().getEntityByUuid(marker.getUuid()));

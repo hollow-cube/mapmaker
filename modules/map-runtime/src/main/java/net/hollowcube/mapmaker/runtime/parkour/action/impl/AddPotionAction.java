@@ -26,7 +26,9 @@ import java.util.Objects;
 import static net.kyori.adventure.text.Component.translatable;
 
 public record AddPotionAction(
-        @Nullable PotionInfo effect, int level, int duration
+    @Nullable PotionInfo effect,
+    int level,
+    int duration
 ) implements Action {
     private static final int INFINITE_DURATION = 0;
     private static final int MAX_DURATION = 24 * 60 * 60 * 20; // 24 hours in ticks.
@@ -35,12 +37,16 @@ public record AddPotionAction(
 
     public static final Key KEY = Key.key("mapmaker:add_potion");
     public static final StructCodec<AddPotionAction> CODEC = StructCodec.struct(
-            "effect", PotionInfo.CODEC.optional(), AddPotionAction::effect,
-            "level", ExtraCodecs.clamppedInt(0, 128).optional(1), AddPotionAction::level,
-            "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), AddPotionAction::duration,
-            AddPotionAction::new);
+        "effect", PotionInfo.CODEC.optional(), AddPotionAction::effect,
+        "level", ExtraCodecs.clamppedInt(0, 128).optional(1), AddPotionAction::level,
+        "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), AddPotionAction::duration,
+        AddPotionAction::new
+    );
     public static final Action.Editor<AddPotionAction> EDITOR = new Action.Editor<>(
-            AddPotionAction::createEditor, SPRITE_ADD, AddPotionAction::thumbnail);
+        AddPotionAction::createEditor,
+        SPRITE_ADD,
+        AddPotionAction::thumbnail
+    );
 
     public AddPotionAction withEffect(@Nullable PotionInfo effect) {
         return new AddPotionAction(effect, this.level, this.duration);
@@ -77,17 +83,24 @@ public record AddPotionAction(
     private static TranslatableComponent thumbnail(@Nullable AddPotionAction action) {
         if (action == null || action.effect == null)
             return Component.translatable("gui.action.add_potion.thumbnail.empty");
-        return Component.translatable("gui.action.add_potion.thumbnail", List.of(
+        return Component.translatable(
+            "gui.action.add_potion.thumbnail",
+            List.of(
                 Component.translatable(action.effect.translationKey() + ".name"),
                 Component.text(action.level),
-                Component.text(action.duration == 0 ? "Infinite" : NumberUtil.formatDuration(action.duration * 50L))
-        ));
+                Component.text(
+                    action.duration == 0
+                        ? "Infinite"
+                        : NumberUtil.formatDuration(action.duration * 50L)
+                )
+            )
+        );
     }
 
     private static AbstractActionEditorPanel<AddPotionAction> createEditor(ActionList.Ref ref) {
         return ref.<AddPotionAction>cast().effect == null
-                ? new PotionEffectPickerView(ref)
-                : new PotionEffectEditorView(ref);
+            ? new PotionEffectPickerView(ref)
+            : new PotionEffectEditorView(ref);
     }
 
     private static class PotionEffectPickerView extends AbstractActionEditorPanel<AddPotionAction> {
@@ -96,7 +109,14 @@ public record AddPotionAction(
 
             background("action/editor/list_container", -10, -31);
 
-            add(1, 1, net.hollowcube.mapmaker.runtime.parkour.action.gui.AbstractActionEditorPanel.groupText(7, "choose effect"));
+            add(
+                1,
+                1,
+                net.hollowcube.mapmaker.runtime.parkour.action.gui.AbstractActionEditorPanel.groupText(
+                    7,
+                    "choose effect"
+                )
+            );
 
             var updateFunc = update(AddPotionAction::withEffect);
             var potionTypes = PotionInfo.sortedValues();
@@ -104,9 +124,13 @@ public record AddPotionAction(
                 var potionInfo = potionTypes.get(i);
                 int x = i % 7, y = i / 7;
 
-                add(x + 1, y + 2, new Button(potionInfo.translationKey(), 1, 1)
+                add(
+                    x + 1,
+                    y + 2,
+                    new Button(potionInfo.translationKey(), 1, 1)
                         .model(potionInfo.itemModel(), null)
-                        .onLeftClick(() -> updateFunc.accept(potionInfo)));
+                        .onLeftClick(() -> updateFunc.accept(potionInfo))
+                );
             }
         }
 
@@ -126,14 +150,31 @@ public record AddPotionAction(
 
             // Should be non-null now because we otherwise open the picker
             var effect = Objects.requireNonNull(ref.<AddPotionAction>cast().effect());
-            subtitleText.text(LanguageProviderV2.translateToPlain(translatable(effect.translationKey() + ".name")));
+            subtitleText.text(
+                LanguageProviderV2.translateToPlain(translatable(effect.translationKey() + ".name"))
+            );
 
-            this.levelInput = add(1, 1, new ControlledNumberInput("add_potion.level", update(AddPotionAction::withLevel))
-                    .range(1, effect.maxLevel()));
-            this.durationInput = add(1, 3, new ControlledNumberInput("add_potion.duration", update(AddPotionAction::withDuration))
-                    .parsed(i -> i == 0 ? "" : String.valueOf(i / 20.), NumberUtil::parseDurationToTicks)
+            this.levelInput = add(
+                1,
+                1,
+                new ControlledNumberInput("add_potion.level", update(AddPotionAction::withLevel))
+                    .range(1, effect.maxLevel())
+            );
+            this.durationInput = add(
+                1,
+                3,
+                new ControlledNumberInput(
+                    "add_potion.duration",
+                    update(AddPotionAction::withDuration)
+                )
+                    .parsed(
+                        i -> i == 0 ? "" : String.valueOf(i / 20.),
+                        NumberUtil::parseDurationToTicks
+                    )
                     .formatted(i -> i == 0 ? "Infinite" : NumberUtil.formatDuration(i * 50L))
-                    .range(INFINITE_DURATION, MAX_DURATION).stepped(5 * 20, 3 * 20));
+                    .range(INFINITE_DURATION, MAX_DURATION)
+                    .stepped(5 * 20, 3 * 20)
+            );
         }
 
         @Override

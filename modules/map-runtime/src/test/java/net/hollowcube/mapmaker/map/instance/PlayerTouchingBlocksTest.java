@@ -109,17 +109,26 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
 
     @Test
     void changedDataIsLiveBeforeSafePoint() {
-        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate)
-            .withNbt(CompoundBinaryTag.builder().putString("data", "old").build()));
+        world.instance().setBlock(
+            PLATE_POS,
+            Block.STONE_PRESSURE_PLATE.withHandler(plate)
+                .withNbt(CompoundBinaryTag.builder().putString("data", "old").build())
+        );
         env.tick();
         var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
         plate.events.clear();
 
-        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(plate)
-            .withNbt(CompoundBinaryTag.builder().putString("data", "new").build()));
+        world.instance().setBlock(
+            PLATE_POS,
+            Block.STONE_PRESSURE_PLATE.withHandler(plate)
+                .withNbt(CompoundBinaryTag.builder().putString("data", "new").build())
+        );
         moveTo(player, ON_PLATE);
         moveTo(player, OFF_PLATE);
-        assertEquals(List.of("enter " + PLATE_POS + " new", "exit " + PLATE_POS + " new"), plate.events);
+        assertEquals(
+            List.of("enter " + PLATE_POS + " new", "exit " + PLATE_POS + " new"),
+            plate.events
+        );
     }
 
     @Test
@@ -130,12 +139,18 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
         marker.setRegion(new Vec(-1, 0, -1), new Vec(1, 1, 1));
         marker.setInstance(world.instance(), markerPos).join();
         world.queueCollisionTreeRebuild();
-        world.instance().setBlock(PLATE_POS, Block.STONE_PRESSURE_PLATE.withHandler(new TeleportPlate(markerPos)));
+        world.instance().setBlock(
+            PLATE_POS,
+            Block.STONE_PRESSURE_PLATE.withHandler(new TeleportPlate(markerPos))
+        );
         env.tick();
 
         var player = (MapPlayer) spawnTestPlayer(OFF_PLATE);
         var entered = new ArrayList<Entity>();
-        world.eventNode().addListener(Map2PlayerEnterEntityEvent.class, event -> entered.add(event.enteredEntity()));
+        world.eventNode().addListener(
+            Map2PlayerEnterEntityEvent.class,
+            event -> entered.add(event.enteredEntity())
+        );
 
         moveTo(player, ON_PLATE);
         assertEquals(List.of(marker), entered);
@@ -193,7 +208,9 @@ class PlayerTouchingBlocksTest extends AbstractMapWorldTest<TestMapWorld> {
         public Trigger createTrigger(BlockVec position, Block block) {
             triggersCreated++;
             var nbt = block.nbt();
-            var label = nbt == null || !nbt.keySet().contains("data") ? "" : " " + nbt.getString("data");
+            var label = nbt == null || !nbt.keySet().contains("data")
+                ? ""
+                : " " + nbt.getString("data");
             return new Trigger() {
                 @Override
                 public void onEnter(MapWorld world, Player player) {

@@ -16,8 +16,13 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public class ReturnToCheckpointItem extends ItemHandler {
-    private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/checkpoint_item_confirm", 2000);
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint"));
+    private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown(
+        "mapmaker:play/checkpoint_item_confirm",
+        2000
+    );
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_checkpoint")
+    );
     public static final Key ID = Key.key("mapmaker:return_to_checkpoint");
     public static final ReturnToCheckpointItem INSTANCE = new ReturnToCheckpointItem();
 
@@ -38,8 +43,15 @@ public class ReturnToCheckpointItem extends ItemHandler {
 
         switch (world.getPlayerState(player)) {
             case ParkourState.AnyPlaying p -> {
-                boolean needsConfirmation = p.isScorable() && p.saveState().state(PlayState.class).lastState() == null;
-                if (needsConfirmation && ResetSaveStateItem.tryConfirmation(player, p, CONFIRM_COOLDOWN, () -> world.softResetPlayer(player, CheckpointResetEvent.Reason.MANUAL))) {
+                boolean needsConfirmation = p.isScorable()
+                    && p.saveState().state(PlayState.class).lastState() == null;
+                if (needsConfirmation
+                    && ResetSaveStateItem.tryConfirmation(
+                        player,
+                        p,
+                        CONFIRM_COOLDOWN,
+                        () -> world.softResetPlayer(player, CheckpointResetEvent.Reason.MANUAL)
+                    )) {
                     return;
                 }
 
@@ -50,8 +62,7 @@ public class ReturnToCheckpointItem extends ItemHandler {
                     player.teleport(gameState.pos(), Vec.ZERO, null, RelativeFlags.NONE);
                 }
             }
-            case null, default -> {
-            }
+            case null, default -> {}
         }
     }
 

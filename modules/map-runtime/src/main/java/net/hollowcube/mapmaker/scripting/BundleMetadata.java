@@ -18,6 +18,7 @@ public record BundleMetadata(
         return new BundleMetadata(
             LATEST_VERSION,
             ServerRuntime.getRuntime().version(),
-            observedLuauBytecodeVersion);
+            observedLuauBytecodeVersion
+        );
     }
 }

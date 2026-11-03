@@ -27,21 +27,37 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
     }
 
     protected AbstractActionEditorPanel(ActionList.Ref ref, boolean oneSlotLessHack) {
-        super(oneSlotLessHack ? InventoryType.CHEST_5_ROW : InventoryType.CHEST_6_ROW, 9, oneSlotLessHack ? 9 : 10);
+        super(
+            oneSlotLessHack ? InventoryType.CHEST_5_ROW : InventoryType.CHEST_6_ROW,
+            9,
+            oneSlotLessHack ? 9 : 10
+        );
         this.ref = Objects.requireNonNull(ref, "ref");
 
         background("action/editor/container", -10, -31);
-        add(0, 0, title(LanguageProviderV2.translateToPlain(translatable(translationKey("title")))));
+        add(
+            0,
+            0,
+            title(LanguageProviderV2.translateToPlain(translatable(translationKey("title"))))
+        );
 
         add(0, 0, backOrClose());
         add(1, 0, infoWithKey(translationKey("info")));
-        this.subtitleText = add(2, 0, new Text(null, 5, 1, "")
-            .align(Text.CENTER, Text.CENTER)
-            .background("generic2/btn/default/5_1"));
-        add(7, 0, new Button("gui.action.remove", 2, 1)
-            .background("generic2/btn/default/2_1")
-            .sprite("action/icon/trash", 11, 3)
-            .onLeftClick(this::removeAction));
+        this.subtitleText = add(
+            2,
+            0,
+            new Text(null, 5, 1, "")
+                .align(Text.CENTER, Text.CENTER)
+                .background("generic2/btn/default/5_1")
+        );
+        add(
+            7,
+            0,
+            new Button("gui.action.remove", 2, 1)
+                .background("generic2/btn/default/2_1")
+                .sprite("action/icon/trash", 11, 3)
+                .onLeftClick(this::removeAction)
+        );
     }
 
     protected abstract void update(T data);
@@ -78,7 +94,6 @@ public abstract class AbstractActionEditorPanel<T extends Action> extends Panel 
     }
 
     public static Text groupText(int width, String text) {
-        return new Text(null, width, 1, text)
-            .font("small").align(1, 6);
+        return new Text(null, width, 1, text).font("small").align(1, 6);
     }
 }

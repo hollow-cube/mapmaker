@@ -39,31 +39,50 @@ public class MapLeaderboardMarkerHandler extends ObjectEntityHandler {
         var scale = data.getDouble("scale", 1) * 0.5;
         var facing = data.getString("facing", "follow");
         var hasBackground = data.getBoolean("background", true);
-        var leaderboard = this.leaderboard = new LeaderboardDisplay(entity,
+        var leaderboard = this.leaderboard = new LeaderboardDisplay(
+            entity,
             () -> world.server().api().mapService.getMapLeaderboard(world.map().id(), null),
-            playerId -> world.server().api().mapService.getMapLeaderboard(world.map().id(), playerId).player(),
+            playerId -> world.server().api().mapService
+                .getMapLeaderboard(world.map().id(), playerId)
+                .player(),
             playerId -> world.server().api().players.displayName(playerId).render(),
-                0, 0, 0, scale);
+            0,
+            0,
+            0,
+            scale
+        );
         leaderboard.setPadding(true);
         if (hasBackground) leaderboard.entriesDisplay().setUseDefaultBackground(true);
-        leaderboard.setTitle(Component.text(FontUtil.rewrite("small", "fastest times"), NamedTextColor.GOLD), 0.3 * scale);
+        leaderboard.setTitle(
+            Component.text(FontUtil.rewrite("small", "fastest times"), NamedTextColor.GOLD),
+            0.3 * scale
+        );
         leaderboard.setSubtitle(Component.text("ᴀʟʟ ᴛɪᴍᴇ", NamedTextColor.GRAY), 0.3 * scale);
         leaderboard.editDisplays(meta -> {
             switch (facing) {
-                case "north" -> meta.setLeftRotation(new Quaternion(new Vec(0, 1, 0).normalize(),
-                        Math.toRadians(180)).into());
-                case "south" -> {/* Do nothing*/}
-                case "east" -> meta.setLeftRotation(new Quaternion(new Vec(0, 1, 0).normalize(),
-                        Math.toRadians(90)).into());
-                case "west" -> meta.setLeftRotation(new Quaternion(new Vec(0, 1, 0).normalize(),
-                        Math.toRadians(-90)).into());
-                default -> meta.setBillboardRenderConstraints(AbstractDisplayMeta.BillboardConstraints.VERTICAL);
+                case "north" -> meta.setLeftRotation(
+                    new Quaternion(new Vec(0, 1, 0).normalize(), Math.toRadians(180)).into()
+                );
+                case "south" -> {
+                    /* Do nothing*/
+                }
+                case "east" -> meta.setLeftRotation(
+                    new Quaternion(new Vec(0, 1, 0).normalize(), Math.toRadians(90)).into()
+                );
+                case "west" -> meta.setLeftRotation(
+                    new Quaternion(new Vec(0, 1, 0).normalize(), Math.toRadians(-90)).into()
+                );
+                default -> meta.setBillboardRenderConstraints(
+                    AbstractDisplayMeta.BillboardConstraints.VERTICAL
+                );
             }
         });
         leaderboard.setScoreFormatter(score -> NumberUtil.formatMapPlaytime(score, true));
         leaderboard.setTargetWidth(150);
         leaderboard.setTrueCenter(false);
-        entity.scheduleNextTick(ignored -> leaderboard.setInstance(world.instance(), entity.getPosition()));
+        entity.scheduleNextTick(
+            ignored -> leaderboard.setInstance(world.instance(), entity.getPosition())
+        );
 
         FutureUtil.submitVirtual(leaderboard::update);
     }

@@ -30,7 +30,10 @@ import net.minestom.server.world.DimensionType;
 
 public class ClientBlockPlacementListener {
 
-    public static void handleBlockPlacementPacket(ClientPlayerBlockPlacementPacket packet, Player player) {
+    public static void handleBlockPlacementPacket(
+        ClientPlayerBlockPlacementPacket packet,
+        Player player
+    ) {
         if (handleClientsidePlacement(packet, player)) return;
 
         // Was not handled by us, pass it along to Minestom
@@ -38,12 +41,16 @@ public class ClientBlockPlacementListener {
     }
 
     // Returns true if handled, false to delegate to Minestom
-    private static boolean handleClientsidePlacement(ClientPlayerBlockPlacementPacket packet, Player player) {
+    private static boolean handleClientsidePlacement(
+        ClientPlayerBlockPlacementPacket packet,
+        Player player
+    ) {
         if (player.getGameMode() != GameMode.ADVENTURE) return false;
 
         // Basically we want to fast exit if this definitely doesn't look like a block placement we care about.
         final ParkourMapWorld world = ParkourMapWorld.forPlayer(player);
-        if (world == null || !(world.getPlayerState(player) instanceof ParkourState.AnyPlaying)) return false;
+        if (world == null || !(world.getPlayerState(player) instanceof ParkourState.AnyPlaying))
+            return false;
 
         final PlayerHand hand = packet.hand();
         final ItemStack usedItem = player.getItemInHand(hand);
@@ -60,10 +67,17 @@ public class ClientBlockPlacementListener {
         final Block interactedBlock = ghostBlockHolder.getBlock(blockPosition);
 
         final BlockFace blockFace = packet.blockFace();
-        final Point cursorPosition = new Vec(packet.cursorPositionX(), packet.cursorPositionY(), packet.cursorPositionZ());
+        final Point cursorPosition = new Vec(
+            packet.cursorPositionX(),
+            packet.cursorPositionY(),
+            packet.cursorPositionZ()
+        );
 
         // Verify if the player can place the block
-        BlockPredicates placePredicate = usedItem.get(DataComponents.CAN_PLACE_ON, BlockPredicates.NEVER);
+        BlockPredicates placePredicate = usedItem.get(
+            DataComponents.CAN_PLACE_ON,
+            BlockPredicates.NEVER
+        );
         final boolean canPlaceBlock = placePredicate.test(interactedBlock);
         if (!canPlaceBlock) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
@@ -75,15 +89,33 @@ public class ClientBlockPlacementListener {
         // Get the newly placed block position
         Point placementPosition = blockPosition;
         var interactedPlacementRule = blockManager.getBlockPlacementRule(interactedBlock);
-        if (!interactedBlock.isAir() && (interactedPlacementRule == null || !interactedPlacementRule.isSelfReplaceable(
-                new BlockPlacementRule.Replacement(interactedBlock, blockFace, cursorPosition, false, useMaterial)))) {
+        if (!interactedBlock.isAir()
+            && (interactedPlacementRule == null
+                || !interactedPlacementRule.isSelfReplaceable(
+                    new BlockPlacementRule.Replacement(
+                        interactedBlock,
+                        blockFace,
+                        cursorPosition,
+                        false,
+                        useMaterial
+                    )
+                ))) {
             // If the block is not replaceable, try to place next to it.
             placementPosition = blockPosition.relative(blockFace);
 
             var placementBlock = ghostBlockHolder.getBlock(placementPosition);
             var placementRule = blockManager.getBlockPlacementRule(placementBlock);
-            if (!placementBlock.registry().isReplaceable() && !(placementRule != null && placementRule.isSelfReplaceable(
-                    new BlockPlacementRule.Replacement(placementBlock, blockFace, cursorPosition, true, useMaterial)))) {
+            if (!placementBlock.registry().isReplaceable()
+                && !(placementRule != null
+                    && placementRule.isSelfReplaceable(
+                        new BlockPlacementRule.Replacement(
+                            placementBlock,
+                            blockFace,
+                            cursorPosition,
+                            true,
+                            useMaterial
+                        )
+                    ))) {
                 // If the block is still not replaceable, cancel the placement
                 player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
                 return true;
@@ -92,7 +124,9 @@ public class ClientBlockPlacementListener {
 
         // Ignore the placement if trying to place outside the world.
         final DimensionType instanceDim = instance.getCachedDimensionType();
-        if (placementPosition.y() >= instanceDim.maxY() || placementPosition.y() < instanceDim.minY() || !instance.getWorldBorder().inBounds(placementPosition)) {
+        if (placementPosition.y() >= instanceDim.maxY()
+            || placementPosition.y() < instanceDim.minY()
+            || !instance.getWorldBorder().inBounds(placementPosition)) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
         }
@@ -103,28 +137,43 @@ public class ClientBlockPlacementListener {
             return false;
         }
 
-        final ItemBlockState blockState = usedItem.get(DataComponents.BLOCK_STATE, ItemBlockState.EMPTY);
+        final ItemBlockState blockState = usedItem.get(
+            DataComponents.BLOCK_STATE,
+            ItemBlockState.EMPTY
+        );
         Block placedBlock = blockState.apply(useMaterial.block());
 
         // Note that not all players can necessarily see each other so don't block placement inside a player you cant see.
-        Entity collisionEntity = CollisionUtils.canPlaceBlockAt(instance, placementPosition, placedBlock);
-        if (collisionEntity != null && (collisionEntity.isViewer(player) || collisionEntity == player)) {
+        Entity collisionEntity = CollisionUtils.canPlaceBlockAt(
+            instance,
+            placementPosition,
+            placedBlock
+        );
+        if (collisionEntity != null
+            && (collisionEntity.isViewer(player) || collisionEntity == player)) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;
         }
 
         var placementRule = blockManager.getBlockPlacementRule(placedBlock);
         if (placementRule != null) {
-            placedBlock = placementRule.blockPlace(new BlockPlacementRule.PlacementState(
-                    ghostBlockHolder, placedBlock, blockFace, placementPosition,
-                    cursorPosition, player.getPosition(),
-                    usedItem, player.isSneaking()
-            ));
+            placedBlock = placementRule.blockPlace(
+                new BlockPlacementRule.PlacementState(
+                    ghostBlockHolder,
+                    placedBlock,
+                    blockFace,
+                    placementPosition,
+                    cursorPosition,
+                    player.getPosition(),
+                    usedItem,
+                    player.isSneaking()
+                )
+            );
         }
 
         // If we have a pending teleport out for the player, ignore any placements which occur during that time
         boolean outOfSync = player.getLastSentTeleportId() != player.getLastReceivedTeleportId();
-//                || ((MapPlayer) player).lastPingId() != ((MapPlayer) player).lastReceivedPingId();
+        //                || ((MapPlayer) player).lastPingId() != ((MapPlayer) player).lastReceivedPingId();
         if (outOfSync || placedBlock == null) {
             player.sendPacket(new AcknowledgeBlockChangePacket(packet.sequence()));
             return true;

@@ -21,8 +21,7 @@ public class FinishMarkerHandler extends ObjectEntityHandler {
         if (world == null) return;
 
         // Note that we only check playing here, not testing.
-        if (!(world.getPlayerState(player) instanceof ParkourState.Playing2(var saveState)))
-            return;
+        if (!(world.getPlayerState(player) instanceof ParkourState.Playing2(var saveState))) return;
 
         var finishState = saveState.copy(saveState.state(PlayState.class));
         finishState.complete(System.nanoTime() / 1_000_000);

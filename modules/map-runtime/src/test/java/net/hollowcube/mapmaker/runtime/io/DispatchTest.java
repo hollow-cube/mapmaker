@@ -48,12 +48,16 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
     void signalsFiredDuringTheDrainJoinTheSameLoop() {
         var log = new ArrayList<String>();
         var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
-        dispatch.fire("a", List.of(
-            probe(_ -> {
-                log.add("a1");
-                dispatch.fire("nested", List.of(probe(_ -> log.add("nested"))));
-            }),
-            probe(_ -> log.add("a2"))));
+        dispatch.fire(
+            "a",
+            List.of(
+                probe(_ -> {
+                    log.add("a1");
+                    dispatch.fire("nested", List.of(probe(_ -> log.add("nested"))));
+                }),
+                probe(_ -> log.add("a2"))
+            )
+        );
 
         dispatch.drain();
         assertEquals(List.of("a1", "a2", "nested"), log);
@@ -64,10 +68,12 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
         var count = new int[1];
         var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
         var loop = new ArrayList<Connection>();
-        loop.add(probe(_ -> {
-            count[0]++;
-            dispatch.fire("loop", loop);
-        }));
+        loop.add(
+            probe(_ -> {
+                count[0]++;
+                dispatch.fire("loop", loop);
+            })
+        );
         dispatch.fire("loop", loop);
 
         dispatch.drain();
@@ -78,12 +84,16 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
     void aThrowingSignalIsSkippedAndTheRestStillRun() {
         var log = new ArrayList<String>();
         var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
-        dispatch.fire("a", List.of(
-            probe(_ -> log.add("a1")),
-            probe(_ -> {
-                throw new IllegalStateException("boom");
-            }),
-            probe(_ -> log.add("a3"))));
+        dispatch.fire(
+            "a",
+            List.of(
+                probe(_ -> log.add("a1")),
+                probe(_ -> {
+                    throw new IllegalStateException("boom");
+                }),
+                probe(_ -> log.add("a3"))
+            )
+        );
 
         assertDoesNotThrow(dispatch::drain);
         assertEquals(List.of("a1", "a3"), log);

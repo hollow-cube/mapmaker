@@ -20,12 +20,14 @@ public record RespawnPosAction(RelativePos target) implements CoordinateAction<R
 
     public static final Key KEY = Key.key("mapmaker:respawn_position");
     public static final StructCodec<RespawnPosAction> CODEC = StructCodec.struct(
-            StructCodec.INLINE, RelativePos.STRUCT_CODEC.optional(RelativePos.ORIGIN), RespawnPosAction::target,
-            RespawnPosAction::new
+        StructCodec.INLINE, RelativePos.STRUCT_CODEC.optional(RelativePos.ORIGIN), RespawnPosAction::target,
+        RespawnPosAction::new
     );
     public static final Editor<RespawnPosAction> EDITOR = new Editor<>(
-            CoordinateActionEditor::new, _ -> SPRITE_DEFAULT,
-            RespawnPosAction::makeThumbnail, Set.of(KEY)
+        CoordinateActionEditor::new,
+        _ -> SPRITE_DEFAULT,
+        RespawnPosAction::makeThumbnail,
+        Set.of(KEY)
     );
 
     @Override
@@ -39,11 +41,15 @@ public record RespawnPosAction(RelativePos target) implements CoordinateAction<R
     }
 
     private static TranslatableComponent makeThumbnail(@Nullable RespawnPosAction action) {
-        if (action == null) return Component.translatable("gui.action.respawn_position.thumbnail.empty");
-        return Component.translatable("gui.action.respawn_position.thumbnail", List.of(
+        if (action == null)
+            return Component.translatable("gui.action.respawn_position.thumbnail.empty");
+        return Component.translatable(
+            "gui.action.respawn_position.thumbnail",
+            List.of(
                 tildeOnly(action.target.x()), tildeOnly(action.target.y()), tildeOnly(action.target.z()),
                 tildeOnly(action.target.yaw()), tildeOnly(action.target.pitch())
-        ));
+            )
+        );
     }
 
     private static Component tildeOnly(String value) {

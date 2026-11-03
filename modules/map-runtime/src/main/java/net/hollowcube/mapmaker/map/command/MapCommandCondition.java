@@ -13,7 +13,9 @@ public final class MapCommandCondition {
             if (!(sender instanceof Player player)) return CommandCondition.HIDE;
             var world = MapWorld.forPlayer(player);
             if (world == null) return CommandCondition.HIDE;
-            return MapSettings.get(world.map().settings(), setting) ? CommandCondition.ALLOW : CommandCondition.HIDE;
+            return MapSettings.get(world.map().settings(), setting)
+                ? CommandCondition.ALLOW
+                : CommandCondition.HIDE;
         };
     }
 }

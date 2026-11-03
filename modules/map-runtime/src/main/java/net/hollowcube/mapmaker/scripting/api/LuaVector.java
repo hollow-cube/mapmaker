@@ -54,8 +54,7 @@ public final class LuaVector {
         }
 
         int elem = name.charAt(0) - 'X';
-        if (elem < 0 || elem > 2)
-            throw state.error("No such key: " + name);
+        if (elem < 0 || elem > 2) throw state.error("No such key: " + name);
         state.pushNumber(vec[elem]);
         return 1;
     }

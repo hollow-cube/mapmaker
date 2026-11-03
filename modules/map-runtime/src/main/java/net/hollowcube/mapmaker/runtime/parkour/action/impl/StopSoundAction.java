@@ -24,8 +24,10 @@ public record StopSoundAction(@Nullable SoundEvent event) implements Action {
         StopSoundAction::new
     );
     public static final Editor<StopSoundAction> EDITOR = new Editor<>(
-        StopSoundEditor::open, _ -> SPRITE,
-        StopSoundEditor::makeThumbnail, Set.of()
+        StopSoundEditor::open,
+        _ -> SPRITE,
+        StopSoundEditor::makeThumbnail,
+        Set.of()
     );
 
     public StopSoundAction withEvent(SoundEvent event) {

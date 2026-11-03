@@ -21,26 +21,33 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 public class RateMapItem extends ItemHandler {
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/rate_map"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/rate_map")
+    );
     public static final Key ID = Key.key("mapmaker:rate_map");
     public static final RateMapItem INSTANCE = new RateMapItem();
 
-    public static final Tag<Future<@Nullable MapRating>> LAST_RATING_TAG = Tag.Transient("map:last_rating");
+    public static final Tag<Future<@Nullable MapRating>> LAST_RATING_TAG = Tag.Transient(
+        "map:last_rating"
+    );
 
     public static boolean isMapRatable(MapWorld world) {
         return world.map().isPublished() && world instanceof ParkourMapWorld;
     }
 
     public static void initLastRating(MapClient maps, Player player, MapData map) {
-        player.setTag(LAST_RATING_TAG, FutureUtil.fork(() -> {
-            try {
-                return maps.getPlayerRating(map.id().toString(), player.getUuid().toString());
-            } catch (Exception e) {
-                ExceptionReporter.reportException(e, player);
-                // It's fine to default to a new rating since its valid to overwrite a rating anyway.
-                return new MapRating();
-            }
-        }));
+        player.setTag(
+            LAST_RATING_TAG,
+            FutureUtil.fork(() -> {
+                try {
+                    return maps.getPlayerRating(map.id().toString(), player.getUuid().toString());
+                } catch (Exception e) {
+                    ExceptionReporter.reportException(e, player);
+                    // It's fine to default to a new rating since its valid to overwrite a rating anyway.
+                    return new MapRating();
+                }
+            })
+        );
     }
 
     private RateMapItem() {
@@ -61,9 +68,20 @@ public class RateMapItem extends ItemHandler {
         var initialState = MapRating.State.UNRATED;
         var lastRatingFuture = player.getTag(LAST_RATING_TAG);
         if (lastRatingFuture != null)
-            initialState = Objects.requireNonNullElse(lastRatingFuture.resultNow(), new MapRating()).state();
-        Panel.open(player, new RateMapView(world.server().api().maps, world.map(), initialState, newState ->
-                player.setTag(LAST_RATING_TAG, CompletableFuture.completedFuture(new MapRating(newState, null)))));
+            initialState = Objects.requireNonNullElse(lastRatingFuture.resultNow(), new MapRating())
+                .state();
+        Panel.open(
+            player,
+            new RateMapView(
+                world.server().api().maps,
+                world.map(),
+                initialState,
+                newState -> player.setTag(
+                    LAST_RATING_TAG,
+                    CompletableFuture.completedFuture(new MapRating(newState, null))
+                )
+            )
+        );
     }
 
 }

@@ -23,8 +23,19 @@ public class VariableEditor extends AbstractActionEditorPanel<EditVariableAction
     public VariableEditor(ActionList.Ref ref) {
         super(ref);
 
-        this.variableInput = add(1, 1, new ControlledStringInput("variable.variable", update(EditVariableAction::withVariable)));
-        this.expressionInput = add(1, 3, new ControlledStringInput("variable.expression", update(EditVariableAction::withExpression)));
+        this.variableInput = add(
+            1,
+            1,
+            new ControlledStringInput("variable.variable", update(EditVariableAction::withVariable))
+        );
+        this.expressionInput = add(
+            1,
+            3,
+            new ControlledStringInput(
+                "variable.expression",
+                update(EditVariableAction::withExpression)
+            )
+        );
     }
 
     public static TranslatableComponent thumbnail(@Nullable EditVariableAction action) {
@@ -33,19 +44,22 @@ public class VariableEditor extends AbstractActionEditorPanel<EditVariableAction
         } else if (!action.isValidVariableName()) {
             return Component.translatable("gui.action.variable.thumbnail.invalid_name");
         } else if (action.expression().error() != null) {
-            return Component.translatable("gui.action.variable.thumbnail.error", List.of(
-                    Component.text(action.expression().error().getMessage())
-            ));
+            return Component.translatable(
+                "gui.action.variable.thumbnail.error",
+                List.of(Component.text(action.expression().error().getMessage()))
+            );
         } else {
-            return Component.translatable("gui.action.variable.thumbnail", List.of(
-                    Component.text(action.variable()),
-                    action.expression().display()
-            ));
+            return Component.translatable(
+                "gui.action.variable.thumbnail",
+                List.of(Component.text(action.variable()), action.expression().display())
+            );
         }
     }
 
     @Override
-    protected <V> Consumer<V> update(BiFunction<EditVariableAction, V, EditVariableAction> updater) {
+    protected <V> Consumer<V> update(
+        BiFunction<EditVariableAction, V, EditVariableAction> updater
+    ) {
         return value -> {
             super.update(updater).accept(value);
             // We override here as if we do the onChange in the update it breaks because it gets called twice one for mount and then for the actual change
@@ -65,7 +79,10 @@ public class VariableEditor extends AbstractActionEditorPanel<EditVariableAction
                 ToastManager.showNotification(
                     this.host.player(),
                     Component.text("Invalid Variable Name"),
-                    Component.text("Use 3-25 lowercase letters and underscores only.", NamedTextColor.RED)
+                    Component.text(
+                        "Use 3-25 lowercase letters and underscores only.",
+                        NamedTextColor.RED
+                    )
                 );
             }
 
@@ -73,7 +90,10 @@ public class VariableEditor extends AbstractActionEditorPanel<EditVariableAction
                 ToastManager.showNotification(
                     this.host.player(),
                     Component.text("Molang Expression Error"),
-                    Component.text("Invalid expression, please check your syntax.", NamedTextColor.RED)
+                    Component.text(
+                        "Invalid expression, please check your syntax.",
+                        NamedTextColor.RED
+                    )
                 );
             }
         }

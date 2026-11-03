@@ -29,8 +29,8 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
         itemRegistry().registerSilent(RateMapItem.INSTANCE);
 
         eventNode()
-                .addListener(PlayerTickEvent.class, this::handlePlayerTick)
-                .addChild(EventUtil.READ_ONLY_NODE);
+            .addListener(PlayerTickEvent.class, this::handlePlayerTick)
+            .addChild(EventUtil.READ_ONLY_NODE);
     }
 
     @Override

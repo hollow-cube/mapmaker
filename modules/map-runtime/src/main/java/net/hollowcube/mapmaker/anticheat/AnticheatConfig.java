@@ -38,9 +38,21 @@ public record AnticheatConfig(
     public static final int DEFAULT_MAX_SECONDS = 600;
 
     /// What every server starts with, and what it keeps if the config has nothing to say.
-    public static final AnticheatConfig DISABLED = new AnticheatConfig(false, 0, "", true, DEFAULT_MAX_SECONDS);
+    public static final AnticheatConfig DISABLED = new AnticheatConfig(
+        false,
+        0,
+        "",
+        true,
+        DEFAULT_MAX_SECONDS
+    );
 
-    public AnticheatConfig(boolean enabled, double rate, String trusted, boolean playingOnly, int maxSeconds) {
+    public AnticheatConfig(
+        boolean enabled,
+        double rate,
+        String trusted,
+        boolean playingOnly,
+        int maxSeconds
+    ) {
         this(enabled, rate, trusted, playingOnly, maxSeconds, Set.of());
     }
 

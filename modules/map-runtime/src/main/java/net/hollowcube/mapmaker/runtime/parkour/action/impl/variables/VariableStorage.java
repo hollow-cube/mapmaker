@@ -4,17 +4,16 @@ import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
 import it.unimi.dsi.fastutil.objects.Object2DoubleMaps;
 import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minestom.server.codec.Codec;
+
 import java.util.Map;
 
 public class VariableStorage {
 
-    public static final Codec<VariableStorage> CODEC = Codec.STRING
-            .mapValue(Codec.DOUBLE)
-            .transform(VariableStorage::new, it -> it.variables);
+    public static final Codec<VariableStorage> CODEC = Codec.STRING.mapValue(Codec.DOUBLE)
+        .transform(VariableStorage::new, it -> it.variables);
     private final Object2DoubleMap<String> variables = new Object2DoubleOpenHashMap<>();
 
-    public VariableStorage() {
-    }
+    public VariableStorage() {}
 
     private VariableStorage(Map<? extends String, ? extends Double> variables) {
         this.variables.putAll(variables);

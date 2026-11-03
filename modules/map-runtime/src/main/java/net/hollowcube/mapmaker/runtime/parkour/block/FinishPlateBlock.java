@@ -16,8 +16,7 @@ public class FinishPlateBlock implements BlockHandler, PressurePlateBlock, Trigg
 
     public static final FinishPlateBlock INSTANCE = new FinishPlateBlock();
 
-    private FinishPlateBlock() {
-    }
+    private FinishPlateBlock() {}
 
     @Override
     public Key getKey() {

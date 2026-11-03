@@ -22,17 +22,21 @@ import static net.kyori.adventure.text.Component.translatable;
 
 /// Only supports boolean settings for now, should revisit later.
 public record DisableSettingAction(
-        // Null has no effect when executed.
-        @Nullable MapSetting<?> setting
+    // Null has no effect when executed.
+    @Nullable MapSetting<?> setting
 ) implements Action {
     private static final Sprite SPRITE = new Sprite("action/icon/setting_subtract", 2, 3);
 
     public static final Key KEY = Key.key("mapmaker:disable_setting");
     public static final StructCodec<DisableSettingAction> CODEC = StructCodec.struct(
-            "setting", MapSetting.CODEC.optional(), DisableSettingAction::setting,
-            DisableSettingAction::new);
+        "setting", MapSetting.CODEC.optional(), DisableSettingAction::setting,
+        DisableSettingAction::new
+    );
     public static final Action.Editor<DisableSettingAction> EDITOR = new Action.Editor<>(
-            Editor::new, SPRITE, DisableSettingAction::makeThumbnail);
+        Editor::new,
+        SPRITE,
+        DisableSettingAction::makeThumbnail
+    );
 
     public DisableSettingAction withSetting(@Nullable MapSetting<?> setting) {
         return new DisableSettingAction(setting);
@@ -54,9 +58,14 @@ public record DisableSettingAction(
     private static TranslatableComponent makeThumbnail(@Nullable DisableSettingAction action) {
         if (action == null || action.setting == null)
             return translatable("gui.action.disable_setting.thumbnail.empty");
-        return translatable("gui.action.disable_setting.thumbnail", List.of(
-                translatable(EnableSettingAction.SETTINGS_TRANSLATION_KEYS.get(action.setting) + ".name")
-        ));
+        return translatable(
+            "gui.action.disable_setting.thumbnail",
+            List.of(
+                translatable(
+                    EnableSettingAction.SETTINGS_TRANSLATION_KEYS.get(action.setting) + ".name"
+                )
+            )
+        );
     }
 
     private static class Editor extends AbstractActionEditorPanel<DisableSettingAction> {
@@ -76,9 +85,13 @@ public record DisableSettingAction(
                 var setting = EnableSettingAction.BOOL_SETTINGS.get(i);
                 int x = i % 7, y = i / 7;
 
-                add(x + 1, y + 2, new Button(EnableSettingAction.SETTINGS_TRANSLATION_KEYS.get(setting), 1, 1)
+                add(
+                    x + 1,
+                    y + 2,
+                    new Button(EnableSettingAction.SETTINGS_TRANSLATION_KEYS.get(setting), 1, 1)
                         .model(EnableSettingAction.SETTINGS_ICONS.get(setting), null)
-                        .onLeftClick(() -> updateFunc.accept(setting)));
+                        .onLeftClick(() -> updateFunc.accept(setting))
+                );
             }
         }
 

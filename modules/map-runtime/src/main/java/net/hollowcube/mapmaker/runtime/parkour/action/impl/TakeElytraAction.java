@@ -17,9 +17,15 @@ public record TakeElytraAction() implements Action {
     private static final Sprite SPRITE = new Sprite("action/icon/elytra_subtract", 2, 3);
 
     public static final Key KEY = Key.key("mapmaker:take_elytra");
-    public static final StructCodec<TakeElytraAction> CODEC = StructCodec.struct(TakeElytraAction::new);
-    public static final Editor<TakeElytraAction> EDITOR = new Editor<>(null, _ -> SPRITE,
-            TakeElytraAction::makeThumbnail, Set.of(GiveElytraAction.KEY, TakeElytraAction.KEY));
+    public static final StructCodec<TakeElytraAction> CODEC = StructCodec.struct(
+        TakeElytraAction::new
+    );
+    public static final Editor<TakeElytraAction> EDITOR = new Editor<>(
+        null,
+        _ -> SPRITE,
+        TakeElytraAction::makeThumbnail,
+        Set.of(GiveElytraAction.KEY, TakeElytraAction.KEY)
+    );
 
     @Override
     public StructCodec<? extends Action> codec() {

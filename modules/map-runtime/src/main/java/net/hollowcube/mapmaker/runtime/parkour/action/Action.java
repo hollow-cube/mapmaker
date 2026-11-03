@@ -19,7 +19,8 @@ public interface Action extends PlayerInput {
     enum Type {
         SPAWN("Spawn"),
         CHECKPOINT("Checkpoint"),
-        STATUS("Status");
+        STATUS("Status"),
+        ;
 
         private final String displayName;
 
@@ -33,11 +34,11 @@ public interface Action extends PlayerInput {
     }
 
     record Editor<T extends Action>(
-            @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
-            Function<@Nullable T, Sprite> sprite,
-            @Nullable Function<@Nullable T, TranslatableComponent> thumbnail,
-            Set<Key> exclusiveSet,
-            @MagicConstant(valuesFromClass = Permission.class) long requiredPermission
+        @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
+        Function<@Nullable T, Sprite> sprite,
+        @Nullable Function<@Nullable T, TranslatableComponent> thumbnail,
+        Set<Key> exclusiveSet,
+        @MagicConstant(valuesFromClass = Permission.class) long requiredPermission
     ) {
         private static final Sprite DEFAULT_SPRITE = new Sprite("map_details/action/report", 6, 3);
 
@@ -45,31 +46,39 @@ public interface Action extends PlayerInput {
             this(editor, _ -> DEFAULT_SPRITE, null, Set.of(), Permission.NONE);
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
-                      Sprite sprite) {
+        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor, Sprite sprite) {
             this(editor, _ -> sprite, null, Set.of(), Permission.NONE);
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
-                      Function<@Nullable T, Sprite> sprite) {
+        public Editor(
+            @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
+            Function<@Nullable T, Sprite> sprite
+        ) {
             this(editor, sprite, null, Set.of(), Permission.NONE);
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
-                      Sprite sprite,
-                      TranslatableComponent thumbnail) {
+        public Editor(
+            @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
+            Sprite sprite,
+            TranslatableComponent thumbnail
+        ) {
             this(editor, _ -> sprite, _ -> thumbnail, Set.of(), Permission.NONE);
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
-                      Sprite sprite, @Nullable Function<@Nullable T, TranslatableComponent> thumbnail) {
+        public Editor(
+            @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
+            Sprite sprite,
+            @Nullable Function<@Nullable T, TranslatableComponent> thumbnail
+        ) {
             this(editor, _ -> sprite, thumbnail, Set.of(), Permission.NONE);
         }
 
-        public Editor(@Nullable Function<ActionList.Ref, @Nullable Panel> editor,
-                      Function<@Nullable T, Sprite> sprite,
-                      @Nullable Function<@Nullable T, TranslatableComponent> thumbnail,
-                      Set<Key> exclusiveSet) {
+        public Editor(
+            @Nullable Function<ActionList.Ref, @Nullable Panel> editor,
+            Function<@Nullable T, Sprite> sprite,
+            @Nullable Function<@Nullable T, TranslatableComponent> thumbnail,
+            Set<Key> exclusiveSet
+        ) {
             this(editor, sprite, thumbnail, exclusiveSet, Permission.NONE);
         }
 

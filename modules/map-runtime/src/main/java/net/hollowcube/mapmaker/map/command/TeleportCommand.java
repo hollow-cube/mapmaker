@@ -14,7 +14,10 @@ import net.minestom.server.utils.entity.EntityFinder;
 import static net.hollowcube.mapmaker.runtime.parkour.command.ParkourConditions.spectatorOnly;
 
 public class TeleportCommand extends CommandDsl {
-    private final Argument<EntityFinder> targetArg = Argument.Entity("target").singleEntity(true).onlyPlayers(true).sameWorld(true)
+    private final Argument<EntityFinder> targetArg = Argument.Entity("target")
+        .singleEntity(true)
+        .onlyPlayers(true)
+        .sameWorld(true)
         .description("The player to teleport to");
     private final Argument<Point> locArg = Argument.RelativeVec3("location")
         .description("The location to teleport to");
@@ -35,7 +38,12 @@ public class TeleportCommand extends CommandDsl {
     private void handleTeleportToTarget(Player player, CommandContext context) {
         var target = context.get(targetArg).findFirstPlayer(player);
         if (target == null) {
-            player.sendMessage(Component.translatable("generic.player.offline", Component.translatable(context.getRaw(targetArg))));
+            player.sendMessage(
+                Component.translatable(
+                    "generic.player.offline",
+                    Component.translatable(context.getRaw(targetArg))
+                )
+            );
             return;
         }
         if (player.equals(target)) {
@@ -52,18 +60,30 @@ public class TeleportCommand extends CommandDsl {
         }
 
         // Actually do the teleport
-        MapWorldHelpers.teleportPlayer(player, target.getPosition()).thenRun(() ->
-            player.sendMessage(Component.translatable("teleport.target.success", Component.translatable(target.getUsername())))
-        );
+        MapWorldHelpers.teleportPlayer(player, target.getPosition())
+            .thenRun(
+                () -> player.sendMessage(
+                    Component.translatable(
+                        "teleport.target.success",
+                        Component.translatable(target.getUsername())
+                    )
+                )
+            );
     }
 
     private void handleTeleportToLocation(Player player, CommandContext context) {
         var loc = context.get(locArg);
         var instance = player.getInstance();
         if (instance.getWorldBorder().inBounds(loc)) {
-            MapWorldHelpers.teleportPlayer(player, loc).thenRun(() ->
-                player.sendMessage(Component.translatable("teleport.location.success", CoordinateUtil.asTranslationArgs(loc)))
-            );
+            MapWorldHelpers.teleportPlayer(player, loc)
+                .thenRun(
+                    () -> player.sendMessage(
+                        Component.translatable(
+                            "teleport.location.success",
+                            CoordinateUtil.asTranslationArgs(loc)
+                        )
+                    )
+                );
         } else {
             player.sendMessage(Component.translatable("teleport.out_of_bounds"));
         }

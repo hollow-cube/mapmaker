@@ -27,7 +27,8 @@ public record OwnedEntityList(List<Saved> entities) {
         public static final StructCodec<Saved> CODEC = StructCodec.struct(
             "kind", Codec.KEY, Saved::kind,
             "nbt", Codec.NBT_COMPOUND, Saved::nbt,
-            Saved::new);
+            Saved::new
+        );
     }
 
     public static final Codec<OwnedEntityList> CODEC = Saved.CODEC.list(MAX_SAVED)

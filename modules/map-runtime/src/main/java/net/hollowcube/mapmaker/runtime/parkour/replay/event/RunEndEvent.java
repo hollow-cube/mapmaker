@@ -14,18 +14,22 @@ import net.minestom.server.network.NetworkBufferTemplate;
 /// @param runTime the final run time in milliseconds, which for a completion is the same one the
 ///                score is computed from
 public record RunEndEvent(Reason reason, long runTime) implements ReplayEvent {
-    public static final NetworkBuffer.Type<RunEndEvent> NETWORK_TYPE = NetworkBufferTemplate.template(
-        Reason.NETWORK_TYPE, RunEndEvent::reason,
-        NetworkBuffer.VAR_LONG, RunEndEvent::runTime,
-        RunEndEvent::new
-    );
+    public static final NetworkBuffer.Type<RunEndEvent> NETWORK_TYPE =
+        NetworkBufferTemplate.template(
+            Reason.NETWORK_TYPE, RunEndEvent::reason,
+            NetworkBuffer.VAR_LONG, RunEndEvent::runTime,
+            RunEndEvent::new
+        );
 
     /// WARNING: These are positional and baked into every replay recorded so far.
     /// New reasons MUST go on the end. Reordering or deleting is never valid.
     public enum Reason {
         FINISH,
-        RESET; // eg fail with no checkpoint or reset item. only hard resets, otherwise CheckpointResetEvent
+        RESET, // eg fail with no checkpoint or reset item. only hard resets, otherwise CheckpointResetEvent
+        ;
 
-        public static final NetworkBuffer.Type<Reason> NETWORK_TYPE = NetworkBuffer.Enum(Reason.class);
+        public static final NetworkBuffer.Type<Reason> NETWORK_TYPE = NetworkBuffer.Enum(
+            Reason.class
+        );
     }
 }

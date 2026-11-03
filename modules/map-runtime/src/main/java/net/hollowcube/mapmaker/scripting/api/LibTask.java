@@ -52,8 +52,7 @@ public final class LibTask {
         int ticks = state.optInteger(1, 0);
         if (ticks < 0) state.argError(1, "must be a non-negative");
 
-        if (!state.isYieldable())
-            throw state.error("thread is not in a yieldable state");
+        if (!state.isYieldable()) throw state.error("thread is not in a yieldable state");
 
         state.pushThread(state);
         scheduleLater(state, ticks, new int[0]);
@@ -66,19 +65,19 @@ public final class LibTask {
     @LuaMethod
     public static int cancel(LuaState state) {
         throw new UnsupportedOperationException("todo");
-//        state.checkType(1, LuaType.THREAD);
-//        var thread = Objects.requireNonNull(state.toThread(1)); // checked above
-//
-//        var context = ScriptContext.get(thread);
-//        var task = context.getTag(TaskRef.ACTIVE_TASK);
-//        if (task == null || task.isDisposed()) {
-//            state.pushBoolean(false);
-//            return 1;
-//        }
-//
-//        task.dispose();
-//        state.pushBoolean(true);
-//        return 1;
+        //        state.checkType(1, LuaType.THREAD);
+        //        var thread = Objects.requireNonNull(state.toThread(1)); // checked above
+        //
+        //        var context = ScriptContext.get(thread);
+        //        var task = context.getTag(TaskRef.ACTIVE_TASK);
+        //        if (task == null || task.isDisposed()) {
+        //            state.pushBoolean(false);
+        //            return 1;
+        //        }
+        //
+        //        task.dispose();
+        //        state.pushBoolean(true);
+        //        return 1;
     }
 
     // Leaves the thread on the stack at -1
@@ -150,7 +149,8 @@ public final class LibTask {
 
         public void schedule(ScriptContext context, int ticks) {
             if (task != null) throw new IllegalStateException("task already scheduled");
-            this.task = context.runtime().scheduler()
+            this.task = context.runtime()
+                .scheduler()
                 .scheduleTask(this::execute, TaskSchedule.tick(ticks));
         }
 

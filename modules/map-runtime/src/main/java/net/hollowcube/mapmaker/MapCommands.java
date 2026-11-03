@@ -14,13 +14,20 @@ import net.hollowcube.mapmaker.runtime.parkour.replay.ReplayDebugHud;
 import org.jetbrains.annotations.NotNull;
 
 public final class MapCommands {
-    public static void registerPlayingCommands(@NotNull AbstractMapServer server, @NotNull CommandManager commandManager) {
-        commandManager.register(new HelpCommand(
-            "help", new String[]{"h"},
-            commandManager, CommandCategories.GLOBAL,
-            // Exclude terraform commands
-            entry -> !entry.getKey().startsWith("/")
-        ));
+    public static void registerPlayingCommands(
+        @NotNull AbstractMapServer server,
+        @NotNull CommandManager commandManager
+    ) {
+        commandManager.register(
+            new HelpCommand(
+                "help",
+                new String[] {"h"},
+                commandManager,
+                CommandCategories.GLOBAL,
+                // Exclude terraform commands
+                entry -> !entry.getKey().startsWith("/")
+            )
+        );
 
         commandManager.register(new HubCommand(server.bridge()));
         commandManager.register(new PlayerInfoCommand(server.api(), server.sessionManager()));
@@ -44,7 +51,8 @@ public final class MapCommands {
         cmd.createPermissionedSubcommand(
             "replay",
             (player, _) -> player.scheduleNextTick(
-                _ -> PlayerHud.forPlayer(player).toggleModule(new ReplayDebugHud())),
+                _ -> PlayerHud.forPlayer(player).toggleModule(new ReplayDebugHud())
+            ),
             "Toggles the replay recording overlay"
         );
     }

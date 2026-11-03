@@ -37,7 +37,9 @@ class ReplaySceneTest {
 
         scene.accept(new SetBlockEvent(BLOCK_POSITION, Block.DIAMOND_BLOCK));
 
-        viewerBlocks.assertSingle(packet -> assertEquals(Block.DIAMOND_BLOCK.stateId(), packet.blockStateId()));
+        viewerBlocks.assertSingle(
+            packet -> assertEquals(Block.DIAMOND_BLOCK.stateId(), packet.blockStateId())
+        );
         bystanderBlocks.assertEmpty();
         assertEquals(Block.AIR, instance.getBlock(BLOCK_POSITION));
     }
@@ -129,7 +131,9 @@ class ReplaySceneTest {
         var secondDestroys = secondConnection.trackIncoming(DestroyEntitiesPacket.class);
         scene.close();
 
-        firstBlocks.assertSingle(packet -> assertEquals(Block.STONE.stateId(), packet.blockStateId()));
+        firstBlocks.assertSingle(
+            packet -> assertEquals(Block.STONE.stateId(), packet.blockStateId())
+        );
         secondDestroys.assertSingle();
         assertTrue(scene.getViewers().isEmpty());
     }

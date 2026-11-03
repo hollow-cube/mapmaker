@@ -27,26 +27,26 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
     public static final String ID = "mapmaker:happy_ghast";
 
     public record Data(
-            List<RelativeVec> path,
-            double speed,
-            boolean smooth,
-            boolean loop,
-            @Nullable NamedTextColor harness,
-            double scale
+        List<RelativeVec> path,
+        double speed,
+        boolean smooth,
+        boolean loop,
+        @Nullable NamedTextColor harness,
+        double scale
     ) {
         private static final double DEFAULT_SPEED = 3.6; // blocks per second
         public static final StructCodec<Data> CODEC = StructCodec.struct(
-                "path", RelativeVec.ARRAY_CODEC.list(64).optional(List.of()), Data::path,
-                "speed", Codec.DOUBLE.optional(DEFAULT_SPEED), Data::speed,
-                "smooth", Codec.BOOLEAN.optional(false), Data::smooth,
-                "loop", Codec.BOOLEAN.optional(false), Data::loop,
-                "harness", ExtraCodecs.NAMED_TEXT_COLOR.optional(), Data::harness,
-                "scale", ExtraCodecs.clamppedDouble(0.0625, 1.0).optional(1.0), Data::scale,
-                Data::new);
+            "path", RelativeVec.ARRAY_CODEC.list(64).optional(List.of()), Data::path,
+            "speed", Codec.DOUBLE.optional(DEFAULT_SPEED), Data::speed,
+            "smooth", Codec.BOOLEAN.optional(false), Data::smooth,
+            "loop", Codec.BOOLEAN.optional(false), Data::loop,
+            "harness", ExtraCodecs.NAMED_TEXT_COLOR.optional(), Data::harness,
+            "scale", ExtraCodecs.clamppedDouble(0.0625, 1.0).optional(1.0), Data::scale,
+            Data::new
+        );
     }
 
-    private record Keyframe(double time, Vec position) {
-    }
+    private record Keyframe(double time, Vec position) {}
 
     private final LivingEntity ghastEntity;
 
@@ -61,7 +61,11 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
             setNoGravity(true);
             hasPhysics = false;
         }};
-        var spawnPosition = entity.getPosition().sub(0, ghastEntity.getBoundingBox().height() / 2, 0);
+        var spawnPosition = entity.getPosition().sub(
+            0,
+            ghastEntity.getBoundingBox().height() / 2,
+            0
+        );
         ghastEntity.setInstance(entity.getInstance(), spawnPosition);
         onDataChange(null); // init
     }
@@ -138,10 +142,11 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
 
         var currentKeyframe = keyframes.get(currentIndex);
         var nextKeyframe = keyframes.get(nextIndex);
-        double t = (timeSeconds - currentKeyframe.time) / (nextKeyframe.time - currentKeyframe.time);
+        double t = (timeSeconds - currentKeyframe.time)
+            / (nextKeyframe.time - currentKeyframe.time);
         var interpolatedPos = smooth
-                ? interpolateCatmullrom(currentIndex, nextIndex, t)
-                : interpolateLinear(currentIndex, nextIndex, t);
+            ? interpolateCatmullrom(currentIndex, nextIndex, t)
+            : interpolateLinear(currentIndex, nextIndex, t);
 
         // Update the ghast entity's position
         ghastEntity.teleport(new Pos(interpolatedPos));
@@ -164,14 +169,18 @@ public class HappyGhastMarkerHandler extends ObjectEntityHandler {
         var next = keyframes.get(nextIndex).position;
         var nextNext = keyframes.get(Math.min(keyframes.size() - 1, nextIndex + 1)).position;
         return new Vec(
-                catmullrom(t, lastLast.x(), last.x(), next.x(), nextNext.x()),
-                catmullrom(t, lastLast.y(), last.y(), next.y(), nextNext.y()),
-                catmullrom(t, lastLast.z(), last.z(), next.z(), nextNext.z())
+            catmullrom(t, lastLast.x(), last.x(), next.x(), nextNext.x()),
+            catmullrom(t, lastLast.y(), last.y(), next.y(), nextNext.y()),
+            catmullrom(t, lastLast.z(), last.z(), next.z(), nextNext.z())
         );
     }
 
     private static double catmullrom(double f, double g, double h, double i, double j) {
-        return 0.5F * (2.0F * h + (i - g) * f + (2.0F * g - 5.0F * h + 4.0F * i - j) * f * f + (3.0F * h - g - 3.0F * i + j) * f * f * f);
+        return 0.5F
+            * (2.0F * h
+                + (i - g) * f
+                + (2.0F * g - 5.0F * h + 4.0F * i - j) * f * f
+                + (3.0F * h - g - 3.0F * i + j) * f * f * f);
     }
 
 }

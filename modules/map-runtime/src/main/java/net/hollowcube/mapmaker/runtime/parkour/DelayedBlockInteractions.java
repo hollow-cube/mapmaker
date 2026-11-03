@@ -28,10 +28,14 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
  */
 public class DelayedBlockInteractions {
 
-    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(PlayerBlockInteractEvent.class, DelayedBlockInteractions::handleBlockInteraction);
+    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode().addListener(
+        PlayerBlockInteractEvent.class,
+        DelayedBlockInteractions::handleBlockInteraction
+    );
 
-    private static final Tag<Long2BooleanMap> BLOCK_INTERACTIONS_TAG = Tag.Transient("mapmaker:delayed_block_interactions");
+    private static final Tag<Long2BooleanMap> BLOCK_INTERACTIONS_TAG = Tag.Transient(
+        "mapmaker:delayed_block_interactions"
+    );
     private static final Set<Key> DELAYED_BLOCKS = new HashSet<>();
 
     static {
@@ -47,7 +51,8 @@ public class DelayedBlockInteractions {
         var player = event.getPlayer();
         var block = event.getBlock();
         var world = MapWorld.forPlayer(player);
-        var holdingItems = !player.getItemInMainHand().isAir() || !player.getItemInOffHand().isAir();
+        var holdingItems = !player.getItemInMainHand().isAir()
+            || !player.getItemInOffHand().isAir();
         if (world == null || (player.isSneaking() && holdingItems)) return;
         if (!DELAYED_BLOCKS.contains(block.key())) return;
         if (!(player instanceof MapPlayer mp) || mp.canSendPose()) return;
@@ -57,12 +62,14 @@ public class DelayedBlockInteractions {
             it -> it == null ? new Long2BooleanArrayMap() : it
         );
         var pos = event.getBlockPosition();
-        var key = (((long) pos.x() & 0x3FFFFFF) << 38) | (((long) pos.z() & 0x3FFFFFF) << 12) | ((long) pos.y() & 0xFFF);
+        var key = (((long) pos.x() & 0x3FFFFFF) << 38)
+            | (((long) pos.z() & 0x3FFFFFF) << 12)
+            | ((long) pos.y() & 0xFFF);
         var open = interactions.getOrDefault(key, Boolean.parseBoolean(block.getProperty("open")));
 
-        var newBlock = BlockTags.FENCE_GATES.contains(block.key()) ?
-            handleFenceGate(open, block, player) :
-            block.withProperty("open", String.valueOf(!open));
+        var newBlock = BlockTags.FENCE_GATES.contains(block.key())
+            ? handleFenceGate(open, block, player)
+            : block.withProperty("open", String.valueOf(!open));
 
         player.sendPacket(new BlockChangePacket(pos, newBlock));
         interactions.put(key, !open);

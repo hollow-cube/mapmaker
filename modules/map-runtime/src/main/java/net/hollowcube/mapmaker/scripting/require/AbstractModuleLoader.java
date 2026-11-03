@@ -12,7 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractModuleLoader implements RequireResolver, Closeable {
-    private static final List<String> SUFFIXES = List.of(".luau", ".lua", "/init.luau", "/init.lua");
+    private static final List<String> SUFFIXES = List.of(
+        ".luau",
+        ".lua",
+        "/init.luau",
+        "/init.lua"
+    );
 
     protected record ResolvedPath(Result result, String realPath) {}
 
@@ -42,8 +47,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
     /// Loaders that support hot reload override this to maintain a dependency
     /// graph for transitive invalidation. Both names are normalized (no leading
     /// {@code @}).
-    protected void onResolved(String requiredBy, String required) {
-    }
+    protected void onResolved(String requiredBy, String required) {}
 
     /// Strip the leading {@code @} alias marker luau uses for chunk names so that
     /// scope keys and dependency-graph keys are stable.
@@ -71,8 +75,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
     }
 
     @Override
-    public void close() throws IOException {
-    }
+    public void close() throws IOException {}
 
     // RequireResolver impl
 
@@ -90,8 +93,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
 
     @Override
     public Result toParent(LuaState luaState) {
-        if ("/".equals(absoluteModulePath))
-            return Result.NOT_FOUND; // At root
+        if ("/".equals(absoluteModulePath)) return Result.NOT_FOUND; // At root
 
         modulePath = normalizePath(modulePath + "/..");
         absoluteModulePath = normalizePath(absoluteModulePath + "/..");
@@ -172,9 +174,12 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
             // module's own scope/thread-data.
             var moduleChunk = normChunk(chunkName);
             if (state.getThreadData() instanceof ScriptContext parentFrame) {
-                thread.setThreadData(new ScriptContext(
-                    parentFrame.runtime(),
-                    parentFrame.runtime().scope(moduleChunk)));
+                thread.setThreadData(
+                    new ScriptContext(
+                        parentFrame.runtime(),
+                        parentFrame.runtime().scope(moduleChunk)
+                    )
+                );
             }
 
             byte[] bytecode;
@@ -187,8 +192,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
             thread.load(chunkName, bytecode); // throws on fail
             var status = thread.resume(state, 0); // todo deal with other states in resume its currently cooked
             if (status == LuaStatus.OK) {
-                if (thread.top() != 1)
-                    throw state.error("module must return a single value");
+                if (thread.top() != 1) throw state.error("module must return a single value");
             } else if (status == LuaStatus.YIELD) {
                 throw state.error("module can not yield");
             }
@@ -217,17 +221,17 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
             absolutePathPrefix = normalizedPath.substring(0, firstSlash);
         } else {
             throw new UnsupportedOperationException("non absolute path in reset");
-//            std::optional<std::string> cwd = getCurrentWorkingDirectory();
-//            if (!cwd)
-//                return NavigationStatus::NotFound;
-//
-//            modulePath = getModulePath(normalizedPath);
-//            std::string joinedPath = normalizePath(*cwd + "/" + normalizedPath);
-//            absoluteModulePath = getModulePath(joinedPath);
-//
-//            size_t firstSlash = joinedPath.find_first_of('/');
-//            LUAU_ASSERT(firstSlash != std::string::npos);
-//            absolutePathPrefix = joinedPath.substr(0, firstSlash);
+            //            std::optional<std::string> cwd = getCurrentWorkingDirectory();
+            //            if (!cwd)
+            //                return NavigationStatus::NotFound;
+            //
+            //            modulePath = getModulePath(normalizedPath);
+            //            std::string joinedPath = normalizePath(*cwd + "/" + normalizedPath);
+            //            absoluteModulePath = getModulePath(joinedPath);
+            //
+            //            size_t firstSlash = joinedPath.find_first_of('/');
+            //            LUAU_ASSERT(firstSlash != std::string::npos);
+            //            absolutePathPrefix = joinedPath.substr(0, firstSlash);
         }
 
         return updateRealPaths();
@@ -239,7 +243,9 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
         if (result.result != Result.PRESENT || absoluteResult.result != Result.PRESENT)
             return result.result;
 
-        realPath = isAbsolutePath(result.realPath) ? absolutePathPrefix + result.realPath : result.realPath;
+        realPath = isAbsolutePath(result.realPath)
+            ? absolutePathPrefix + result.realPath
+            : result.realPath;
         absoluteRealPath = absolutePathPrefix + absoluteResult.realPath;
         return Result.PRESENT;
     }
@@ -260,7 +266,7 @@ public abstract class AbstractModuleLoader implements RequireResolver, Closeable
                 }
             }
         }
-//        if (!found) return new ResolvedPath(Result.NOT_FOUND, "");
+        //        if (!found) return new ResolvedPath(Result.NOT_FOUND, "");
         return new ResolvedPath(Result.PRESENT, modulePath + suffix);
     }
 

@@ -6,20 +6,22 @@ import net.minestom.server.codec.StructCodec;
 import org.jetbrains.annotations.Nullable;
 
 public record ActionTriggerCondition(
-        @Nullable MolangExpression<VariableQueries.Context> expression,
-        boolean showMessage,
-        String message
+    @Nullable MolangExpression<VariableQueries.Context> expression,
+    boolean showMessage,
+    String message
 ) {
 
     public static final ActionTriggerCondition DEFAULT = new ActionTriggerCondition(null, true, "");
     public static final Codec<ActionTriggerCondition> CODEC = StructCodec.struct(
-            "expression", MolangExpression.codec(VariableQueries.ENVIRONMENT).optional(), ActionTriggerCondition::expression,
-            "show_message", Codec.BOOLEAN.optional(true), ActionTriggerCondition::showMessage,
-            "message", Codec.STRING.optional(""), ActionTriggerCondition::message,
-            ActionTriggerCondition::new
+        "expression", MolangExpression.codec(VariableQueries.ENVIRONMENT).optional(), ActionTriggerCondition::expression,
+        "show_message", Codec.BOOLEAN.optional(true), ActionTriggerCondition::showMessage,
+        "message", Codec.STRING.optional(""), ActionTriggerCondition::message,
+        ActionTriggerCondition::new
     );
 
-    public ActionTriggerCondition withCondition(@Nullable MolangExpression<VariableQueries.Context> condition) {
+    public ActionTriggerCondition withCondition(
+        @Nullable MolangExpression<VariableQueries.Context> condition
+    ) {
         return new ActionTriggerCondition(condition, this.showMessage, this.message);
     }
 

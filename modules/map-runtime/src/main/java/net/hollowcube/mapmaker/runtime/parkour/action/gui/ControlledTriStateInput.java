@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.function.Consumer;
 
 public class ControlledTriStateInput<E extends Enum<E>> extends Panel {
-    private static final List<Component> GUI_ACTION_CLICKSELECT = LanguageProviderV2.translateMulti("gui.action.clickselect", List.of());
+    private static final List<Component> GUI_ACTION_CLICKSELECT = LanguageProviderV2.translateMulti(
+        "gui.action.clickselect",
+        List.of()
+    );
 
     private final String key;
     private final Sprite[] sprites = new Sprite[3];
@@ -33,14 +36,20 @@ public class ControlledTriStateInput<E extends Enum<E>> extends Panel {
 
         this.labelText = add(0, 0, AbstractActionEditorPanel.groupText(7, ""));
 
-        this.iconButton = add(0, 1, new Button("aaa", 1, 1)
-                .background("generic2/btn/tristate/icon", -2, -1));
+        this.iconButton = add(
+            0,
+            1,
+            new Button("aaa", 1, 1).background("generic2/btn/tristate/icon", -2, -1)
+        );
         for (int i = 0; i < 3; i++) {
-            this.buttons[i] = add(1 + (i * 2), 1, new Text("aaa", 2, 1, "")
-                    .align(Text.CENTER, Text.CENTER));
+            this.buttons[i] = add(
+                1 + (i * 2),
+                1,
+                new Text("aaa", 2, 1, "").align(Text.CENTER, Text.CENTER)
+            );
             final int fi = i;
             this.buttons[i].sprite("generic2/btn/tristate/default")
-                    .onLeftClick(() -> this.handleNewValue(values[fi]));
+                .onLeftClick(() -> this.handleNewValue(values[fi]));
         }
     }
 
@@ -52,11 +61,17 @@ public class ControlledTriStateInput<E extends Enum<E>> extends Panel {
     }
 
     public ControlledTriStateInput<E> labels(String text1, String text2, String text3) {
-        this.buttons[0].text(LanguageProviderV2.translateToPlain("gui.action." + key + "." + text1 + ".label"));
+        this.buttons[0].text(
+            LanguageProviderV2.translateToPlain("gui.action." + key + "." + text1 + ".label")
+        );
         this.buttons[0].translationKey("gui.action." + key + "." + text1 + ".label");
-        this.buttons[1].text(LanguageProviderV2.translateToPlain("gui.action." + key + "." + text2 + ".label"));
+        this.buttons[1].text(
+            LanguageProviderV2.translateToPlain("gui.action." + key + "." + text2 + ".label")
+        );
         this.buttons[1].translationKey("gui.action." + key + "." + text2 + ".label");
-        this.buttons[2].text(LanguageProviderV2.translateToPlain("gui.action." + key + "." + text3 + ".label"));
+        this.buttons[2].text(
+            LanguageProviderV2.translateToPlain("gui.action." + key + "." + text3 + ".label")
+        );
         this.buttons[2].translationKey("gui.action." + key + "." + text3 + ".label");
         return this;
     }
@@ -79,7 +94,9 @@ public class ControlledTriStateInput<E extends Enum<E>> extends Panel {
 
         for (int i = 0; i < 3; i++) {
             var button = this.buttons[i];
-            button.sprite("generic2/btn/tristate/" + (i == newValue.ordinal() ? "selected" : "default"));
+            button.sprite(
+                "generic2/btn/tristate/" + (i == newValue.ordinal() ? "selected" : "default")
+            );
             button.lorePostfix(i == newValue.ordinal() ? null : GUI_ACTION_CLICKSELECT);
         }
     }

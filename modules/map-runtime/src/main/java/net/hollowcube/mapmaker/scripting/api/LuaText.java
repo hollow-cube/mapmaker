@@ -22,14 +22,15 @@ public final class LuaText {
     // Extremely limited mini message for now, likely will expand in the future.
     // Not sure if we want open_url for example. Though probably do want some click events.
     private static final MiniMessage MINI_MESSAGE = MiniMessage.builder()
-        .tags(TagResolver.builder()
-            .resolver(StandardTags.color())
-            .resolver(StandardTags.decorations())
-            .resolver(StandardTags.gradient())
-            .resolver(StandardTags.rainbow())
-            .resolver(StandardTags.hoverEvent())
-            .resolver(StandardTags.pride())
-            .build()
+        .tags(
+            TagResolver.builder()
+                .resolver(StandardTags.color())
+                .resolver(StandardTags.decorations())
+                .resolver(StandardTags.gradient())
+                .resolver(StandardTags.rainbow())
+                .resolver(StandardTags.hoverEvent())
+                .resolver(StandardTags.pride())
+                .build()
         )
         .build();
 
@@ -134,6 +135,5 @@ public final class LuaText {
         //endregion
 
     }
-
 
 }

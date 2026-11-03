@@ -30,11 +30,18 @@ public record SetTimeAction(TimeOfDay time) implements Action {
     public static final Key KEY = key("mapmaker:set_time");
     public static final StructCodec<SetTimeAction> CODEC = StructCodec.struct(
         "time", TimeOfDay.CODEC.optional(TimeOfDay.NOON), SetTimeAction::time,
-        SetTimeAction::new);
+        SetTimeAction::new
+    );
     public static final Action.Editor<SetTimeAction> EDITOR = new Action.Editor<>(
-        SetTimeAction.Editor::new, SetTimeAction::makeSprite,
-        SetTimeAction::makeThumbnail, Set.of(KEY));
-    public static final PlayState.Attachment<TimeOfDay> SAVE_DATA = PlayState.attachment(key("mapmaker:time_of_day"), TimeOfDay.CODEC);
+        SetTimeAction.Editor::new,
+        SetTimeAction::makeSprite,
+        SetTimeAction::makeThumbnail,
+        Set.of(KEY)
+    );
+    public static final PlayState.Attachment<TimeOfDay> SAVE_DATA = PlayState.attachment(
+        key("mapmaker:time_of_day"),
+        TimeOfDay.CODEC
+    );
 
     public SetTimeAction withTime(TimeOfDay time) {
         return new SetTimeAction(time);
@@ -57,9 +64,14 @@ public record SetTimeAction(TimeOfDay time) implements Action {
 
     private static TranslatableComponent makeThumbnail(@Nullable SetTimeAction action) {
         if (action == null) return translatable("gui.action.set_time_of_day.thumbnail.empty");
-        return translatable("gui.action.set_time_of_day.thumbnail", List.of(
-            translatable("gui.action.set_time_of_day." + action.time.name().toLowerCase() + ".label")
-        ));
+        return translatable(
+            "gui.action.set_time_of_day.thumbnail",
+            List.of(
+                translatable(
+                    "gui.action.set_time_of_day." + action.time.name().toLowerCase() + ".label"
+                )
+            )
+        );
     }
 
     private static Sprite iconSprite(TimeOfDay time) {
@@ -82,12 +94,20 @@ public record SetTimeAction(TimeOfDay time) implements Action {
 
             add(1, 1, groupText(7, "time"));
 
-            this.timeSwitch = add(1, 2, new Switch(7, 1, List.of(
-                new Row(TimeOfDay.NOON, update(SetTimeAction::withTime)),
-                new Row(TimeOfDay.SUNSET, update(SetTimeAction::withTime)),
-                new Row(TimeOfDay.NIGHT, update(SetTimeAction::withTime)),
-                new Row(TimeOfDay.SUNRISE, update(SetTimeAction::withTime))
-            )));
+            this.timeSwitch = add(
+                1,
+                2,
+                new Switch(
+                    7,
+                    1,
+                    List.of(
+                        new Row(TimeOfDay.NOON, update(SetTimeAction::withTime)),
+                        new Row(TimeOfDay.SUNSET, update(SetTimeAction::withTime)),
+                        new Row(TimeOfDay.NIGHT, update(SetTimeAction::withTime)),
+                        new Row(TimeOfDay.SUNRISE, update(SetTimeAction::withTime))
+                    )
+                )
+            );
         }
 
         @Override
@@ -101,16 +121,24 @@ public record SetTimeAction(TimeOfDay time) implements Action {
 
                 var translationKey = "gui.action.set_time_of_day." + value.name().toLowerCase();
                 var name = LanguageProviderV2.translateToPlain(translationKey + ".label");
-                add(0, 0, new Button(translationKey, 1, 1)
-                    .background("generic2/btn/tristate/icon", -1, -1)
-                    .sprite(iconSprite(value))
-                    .onLeftClick(() -> onChange.accept(value.next()))
-                    .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE));
-                add(1, 0, new Text(translationKey, 6, 1, name)
-                    .align(4, Text.CENTER)
-                    .background("generic2/btn/default/6_1")
-                    .onLeftClick(() -> onChange.accept(value.next()))
-                    .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE));
+                add(
+                    0,
+                    0,
+                    new Button(translationKey, 1, 1)
+                        .background("generic2/btn/tristate/icon", -1, -1)
+                        .sprite(iconSprite(value))
+                        .onLeftClick(() -> onChange.accept(value.next()))
+                        .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE)
+                );
+                add(
+                    1,
+                    0,
+                    new Text(translationKey, 6, 1, name)
+                        .align(4, Text.CENTER)
+                        .background("generic2/btn/default/6_1")
+                        .onLeftClick(() -> onChange.accept(value.next()))
+                        .lorePostfix(ExtraPanels.LORE_POSTFIX_CLICKCYCLE)
+                );
             }
         }
     }

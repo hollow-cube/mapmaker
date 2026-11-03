@@ -36,27 +36,57 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
 
         background("action/editor/container", -10, -31);
 
-        add(1, 1, AbstractActionEditorPanel.groupText(7, "Sound").translationKey("gui.action.play_sound.sound"));
+        add(
+            1,
+            1,
+            AbstractActionEditorPanel.groupText(7, "Sound")
+                .translationKey("gui.action.play_sound.sound")
+        );
         this.soundInput = add(1, 2, new Text("gui.action.play_sound.sound", 7, 1, ""));
         this.soundInput.align(6, 5);
         this.soundInput.background("generic2/input/7_1_shadow");
         this.soundInput.lorePostfix(LORE_POSTFIX_CLICKEDIT);
-        this.soundInput.onLeftClick(() ->
-            host.pushView(AnvilSearchView.simple(
-                "action/anvil/search_icon", "Search Sounds",
-                Autocompletors::searchSounds,
-                PlaySoundEditor::makeSoundButton,
-                update(PlaySoundAction::withEvent)
-            ))
+        this.soundInput.onLeftClick(
+            () -> host.pushView(
+                AnvilSearchView.simple(
+                    "action/anvil/search_icon",
+                    "Search Sounds",
+                    Autocompletors::searchSounds,
+                    PlaySoundEditor::makeSoundButton,
+                    update(PlaySoundAction::withEvent)
+                )
+            )
         );
 
-        this.volumeInput = add(1, 3, new ControlledNumberInput(4, "play_sound.volume", update(PlaySoundAction::withVolume), false, true));
+        this.volumeInput = add(
+            1,
+            3,
+            new ControlledNumberInput(
+                4,
+                "play_sound.volume",
+                update(PlaySoundAction::withVolume),
+                false,
+                true
+            )
+        );
         this.volumeInput.range(1, 100);
         this.volumeInput.stepped(5, 10);
 
-        this.pitchInput = add(6, 3, new ControlledNumberInput(2, "play_sound.pitch",
-            update((v, i) -> v.withPitch(i / 100f)), false, false));
-        this.pitchInput.parsed(i -> String.valueOf(i / 100f), s -> (int) (Float.parseFloat(s) * 100));
+        this.pitchInput = add(
+            6,
+            3,
+            new ControlledNumberInput(
+                2,
+                "play_sound.pitch",
+                update((v, i) -> v.withPitch(i / 100f)),
+                false,
+                false
+            )
+        );
+        this.pitchInput.parsed(
+            i -> String.valueOf(i / 100f),
+            s -> (int) (Float.parseFloat(s) * 100)
+        );
         this.pitchInput.formatted(i -> String.valueOf(i / 100f));
         this.pitchInput.range(0, 200);
     }
@@ -88,10 +118,15 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
         var firstDot = id.indexOf('.');
         var key = firstDot == -1 ? id : id.substring(0, firstDot);
         var secondDot = firstDot == -1 ? -1 : id.indexOf('.', firstDot + 1);
-        var path = firstDot == -1 ? "" :
-            secondDot != -1 ? id.substring(firstDot + 1, secondDot) : id.substring(firstDot + 1);
+        var path = firstDot == -1
+            ? ""
+            : secondDot != -1 ? id.substring(firstDot + 1, secondDot) : id.substring(firstDot + 1);
         var icon = switch (key) {
-            case "block" -> OpUtils.mapOr(Block.fromKey(path), it -> it.registry().material(), Material.BARRIER);
+            case "block" -> OpUtils.mapOr(
+                Block.fromKey(path),
+                it -> it.registry().material(),
+                Material.BARRIER
+            );
             case "entity" -> {
                 if (path.equals("player")) {
                     yield Material.PLAYER_HEAD;
@@ -104,7 +139,8 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
                 }
             }
             case "item" -> OpUtils.firstNonNull(Material.fromKey(path), Material.BARRIER);
-            case "music_disc" -> OpUtils.firstNonNull(Material.fromKey("music_disc_" + path), Material.BARRIER);
+            case "music_disc" ->
+                OpUtils.firstNonNull(Material.fromKey("music_disc_" + path), Material.BARRIER);
             case "music" -> Material.JUKEBOX;
             case "ambient" -> Material.FIREFLY_BUSH;
             default -> Material.BARRIER;
@@ -118,10 +154,13 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
     public static TranslatableComponent makeThumbnail(@Nullable PlaySoundAction action) {
         if (action == null || action.event() == null)
             return Component.translatable("gui.action.play_sound.thumbnail.empty");
-        return Component.translatable("gui.action.play_sound.thumbnail", List.of(
-            Component.text(action.event().key().asMinimalString()),
-            TranslationArgument.numeric((int) (action.volume() * 100)),
-            TranslationArgument.numeric(action.pitch())
-        ));
+        return Component.translatable(
+            "gui.action.play_sound.thumbnail",
+            List.of(
+                Component.text(action.event().key().asMinimalString()),
+                TranslationArgument.numeric((int) (action.volume() * 100)),
+                TranslationArgument.numeric(action.pitch())
+            )
+        );
     }
 }

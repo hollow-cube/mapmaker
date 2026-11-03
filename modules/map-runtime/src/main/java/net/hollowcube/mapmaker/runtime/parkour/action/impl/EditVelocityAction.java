@@ -11,9 +11,7 @@ import net.kyori.adventure.key.Key;
 import net.minestom.server.codec.StructCodec;
 import net.minestom.server.entity.Player;
 
-public record EditVelocityAction(
-        VelocityModifier modifier
-) implements Action {
+public record EditVelocityAction(VelocityModifier modifier) implements Action {
 
     public static final Key KEY = Key.key("mapmaker:velocity");
     public static final StructCodec<EditVelocityAction> CODEC = StructCodec.struct(
@@ -24,7 +22,10 @@ public record EditVelocityAction(
     private static final Sprite SPRITE = new Sprite("action/icon/velocity", 1, 1);
 
     public static final Editor<EditVelocityAction> EDITOR = new Editor<>(
-        it -> it.action() instanceof EditVelocityAction(VelocityModifier modifier) && modifier instanceof VelocityModifiers.DirectionPower ? new VelocityEditor(it) : null,
+        it -> it.action() instanceof EditVelocityAction(VelocityModifier modifier)
+                && modifier instanceof VelocityModifiers.DirectionPower
+            ? new VelocityEditor(it)
+            : null,
         SPRITE,
         VelocityEditor::thumbnail
     );

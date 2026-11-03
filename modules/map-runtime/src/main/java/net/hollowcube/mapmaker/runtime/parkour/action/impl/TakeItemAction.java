@@ -32,10 +32,14 @@ public record TakeItemAction(boolean slot0, boolean slot1, boolean slot2) implem
         "slot0", Codec.BOOLEAN.optional(false), TakeItemAction::slot0,
         "slot1", Codec.BOOLEAN.optional(false), TakeItemAction::slot1,
         "slot2", Codec.BOOLEAN.optional(false), TakeItemAction::slot2,
-        TakeItemAction::new);
+        TakeItemAction::new
+    );
     public static final Action.Editor<TakeItemAction> EDITOR = new Action.Editor<>(
-        TakeItemAction.Editor::new, _ -> SPRITE_SUBTRACT,
-        TakeItemAction::makeThumbnail, Set.of());
+        TakeItemAction.Editor::new,
+        _ -> SPRITE_SUBTRACT,
+        TakeItemAction::makeThumbnail,
+        Set.of()
+    );
 
     public TakeItemAction withSlot0(boolean slot0) {
         return new TakeItemAction(slot0, this.slot1, this.slot2);
@@ -71,7 +75,12 @@ public record TakeItemAction(boolean slot0, boolean slot1, boolean slot2) implem
         if (action.slot1) slots.add(Component.text("2", TextColor.color(0xF2F2F2)));
         if (action.slot2) slots.add(Component.text("3", TextColor.color(0xF2F2F2)));
         if (slots.isEmpty()) return Component.translatable("gui.action.take_item.thumbnail.empty");
-        var arg0 = Component.join(JoinConfiguration.separator(net.kyori.adventure.text.Component.text(", ", TextColor.color(0xB0B0B0))), slots);
+        var arg0 = Component.join(
+            JoinConfiguration.separator(
+                net.kyori.adventure.text.Component.text(", ", TextColor.color(0xB0B0B0))
+            ),
+            slots
+        );
         return Component.translatable("gui.action.take_item.thumbnail", arg0);
     }
 
@@ -85,25 +94,57 @@ public record TakeItemAction(boolean slot0, boolean slot1, boolean slot2) implem
 
             background("action/editor/container_sm", -10, -31);
 
-            add(1, 1, AbstractActionEditorPanel.groupText(7, "choose slots")
-                .translationKey("gui.action.take_item.label"));
+            add(
+                1,
+                1,
+                AbstractActionEditorPanel.groupText(7, "choose slots")
+                    .translationKey("gui.action.take_item.label")
+            );
 
-            add(1, 2, new Button("gui.action.take_item.label", 1, 1)
-                .background("generic2/btn/tristate/icon", -2, -1)
-                .sprite(SPRITE_SUBTRACT));
+            add(
+                1,
+                2,
+                new Button("gui.action.take_item.label", 1, 1)
+                    .background("generic2/btn/tristate/icon", -2, -1)
+                    .sprite(SPRITE_SUBTRACT)
+            );
 
-            this.slot0Button = add(2, 2, new Text("gui.action.take_item.slot0.label", 2, 1, "Slot 1")
-                .align(Text.CENTER, Text.CENTER))
+            this.slot0Button = add(
+                2,
+                2,
+                new Text("gui.action.take_item.slot0.label", 2, 1, "Slot 1")
+                    .align(Text.CENTER, Text.CENTER)
+            )
                 .sprite("generic2/btn/tristate/default")
-                .onLeftClick(() -> update(TakeItemAction::withSlot0).accept(!ref.<TakeItemAction>cast().slot0));
-            this.slot1Button = add(4, 2, new Text("gui.action.take_item.slot1.label", 2, 1, "Slot 2")
-                .align(Text.CENTER, Text.CENTER))
+                .onLeftClick(
+                    () -> update(
+                        TakeItemAction::withSlot0
+                    ).accept(!ref.<TakeItemAction>cast().slot0)
+                );
+            this.slot1Button = add(
+                4,
+                2,
+                new Text("gui.action.take_item.slot1.label", 2, 1, "Slot 2")
+                    .align(Text.CENTER, Text.CENTER)
+            )
                 .sprite("generic2/btn/tristate/default")
-                .onLeftClick(() -> update(TakeItemAction::withSlot1).accept(!ref.<TakeItemAction>cast().slot1));
-            this.slot2Button = add(6, 2, new Text("gui.action.take_item.slot2.label", 2, 1, "Slot 3")
-                .align(Text.CENTER, Text.CENTER))
+                .onLeftClick(
+                    () -> update(
+                        TakeItemAction::withSlot1
+                    ).accept(!ref.<TakeItemAction>cast().slot1)
+                );
+            this.slot2Button = add(
+                6,
+                2,
+                new Text("gui.action.take_item.slot2.label", 2, 1, "Slot 3")
+                    .align(Text.CENTER, Text.CENTER)
+            )
                 .sprite("generic2/btn/tristate/default")
-                .onLeftClick(() -> update(TakeItemAction::withSlot2).accept(!ref.<TakeItemAction>cast().slot2));
+                .onLeftClick(
+                    () -> update(
+                        TakeItemAction::withSlot2
+                    ).accept(!ref.<TakeItemAction>cast().slot2)
+                );
         }
 
         @Override

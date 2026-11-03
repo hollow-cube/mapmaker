@@ -16,8 +16,7 @@ public class SpectatorModeHud implements PlayerHud.Module {
 
     public static final SpectatorModeHud INSTANCE = new SpectatorModeHud();
 
-    private SpectatorModeHud() {
-    }
+    private SpectatorModeHud() {}
 
     @Override
     public HudNode.Anchored render(Player player) {

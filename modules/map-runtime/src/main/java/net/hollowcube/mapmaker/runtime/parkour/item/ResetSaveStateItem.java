@@ -17,12 +17,17 @@ import java.util.Objects;
 
 public class ResetSaveStateItem extends ItemHandler {
 
-    private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown("mapmaker:play/reset_item_confirm", 2000);
+    private static final TagCooldown CONFIRM_COOLDOWN = new TagCooldown(
+        "mapmaker:play/reset_item_confirm",
+        2000
+    );
 
     private static final int MIN_RESET_ITEM_TIME = 60 * 1000; // 1 minute
     private static final int MIN_RESET_SCREEN_TIME = 60 * 5000; // 5 minutes
 
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/reset"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/reset")
+    );
     public static final Key ID = Key.key("mapmaker:reset_savestate");
     public static final ResetSaveStateItem INSTANCE = new ResetSaveStateItem();
 
@@ -43,7 +48,12 @@ public class ResetSaveStateItem extends ItemHandler {
 
         var currentState = world.getPlayerState(player);
         if (currentState == null) return;
-        if (tryConfirmation(player, currentState, CONFIRM_COOLDOWN, () -> world.hardResetPlayer(player))) {
+        if (tryConfirmation(
+            player,
+            currentState,
+            CONFIRM_COOLDOWN,
+            () -> world.hardResetPlayer(player)
+        )) {
             return;
         }
 
@@ -51,10 +61,10 @@ public class ResetSaveStateItem extends ItemHandler {
     }
 
     public static boolean tryConfirmation(
-            Player player,
-            ParkourState currentState,
-            TagCooldown cooldown,
-            Runnable onConfirm
+        Player player,
+        ParkourState currentState,
+        TagCooldown cooldown,
+        Runnable onConfirm
     ) {
         if (currentState instanceof ParkourState.AnyPlaying parkourState) {
             var saveState = parkourState.saveState();
@@ -62,7 +72,9 @@ public class ResetSaveStateItem extends ItemHandler {
             if (playtime > MIN_RESET_SCREEN_TIME) {
                 Panel.open(player, ExtraPanels.confirm("Reset Map Progress?", onConfirm));
                 return true;
-            } else if ((playtime > MIN_RESET_ITEM_TIME || saveState.state(PlayState.class).lastState() != null) && cooldown.test(player)) {
+            } else if ((playtime > MIN_RESET_ITEM_TIME
+                || saveState.state(PlayState.class).lastState() != null)
+                && cooldown.test(player)) {
                 player.sendMessage(Component.translatable("item.mapmaker.reset_savestate.confirm"));
                 return true;
             }

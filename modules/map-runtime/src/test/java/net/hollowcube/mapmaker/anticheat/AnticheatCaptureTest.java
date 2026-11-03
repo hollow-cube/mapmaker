@@ -32,18 +32,28 @@ class AnticheatCaptureTest {
         assertNull(AnticheatCapture.activeCapture(player));
 
         var packets = connection.trackIncoming(PluginMessagePacket.class);
-        AnticheatCapture.start(player, "run-1", TraceHeader.Reason.RUN, TraceHeader.Cohort.RANDOM,
-            TrimPolicy.DEFAULT);
+        AnticheatCapture.start(
+            player, "run-1", TraceHeader.Reason.RUN, TraceHeader.Cohort.RANDOM,
+            TrimPolicy.DEFAULT
+        );
         assertEquals("run-1", AnticheatCapture.activeCapture(player));
 
         AnticheatCapture.stop(player, "run-2"); // A capture that is not the open one.
         AnticheatCapture.stop(player, "run-1");
         AnticheatCapture.stop(player, "run-1"); // The same one twice, as a disconnect after a finish would.
 
-        assertEquals(List.of(
-            new CaptureControl.Start("run-1", TraceHeader.Reason.RUN, TraceHeader.Cohort.RANDOM,
-                TrimPolicy.DEFAULT),
-            new CaptureControl.Stop("run-1")), controlMessages(packets));
+        assertEquals(
+            List.of(
+                new CaptureControl.Start(
+                    "run-1",
+                    TraceHeader.Reason.RUN,
+                    TraceHeader.Cohort.RANDOM,
+                    TrimPolicy.DEFAULT
+                ),
+                new CaptureControl.Stop("run-1")
+            ),
+            controlMessages(packets)
+        );
         assertNull(AnticheatCapture.activeCapture(player));
     }
 
@@ -58,10 +68,14 @@ class AnticheatCaptureTest {
         AnticheatCapture.start(player, "run-1", TraceHeader.Reason.RUN, null, TrimPolicy.DEFAULT);
         AnticheatCapture.flush(player, TraceHeader.Reason.MANUAL);
 
-        assertEquals(List.of(
-            new CaptureControl.Flush(null, TraceHeader.Reason.MANUAL),
-            new CaptureControl.Start("run-1", TraceHeader.Reason.RUN, null, TrimPolicy.DEFAULT),
-            new CaptureControl.Flush("run-1", TraceHeader.Reason.MANUAL)), controlMessages(packets));
+        assertEquals(
+            List.of(
+                new CaptureControl.Flush(null, TraceHeader.Reason.MANUAL),
+                new CaptureControl.Start("run-1", TraceHeader.Reason.RUN, null, TrimPolicy.DEFAULT),
+                new CaptureControl.Flush("run-1", TraceHeader.Reason.MANUAL)
+            ),
+            controlMessages(packets)
+        );
     }
 
     /// The flag payload is hand-typed in the posthog UI, so both what it should look like and what
@@ -69,7 +83,8 @@ class AnticheatCaptureTest {
     @Test
     void aFlagPayloadParsesIntoAnEnabledConfig() {
         var config = AnticheatCapture.parse(
-            "{\"rate\":0.25,\"trusted\":\"00000000-0000-0000-0000-0000000000aa\",\"playingOnly\":true,\"maxSeconds\":120}");
+            "{\"rate\":0.25,\"trusted\":\"00000000-0000-0000-0000-0000000000aa\",\"playingOnly\":true,\"maxSeconds\":120}"
+        );
 
         assertTrue(config.enabled());
         assertEquals(0.25, config.rate());
@@ -89,7 +104,8 @@ class AnticheatCaptureTest {
     }
 
     private static List<CaptureControl> controlMessages(Collector<PluginMessagePacket> packets) {
-        return packets.collect().stream()
+        return packets.collect()
+            .stream()
             .filter(packet -> AnticheatCapture.CHANNEL.equals(packet.channel()))
             .map(packet -> CaptureControl.decode(packet.data()))
             .toList();

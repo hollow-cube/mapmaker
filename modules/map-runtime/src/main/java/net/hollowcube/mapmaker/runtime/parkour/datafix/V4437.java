@@ -14,14 +14,17 @@ public class V4437 extends DataVersion implements ExternalDataFix {
     public V4437() {
         super(4437);
 
-        addFix(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate", V4437::updateItemActionPlaceableOn);
+        addFix(
+            DataTypes.BLOCK_ENTITY,
+            "mapmaker:checkpoint_plate",
+            V4437::updateItemActionPlaceableOn
+        );
         addFix(DataTypes.BLOCK_ENTITY, "mapmaker:status_plate", V4437::updateItemActionPlaceableOn);
     }
 
     static Value updateItemActionPlaceableOn(@NotNull Value container) {
         for (var action : container.get("actions")) {
-            if (!"mapmaker:give_item".equals(action.getValue("type")))
-                continue;
+            if (!"mapmaker:give_item".equals(action.getValue("type"))) continue;
 
             var block = action.get("block").as(String.class, "minecraft:stone");
             if (Block.fromState(block) == null) continue; // Sanity

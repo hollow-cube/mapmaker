@@ -23,35 +23,49 @@ import java.util.Objects;
 
 @SuppressWarnings("UnstableApiUsage")
 public record EditAttributeAction(
-        @Nullable Attribute attribute,
-        Operation operation,
-        double value
+    @Nullable Attribute attribute,
+    Operation operation,
+    double value
 ) implements Action {
 
     public static final Key KEY = Key.key("mapmaker:attribute");
     public static final StructCodec<EditAttributeAction> CODEC = StructCodec.struct(
-            "attribute", Attribute.CODEC.optional(), EditAttributeAction::attribute,
-            "operation", Operation.CODEC.optional(Operation.ADD), EditAttributeAction::operation,
-            "value", Codec.DOUBLE.optional(0.0), EditAttributeAction::value,
-            EditAttributeAction::new
+        "attribute", Attribute.CODEC.optional(), EditAttributeAction::attribute,
+        "operation", Operation.CODEC.optional(Operation.ADD), EditAttributeAction::operation,
+        "value", Codec.DOUBLE.optional(0.0), EditAttributeAction::value,
+        EditAttributeAction::new
     );
 
-    public static final PlayState.Attachment<AttributeMap> SAVE_DATA = PlayState.attachment(KEY, AttributeMap.CODEC);
+    public static final PlayState.Attachment<AttributeMap> SAVE_DATA = PlayState.attachment(
+        KEY,
+        AttributeMap.CODEC
+    );
     public static final Editor<EditAttributeAction> EDITOR = new Editor<>(
-            it -> {
-                var attribute = it.<EditAttributeAction>cast().attribute();
-                return attribute == null ? new AttributesEditor(it) : new AttributeEditor(it, ActionAttributes.ENTRIES.get(attribute));
-            },
-            new Sprite("action/icon/attribute", 2, 3),
-            action -> {
-                if (action == null || action.attribute() == null)
-                    return Component.translatable("gui.action.attribute.thumbnail.empty");
-                return Component.translatable("gui.action.attribute.thumbnail", List.of(
-                        Component.translatable("gui.action.attribute.%s.name".formatted(action.attribute().key().value())),
-                        Component.translatable("gui.action.attribute.%s.label".formatted(action.operation().name().toLowerCase(Locale.ROOT))),
-                        TranslationArgument.numeric(action.value)
-                ));
-            }
+        it -> {
+            var attribute = it.<EditAttributeAction>cast().attribute();
+            return attribute == null
+                ? new AttributesEditor(it)
+                : new AttributeEditor(it, ActionAttributes.ENTRIES.get(attribute));
+        },
+        new Sprite("action/icon/attribute", 2, 3),
+        action -> {
+            if (action == null || action.attribute() == null)
+                return Component.translatable("gui.action.attribute.thumbnail.empty");
+            return Component.translatable(
+                "gui.action.attribute.thumbnail",
+                List.of(
+                    Component.translatable(
+                        "gui.action.attribute.%s.name".formatted(action.attribute().key().value())
+                    ),
+                    Component.translatable(
+                        "gui.action.attribute.%s.label".formatted(
+                            action.operation().name().toLowerCase(Locale.ROOT)
+                        )
+                    ),
+                    TranslationArgument.numeric(action.value)
+                )
+            );
+        }
     );
 
     @Override

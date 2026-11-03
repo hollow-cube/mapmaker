@@ -46,5 +46,4 @@ public class PlaybackPlayerEntity extends LivingEntity {
         setItemInMainHand(inventory[slot]);
     }
 
-
 }

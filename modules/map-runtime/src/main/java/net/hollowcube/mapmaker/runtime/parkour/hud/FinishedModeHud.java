@@ -16,8 +16,7 @@ public class FinishedModeHud implements PlayerHud.Module {
 
     public static final FinishedModeHud INSTANCE = new FinishedModeHud();
 
-    private FinishedModeHud() {
-    }
+    private FinishedModeHud() {}
 
     @Override
     public HudNode.Anchored render(Player player) {

@@ -36,7 +36,9 @@ public final class AnticheatCapture {
 
     private static final String FLAG = "anticheat_capture";
 
-    private static final Tag<String> ACTIVE_CAPTURE = Tag.Transient("mapmaker:anticheat/active_capture");
+    private static final Tag<String> ACTIVE_CAPTURE = Tag.Transient(
+        "mapmaker:anticheat/active_capture"
+    );
 
     /// The last payload parsed, one slot: the flag answers every call but the payload only ever
     /// changes when somebody edits it.
@@ -62,10 +64,20 @@ public final class AnticheatCapture {
     static AnticheatConfig parse(String payload) {
         try {
             var config = AbstractHttpService.GSON.fromJson(payload, AnticheatConfig.class);
-            return new AnticheatConfig(true, config.rate(), config.trusted(), config.playingOnly(),
-                config.maxSeconds());
+            return new AnticheatConfig(
+                true,
+                config.rate(),
+                config.trusted(),
+                config.playingOnly(),
+                config.maxSeconds()
+            );
         } catch (RuntimeException e) {
-            logger.warn("anticheat: the {} flag payload does not parse, capturing nothing: {}", FLAG, payload, e);
+            logger.warn(
+                "anticheat: the {} flag payload does not parse, capturing nothing: {}",
+                FLAG,
+                payload,
+                e
+            );
             return AnticheatConfig.DISABLED;
         }
     }
@@ -92,12 +104,18 @@ public final class AnticheatCapture {
     /// The proxy never times a capture out, so the cap on how long one runs is scheduled here. It
     /// rides the player's own scheduler, which is cancelled when they go, and stopping a capture
     /// that already ended is a no-op.
-    public static void start(Player player, String captureId, TraceHeader.Reason reason,
-                             @Nullable TraceHeader.Cohort cohort, TrimPolicy trim) {
+    public static void start(
+        Player player,
+        String captureId,
+        TraceHeader.Reason reason,
+        @Nullable TraceHeader.Cohort cohort,
+        TrimPolicy trim
+    ) {
         player.setTag(ACTIVE_CAPTURE, captureId);
         send(player, new CaptureControl.Start(captureId, reason, cohort, trim));
 
-        player.scheduler().buildTask(() -> stop(player, captureId))
+        player.scheduler()
+            .buildTask(() -> stop(player, captureId))
             .delay(config().maxSeconds(), TimeUnit.SECOND)
             .schedule();
     }

@@ -17,7 +17,8 @@ public class StopSoundEditor {
 
     public static @NotNull AnvilSearchView<BuiltinSoundEvent> open(@NotNull ActionList.Ref ref) {
         return AnvilSearchView.simple(
-            "action/anvil/search_icon", "Search Sounds",
+            "action/anvil/search_icon",
+            "Search Sounds",
             (query, limit) -> {
                 var search = Autocompletors.searchSounds(query, limit);
                 if (query.isBlank() || query.equals("s")) {
@@ -38,8 +39,9 @@ public class StopSoundEditor {
     public static TranslatableComponent makeThumbnail(@Nullable StopSoundAction action) {
         if (action == null || action.event() == null)
             return Component.translatable("gui.action.stop_sound.thumbnail.empty");
-        return Component.translatable("gui.action.stop_sound.thumbnail", List.of(
-            Component.text(action.event().key().asMinimalString())
-        ));
+        return Component.translatable(
+            "gui.action.stop_sound.thumbnail",
+            List.of(Component.text(action.event().key().asMinimalString()))
+        );
     }
 }

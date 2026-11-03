@@ -1,7 +1,7 @@
 package net.hollowcube.mapmaker.runtime.parkour.setting;
 
-import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.common.util.dfu.ExtraCodecs;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.minestom.server.codec.Codec;
@@ -13,15 +13,15 @@ import java.util.Map;
 public class SavedMapSettings {
 
     @SuppressWarnings("unchecked")
-    public static final Codec<SavedMapSettings> CODEC = ExtraCodecs.dispatchedMap(MapSetting.CODEC, s -> (Codec<Object>) s.codec())
+    public static final Codec<SavedMapSettings> CODEC =
+        ExtraCodecs.dispatchedMap(MapSetting.CODEC, s -> (Codec<Object>) s.codec())
             .transform(SavedMapSettings::new, settings -> settings.settings);
 
     private final Map<MapSetting<?>, Object> settings = new HashMap<>();
 
     public static final SavedMapSettings EMPTY = new SavedMapSettings();
 
-    public SavedMapSettings() {
-    }
+    public SavedMapSettings() {}
 
     private SavedMapSettings(Map<MapSetting<?>, ?> settings) {
         this.settings.putAll(settings);

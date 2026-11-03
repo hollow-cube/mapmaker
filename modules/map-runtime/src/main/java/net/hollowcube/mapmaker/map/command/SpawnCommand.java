@@ -28,10 +28,17 @@ public class SpawnCommand extends CommandDsl {
         var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
-        if (world instanceof ParkourMapWorld pkWorld && pkWorld.getPlayerState(player) instanceof ParkourState.AnyPlaying) {
-            Panel.open(player, ExtraPanels.confirm("Reset Map Progress?", () -> pkWorld.hardResetPlayer(player)));
+        if (world instanceof ParkourMapWorld pkWorld
+            && pkWorld.getPlayerState(player) instanceof ParkourState.AnyPlaying) {
+            Panel.open(
+                player,
+                ExtraPanels.confirm("Reset Map Progress?", () -> pkWorld.hardResetPlayer(player))
+            );
         } else {
-            MapWorldHelpers.teleportPlayer(player, MapSettings.getSpawnPoint(world.map().settings()));
+            MapWorldHelpers.teleportPlayer(
+                player,
+                MapSettings.getSpawnPoint(world.map().settings())
+            );
             player.sendMessage(Component.translatable("teleport.spawn"));
         }
     }

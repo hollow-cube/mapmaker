@@ -16,7 +16,9 @@ import java.util.Objects;
 public class ReturnToHubItem extends ItemHandler {
     private static final Logger logger = LoggerFactory.getLogger(ReturnToHubItem.class);
 
-    private static final BadSprite SPRITE = Objects.requireNonNull(BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_hub"));
+    private static final BadSprite SPRITE = Objects.requireNonNull(
+        BadSprite.SPRITE_MAP.get("hud/hotbar/return_to_hub")
+    );
     public static final Key ID = Key.key("mapmaker:return_to_hub");
     public static final ReturnToHubItem INSTANCE = new ReturnToHubItem();
 
@@ -39,9 +41,13 @@ public class ReturnToHubItem extends ItemHandler {
             try {
                 world.server().bridge().joinHub(player);
             } catch (Exception e) {
-                logger.error("failed to send player {} to hub: {}", player.getUuid(), e.getMessage());
+                logger.error(
+                    "failed to send player {} to hub: {}",
+                    player.getUuid(),
+                    e.getMessage()
+                );
                 LanguageProviderV2.translateMulti("command.generic.unknown_error", List.of())
-                        .forEach(player::sendMessage);
+                    .forEach(player::sendMessage);
             }
         });
     }

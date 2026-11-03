@@ -9,5 +9,4 @@ public record ParkourMapPlayerTookActionEvent(
     ParkourMapWorld world,
     Player player,
     SaveState saveState
-) implements Map2PlayerEvent {
-}
+) implements Map2PlayerEvent {}

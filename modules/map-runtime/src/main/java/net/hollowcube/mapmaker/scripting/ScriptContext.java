@@ -28,7 +28,9 @@ public record ScriptContext(ScriptRuntime runtime, ScriptScope scope) {
     public static ScriptContext get(LuaState state) {
         var context = current(state);
         if (context == null) {
-            throw new IllegalStateException("No script context for thread, cannot run API logic. This is probably a bug.");
+            throw new IllegalStateException(
+                "No script context for thread, cannot run API logic. This is probably a bug."
+            );
         }
         return context;
     }
@@ -37,7 +39,9 @@ public record ScriptContext(ScriptRuntime runtime, ScriptScope scope) {
         var context = current(state);
         if (context == null) {
             // Even though this is probably wrong, we should not leak it.
-            logger.warn("No script frame for thread, cannot track resource, disposing immediately. This is probably a bug.");
+            logger.warn(
+                "No script frame for thread, cannot track resource, disposing immediately. This is probably a bug."
+            );
             disposable.dispose();
             return Tracked.NO_OP;
         }

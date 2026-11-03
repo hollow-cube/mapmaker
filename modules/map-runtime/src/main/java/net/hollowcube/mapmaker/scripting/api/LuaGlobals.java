@@ -15,7 +15,6 @@ public final class LuaGlobals {
         state.setGlobal("print");
     }
 
-
     private static int print(LuaState state) {
         var builder = new StringBuilder();
         int top = state.top();
@@ -27,13 +26,13 @@ public final class LuaGlobals {
 
         LOGGER.info("[SCRIPT] {}", builder);
 
-//        if (ServerRuntime.getRuntime().isDevelopment()) {
-//            var world = switch (LegacyScriptContext.get(state)) {
-//                case LegacyScriptContext.World w -> w.world().instance();
-//                case LegacyScriptContext.Player p -> p.player().getInstance();
-//            };
-//            world.sendMessage(Component.text("[SCRIPT] " + builder));
-//        }
+        //        if (ServerRuntime.getRuntime().isDevelopment()) {
+        //            var world = switch (LegacyScriptContext.get(state)) {
+        //                case LegacyScriptContext.World w -> w.world().instance();
+        //                case LegacyScriptContext.Player p -> p.player().getInstance();
+        //            };
+        //            world.sendMessage(Component.text("[SCRIPT] " + builder));
+        //        }
 
         return 0;
     }

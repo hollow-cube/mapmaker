@@ -22,15 +22,23 @@ import java.util.Set;
 public record TeleportAction(RelativePos target) implements CoordinateAction<TeleportAction> {
     private static final Sprite SPRITE_DEFAULT = new Sprite("action/icon/teleport", 3, 3);
     private static final String RELATIVE_ZERO = "~0.0";
-    private static final Sound TELEPORT_SOUND = Sound.sound(SoundEvent.ENTITY_PLAYER_TELEPORT, Sound.Source.PLAYER, 0.5f, 1f);
+    private static final Sound TELEPORT_SOUND = Sound.sound(
+        SoundEvent.ENTITY_PLAYER_TELEPORT,
+        Sound.Source.PLAYER,
+        0.5f,
+        1f
+    );
 
     public static final Key KEY = Key.key("mapmaker:teleport");
     public static final StructCodec<TeleportAction> CODEC = StructCodec.struct(
-            StructCodec.INLINE, RelativePos.STRUCT_CODEC.optional(RelativePos.ORIGIN), TeleportAction::target,
-            TeleportAction::new);
+        StructCodec.INLINE, RelativePos.STRUCT_CODEC.optional(RelativePos.ORIGIN), TeleportAction::target,
+        TeleportAction::new
+    );
     public static final Action.Editor<TeleportAction> EDITOR = new Action.Editor<>(
-            CoordinateActionEditor::new, _ -> SPRITE_DEFAULT,
-            TeleportAction::makeThumbnail, Set.of(KEY)
+        CoordinateActionEditor::new,
+        _ -> SPRITE_DEFAULT,
+        TeleportAction::makeThumbnail,
+        Set.of(KEY)
     );
 
     @Override
@@ -51,10 +59,13 @@ public record TeleportAction(RelativePos target) implements CoordinateAction<Tel
 
     private static TranslatableComponent makeThumbnail(@Nullable TeleportAction action) {
         if (action == null) return Component.translatable("gui.action.teleport.thumbnail.empty");
-        return Component.translatable("gui.action.teleport.thumbnail", List.of(
+        return Component.translatable(
+            "gui.action.teleport.thumbnail",
+            List.of(
                 tildeOnly(action.target.x()), tildeOnly(action.target.y()), tildeOnly(action.target.z()),
                 tildeOnly(action.target.yaw()), tildeOnly(action.target.pitch())
-        ));
+            )
+        );
     }
 
     private static Component tildeOnly(String value) {

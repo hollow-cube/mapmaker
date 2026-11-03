@@ -24,9 +24,10 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
 
     public static final Key ID = Key.key("firework_rocket");
     public static final StructCodec<FireworkRocketCheckpointItem> CODEC = StructCodec.struct(
-            "amount", ExtraCodecs.clamppedInt(INFINITE_AMOUNT, MAX_AMOUNT).optional(INFINITE_AMOUNT), FireworkRocketCheckpointItem::amount,
-            "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), FireworkRocketCheckpointItem::duration,
-            FireworkRocketCheckpointItem::new);
+        "amount", ExtraCodecs.clamppedInt(INFINITE_AMOUNT, MAX_AMOUNT).optional(INFINITE_AMOUNT), FireworkRocketCheckpointItem::amount,
+        "duration", ExtraCodecs.clamppedInt(INFINITE_DURATION, MAX_DURATION).optional(INFINITE_DURATION), FireworkRocketCheckpointItem::duration,
+        FireworkRocketCheckpointItem::new
+    );
 
     public FireworkRocketCheckpointItem withAmount(int amount) {
         return new FireworkRocketCheckpointItem(amount, this.duration);
@@ -54,10 +55,17 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
 
     @Override
     public TranslatableComponent thumbnail() {
-        return Component.translatable("gui.action.give_item.firework_rocket.thumbnail", List.of(
-                Component.text(this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)),
-                Component.text(this.duration > 0 ? NumberUtil.formatDuration(this.duration * 50L) : "Infinite")
-        ));
+        return Component.translatable(
+            "gui.action.give_item.firework_rocket.thumbnail",
+            List.of(
+                Component.text(
+                    this.amount == INFINITE_AMOUNT ? "Infinite" : String.valueOf(this.amount)
+                ),
+                Component.text(
+                    this.duration > 0 ? NumberUtil.formatDuration(this.duration * 50L) : "Infinite"
+                )
+            )
+        );
     }
 
     @Override
@@ -74,14 +82,32 @@ public record FireworkRocketCheckpointItem(int amount, int duration) implements 
 
             background("action/editor/container_lg", -10, -31);
 
-            this.amountInput = add(1, 3, makeGenericAmount(FireworkRocketCheckpointItem::withAmount, MAX_AMOUNT));
+            this.amountInput = add(
+                1,
+                3,
+                makeGenericAmount(FireworkRocketCheckpointItem::withAmount, MAX_AMOUNT)
+            );
 
-            this.durationInput = add(1, 5, new ControlledNumberInput("give_item.firework_rocket.duration",
-                    updateItem(FireworkRocketCheckpointItem::withDuration), true)
-                    .parsed(dur -> NumberUtil.formatDuration(dur * 50L), NumberUtil::parseDurationToTicks)
-                    .formatted(dur -> dur == INFINITE_DURATION ? "Infinite" : NumberUtil.formatDuration(dur * 50L))
+            this.durationInput = add(
+                1,
+                5,
+                new ControlledNumberInput(
+                    "give_item.firework_rocket.duration",
+                    updateItem(FireworkRocketCheckpointItem::withDuration),
+                    true
+                )
+                    .parsed(
+                        dur -> NumberUtil.formatDuration(dur * 50L),
+                        NumberUtil::parseDurationToTicks
+                    )
+                    .formatted(
+                        dur -> dur == INFINITE_DURATION
+                            ? "Infinite"
+                            : NumberUtil.formatDuration(dur * 50L)
+                    )
                     .range(INFINITE_DURATION, MAX_DURATION)
-                    .stepped(5, 20)); // 0.25s, 1s steps
+                    .stepped(5, 20)
+            ); // 0.25s, 1s steps
         }
 
         @Override

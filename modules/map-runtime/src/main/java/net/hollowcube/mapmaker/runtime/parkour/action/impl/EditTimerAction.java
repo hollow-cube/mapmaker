@@ -37,17 +37,25 @@ public record EditTimerAction(Operation operation, int time) implements Action {
 
     public static final Key KEY = Key.key("mapmaker:timer");
     public static final StructCodec<EditTimerAction> CODEC = StructCodec.struct(
-            "operation", Operation.CODEC.optional(Operation.SET), EditTimerAction::operation,
-            "value", ExtraCodecs.clamppedInt(0, MAX_TIMER).optional(NO_TIMER), EditTimerAction::time,
-            EditTimerAction::new);
+        "operation", Operation.CODEC.optional(Operation.SET), EditTimerAction::operation,
+        "value", ExtraCodecs.clamppedInt(0, MAX_TIMER).optional(NO_TIMER), EditTimerAction::time,
+        EditTimerAction::new
+    );
     public static final Action.Editor<EditTimerAction> EDITOR = new Action.Editor<>(
-            EditTimerAction.Editor::new, EditTimerAction::makeSprite,
-            EditTimerAction::makeThumbnail, Set.of());
-    public static final PlayState.Attachment<TimerData> SAVE_DATA = PlayState.attachment(KEY, TimerData.CODEC);
+        EditTimerAction.Editor::new,
+        EditTimerAction::makeSprite,
+        EditTimerAction::makeThumbnail,
+        Set.of()
+    );
+    public static final PlayState.Attachment<TimerData> SAVE_DATA = PlayState.attachment(
+        KEY,
+        TimerData.CODEC
+    );
 
     // This tag is present when the player has an active countdown and holds the time at which
     // the countdown will end, in ms since epoch.
-    public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end").defaultValue(-1L);
+    public static final Tag<Long> COUNTDOWN_END = Tag.Long("mapmaker:play/countdown_end")
+        .defaultValue(-1L);
 
     public EditTimerAction withOperation(Operation operation) {
         return new EditTimerAction(operation, this.time);
@@ -82,11 +90,21 @@ public record EditTimerAction(Operation operation, int time) implements Action {
 
     private static TranslatableComponent makeThumbnail(@Nullable EditTimerAction action) {
         if (action == null) return Component.translatable("gui.action.timer.thumbnail.empty");
-        return Component.translatable("gui.action.timer.thumbnail", List.of(
+        return Component.translatable(
+            "gui.action.timer.thumbnail",
+            List.of(
                 // todo add operation.translationKey which does this
-                Component.translatable("gui.action.timer." + action.operation.name().toLowerCase(Locale.ROOT) + ".label"),
-                Component.text(action.time == 0 ? (action.operation == Operation.SET ? "Disable Timer" : "-") : NumberUtil.formatDuration(action.time * 50L))
-        ));
+                Component.translatable(
+                    "gui.action.timer." + action.operation.name().toLowerCase(Locale.ROOT)
+                        + ".label"
+                ),
+                Component.text(
+                    action.time == 0
+                        ? (action.operation == Operation.SET ? "Disable Timer" : "-")
+                        : NumberUtil.formatDuration(action.time * 50L)
+                )
+            )
+        );
     }
 
     private static class Editor extends AbstractActionEditorPanel<EditTimerAction> {
@@ -97,15 +115,35 @@ public record EditTimerAction(Operation operation, int time) implements Action {
         public Editor(ActionList.Ref ref) {
             super(ref);
 
-            this.operationInput = add(1, 1, new ControlledTriStateInput<>("timer", Operation.class, update(EditTimerAction::withOperation))
-                    .label("operation").labels("set", "add", "subtract")
-                    .sprites(SPRITE_SET.withOffset(2, 3),
-                            SPRITE_ADD.withOffset(2, 3),
-                            SPRITE_SUBTRACT.withOffset(2, 3)));
-            this.valueInput = add(1, 3, new ControlledNumberInput("timer.value", update(EditTimerAction::withTime))
-                    .formatted(i -> i == 0 ? "Disable Timer" : NumberUtil.formatDuration(i * 50L)) // Ticks to milliseconds
-                    .parsed(i -> i == 0 ? "" : NumberUtil.formatDuration(i * 50L).trim(), NumberUtil::parseDurationToTicks)
-                    .stepped(20, 5 * 20).range(NO_TIMER, MAX_TIMER));
+            this.operationInput = add(
+                1,
+                1,
+                new ControlledTriStateInput<>(
+                    "timer",
+                    Operation.class,
+                    update(EditTimerAction::withOperation)
+                )
+                    .label("operation")
+                    .labels("set", "add", "subtract")
+                    .sprites(
+                        SPRITE_SET.withOffset(2, 3),
+                        SPRITE_ADD.withOffset(2, 3),
+                        SPRITE_SUBTRACT.withOffset(2, 3)
+                    )
+            );
+            this.valueInput = add(
+                1,
+                3,
+                new ControlledNumberInput("timer.value", update(EditTimerAction::withTime))
+                    // Ticks to milliseconds
+                    .formatted(i -> i == 0 ? "Disable Timer" : NumberUtil.formatDuration(i * 50L))
+                    .parsed(
+                        i -> i == 0 ? "" : NumberUtil.formatDuration(i * 50L).trim(),
+                        NumberUtil::parseDurationToTicks
+                    )
+                    .stepped(20, 5 * 20)
+                    .range(NO_TIMER, MAX_TIMER)
+            );
         }
 
         @Override

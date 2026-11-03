@@ -54,41 +54,40 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
         Map.entry(MapSettings.NO_SNEAK, "nk"),
         Map.entry(MapSettings.RESET_IN_WATER, "rw"),
         Map.entry(MapSettings.RESET_IN_LAVA, "rl"),
-        Map.entry(MapSettings.NO_TURN, "nt"));
+        Map.entry(MapSettings.NO_TURN, "nt")
+    );
 
     private static final Map<Attribute, String> ATTRIBUTE_CODES = Map.of(
         Attribute.SCALE, "s",
         Attribute.BLOCK_INTERACTION_RANGE, "ir",
         Attribute.STEP_HEIGHT, "sh",
-        Attribute.GRAVITY, "g");
+        Attribute.GRAVITY, "g"
+    );
 
     public static final ParkourStateDebugHud INSTANCE = new ParkourStateDebugHud();
 
-    private ParkourStateDebugHud() {
-    }
+    private ParkourStateDebugHud() {}
 
     @Override
     public @Nullable HudNode.Anchored render(Player player) {
         var playerData = localPlayer(player);
-        if (!playerData.getSetting(PlayerSettings.PARKOUR_DEBUG_HUD))
-            return null;
+        if (!playerData.getSetting(PlayerSettings.PARKOUR_DEBUG_HUD)) return null;
 
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null || !(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
             return null;
         // Staff only during gameplay for now, may allow everyone later.
         var isMapTesting = p instanceof ParkourState.Testing testing && testing.parent() == null;
-        if (!isMapTesting && !playerData.has(Permission.GENERIC_STAFF))
-            return null;
-        if (!(p.saveState().state instanceof PlayState state))
-            return null;
+        if (!isMapTesting && !playerData.has(Permission.GENERIC_STAFF)) return null;
+        if (!(p.saveState().state instanceof PlayState state)) return null;
 
         var lines = new ArrayList<HudNode>();
 
         var stats = Component.text();
         var progressIndex = state.get(Attachments.PROGRESS_INDEX);
         if (progressIndex != null)
-            stats.append(Component.text("PI: ", LABEL)).append(Component.text(progressIndex, VALUE))
+            stats.append(Component.text("PI: ", LABEL))
+                .append(Component.text(progressIndex, VALUE))
                 .append(Component.text(" "));
         // Always present so the hud is never fully empty.
         int resetHeight = state.get(Attachments.RESET_HEIGHT, world.defaultResetHeight());
@@ -103,7 +102,8 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
         var entities = state.get(Attachments.OWNED_ENTITIES);
         if (entities != null) {
             if (ghostBlocks > 0) counts.append(Component.text(" "));
-            counts.append(Component.text("E: ", LABEL)).append(Component.text(entities.entities().size(), VALUE));
+            counts.append(Component.text("E: ", LABEL))
+                .append(Component.text(entities.entities().size(), VALUE));
         }
         if (ghostBlocks > 0 || entities != null) lines.add(HudNode.text(counts.build()));
 
@@ -115,7 +115,9 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
                 var value = settings.getOrNull(entry.getKey());
                 if (value == null) continue;
                 if (any) row.append(Component.text(" "));
-                row.append(Component.text((value ? "+" : "-") + entry.getValue(), value ? ON : OFF));
+                row.append(
+                    Component.text((value ? "+" : "-") + entry.getValue(), value ? ON : OFF)
+                );
                 any = true;
             }
             if (any) lines.add(HudNode.text(row.build()));
@@ -127,8 +129,12 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
             boolean first = true;
             for (var entry : attributes.view().entrySet()) {
                 if (!first) row.append(Component.text(" "));
-                var code = ATTRIBUTE_CODES.getOrDefault(entry.getKey(), entry.getKey().key().value());
-                row.append(Component.text(code, NAME)).append(Component.text("=" + fmt(entry.getValue()), VALUE));
+                var code = ATTRIBUTE_CODES.getOrDefault(
+                    entry.getKey(),
+                    entry.getKey().key().value()
+                );
+                row.append(Component.text(code, NAME))
+                    .append(Component.text("=" + fmt(entry.getValue()), VALUE));
                 first = false;
             }
             lines.add(HudNode.text(row.build()));
@@ -141,13 +147,19 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
             var varLines = new ArrayList<HudNode>();
             for (int i = 0; i < names.size(); i++) {
                 if (lines.size() + varLines.size() == MAX_ROWS - 1 && i < names.size() - 1) {
-                    varLines.add(HudNode.text(Component.text("+" + (names.size() - i) + " more", VALUE)));
+                    varLines.add(
+                        HudNode.text(Component.text("+" + (names.size() - i) + " more", VALUE))
+                    );
                     break;
                 }
-                varLines.add(HudNode.text(Component.text()
-                    .append(Component.text(FontUtil.stripInvalidChars(names.get(i)), NAME))
-                    .append(Component.text(" = " + fmt(view.get(names.get(i))), VALUE))
-                    .build()));
+                varLines.add(
+                    HudNode.text(
+                        Component.text()
+                            .append(Component.text(FontUtil.stripInvalidChars(names.get(i)), NAME))
+                            .append(Component.text(" = " + fmt(view.get(names.get(i))), VALUE))
+                            .build()
+                    )
+                );
             }
             if (!varLines.isEmpty()) {
                 var block = HudNode.vstack(0, HudNode.Align.LEFT, varLines.toArray(HudNode[]::new));
@@ -163,7 +175,8 @@ public class ParkourStateDebugHud implements PlayerHud.Module {
     }
 
     private static String fmt(double value) {
-        if (value == Math.rint(value) && Math.abs(value) < 1e15) return String.valueOf((long) value);
+        if (value == Math.rint(value) && Math.abs(value) < 1e15)
+            return String.valueOf((long) value);
         return String.format("%.2f", value);
     }
 

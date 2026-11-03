@@ -18,9 +18,8 @@ import net.minestom.server.utils.Unit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
-
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.*;
+import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public class ActionPickerView extends Panel {
     private final ActionList actionList;
@@ -38,11 +37,15 @@ public class ActionPickerView extends Panel {
 
         add(0, 0, backOrClose());
         add(1, 0, info("action"));
-        add(2, 0, new Text("gui.action.search.empty", 7, 1, "Search...")
-            .align(8, 5).background("action/editor/search_bar")); // TODO: search support
+        add(
+            2,
+            0,
+            new Text("gui.action.search.empty", 7, 1, "Search...")
+                .align(8, 5)
+                .background("action/editor/search_bar")
+        ); // TODO: search support
 
-        this.pagination = add(1, 2, new Pagination<Unit>(7, 3)
-            .fetch(this::fetchPage));
+        this.pagination = add(1, 2, new Pagination<Unit>(7, 3).fetch(this::fetchPage));
         add(2, 5, pagination.prevButton());
         add(3, 5, pagination.pageText(3, 1));
         add(6, 5, pagination.nextButton());
@@ -74,8 +77,10 @@ public class ActionPickerView extends Panel {
             var editor = ActionRegistry.getEditor(actionKey);
 
             if (editor.exclusiveSet().stream().anyMatch(actionList::has))
-                continue; // skip if any exclusive action is already present
-            if (editor.requiredPermission() != Permission.NONE && !playerData.has(editor.requiredPermission()))
+                // skip if any exclusive action is already present
+                continue;
+            if (editor.requiredPermission() != Permission.NONE
+                && !playerData.has(editor.requiredPermission()))
                 continue; // skip if player doesn't have required permission
 
             available.add(actionKey);
@@ -86,8 +91,13 @@ public class ActionPickerView extends Panel {
     private Button createButton(Key actionKey) {
         var editor = ActionRegistry.getEditor(actionKey);
         return new Button(null, 1, 1)
-            .text(Component.translatable("gui.action." + actionKey.value() + ".title"),
-                LanguageProviderV2.translateMulti("gui.action." + actionKey.value() + ".info.lore", List.of()))
+            .text(
+                Component.translatable("gui.action." + actionKey.value() + ".title"),
+                LanguageProviderV2.translateMulti(
+                    "gui.action." + actionKey.value() + ".info.lore",
+                    List.of()
+                )
+            )
             .lorePostfix(LORE_POSTFIX_CLICKSELECT)
             .sprite(editor.sprite().apply(null))
             .onLeftClick(() -> this.handleAddAction(actionKey, editor));

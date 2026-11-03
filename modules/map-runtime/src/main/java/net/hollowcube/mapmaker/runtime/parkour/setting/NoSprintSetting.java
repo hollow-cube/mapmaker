@@ -15,19 +15,20 @@ import static net.hollowcube.mapmaker.map.util.EventUtil.playerEventNode;
 
 public class NoSprintSetting {
 
-    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode()
-            .addListener(ParkourMapPlayerUpdateStateEvent.class, NoSprintSetting::updatePlayer);
+    public static final EventNode<PlayerInstanceEvent> EVENT_NODE = playerEventNode().addListener(
+        ParkourMapPlayerUpdateStateEvent.class,
+        NoSprintSetting::updatePlayer
+    );
 
     public static boolean canSprint(ParkourMapWorld world, Player player) {
-        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p))
-            return true;
+        if (!(world.getPlayerState(player) instanceof ParkourState.AnyPlaying p)) return true;
 
         return canSprint(world, p.saveState().state(PlayState.class));
     }
 
     public static boolean canSprint(ParkourMapWorld world, PlayState playState) {
         return !playState.get(Attachments.SETTINGS, SavedMapSettings.EMPTY)
-                .get(MapSettings.NO_SPRINT, world.map().settings());
+            .get(MapSettings.NO_SPRINT, world.map().settings());
     }
 
     private static void updatePlayer(ParkourMapPlayerUpdateStateEvent event) {

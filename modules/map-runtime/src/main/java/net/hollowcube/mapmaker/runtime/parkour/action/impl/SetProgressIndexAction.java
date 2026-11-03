@@ -21,18 +21,20 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
-public record SetProgressIndexAction(
-        int value
-) implements Action {
+public record SetProgressIndexAction(int value) implements Action {
     private static final Sprite SPRITE = new Sprite("action/icon/progress_index", 2, 2);
 
     public static final Key KEY = Key.key("mapmaker:progress_index");
     public static final StructCodec<SetProgressIndexAction> CODEC = StructCodec.struct(
-            "value", Codec.INT.optional(0), SetProgressIndexAction::value,
-            SetProgressIndexAction::new);
+        "value", Codec.INT.optional(0), SetProgressIndexAction::value,
+        SetProgressIndexAction::new
+    );
     public static final Action.Editor<SetProgressIndexAction> EDITOR = new Action.Editor<>(
-            SetProgressIndexAction::makeEditor, _ -> SPRITE,
-            SetProgressIndexAction::makeThumbnail, Set.of(SetProgressIndexAction.KEY));
+        SetProgressIndexAction::makeEditor,
+        _ -> SPRITE,
+        SetProgressIndexAction::makeThumbnail,
+        Set.of(SetProgressIndexAction.KEY)
+    );
 
     public SetProgressIndexAction withValue(int value) {
         return new SetProgressIndexAction(value);
@@ -45,28 +47,40 @@ public record SetProgressIndexAction(
 
     @Override
     public void applyTo(Player player, PlayState state) {
-        boolean useProgressAddition = OpUtils.mapOr(MapWorld.forPlayer(player),
-                world -> MapSettings.get(world.map().settings(), MapSettings.PROGRESS_INDEX_ADDITION),
-                false);
-        state.set(Attachments.PROGRESS_INDEX, useProgressAddition ? (state.get(Attachments.PROGRESS_INDEX, 0) + value) : value);
+        boolean useProgressAddition = OpUtils.mapOr(
+            MapWorld.forPlayer(player),
+            world -> MapSettings.get(world.map().settings(), MapSettings.PROGRESS_INDEX_ADDITION),
+            false
+        );
+        state.set(
+            Attachments.PROGRESS_INDEX,
+            useProgressAddition ? (state.get(Attachments.PROGRESS_INDEX, 0) + value) : value
+        );
     }
 
     private static TranslatableComponent makeThumbnail(@Nullable SetProgressIndexAction action) {
         return action == null || action.value == 0
-                ? Component.translatable("gui.action.progress_index.thumbnail.clear")
-                : Component.translatable("gui.action.progress_index.thumbnail", List.of(
-                Component.text(action.value)
-        ));
+            ? Component.translatable("gui.action.progress_index.thumbnail.clear")
+            : Component.translatable(
+                "gui.action.progress_index.thumbnail",
+                List.of(Component.text(action.value))
+            );
     }
 
     private static Panel makeEditor(ActionList.Ref ref) {
-        return new ActionEditorAnvil<>(ref, SetProgressIndexAction::valueToString, SetProgressIndexAction::stringToValue) {
+        return new ActionEditorAnvil<>(
+            ref,
+            SetProgressIndexAction::valueToString,
+            SetProgressIndexAction::stringToValue
+        ) {
             @Override
             protected SetProgressIndexAction parse(SetProgressIndexAction data, String text) {
                 try {
                     return super.parse(data, text);
                 } catch (NumberFormatException _) {
-                    host.player().sendMessage(Component.translatable("create_maps.checkpoint.progress_index.nan"));
+                    host.player().sendMessage(
+                        Component.translatable("create_maps.checkpoint.progress_index.nan")
+                    );
                     host.player().closeInventory();
                     return data;
                 }
@@ -78,7 +92,10 @@ public record SetProgressIndexAction(
         return action.value == 0 ? "" : String.valueOf(action.value);
     }
 
-    private static SetProgressIndexAction stringToValue(SetProgressIndexAction action, String value) {
+    private static SetProgressIndexAction stringToValue(
+        SetProgressIndexAction action,
+        String value
+    ) {
         return action.withValue(Integer.parseInt(value));
     }
 

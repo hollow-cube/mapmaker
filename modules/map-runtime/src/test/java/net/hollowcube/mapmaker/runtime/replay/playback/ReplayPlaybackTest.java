@@ -9,9 +9,9 @@ import dev.hollowcube.replay.event.AbsoluteMoveEvent;
 import dev.hollowcube.replay.event.ReplayEvent;
 import dev.hollowcube.replay.event.ReplayEvents;
 import dev.hollowcube.replay.io.CompactedReplayReader;
+import dev.hollowcube.replay.io.ReplayReader;
 import dev.hollowcube.replay.io.RunOutcome;
 import dev.hollowcube.replay.io.SegmentedFileReplaySource;
-import dev.hollowcube.replay.io.ReplayReader;
 import dev.hollowcube.replay.io.SegmentedFileReplayStorage;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
@@ -149,7 +149,8 @@ final class ReplayPlaybackTest {
         var events = new ArrayList<ReplayEvent>();
         var reader = new WithholdingReader(new CompactedReplayReader(record(temporaryDirectory)));
         var playback = new ReplayPlayback(
-            new ReplayPlayer(reader, ReplayEvents.builder().build(), events::add));
+            new ReplayPlayer(reader, ReplayEvents.builder().build(), events::add)
+        );
         playback.play();
 
         for (var i = 0; i < 5; i++) playback.tick();
@@ -166,11 +167,13 @@ final class ReplayPlaybackTest {
     }
 
     private static ReplayPlayback playback(Path temporaryDirectory, List<ReplayEvent> events) {
-        return new ReplayPlayback(new ReplayPlayer(
-            new CompactedReplayReader(record(temporaryDirectory)),
-            ReplayEvents.builder().build(),
-            events::add
-        ));
+        return new ReplayPlayback(
+            new ReplayPlayer(
+                new CompactedReplayReader(record(temporaryDirectory)),
+                ReplayEvents.builder().build(),
+                events::add
+            )
+        );
     }
 
     private static byte[] record(Path temporaryDirectory) {
@@ -182,8 +185,7 @@ final class ReplayPlaybackTest {
             storage.writer("run", null),
             UUID.randomUUID(),
             ReplayHeader.worldVersion(UUID.randomUUID()),
-            () -> {
-            }
+            () -> {}
         );
         for (var tick = 0; tick < TICK_COUNT; tick++) {
             recorder.submit(move(tick));

@@ -1,6 +1,7 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
 
 plugins {
+    alias(libs.plugins.javafmt)
     id("mapmaker.java-library")
 }
 
