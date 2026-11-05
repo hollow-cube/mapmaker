@@ -35,6 +35,7 @@ import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.AppliedRewards;
 import net.hollowcube.mapmaker.runtime.PlayState;
+import net.hollowcube.mapmaker.runtime.io.Dispatch;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
@@ -301,8 +302,12 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         return replayManager.finalization(saveState.id());
     }
 
+    public Dispatch.Source spawnSource() {
+        return new Dispatch.Source("spawn", MapSettings.getSpawnPoint(map().settings()));
+    }
+
     /// Records a parkour-specific moment in the player's run, if it is being recorded.
-    void recordReplayEvent(Player player, ReplayEvent event) {
+    public void recordReplayEvent(Player player, ReplayEvent event) {
         replayManager.submit(player, event);
     }
 

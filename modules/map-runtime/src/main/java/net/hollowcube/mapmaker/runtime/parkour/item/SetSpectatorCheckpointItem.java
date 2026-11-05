@@ -4,8 +4,7 @@ import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
-import net.hollowcube.mapmaker.runtime.parkour.TempEffectApplicator;
-import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -39,16 +38,10 @@ public class SetSpectatorCheckpointItem extends ItemHandler {
         if (world == null) return;
 
         var added = switch (world.getPlayerState(player)) {
-            case ParkourState.Testing(var saveState, var _) -> {
-                TempEffectApplicator.applyCheckpoint(
-                    world,
-                    new ActionTriggerData(),
-                    player,
-                    saveState,
-                    "temp-spec-" + UUID.randomUUID(),
-                    player.getPosition(),
-                    true
-                );
+            case ParkourState.Testing _ -> {
+                LegacyTriggers
+                    .temporaryCheckpoint("temp-spec-" + UUID.randomUUID(), player.getPosition())
+                    .onEnter(world, player);
                 yield true;
             }
             case ParkourState.Spectating(var _, var gameState) -> {

@@ -1,11 +1,9 @@
 package net.hollowcube.mapmaker.runtime.parkour.marker;
 
-import net.hollowcube.mapmaker.map.MapPlayer;
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mapmaker.runtime.PlayState;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
 import net.minestom.server.entity.Player;
 
 public class FinishMarkerHandler extends ObjectEntityHandler {
@@ -17,15 +15,11 @@ public class FinishMarkerHandler extends ObjectEntityHandler {
 
     @Override
     public void onPlayerEnter(Player player) {
-        var world = ParkourMapWorld.forPlayer(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
-        // Note that we only check playing here, not testing.
-        if (!(world.getPlayerState(player) instanceof ParkourState.Playing2(var saveState))) return;
-
-        var finishState = saveState.copy(saveState.state(PlayState.class));
-        finishState.complete(System.nanoTime() / 1_000_000);
-        world.changePlayerState(player, new ParkourState.Finished(finishState));
+        LegacyTriggers.finish(entity.getUuid().toString(), entity.getPosition())
+            .onEnter(world, player);
     }
 
 }

@@ -4,6 +4,7 @@ import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.test.AbstractMapWorldTest;
 import net.hollowcube.mapmaker.test.TestMapWorld;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.testing.Env;
 import org.jetbrains.annotations.NotNull;
@@ -16,7 +17,8 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.*;
 
 class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
-    private static final Key INPUT = Key.key("test:input");
+    private static final Key INPUT = Key.key("test", "input");
+    private static final Key OUTPUT = Key.key("test", "out");
 
     private record Probe(Consumer<PlayState> effect) implements PlayerInput {
         @Override
@@ -36,8 +38,12 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
     void deliversOutputsInFireOrder() {
         var log = new ArrayList<String>();
         var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
-        dispatch.fire("a", List.of(probe(_ -> log.add("a1")), probe(_ -> log.add("a2"))));
-        dispatch.fire("b", List.of(probe(_ -> log.add("b1"))));
+        dispatch.fire(
+            source("a"),
+            OUTPUT,
+            List.of(probe(_ -> log.add("a1")), probe(_ -> log.add("a2")))
+        );
+        dispatch.fire(source("b"), OUTPUT, List.of(probe(_ -> log.add("b1"))));
         assertTrue(log.isEmpty());
 
         dispatch.drain();
@@ -49,11 +55,12 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
         var log = new ArrayList<String>();
         var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
         dispatch.fire(
-            "a",
+            source("a"),
+            OUTPUT,
             List.of(
                 probe(_ -> {
                     log.add("a1");
-                    dispatch.fire("nested", List.of(probe(_ -> log.add("nested"))));
+                    dispatch.fire(source("nested"), OUTPUT, List.of(probe(_ -> log.add("nested"))));
                 }),
                 probe(_ -> log.add("a2"))
             )
@@ -71,10 +78,10 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
         loop.add(
             probe(_ -> {
                 count[0]++;
-                dispatch.fire("loop", loop);
+                dispatch.fire(source("loop"), OUTPUT, loop);
             })
         );
-        dispatch.fire("loop", loop);
+        dispatch.fire(source("loop"), OUTPUT, loop);
 
         dispatch.drain();
         assertEquals(Dispatch.MAX_SIGNALS, count[0]);
@@ -85,7 +92,8 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
         var log = new ArrayList<String>();
         var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
         dispatch.fire(
-            "a",
+            source("a"),
+            OUTPUT,
             List.of(
                 probe(_ -> log.add("a1")),
                 probe(_ -> {
@@ -99,7 +107,29 @@ class DispatchTest extends AbstractMapWorldTest<TestMapWorld> {
         assertEquals(List.of("a1", "a3"), log);
     }
 
+    @Test
+    void onlyConnectionsOnTheFiredOutputAreQueued() {
+        var log = new ArrayList<String>();
+        var dispatch = new Dispatch(spawnTestPlayer(), new PlayState());
+        dispatch.fire(
+            source("a"),
+            OUTPUT,
+            List.of(
+                probe(_ -> log.add("a1")),
+                new Connection(Key.key("test", "other"), INPUT, new Probe(_ -> log.add("other"))),
+                probe(_ -> log.add("a2"))
+            )
+        );
+
+        dispatch.drain();
+        assertEquals(List.of("a1", "a2"), log);
+    }
+
+    private static Dispatch.Source source(String id) {
+        return new Dispatch.Source(id, Vec.ZERO);
+    }
+
     private static Connection probe(Consumer<PlayState> effect) {
-        return new Connection(INPUT, new Probe(effect));
+        return new Connection(OUTPUT, INPUT, new Probe(effect));
     }
 }

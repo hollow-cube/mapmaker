@@ -2,9 +2,10 @@ package net.hollowcube.mapmaker.runtime.parkour.block;
 
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
-import net.hollowcube.mapmaker.runtime.parkour.action.ActionTrigger;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerCondition;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyRules;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNode;
 import net.hollowcube.mapmaker.test.AbstractMapWorldTest;
 import net.hollowcube.mapmaker.test.TestMapWorld;
 import net.minestom.server.coordinate.BlockVec;
@@ -37,10 +38,8 @@ class PlateTriggerTest extends AbstractMapWorldTest<TestMapWorld> {
                 .withTag(CheckpointPlateBlock.DATA_TAG, DATA)
         );
 
-        assertEquals(ActionTrigger.Kind.CHECKPOINT, trigger.kind());
         assertEquals("mapmaker:checkpoint_plate/3_41_-2", trigger.id());
         assertEquals(POS, trigger.position());
-        assertTrue(trigger.data().repeatable());
     }
 
     @Test
@@ -50,9 +49,8 @@ class PlateTriggerTest extends AbstractMapWorldTest<TestMapWorld> {
                 .withTag(StatusPlateBlock.DATA_TAG, DATA)
         );
 
-        assertEquals(ActionTrigger.Kind.STATUS, trigger.kind());
         assertEquals("mapmaker:status_plate/3_41_-2", trigger.id());
-        assertTrue(trigger.data().repeatable());
+        assertFalse(trigger.once());
     }
 
     @Test
@@ -61,16 +59,16 @@ class PlateTriggerTest extends AbstractMapWorldTest<TestMapWorld> {
             Block.HEAVY_WEIGHTED_PRESSURE_PLATE.withHandler(CheckpointPlateBlock.INSTANCE)
         );
 
-        assertFalse(trigger.data().repeatable());
-        assertTrue(trigger.data().actions().actions().isEmpty());
+        assertEquals(1, trigger.connections().size());
+        assertEquals(-1, trigger.legacy().progressIndex());
     }
 
-    private ActionTrigger index(Block block) {
+    private TriggerNode index(Block block) {
         var instance = world.instance();
         instance.setBlock(POS, block);
         instance.index().update(instance, MapSize.NORMAL);
         var node = instance.index().block(POS);
         assertNotNull(node);
-        return assertInstanceOf(ActionTrigger.class, node.trigger());
+        return assertInstanceOf(TriggerNode.class, node.trigger());
     }
 }

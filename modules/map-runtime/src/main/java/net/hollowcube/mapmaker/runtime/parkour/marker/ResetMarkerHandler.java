@@ -1,9 +1,9 @@
 package net.hollowcube.mapmaker.runtime.parkour.marker;
 
+import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
-import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointResetEvent;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,15 +24,10 @@ public class ResetMarkerHandler extends ObjectEntityHandler {
 
     @Override
     public void onPlayerEnter(Player player) {
-        this.onPlayerInteract(player);
-    }
-
-    @Override
-    public void onPlayerInteract(Player player) {
-        var world = ParkourMapWorld.forPlayer(player);
+        var world = MapWorld.forPlayer(player);
         if (world == null) return;
 
-        if (this.fullReset) world.hardResetPlayer(player);
-        else world.softResetPlayer(player, CheckpointResetEvent.Reason.FORCED);
+        LegacyTriggers.reset(entity.getUuid().toString(), entity.getPosition(), fullReset)
+            .onEnter(world, player);
     }
 }

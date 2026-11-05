@@ -4,8 +4,8 @@ import net.hollowcube.common.util.JsonUtil;
 import net.hollowcube.common.util.dfu.DFU;
 import net.hollowcube.mapmaker.map.block.Trigger;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.runtime.parkour.action.ActionTrigger;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
@@ -39,12 +39,7 @@ public class CheckpointPlateBlock implements
 
     @Override
     public Trigger createTrigger(BlockVec position, Block block) {
-        return new ActionTrigger(
-            ActionTrigger.Kind.CHECKPOINT,
-            createId(position),
-            position,
-            block.getTag(DATA_TAG)
-        );
+        return LegacyTriggers.checkpoint(createId(position), position, block.getTag(DATA_TAG));
     }
 
     @Override

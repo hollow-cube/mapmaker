@@ -3,8 +3,9 @@ package net.hollowcube.mapmaker.runtime.parkour.marker;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mapmaker.runtime.parkour.action.ActionTrigger;
 import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNode;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public class StatusMarkerHandler extends ObjectEntityHandler {
     public static final String ID = "mapmaker:status";
 
-    private @Nullable ActionTrigger trigger;
+    private @Nullable TriggerNode trigger;
 
     public StatusMarkerHandler(MarkerEntity entity) {
         super(ID, entity);
@@ -38,11 +39,6 @@ public class StatusMarkerHandler extends ObjectEntityHandler {
             return;
         }
 
-        this.trigger = new ActionTrigger(
-            ActionTrigger.Kind.STATUS,
-            entity.getUuid().toString(),
-            position,
-            data
-        );
+        this.trigger = LegacyTriggers.status(entity.getUuid().toString(), position, data);
     }
 }

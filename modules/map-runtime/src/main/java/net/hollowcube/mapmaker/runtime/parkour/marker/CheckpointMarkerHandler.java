@@ -3,8 +3,9 @@ package net.hollowcube.mapmaker.runtime.parkour.marker;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mapmaker.runtime.parkour.action.ActionTrigger;
 import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNode;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 public class CheckpointMarkerHandler extends ObjectEntityHandler {
     public static final String ID = "mapmaker:checkpoint";
 
-    private @Nullable ActionTrigger trigger;
+    private @Nullable TriggerNode trigger;
 
     public CheckpointMarkerHandler(MarkerEntity entity) {
         super(ID, entity);
@@ -49,11 +50,6 @@ public class CheckpointMarkerHandler extends ObjectEntityHandler {
             return;
         }
 
-        this.trigger = new ActionTrigger(
-            ActionTrigger.Kind.CHECKPOINT,
-            entity.getUuid().toString(),
-            position,
-            data
-        );
+        this.trigger = LegacyTriggers.checkpoint(entity.getUuid().toString(), position, data);
     }
 }

@@ -92,7 +92,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
             );
             var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
             if (spawnCheckpoint != null && !hasAppliedSpawnActions) {
-                spawnCheckpoint.actions().applyTo(player, playState);
+                spawnCheckpoint.actions().applyTo(player, playState, world.spawnSource());
                 playState.set(Attachments.START_ACTIONS_APPLIED, true);
             }
 
@@ -393,7 +393,7 @@ public sealed interface ParkourState extends PlayerState<ParkourState, ParkourMa
                 );
                 var spawnCheckpoint = world.getTag(ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS);
                 if (spawnCheckpoint != null && !hasAppliedSpawnActions) {
-                    spawnCheckpoint.actions().applyTo(player, gameState);
+                    spawnCheckpoint.actions().applyTo(player, gameState, world.spawnSource());
                     gameState.set(Attachments.START_ACTIONS_APPLIED, true);
                 }
 

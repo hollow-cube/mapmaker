@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Function;
 
 public class ActionList {
-    private static final String CALLER = "action_list";
+    private static final Key OUTPUT = Key.key("mapmaker", "actions");
 
     private final List<Ref> actions = new ArrayList<>();
 
@@ -31,14 +31,16 @@ public class ActionList {
         }
     }
 
-    public void applyTo(Player player, PlayState state) {
+    public void applyTo(Player player, PlayState state, Dispatch.Source source) {
         var dispatch = new Dispatch(player, state);
-        dispatch.fire(CALLER, connections());
+        dispatch.fire(source, OUTPUT, connections(OUTPUT));
         dispatch.drain();
     }
 
-    public List<Connection> connections() {
-        return actions.stream().map(ref -> new Connection(ref.key(), ref.action())).toList();
+    public List<Connection> connections(Key output) {
+        return actions.stream()
+            .map(ref -> new Connection(output, ref.key(), ref.action()))
+            .toList();
     }
 
     public boolean has(Key actionKey) {
