@@ -283,6 +283,8 @@ public final class MapPresentation {
                 case TUTORIAL -> Component.text("Building Tutorial", TextColor.color(0x0B9F0B));
                 case null -> Component.text("Generic Building", TextColor.color(0x0B9F0B));
             };
+        } else if (map.settings().variant() == MapVariant.FREEFORM) {
+            return Component.text("Freeform", TextColor.color(0xFFAA00));
         } else {
             return Component.text("Adventure Map", TextColor.color(0x9F0B0B));
         }

@@ -8,9 +8,10 @@ import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.misc.TitleHud;
+import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
+import net.hollowcube.mapmaker.runtime.item.ReturnToHubItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.RateMapItem;
-import net.hollowcube.mapmaker.runtime.parkour.item.ReturnToHubItem;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerTickEvent;
 import org.jetbrains.annotations.Nullable;
@@ -23,6 +24,7 @@ public class BuildingMapWorld extends AbstractMapWorld<BuildingState, BuildingMa
 
     public BuildingMapWorld(MapServer server, MapData map) {
         super(server, map, makeMapInstance(map, 'b'), BuildingState.class);
+        MapWorlds.checkInitialized();
 
         itemRegistry().registerSilent(MapDetailsItem.INSTANCE);
         itemRegistry().registerSilent(ReturnToHubItem.INSTANCE);

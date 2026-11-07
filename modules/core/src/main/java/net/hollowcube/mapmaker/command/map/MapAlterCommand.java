@@ -200,9 +200,11 @@ public class MapAlterCommand {
             if (map.settings().variant() == MapVariant.PARKOUR) {
                 var subVariant = ParkourSubVariant.valueOf(newSubVariant.toUpperCase());
                 editor.setSubVariant(subVariant == null ? null : subVariant.name().toLowerCase(java.util.Locale.ROOT));
-            } else {
+            } else if (map.settings().variant() == MapVariant.BUILDING) {
                 var subVariant = BuildingSubVariant.valueOf(newSubVariant.toUpperCase());
                 editor.setSubVariant(subVariant == null ? null : subVariant.name().toLowerCase(java.util.Locale.ROOT));
+            } else {
+                throw new IllegalArgumentException("no subvariants");
             }
         } catch (IllegalArgumentException e) {
             player.sendMessage(Component.text("Invalid variant " + newSubVariant + " for map type " + map.settings().variant()));

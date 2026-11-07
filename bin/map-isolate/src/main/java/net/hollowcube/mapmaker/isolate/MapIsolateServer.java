@@ -12,7 +12,8 @@ import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.MapWorlds;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -48,7 +49,7 @@ public class MapIsolateServer extends AbstractMapServer {
     // Its only kinda unknown. it's not created in the constructor, but after prepareState
     // it is always not-null which should cover any reasonable logic.
     // TODO: pretty sure we could do init in constructor, should investigate.
-    private @UnknownNullability ParkourMapWorld world;
+    private @UnknownNullability AbstractMapWorld<?, ?> world;
 
     private final CompletableFuture<@Nullable Void> worldLoadFuture = new CompletableFuture<>();
 
@@ -101,12 +102,12 @@ public class MapIsolateServer extends AbstractMapServer {
             .setPlayerProvider(simpleMapPlayer(commandManager()));
         MapCommands.registerPlayingCommands(this, commandManager());
 
-        ParkourMapWorld.initGlobalReferences();
+        MapWorlds.initGlobalReferences();
 
         try {
             var map = api().maps.get(this.mapId);
 
-            world = new ParkourMapWorld(this, map);
+            world = MapWorlds.forPlaying(this, map);
             FutureUtil.submitVirtual(() -> {
                 try {
                     world.loadWorld();

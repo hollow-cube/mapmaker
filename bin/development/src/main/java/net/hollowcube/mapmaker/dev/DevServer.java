@@ -49,8 +49,7 @@ import net.hollowcube.mapmaker.map.runtime.IpcServices;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionService;
-import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.posthog.PostHog;
 import net.hollowcube.terraform.legacy.Terraform;
@@ -213,11 +212,7 @@ public class DevServer extends AbstractMultiMapServer {
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
         return createWorld(map, isEditor, _ -> {
             if (isEditor) return new EditorMapWorld(this, map, terraform);
-            return switch (map.settings().variant()) {
-                case PARKOUR -> new ParkourMapWorld(this, map);
-                case BUILDING -> new BuildingMapWorld(this, map);
-                default -> throw new IllegalStateException("No world for map variant " + map.settings().variant());
-            };
+            return MapWorlds.forPlaying(this, map);
         }, true);
     }
 

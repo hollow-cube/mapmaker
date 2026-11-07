@@ -10,7 +10,7 @@ import net.hollowcube.mapmaker.config.*;
 import net.hollowcube.mapmaker.map.ReadableMapData;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.runtime.MapServerInitializer;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.scripting.api.LuaGlobals;
 import net.hollowcube.mapmaker.scripting.api.LuaVector;
 import net.hollowcube.polar.PolarWorldAccess;
@@ -77,7 +77,7 @@ final class IsolateSmoke {
     }
 
     private static void world() throws Exception {
-        ParkourMapWorld.initGlobalReferences();
+        MapWorlds.initGlobalReferences();
 
         var source = new MapInstance("smoke", MapInstance.LightingMode.FULL_BRIGHT);
         for (int x = -24; x < 24; x++) {

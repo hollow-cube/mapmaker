@@ -90,6 +90,7 @@ class MapDetailsInfoPanel extends Panel {
                 case SHOWCASE -> new RowInfo("bd_showcase", "Build Showcase", 4, 3);
                 case TUTORIAL -> new RowInfo("bd_tutorial", "Build Tutorial", 3, 3);
             };
+            case FREEFORM -> new RowInfo("pk_generic", "Freeform", 2, 2);
             case UNKNOWN -> new RowInfo("pk_generic", "Unknown", 2, 2);
             case ADVENTURE -> throw new UnsupportedOperationException("adventure maps");
         };

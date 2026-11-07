@@ -71,7 +71,7 @@ public record MapData(
     }
 
     public boolean needsVerification() {
-        return settings.variant() != MapVariant.BUILDING;
+        return settings.variant() == MapVariant.PARKOUR;
     }
 
     public boolean isVerified() {

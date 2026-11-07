@@ -25,7 +25,7 @@ public class TestCommand extends CommandDsl {
         var world = EditorMapWorld.forPlayer(player);
         if (world == null) return; // Sanity
 
-        if (world.map().settings().variant() == MapVariant.BUILDING) {
+        if (world.map().settings().variant() != MapVariant.PARKOUR) {
             player.sendMessage(Component.translatable("command.test.gameplay_only"));
             return;
         }

@@ -117,9 +117,13 @@ final class MapCompat {
         );
     }
 
-    /// Anything that is not a building map is a parkour one; adventure maps were never written.
+    /// Anything that is not a building or freeform map is a parkour one; adventure maps were never written.
     static MapVariant variant(Maps map) {
-        return "building".equals(map.optVariant()) ? MapVariant.BUILDING : MapVariant.PARKOUR;
+        return switch (map.optVariant()) {
+            case "building" -> MapVariant.BUILDING;
+            case "freeform" -> MapVariant.FREEFORM;
+            case null, default -> MapVariant.PARKOUR;
+        };
     }
 
     static MapVerification verification(Maps map) {

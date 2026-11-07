@@ -2,8 +2,8 @@ package net.hollowcube.mapmaker.runtime.building;
 
 import net.hollowcube.mapmaker.map.PlayerState;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
+import net.hollowcube.mapmaker.runtime.item.ReturnToHubItem;
 import net.hollowcube.mapmaker.runtime.parkour.item.RateMapItem;
-import net.hollowcube.mapmaker.runtime.parkour.item.ReturnToHubItem;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 

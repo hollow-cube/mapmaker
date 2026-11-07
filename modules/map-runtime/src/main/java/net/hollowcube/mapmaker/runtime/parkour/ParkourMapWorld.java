@@ -21,9 +21,7 @@ import net.hollowcube.mapmaker.gui.map.RateMapView;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.LeaderboardFormatting;
 import net.hollowcube.mapmaker.map.MapSettings;
-import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandlerRegistry;
-import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.map.instance.ChunkExt;
 import net.hollowcube.mapmaker.map.instance.Heightmaps;
 import net.hollowcube.mapmaker.map.instance.MapInstance;
@@ -34,19 +32,19 @@ import net.hollowcube.mapmaker.map.util.MapCompletionAnimation;
 import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.player.AppliedRewards;
+import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.io.Dispatch;
 import net.hollowcube.mapmaker.runtime.item.MapDetailsItem;
+import net.hollowcube.mapmaker.runtime.item.ReturnToHubItem;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
-import net.hollowcube.mapmaker.runtime.parkour.action.HotbarItems;
 import net.hollowcube.mapmaker.runtime.parkour.action.LegacyActionStateManager;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditLivesAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetTimeAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetWeatherAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
-import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
 import net.hollowcube.mapmaker.runtime.parkour.block.PressurePlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
@@ -63,20 +61,17 @@ import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.ServerProcess;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerMoveEvent;
 import net.minestom.server.event.player.PlayerTickEndEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
-import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacementPacket;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.timer.TaskSchedule;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -136,38 +131,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         "spawn_checkpoint_effects"
     );
 
-    private static @Nullable ServerProcess initProcess = null;
-
     public static @Nullable ParkourMapWorld forPlayer(Player player) {
         return MapWorld.forPlayer(ParkourMapWorld.class, player);
-    }
-
-    public static void initGlobalReferences() {
-        var process = MinecraftServer.process();
-        if (initProcess == process) return;
-        initProcess = process;
-
-        // Force init. Very gross should fix
-        var _ = Attachments.PROGRESS_INDEX;
-        var _ = HotbarItems.CODEC;
-        var _ = ActionTriggerData.CODEC;
-
-        process.packetListener().setPlayListener(
-            ClientPlayerBlockPlacementPacket.class,
-            ClientBlockPlacementListener::handleBlockPlacementPacket
-        );
-
-        process.block().registerHandler(
-            PressurePlateBlock.INSTANCE.getKey(),
-            () -> PressurePlateBlock.INSTANCE
-        );
-
-        process.block().registerHandler(
-            DripleafBlock.INSTANCE.getKey(),
-            () -> DripleafBlock.INSTANCE
-        );
-
-        MinecraftServer.getGlobalEventHandler().addChild(PotionHandler.EVENT_NODE);
     }
 
     public static void registerMarkers(ObjectEntityHandlerRegistry objectEntityHandlers) {
@@ -195,10 +160,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
 
     protected ParkourMapWorld(MapServer server, MapData map, MapInstance instance) {
         super(server, map, instance, ParkourState.class);
-        Check.stateCondition(
-            initProcess == null,
-            "ParkourMapWorld is not initialized, was `ParkourMapWorld2.initGlobalReferences()` called?"
-        );
+        MapWorlds.checkInitialized();
 
         this.saveStateType = map.verification() == MapVerification.PENDING
             ? SaveStateType.VERIFYING

@@ -748,6 +748,18 @@ class MapServiceImplTest {
         ).map();
     }
 
+    @Test
+    void freeform_roundTripsAndPublishesWithoutVerification() {
+        var id = create(OWNER).id();
+        preparePublish(id);
+        client.update(id, patch(null, MapVariant.FREEFORM, null, null));
+
+        assertEquals(MapVariant.FREEFORM, client.get(id.toString()).settings().variant());
+        assertEquals(BeginVerificationResult.NOT_VERIFIABLE, client.beginVerification(id));
+        client.publish(id);
+        assertEquals(BeginVerificationResult.MAP_PUBLISHED, client.beginVerification(id));
+    }
+
     private void preparePublish(UUID id) {
         var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
         patch.setName("A map");

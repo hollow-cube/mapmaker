@@ -276,8 +276,8 @@ public final class MapServiceImpl implements MapService {
                 tx.maps.insertTags(mapId, patch.tags());
             }
 
-            // Runs recorded against a published building map are meaningless once it is a parkour
-            // map, but only the ones still going: a completed run is somebody's record.
+            // Runs recorded against a published non-parkour map are meaningless once it is a
+            // parkour map, but only the ones still going: a completed run is somebody's record.
             var becomesParkour = patch.variant() == MapVariant.PARKOUR
                 && variant(map) != MapVariant.PARKOUR;
             if (map.publishedAt() != null && becomesParkour) tx.maps.deleteInProgressStates(mapId);
@@ -602,7 +602,7 @@ public final class MapServiceImpl implements MapService {
     private static @Nullable BeginVerificationResult answerWithoutDrain(@Nullable Maps map) {
         if (map == null) return BeginVerificationResult.MAP_NOT_FOUND;
         if (map.publishedAt() != null) return BeginVerificationResult.MAP_PUBLISHED;
-        if (variant(map) == MapVariant.BUILDING) return BeginVerificationResult.NOT_VERIFIABLE;
+        if (variant(map) != MapVariant.PARKOUR) return BeginVerificationResult.NOT_VERIFIABLE;
         if (verification(map) != MapVerification.UNVERIFIED) return BeginVerificationResult.READY;
         return null;
     }
@@ -1013,7 +1013,7 @@ public final class MapServiceImpl implements MapService {
         }
         var buildTime = requireNonNullElse(queries.getLatestEditingTime(map.id(), map.owner()), 0L);
         if (buildTime < required) missing.add(PublishRequirement.BUILD_TIME);
-        if (variant(map) != MapVariant.BUILDING && verification(map) != MapVerification.VERIFIED)
+        if (variant(map) == MapVariant.PARKOUR && verification(map) != MapVerification.VERIFIED)
             missing.add(PublishRequirement.VERIFICATION);
         if (map.optName() == null || map.optName().isBlank()) missing.add(PublishRequirement.NAME);
         if (map.optIcon() == null || map.optIcon().isBlank()) missing.add(PublishRequirement.ICON);

@@ -17,8 +17,7 @@ import net.hollowcube.mapmaker.map.block.PlacementRules;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.NoopServerBridge;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
-import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
-import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
+import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.terraform.legacy.Terraform;
 import net.minestom.server.MinecraftServer;
@@ -62,11 +61,7 @@ public class MapMapServer extends AbstractMultiMapServer {
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
         return createWorld(map, isEditor, _ -> {
             if (isEditor) return new EditorMapWorld(this, map, terraform);
-            return switch (map.settings().variant()) {
-                case PARKOUR -> new ParkourMapWorld(this, map);
-                case BUILDING -> new BuildingMapWorld(this, map);
-                default -> throw new IllegalStateException("No world for map variant " + map.settings().variant());
-            };
+            return MapWorlds.forPlaying(this, map);
         }, true);
     }
 

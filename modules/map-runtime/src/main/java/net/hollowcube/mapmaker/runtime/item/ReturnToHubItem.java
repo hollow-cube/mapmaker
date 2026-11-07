@@ -1,4 +1,4 @@
-package net.hollowcube.mapmaker.runtime.parkour.item;
+package net.hollowcube.mapmaker.runtime.item;
 
 import net.hollowcube.common.lang.LanguageProviderV2;
 import net.hollowcube.common.util.FutureUtil;
