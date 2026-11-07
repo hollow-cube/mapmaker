@@ -5,9 +5,7 @@ import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
 import net.hollowcube.mapmaker.editor.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.editor.item.SpawnPointItem;
-import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
-import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
-import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
+import net.hollowcube.mapmaker.editor.parkour.TriggerEditor;
 import net.hollowcube.mapmaker.map.item.handler.ItemHandler;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.hollowcube.terraform.legacy.session.LocalSession;
@@ -23,17 +21,17 @@ public enum BuilderMenuTabs {
     CUSTOM_BLOCKS(
         "icon2/1_1/box",
         Item.of(
-            FinishEditor.PLATE_ITEM,
+            TriggerEditor.FINISH_PLATE_ITEM,
             "gui.builder_menu.custom_blocks.finish_plate",
             "builder_menu/finish_plate"
         ),
         Item.of(
-            CheckpointEditor.PLATE_ITEM,
+            TriggerEditor.CHECKPOINT_PLATE_ITEM,
             "gui.builder_menu.custom_blocks.checkpoint_plate",
             "builder_menu/checkpoint_plate"
         ),
         Item.of(
-            StatusEditor.PLATE_ITEM,
+            TriggerEditor.STATUS_PLATE_ITEM,
             "gui.builder_menu.custom_blocks.status_plate",
             "builder_menu/status_plate"
         )

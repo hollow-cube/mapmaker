@@ -1,13 +1,15 @@
 package net.hollowcube.mapmaker.runtime.parkour.node;
 
+import net.hollowcube.common.math.relative.RelativePos;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
-import net.hollowcube.mapmaker.runtime.parkour.action.impl.RespawnPosAction;
 import net.hollowcube.mapmaker.util.TagCooldown;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,20 +20,21 @@ import static net.kyori.adventure.text.Component.translatable;
 /// 'legacy' conditions on checkpoint/status plates. The goal is to convert some or all of these to molang
 /// conditions which use conditionally applied molang env. But for now they are listed here :-)
 ///
-/// @param progressIndex  the last `progress_index` action's value, or -1 for no check
 /// @param noBacktrack    blocks the trigger while its id is in the last state's history. prevents re triggering a
 ///                       checkpoint while you are currently at that checkpoint (or any previous for additive mode)
 /// @param statusCooldown the per-player cooldown every status shares
 /// @param faceOnExit     leaving the checkpoint just reached points its saved position the way the player left it,
-///                       or the `respawn` view
-public record LegacyRules(
-    int progressIndex,
-    boolean noBacktrack,
-    boolean statusCooldown,
-    boolean faceOnExit,
-    @Nullable RespawnPosAction respawn
-) {
-    public static final LegacyRules NONE = new LegacyRules(-1, false, false, false, null);
+///                       or its checkpoint's respawn view; only while the trigger has no `teleport`, which
+///                       sets the view itself
+public record LegacyRules(boolean noBacktrack, boolean statusCooldown, boolean faceOnExit) {
+    public static final LegacyRules NONE = new LegacyRules(false, false, false);
+
+    public static final StructCodec<LegacyRules> CODEC = StructCodec.struct(
+        "no_backtrack", Codec.BOOLEAN.optional(false), LegacyRules::noBacktrack,
+        "status_cooldown", Codec.BOOLEAN.optional(false), LegacyRules::statusCooldown,
+        "face_on_exit", Codec.BOOLEAN.optional(false), LegacyRules::faceOnExit,
+        LegacyRules::new
+    );
 
     private static final TagCooldown PROGRESS_INDEX_WARNING = new TagCooldown(
         "mapmaker:play/progress_index_warning",
@@ -49,7 +52,14 @@ public record LegacyRules(
         1
     );
 
-    boolean preCondition(Player player, MapData map, PlayState state, String id) {
+    /// @param progressIndex the trigger's last `progress_index` value, or -1 for none
+    boolean preCondition(
+        Player player,
+        MapData map,
+        PlayState state,
+        String id,
+        int progressIndex
+    ) {
         if (checkProgressIndex(player, map, state, progressIndex)) return true;
         var lastState = state.lastState();
         return noBacktrack && lastState != null && lastState.hasStatus(id);
@@ -59,7 +69,7 @@ public record LegacyRules(
         return statusCooldown && !statusCooldown(map).test(player);
     }
 
-    void faceCheckpoint(Player player, PlayState state, String id) {
+    void faceCheckpoint(Player player, PlayState state, String id, @Nullable RelativePos respawn) {
         var pos = state.pos();
         var lastState = state.lastState();
 
@@ -70,7 +80,7 @@ public record LegacyRules(
 
         var respawnView = OpUtils.mapOr(
             respawn,
-            action -> action.target().resolve(player.getPosition()),
+            target -> target.resolve(player.getPosition()),
             player.getPosition()
         );
         float yaw = respawnView.yaw();

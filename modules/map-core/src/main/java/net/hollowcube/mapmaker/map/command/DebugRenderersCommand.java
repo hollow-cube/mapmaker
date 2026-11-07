@@ -12,7 +12,6 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Map;
 
 import static net.hollowcube.common.math.MathConstants.TICKS_PER_SECOND;
 
@@ -23,17 +22,6 @@ public final class DebugRenderersCommand {
 
     private static final int RANGE = 3 * 16;
 
-    private static final Map<String, WireColor> MARKER_COLORS = Map.of(
-            "mapmaker:checkpoint", WireColor.WHITE,
-            "mapmaker:status", WireColor.LIGHT_GRAY,
-            "mapmaker:finish", WireColor.YELLOW,
-            "mapmaker:reset", WireColor.RED
-    );
-    private static final Map<String, WireColor> BLOCK_COLORS = Map.of(
-            "mapmaker:checkpoint_plate", WireColor.WHITE,
-            "mapmaker:status_plate", WireColor.LIGHT_GRAY,
-            "mapmaker:finish_plate", WireColor.YELLOW
-    );
 
     public static void handleDebugRegions(@NotNull Player player, @NotNull CommandContext ignored) {
         var world = MapWorld.forPlayer(player);
@@ -52,12 +40,12 @@ public final class DebugRenderersCommand {
             switch (object) {
                 case MarkerEntity marker -> {
                     key = "entity_" + marker.getEntityId();
-                    color = MARKER_COLORS.get(marker.getType());
+                    color = marker.debugColor();
                 }
                 case WorldIndex.IndexedBlock block -> {
                     var pos = block.position();
                     key = "block_%d_%d_%d".formatted(pos.blockX(), pos.blockY(), pos.blockZ());
-                    color = BLOCK_COLORS.get(block.handler().getKey().asString());
+                    color = block.trigger().debugColor();
                 }
                 default -> {
                     continue;

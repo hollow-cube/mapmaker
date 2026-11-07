@@ -46,10 +46,8 @@ import net.hollowcube.mapmaker.runtime.parkour.action.impl.EditTimerAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetTimeAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetWeatherAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
-import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.block.ClientBlockPlacementListener;
-import net.hollowcube.mapmaker.runtime.parkour.block.FinishPlateBlock;
-import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.block.PressurePlateBlock;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerTookActionEvent;
 import net.hollowcube.mapmaker.runtime.parkour.hud.ResetHeightDisplay;
 import net.hollowcube.mapmaker.runtime.parkour.item.*;
@@ -160,16 +158,8 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
         );
 
         process.block().registerHandler(
-            CheckpointPlateBlock.INSTANCE.getKey(),
-            () -> CheckpointPlateBlock.INSTANCE
-        );
-        process.block().registerHandler(
-            FinishPlateBlock.INSTANCE.getKey(),
-            () -> FinishPlateBlock.INSTANCE
-        );
-        process.block().registerHandler(
-            StatusPlateBlock.INSTANCE.getKey(),
-            () -> StatusPlateBlock.INSTANCE
+            PressurePlateBlock.INSTANCE.getKey(),
+            () -> PressurePlateBlock.INSTANCE
         );
 
         process.block().registerHandler(
@@ -189,13 +179,7 @@ public class ParkourMapWorld extends AbstractMapWorld<ParkourState, ParkourMapWo
             HappyGhastMarkerHandler.ID,
             HappyGhastMarkerHandler::new
         );
-        objectEntityHandlers.registerForMarkers(
-            CheckpointMarkerHandler.ID,
-            CheckpointMarkerHandler::new
-        );
-        objectEntityHandlers.registerForMarkers(StatusMarkerHandler.ID, StatusMarkerHandler::new);
-        objectEntityHandlers.registerForMarkers(FinishMarkerHandler.ID, FinishMarkerHandler::new);
-        objectEntityHandlers.registerForMarkers(ResetMarkerHandler.ID, ResetMarkerHandler::new);
+        objectEntityHandlers.registerForMarkers(TriggerMarkerHandler.ID, TriggerMarkerHandler::new);
     }
 
     private final MolangProgram<VariableQueries.Context> leaderboardScoreExpr;

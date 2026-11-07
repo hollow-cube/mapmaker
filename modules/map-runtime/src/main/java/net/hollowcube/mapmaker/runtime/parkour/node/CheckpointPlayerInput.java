@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.node;
 
+import net.hollowcube.common.math.relative.RelativePos;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.runtime.PlayState;
@@ -11,6 +12,8 @@ import net.hollowcube.mapmaker.runtime.parkour.action.impl.RespawnPosAction;
 import net.hollowcube.mapmaker.runtime.parkour.replay.event.CheckpointReachedEvent;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.StructCodec;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.sound.SoundEvent;
@@ -24,12 +27,22 @@ import static net.kyori.adventure.text.Component.translatable;
 
 /// Set a checkpoint.
 ///
-/// @param temporary true for a spectator checkpoint
+/// @param respawn   where to respawn, relative to the trigger; the player's position when null
+/// @param temporary true for a spectator checkpoint, which is never stored
 public record CheckpointPlayerInput(
-    @Nullable RespawnPosAction respawn,
+    @Nullable RelativePos respawn,
     boolean temporary
 ) implements PlayerInput {
     public static final Key KEY = Key.key("mapmaker", "checkpoint");
+    // Read the way the `respawn_position` action it replaces was, so `{}` is the trigger's own position.
+    private static final Codec<RelativePos> RESPAWN_CODEC = RespawnPosAction.CODEC.transform(
+        RespawnPosAction::target,
+        RespawnPosAction::new
+    );
+    public static final StructCodec<CheckpointPlayerInput> CODEC = StructCodec.struct(
+        "respawn", RESPAWN_CODEC.optional(), CheckpointPlayerInput::respawn,
+        respawn -> new CheckpointPlayerInput(respawn, false)
+    );
 
     private static final Sound CHECKPOINT_SOUND = Sound.sound(
         SoundEvent.ENTITY_EXPERIENCE_ORB_PICKUP,
@@ -47,13 +60,13 @@ public record CheckpointPlayerInput(
 
         var respawnPosition = OpUtils.mapOr(
             respawn,
-            action -> {
+            target -> {
                 float yaw = player.getPosition().yaw();
                 float pitch = player.getPosition().pitch();
                 var origin = source.position() instanceof BlockVec(int x, int y, int z)
                     ? new Pos(x + 0.5, y, z + 0.5, yaw, pitch)
                     : source.position().asPos(yaw, pitch);
-                return action.target().resolve(origin);
+                return target.resolve(origin);
             },
             player.getPosition()
         );

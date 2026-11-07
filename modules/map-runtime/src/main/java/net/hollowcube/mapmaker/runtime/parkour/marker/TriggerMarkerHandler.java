@@ -3,19 +3,21 @@ package net.hollowcube.mapmaker.runtime.parkour.marker;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.map.entity.object.ObjectEntityHandler;
-import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
-import net.hollowcube.mapmaker.runtime.parkour.node.LegacyTriggers;
+import net.hollowcube.mapmaker.map.util.debug.WireColor;
 import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNode;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNodeData;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
+import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.Nullable;
 
-public class CheckpointMarkerHandler extends ObjectEntityHandler {
-    public static final String ID = "mapmaker:checkpoint";
+public class TriggerMarkerHandler extends ObjectEntityHandler {
+    public static final String ID = "mapmaker:trigger";
+    public static final Tag<TriggerNodeData> DATA_TAG = TriggerNodeData.TAG.path("data");
 
     private @Nullable TriggerNode trigger;
 
-    public CheckpointMarkerHandler(MarkerEntity entity) {
+    public TriggerMarkerHandler(MarkerEntity entity) {
         super(ID, entity);
 
         onDataChange(null); // init
@@ -43,13 +45,16 @@ public class CheckpointMarkerHandler extends ObjectEntityHandler {
         if (trigger != null && world != null) trigger.onExit(world, player);
     }
 
-    private void updateTrigger(Pos position) {
-        var data = entity.getTag(CheckpointPlateBlock.ENTITY_DATA_TAG);
-        if (data == null) {
-            this.trigger = null;
-            return;
-        }
+    @Override
+    public @Nullable WireColor debugColor() {
+        return trigger != null ? trigger.debugColor() : null;
+    }
 
-        this.trigger = LegacyTriggers.checkpoint(entity.getUuid().toString(), position, data);
+    private void updateTrigger(Pos position) {
+        this.trigger = new TriggerNode(
+            entity.getUuid().toString(),
+            position,
+            entity.getTag(DATA_TAG)
+        );
     }
 }

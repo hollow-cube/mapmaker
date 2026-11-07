@@ -2,6 +2,9 @@ package net.hollowcube.apiworker.index;
 
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
+import net.hollowcube.mapmaker.runtime.parkour.marker.TriggerMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNodeData;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerTemplate;
 import net.hollowcube.polar.PolarChunk;
 import net.hollowcube.polar.PolarSection;
 import net.hollowcube.polar.PolarWorld;
@@ -21,14 +24,18 @@ import static org.junit.jupiter.api.Assertions.*;
 class TriggerScanTest {
 
     private static CompoundBinaryTag marker(
-        String type,
+        TriggerNodeData node,
         double x,
         double y,
         double z,
         double half
     ) {
         var data = CompoundBinaryTag.builder()
-            .putString("type", type)
+            .put(
+                (CompoundBinaryTag) TriggerNodeData.CODEC.encode(PolarHelper.CODER, node)
+                    .orElseThrow()
+            )
+            .putString("type", TriggerMarkerHandler.ID)
             .put("min", doubles(-half, -half, -half))
             .put("max", doubles(half, half, half))
             .build();
@@ -80,9 +87,9 @@ class TriggerScanTest {
         MapIndexer.init();
         var scan = TriggerScan.scan(
             world(
-                marker("mapmaker:finish", 100, 64, 0, 2),
-                marker("mapmaker:finish", 500, 64, 0, 2),
-                marker("mapmaker:finish", 502, 64, 0, 2)
+                marker(TriggerTemplate.finish(), 100, 64, 0, 2),
+                marker(TriggerTemplate.finish(), 500, 64, 0, 2),
+                marker(TriggerTemplate.finish(), 502, 64, 0, 2)
             )
         );
 
@@ -101,9 +108,9 @@ class TriggerScanTest {
         MapIndexer.init();
         var scan = TriggerScan.scan(
             world(
-                marker("mapmaker:checkpoint", 0, 64, 0, 1),
-                marker("mapmaker:checkpoint", 20, 64, 0, 1),
-                marker("mapmaker:checkpoint", 20, 64, 0, 1)
+                marker(TriggerTemplate.checkpoint(), 0, 64, 0, 1),
+                marker(TriggerTemplate.checkpoint(), 20, 64, 0, 1),
+                marker(TriggerTemplate.checkpoint(), 20, 64, 0, 1)
             )
         );
 

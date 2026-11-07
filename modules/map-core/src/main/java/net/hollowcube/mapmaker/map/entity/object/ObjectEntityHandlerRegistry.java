@@ -9,12 +9,15 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Function;
 
 public class ObjectEntityHandlerRegistry {
     private final Map<String, Function<ObjectEntity, ObjectEntityHandler>> factories = new HashMap<>();
     private final Map<String, ObjectEntityEditor> editors = new HashMap<>();
     private final Map<Class<?>, ObjectEntityEditor> defaultEditors = new HashMap<>();
+    private final Set<String> markerTypes = new TreeSet<>(); // sorted
 
     public ObjectEntityHandlerRegistry() {
         registerForMarkers(ParticleEmitterMarkerHandler.ID, ParticleEmitterMarkerHandler::new);
@@ -22,6 +25,7 @@ public class ObjectEntityHandlerRegistry {
     }
 
     public void registerForMarkers(String id, Function<MarkerEntity, ObjectEntityHandler> factory) {
+        markerTypes.add(id);
         factories.put(id, entity -> entity instanceof MarkerEntity marker ? factory.apply(marker) : null);
     }
 
@@ -30,6 +34,7 @@ public class ObjectEntityHandlerRegistry {
     }
 
     public void register(String id, Function<ObjectEntity, ObjectEntityHandler> factory) {
+        markerTypes.add(id);
         factories.put(id, factory);
     }
 
@@ -39,6 +44,10 @@ public class ObjectEntityHandlerRegistry {
 
     public void registerDefaultEditor(Class<?> objectClass, ObjectEntityEditor editor) {
         defaultEditors.put(objectClass, editor);
+    }
+
+    public Set<String> markerTypes() {
+        return markerTypes;
     }
 
     public @Nullable ObjectEntityHandler create(@Nullable String type, @NotNull ObjectEntity entity) {

@@ -8,11 +8,12 @@ import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
 import net.hollowcube.mapmaker.map.util.datafix.HCDataTypes;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
-import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
-import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
-import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
-import net.hollowcube.mapmaker.runtime.parkour.marker.FinishMarkerHandler;
-import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.block.PressurePlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.marker.TriggerMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.node.CheckpointPlayerInput;
+import net.hollowcube.mapmaker.runtime.parkour.node.FinishPlayerInput;
+import net.hollowcube.mapmaker.runtime.parkour.node.ResetPlayerInput;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNodeData;
 import net.hollowcube.polar.PolarChunk;
 import net.hollowcube.polar.PolarWorld;
 import net.kyori.adventure.nbt.BinaryTagTypes;
@@ -31,9 +32,9 @@ import java.util.List;
 ///
 /// Triggers live in three places. The spawn checkpoint is on the world user data and holds
 /// whatever the player starts with; markers are entities carrying a region, in the chunk user
-/// data; plates are pressure plate blocks, stored as block entities. All three are decoded with
-/// the same [ActionTriggerData] codec the runtime uses, so an action means here exactly what it
-/// means in game.
+/// data; plates are pressure plate blocks, stored as block entities. Plates and markers hold
+/// [TriggerNodeData] and the spawn holds [ActionTriggerData], both decoded with the codecs the
+/// runtime uses, so an action means here exactly what it means in game.
 ///
 /// Old worlds are upgraded on the way through. Block entities are already fixed by the time polar
 /// hands them over, but the world and chunk user data are mapmaker's own formats and have to be
@@ -50,15 +51,8 @@ final class TriggerScan {
     private static final int VERSION_PRE_CHUNK_NBT = ReadWorldAccess.VERSION_PRE_CHUNK_NBT;
     private static final int VERSION_PRE_WORLD_NBT = ReadWorldAccess.VERSION_PRE_WORLD_NBT;
 
-    // Plate block entity ids. The plate blocks keep theirs private, so these are spelled here.
-    private static final String PLATE_CHECKPOINT = "mapmaker:checkpoint_plate";
-    private static final String PLATE_FINISH = "mapmaker:finish_plate";
-    private static final String PLATE_STATUS = "mapmaker:status_plate";
+    private static final String PRESSURE_PLATE = PressurePlateBlock.INSTANCE.getKey().asString();
 
-    /// Where a marker keeps its trigger data, under the marker's own `data` compound; the same key
-    /// the plate of that kind uses for its block entity.
-    private static final String DATA_CHECKPOINT = CheckpointPlateBlock.ENTITY_DATA_TAG.key();
-    private static final String DATA_STATUS = StatusPlateBlock.ENTITY_DATA_TAG.key();
     /// The spawn checkpoint, on the world tag rather than anywhere in the world.
     private static final String SPAWN_EFFECTS = ParkourMapWorld.SPAWN_CHECKPOINT_EFFECTS.key();
 
@@ -206,7 +200,10 @@ final class TriggerScan {
             }
 
             var data = entity.getCompound("data");
-            Kind kind = markerKind(data.getString("type"));
+            if (!TriggerMarkerHandler.ID.equals(data.getString("type"))) continue;
+            // A trigger marker keeps its node at the root of its data.
+            var node = decodeNode(data, counts);
+            Kind kind = node == null ? null : nodeKind(node);
             if (kind == null) continue;
 
             var position = entity.getList("Pos", BinaryTagTypes.DOUBLE);
@@ -229,7 +226,7 @@ final class TriggerScan {
                     Math.max(min[0], max[0]),
                     Math.max(min[1], max[1]),
                     Math.max(min[2], max[2]),
-                    markerData(data, kind, counts)
+                    node.actionData()
                 )
             );
         }
@@ -245,37 +242,36 @@ final class TriggerScan {
 
     private static void readPlates(PolarChunk chunk, List<Raw> out, Counts counts) {
         for (var blockEntity : chunk.blockEntities()) {
-            Kind kind = plateKind(blockEntity.id());
-            if (kind == null) continue;
+            if (!PRESSURE_PLATE.equals(blockEntity.id())) continue;
 
             // A plate's block entity compound is the trigger data itself, with no wrapper, and
             // polar has already run it through the block entity fixes.
-            var data = blockEntity.data() == null
-                ? ActionTriggerData.EMPTY
-                : decodeOrEmpty(blockEntity.data(), counts);
+            var node = blockEntity.data() == null
+                ? TriggerNodeData.EMPTY
+                : decodeNode(blockEntity.data(), counts);
+            Kind kind = node == null ? null : nodeKind(node);
+            if (kind == null) continue;
+            var data = node.actionData();
             double x = chunk.x() * 16 + blockEntity.x();
             double z = chunk.z() * 16 + blockEntity.z();
             out.add(new Raw(kind, true, x, blockEntity.y(), z, x, blockEntity.y(), z, data));
         }
     }
 
-    /// Only checkpoints and status markers carry actions; reaching a finish or a reset volume is
-    /// the whole effect, so those handlers have no trigger data to read.
-    private static ActionTriggerData markerData(CompoundBinaryTag data, Kind kind, Counts counts) {
-        String key = switch (kind) {
-            case CHECKPOINT -> DATA_CHECKPOINT;
-            case STATUS -> DATA_STATUS;
-            case FINISH, SPAWN -> null;
-        };
-        if (key == null || !data.keySet().contains(key)) return ActionTriggerData.EMPTY;
-        return decodeOrEmpty(data.getCompound(key), counts);
-    }
-
     // Decoding
 
-    private static ActionTriggerData decodeOrEmpty(CompoundBinaryTag tag, Counts counts) {
-        var data = decode(tag, counts);
-        return data == null ? ActionTriggerData.EMPTY : data;
+    /// Plates and trigger markers store trigger node data.
+    private static @Nullable TriggerNodeData decodeNode(CompoundBinaryTag tag, Counts counts) {
+        try {
+            if (TriggerNodeData.CODEC.decode(PolarHelper.CODER, tag)
+                instanceof Result.Ok<TriggerNodeData> ok)
+                return ok.value();
+            counts.failures++;
+            return null;
+        } catch (Exception e) {
+            counts.failures++;
+            return null;
+        }
     }
 
     private static @Nullable ActionTriggerData decode(CompoundBinaryTag tag, Counts counts) {
@@ -315,23 +311,12 @@ final class TriggerScan {
         return buffer;
     }
 
-    private static @Nullable Kind markerKind(String type) {
-        return switch (type) {
-            case CheckpointMarkerHandler.ID -> Kind.CHECKPOINT;
-            case FinishMarkerHandler.ID -> Kind.FINISH;
-            case StatusMarkerHandler.ID -> Kind.STATUS;
-            default -> null;
-        };
-    }
-
-    private static @Nullable Kind plateKind(@Nullable String id) {
-        if (id == null) return null;
-        return switch (id) {
-            case PLATE_CHECKPOINT -> Kind.CHECKPOINT;
-            case PLATE_FINISH -> Kind.FINISH;
-            case PLATE_STATUS -> Kind.STATUS;
-            default -> null;
-        };
+    /// A trigger's kind is whatever its node does; reset triggers are not indexed.
+    private static @Nullable Kind nodeKind(TriggerNodeData node) {
+        if (node.has(CheckpointPlayerInput.KEY)) return Kind.CHECKPOINT;
+        if (node.has(FinishPlayerInput.KEY)) return Kind.FINISH;
+        if (node.has(ResetPlayerInput.KEY)) return null;
+        return Kind.STATUS;
     }
 
     private static double[] corner(

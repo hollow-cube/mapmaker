@@ -29,6 +29,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.registry.RegistryTranscoder;
 import net.minestom.server.tag.Tag;
 import org.intellij.lang.annotations.MagicConstant;
+import net.hollowcube.mapmaker.map.util.debug.WireColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,8 +81,17 @@ public abstract class ObjectEntity<M extends EntityMeta> extends MapEntity<M> im
         preventBlockPlacement = false;
     }
 
+    /// The label Axiom shows on the marker: its name, else its type without the `mapmaker:` namespace.
     public @NotNull String getDisplayName() {
-        return Objects.requireNonNullElseGet(getTag(NAME_TAG), this::getType);
+        var name = getTag(NAME_TAG);
+        if (name != null) return name;
+        var type = getTag(TYPE_TAG);
+        if (type == null) return UNKNOWN_TYPE.value();
+        return type.namespace().equals("mapmaker") ? type.value() : type.asString();
+    }
+
+    public @Nullable WireColor debugColor() {
+        return handler != null ? handler.debugColor() : null;
     }
 
     public @NotNull String getType() {

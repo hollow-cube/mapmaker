@@ -6,11 +6,15 @@ import net.hollowcube.mapmaker.runtime.io.PlayerInput;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.kyori.adventure.key.Key;
+import net.minestom.server.codec.StructCodec;
 
 import java.util.Objects;
 
 public record FinishPlayerInput() implements PlayerInput {
     public static final Key KEY = Key.key("mapmaker", "finish");
+    public static final StructCodec<FinishPlayerInput> CODEC = StructCodec.struct(
+        FinishPlayerInput::new
+    );
 
     @Override
     public void deliver(Dispatch.Delivery delivery) {

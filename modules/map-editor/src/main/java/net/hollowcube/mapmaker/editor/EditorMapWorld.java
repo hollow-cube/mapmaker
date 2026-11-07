@@ -19,9 +19,7 @@ import net.hollowcube.mapmaker.editor.item.BuilderMenuItem;
 import net.hollowcube.mapmaker.editor.item.EnterTestModeItem;
 import net.hollowcube.mapmaker.editor.item.ExitTestModeItem;
 import net.hollowcube.mapmaker.editor.item.SpawnPointItem;
-import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
-import net.hollowcube.mapmaker.editor.parkour.FinishEditor;
-import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
+import net.hollowcube.mapmaker.editor.parkour.TriggerEditor;
 import net.hollowcube.mapmaker.editor.scripting.NatsChangeSource;
 import net.hollowcube.mapmaker.editor.scripting.ReloadingScriptSession;
 import net.hollowcube.mapmaker.editor.scripting.ScriptChangeSource;
@@ -43,9 +41,7 @@ import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
-import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
-import net.hollowcube.mapmaker.runtime.parkour.marker.FinishMarkerHandler;
-import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.marker.TriggerMarkerHandler;
 import net.hollowcube.terraform.legacy.Terraform;
 import net.hollowcube.terraform.legacy.instance.TerraformInstanceBiomes;
 import net.hollowcube.terraform.legacy.storage.TerraformInstanceStorage;
@@ -117,14 +113,12 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         itemRegistry().register(EnterTestModeItem.INSTANCE);
         itemRegistry().register(ExitTestModeItem.INSTANCE);
 
-        itemRegistry().register(CheckpointEditor.PLATE_ITEM);
-        itemRegistry().register(StatusEditor.PLATE_ITEM);
-        itemRegistry().register(FinishEditor.PLATE_ITEM);
+        itemRegistry().register(TriggerEditor.CHECKPOINT_PLATE_ITEM);
+        itemRegistry().register(TriggerEditor.STATUS_PLATE_ITEM);
+        itemRegistry().register(TriggerEditor.FINISH_PLATE_ITEM);
 
         ParkourMapWorld.registerMarkers(objectEntityHandlers());
-        objectEntityHandlers().registerEditor(CheckpointMarkerHandler.ID, CheckpointEditor.MARKER_EDITOR);
-        objectEntityHandlers().registerEditor(StatusMarkerHandler.ID, StatusEditor.MARKER_EDITOR);
-        objectEntityHandlers().registerEditor(FinishMarkerHandler.ID, FinishEditor.MARKER_EDITOR);
+        objectEntityHandlers().registerEditor(TriggerMarkerHandler.ID, TriggerEditor.MARKER_EDITOR);
         objectEntityHandlers().registerDefaultEditor(InteractionEntity.class, InteractionEditorScreen.MARKER_EDITOR);
 
         eventNode(EditorState.Building.class)
@@ -137,8 +131,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             .addListener(PlayerPickEntityEvent.class, EntityEditor::handlePickEntity)
             .addListener(PlayerCustomClickEvent.class, EntityEditorDialog::handleDialogSubmit)
             .addChild(SignEditor.EVENT_NODE)
-            .addChild(CheckpointEditor.EVENT_NODE)
-            .addChild(StatusEditor.EVENT_NODE);
+            .addChild(TriggerEditor.EVENT_NODE);
 
         eventNode().addChild(DisplayEntityEditor.EVENT_NODE);
 

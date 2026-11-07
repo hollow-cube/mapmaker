@@ -1,9 +1,11 @@
 package net.hollowcube.mapmaker.runtime.parkour.node;
 
+import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.block.Trigger;
+import net.hollowcube.mapmaker.map.util.debug.WireColor;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.io.Connection;
 import net.hollowcube.mapmaker.runtime.io.Dispatch;
@@ -11,6 +13,8 @@ import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerCondition;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.SetProgressIndexAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.TeleportAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.variables.VariableQueries;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerStateUpdateEvent;
 import net.hollowcube.mapmaker.runtime.parkour.event.ParkourMapPlayerUpdateStateEvent;
@@ -26,19 +30,32 @@ import java.util.stream.Collectors;
 
 import static net.kyori.adventure.text.Component.translatable;
 
-/// A physical trigger with `enter` and `exit` connections.
+/// A physical trigger with `enter` and `exit` connections: a holder's [TriggerNodeData] placed in the world.
 ///
-/// @param id          the legacy id, persisted in save state history and replays
-public record TriggerNode(
-    String id,
-    Point position,
-    boolean once,
-    ActionTriggerCondition condition,
-    LegacyRules legacy,
-    List<Connection> connections
-) implements Trigger {
+/// @param id the legacy id, persisted in save state history and replays
+public record TriggerNode(String id, Point position, TriggerNodeData data) implements Trigger {
     public static final Key ENTER = Key.key("mapmaker", "enter");
     public static final Key EXIT = Key.key("mapmaker", "exit");
+
+    @Override
+    public WireColor debugColor() {
+        if (data.has(CheckpointPlayerInput.KEY)) return WireColor.WHITE;
+        if (data.has(FinishPlayerInput.KEY)) return WireColor.YELLOW;
+        if (data.has(ResetPlayerInput.KEY)) return WireColor.RED;
+        return WireColor.LIGHT_GRAY;
+    }
+
+    boolean faceOnExit() {
+        return data.legacy().faceOnExit() && !data.has(TeleportAction.KEY);
+    }
+
+    int progressIndex() {
+        return OpUtils.mapOr(
+            data.findLast(SetProgressIndexAction.class),
+            SetProgressIndexAction::value,
+            -1
+        );
+    }
 
     @Override
     public void onEnter(MapWorld ignored, Player player) {
@@ -49,17 +66,18 @@ public record TriggerNode(
         var playState = saveState.state(PlayState.class);
         var map = world.map();
 
-        if (once && playState.hasStatus(id)) return;
-        if (legacy.preCondition(player, map, playState, id)) return;
-        if (checkCondition(player, map, playState, condition)) return;
+        var legacy = data.legacy();
+        if (data.once() && playState.hasStatus(id)) return;
+        if (legacy.preCondition(player, map, playState, id, progressIndex())) return;
+        if (checkCondition(player, map, playState, data.condition())) return;
         if (legacy.postCondition(player, map)) return;
 
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
         var dispatch = new Dispatch(player, playState);
-        dispatch.fire(new Dispatch.Source(id, position), ENTER, connections);
+        dispatch.fire(new Dispatch.Source(id, position), ENTER, data.connections());
         dispatch.drain();
         if (replacesState(ENTER)) return;
-        if (once) playState.addStatus(id);
+        if (data.once()) playState.addStatus(id);
         world.callEvent(
             new ParkourMapPlayerUpdateStateEvent(
                 world,
@@ -75,10 +93,10 @@ public record TriggerNode(
 
     @Override
     public void onExit(MapWorld ignored, Player player) {
-        boolean faceOnExit = legacy.faceOnExit();
-        boolean hasExit = connections.stream().anyMatch(
-            connection -> connection.output().equals(EXIT)
-        );
+        boolean faceOnExit = faceOnExit();
+        boolean hasExit = data.connections()
+            .stream()
+            .anyMatch(connection -> connection.output().equals(EXIT));
         if (!faceOnExit && !hasExit) return;
         var world = ParkourMapWorld.forPlayer(player);
         if (world == null) return;
@@ -86,12 +104,13 @@ public record TriggerNode(
         var saveState = p.saveState();
         var playState = saveState.state(PlayState.class);
 
-        if (faceOnExit) legacy.faceCheckpoint(player, playState, id);
+        if (faceOnExit)
+            data.legacy().faceCheckpoint(player, playState, id, data.checkpointRespawn());
         if (!hasExit) return;
 
         world.callEvent(new ParkourMapPlayerStateUpdateEvent(world, player, saveState, playState));
         var dispatch = new Dispatch(player, playState);
-        dispatch.fire(new Dispatch.Source(id, position), EXIT, connections);
+        dispatch.fire(new Dispatch.Source(id, position), EXIT, data.connections());
         dispatch.drain();
         if (replacesState(EXIT)) return;
         world.callEvent(
@@ -108,7 +127,7 @@ public record TriggerNode(
     }
 
     private boolean replacesState(Key output) {
-        for (var connection : connections) {
+        for (var connection : data.connections()) {
             if (connection.output().equals(output) && connection.params().replacesState())
                 return true;
         }

@@ -8,6 +8,7 @@ import net.minestom.server.codec.StructCodec;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.RegistryKey;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -31,6 +32,10 @@ public final class ActionRegistry {
         return CODEC.list(maxSize)
             .transform(ActionList::new, ActionList::actions)
             .optional(new ActionList());
+    }
+
+    public static @Nullable StructCodec<? extends Action> codec(Key key) {
+        return REGISTRY.get(key);
     }
 
     public static Key getKey(Action action) {

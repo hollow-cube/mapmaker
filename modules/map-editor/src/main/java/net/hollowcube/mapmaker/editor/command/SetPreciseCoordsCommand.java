@@ -4,16 +4,14 @@ import net.hollowcube.command.CommandContext;
 import net.hollowcube.command.arg.Argument;
 import net.hollowcube.command.dsl.CommandDsl;
 import net.hollowcube.common.math.relative.RelativePos;
-import net.hollowcube.mapmaker.editor.parkour.CheckpointEditor;
-import net.hollowcube.mapmaker.editor.parkour.StatusEditor;
 import net.hollowcube.mapmaker.map.entity.marker.MarkerEntity;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.ResetHeightAction;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.base.CoordinateAction;
-import net.hollowcube.mapmaker.runtime.parkour.block.CheckpointPlateBlock;
-import net.hollowcube.mapmaker.runtime.parkour.block.StatusPlateBlock;
-import net.hollowcube.mapmaker.runtime.parkour.marker.CheckpointMarkerHandler;
-import net.hollowcube.mapmaker.runtime.parkour.marker.StatusMarkerHandler;
+import net.hollowcube.mapmaker.editor.parkour.TriggerEditor;
+import net.hollowcube.mapmaker.runtime.parkour.block.PressurePlateBlock;
+import net.hollowcube.mapmaker.runtime.parkour.marker.TriggerMarkerHandler;
+import net.hollowcube.mapmaker.runtime.parkour.node.TriggerNodeData;
 import net.hollowcube.mapmaker.util.CoordinateUtil;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
@@ -79,26 +77,15 @@ public class SetPreciseCoordsCommand extends CommandDsl {
 
         if (updateTarget.value() instanceof Point targetBlockPosition) {
             var block = player.getInstance().getBlock(targetBlockPosition);
-            if (block.handler() instanceof CheckpointPlateBlock) {
-                CheckpointEditor.editBlock(player.getInstance(), targetBlockPosition, block,
-                        data -> updater.accept(data.actions()));
-            } else if (block.handler() instanceof StatusPlateBlock) {
-                StatusEditor.editBlock(player.getInstance(), targetBlockPosition, block,
-                        data -> updater.accept(data.actions()));
-            } else {
-                return;
-            }
+            if (!(block.handler() instanceof PressurePlateBlock)) return;
+            TriggerEditor.editBlock(player.getInstance(), targetBlockPosition, block,
+                    data -> updater.accept(data.actions()));
         } else if (updateTarget.value() instanceof MarkerEntity marker) {
-            var tag = switch (marker.getType()) {
-                case CheckpointMarkerHandler.ID -> CheckpointPlateBlock.ENTITY_DATA_TAG;
-                case StatusMarkerHandler.ID -> StatusPlateBlock.ENTITY_DATA_TAG;
-                default -> null;
-            };
-            if (tag == null) return;
-            marker.updateTag(tag, data -> {
-                updater.accept(data.actions());
-                return data;
-            });
+            if (!TriggerMarkerHandler.ID.equals(marker.getType())) return;
+            var node = marker.getTag(TriggerMarkerHandler.DATA_TAG);
+            var data = node.actionData();
+            updater.accept(data.actions());
+            marker.setData(node.withActionData(data).mergeInto(marker.getData()), player, false);
         } else {
             return;
         }

@@ -6,12 +6,10 @@ import net.hollowcube.mapmaker.map.event.BlockItemPlaceEvent;
 import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.component.DataComponents;
-import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.component.CustomData;
 import net.minestom.server.tag.TagHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,8 +27,16 @@ public class BlockItemHandler extends ItemHandler {
     }
 
     public BlockItemHandler(@NotNull Supplier<BlockHandler> blockHandler, @NotNull Block block, @NotNull String sprite, @Nullable ItemUpdateFunc extraData) {
-        super(blockHandler.get().getKey().asString(), RIGHT_CLICK_BLOCK);
-        this.block = block.withHandler(blockHandler.get());
+        this(blockHandler.get().getKey().asString(), block.withHandler(blockHandler.get()), sprite, extraData);
+    }
+
+    public BlockItemHandler(@NotNull String id, @NotNull Block block, @NotNull String sprite) {
+        this(id, block, sprite, null);
+    }
+
+    private BlockItemHandler(@NotNull String id, @NotNull Block block, @NotNull String sprite, @Nullable ItemUpdateFunc extraData) {
+        super(id, RIGHT_CLICK_BLOCK);
+        this.block = block;
         this.sprite = BadSprite.require(sprite);
         this.extraData = extraData;
     }
@@ -48,7 +54,7 @@ public class BlockItemHandler extends ItemHandler {
     public void build(ItemStack.@NotNull Builder builder, @Nullable CompoundBinaryTag tag) {
         super.build(builder, tag);
 
-        var material = this.block.registry().material();
+        var material = this.block.material();
         if (material != null) {
             builder.material(material);
         }
@@ -67,7 +73,7 @@ public class BlockItemHandler extends ItemHandler {
         var blockData = click.itemStack().get(DataComponents.BLOCK_ENTITY_DATA);
         var block = blockData != null ? this.block.withNbt(blockData.nbt()) : this.block;
         var existingBlock = instance.getBlock(click.blockPosition());
-        var event = new BlockItemPlaceEvent(click.player(), new BlockVec(click.placePosition()), block);
+        var event = new BlockItemPlaceEvent(click.player(), click.placePosition().asBlockVec(), block);
         EventDispatcher.callCancellable(event, () -> {
             instance.placeBlock(new BlockHandler.PlayerPlacement(
                     block, existingBlock, instance, click.placePosition(),

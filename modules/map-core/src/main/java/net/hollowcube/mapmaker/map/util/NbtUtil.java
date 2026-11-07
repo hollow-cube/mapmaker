@@ -4,14 +4,19 @@ import net.hollowcube.mapmaker.to_be_refactored.BadSprite;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.codec.Codec;
+import net.minestom.server.codec.Transcoder;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.registry.RegistryTranscoder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
 import java.util.List;
 
@@ -127,6 +132,12 @@ public final class NbtUtil {
             if (model != null) itemStack = itemStack.with(DataComponents.ITEM_MODEL, model);
         }
         return itemStack;
+    }
+
+    public static <T> @UnknownNullability Component prettyPrint(@NotNull Codec<T> codec, @NotNull T value) {
+        var coder = new RegistryTranscoder<>(Transcoder.NBT, MinecraftServer.process());
+        var nbt = codec.encode(coder, value).orElse(null);
+        return prettyPrint(nbt);
     }
 
     public static @NotNull Component prettyPrint(@NotNull BinaryTag tag) {

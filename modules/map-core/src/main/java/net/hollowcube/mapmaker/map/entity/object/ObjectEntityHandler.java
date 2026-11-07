@@ -1,6 +1,7 @@
 package net.hollowcube.mapmaker.map.entity.object;
 
 import net.hollowcube.mapmaker.map.MapWorld;
+import net.hollowcube.mapmaker.map.util.debug.WireColor;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
@@ -47,6 +48,10 @@ public abstract class ObjectEntityHandler {
 
     public boolean canSendToPlayer(@NotNull Player player) {
         return true;
+    }
+
+    public @Nullable WireColor debugColor() {
+        return null;
     }
 
     public void addViewer(@NotNull MapWorld world, @NotNull Player player) {
