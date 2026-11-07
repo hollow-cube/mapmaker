@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.runtime.parkour.hud;
 
+import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.runtime.PlayState;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourState;
@@ -100,11 +101,14 @@ public class ResetHeightDisplay {
         public void hide(Player player) {
             if (removeViewer(player)) {
                 player.sendPacket(new DestroyEntitiesPacket(this.getEntityId()));
+                AxiomPlayer.get(player)
+                    .updateIgnoredEntities(ignored -> ignored.remove(getUuid()), false);
             }
         }
 
         public void show(Player player) {
             this.addViewer(player);
+            AxiomPlayer.get(player).updateIgnoredEntities(ignored -> ignored.add(getUuid()));
             var world = ParkourMapWorld.forPlayer(player);
             if (world != null) update(player, world);
         }

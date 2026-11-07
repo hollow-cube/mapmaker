@@ -3,17 +3,14 @@ package net.hollowcube.mapmaker.map.util.debug;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Metadata;
-import net.minestom.server.entity.MetadataDef;
-import net.minestom.server.entity.Player;
+import net.minestom.server.entity.*;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.DestroyEntitiesPacket;
@@ -23,11 +20,7 @@ import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.TaskSchedule;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 /// Not thread safe, use from player tick thread.
 public final class DebugDraw {
@@ -78,6 +71,7 @@ public final class DebugDraw {
         if (entityIds == null) return;
 
         player.sendPacket(new DestroyEntitiesPacket(entityIds));
+        AxiomPlayer.get(player).updateIgnoredEntities(ignored -> entityIds.forEach(id -> ignored.remove(new UUID(0, id))), false);
     }
 
     public void clear(String prefix) {
@@ -92,6 +86,7 @@ public final class DebugDraw {
         if (ids.isEmpty()) return;
 
         player.sendPacket(new DestroyEntitiesPacket(ids));
+        AxiomPlayer.get(player).updateIgnoredEntities(ignored -> ids.forEach(id -> ignored.remove(new UUID(0, id))), false);
     }
 
     private IntArrayList drawInternal(String key, DebugShape shape) {
@@ -106,6 +101,7 @@ public final class DebugDraw {
 
         shapes.put(key, entityIds);
         player.sendPackets(packets);
+        AxiomPlayer.get(player).updateIgnoredEntities(ignored -> entityIds.forEach(id -> ignored.add(new UUID(0, id))));
         return entityIds;
     }
 
@@ -207,7 +203,7 @@ public final class DebugDraw {
 
                 int entityId = Entity.generateId();
                 entityIds.add(entityId);
-                packets.add(new SpawnEntityPacket(entityId, UUID.randomUUID(), EntityType.TEXT_DISPLAY, position, 0, 0, Vec.ZERO));
+                packets.add(new SpawnEntityPacket(entityId, new UUID(0, entityId), EntityType.TEXT_DISPLAY, position, 0, 0, Vec.ZERO));
                 packets.add(new EntityMetaDataPacket(entityId, meta));
             }
         }

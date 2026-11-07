@@ -13,13 +13,10 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNullByDefault;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 /// One player's Axiom negotiation and editor state for a single backend connection. Desired state (build mode)
@@ -34,6 +31,7 @@ public final class AxiomPlayer {
     private final Player player;
     private final AxiomTunnel tunnel = new AxiomTunnel();
     private final Set<UUID> ignoredEntities = ConcurrentHashMap.newKeySet();
+    private final AtomicBoolean ignoredEntitiesDirty = new AtomicBoolean();
 
     private int api = -1;
     private long handshakeId = 0;
@@ -76,8 +74,18 @@ public final class AxiomPlayer {
     }
 
     public void updateIgnoredEntities(Consumer<Set<UUID>> updater) {
+        updateIgnoredEntities(updater, true);
+    }
+
+    public void updateIgnoredEntities(Consumer<Set<UUID>> updater, boolean resend) {
         updater.accept(this.ignoredEntities);
-        new AxiomClientboundIgnoreDisplayEntitiesPacket(this.ignoredEntities).send(player);
+        if (resend) this.ignoredEntitiesDirty.set(true);
+    }
+
+    public static void sendIgnoredEntitiesIfDirty(Player player) {
+        var axiomPlayer = player.getTag(TAG);
+        if (axiomPlayer == null || !axiomPlayer.ignoredEntitiesDirty.getAndSet(false)) return;
+        new AxiomClientboundIgnoreDisplayEntitiesPacket(Set.copyOf(axiomPlayer.ignoredEntities)).send(player);
     }
 
     AxiomTunnel tunnel() {

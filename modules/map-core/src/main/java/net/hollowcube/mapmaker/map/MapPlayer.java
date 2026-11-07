@@ -9,6 +9,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.util.CommandHandlingPlayer;
 import net.hollowcube.common.util.FutureUtil;
+import net.hollowcube.compat.axiom.AxiomPlayer;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.hollowcube.mapmaker.cosmetic.CosmeticType;
 import net.hollowcube.mapmaker.map.block.BlockTags;
@@ -22,8 +23,8 @@ import net.hollowcube.mapmaker.map.event.PlayerLandEvent;
 import net.hollowcube.mapmaker.map.event.PlayerSwingEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerEnterEntityEvent;
 import net.hollowcube.mapmaker.map.event.entity.Map2PlayerExitEntityEvent;
-import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.instance.WorldIndex;
+import net.hollowcube.mapmaker.map.item.vanilla.FireworkRocketItem;
 import net.hollowcube.mapmaker.map.util.PlayerVisibility;
 import net.hollowcube.mapmaker.map.util.spatial.SpatialObject;
 import net.hollowcube.mapmaker.misc.MiscFunctionality;
@@ -243,6 +244,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
         fallTick();
         weatherTick();
         jumpTick();
+        AxiomPlayer.sendIgnoredEntitiesIfDirty(this);
     }
 
     @Override
@@ -1102,6 +1104,7 @@ public abstract class MapPlayer extends CommandHandlingPlayer implements MiscFun
             new SetPassengersPacket(nameTagOffsetEntityId, List.of(nameTagEntityId)),
             new BundlePacket()
         ));
+        AxiomPlayer.get(player).updateIgnoredEntities(ignored -> ignored.add(nameTagOffsetEntityUuid));
     }
 
     private void destroyNameTagEntity(Player player) {
