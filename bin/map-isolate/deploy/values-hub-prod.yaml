@@ -13,6 +13,9 @@ image:
     - name: dockerio
 
 args:
+  - "./map-isolate"
+  - "-Xms1000M"
+  - "-Xmx1000M"
   - "b210fa07-d64c-4100-a2db-1426c35b7533"
 
 resources:
