@@ -5,7 +5,6 @@ import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.util.Value;
 import net.hollowcube.schem.util.GameDataProvider;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,7 +13,7 @@ public class SchemUpgrader implements GameDataProvider, net.hollowcube.terraform
 
     @Override
     public int dataVersion() {
-        return MinecraftServer.DATA_VERSION;
+        return DataFixer.maxVersion();
     }
 
     @Override
