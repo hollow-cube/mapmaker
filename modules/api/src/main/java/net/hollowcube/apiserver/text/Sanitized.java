@@ -120,8 +120,7 @@ record Sanitized(
             var survived = false;
             var onlyMarks = true;
             for (var c : fold(cp).toCharArray()) {
-                if (Character.getType(c) == Character.NON_SPACING_MARK)
-                    continue; // the accent off an é
+                if (Character.getType(c) == Character.NON_SPACING_MARK) continue; // the accent off an é
                 onlyMarks = false;
                 var replaced = REPLACEMENTS.get(c);
                 if (replaced != null) c = replaced;

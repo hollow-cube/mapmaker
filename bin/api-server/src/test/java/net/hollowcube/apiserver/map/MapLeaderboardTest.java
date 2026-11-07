@@ -61,10 +61,7 @@ class MapLeaderboardTest {
         for (var player : List.of(ALICE, BOB, CAROL, DAVE))
             TEST_DB.seed(
                 "insert into player_data (id, username, first_join, last_online, online) values ('"
-                    + player
-                    + "', 'p"
-                    + player.toString().charAt(35)
-                    + "', now(), now(), false)"
+                    + player + "', 'p" + player.toString().charAt(35) + "', now(), now(), false)"
             );
     }
 
@@ -308,10 +305,7 @@ class MapLeaderboardTest {
             1,
             count(
                 "select count(*) from player_notifications where type = 'map_time_deleted' and key = '"
-                    + map
-                    + "' and player_id = '"
-                    + ALICE
-                    + "'"
+                    + map + "' and player_id = '" + ALICE + "'"
             )
         );
         assertTrue(

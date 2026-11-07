@@ -320,14 +320,7 @@ final class Profanities {
         term("spunk", "spunky", "tidspunkt");
         term("suckmy");
         term("sodom");
-        term(
-            "semen",
-            "sement",
-            "horsemen",
-            "norsemen",
-            "wisemen",
-            "advertisemen"
-        ); // basement, casement
+        term("semen", "sement", "horsemen", "norsemen", "wisemen", "advertisemen"); // basement, casement
         term("teensex");
         term("tittie");
         term("titty", "entitty");

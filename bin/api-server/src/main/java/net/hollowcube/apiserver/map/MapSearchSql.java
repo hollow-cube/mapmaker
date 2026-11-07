@@ -20,17 +20,14 @@ final class MapSearchSql {
 
     /// Go's `maps_published`: what the listing shows at all.
     private static final String LISTED = "maps.deleted_at is null"
-        + " and maps.published_at is not null"
-        + " and maps.published_id is not null"
+        + " and maps.published_at is not null" + " and maps.published_id is not null"
         + " and maps.listed";
 
     /// The view's difficulty bucket, which reads the `map_stats` join the query already makes.
     private static final String DIFFICULTY = "(case"
         + " when coalesce(stats.play_count, 0) < 10 then -1"
-        + " when stats.clear_rate < 0.05 then 4"
-        + " when stats.clear_rate < 0.25 then 3"
-        + " when stats.clear_rate < 0.5 then 2"
-        + " when stats.clear_rate < 0.75 then 1"
+        + " when stats.clear_rate < 0.05 then 4" + " when stats.clear_rate < 0.25 then 3"
+        + " when stats.clear_rate < 0.5 then 2" + " when stats.clear_rate < 0.75 then 1"
         + " else 0 end)";
 
     private MapSearchSql() {}
@@ -68,8 +65,7 @@ final class MapSearchSql {
         var direction = search.ascending() ? " asc" : " desc";
         return switch (search.sort()) {
             case BEST -> SqlFragment.of(
-                "maps.quality_override"
-                    + direction
+                "maps.quality_override" + direction
                     + ", maps.total_likes desc, maps.published_at desc, maps.id"
             );
             case PUBLISHED -> SqlFragment.of("maps.published_at" + direction + ", maps.id");

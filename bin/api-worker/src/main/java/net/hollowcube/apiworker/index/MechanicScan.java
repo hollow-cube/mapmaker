@@ -63,9 +63,8 @@ final class MechanicScan {
                             if (item != null) mechanics.add(item);
                         }
                     }
-                    case TakeItemAction _, TakeElytraAction _ -> mechanics.add(
-                        Mechanic.ITEM_REVOKE
-                    );
+                    case TakeItemAction _, TakeElytraAction _ ->
+                        mechanics.add(Mechanic.ITEM_REVOKE);
                     case GiveElytraAction _ -> mechanics.add(Mechanic.ELYTRA);
                     case EditAttributeAction edit -> {
                         if (edit.attribute() != null)

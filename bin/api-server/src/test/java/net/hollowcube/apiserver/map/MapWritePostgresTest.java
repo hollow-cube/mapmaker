@@ -35,8 +35,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @EnabledIfEnvironmentVariable(named = "MAP_WRITE_TEST_DATABASE_URL", matches = ".+")
 class MapWritePostgresTest {
 
-    private static final String SCHEMA = "map_write_test_"
-        + UUID.randomUUID().toString().replace("-", "");
+    private static final String SCHEMA = "map_write_test_" + UUID.randomUUID()
+        .toString()
+        .replace("-", "");
     private static HikariDataSource pool;
     private ApiDatabase db;
     private MapServiceImpl service;
@@ -270,7 +271,8 @@ class MapWritePostgresTest {
         );
         assertEquals(
             "987-654-321",
-            assertInstanceOf(PublishMapResult.Success.class, retrying.publish(second)).map()
+            assertInstanceOf(PublishMapResult.Success.class, retrying.publish(second))
+                .map()
                 .publishedId()
         );
     }
@@ -307,7 +309,8 @@ class MapWritePostgresTest {
         return assertInstanceOf(
             CreateMapResult.Success.class,
             service.create(player, MapSize.NORMAL, 776)
-        ).map()
+        )
+            .map()
             .id();
     }
 

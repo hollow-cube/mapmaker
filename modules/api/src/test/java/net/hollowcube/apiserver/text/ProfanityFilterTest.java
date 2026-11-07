@@ -184,19 +184,10 @@ class ProfanityFilterTest {
         assertEquals("well ****", result.censored('*'));
 
         assertEquals("****", ProfanityFilter.test("fück").censored('*'));
-        assertEquals(
-            "*****",
-            ProfanityFilter.test("fu\u0308ck").censored('*')
-        ); // combining mark inside the span
-        assertEquals(
-            "*******",
-            ProfanityFilter.test("r a p e").censored('*')
-        ); // spelled out: the whole span
+        assertEquals("*****", ProfanityFilter.test("fu\u0308ck").censored('*')); // combining mark inside the span
+        assertEquals("*******", ProfanityFilter.test("r a p e").censored('*')); // spelled out: the whole span
         assertEquals("*****!", ProfanityFilter.test("c()ck!").censored('*'));
-        assertEquals(
-            "😀 ****",
-            ProfanityFilter.test("😀 fuck").censored('*')
-        ); // surrogate pair before it
+        assertEquals("😀 ****", ProfanityFilter.test("😀 fuck").censored('*')); // surrogate pair before it
         assertEquals("****😀****", ProfanityFilter.test("fuck😀shit").censored('*'));
         assertEquals("**** ****", ProfanityFilter.test("ｆｕｃｋ shit").censored('*'));
     }

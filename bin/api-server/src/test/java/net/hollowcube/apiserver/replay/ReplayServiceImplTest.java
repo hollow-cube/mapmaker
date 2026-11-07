@@ -658,8 +658,7 @@ class ReplayServiceImplTest {
         // The id is hashed rather than used, so a client-supplied one cannot leave the prefix.
         assertTrue(
             segment.objectReference().startsWith(
-                "replays/"
-                    + HexFormat.of().formatHex(sha256(ID.getBytes(StandardCharsets.UTF_8)))
+                "replays/" + HexFormat.of().formatHex(sha256(ID.getBytes(StandardCharsets.UTF_8)))
                     + "/"
             )
         );
@@ -753,19 +752,20 @@ class ReplayServiceImplTest {
                         ),
                         Blob.of(body)
                     );
-                else replays.commit(
-                    new ReplayCommit(
-                        ID,
-                        null,
-                        "lost-upload",
-                        PREAMBLE.length,
-                        0,
-                        false,
-                        null,
-                        digest(body)
-                    ),
-                    Blob.of(body)
-                );
+                else
+                    replays.commit(
+                        new ReplayCommit(
+                            ID,
+                            null,
+                            "lost-upload",
+                            PREAMBLE.length,
+                            0,
+                            false,
+                            null,
+                            digest(body)
+                        ),
+                        Blob.of(body)
+                    );
             })
         );
         assertTrue(s3.objects().isEmpty());

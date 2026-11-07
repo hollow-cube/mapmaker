@@ -67,11 +67,8 @@ class ChatFilterTest {
                     worst = Math.max(worst, diff);
                     if (diff > TOLERANCE) {
                         failures.add(
-                            row.get("text")
-                                + "\n  expected "
-                                + Arrays.toString(expected)
-                                + "\n  actual   "
-                                + actual
+                            row.get("text") + "\n  expected " + Arrays.toString(expected)
+                                + "\n  actual   " + actual
                         );
                         break;
                     }
@@ -81,8 +78,7 @@ class ChatFilterTest {
         System.out.println("worst difference " + worst);
         assertTrue(
             failures.isEmpty(),
-            failures.size()
-                + " differ:\n"
+            failures.size() + " differ:\n"
                 + String.join("\n", failures.subList(0, Math.min(20, failures.size())))
         );
     }

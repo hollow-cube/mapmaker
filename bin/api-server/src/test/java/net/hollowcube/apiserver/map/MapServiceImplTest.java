@@ -310,7 +310,8 @@ class MapServiceImplTest {
         );
         assertEquals(
             "000-000-007",
-            assertInstanceOf(PublishMapResult.Success.class, smallId.publish(id)).map()
+            assertInstanceOf(PublishMapResult.Success.class, smallId.publish(id))
+                .map()
                 .publishedId()
         );
         assertEquals(id, client.get("000-000-007").id());
@@ -673,8 +674,7 @@ class MapServiceImplTest {
         state(done, BUILDER, "playing", false, 1_000);
         state(going, BUILDER, "verifying", false, 4_000);
         TEST_DB.seed(
-            "update save_states set updated = now() - interval '1 hour' where map_id = '"
-                + going
+            "update save_states set updated = now() - interval '1 hour' where map_id = '" + going
                 + "'"
         );
         state(going, BUILDER, "playing", false, 7_000);

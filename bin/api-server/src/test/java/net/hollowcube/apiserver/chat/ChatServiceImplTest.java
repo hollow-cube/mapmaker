@@ -145,8 +145,7 @@ class ChatServiceImplTest {
     void send_countsAnUnexpiredHypercubeAsOneToo() {
         TEST_DB.seed(
             "update player_data set hypercube_start = now(), hypercube_end = now() + interval '1 day' where id = '"
-                + SENDER
-                + "'"
+                + SENDER + "'"
         );
 
         chat.send(SENDER, "server-1", ChatChannel.GLOBAL, null, "hi", null);
@@ -411,9 +410,7 @@ class ChatServiceImplTest {
             HttpRequest.newBuilder()
                 .uri(
                     URI.create(
-                        "http://127.0.0.1:"
-                            + server.getAddress().getPort()
-                            + ChatServer.PATH
+                        "http://127.0.0.1:" + server.getAddress().getPort() + ChatServer.PATH
                             + "/send"
                     )
                 )
@@ -528,8 +525,7 @@ class ChatServiceImplTest {
 
         assertEquals(
             List.of(
-                "1970-01-01 00:00:01|"
-                    + SENDER
+                "1970-01-01 00:00:01|" + SENDER
                     + "|server-1|map-1|world-1|spawn|false|success|null|3"
             ),
             commandRows()
@@ -589,9 +585,7 @@ class ChatServiceImplTest {
 
         assertEquals(
             List.of(
-                "1970-01-01 00:00:01|"
-                    + SENDER
-                    + "|server-1|null|null|tp|true|execution_error"
+                "1970-01-01 00:00:01|" + SENDER + "|server-1|null|null|tp|true|execution_error"
                     + "|java.lang.IllegalStateException: nope|12"
             ),
             commandRows()
@@ -737,8 +731,7 @@ class ChatServiceImplTest {
             assertEquals(new ChatResult.Sent(), sent);
             assertEquals(
                 List.of(
-                    "global|"
-                        + SENDER
+                    "global|" + SENDER
                         + "|ja to już kurwa jestem zrezygnowany|chat-filter|strong_swear",
                     "global|" + SENDER + "|damn this jump is hard|null|null"
                 ),
@@ -775,15 +768,8 @@ class ChatServiceImplTest {
         ) {
             while (rs.next()) {
                 out.add(
-                    rs.getString(1)
-                        + "|"
-                        + rs.getString(2)
-                        + "|"
-                        + rs.getString(3)
-                        + "|"
-                        + rs.getString(4)
-                        + "|"
-                        + rs.getString(5)
+                    rs.getString(1) + "|" + rs.getString(2) + "|" + rs.getString(3) + "|"
+                        + rs.getString(4) + "|" + rs.getString(5)
                 );
             }
         }

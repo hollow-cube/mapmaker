@@ -30,8 +30,8 @@ public final class Roles {
         return switch (effective(role, hypercubeEnd)) {
             case DEFAULT -> 0;
             case HYPERCUBE, MEDIA -> EXTENDED_LIMITS;
-            case CT_1, MOD_1, DEV_1, CT_2, MOD_2, DEV_2, CT_3, MOD_3, DEV_3 -> EXTENDED_LIMITS
-                | GENERIC_STAFF;
+            case CT_1, MOD_1, DEV_1, CT_2, MOD_2, DEV_2, CT_3, MOD_3, DEV_3 ->
+                EXTENDED_LIMITS | GENERIC_STAFF;
         };
     }
 

@@ -16,9 +16,8 @@ class JobSpecTest {
 
     record IndexMap(String mapId, String reason) {}
 
-    private static final JobSpec<IndexMap> INDEX_MAP = JobSpec
-        .queued("index-map", IndexMap.class, IndexMap::mapId)
-        .attempts(3);
+    private static final JobSpec<IndexMap> INDEX_MAP =
+        JobSpec.queued("index-map", IndexMap.class, IndexMap::mapId).attempts(3);
 
     @Test
     void enqueue_keysTheRowByTheDataAndStoresTheDataAsJson() {

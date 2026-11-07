@@ -261,7 +261,8 @@ public final class OnnxModel implements AutoCloseable {
 
     private static void check(MemorySegment api, MemorySegment status) {
         if (status.equals(MemorySegment.NULL)) return;
-        var message = call(P_P, fn(api, GET_ERROR_MESSAGE), status).reinterpret(Long.MAX_VALUE)
+        var message = call(P_P, fn(api, GET_ERROR_MESSAGE), status)
+            .reinterpret(Long.MAX_VALUE)
             .getString(0);
         callVoid(fn(api, RELEASE_STATUS), status);
         throw new IllegalStateException("onnxruntime: " + message);

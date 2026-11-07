@@ -26,8 +26,7 @@ final class FakeMapClients implements AutoCloseable {
     private final List<String> analytics = new CopyOnWriteArrayList<>();
     private final HttpServer analyticsServer;
     private boolean analyticsFinished;
-    @Nullable
-    RuntimeException publishFailure;
+    @Nullable RuntimeException publishFailure;
 
     final NatsPublisher nats;
     final PostHogClient posthog;

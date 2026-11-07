@@ -50,7 +50,8 @@ public final class DisplayNames {
         return switch (effective) {
             case DEFAULT -> null;
             case HYPERCUBE -> "hypercube/gold";
-            case MEDIA, CT_1, MOD_1, DEV_1, CT_2, MOD_2, DEV_2, CT_3, MOD_3, DEV_3 -> effective.pgLabel();
+            case MEDIA, CT_1, MOD_1, DEV_1, CT_2, MOD_2, DEV_2, CT_3, MOD_3, DEV_3 ->
+                effective.pgLabel();
         };
     }
 

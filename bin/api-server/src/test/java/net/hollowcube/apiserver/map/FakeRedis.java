@@ -34,10 +34,11 @@ final class FakeRedis extends JedisPooled {
         }
     }
 
-    private static final Comparator<Map.Entry<Member, Double>> ORDER = Map.Entry.<Member, Double>comparingByValue().thenComparing(
-        entry -> entry.getKey().bytes(),
-        Arrays::compareUnsigned
-    );
+    private static final Comparator<Map.Entry<Member, Double>> ORDER =
+        Map.Entry.<Member, Double>comparingByValue().thenComparing(
+            entry -> entry.getKey().bytes(),
+            Arrays::compareUnsigned
+        );
 
     final List<String> deleted = new CopyOnWriteArrayList<>();
     private final Map<String, Map<Member, Double>> sets = new HashMap<>();
@@ -127,11 +128,8 @@ final class FakeRedis extends JedisPooled {
                     var name = new String(arguments.getFirst(), StandardCharsets.UTF_8);
                     replies.add(switch (name) {
                         case "DEL" -> del(arguments.get(1));
-                        case "ZCOUNT" -> zcount(
-                            arguments.get(1),
-                            arguments.get(2),
-                            arguments.get(3)
-                        );
+                        case "ZCOUNT" ->
+                            zcount(arguments.get(1), arguments.get(2), arguments.get(3));
                         // The score and member end a ZADD, so whatever sits between them and
                         // the key is the flags, which a pipelined write must honour like any other.
                         case "ZADD" -> add(

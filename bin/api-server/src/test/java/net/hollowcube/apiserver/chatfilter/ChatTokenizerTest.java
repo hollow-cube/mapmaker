@@ -78,10 +78,7 @@ class ChatTokenizerTest {
         assertTrue(count > 0, "empty golden file");
         assertTrue(
             failures.isEmpty(),
-            failures.size()
-                + "/"
-                + count
-                + " differ:\n"
+            failures.size() + "/" + count + " differ:\n"
                 + String.join("\n", failures.subList(0, Math.min(20, failures.size())))
         );
     }

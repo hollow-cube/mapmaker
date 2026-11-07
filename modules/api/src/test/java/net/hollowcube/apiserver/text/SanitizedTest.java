@@ -17,14 +17,8 @@ class SanitizedTest {
         assertEquals("fuck", Sanitized.of("fück").text());
         assertEquals("fuck", Sanitized.of("ｆｕｃｋ").text());
         assertEquals("fi", Sanitized.of("ﬁ").text()); // one code point, two letters
-        assertEquals(
-            "",
-            Sanitized.of("﷽").text()
-        ); // one code point, eighteen chars, none of them ours
-        assertEquals(
-            "fifi",
-            Sanitized.of("ﬁ﷽ﬁ").text()
-        ); // and the arrays grow past the input length
+        assertEquals("", Sanitized.of("﷽").text()); // one code point, eighteen chars, none of them ours
+        assertEquals("fifi", Sanitized.of("ﬁ﷽ﬁ").text()); // and the arrays grow past the input length
         assertEquals("rape", Sanitized.of("rаpe").text()); // cyrillic а
         assertEquals("", Sanitized.of("日本語 🎉").text());
         assertEquals("io", Sanitized.of("10").text());

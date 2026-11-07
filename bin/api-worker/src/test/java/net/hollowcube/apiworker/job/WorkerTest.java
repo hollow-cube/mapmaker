@@ -27,17 +27,14 @@ class WorkerTest {
     record IndexMap(String mapId, @Nullable String reason) {}
 
     private static final JobSpec<Void> COUNT = JobSpec.timed("count", "*/5 * * * *");
-    private static final JobSpec<IndexMap> INDEX = JobSpec
-        .queued("index", IndexMap.class, IndexMap::mapId)
-        .attempts(2);
+    private static final JobSpec<IndexMap> INDEX =
+        JobSpec.queued("index", IndexMap.class, IndexMap::mapId).attempts(2);
 
     private static final class Recording<D> implements JobRunner<D> {
         final List<D> seen = new ArrayList<>();
         int runs;
-        @Nullable
-        RuntimeException failure;
-        @Nullable
-        Error death;
+        @Nullable RuntimeException failure;
+        @Nullable Error death;
 
         @Override
         public void run(@Nullable D data) {
@@ -58,11 +55,8 @@ class WorkerTest {
 
     private void makeDue(String job, String instance) {
         TEST_DB.seed(
-            "update jobs set run_at = now() - interval '1 second' where job = '"
-                + job
-                + "' and instance = '"
-                + instance
-                + "'"
+            "update jobs set run_at = now() - interval '1 second' where job = '" + job
+                + "' and instance = '" + instance + "'"
         );
     }
 

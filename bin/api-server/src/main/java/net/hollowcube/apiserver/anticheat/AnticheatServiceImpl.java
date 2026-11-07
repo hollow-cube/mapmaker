@@ -63,14 +63,10 @@ public final class AnticheatServiceImpl implements AnticheatService {
         }
 
         return switch (written) {
-            case AnticheatTraceStore.Result.TooLarge _ -> throw new IpcException(
-                413,
-                "trace is longer than the store accepts"
-            );
-            case AnticheatTraceStore.Result.NotATrace _ -> throw new IpcException(
-                400,
-                "body does not open with the HCTR magic"
-            );
+            case AnticheatTraceStore.Result.TooLarge _ ->
+                throw new IpcException(413, "trace is longer than the store accepts");
+            case AnticheatTraceStore.Result.NotATrace _ ->
+                throw new IpcException(400, "body does not open with the HCTR magic");
             case AnticheatTraceStore.Result.Stored stored -> {
                 // Read before the upsert only to tell the proxy which of its retries this was; the
                 // two racing is a pair of first uploads for one trace, which is nothing.

@@ -117,10 +117,7 @@ public final class ReplayServiceImpl implements ReplayService {
             if (segment.data().length != segment.length())
                 throw new IpcException(
                     500,
-                    "replay "
-                        + id
-                        + " segment "
-                        + segmentIndex
+                    "replay " + id + " segment " + segmentIndex
                         + " has an inconsistent inline length"
                 );
             return Blob.of(segment.data());
@@ -148,14 +145,7 @@ public final class ReplayServiceImpl implements ReplayService {
         if (length == null || length <= 0 || start < 0 || start >= length || endInclusive < start)
             throw new IpcException(
                 416,
-                "replay "
-                    + id
-                    + " is "
-                    + length
-                    + " bytes; "
-                    + start
-                    + "-"
-                    + endInclusive
+                "replay " + id + " is " + length + " bytes; " + start + "-" + endInclusive
                     + " is not in it"
             );
         return object(row.compactedObject(), start, Math.min(endInclusive, length - 1));

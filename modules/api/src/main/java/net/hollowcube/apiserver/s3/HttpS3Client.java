@@ -48,11 +48,11 @@ public final class HttpS3Client implements S3Client {
     private static final String SERVICE = "s3";
     private static final String UNSIGNED_PAYLOAD = "UNSIGNED-PAYLOAD";
     /// What a request with no body hashes to.
-    private static final String EMPTY_PAYLOAD = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
+    private static final String EMPTY_PAYLOAD =
+        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
 
-    private static final DateTimeFormatter STAMP = DateTimeFormatter
-        .ofPattern("yyyyMMdd'T'HHmmss'Z'")
-        .withZone(ZoneOffset.UTC);
+    private static final DateTimeFormatter STAMP =
+        DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'").withZone(ZoneOffset.UTC);
     private static final DateTimeFormatter DAY = DateTimeFormatter.ofPattern("yyyyMMdd")
         .withZone(ZoneOffset.UTC);
 
@@ -294,24 +294,9 @@ public final class HttpS3Client implements S3Client {
             + (endpoint.getPort() == -1 || endpoint.getPort() == defaultPort()
                 ? ""
                 : ":" + endpoint.getPort());
-        var canonicalRequest = method
-            + "\n"
-            + canonicalPath
-            + "\n"
-            + canonicalQuery
-            + "\n"
-            + "host:"
-            + host
-            + "\n"
-            + "x-amz-content-sha256:"
-            + payloadHash
-            + "\n"
-            + "x-amz-date:"
-            + stamp
-            + "\n"
-            + "\n"
-            + "host;x-amz-content-sha256;x-amz-date\n"
-            + payloadHash;
+        var canonicalRequest = method + "\n" + canonicalPath + "\n" + canonicalQuery + "\n"
+            + "host:" + host + "\n" + "x-amz-content-sha256:" + payloadHash + "\n" + "x-amz-date:"
+            + stamp + "\n" + "\n" + "host;x-amz-content-sha256;x-amz-date\n" + payloadHash;
 
         var signature = signature(canonicalRequest, stamp, scope, day);
 
@@ -321,25 +306,15 @@ public final class HttpS3Client implements S3Client {
             .header("x-amz-content-sha256", payloadHash)
             .header(
                 "Authorization",
-                ALGORITHM
-                    + " Credential="
-                    + accessKey
-                    + "/"
-                    + scope
-                    + ", SignedHeaders=host;x-amz-content-sha256;x-amz-date"
-                    + ", Signature="
+                ALGORITHM + " Credential=" + accessKey + "/" + scope
+                    + ", SignedHeaders=host;x-amz-content-sha256;x-amz-date" + ", Signature="
                     + signature
             );
     }
 
     /// The whole of SigV4 that is not string assembly.
     String signature(String canonicalRequest, String stamp, String scope, String day) {
-        var stringToSign = ALGORITHM
-            + "\n"
-            + stamp
-            + "\n"
-            + scope
-            + "\n"
+        var stringToSign = ALGORITHM + "\n" + stamp + "\n" + scope + "\n"
             + Digest.hex(Digest.sha256(canonicalRequest));
         return Digest.hex(hmac(signingKey(day), stringToSign.getBytes(StandardCharsets.UTF_8)));
     }

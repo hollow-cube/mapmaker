@@ -114,9 +114,7 @@ class HttpS3ClientTest {
         assertNotNull(authorization);
         assertTrue(
             authorization.startsWith(
-                "AWS4-HMAC-SHA256 Credential="
-                    + ACCESS_KEY
-                    + "/20130524/us-east-1/s3/aws4_request,"
+                "AWS4-HMAC-SHA256 Credential=" + ACCESS_KEY + "/20130524/us-east-1/s3/aws4_request,"
                     + " SignedHeaders=host;x-amz-content-sha256;x-amz-date, Signature="
             ),
             authorization
@@ -262,7 +260,8 @@ class HttpS3ClientTest {
                     var body = ("<?xml version=\"1.0\" encoding=\"UTF-8\"?><Error>"
                         + "<Code>InternalError</Code>"
                         + "<Message>We encountered an internal error. Please try again.</Message>"
-                        + "</Error>").getBytes(StandardCharsets.UTF_8);
+                        + "</Error>")
+                        .getBytes(StandardCharsets.UTF_8);
                     exchange.sendResponseHeaders(500, body.length);
                     exchange.getResponseBody().write(body);
                     return;

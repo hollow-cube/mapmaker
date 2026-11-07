@@ -51,11 +51,7 @@ final class ReplayCompat {
     /// A fresh staging key per call. The id is hashed because it is client-supplied and never
     /// validated as a uuid, so it must not be able to escape the `replays/` prefix.
     static String objectKey(String replayId, String kind) {
-        return "replays/"
-            + Digest.hex(Digest.sha256(replayId))
-            + "/"
-            + kind
-            + "/"
+        return "replays/" + Digest.hex(Digest.sha256(replayId)) + "/" + kind + "/"
             + UUID.randomUUID();
     }
 

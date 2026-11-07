@@ -231,8 +231,7 @@ class MapSaveStateTest {
         var map = map("parkour");
         TEST_DB.seed(
             "update maps set leaderboard = '{\"asc\": false, \"format\": \"number\", \"score\": \"q.coins\"}' where id = '"
-                + map
-                + "'"
+                + map + "'"
         );
         client.upsertSaveState(
             map,
@@ -371,8 +370,7 @@ class MapSaveStateTest {
         client.upsertSaveState(map, PLAYER, first, playing(1000).build());
         client.upsertSaveState(map, PLAYER, second, playing(1000).build());
         TEST_DB.seed(
-            "update save_states set updated = updated - interval '1 minute' where id = '"
-                + second
+            "update save_states set updated = updated - interval '1 minute' where id = '" + second
                 + "'"
         );
         assertEquals(first, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).id());
@@ -420,8 +418,7 @@ class MapSaveStateTest {
 
         TEST_DB.seed(
             "update maps set leaderboard = '{\"asc\": false, \"format\": \"time\", \"score\": \"q.playtime\"}' where id = '"
-                + map
-                + "'"
+                + map + "'"
         );
         assertEquals(3000.0, client.getBestSaveState(map, PLAYER).score());
         assertNull(client.getBestSaveState(map, OTHER));
