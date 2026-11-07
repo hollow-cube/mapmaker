@@ -291,7 +291,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                         for (var builder : builders) {
                             if (world.hasPlayer(builder.id().toString()))
                                 return; // dont need to close
-                            if (builder.id().toString().equals(leavingId))
+                            if (builder.id().equals(leavingId))
                                 leavingIsBuilder = true;
                         }
 
