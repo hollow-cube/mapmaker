@@ -35,8 +35,12 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.prefix }}{{ .Values.mapmaker.role }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.prefix }}{{ .Values.image.name | default .Values.mapmaker.role }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- with .Values.args }}
+          args:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.httpPort }}
@@ -52,10 +56,12 @@ spec:
             httpGet:
               path: /ready
               port: http
+          {{- if .Values.mapmaker.preStopSigterm }}
           lifecycle:
             preStop:
               exec:
                 command: [ "/bin/sh", "-c", "kill -SIGTERM 1" ]
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           env:

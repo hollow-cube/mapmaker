@@ -21,6 +21,7 @@ dependencies {
     implementation(libs.fastutil)
     implementation(libs.polar)
     implementation(libs.included.molang)
+    implementation(libs.included.schem)
     implementation(libs.bundles.adventure)
 
     testImplementation(project(":modules:compat"))

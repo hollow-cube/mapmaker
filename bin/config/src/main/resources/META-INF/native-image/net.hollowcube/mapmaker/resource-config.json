@@ -9,6 +9,9 @@
       },
       {
         "pattern": "\\Qchar_widths.bin\\E"
+      },
+      {
+        "pattern": "\\Qhub/\\E.*"
       }
     ]
   }

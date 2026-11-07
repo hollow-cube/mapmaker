@@ -6,16 +6,19 @@ import net.hollowcube.mapmaker.CoreFeatureFlags;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
+import net.hollowcube.mapmaker.misc.MiscFunctionality;
 import net.hollowcube.mapmaker.misc.ProxySupport;
 import net.hollowcube.mapmaker.player.JoinMapRequest;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.session.MapPresence;
+import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BooleanSupplier;
 
 import static net.hollowcube.common.util.PlayerUtil.onConfigOrDisconnect;
 
@@ -24,10 +27,12 @@ public class MapIsolateBridge implements ServerBridge {
 
     private final ApiClient api;
     private final SessionService sessionService;
+    private final BooleanSupplier isHub;
 
-    public MapIsolateBridge(ApiClient api, SessionService sessionService) {
+    public MapIsolateBridge(ApiClient api, SessionService sessionService, BooleanSupplier isHub) {
         this.api = api;
         this.sessionService = sessionService;
+        this.isHub = isHub;
     }
 
     @Override
@@ -48,6 +53,7 @@ public class MapIsolateBridge implements ServerBridge {
                 return;
             }
 
+            if (isHub.getAsBoolean()) MiscFunctionality.sendFadeout(player);
             var targetState = switch (joinConfig.joinMapState()) {
                 case EDITING -> MapPresence.STATE_EDITING;
                 case PLAYING -> MapPresence.STATE_PLAYING;
@@ -59,15 +65,23 @@ public class MapIsolateBridge implements ServerBridge {
 
             ProxySupport.transfer(player, response);
         } catch (Exception e) {
-            ExceptionReporter.reportException(e, player);
-            player.sendMessage(Component.text("An error occurred while trying to join the map. Please try again later."));
+            if (!isHub.getAsBoolean()) {
+                ExceptionReporter.reportException(e, player);
+                player.sendMessage(Component.text("An error occurred while trying to join the map. Please try again later."));
+                return;
+            }
+
+            if (!(e instanceof SessionService.NoAvailableServerException))
+                ExceptionReporter.reportException(e, player);
+            player.sendMessage(Component.translatable("map.join.fail"));
+            player.clearTitle();
         }
     }
 
     @Override
     public void joinHub(Player player) {
         try {
-            var hub = api.sessions.findHub(null);
+            var hub = api.sessions.findHub(AbstractHttpService.hostname);
             if (hub == null) {
                 player.sendMessage("No hub server is available!");
                 return;

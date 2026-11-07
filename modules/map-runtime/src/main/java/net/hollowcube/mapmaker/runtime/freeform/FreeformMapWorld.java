@@ -6,11 +6,12 @@ import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.MapWorld;
-import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerTickEvent;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.function.Function;
 
 /// A played map that isn't a parkour course: no save state, no runs, nothing to complete.
 public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMapWorld> {
@@ -19,17 +20,35 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
         return MapWorld.forPlayer(FreeformMapWorld.class, player);
     }
 
-    public FreeformMapWorld(MapServer server, MapData map) {
+    private final FreeformRuntime runtime;
+
+    public FreeformMapWorld(
+        MapServer server,
+        MapData map,
+        Function<FreeformMapWorld, FreeformRuntime> runtime
+    ) {
         super(server, map, makeMapInstance(map, 'f'), FreeformState.class);
         MapWorlds.checkInitialized();
 
         eventNode().addListener(PlayerTickEvent.class, this::handlePlayerTick);
+
+        this.runtime = runtime.apply(this);
+    }
+
+    public FreeformRuntime runtime() {
+        return runtime;
     }
 
     @Override
     protected FreeformState configurePlayer(Player player) {
-        player.setRespawnPoint(MapSettings.getSpawnPoint(map().settings()));
+        runtime.configurePlayer(this, player);
         return new FreeformState.Playing();
+    }
+
+    @Override
+    protected void loadWorldData() {
+        super.loadWorldData();
+        runtime.load(this);
     }
 
     private void handlePlayerTick(PlayerTickEvent event) {
@@ -42,6 +61,6 @@ public class FreeformMapWorld extends AbstractMapWorld<FreeformState, FreeformMa
 
     @Override
     protected PlayerHud.@Nullable Module createTitleHud() {
-        return TitleHud.playing(server().api().players, map());
+        return runtime.titleHud(this);
     }
 }

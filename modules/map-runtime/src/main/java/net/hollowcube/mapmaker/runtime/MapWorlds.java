@@ -3,10 +3,13 @@ package net.hollowcube.mapmaker.runtime;
 import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.MapServer;
+import net.hollowcube.mapmaker.map.MapSettings;
 import net.hollowcube.mapmaker.map.block.vanilla.DripleafBlock;
 import net.hollowcube.mapmaker.map.entity.potion.PotionHandler;
 import net.hollowcube.mapmaker.runtime.building.BuildingMapWorld;
 import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
+import net.hollowcube.mapmaker.runtime.freeform.FreeformRuntime;
+import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
 import net.hollowcube.mapmaker.runtime.parkour.ParkourMapWorld;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.Attachments;
@@ -19,6 +22,8 @@ import net.minestom.server.network.packet.client.play.ClientPlayerBlockPlacement
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Function;
+
 /// Creates the world a map is played in, and sets up what every played world needs from the server process.
 public final class MapWorlds {
     private static @Nullable ServerProcess initProcess = null;
@@ -27,10 +32,19 @@ public final class MapWorlds {
         return switch (map.settings().variant()) {
             case PARKOUR -> new ParkourMapWorld(server, map);
             case BUILDING -> new BuildingMapWorld(server, map);
-            case FREEFORM -> new FreeformMapWorld(server, map);
+            case FREEFORM -> new FreeformMapWorld(server, map, freeformRuntime(map));
             default -> throw new IllegalStateException(
                 "No world for map variant " + map.settings().variant()
             );
+        };
+    }
+
+    private static Function<FreeformMapWorld, FreeformRuntime> freeformRuntime(MapData map) {
+        var runtime = MapSettings.get(map.settings(), MapSettings.RUNTIME);
+        return switch (runtime) {
+            case "" -> _ -> FreeformRuntime.NONE;
+            case HubRuntime.ID -> HubRuntime::new;
+            default -> throw new IllegalStateException("No freeform runtime " + runtime);
         };
     }
 

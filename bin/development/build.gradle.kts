@@ -8,7 +8,6 @@ dependencies {
     implementation(project(":bin:api-worker"))
     implementation(project(":modules:api"))
     implementation(project(":bin:config"))
-    implementation(project(":bin:hub"))
     implementation(project(":bin:map"))
 
     implementation(project(":modules:map-core"))

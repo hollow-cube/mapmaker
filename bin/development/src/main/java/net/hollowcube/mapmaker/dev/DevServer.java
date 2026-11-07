@@ -38,8 +38,8 @@ import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.hub.HubMapWorld;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
+import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.apiserver.map.MapServiceImpl;
 import net.hollowcube.ipc.map.MapData;
@@ -92,9 +92,6 @@ public class DevServer extends AbstractMultiMapServer {
     private static final int WORKER_SLOTS = 2;
     private static final long MAX_TRACE_BYTES = 512L << 20;
     private static final Duration WORKER_STOP_GRACE = Duration.ofSeconds(5);
-
-    // Hub stuff
-    private HubMapWorld hubWorld;
 
     // Map stuff
     private Terraform terraform;
@@ -206,7 +203,7 @@ public class DevServer extends AbstractMultiMapServer {
     @Override
     protected @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo) {
         var map = joinInfo.mapId().equals(MapData.SPAWN_MAP_ID)
-            ? HubServer.HUB_MAP_DATA
+            ? HubRuntime.HUB_MAP_DATA
             : api().maps.get(joinInfo.mapId());
 
         final boolean isEditor = Presence.MAP_BUILDING_STATES.contains(joinInfo.state());
@@ -224,7 +221,7 @@ public class DevServer extends AbstractMultiMapServer {
             @Override
             public @NotNull CommandManager getCommandManager() {
                 var world = MapWorld.forPlayer(this);
-                return world == null || world instanceof HubMapWorld
+                return world == null || world instanceof FreeformMapWorld freeform && freeform.runtime() instanceof HubRuntime
                     ? hubCommandManager : mapCommandManager;
             }
         });
@@ -236,13 +233,12 @@ public class DevServer extends AbstractMultiMapServer {
     }
 
     private void performHubInit() {
-        this.hubWorld = FutureUtil.getUnchecked(createWorld(HubServer.HUB_MAP_DATA,
-            false, map -> new HubMapWorld(this, map), false));
+        FutureUtil.getUnchecked(createWorld(HubRuntime.HUB_MAP_DATA,
+            false, map -> MapWorlds.forPlaying(this, map), false));
 
-        HubServer.registerCommands(this, hubCommandManager, hubWorld, MinecraftServer.getSchedulerManager());
+        HubRuntime.registerCommands(this, hubCommandManager, MinecraftServer.getSchedulerManager());
         hubCommandManager.register(PlayNbsCommand.INSTANCE);
         hubCommandManager.register(AcDevCommand.INSTANCE);
-        HubServer.loadHubFeatures(this, hubWorld);
     }
 
     private void performMapInit() {
@@ -288,7 +284,7 @@ public class DevServer extends AbstractMultiMapServer {
                 event.getConnection().getProtocolVersion()
             );
 
-            addPendingJoin(playerId, HubServer.HUB_MAP_DATA.id().toString(), "playing");
+            addPendingJoin(playerId, HubRuntime.HUB_MAP_DATA.id().toString(), "playing");
         } catch (SessionService.SessionCreationDeniedError error) {
             PlayerUtil.disconnect(event.getConnection(), error.reason());
         }

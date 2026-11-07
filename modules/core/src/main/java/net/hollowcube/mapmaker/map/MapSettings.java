@@ -53,6 +53,8 @@ public final class MapSettings {
     public static final MapSetting<String> INSTANCE_SIZE = MapSetting.String("instance_size", "");
     // If set on a parkour map, the map will try to load a script bundle in playing mode.
     public static final MapSetting<Boolean> HAS_SCRIPT_BUNDLE = MapSetting.Bool("has_script_bundle", false);
+    // Built-in behaviour a freeform map runs (e.g. "hub"), see MapWorlds#forPlaying.
+    public static final MapSetting<String> RUNTIME = MapSetting.String("runtime", "");
 
     public static @NotNull String getNameSafe(MapData.Settings settings) {
         if (settings.name().isEmpty()) return MapData.DEFAULT_NAME;

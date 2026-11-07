@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.isolate;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
@@ -13,6 +14,8 @@ import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.runtime.MapWorlds;
+import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
+import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
 import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
 import net.kyori.adventure.text.Component;
@@ -50,6 +53,8 @@ public class MapIsolateServer extends AbstractMapServer {
     // it is always not-null which should cover any reasonable logic.
     // TODO: pretty sure we could do init in constructor, should investigate.
     private @UnknownNullability AbstractMapWorld<?, ?> world;
+    private @UnknownNullability MapData map;
+    private boolean isHub;
 
     private final CompletableFuture<@Nullable Void> worldLoadFuture = new CompletableFuture<>();
 
@@ -80,13 +85,13 @@ public class MapIsolateServer extends AbstractMapServer {
     @Override
     protected @NotNull DebugCommand createDebugCommand() {
         var cmd = super.createDebugCommand();
-        MapCommands.registerPlayingDebugSubcommands(cmd);
+        if (!isHub) MapCommands.registerPlayingDebugSubcommands(cmd);
         return cmd;
     }
 
     @Override
     protected ServerBridge createBridge() {
-        return new MapIsolateBridge(api(), sessionService());
+        return new MapIsolateBridge(api(), sessionService(), () -> isHub);
     }
 
     @Override
@@ -96,17 +101,23 @@ public class MapIsolateServer extends AbstractMapServer {
 
     @Override
     protected void prepareStart() {
+        // Before super so the commands it registers can depend on whether this is the hub.
+        try {
+            map = api().maps.get(this.mapId);
+        } catch (Exception e) {
+            logger.error("Error fetching map", e);
+            throw new RuntimeException(e);
+        }
+        isHub = HubRuntime.isHub(map);
+
         super.prepareStart();
 
         MinecraftServer.getConnectionManager()
             .setPlayerProvider(simpleMapPlayer(commandManager()));
-        MapCommands.registerPlayingCommands(this, commandManager());
 
         MapWorlds.initGlobalReferences();
 
         try {
-            var map = api().maps.get(this.mapId);
-
             world = MapWorlds.forPlaying(this, map);
             FutureUtil.submitVirtual(() -> {
                 try {
@@ -123,6 +134,14 @@ public class MapIsolateServer extends AbstractMapServer {
         } catch (Exception e) {
             logger.error("Error allocating map", e);
             throw new RuntimeException(e);
+        }
+
+        if (isHub) {
+            HubRuntime.registerCommands(this, commandManager(), world.instance().scheduler());
+            MinecraftServer.getGlobalEventHandler()
+                .addListener(ServerBeginShutdownEvent.class, _ -> HubRuntime.drainToAnotherHub(api()));
+        } else {
+            MapCommands.registerPlayingCommands(this, commandManager());
         }
 
         var serverId = ServerRuntime.getRuntime().hostname();
@@ -176,7 +195,9 @@ public class MapIsolateServer extends AbstractMapServer {
 
             logger.info("configuring player {}", player.getUuid());
             var instanceId = ServerRuntime.getRuntime().hostname();
-            var presence = new Presence(Presence.TYPE_MAPMAKER_MAP, "playing", instanceId, this.mapId);
+            var presence = isHub
+                ? new Presence(Presence.TYPE_MAPMAKER_HUB, "__hub_unused__", instanceId, "hub")
+                : new Presence(Presence.TYPE_MAPMAKER_MAP, "playing", instanceId, this.mapId);
             transferPlayerSession(player, presence);
 
             // Ensure resource pack was applied before allowing the player in

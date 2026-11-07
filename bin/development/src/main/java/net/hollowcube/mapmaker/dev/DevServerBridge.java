@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.dev;
 
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.mapmaker.hub.HubServer;
+import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
 import net.hollowcube.mapmaker.map.MapWorld;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.kyori.adventure.text.Component;
@@ -41,7 +41,7 @@ public final class DevServerBridge implements ServerBridge {
 
     @Override
     public void joinHub(@NotNull Player player) {
-        joinMapInternal(player, HubServer.HUB_MAP_DATA.id().toString(), JoinMapState.PLAYING);
+        joinMapInternal(player, HubRuntime.HUB_MAP_DATA.id().toString(), JoinMapState.PLAYING);
     }
 
     private void joinMapInternal(@NotNull Player player, @NotNull String mapId, @NotNull JoinMapState joinMapState) {

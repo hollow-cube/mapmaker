@@ -6,12 +6,18 @@ mapmaker:
 
   # Max time given for people to leave before shutting down the server by force.
   terminationSeconds: 60
+  # Images without a shell (map-isolate is distroless) must turn this off.
+  preStopSigterm: true
 
 image:
   prefix: "mworzala/mapmaker-"
+  # Defaults to mapmaker.role
+  name: ""
   pullPolicy: IfNotPresent
   pullSecrets: [ ]
   tag: ""
+
+args: [ ]
 
 env:
   PROMETHEUS_DISABLE_CREATED_SERIES: "true"

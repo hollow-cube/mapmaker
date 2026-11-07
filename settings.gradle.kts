@@ -57,7 +57,6 @@ include(
     "bin:api-worker",
     "bin:config",
     "bin:development",
-    "bin:hub",
     "bin:map",
     "bin:map-isolate",
     "bin:packer",
