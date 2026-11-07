@@ -2259,7 +2259,8 @@
       "constants": [
         "PARKOUR",
         "BUILDING",
-        "ADVENTURE"
+        "ADVENTURE",
+        "FREEFORM"
       ]
     },
     "net.hollowcube.ipc.map.MapVerification": {

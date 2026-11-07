@@ -11,16 +11,13 @@ import java.util.UUID;
 @Ipc
 public interface PlayerService {
 
-    @Nullable
-    PlayerData get(String idOrUsername);
+    @Nullable PlayerData get(String idOrUsername);
 
-    @Nullable
-    DisplayName displayName(UUID playerId);
+    @Nullable DisplayName displayName(UUID playerId);
 
     Map<UUID, DisplayName> displayNames(List<UUID> playerIds);
 
-    @Nullable
-    HypercubeStatus hypercube(UUID playerId);
+    @Nullable HypercubeStatus hypercube(UUID playerId);
 
     /// Merges top-level keys atomically; a JSON null removes its key.
     void updateSettings(UUID playerId, JsonObject patch);

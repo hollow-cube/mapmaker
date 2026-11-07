@@ -13,11 +13,9 @@ public interface SessionService {
     int onlinePlayers();
 
     /// A ready hub other than `exclude`, or null when there is none.
-    @Nullable
-    GameServer findHub(@Nullable String exclude);
+    @Nullable GameServer findHub(@Nullable String exclude);
 
     /// The server `id` names while its pod is still around, or null once it is gone.
-    @Nullable
-    GameServer findServer(String id);
+    @Nullable GameServer findServer(String id);
 
 }

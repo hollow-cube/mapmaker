@@ -15,7 +15,7 @@ import java.util.List;
 /// Data the legacy codec rejected is carried over so that the node codec rejects it too: a malformed action stays a
 /// malformed connection rather than being dropped.
 @AutoService(ExternalDataFix.class)
-public class V5024 extends DataVersion implements ExternalDataFix {
+public class V5025 extends DataVersion implements ExternalDataFix {
     private static final String ENTER = "mapmaker:enter";
     private static final List<String> NODE_KEYS = List.of("once", "legacy", "connections");
     private static final List<String> NODE_FIELDS = List.of(
@@ -32,8 +32,8 @@ public class V5024 extends DataVersion implements ExternalDataFix {
         "full_reset"
     );
 
-    public V5024() {
-        super(5024);
+    public V5025() {
+        super(5025);
 
         // The three plate kinds become one pressure plate, which keeps the old handler id for its trigger id.
         addFix(DataTypes.BLOCK_ENTITY, "mapmaker:checkpoint_plate", plate -> {

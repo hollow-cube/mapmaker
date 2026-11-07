@@ -33,7 +33,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class V5024Test {
+class V5025Test {
     private static final List<Action> ACTIONS = List.of(
         new ChatAction("a"),
         new TeleportAction(RelativePos.ORIGIN)
@@ -259,7 +259,7 @@ class V5024Test {
         net.hollowcube.datafix.DataType type,
         CompoundBinaryTag tag
     ) {
-        return (CompoundBinaryTag) DataFixer.upgrade(type, Transcoder.NBT, tag, 5023, 5024);
+        return (CompoundBinaryTag) DataFixer.upgrade(type, Transcoder.NBT, tag, 5024, 5025);
     }
 
     private static TriggerNodeData decode(CompoundBinaryTag tag) {

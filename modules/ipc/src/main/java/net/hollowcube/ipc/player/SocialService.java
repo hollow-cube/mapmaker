@@ -24,8 +24,11 @@ public interface SocialService {
     /// Accepts an existing request in the opposite direction.
     FriendRequestResult sendFriendRequest(UUID playerId, UUID targetId);
 
-    @Nullable
-    FriendRequest deleteFriendRequest(UUID playerId, UUID targetId, boolean bidirectional);
+    @Nullable FriendRequest deleteFriendRequest(
+        UUID playerId,
+        UUID targetId,
+        boolean bidirectional
+    );
 
     BlockResult block(UUID playerId, UUID targetId);
 

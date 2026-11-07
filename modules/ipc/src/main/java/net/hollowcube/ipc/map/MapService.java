@@ -28,8 +28,7 @@ public interface MapService {
     CreateMapResult create(UUID owner, MapSize size, int protocolVersion);
 
     /// By id, or by the `000-000-000` published id.
-    @Nullable
-    MapData get(String idOrPublishedId);
+    @Nullable MapData get(String idOrPublishedId);
 
     void update(UUID mapId, MapPatch patch);
 
@@ -87,12 +86,10 @@ public interface MapService {
 
     /// The player's newest state of this type on the map, or null when there is none or the newest
     /// is completed, in which case the caller starts a new one under an id of its own.
-    @Nullable
-    SaveStateData getLatestSaveState(UUID mapId, UUID playerId, SaveStateType type);
+    @Nullable SaveStateData getLatestSaveState(UUID mapId, UUID playerId, SaveStateType type);
 
     /// The player's best completed run on the map by its leaderboard's direction, or null.
-    @Nullable
-    SaveStateData getBestSaveState(UUID mapId, UUID playerId);
+    @Nullable SaveStateData getBestSaveState(UUID mapId, UUID playerId);
 
     /// Inserts on first sight. 404 for an unknown map; 409 for a state already completed, which
     /// never changes again.

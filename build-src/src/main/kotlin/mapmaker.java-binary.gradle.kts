@@ -45,4 +45,8 @@ tasks.shadowJar {
     mergeServiceFiles()
 
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    filesMatching("META-INF/services/**") {
+        // duh, why anyone would want to exclude service files idk
+        duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    }
 }
