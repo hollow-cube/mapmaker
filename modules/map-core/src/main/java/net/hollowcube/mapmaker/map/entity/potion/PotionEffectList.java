@@ -106,6 +106,16 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
     }
 
     @SuppressWarnings("UnstableApiUsage")
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof PotionEffectList other && entries.equals(other.entries);
+    }
+
+    @Override
+    public int hashCode() {
+        return entries.hashCode();
+    }
+
     public static class Entry implements Comparable<Entry> {
         private static final Comparator<Entry> COMPARATOR = Comparator.comparing(Entry::type);
 
@@ -193,6 +203,19 @@ public class PotionEffectList implements Iterable<PotionEffectList.Entry> {
         @Override
         public int compareTo(PotionEffectList.Entry o) {
             return COMPARATOR.compare(this, o);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            return obj instanceof Entry other
+                    && type.equals(other.type)
+                    && level == other.level
+                    && duration == other.duration;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(type, level, duration);
         }
 
         @Override
