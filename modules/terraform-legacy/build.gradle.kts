@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.gson)
     implementation(libs.fastutil)
     implementation(libs.included.schem)
+    implementation(libs.zstd)
 
     testImplementation(project(":modules:test"))
 }

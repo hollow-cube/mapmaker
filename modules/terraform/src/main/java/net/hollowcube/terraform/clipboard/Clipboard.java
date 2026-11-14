@@ -33,7 +33,7 @@ public final class Clipboard {
         this(new Schematic(buffer, origin.asBlockVec()));
     }
 
-    private Clipboard(Schematic schematic, Transform transform) {
+    public Clipboard(Schematic schematic, Transform transform) {
         this.schematic = schematic;
         this.transform = transform;
     }

@@ -5,13 +5,17 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.hollowcube.terraform.entity.EntityEdit;
 import net.hollowcube.terraform.util.BlockUtil;
+import net.hollowcube.terraform.util.GameDataProvider;
 import net.hollowcube.terraform.util.HeapSize;
 import net.hollowcube.terraform.util.PosConsumer;
 import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.palette.Palette;
+import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.registry.Registry;
 import net.minestom.server.utils.validate.Check;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
@@ -45,11 +49,18 @@ public final class EditBuffer {
         return new Builder();
     }
 
+    public static NetworkBuffer.Type<EditBuffer> serializer(
+        GameDataProvider gameData,
+        Registry<Biome> biomes
+    ) {
+        return new EditBufferSerializer(gameData, biomes);
+    }
+
     private final Long2ObjectMap<BufferSection> sections;
     private final Area.@Nullable Cuboid blockBounds;
     private final @Unmodifiable List<EntityEdit> entities;
 
-    private EditBuffer(
+    EditBuffer(
         Long2ObjectMap<BufferSection> sections,
         Area.@Nullable Cuboid blockBounds,
         @Unmodifiable List<EntityEdit> entities
@@ -95,8 +106,6 @@ public final class EditBuffer {
         return sections.get(packBlockPos(sectionX, sectionY, sectionZ));
     }
 
-    /// The smallest box holding every set block, or null when no block is set. After [#clipToBox] it is the
-    /// original box clipped, which can be larger than what the clip kept.
     /// Entity edits, applied in order after every block.
     public @Unmodifiable List<EntityEdit> entities() {
         return entities;

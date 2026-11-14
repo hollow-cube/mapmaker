@@ -92,6 +92,22 @@ public final class BufferSection {
         this.blockPalette = blocks;
     }
 
+    static Palette emptyBlockPalette() {
+        return Palette.empty(BLOCK_DIM, BLOCK_MIN_BITS, BLOCK_MAX_BITS, BLOCK_DIRECT_BITS);
+    }
+
+    static Palette emptyBiomePalette() {
+        return Palette.empty(BIOME_DIM, BIOME_MIN_BITS, BIOME_MAX_BITS, BIOME_DIRECT_BITS);
+    }
+
+    @Nullable Palette densePalette() {
+        return blockPalette;
+    }
+
+    @Nullable Palette biomePalette() {
+        return biomes;
+    }
+
     // Blocks
 
     public int count() {
@@ -100,6 +116,10 @@ public final class BufferSection {
 
     public boolean hasBlocks() {
         return count() > 0;
+    }
+
+    int blockEntityCount() {
+        return blockEntities == null ? 0 : blockEntities.size();
     }
 
     public boolean hasBlockEntities() {

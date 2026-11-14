@@ -35,7 +35,7 @@ public class PlayerSession {
     @ApiStatus.Internal
     public static final Tag<PlayerSession> TAG = Tag.Transient("terraform:player_session");
     private static final int ABSOLUTE_MAX_CLIPBOARDS = 1024;
-    private static final int STATE_VERSION = 1;
+    private static final int STATE_VERSION = 2;
     private final Terraform terraform;
     private final String id;
     private final Player player;
@@ -120,7 +120,7 @@ public class PlayerSession {
     }
 
     // Serialization
-    // Note: No data is compressed. A storage implementation MAY choose to compress the data before writing it.
+    // Note: Only clipboards are compressed. A storage implementation MAY choose to compress the data before writing it.
 
     @ApiStatus.Internal
     public byte @NotNull [] write() {
@@ -139,7 +139,8 @@ public class PlayerSession {
         var version = buffer.read(SHORT);
         Check.argCondition(version > STATE_VERSION, "Cannot deserialize future session state format");
 
-        var clipboards = buffer.read(Clipboard.NETWORK_TYPE.list(ABSOLUTE_MAX_CLIPBOARDS));
+        var clipboardType = version >= 2 ? Clipboard.NETWORK_TYPE : Clipboard.NETWORK_TYPE_V1;
+        var clipboards = buffer.read(clipboardType.list(ABSOLUTE_MAX_CLIPBOARDS));
         clipboards.forEach(c -> this.clipboards.put(c.name().toLowerCase(Locale.ROOT), c));
         assertMarker(buffer, "clipboards");
 
