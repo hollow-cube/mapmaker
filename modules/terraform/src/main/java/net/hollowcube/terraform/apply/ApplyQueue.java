@@ -4,6 +4,7 @@ import net.hollowcube.terraform.apply.ApplyEngine.ApplyContext;
 import net.hollowcube.terraform.apply.ApplyEngine.ApplyResult;
 import net.hollowcube.terraform.apply.ApplyEngine.ChunkWork;
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityEdit;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.timer.ExecutionType;
@@ -75,6 +76,7 @@ final class ApplyQueue {
 
         private final ApplyEngine engine;
         private final List<ChunkWork> work;
+        private final List<EntityEdit> entities;
         private final ApplyContext context;
         private final CompletableFuture<ApplyResult> result = new CompletableFuture<>();
         private int next = CHUNK_LOADING;
@@ -89,6 +91,7 @@ final class ApplyQueue {
         ) {
             this.engine = engine;
             this.work = ApplyEngine.chunkWork(instance, buffer, policy);
+            this.entities = buffer.entities();
             this.context = engine.newContext(instance, captureUndo);
         }
 
@@ -114,6 +117,7 @@ final class ApplyQueue {
                     if (System.nanoTime() - deadlineNanos >= 0) break;
                 }
                 if (next < work.size()) return false;
+                context.applyEntities(entities);
                 result.complete(context.result());
             } catch (Throwable t) {
                 result.completeExceptionally(t);

@@ -2,6 +2,7 @@ package net.hollowcube.terraform.schem;
 
 import net.hollowcube.terraform.buffer.EditBuffer;
 import net.hollowcube.terraform.util.GameDataProvider;
+import net.hollowcube.terraform.util.TypedData;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;

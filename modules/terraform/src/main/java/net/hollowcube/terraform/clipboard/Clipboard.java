@@ -1,14 +1,21 @@
 package net.hollowcube.terraform.clipboard;
 
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityAccessor;
+import net.hollowcube.terraform.entity.EntityEdit;
 import net.hollowcube.terraform.schem.Schematic;
 import net.hollowcube.terraform.util.Transform;
+import net.hollowcube.terraform.util.TypedData;
 import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 /// A [Schematic] held for pasting, with a pending [Transform] from rotates and flips. Transforms compose
 /// exactly and are applied once, at paste, pivoting on the centre of the origin block, so a paste always
@@ -61,11 +68,27 @@ public final class Clipboard {
     /// The schematic with any pending transform applied, for saving.
     public Schematic toSchematic() {
         if (!hasTransform()) return schematic;
-        return new Schematic(pasteBuffer(origin(), false), origin(), schematic.metadata());
+        return new Schematic(
+            remap(buffer(), pasteTransform(origin()), false),
+            origin(),
+            schematic.metadata()
+        );
     }
 
-    public EditBuffer pasteBuffer(Point anchor, boolean skipAir) {
-        return remap(buffer(), pasteTransform(anchor), skipAir);
+    /// The clipboard placed at `anchor`. With `entities`, its entities come along as new ones: given fresh ids and
+    /// passed through the host's [EntityAccessor#copy]. Without, they're left out.
+    public EditBuffer pasteBuffer(Point anchor, boolean skipAir, @Nullable EntityAccessor entities) {
+        Transform paste = pasteTransform(anchor);
+        EditBuffer pasted = remap(buffer(), paste, skipAir);
+        if (entities == null) return pasted.withEntities(List.of());
+
+        List<EntityEdit> copies = new ArrayList<>();
+        for (EntityEdit edit : pasted.entities()) {
+            TypedData data = edit.data();
+            if (data == null) continue;
+            copies.add(new EntityEdit(UUID.randomUUID(), edit.pos(), entities.copy(data, paste)));
+        }
+        return pasted.withEntities(copies);
     }
 
     public Area.@Nullable Cuboid pasteBounds(Point anchor) {
@@ -90,7 +113,8 @@ public final class Clipboard {
     }
 
     /// Moves every set cell of `source` to the cell holding its transformed centre, reorienting its block
-    /// and dropping air when `skipAir`. Block entities and biomes move with their cells.
+    /// and dropping air when `skipAir`. Block entities and biomes move with their cells, and entity edits keep
+    /// their ids but move their position and facing.
     ///
     /// @throws IllegalArgumentException unless `transform` is a [cube symmetry][Transform#isCubeSymmetry()]
     ///     (90 degree rotations and flips), the only transforms that map cells one to one
@@ -150,6 +174,10 @@ public final class Clipboard {
                 );
             });
         });
+
+        for (EntityEdit edit : source.entities()) {
+            out.addEntityEdit(new EntityEdit(edit.id(), transform.apply(edit.pos()), edit.data()));
+        }
         return out.build();
     }
 }

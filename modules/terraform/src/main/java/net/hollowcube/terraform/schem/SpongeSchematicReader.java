@@ -1,11 +1,18 @@
 package net.hollowcube.terraform.schem;
 
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityEdit;
 import net.hollowcube.terraform.nbt.NbtStreamReader;
 import net.hollowcube.terraform.util.GameDataProvider;
+import net.hollowcube.terraform.util.TypedData;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.nbt.BinaryTag;
+import net.kyori.adventure.nbt.BinaryTagTypes;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.ListBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.instance.block.BlockManager;
@@ -55,6 +62,7 @@ public final class SpongeSchematicReader {
     private BlockVec offset = BlockVec.ZERO;
     private EditBuffer.@Nullable Builder out;
     private final List<CapturedBlockEntity> blockEntities = new ArrayList<>();
+    private final List<CapturedEntity> entities = new ArrayList<>();
 
     private SpongeSchematicReader(GameDataProvider gameData) {
         this.gameData = gameData;
@@ -71,6 +79,7 @@ public final class SpongeSchematicReader {
         }
         if (out == null) throw new IOException("schematic has no block data");
         applyBlockEntities(out);
+        applyEntities(out);
         return new Schematic(
             out.build(),
             BlockVec.ZERO,
@@ -107,8 +116,8 @@ public final class SpongeSchematicReader {
                 case "BlockData" -> handleBlockData(nbt, t, false);
                 case "TileEntities", "BlockEntities" -> readBlockEntities(nbt, key, t, true);
                 case "Blocks" -> readBlocksV3(nbt, t);
-                // PaletteMax is only a hint (the palette is sized from its ids), biomes and entities are
-                // not read.
+                case "Entities" -> readEntities(nbt, key, t);
+                // PaletteMax is only a hint (the palette is sized from its ids), biomes are not read.
                 default -> nbt.skipPayload(t);
             }
         }
@@ -299,7 +308,7 @@ public final class SpongeSchematicReader {
             int stateId = builder.getBlockState(ax, ay, az);
             if (stateId == EditBuffer.NONE) continue; // outside the decoded volume
 
-            var data = new GameDataProvider.TypedData(be.id, be.nbt);
+            var data = new TypedData(be.id, be.nbt);
             if (dataVersion < gameData.dataVersion()) {
                 data = gameData.upgradeBlockEntity(dataVersion, gameData.dataVersion(), data);
             }
@@ -311,6 +320,87 @@ public final class SpongeSchematicReader {
             if (handler != null) block = block.withHandler(handler);
             if (data.nbt().size() > 0) block = block.withNbt(data.nbt());
             builder.setBlockState(ax, ay, az, block);
+        }
+    }
+
+    private void applyEntities(EditBuffer.Builder builder) {
+        for (CapturedEntity entity : entities) {
+            // v3 keeps the entity's data in `Data`, v1/v2 spread it over the entry
+            CompoundBinaryTag nbtData = version >= 3
+                ? entity.data != null ? entity.data : CompoundBinaryTag.empty()
+                : entity.inline;
+            var data = new TypedData(entity.id, nbtData);
+            if (dataVersion < gameData.dataVersion()) {
+                data = gameData.upgradeEntity(dataVersion, gameData.dataVersion(), data);
+            }
+            String id = data.type().toLowerCase(Locale.ROOT);
+            if (id.indexOf(':') < 0) id = "minecraft:" + id;
+            if (!Key.parseable(id)) {
+                LOGGER.warn("dropped an entity with an invalid id {}", id);
+                continue;
+            }
+
+            CompoundBinaryTag nbtOut = data.nbt();
+            float yaw = 0, pitch = 0;
+            if (nbtOut.get("Rotation") instanceof ListBinaryTag rotation && rotation.size() == 2) {
+                yaw = rotation.getFloat(0);
+                pitch = rotation.getFloat(1);
+            }
+            var pos = new Pos(
+                offset.x() + entity.pos[0],
+                offset.y() + entity.pos[1],
+                offset.z() + entity.pos[2],
+                yaw,
+                pitch
+            );
+            builder.addEntityEdit(
+                new EntityEdit(UUID.randomUUID(), pos, new TypedData(id, nbtOut))
+            );
+        }
+    }
+
+    private void readEntities(NbtStreamReader nbt, String key, byte type) throws IOException {
+        requireType(key, type, LIST);
+        byte elem = nbt.readType();
+        int len = nbt.readListLength(elem);
+        if (len > 0) requireType(key + " element", elem, COMPOUND);
+        for (int i = 0; i < len; i++) {
+            @Nullable String id = null;
+            double @Nullable [] pos = null;
+            @Nullable CompoundBinaryTag data = null;
+            CompoundBinaryTag.Builder inline = CompoundBinaryTag.builder();
+            byte t;
+            while ((t = nbt.readType()) != END) {
+                String field = nbt.readString();
+                switch (field) {
+                    case "Id" -> {
+                        requireType(field, t, STRING);
+                        id = nbt.readString();
+                    }
+                    case "Pos" -> {
+                        requireType(field, t, LIST);
+                        if (!(nbt.readPayload(t) instanceof ListBinaryTag list)
+                            || list.size() != 3
+                            || list.elementType() != BinaryTagTypes.DOUBLE) {
+                            throw new IOException("entity Pos is not three doubles");
+                        }
+                        pos = new double[] {
+                            list.getDouble(0),
+                            list.getDouble(1),
+                            list.getDouble(2),
+                        };
+                    }
+                    case "Data" -> {
+                        BinaryTag payload = nbt.readPayload(t);
+                        if (payload instanceof CompoundBinaryTag compound) data = compound;
+                        inline.put(field, payload);
+                    }
+                    default -> inline.put(field, nbt.readPayload(t));
+                }
+            }
+            if (id == null) throw new IOException("entity without an Id");
+            if (pos == null) throw new IOException("entity without a Pos");
+            entities.add(new CapturedEntity(pos, id, inline.build(), data));
         }
     }
 
@@ -456,6 +546,12 @@ public final class SpongeSchematicReader {
         }
     }
 
-    /// A block entity at its schematic-local position.
     private record CapturedBlockEntity(int x, int y, int z, String id, CompoundBinaryTag nbt) {}
+
+    private record CapturedEntity(
+        double[] pos,
+        String id,
+        CompoundBinaryTag inline,
+        @Nullable CompoundBinaryTag data
+    ) {}
 }

@@ -29,7 +29,7 @@ class ClipboardPasteTest {
 
         var result = ApplyEngine.DEFAULT.apply(
             instance,
-            clip.pasteBuffer(new Vec(8, 70, 5), false)
+            clip.pasteBuffer(new Vec(8, 70, 5), false, null)
         );
         assertEquals(Block.OAK_STAIRS.withProperty("facing", "south"), instance.getBlock(8, 70, 5));
         assertEquals(east, instance.getBlock(5, 70, 5));
@@ -50,7 +50,7 @@ class ClipboardPasteTest {
             origin
         ).withTransform(Transform.mirror(Transform.Axis.X));
 
-        ApplyEngine.DEFAULT.apply(instance, clip.pasteBuffer(new Vec(8, 70, 5), false));
+        ApplyEngine.DEFAULT.apply(instance, clip.pasteBuffer(new Vec(8, 70, 5), false, null));
         assertEquals(Block.OAK_STAIRS.withProperty("facing", "west"), instance.getBlock(8, 70, 5));
     }
 
@@ -67,7 +67,7 @@ class ClipboardPasteTest {
 
         ApplyEngine.DEFAULT.apply(
             instance,
-            clip.withTransform(Transform.rotateY(360)).pasteBuffer(origin, false)
+            clip.withTransform(Transform.rotateY(360)).pasteBuffer(origin, false, null)
         );
         assertEquals(Block.STONE, instance.getBlock(2, 70, 2));
         assertEquals(Block.DIRT, instance.getBlock(3, 70, 3));
@@ -87,7 +87,7 @@ class ClipboardPasteTest {
             new Vec(15, 71, 3)
         ).withTransform(Transform.rotateY(180));
 
-        ApplyEngine.DEFAULT.apply(instance, clip.pasteBuffer(new Vec(16, 70, 20), false));
+        ApplyEngine.DEFAULT.apply(instance, clip.pasteBuffer(new Vec(16, 70, 20), false, null));
         assertEquals(Block.STONE, instance.getBlock(16, 70, 20));
         assertEquals(Block.DIRT, instance.getBlock(15, 70, 20));
         assertEquals(Block.GLASS, instance.getBlock(15, 71, 19));

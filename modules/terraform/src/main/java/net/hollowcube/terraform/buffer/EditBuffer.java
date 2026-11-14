@@ -3,7 +3,9 @@ package net.hollowcube.terraform.buffer;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMaps;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+import net.hollowcube.terraform.entity.EntityEdit;
 import net.hollowcube.terraform.util.BlockUtil;
+import net.hollowcube.terraform.util.HeapSize;
 import net.hollowcube.terraform.util.PosConsumer;
 import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.BlockVec;
@@ -13,7 +15,10 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static net.hollowcube.terraform.util.BlockUtil.*;
@@ -22,7 +27,11 @@ import static net.hollowcube.terraform.util.BlockUtil.*;
 /// [BufferSection], randomly addressable. The only entry point to editing.
 @SuppressWarnings("UnstableApiUsage")
 public final class EditBuffer {
-    private static final EditBuffer EMPTY = new EditBuffer(Long2ObjectMaps.emptyMap(), null);
+    private static final EditBuffer EMPTY = new EditBuffer(
+        Long2ObjectMaps.emptyMap(),
+        null,
+        List.of()
+    );
 
     /// ID for "not set" aka untouched.
     public static final int NONE = BufferSection.NONE;
@@ -38,10 +47,16 @@ public final class EditBuffer {
 
     private final Long2ObjectMap<BufferSection> sections;
     private final Area.@Nullable Cuboid blockBounds;
+    private final @Unmodifiable List<EntityEdit> entities;
 
-    private EditBuffer(Long2ObjectMap<BufferSection> sections, Area.@Nullable Cuboid blockBounds) {
+    private EditBuffer(
+        Long2ObjectMap<BufferSection> sections,
+        Area.@Nullable Cuboid blockBounds,
+        @Unmodifiable List<EntityEdit> entities
+    ) {
         this.sections = sections;
         this.blockBounds = blockBounds;
+        this.entities = entities;
     }
 
     public int sectionCount() {
@@ -82,6 +97,17 @@ public final class EditBuffer {
 
     /// The smallest box holding every set block, or null when no block is set. After [#clipToBox] it is the
     /// original box clipped, which can be larger than what the clip kept.
+    /// Entity edits, applied in order after every block.
+    public @Unmodifiable List<EntityEdit> entities() {
+        return entities;
+    }
+
+    /// This buffer's blocks and biomes with `entities` as its entity edits instead.
+    public EditBuffer withEntities(List<EntityEdit> entities) {
+        if (this.entities.equals(entities)) return this;
+        return new EditBuffer(sections, blockBounds, List.copyOf(entities));
+    }
+
     public Area.@Nullable Cuboid blockBounds() {
         return blockBounds;
     }
@@ -99,9 +125,16 @@ public final class EditBuffer {
         }
     }
 
-    /// Returns a buffer holding only the content inside the inclusive box of min/maxXYZ.
+    /// Returns a buffer holding only the content inside the inclusive box of min/maxXYZ. Entity edits are kept by
+    /// their position.
     public EditBuffer clipToBox(int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
-        boolean changed = false;
+        List<EntityEdit> keptEntities = new ArrayList<>(entities.size());
+        for (EntityEdit edit : entities) {
+            int x = edit.pos().blockX(), y = edit.pos().blockY(), z = edit.pos().blockZ();
+            if (x >= minX && x <= maxX && y >= minY && y <= maxY && z >= minZ && z <= maxZ)
+                keptEntities.add(edit);
+        }
+        boolean changed = keptEntities.size() != entities.size();
         boolean anyBlocks = false;
         Long2ObjectMap<BufferSection> out = new Long2ObjectOpenHashMap<>(sections.size());
         for (var entry : Long2ObjectMaps.fastIterable(sections)) {
@@ -166,13 +199,16 @@ public final class EditBuffer {
             BlockVec high = blockBounds.max().min(maxX, maxY, maxZ);
             bounds = Area.cuboid(low, high);
         }
-        return new EditBuffer(out, bounds);
+        return new EditBuffer(out, bounds, changed ? List.copyOf(keptEntities) : entities);
     }
 
     public long sizeBytes() {
         long total = 0;
         for (BufferSection section : sections.values()) {
             total += section.sizeBytes();
+        }
+        for (EntityEdit edit : entities) {
+            total += HeapSize.entityEdit(edit);
         }
         return total;
     }
@@ -188,6 +224,7 @@ public final class EditBuffer {
     /// Not thread-safe
     public static final class Builder {
         private final Long2ObjectMap<BufferSection> sections = new Long2ObjectOpenHashMap<>();
+        private final List<EntityEdit> entities = new ArrayList<>();
 
         private boolean built;
 
@@ -325,6 +362,13 @@ public final class EditBuffer {
             section.setBlockEntity(x & 15, y & 15, z & 15, block);
         }
 
+        @Contract("_ -> this")
+        public Builder addEntityEdit(EntityEdit edit) {
+            assertNotBuilt();
+            entities.add(edit);
+            return this;
+        }
+
         @Contract(" -> new")
         public EditBuffer build() {
             assertNotBuilt();
@@ -332,7 +376,7 @@ public final class EditBuffer {
             Area.@Nullable Cuboid bounds = minX > maxX
                 ? null
                 : Area.cuboid(new BlockVec(minX, minY, minZ), new BlockVec(maxX, maxY, maxZ));
-            return new EditBuffer(sections, bounds);
+            return new EditBuffer(sections, bounds, List.copyOf(entities));
         }
 
         private void replaceSection(long key, BufferSection section) {

@@ -5,6 +5,8 @@ import net.hollowcube.command.arg.Argument;
 import net.hollowcube.schem.util.Rotation;
 import net.hollowcube.terraform.apply.CaptureEngine;
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityEdit;
+import net.hollowcube.terraform.legacy.TerraformImpl;
 import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
 import net.hollowcube.terraform.legacy.command.util.ArgumentRotation;
 import net.hollowcube.terraform.legacy.command.util.CommandPreviewHelper;
@@ -37,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.EnumSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -244,8 +247,6 @@ public final class SchematicCommands {
             } else mask = Mask.always();
 
             // Warnings for currently unsupported flags
-            if (flags.contains(Flags.ENTITIES))
-                player.sendMessage(Messages.GENERIC_ENTITIES_UNSUPPORTED);
             if (flags.contains(Flags.BIOMES))
                 player.sendMessage(Messages.GENERIC_BIOMES_UNSUPPORTED);
 
@@ -258,6 +259,7 @@ public final class SchematicCommands {
                 player.sendMessage(Messages.GENERIC_NO_SELECTION);
                 return;
             }
+            var entities = flags.contains(Flags.ENTITIES) ? captureEntities(session, region) : List.<EntityEdit>of();
 
             Point anchor = flags.contains(Flags.CENTER)
                     ? region.min().add(region.max()).div(2)
@@ -275,7 +277,8 @@ public final class SchematicCommands {
                             return new EditBlockBuffer(EditBuffer.empty());
                         })
                         .post(_ -> {
-                            clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(copied.get(), anchor));
+                            var buffer = copied.get().withEntities(entities);
+                            clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(buffer, anchor));
                             player.sendMessage(Messages.CLIPBOARD_COPY.with(region.volume()));
                         })
                         .dryRunIfCapacity();
@@ -284,7 +287,7 @@ public final class SchematicCommands {
                         .metadata() //todo
                         .compute(RegionFunctions.replace(region, mask, Pattern.air()))
                         .post(result -> {
-                            var copied = EditBlockBuffer.toEditBuffer(result.undoBuffer());
+                            var copied = EditBlockBuffer.toEditBuffer(result.undoBuffer()).withEntities(entities);
                             clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(copied, anchor));
                             player.sendMessage(Messages.CLIPBOARD_COPY.with(result.blocksChanged()));
                         })
@@ -328,8 +331,6 @@ public final class SchematicCommands {
             } else mask = Mask.always();
 
             // Warnings for currently unsupported flags
-            if (flags.contains(Flags.ENTITIES))
-                player.sendMessage(Messages.GENERIC_ENTITIES_UNSUPPORTED);
             if (flags.contains(Flags.BIOMES))
                 player.sendMessage(Messages.GENERIC_BIOMES_UNSUPPORTED);
 
@@ -342,6 +343,9 @@ public final class SchematicCommands {
                 player.sendMessage(Messages.GENERIC_NO_SELECTION);
                 return;
             }
+            // The clipboard keeps the entities, and the clear removes them from the world.
+            var entities = flags.contains(Flags.ENTITIES) ? captureEntities(session, region) : List.<EntityEdit>of();
+            var removals = entities.stream().map(edit -> EntityEdit.remove(edit.id(), edit.pos())).toList();
 
             var origin = player.getPosition();
             Task task;
@@ -355,8 +359,9 @@ public final class SchematicCommands {
                 task = session.buildTask("we-cut")
                         .metadata() //todo
                         .compute((computeTask, world) -> {
-                            cut.set(CaptureEngine.capture(instance, box));
-                            return clear.exec(computeTask, world);
+                            cut.set(CaptureEngine.capture(instance, box).withEntities(entities));
+                            var cleared = EditBlockBuffer.toEditBuffer(clear.exec(computeTask, world));
+                            return new EditBlockBuffer(cleared.withEntities(removals));
                         })
                         .post(result -> {
                             clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(cut.get(), origin));
@@ -364,12 +369,16 @@ public final class SchematicCommands {
                         })
                         .submitIfCapacity();
             } else {
+                var replace = RegionFunctions.replace(region, mask, pattern);
                 task = session.buildTask("we-cut")
                         .metadata() //todo
-                        .compute(RegionFunctions.replace(region, mask, pattern))
+                        .compute((computeTask, world) -> {
+                            var cleared = replace.exec(computeTask, world);
+                            return new EditBlockBuffer(EditBlockBuffer.toEditBuffer(cleared).withEntities(removals));
+                        })
                         .captureAll()
                         .post(result -> {
-                            var cut = EditBlockBuffer.toEditBuffer(result.undoBuffer());
+                            var cut = EditBlockBuffer.toEditBuffer(result.undoBuffer()).withEntities(entities);
                             clipboard.setData(new net.hollowcube.terraform.clipboard.Clipboard(cut, origin));
                             player.sendMessage(Messages.CLIPBOARD_CUT.with(result.blocksChanged()));
                         })
@@ -434,8 +443,6 @@ public final class SchematicCommands {
             }
 
             // Warnings for currently unsupported flags
-            if (flags.contains(Flags.ENTITIES))
-                player.sendMessage(Messages.GENERIC_ENTITIES_UNSUPPORTED);
             if (flags.contains(Flags.BIOMES))
                 player.sendMessage(Messages.GENERIC_BIOMES_UNSUPPORTED);
             if (flags.contains(Flags.ORIGINAL_POS))
@@ -467,9 +474,10 @@ public final class SchematicCommands {
             }
 
             boolean skipAir = flags.contains(Flags.AIR_SKIP);
+            var entities = flags.contains(Flags.ENTITIES) ? TerraformImpl.ENTITIES : null;
             var submitted = session.buildTask("we-paste")
                     .metadata() //todo
-                    .compute((task, world) -> new EditBlockBuffer(data.pasteBuffer(origin, skipAir)))
+                    .compute((task, world) -> new EditBlockBuffer(data.pasteBuffer(origin, skipAir, entities)))
                     .post(result -> {
                         if (flags.contains(Flags.SELECT_REGION)) {
                             selection.setType(Region.Type.CUBOID);
@@ -564,5 +572,14 @@ public final class SchematicCommands {
     }
 
     private SchematicCommands() {
+    }
+
+    /**
+     * The editable entities in the region's bounding box, as edits setting them. Reads live entities, so it runs
+     * on the command's thread rather than in a task's compute.
+     */
+    private static @NotNull List<EntityEdit> captureEntities(@NotNull LocalSession session, @NotNull Region region) {
+        var box = Area.cuboid(region.min(), region.max().sub(1, 1, 1));
+        return TerraformImpl.ENTITIES.entitiesIn(session.instance(), box);
     }
 }

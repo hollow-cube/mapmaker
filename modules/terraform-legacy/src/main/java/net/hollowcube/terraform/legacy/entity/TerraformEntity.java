@@ -51,18 +51,29 @@ public interface TerraformEntity {
     }
 
     static @Nullable Entity spawnWithPassengers(@Nullable Player source, @NotNull Instance instance, @NotNull CompoundBinaryTag tag) {
-        var entity = createEntityUnspawned(source, instance, tag);
+        var spawnPosition = Objects.requireNonNullElse(NbtUtil.readSpawnPosition(tag), Pos.ZERO);
+        return spawnWithPassengers(source, instance, tag, null, spawnPosition);
+    }
+
+    /**
+     * Spawns the entity in {@code tag} under {@code uuid} (the tag's own UUID when null) at {@code position},
+     * with the passengers listed in its {@code Passengers}.
+     */
+    static @Nullable Entity spawnWithPassengers(
+            @Nullable Player source, @NotNull Instance instance, @NotNull CompoundBinaryTag tag,
+            @Nullable UUID uuid, @NotNull Pos position
+    ) {
+        var entity = createEntityUnspawned(source, instance, tag, uuid);
         if (entity == null) return null;
 
         var passengers = new ArrayList<Entity>();
         for (var passengerTag : tag.getList("Passengers", BinaryTagTypes.COMPOUND)) {
-            var passenger = createEntityUnspawned(source, instance, (CompoundBinaryTag) passengerTag);
+            var passenger = createEntityUnspawned(source, instance, (CompoundBinaryTag) passengerTag, null);
             if (passenger == null) continue;
             passengers.add(passenger);
         }
 
-        var spawnPosition = Objects.requireNonNullElse(NbtUtil.readSpawnPosition(tag), Pos.ZERO);
-        var event = new TerraformSpawnEntityEvent(source, instance, entity, spawnPosition);
+        var event = new TerraformSpawnEntityEvent(source, instance, entity, position);
         EventDispatcher.call(event);
         if (event.isCancelled()) return null;
 
@@ -75,7 +86,9 @@ public interface TerraformEntity {
     }
 
     @SuppressWarnings("UnstableApiUsage")
-    private static @Nullable Entity createEntityUnspawned(@Nullable Player source, @NotNull Instance instance, @NotNull CompoundBinaryTag tag) {
+    private static @Nullable Entity createEntityUnspawned(
+            @Nullable Player source, @NotNull Instance instance, @NotNull CompoundBinaryTag tag, @Nullable UUID uuid
+    ) {
         var entityTypeName = tag.getString("id");
         var entityType = EntityType.fromKey(entityTypeName);
         if (entityType == null) return null;
@@ -84,7 +97,9 @@ public interface TerraformEntity {
         EventDispatcher.call(preEvent);
         if (preEvent.isCancelled()) return null;
 
-        var uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UUIDUtils.fromNbt(uuidTag) : UUID.randomUUID();
+        if (uuid == null) {
+            uuid = tag.get("UUID") instanceof IntArrayBinaryTag uuidTag ? UUIDUtils.fromNbt(uuidTag) : UUID.randomUUID();
+        }
         var entity = preEvent.getConstructor().apply(entityType, uuid);
         if (entity instanceof TerraformEntity tfEntity) {
             final CompoundBinaryTag fnbt = tag;

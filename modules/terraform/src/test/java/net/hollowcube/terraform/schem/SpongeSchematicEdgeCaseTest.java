@@ -119,7 +119,7 @@ class SpongeSchematicEdgeCaseTest {
 
         Clipboard read = new Clipboard(SpongeSchematicReader.read(encoded, GameDataProvider.NOOP));
         // Pasted at the same anchor as the copy origin, the chest lands where it was.
-        EditBuffer pasted = read.pasteBuffer(new Vec(-3, 1, 40), false);
+        EditBuffer pasted = read.pasteBuffer(new Vec(-3, 1, 40), false, null);
         assertEquals(nbt, pasted.getBlock(-17, 7, 35).nbt());
     }
 

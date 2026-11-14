@@ -2,13 +2,16 @@ package net.hollowcube.terraform.schem;
 
 import net.hollowcube.terraform.buffer.BufferSection;
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityEdit;
 import net.hollowcube.terraform.nbt.NbtStreamWriter;
 import net.hollowcube.terraform.util.BlockUtil;
 import net.hollowcube.terraform.util.GameDataProvider;
+import net.hollowcube.terraform.util.TypedData;
 import net.kyori.adventure.key.Key;
-import net.kyori.adventure.nbt.CompoundBinaryTag;
+import net.kyori.adventure.nbt.*;
 import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,6 +22,7 @@ import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.Deflater;
 import java.util.zip.GZIPOutputStream;
 
@@ -145,6 +149,7 @@ public final class SpongeSchematicWriter {
         writeBlockData(out);
         writeBlockEntities(out);
         out.endCompound();
+        writeEntities(out);
 
         out.endCompound();
         out.endCompound();
@@ -186,6 +191,48 @@ public final class SpongeSchematicWriter {
             out.writeString("Id", entry.id());
             out.writeIntArray("Pos", entry.x(), entry.y(), entry.z());
             out.writeTag("Data", entry.nbt() != null ? entry.nbt() : CompoundBinaryTag.empty());
+            out.endCompound();
+        }
+    }
+
+    private void writeEntities(NbtStreamWriter out) throws IOException {
+        var entities = new ArrayList<EntityEdit>();
+        for (EntityEdit edit : buffer.entities()) {
+            if (edit.data() != null) entities.add(edit);
+        }
+        if (entities.isEmpty()) return;
+
+        out.beginList("Entities", COMPOUND, entities.size());
+        for (EntityEdit edit : entities) {
+            TypedData data = Objects.requireNonNull(edit.data());
+            Pos pos = edit.pos();
+            out.beginCompound();
+            out.writeString("Id", data.type());
+            out.writeTag(
+                "Pos",
+                ListBinaryTag.listBinaryTag(
+                    BinaryTagTypes.DOUBLE,
+                    List.of(
+                        DoubleBinaryTag.doubleBinaryTag(pos.x() - min.blockX()),
+                        DoubleBinaryTag.doubleBinaryTag(pos.y() - min.blockY()),
+                        DoubleBinaryTag.doubleBinaryTag(pos.z() - min.blockZ())
+                    )
+                )
+            );
+            out.writeTag(
+                "Data",
+                data.nbt()
+                    .put(
+                        "Rotation",
+                        ListBinaryTag.listBinaryTag(
+                            BinaryTagTypes.FLOAT,
+                            List.of(
+                                FloatBinaryTag.floatBinaryTag(pos.yaw()),
+                                FloatBinaryTag.floatBinaryTag(pos.pitch())
+                            )
+                        )
+                    )
+            );
             out.endCompound();
         }
     }

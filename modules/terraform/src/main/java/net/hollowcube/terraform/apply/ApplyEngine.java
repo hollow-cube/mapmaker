@@ -3,6 +3,9 @@ package net.hollowcube.terraform.apply;
 import it.unimi.dsi.fastutil.longs.Long2ObjectRBTreeMap;
 import net.hollowcube.terraform.buffer.BufferSection;
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityAccessor;
+import net.hollowcube.terraform.entity.EntityEdit;
+import net.hollowcube.terraform.util.TypedData;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Chunk;
@@ -52,11 +55,13 @@ public final class ApplyEngine {
     }
 
     private final BlockHandlerRegistry handlers;
+    private final @Nullable EntityAccessor entities;
     private final Function<Chunk, Collection<HeightmapView>> heightmaps;
     private final long tickTargetNanos;
 
     private ApplyEngine(Builder builder) {
         this.handlers = Objects.requireNonNullElseGet(builder.handlers, BlockHandlerRegistry::new);
+        this.entities = builder.entities;
         this.heightmaps = builder.heightmaps;
         this.tickTargetNanos = builder.tickTargetNanos;
     }
@@ -87,11 +92,13 @@ public final class ApplyEngine {
         UnloadedChunkPolicy policy,
         boolean captureUndo
     ) {
+        checkEntities(buffer);
         var work = chunkWork(instance, buffer, policy);
         checkStorage(work); // Waits for every load (all started above, so they run concurrently)
 
         var context = newContext(instance, captureUndo);
         for (ChunkWork chunkWork : work) applyColumn(context, chunkWork);
+        context.applyEntities(buffer.entities());
         return context.result();
     }
 
@@ -130,6 +137,7 @@ public final class ApplyEngine {
     ) {
         ApplyQueue.Operation operation;
         try {
+            checkEntities(buffer);
             operation = new ApplyQueue.Operation(this, instance, buffer, policy, captureUndo);
         } catch (RuntimeException e) {
             return CompletableFuture.failedFuture(e);
@@ -150,8 +158,17 @@ public final class ApplyEngine {
         return ApplyQueue.forInstance(instance, tickTargetNanos).close();
     }
 
+    /// Throws if the buffer edits entities but no [EntityAccessor] was given, before anything is written.
+    private void checkEntities(EditBuffer buffer) {
+        if (entities == null && !buffer.entities().isEmpty()) {
+            throw new IllegalStateException(
+                "entity edits need an EntityAccessor (ApplyEngine.Builder#entities)"
+            );
+        }
+    }
+
     ApplyContext newContext(Instance instance, boolean captureUndo) {
-        return new ApplyContext(handlers, instance, captureUndo);
+        return new ApplyContext(handlers, entities, instance, captureUndo);
     }
 
     void applyColumn(ApplyContext context, ChunkWork work) {
@@ -229,11 +246,18 @@ public final class ApplyEngine {
         final boolean anyViewers;
         long changed;
         private final BlockHandlerRegistry registry;
+        private final @Nullable EntityAccessor entities;
         private final Instance instance;
-        private boolean warned;
+        private boolean warned, warnedEntity;
 
-        ApplyContext(BlockHandlerRegistry registry, Instance instance, boolean captureUndo) {
+        ApplyContext(
+            BlockHandlerRegistry registry,
+            @Nullable EntityAccessor entities,
+            Instance instance,
+            boolean captureUndo
+        ) {
             this.registry = registry;
+            this.entities = entities;
             this.instance = instance;
             this.undo = captureUndo ? EditBuffer.builder() : null;
             this.anyViewers = !instance.getPlayers().isEmpty();
@@ -249,6 +273,60 @@ public final class ApplyEngine {
 
         Block attach(Block block) {
             return registry.attach(block);
+        }
+
+        /// Applies entity edits in order, recording their undo in reverse so it unwinds them in order.
+        /// An edit whose accessor call throws is skipped.
+        void applyEntities(List<EntityEdit> edits) {
+            if (edits.isEmpty()) return;
+            EntityAccessor entities = Objects.requireNonNull(this.entities); // checked on apply
+            List<EntityEdit> undone = new ArrayList<>(edits.size());
+            for (EntityEdit edit : edits) {
+                try {
+                    EntityEdit undoEdit = applyEntity(entities, edit);
+                    if (undoEdit != null) {
+                        undone.add(undoEdit);
+                        changed++;
+                    }
+                } catch (Throwable t) {
+                    if (warnedEntity) continue;
+                    warnedEntity = true;
+                    LOGGER.warn(
+                        "entity accessor threw for {} (further throws this apply are not logged)",
+                        edit.id(),
+                        t
+                    );
+                }
+            }
+            if (undo != null) {
+                for (EntityEdit edit : undone.reversed()) undo.addEntityEdit(edit);
+            }
+        }
+
+        /// Applies the edit, returning its undo, or null if it changed nothing.
+        private @Nullable EntityEdit applyEntity(EntityAccessor entities, EntityEdit edit) {
+            UUID id = edit.id();
+            EntityEdit before = entities.capture(instance, id);
+            TypedData data = edit.data();
+            if (data == null) {
+                if (before == null) return null;
+                entities.remove(instance, id);
+                return before;
+            }
+            if (before == null) {
+                entities.spawn(instance, id, edit.pos(), data);
+                return EntityEdit.remove(id, edit.pos());
+            }
+            if (before.equals(edit)) return null;
+
+            TypedData current = Objects.requireNonNull(before.data(), "a capture sets the entity");
+            if (!current.type().equals(data.type())) {
+                entities.remove(instance, id);
+                entities.spawn(instance, id, edit.pos(), data);
+            } else {
+                entities.apply(instance, id, edit.pos(), data);
+            }
+            return before;
         }
 
         boolean needsEntry(int stateId) {
@@ -307,10 +385,17 @@ public final class ApplyEngine {
         private @Nullable BlockHandlerRegistry handlers = null;
         private Function<Chunk, Collection<HeightmapView>> heightmaps = HeightmapView.MINESTOM;
         private long tickTargetNanos = TimeUnit.MILLISECONDS.toNanos(45);
+        private @Nullable EntityAccessor entities = null;
 
         /// Handlers to attach, by block key, to written blocks that carry none.
         public Builder blockHandlers(Map<Key, ? extends BlockHandler> handlers) {
             this.handlers = new BlockHandlerRegistry(handlers);
+            return this;
+        }
+
+        /// How entity edits read and write the world's entities.
+        public Builder entities(EntityAccessor entities) {
+            this.entities = entities;
             return this;
         }
 

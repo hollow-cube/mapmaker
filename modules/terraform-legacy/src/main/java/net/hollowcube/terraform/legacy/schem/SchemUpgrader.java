@@ -4,6 +4,7 @@ import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.datafix.DataTypes;
 import net.hollowcube.datafix.util.Value;
 import net.hollowcube.schem.util.GameDataProvider;
+import net.hollowcube.terraform.util.TypedData;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.codec.Transcoder;
 import org.jetbrains.annotations.NotNull;
@@ -31,6 +32,13 @@ public class SchemUpgrader implements GameDataProvider, net.hollowcube.terraform
     public @NotNull TypedData upgradeBlockEntity(int fromVersion, int toVersion, @NotNull TypedData blockEntity) {
         var upgraded = upgradeBlockEntity(fromVersion, toVersion, blockEntity.type(), blockEntity.nbt());
         return new TypedData(upgraded.getString("id", blockEntity.type()), upgraded.remove("id"));
+    }
+
+    @Override
+    public @NotNull TypedData upgradeEntity(int fromVersion, int toVersion, @NotNull TypedData entity) {
+        var preData = entity.nbt().putString("id", entity.type());
+        var upgraded = (CompoundBinaryTag) DataFixer.upgrade(DataTypes.ENTITY, Transcoder.NBT, preData, fromVersion, toVersion);
+        return new TypedData(upgraded.getString("id", entity.type()), upgraded.remove("id"));
     }
 
     @Override

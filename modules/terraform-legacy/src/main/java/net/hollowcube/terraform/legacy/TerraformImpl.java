@@ -8,7 +8,9 @@ import net.hollowcube.terraform.apply.ApplyEngine;
 import net.hollowcube.terraform.apply.PartialApplyException;
 import net.hollowcube.terraform.apply.UnloadedChunkPolicy;
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.hollowcube.terraform.entity.EntityAccessor;
 import net.hollowcube.terraform.legacy.buffer.EditBlockBuffer;
+import net.hollowcube.terraform.legacy.entity.TerraformEntityAccessor;
 import net.hollowcube.terraform.legacy.schem.SchemUpgrader;
 import net.hollowcube.terraform.legacy.session.LocalSession;
 import net.hollowcube.terraform.legacy.session.PlayerSession;
@@ -54,6 +56,8 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 @ApiStatus.Internal
 public final class TerraformImpl implements Terraform {
     private static final Logger logger = LoggerFactory.getLogger(Terraform.class);
+    @ApiStatus.Internal
+    public static final EntityAccessor ENTITIES = new TerraformEntityAccessor();
 
     final EventNode<InstanceEvent> eventNode;
     private final TerraformRegistryImpl registry;
@@ -89,6 +93,7 @@ public final class TerraformImpl implements Terraform {
         this.applyEngine = ApplyEngine.builder()
                 .blockHandlers(blockHandlers(this.registry))
                 .heightmap(this.registry.heightmaps())
+                .entities(ENTITIES)
                 .build();
 
         this.storage = Objects.requireNonNull(this.registry.storage(storage),
@@ -289,7 +294,7 @@ public final class TerraformImpl implements Terraform {
                 // Keep what was written undoable, then fail the task.
                 var partial = error instanceof PartialApplyException e ? e.partial() : null;
                 if (partial != null && !task.isEphemeral()) {
-                    var partialUndo = new EditBlockBuffer(before != null ? before : partial.undo());
+                    var partialUndo = new EditBlockBuffer(before != null ? before.withEntities(partial.undo().entities()) : partial.undo());
                     task.session().remember(Change.of(partialUndo, new EditBlockBuffer(edit)));
                 }
                 threadPoolApply.execute(() -> {
@@ -300,7 +305,9 @@ public final class TerraformImpl implements Terraform {
                 return;
             }
 
-            var undoBuffer = new EditBlockBuffer(before != null ? before : Objects.requireNonNull(result).undo());
+            // A cut's undo is the blocks it read before applying, plus the entities the apply captured.
+            var undo = Objects.requireNonNull(result).undo();
+            var undoBuffer = new EditBlockBuffer(before != null ? before.withEntities(undo.entities()) : undo);
             var redoBuffer = new EditBlockBuffer(edit);
             if (!task.isEphemeral()) {
                 task.session().remember(Change.of(undoBuffer, redoBuffer));

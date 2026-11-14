@@ -52,7 +52,7 @@ class ClipboardSchematicTest {
         assertFalse(read.hasTransform());
         assertPastesMatch(clip, read);
         Block chest = Objects.requireNonNull(
-            read.pasteBuffer(ANCHOR, false).getBlock(97, 52, -100)
+            read.pasteBuffer(ANCHOR, false, null).getBlock(97, 52, -100)
         );
         assertEquals("east", chest.getProperty("facing"));
         assertEquals("k", Objects.requireNonNull(chest.nbt()).getString("Lock"));
@@ -83,8 +83,8 @@ class ClipboardSchematicTest {
     /// Every cell `expected` pastes, `actual` pastes the same at the same anchor. `actual` may add air
     /// for the cells `expected` left unset.
     private static void assertPastesMatch(Clipboard expected, Clipboard actual) {
-        EditBuffer want = expected.pasteBuffer(ANCHOR, false);
-        EditBuffer got = actual.pasteBuffer(ANCHOR, false);
+        EditBuffer want = expected.pasteBuffer(ANCHOR, false, null);
+        EditBuffer got = actual.pasteBuffer(ANCHOR, false, null);
         assertEquals(want.blockBounds(), got.blockBounds());
         want.forEachSection(
             (sx, sy, sz, section) -> section.forEachBlockState((x, y, z, stateId) -> {

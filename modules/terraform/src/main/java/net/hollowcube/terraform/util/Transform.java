@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.util;
 
 import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 
 /// An affine transform: a 3x3 linear part plus a translation. It moves cells, and block states reorient
@@ -65,6 +66,20 @@ public record Transform(
             m10 * x + m11 * y + m12 * z,
             m20 * x + m21 * y + m22 * z
         );
+    }
+
+    public Pos apply(Pos pos) {
+        double x = pos.x(), y = pos.y(), z = pos.z();
+        var moved = new Pos(
+            m00 * x + m01 * y + m02 * z + m03,
+            m10 * x + m11 * y + m12 * z + m13,
+            m20 * x + m21 * y + m22 * z + m23,
+            pos.yaw(),
+            pos.pitch()
+        );
+        if (isLinearIdentity()) return moved;
+        Vec direction = pos.direction();
+        return moved.withDirection(applyDirection(direction.x(), direction.y(), direction.z()));
     }
 
     /// Maps a cell to the cell holding its transformed centre. A bijection of the block grid for a

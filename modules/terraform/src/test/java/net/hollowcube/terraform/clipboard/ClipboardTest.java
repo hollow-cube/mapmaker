@@ -22,7 +22,7 @@ class ClipboardTest {
             .build();
         Clipboard clip = new Clipboard(buffer, new Vec(0, 70, 0));
 
-        EditBuffer pasted = clip.pasteBuffer(new Vec(10, 70, 10), false);
+        EditBuffer pasted = clip.pasteBuffer(new Vec(10, 70, 10), false, null);
         assertEquals(Block.STONE.stateId(), pasted.getBlockState(10, 70, 10));
         assertEquals(Block.DIRT.stateId(), pasted.getBlockState(12, 70, 12));
         assertEquals(EditBuffer.NONE, pasted.getBlockState(0, 70, 0));
@@ -37,7 +37,7 @@ class ClipboardTest {
         Clipboard clip = new Clipboard(buffer, new Vec(0.7, 64.2, 0.9));
         assertEquals(new BlockVec(0, 64, 0), clip.origin());
 
-        EditBuffer pasted = clip.pasteBuffer(new Vec(16, 64, 0), false);
+        EditBuffer pasted = clip.pasteBuffer(new Vec(16, 64, 0), false, null);
         assertEquals(Block.STONE.stateId(), pasted.getBlockState(16, 64, 0));
         assertEquals(7, pasted.getBiome(16, 64, 0));
     }
@@ -48,7 +48,7 @@ class ClipboardTest {
             EditBuffer.builder().setBlockState(0, 0, 0, Block.STONE).build(),
             Vec.ZERO
         );
-        EditBuffer pasted = clip.pasteBuffer(new Vec(-0.5, 3.9, 2.1), false);
+        EditBuffer pasted = clip.pasteBuffer(new Vec(-0.5, 3.9, 2.1), false, null);
         assertEquals(Block.STONE.stateId(), pasted.getBlockState(-1, 3, 2));
     }
 
@@ -61,10 +61,10 @@ class ClipboardTest {
         Clipboard clip = new Clipboard(buffer, new Vec(0, 70, 0));
 
         Vec anchor = new Vec(0, 70, 0);
-        EditBuffer withAir = clip.pasteBuffer(anchor, false);
+        EditBuffer withAir = clip.pasteBuffer(anchor, false, null);
         assertEquals(Block.AIR.stateId(), withAir.getBlockState(1, 70, 0));
 
-        EditBuffer noAir = clip.pasteBuffer(anchor, true);
+        EditBuffer noAir = clip.pasteBuffer(anchor, true, null);
         assertEquals(Block.STONE.stateId(), noAir.getBlockState(0, 70, 0));
         assertEquals(EditBuffer.NONE, noAir.getBlockState(1, 70, 0));
     }
@@ -88,7 +88,7 @@ class ClipboardTest {
             clip.withTransform(Transform.mirror(Transform.Axis.Z))
         );
         for (Clipboard t : transformed) {
-            EditBuffer pasted = t.pasteBuffer(anchor, false);
+            EditBuffer pasted = t.pasteBuffer(anchor, false, null);
             assertEquals(
                 Block.STONE.stateId(),
                 pasted.getBlockState(20, 64, 30),
@@ -96,10 +96,10 @@ class ClipboardTest {
             );
         }
 
-        EditBuffer rotated = clip.withTransform(Transform.rotateY(90)).pasteBuffer(anchor, false);
+        EditBuffer rotated = clip.withTransform(Transform.rotateY(90)).pasteBuffer(anchor, false, null);
         assertEquals(Block.DIRT.stateId(), rotated.getBlockState(20, 64, 31));
         EditBuffer mirrored = clip.withTransform(Transform.mirror(Transform.Axis.X))
-            .pasteBuffer(anchor, false);
+            .pasteBuffer(anchor, false, null);
         assertEquals(Block.DIRT.stateId(), mirrored.getBlockState(19, 64, 30));
     }
 
@@ -114,13 +114,13 @@ class ClipboardTest {
         // +x turns to +z, then the z mirror sends it to -z.
         EditBuffer rotateThenMirror = clip.withTransform(Transform.rotateY(90))
             .withTransform(Transform.mirror(Transform.Axis.Z))
-            .pasteBuffer(Vec.ZERO, false);
+            .pasteBuffer(Vec.ZERO, false, null);
         assertEquals(Block.DIRT.stateId(), rotateThenMirror.getBlockState(0, 0, -1));
 
         // The z mirror leaves +x alone, then it turns to +z.
         EditBuffer mirrorThenRotate = clip.withTransform(Transform.mirror(Transform.Axis.Z))
             .withTransform(Transform.rotateY(90))
-            .pasteBuffer(Vec.ZERO, false);
+            .pasteBuffer(Vec.ZERO, false, null);
         assertEquals(Block.DIRT.stateId(), mirrorThenRotate.getBlockState(0, 0, 1));
     }
 
@@ -155,7 +155,7 @@ class ClipboardTest {
         Clipboard clip = new Clipboard(EditBuffer.empty(), Vec.ZERO);
         assertNull(clip.buffer().blockBounds());
         assertNull(clip.pasteBounds(Vec.ZERO));
-        assertEquals(0, clip.pasteBuffer(Vec.ZERO, false).sectionCount());
+        assertEquals(0, clip.pasteBuffer(Vec.ZERO, false, null).sectionCount());
     }
 
     @Test
@@ -181,7 +181,7 @@ class ClipboardTest {
         for (Transform t : transforms) {
             Clipboard transformed = clip.withTransform(t);
             assertEquals(
-                transformed.pasteBuffer(anchor, false).blockBounds(),
+                transformed.pasteBuffer(anchor, false, null).blockBounds(),
                 transformed.pasteBounds(anchor),
                 "under " + t
             );
@@ -194,14 +194,14 @@ class ClipboardTest {
             EditBuffer.builder().setBlockState(0, 0, 0, Block.STONE).build(),
             Vec.ZERO
         ).withTransform(Transform.rotateY(45));
-        assertThrows(IllegalArgumentException.class, () -> clip.pasteBuffer(Vec.ZERO, false));
+        assertThrows(IllegalArgumentException.class, () -> clip.pasteBuffer(Vec.ZERO, false, null));
     }
 
     @Test
     void pastingAtTheOriginWithoutATransformReusesTheBuffer() {
         EditBuffer buffer = EditBuffer.builder().setBlockState(1, 2, 3, Block.STONE).build();
         Clipboard clip = new Clipboard(buffer, new Vec(1, 2, 3));
-        assertSame(buffer, clip.pasteBuffer(new Vec(1, 2, 3), false));
-        assertNotSame(buffer, clip.pasteBuffer(new Vec(1, 2, 3), true));
+        assertSame(buffer, clip.pasteBuffer(new Vec(1, 2, 3), false, null));
+        assertNotSame(buffer, clip.pasteBuffer(new Vec(1, 2, 3), true, null));
     }
 }

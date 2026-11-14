@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.util;
 
 import it.unimi.dsi.fastutil.HashCommon;
+import net.hollowcube.terraform.entity.EntityEdit;
 import net.kyori.adventure.nbt.*;
 import net.minestom.server.instance.block.Block;
 import org.jetbrains.annotations.Nullable;
@@ -14,6 +15,7 @@ import java.util.Map;
 public final class HeapSize {
     private static final long OPEN_HASH_MAP = 64;
     private static final long BLOCK_ENTITY = 64; // Block entity overhead (excluding nbt)
+    private static final long ENTITY_EDIT = 160; // Edit, id, data, position and type key (excluding nbt)
 
     public static final long SECTION = 40 + 24; // Section overhead
 
@@ -52,6 +54,11 @@ public final class HeapSize {
 
     public static long block(Block block) {
         return BLOCK_ENTITY + nbt(block.nbt());
+    }
+
+    public static long entityEdit(EntityEdit edit) {
+        TypedData data = edit.data();
+        return ENTITY_EDIT + (data != null ? nbt(data.nbt()) : 0);
     }
 
     private static long align(long bytes) {

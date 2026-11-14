@@ -1,6 +1,5 @@
 package net.hollowcube.terraform.util;
 
-import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 
 public interface GameDataProvider {
@@ -16,5 +15,7 @@ public interface GameDataProvider {
         return blockEntity;
     }
 
-    record TypedData(String type, CompoundBinaryTag nbt) {}
+    default TypedData upgradeEntity(int fromVersion, int toVersion, TypedData entity) {
+        return entity;
+    }
 }
