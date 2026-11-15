@@ -160,6 +160,14 @@
             "type": "net.hollowcube.ipc.map.BeginVerificationResult"
           }
         },
+        "close-world": {
+          "params": [
+            {
+              "name": "worldId",
+              "type": "String"
+            }
+          ]
+        },
         "create": {
           "params": [
             {
@@ -435,6 +443,25 @@
             "type": "net.hollowcube.ipc.map.BuilderResult"
           }
         },
+        "open-world": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "worldId",
+              "type": "String"
+            },
+            {
+              "name": "serverId",
+              "type": "String"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.OpenWorldResult"
+          }
+        },
         "progress": {
           "params": [
             {
@@ -519,6 +546,29 @@
               "nullable": true
             }
           ]
+        },
+        "save-world": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "worldId",
+              "type": "String"
+            },
+            {
+              "name": "walSeq",
+              "type": "long"
+            },
+            {
+              "name": "world",
+              "type": "net.hollowcube.ipc.Blob"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.map.SaveWorldResult"
+          }
         },
         "search": {
           "params": [
@@ -2271,6 +2321,33 @@
         "VERIFIED"
       ]
     },
+    "net.hollowcube.ipc.map.OpenWorldResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "open-elsewhere": "net.hollowcube.ipc.map.OpenWorldResult.OpenElsewhere",
+        "opened": "net.hollowcube.ipc.map.OpenWorldResult.Opened"
+      }
+    },
+    "net.hollowcube.ipc.map.OpenWorldResult.OpenElsewhere": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": [
+        {
+          "name": "serverId",
+          "type": "String"
+        }
+      ]
+    },
+    "net.hollowcube.ipc.map.OpenWorldResult.Opened": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
     "net.hollowcube.ipc.map.PlayerMapProgress": {
       "kind": "record",
       "used": [
@@ -2529,6 +2606,28 @@
           "nullable": true
         }
       ]
+    },
+    "net.hollowcube.ipc.map.SaveWorldResult": {
+      "kind": "sealed",
+      "discriminator": "type",
+      "variants": {
+        "not-held": "net.hollowcube.ipc.map.SaveWorldResult.NotHeld",
+        "saved": "net.hollowcube.ipc.map.SaveWorldResult.Saved"
+      }
+    },
+    "net.hollowcube.ipc.map.SaveWorldResult.NotHeld": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
+    },
+    "net.hollowcube.ipc.map.SaveWorldResult.Saved": {
+      "kind": "record",
+      "used": [
+        "response"
+      ],
+      "fields": []
     },
     "net.hollowcube.ipc.notification.Notification": {
       "kind": "record",
