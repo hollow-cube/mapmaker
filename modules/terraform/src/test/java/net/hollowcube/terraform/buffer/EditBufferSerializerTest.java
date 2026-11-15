@@ -1,6 +1,7 @@
 package net.hollowcube.terraform.buffer;
 
 import net.hollowcube.terraform.entity.EntityEdit;
+import net.hollowcube.terraform.util.BlockUtil;
 import net.hollowcube.terraform.util.GameDataProvider;
 import net.hollowcube.terraform.util.TypedData;
 import net.kyori.adventure.key.Key;
@@ -16,7 +17,9 @@ import net.minestom.server.world.biome.Biome;
 import org.junit.jupiter.api.Test;
 
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 import java.util.UUID;
 
@@ -194,6 +197,61 @@ class EditBufferSerializerTest {
             List.of("minecraft:husk"),
             read.entities().stream().map(edit -> edit.data().type()).toList()
         );
+    }
+
+    @Test
+    void aPaletteWithValuesNoCellUsesRoundTrips() {
+        Block[] states = {Block.STONE, Block.DIRT, Block.GRANITE, Block.ANDESITE, Block.DIORITE};
+        var builder = EditBuffer.builder();
+        for (int y = 64; y < 80; y++)
+            for (int z = 0; z < 16; z++)
+                for (int x = 0; x < 16; x++)
+                    builder.setBlockState(x, y, z, states[(x + y + z) % 5]);
+        for (int y = 64; y < 80; y++)
+            for (int z = 0; z < 16; z++)
+                for (int x = 0; x < 16; x++)
+                    if ((x + y + z) % 5 >= 3) builder.setBlockState(x, y, z, Block.STONE);
+        var buffer = builder.build();
+        var palette = Objects.requireNonNull(
+            Objects.requireNonNull(buffer.section(0, 4, 0)).densePalette()
+        );
+        assertTrue(
+            Objects.requireNonNull(PaletteHack.dictionary(palette)).size() > 3,
+            "the palette still lists the overwritten states"
+        );
+
+        assertSameContent(buffer, roundTrip(buffer, GameDataProvider.NOOP, GameDataProvider.NOOP));
+    }
+
+    @Test
+    void cellsPackedWiderThanNeededAreRead() {
+        // Two values packed at 4 bits per cell, alternating stone and dirt
+        byte[] bytes = NetworkBuffer.makeArray(out -> {
+            out.write(NetworkBuffer.VAR_INT, 1);
+            out.write(NetworkBuffer.VAR_INT, MinecraftServer.DATA_VERSION);
+            out.write(NetworkBuffer.BOOLEAN, false);
+            out.write(NetworkBuffer.VAR_INT, 1);
+            out.write(NetworkBuffer.LONG, BlockUtil.packBlockPos(0, 4, 0));
+            out.write(NetworkBuffer.BYTE, (byte) 3);
+            out.write(NetworkBuffer.VAR_INT, 2);
+            out.write(NetworkBuffer.VAR_INT, 1);
+            out.write(NetworkBuffer.STRING, "minecraft:stone");
+            out.write(NetworkBuffer.VAR_INT, 2);
+            out.write(NetworkBuffer.STRING, "minecraft:dirt");
+            out.write(NetworkBuffer.VAR_INT, 4);
+            long[] packed = new long[256];
+            Arrays.fill(packed, 0x1010101010101010L);
+            out.write(NetworkBuffer.LONG_ARRAY, packed);
+            out.write(NetworkBuffer.VAR_INT, 0);
+            out.write(NetworkBuffer.BYTE, (byte) 0);
+            out.write(NetworkBuffer.VAR_INT, 0);
+        });
+
+        EditBuffer read = read(bytes, GameDataProvider.NOOP);
+
+        assertEquals(Block.STONE, read.getBlock(0, 64, 0));
+        assertEquals(Block.DIRT, read.getBlock(1, 64, 0));
+        assertEquals(Block.DIRT, read.getBlock(15, 79, 15));
     }
 
     @Test

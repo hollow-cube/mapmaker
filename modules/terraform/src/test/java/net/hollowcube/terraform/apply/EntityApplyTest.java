@@ -214,7 +214,7 @@ class EntityApplyTest {
         return CompoundBinaryTag.builder().putString("value", value).build();
     }
 
-    private record ThrowingFor(UUID broken) implements EntityAccessor {
+    record ThrowingFor(UUID broken) implements EntityAccessor {
         @Override
         public @Nullable EntityEdit capture(Instance instance, UUID id) {
             if (id.equals(broken)) throw new IllegalStateException("broken accessor");

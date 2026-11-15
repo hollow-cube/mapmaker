@@ -116,6 +116,14 @@ final class PaletteHack {
         return (IntArrayList) PALETTE_TO_VALUE_LIST.get(palette);
     }
 
+    static int bitsPerEntry(Palette palette) {
+        return (byte) BITS_PER_ENTRY.get(palette);
+    }
+
+    static long[] packed(Palette palette) {
+        return (long[]) VALUES.get(palette);
+    }
+
     /// Very gross fast cases :(
     ///
     /// Some version probably should be partially upstreamed at some point

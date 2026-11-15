@@ -358,6 +358,17 @@ public final class EditBuffer {
             return section;
         }
 
+        /// Copy the given world biome palette into this section biomes
+        @ApiStatus.Internal
+        public void captureBiomes(int sectionX, int sectionY, int sectionZ, Palette worldBiomes) {
+            BufferSection section = section(sectionX << 4, sectionY << 4, sectionZ << 4);
+            for (int y = 0; y < 4; y++) {
+                for (int z = 0; z < 4; z++) {
+                    for (int x = 0; x < 4; x++) section.setBiome(x, y, z, worldBiomes.get(x, y, z));
+                }
+            }
+        }
+
         /// Records block-entity data at a cell of a section the builder already holds (one from
         /// [#captureSection]), leaving the cell's block state alone. Throws if no section holds the cell.
         @ApiStatus.Internal

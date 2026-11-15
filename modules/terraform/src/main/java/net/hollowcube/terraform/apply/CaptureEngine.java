@@ -2,14 +2,19 @@ package net.hollowcube.terraform.apply;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.hollowcube.terraform.buffer.EditBuffer;
 import net.minestom.server.coordinate.Area;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.DynamicChunk;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.instance.Section;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.palette.Palette;
+
+import java.util.List;
 
 import static net.minestom.server.coordinate.CoordConversion.*;
 
@@ -82,6 +87,80 @@ public final class CaptureEngine {
             int z = (cz << 4) + chunkBlockIndexGetZ(index);
             if (x < x0 || x > x1 || y < minY || y > maxY || z < z0 || z > z1) continue;
             out.captureBlockEntity(x, y, z, entry.getValue());
+        }
+    }
+
+    /// Captures the entirety of each `sectionY`s into `out`
+    static void captureSections(Chunk chunk, int[] sectionYs, EditBuffer.Builder out) {
+        if (!(chunk instanceof DynamicChunk)) return;
+
+        int cx = chunk.getChunkX(), cz = chunk.getChunkZ();
+        chunk.lockReadLock();
+        try {
+            IntSet captured = new IntOpenHashSet(sectionYs.length);
+            for (int sy : sectionYs) {
+                if (sy < chunk.getMinSection() || sy >= chunk.getMaxSection()) continue;
+
+                Section section = chunk.getSection(sy);
+                out.captureSection(cx, sy, cz, section.blockPalette());
+                out.captureBiomes(cx, sy, cz, section.biomePalette());
+                captured.add(sy);
+            }
+
+            Int2ObjectMap<Block> entries = ChunkHack.entries(chunk);
+            for (Int2ObjectMap.Entry<Block> entry : Int2ObjectMaps.fastIterable(entries)) {
+                int index = entry.getIntKey();
+                int y = chunkBlockIndexGetY(index);
+                if (!captured.contains(y >> 4)) continue;
+                int x = (cx << 4) + chunkBlockIndexGetX(index);
+                int z = (cz << 4) + chunkBlockIndexGetZ(index);
+                out.captureBlockEntity(x, y, z, entry.getValue());
+            }
+        } finally {
+            chunk.unlockReadLock();
+        }
+    }
+
+    /// Captures the marked cells of each section: block states with their block entities, and biomes.
+    static void captureCells(Chunk chunk, List<SectionChange> sections, EditBuffer.Builder out) {
+        if (!(chunk instanceof DynamicChunk)) return;
+
+        int baseX = chunk.getChunkX() << 4, baseZ = chunk.getChunkZ() << 4;
+        chunk.lockReadLock();
+        try {
+            Int2ObjectMap<Block> entries = ChunkHack.entries(chunk);
+            for (SectionChange change : sections) {
+                int sectionY = change.sectionY();
+                if (sectionY < chunk.getMinSection() || sectionY >= chunk.getMaxSection()) continue;
+
+                int baseY = sectionY << 4;
+                Section section = chunk.getSection(sectionY);
+                Palette blockPalette = section.blockPalette(),
+                    biomePalette = section.biomePalette();
+                change.blocks()
+                    .stream()
+                    .forEach(index -> {
+                        int x = baseX + (index & 15),
+                            y = baseY + (index >> 8),
+                            z = baseZ + ((index >> 4) & 15);
+                        Block entry = entries.get(chunkBlockIndex(x, y, z));
+                        if (entry != null) out.setBlockState(x, y, z, entry);
+                        else out.setBlockState(x, y, z, blockPalette.get(x & 15, y & 15, z & 15));
+                    });
+                change.biomes()
+                    .stream()
+                    .forEach(index -> {
+                        int bx = index & 3, by = index >> 4, bz = (index >> 2) & 3;
+                        out.setBiome(
+                            baseX + (bx << 2),
+                            baseY + (by << 2),
+                            baseZ + (bz << 2),
+                            biomePalette.get(bx, by, bz)
+                        );
+                    });
+            }
+        } finally {
+            chunk.unlockReadLock();
         }
     }
 

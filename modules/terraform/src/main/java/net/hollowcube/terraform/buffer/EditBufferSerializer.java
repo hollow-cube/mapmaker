@@ -168,31 +168,36 @@ final class EditBufferSerializer implements NetworkBuffer.Type<EditBuffer> {
         }
     }
 
-    /// The palette's distinct values (0 for leave, else a name reference offset by one), then each cell's index in
-    /// that list, packed the way [Palette#load] reads it back.
+    /// The palette's values (0 for leave, else a name reference offset by one), the bits per cell, then each cell's
+    /// index in the values, packed the way [Palette#load] reads them. The values may include some no cell uses.
     private static void writePalette(
         NetworkBuffer buffer,
         Palette palette,
         int dimension,
         NameWriter names
     ) {
+        IntArrayList dictionary = PaletteHack.dictionary(palette);
+        int paletteBits = PaletteHack.bitsPerEntry(palette);
+        if (dictionary != null && paletteBits > 0) {
+            // An indirect palette already holds this encoding: its dictionary, and the cells packed as indices
+            writeValues(buffer, dictionary, names);
+            buffer.write(VAR_INT, paletteBits);
+            buffer.write(LONG_ARRAY, PaletteHack.packed(palette));
+            return;
+        }
+
         var local = new Int2IntOpenHashMap();
         local.defaultReturnValue(-1);
         var values = new IntArrayList();
         palette.getAll((_, _, _, value) -> {
             if (local.putIfAbsent(value, values.size()) == -1) values.add(value);
         });
-
-        buffer.write(VAR_INT, values.size());
-        for (int i = 0; i < values.size(); i++) {
-            int value = values.getInt(i);
-            if (value == 0) buffer.write(VAR_INT, 0);
-            else names.write(buffer, value - 1, 1);
-        }
+        writeValues(buffer, values, names);
 
         // Palette#getAll walks the cells in index order, so the indices pack straight into the longs
-        int bits = Math.max(1, MathUtils.bitsToRepresent(Math.max(1, values.size() - 1)));
+        int bits = minimalBits(values.size());
         int perLong = 64 / bits;
+        buffer.write(VAR_INT, bits);
         buffer.write(VAR_INT, Palettes.arrayLength(dimension, bits));
         var packer = new long[] {0, 0}; // current long, cells in it
         palette.getAll((_, _, _, value) -> {
@@ -203,6 +208,19 @@ final class EditBufferSerializer implements NetworkBuffer.Type<EditBuffer> {
             }
         });
         if (packer[1] > 0) buffer.write(LONG, packer[0]);
+    }
+
+    private static void writeValues(NetworkBuffer buffer, IntArrayList values, NameWriter names) {
+        buffer.write(VAR_INT, values.size());
+        for (int i = 0; i < values.size(); i++) {
+            int value = values.getInt(i);
+            if (value == 0) buffer.write(VAR_INT, 0);
+            else names.write(buffer, value - 1, 1);
+        }
+    }
+
+    private static int minimalBits(int size) {
+        return Math.max(1, MathUtils.bitsToRepresent(Math.max(1, size - 1)));
     }
 
     private String biomeName(int biomeId) {
@@ -413,16 +431,19 @@ final class EditBufferSerializer implements NetworkBuffer.Type<EditBuffer> {
                 values[i] = raw == 0 ? 0 : readReference(buffer, raw - 1, table, resolve) + 1;
                 distinct &= seen.add(values[i]);
             }
-            int bits = Math.max(1, MathUtils.bitsToRepresent(Math.max(1, size - 1)));
+            int bits = buffer.read(VAR_INT);
+            if (bits < minimalBits(size) || bits > 16)
+                throw new IllegalStateException(bits + " bits per cell for " + size + " values");
             long[] packed = buffer.read(LONG_ARRAY);
             if (packed.length != Palettes.arrayLength(dimension, bits))
                 throw new IllegalStateException("palette indices are " + packed.length + " longs");
 
-            if (distinct) {
+            if (distinct && bits == minimalBits(size)) {
                 palette.load(values, packed);
                 return palette;
             }
-            // Two names can resolve to the same value (both unknown, say), which a palette can't hold twice
+            // Two names can resolve to the same value (both unknown, say), which a palette can't hold twice, and
+            // the cells can be packed wider than a palette would load them
             int[] indices = new int[cells];
             Palettes.unpack(indices, packed, bits);
             int i = 0;

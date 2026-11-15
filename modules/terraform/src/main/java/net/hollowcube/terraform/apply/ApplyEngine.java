@@ -173,8 +173,9 @@ public final class ApplyEngine {
 
     void applyColumn(ApplyContext context, ChunkWork work) {
         var chunk = work.chunk();
+        ChunkApplyContext chunkContext = null;
         try {
-            var chunkContext = new ChunkApplyContext(context, chunk, heightmaps);
+            chunkContext = new ChunkApplyContext(context, chunk, heightmaps);
             boolean dirty = chunkContext.applyChunk(work.sections());
             if (dirty || work.loaded()) context.chunks.add(chunk);
         } catch (RuntimeException e) {
@@ -183,6 +184,8 @@ public final class ApplyEngine {
             if (context.anyViewers && chunk.isLoaded())
                 chunk.sendPacketToViewers(chunk.getFullDataPacket());
             throw new PartialApplyException(context.result(), e);
+        } finally {
+            if (chunkContext != null) chunkContext.markChanges();
         }
     }
 
@@ -281,14 +284,17 @@ public final class ApplyEngine {
             if (edits.isEmpty()) return;
             EntityAccessor entities = Objects.requireNonNull(this.entities); // checked on apply
             List<EntityEdit> undone = new ArrayList<>(edits.size());
+            List<EntityEdit> marked = new ArrayList<>(edits.size());
             for (EntityEdit edit : edits) {
                 try {
                     EntityEdit undoEdit = applyEntity(entities, edit);
                     if (undoEdit != null) {
                         undone.add(undoEdit);
+                        marked.add(edit);
                         changed++;
                     }
                 } catch (Throwable t) {
+                    marked.add(edit);
                     if (warnedEntity) continue;
                     warnedEntity = true;
                     LOGGER.warn(
@@ -301,6 +307,8 @@ public final class ApplyEngine {
             if (undo != null) {
                 for (EntityEdit edit : undone.reversed()) undo.addEntityEdit(edit);
             }
+            ChangeTracker tracker = ChangeTracker.of(instance);
+            if (tracker != null && !marked.isEmpty()) tracker.markEntities(marked);
         }
 
         /// Applies the edit, returning its undo, or null if it changed nothing.

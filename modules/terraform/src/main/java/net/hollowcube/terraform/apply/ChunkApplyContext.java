@@ -25,6 +25,7 @@ import net.minestom.server.utils.block.BlockUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Function;
@@ -42,11 +43,25 @@ final class ChunkApplyContext {
     /// and can get very laggy.
     private static final int MBC_FULL_CHUNK_LIMIT = 2048;
 
+    private static final BitSet ALL_BLOCKS = new BitSet(SECTION_BLOCK_COUNT);
+    private static final BitSet NO_CELLS = new BitSet(0);
+
+    static {
+        ALL_BLOCKS.set(0, SECTION_BLOCK_COUNT);
+    }
+
     private final ApplyContext context;
     private final Chunk chunk;
     private final Int2ObjectMap<Block> entries;
     private final Int2ObjectMap<Block> tickable;
     private final HeightmapChanges heights;
+
+    // Change tracking machinery, only set when `tracker != null`.
+    private final @Nullable ChangeTracker tracker;
+    private final List<SectionChange> changes = new ArrayList<>();
+    private @Nullable SectionRef writing;
+    private @Nullable BitSet blockCells, biomeCells;
+    private boolean wholeSection;
 
     // Packets, only collected when the chunk had viewers before the write. `mbc` goes null (and recording
     // stops) once the changes are better sent as one full chunk.
@@ -68,6 +83,7 @@ final class ChunkApplyContext {
         this.heights = new HeightmapChanges(chunk, heightmaps);
         this.viewed = context.anyViewers && !chunk.getViewers().isEmpty();
         this.mbc = viewed ? new Int2ObjectOpenHashMap<>() : null;
+        this.tracker = ChangeTracker.of(chunk.getInstance());
     }
 
     /// Applies the sections to the chunk. Returns whether the chunk changed.
@@ -93,8 +109,13 @@ final class ChunkApplyContext {
                     if (ref.sy() < minSection || ref.sy() >= maxSection) continue;
 
                     var worldSection = chunk.getSection(ref.sy());
+                    writing = ref;
+                    blockCells = biomeCells = null;
+                    wholeSection = false;
                     applySectionBlocks(ref, worldSection.blockPalette());
                     applySectionBiomes(ref, worldSection.biomePalette());
+                    writing = null;
+                    if (tracker != null) recordSection(ref.sy());
                 }
             } finally {
                 heights.refresh();
@@ -122,6 +143,62 @@ final class ChunkApplyContext {
         return dirty;
     }
 
+    void markChanges() {
+        ChangeTracker tracker = this.tracker;
+        if (tracker == null) return;
+        List<SectionChange> changes = changes();
+        if (!changes.isEmpty()) tracker.markSections(chunk.getChunkX(), chunk.getChunkZ(), changes);
+    }
+
+    private List<SectionChange> changes() {
+        SectionRef interrupted = writing;
+        if (interrupted == null) return changes;
+
+        BitSet blocks = wholeSection ? ALL_BLOCKS : new BitSet(SECTION_BLOCK_COUNT);
+        BitSet biomes = new BitSet(64);
+        if (!wholeSection) {
+            interrupted.section().forEachBlockState(
+                (x, y, z, _) -> blocks.set(y << 8 | z << 4 | x)
+            );
+        }
+        interrupted.section().forEachBiome((x, y, z, _) -> biomes.set(y << 4 | z << 2 | x));
+
+        List<SectionChange> all = new ArrayList<>(changes);
+        all.add(new SectionChange(interrupted.sy(), blocks, biomes));
+        return all;
+    }
+
+    private void recordSection(int sectionY) {
+        BitSet blocks = wholeSection ? ALL_BLOCKS : blockCells;
+        if (blocks == null) blocks = NO_CELLS;
+        BitSet biomes = biomeCells != null ? biomeCells : NO_CELLS;
+        if (blocks.isEmpty() && biomes.isEmpty()) return;
+
+        changes.add(new SectionChange(sectionY, blocks, biomes));
+    }
+
+    private void cellChanged(int rx, int ry, int rz) {
+        if (tracker == null) return;
+
+        BitSet cells = blockCells;
+        if (cells == null) {
+            cells = new BitSet(SECTION_BLOCK_COUNT);
+            blockCells = cells;
+        }
+        cells.set(ry << 8 | rz << 4 | rx);
+    }
+
+    private void biomeCellChanged(int bx, int by, int bz) {
+        if (tracker == null) return;
+
+        BitSet cells = biomeCells;
+        if (cells == null) {
+            cells = new BitSet(64);
+            biomeCells = cells;
+        }
+        cells.set(by << 4 | bz << 2 | bx);
+    }
+
     private void applySectionBlocks(SectionRef ref, Palette world) {
         final BufferSection section = ref.section();
         if (!section.hasBlocks()) return;
@@ -141,7 +218,10 @@ final class ChunkApplyContext {
                 if (isPlainState) applyUniformFill(ref, world, uniform - 1);
                 else applyFullCover(ref, world, baseX, baseY, baseZ);
             } finally {
-                if (context.changed != before) heights.sectionChanged(sy);
+                if (context.changed != before) {
+                    heights.sectionChanged(sy);
+                    wholeSection = true;
+                }
             }
             if (context.changed != before) {
                 // Send the full chunk rather than mbc
@@ -168,6 +248,7 @@ final class ChunkApplyContext {
                 world.set(rx, ry, rz, newStateId);
                 if (context.undo != null) context.undo.setBlockState(absX, absY, absZ, oldStateId);
                 context.changed++;
+                cellChanged(rx, ry, rz);
                 recordBlockChangeForSend(sy, rx, ry, rz, newStateId);
                 return;
             }
@@ -193,6 +274,7 @@ final class ChunkApplyContext {
 
             if (context.undo != null) context.undo.setBlockState(absX, absY, absZ, oldBlock);
             context.changed++;
+            cellChanged(rx, ry, rz);
             if (newStateId != oldStateId) recordBlockChangeForSend(sy, rx, ry, rz, newStateId);
             if (newBlock.blockEntityType() != null)
                 recordBlockEntityForSend(absX, absY, absZ, newBlock);
@@ -207,8 +289,7 @@ final class ChunkApplyContext {
         var sectionEntries = collectSectionEntries(ref.sy());
 
         long sameCount = world.count(newStateId);
-        if (sameCount == SECTION_BLOCK_COUNT && sectionEntries == null)
-            return; // Same contents already
+        if (sameCount == SECTION_BLOCK_COUNT && sectionEntries == null) return; // Same contents already
 
         if (sectionEntries != null) {
             // Entries which have the same state but are losing a block entry should not be considered the same.
@@ -342,6 +423,7 @@ final class ChunkApplyContext {
             if (context.undo != null)
                 context.undo.setBiome(baseX + (bx << 2), baseY + (by << 2), baseZ + (bz << 2), old);
             biomesChanged = true;
+            biomeCellChanged(bx, by, bz);
         });
     }
 
