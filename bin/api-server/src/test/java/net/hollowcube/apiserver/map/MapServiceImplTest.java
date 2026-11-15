@@ -3,6 +3,7 @@ package net.hollowcube.apiserver.map;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import net.hollowcube.apiserver.common.Digest;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.s3.MemoryS3Client;
 import net.hollowcube.ipc.Blob;
@@ -40,6 +41,7 @@ class MapServiceImplTest {
     private static final UUID BUILDER = UUID.fromString("00000000-0000-0000-0000-000000000002");
     private ApiDatabase db;
     private MemoryS3Client storage;
+    private MemoryS3Client worldStore;
     private FakeMapClients clients;
     private MapServiceImpl service;
     private MapClient client;
@@ -50,10 +52,12 @@ class MapServiceImplTest {
     void start() throws Exception {
         db = TEST_DB.database(ApiDatabase::new);
         storage = new MemoryS3Client();
+        worldStore = new MemoryS3Client();
         clients = new FakeMapClients();
         service = new MapServiceImpl(
             db,
             storage,
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,
@@ -301,6 +305,7 @@ class MapServiceImplTest {
         var smallId = new MapServiceImpl(
             db,
             storage,
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,
@@ -407,6 +412,129 @@ class MapServiceImplTest {
                 () -> client.updateWorld(id, 0, Blob.of(new byte[] {4}))
             ).status()
         );
+    }
+
+    @Test
+    void saveWorld_storesByDigestAndKeepsTheBareKey() throws Exception {
+        var id = create(OWNER).id();
+        storage.objects().put(id.toString(), new byte[] {9});
+        assertArrayEquals(new byte[] {9}, client.getWorld(id).readAllBytes());
+
+        open(id, "world");
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
+
+        var key = "worlds/" + Digest.hex(Digest.sha256(new byte[] {1, 2}));
+        assertArrayEquals(new byte[] {1, 2}, worldStore.objects().get(key));
+        assertArrayEquals(new byte[] {1, 2}, storage.objects().get(id.toString()));
+        assertArrayEquals(new byte[] {1, 2}, client.getWorld(id).readAllBytes());
+        assertEquals(1, count("select count(*) from map_world_versions where world_id='world'"));
+    }
+
+    @Test
+    void openWorld_oneWorldHoldsAMapUntilItCloses() {
+        var id = create(OWNER).id();
+        TEST_DB.seed("insert into server_states(id,role) values ('other','map')");
+        open(id, "first");
+        open(id, "first");
+        assertEquals(
+            new OpenWorldResult.OpenElsewhere("editor"),
+            client.openWorld(id, "second", "other")
+        );
+        assertInstanceOf(
+            SaveWorldResult.NotHeld.class,
+            client.saveWorld(id, "second", 0, Blob.of(new byte[] {1}))
+        );
+
+        client.saveWorld(id, "first", 0, Blob.of(new byte[] {2}));
+        client.closeWorld("first");
+        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(id, "second", "other"));
+        assertInstanceOf(
+            SaveWorldResult.NotHeld.class,
+            client.saveWorld(id, "first", 0, Blob.of(new byte[] {3}))
+        );
+    }
+
+    @Test
+    void openWorld_takesOverTheRowTheTrackerInserted() {
+        var id = create(OWNER).id();
+        TEST_DB.seed(
+            """
+            insert into server_states(id,role) values ('editor','map');
+            insert into map_worlds(id,map_id,server_id,type) values ('world','%s','editor','todo')
+            """
+                .formatted(id)
+        );
+        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(id, "world", "editor"));
+        assertEquals(1, count("select count(*) from map_worlds where type='editing'"));
+    }
+
+    @Test
+    void openWorld_aGoneServerNoLongerHoldsTheMap() {
+        var id = create(OWNER).id();
+        TEST_DB.seed("insert into server_states(id,role) values ('other','map')");
+        open(id, "first");
+        TEST_DB.seed("delete from server_states where id='editor'");
+        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(id, "second", "other"));
+    }
+
+    @Test
+    void publish_releasesTheEditingWorld() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1}));
+        preparePublish(id);
+        client.publish(id);
+        assertInstanceOf(
+            SaveWorldResult.NotHeld.class,
+            client.saveWorld(id, "world", 0, Blob.of(new byte[] {2}))
+        );
+        assertEquals(1, count("select count(*) from map_world_versions"));
+        assertEquals(0, count("select count(*) from map_worlds"));
+    }
+
+    @Test
+    void openWorld_unknownMapIs404() {
+        assertEquals(
+            404,
+            assertThrows(
+                IpcException.class,
+                () -> client.openWorld(UUID.randomUUID(), "world", "editor")
+            ).status()
+        );
+    }
+
+    @Test
+    void updateWorld_recordsAVersionWithoutAWorld() throws Exception {
+        var id = create(OWNER).id();
+        client.updateWorld(id, Long.MAX_VALUE, Blob.of(new byte[] {1, 2}));
+        assertEquals(1, count("select count(*) from map_world_versions where world_id is null"));
+        assertArrayEquals(new byte[] {1, 2}, client.getWorld(id).readAllBytes());
+    }
+
+    @Test
+    void getWorld_readsTheBareKeyEvenWhenAVersionIsOlder() throws Exception {
+        var id = create(OWNER).id();
+        open(id, "world");
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1}));
+        storage.objects().put(id.toString(), new byte[] {2});
+        assertArrayEquals(new byte[] {2}, client.getWorld(id).readAllBytes());
+    }
+
+    @Test
+    void saveWorld_anUnchangedWorldAddsNoVersion() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
+        assertEquals(1, count("select count(*) from map_world_versions"));
+        assertEquals(1, worldStore.puts());
+    }
+
+    private void open(UUID mapId, String worldId) {
+        TEST_DB.seed(
+            "insert into server_states(id,role) values ('editor','map') on conflict do nothing"
+        );
+        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(mapId, worldId, "editor"));
     }
 
     @Test

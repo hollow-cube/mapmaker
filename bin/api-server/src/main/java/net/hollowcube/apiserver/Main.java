@@ -74,6 +74,7 @@ public final class Main {
     /// Hardcoded in the Go api-server too; both write the same objects into it.
     private static final String REPLAY_BUCKET = "mapmaker-replays";
     private static final String MAP_BUCKET = "mapmaker";
+    private static final String WORLD_STORE_BUCKET = "mapmaker-worlds";
 
     /// The Go api-server proxies PostHog, and the game servers go through it; so does this.
     private static final String POSTHOG_PROXY = "http://api-server.mapmaker:9124/posthog";
@@ -142,6 +143,14 @@ public final class Main {
             secrets.require("s3.access_key", "S3_ACCESS_KEY"),
             secrets.require("s3.secret_key", "S3_SECRET_KEY")
         );
+        var worldStore = new HttpS3Client(
+            HttpClient.newHttpClient(),
+            secrets.require("s3.endpoint", "S3_ENDPOINT"),
+            WORLD_STORE_BUCKET,
+            secrets.get("s3.region", "S3_REGION", "auto"),
+            secrets.require("s3.access_key", "S3_ACCESS_KEY"),
+            secrets.require("s3.secret_key", "S3_SECRET_KEY")
+        );
         var redis = Pools.redis(secrets.require("redis.address", "REDIS_ADDRESS"));
         var minimumBuild = secrets.get(
             "maps.minimum_build_seconds",
@@ -151,6 +160,7 @@ public final class Main {
         var maps = new MapServiceImpl(
             db,
             mapWorlds,
+            worldStore,
             nats,
             redis,
             PostHog.getClient(),

@@ -10,6 +10,7 @@ import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
 import net.hollowcube.apiserver.job.JobSpec;
+import net.hollowcube.apiserver.map.MapServiceImpl;
 import net.hollowcube.apiserver.notification.NotificationServiceImpl;
 import net.hollowcube.apiserver.player.PlayerServiceImpl;
 import net.hollowcube.apiserver.player.SocialServiceImpl;
@@ -21,11 +22,13 @@ import net.hollowcube.apiworker.jobs.IndexMapRunner;
 import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.*;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.anticheat.AnticheatServer;
 import net.hollowcube.ipc.chat.ChatServer;
 import net.hollowcube.ipc.hdb.HeadDatabaseServer;
+import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapServer;
 import net.hollowcube.ipc.notification.NotificationServer;
 import net.hollowcube.ipc.player.PlayerServer;
@@ -38,19 +41,17 @@ import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
-import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.apiserver.map.MapServiceImpl;
-import net.hollowcube.ipc.map.MapData;
-import net.hollowcube.mapmaker.util.HttpServerWrapper;
-import net.hollowcube.mapmaker.util.nats.NatsConfig;
 import net.hollowcube.mapmaker.map.runtime.IpcServices;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerSkin;
 import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.runtime.MapWorlds;
+import net.hollowcube.mapmaker.runtime.freeform.FreeformMapWorld;
+import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.mapmaker.util.HttpServerWrapper;
+import net.hollowcube.mapmaker.util.nats.NatsConfig;
 import net.hollowcube.posthog.PostHog;
 import net.hollowcube.terraform.legacy.Terraform;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -66,8 +67,10 @@ import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.sql.DataSource;
 import java.net.http.HttpClient;
 import java.nio.file.Path;
+import java.sql.SQLException;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.Objects;
@@ -86,6 +89,7 @@ public class DevServer extends AbstractMultiMapServer {
     private static final String COMPOSE_MINIO_KEY = "mapmaker";
     private static final String REPLAY_BUCKET = "mapmaker-replays";
     private static final String MAP_BUCKET = "mapmaker";
+    private static final String WORLD_STORE_BUCKET = "mapmaker-worlds";
 
     /// Fewer than the real worker's four: one developer is not going to queue enough to need them,
     /// and the threads are shared with a game server here.
@@ -152,6 +156,7 @@ public class DevServer extends AbstractMultiMapServer {
         shutdowner().queue("dev-ipc-pool", pool::close);
 
         this.db = new ApiDatabase(pool);
+        registerServerState(pool);
 
         var nats = NatsPublisher.connect(config.get(NatsConfig.class).servers(), Wire.gson());
         shutdowner().queue("dev-ipc-nats", nats::close);
@@ -163,6 +168,9 @@ public class DevServer extends AbstractMultiMapServer {
         var mapWorlds = new HttpS3Client(HttpClient.newHttpClient(), otel, COMPOSE_MINIO, MAP_BUCKET,
             "us-east-1", COMPOSE_MINIO_KEY, COMPOSE_MINIO_KEY);
         mapWorlds.createBucketIfAbsent();
+        var worldStore = new HttpS3Client(HttpClient.newHttpClient(), otel, COMPOSE_MINIO, WORLD_STORE_BUCKET,
+            "us-east-1", COMPOSE_MINIO_KEY, COMPOSE_MINIO_KEY);
+        worldStore.createBucketIfAbsent();
         var redis = Pools.redis(System.getenv().getOrDefault("REDIS_ADDRESS", "localhost:6379"));
         shutdowner().queue("dev-ipc-map-redis", redis::close);
 
@@ -171,7 +179,7 @@ public class DevServer extends AbstractMultiMapServer {
             new HeadDatabaseServiceImpl(db),
             new ChatServiceImpl(db, nats, null),
             new ReplayServiceImpl(db, s3),
-            new MapServiceImpl(db, mapWorlds, nats, redis, PostHog.getClient(), Duration.ZERO),
+            new MapServiceImpl(db, mapWorlds, worldStore, nats, redis, PostHog.getClient(), Duration.ZERO),
             new PlayerServiceImpl(db), new SocialServiceImpl(db, notifications), notifications,
             new DevSessionService(new SessionServiceImpl(db)));
         return ipc;
@@ -307,6 +315,24 @@ public class DevServer extends AbstractMultiMapServer {
             .build());
     }
 
+
+    private static void registerServerState(DataSource pool) {
+        try (
+            var conn = pool.getConnection();
+            var insert = conn.prepareStatement(
+                "insert into server_states (id, role) values (?, 'map') on conflict (id) do nothing");
+            // Worlds a previous run of this server still holds, which nothing else would ever release.
+            var release = conn.prepareStatement("delete from map_worlds where server_id = ?")
+        ) {
+            var hostname = ServerRuntime.getRuntime().hostname();
+            insert.setString(1, hostname);
+            insert.executeUpdate();
+            release.setString(1, hostname);
+            release.executeUpdate();
+        } catch (SQLException e) {
+            throw new IllegalStateException("could not register the dev server in server_states", e);
+        }
+    }
 
     /// The dev server is its own hub, and nothing tracks it in `server_states` as one, so a proxy in
     /// front of it (`runProxy`) is always handed this server.

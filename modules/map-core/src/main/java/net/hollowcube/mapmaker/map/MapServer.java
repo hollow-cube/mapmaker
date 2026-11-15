@@ -10,6 +10,7 @@ import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.ServiceContext;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 import net.hollowcube.mapmaker.util.HttpServerWrapper;
@@ -50,5 +51,8 @@ public interface MapServer {
     @NotNull Scheduler scheduler();
 
     @NotNull JetStreamWrapper jetStream();
+
+    /// Closes every world of the map on this server, sending its players out with `reason`.
+    void destroyMapWorlds(@NotNull String mapId, @NotNull Component reason);
 
 }

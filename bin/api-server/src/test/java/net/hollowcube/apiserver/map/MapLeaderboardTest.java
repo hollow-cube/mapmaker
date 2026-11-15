@@ -75,6 +75,7 @@ class MapLeaderboardTest {
         return new MapServiceImpl(
             db,
             new MemoryS3Client(),
+            new MemoryS3Client(),
             clients.nats,
             clients.redis,
             clients.posthog,

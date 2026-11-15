@@ -48,6 +48,20 @@ public interface MapService {
 
     Blob getWorld(UUID mapId);
 
+    /// Claims the map for editing by `worldId`. At most one world holds a map at a time, and the
+    /// claim lasts until [#closeWorld], until the map is published, or until `serverId` is gone.
+    /// Claiming again with the same `worldId` succeeds.
+    OpenWorldResult openWorld(UUID mapId, String worldId, String serverId);
+
+    /// Saves nothing and answers `NotHeld` when `worldId` no longer holds the map. Refused while
+    /// verification is pending.
+    ///
+    /// @param walSeq the last write-ahead-log record whose changes are already in `world`
+    SaveWorldResult saveWorld(UUID mapId, String worldId, long walSeq, Blob world);
+
+    /// Gives up the world's claim, after its last save.
+    void closeWorld(String worldId);
+
     /// `loadTime` is when the uploading server loaded the world; a world loaded before the map was
     /// published is refused, as is any upload while verification is pending.
     void updateWorld(UUID mapId, long loadTime, Blob world);

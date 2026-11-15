@@ -9,6 +9,7 @@ import net.hollowcube.mapmaker.player.SessionService;
 import net.hollowcube.mapmaker.punishments.PunishmentService;
 import net.hollowcube.mapmaker.session.SessionManager;
 import net.hollowcube.mapmaker.util.nats.JetStreamWrapper;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.timer.Scheduler;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,6 +75,11 @@ public class MockMapServer implements MapServer {
     @Override
     public @NotNull JetStreamWrapper jetStream() {
         return Objects.requireNonNull(jetStream, "JetStreamWrapper is not initialized");
+    }
+
+    @Override
+    public void destroyMapWorlds(@NotNull String mapId, @NotNull Component reason) {
+        throw new UnsupportedOperationException("MockMapServer holds no worlds");
     }
 
 }

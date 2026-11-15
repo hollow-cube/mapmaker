@@ -152,6 +152,11 @@ public class MapIsolateServer extends AbstractMapServer {
         shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
     }
 
+    @Override
+    public void destroyMapWorlds(String mapId, Component reason) {
+        if (mapId().equals(mapId)) shutdown(reason);
+    }
+
     @Blocking
     public void shutdown(@Nullable Component reason) {
         FutureUtil.assertThread();

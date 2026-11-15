@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.api.maps;
 
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
+import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.ipc.Blob;
 import net.hollowcube.ipc.map.BeginVerificationResult;
@@ -16,9 +17,11 @@ import net.hollowcube.ipc.map.MapService;
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.map.MapSlot;
 import net.hollowcube.ipc.map.MapStatus;
+import net.hollowcube.ipc.map.OpenWorldResult;
 import net.hollowcube.ipc.map.PublishMapResult;
 import net.hollowcube.ipc.map.SaveStateType;
 import net.hollowcube.ipc.map.SaveStateUpdate;
+import net.hollowcube.ipc.map.SaveWorldResult;
 import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
@@ -73,7 +76,16 @@ public interface MapClient {
         return new ReadableMapData(Channels.newChannel(new ByteArrayInputStream(bytes)), bytes.length);
     }
 
-    default void updateWorld(String mapId, byte[] worldData, long loadTime) {
+    /// Claims the map for editing by `worldId`, which [#saveWorld] then saves as.
+    default OpenWorldResult openWorld(String mapId, String worldId) {
+        throw notImplemented();
+    }
+
+    default SaveWorldResult saveWorld(String mapId, String worldId, byte[] worldData) {
+        throw notImplemented();
+    }
+
+    default void closeWorld(String worldId) {
         throw notImplemented();
     }
 
@@ -204,8 +216,18 @@ public interface MapClient {
         }
 
         @Override
-        public void updateWorld(String mapId, byte[] bytes, long loadTime) {
-            maps.updateWorld(UUID.fromString(mapId), loadTime, Blob.of(bytes));
+        public OpenWorldResult openWorld(String mapId, String worldId) {
+            return maps.openWorld(UUID.fromString(mapId), worldId, ServerRuntime.getRuntime().hostname());
+        }
+
+        @Override
+        public SaveWorldResult saveWorld(String mapId, String worldId, byte[] bytes) {
+            return maps.saveWorld(UUID.fromString(mapId), worldId, 0, Blob.of(bytes));
+        }
+
+        @Override
+        public void closeWorld(String worldId) {
+            maps.closeWorld(worldId);
         }
 
         @Override

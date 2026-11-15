@@ -44,6 +44,8 @@ public final class ApiDatabase {
 
     public final SocialQueries social;
 
+    public final WorldVersionsQueries worldVersions;
+
     public ApiDatabase(DataSource dataSource) {
         this.dataSource = dataSource;
         ConnectionSource source = ConnectionSource.pooled(dataSource);
@@ -62,6 +64,7 @@ public final class ApiDatabase {
         this.servers = new ServersQueriesImpl(source);
         this.sessions = new SessionsQueriesImpl(source);
         this.social = new SocialQueriesImpl(source);
+        this.worldVersions = new WorldVersionsQueriesImpl(source);
     }
 
     private ApiDatabase(Fake fake) {
@@ -81,6 +84,7 @@ public final class ApiDatabase {
         this.servers = fake.servers;
         this.sessions = fake.sessions;
         this.social = fake.social;
+        this.worldVersions = fake.worldVersions;
     }
 
     /**
@@ -155,6 +159,8 @@ public final class ApiDatabase {
 
         public final SocialQueries social;
 
+        public final WorldVersionsQueries worldVersions;
+
         Tx(Transaction transaction) {
             this.transaction = transaction;
             ConnectionSource source = ConnectionSource.pinned(transaction.conn());
@@ -173,6 +179,7 @@ public final class ApiDatabase {
             this.servers = new ServersQueriesImpl(source);
             this.sessions = new SessionsQueriesImpl(source);
             this.social = new SocialQueriesImpl(source);
+            this.worldVersions = new WorldVersionsQueriesImpl(source);
         }
 
         /**
@@ -223,6 +230,8 @@ public final class ApiDatabase {
         private SessionsQueries sessions = new SessionsQueries.Stub();
 
         private SocialQueries social = new SocialQueries.Stub();
+
+        private WorldVersionsQueries worldVersions = new WorldVersionsQueries.Stub();
 
         public Fake anticheat(AnticheatQueries anticheat) {
             this.anticheat = anticheat;
@@ -296,6 +305,11 @@ public final class ApiDatabase {
 
         public Fake social(SocialQueries social) {
             this.social = social;
+            return this;
+        }
+
+        public Fake worldVersions(WorldVersionsQueries worldVersions) {
+            this.worldVersions = worldVersions;
             return this;
         }
 

@@ -1,15 +1,11 @@
 package net.hollowcube.apiserver.map;
 
 import com.google.gson.JsonObject;
+import net.hollowcube.apiserver.common.Digest;
 import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.common.NatsPublisher;
-import net.hollowcube.apiserver.db.ApiDatabase;
-import net.hollowcube.apiserver.db.LeaderboardsQueries;
-import net.hollowcube.apiserver.db.Maps;
-import net.hollowcube.apiserver.db.MapsQueries;
+import net.hollowcube.apiserver.db.*;
 import net.hollowcube.apiserver.db.SaveStateType;
-import net.hollowcube.apiserver.db.SaveStates;
-import net.hollowcube.apiserver.db.SaveStatesQueries;
 import net.hollowcube.apiserver.job.IndexMap;
 import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.player.Roles;
@@ -28,33 +24,23 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPooled;
 import redis.clients.jedis.Response;
 import redis.clients.jedis.params.ZAddParams;
-import redis.clients.jedis.resps.Tuple;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.BiPredicate;
 import java.util.function.LongSupplier;
 
 import static java.util.Objects.requireNonNullElse;
 import static net.hollowcube.apiserver.map.MapCompat.*;
 import static net.hollowcube.ipc.PaginatedList.limit;
 import static net.hollowcube.ipc.PaginatedList.offset;
-import static net.hollowcube.ipc.util.IpcException.badRequest;
-import static net.hollowcube.ipc.util.IpcException.conflict;
-import static net.hollowcube.ipc.util.IpcException.notFound;
-import static net.hollowcube.ipc.util.IpcException.unavailable;
+import static net.hollowcube.ipc.util.IpcException.*;
 
 /// Map writes: creation, settings, the world object, builders, verification and publishing; save
 /// states; leaderboards.
@@ -82,8 +68,11 @@ public final class MapServiceImpl implements MapService {
     private static final byte[] LOWEST = "-inf".getBytes(StandardCharsets.UTF_8);
     private static final byte[] HIGHEST = "+inf".getBytes(StandardCharsets.UTF_8);
 
+    private static final int MAX_WORLD_BYTES = 1 << 30;
+
     private final ApiDatabase db;
-    private final S3Client worlds;
+    private final S3Client worlds; // pre-cas store
+    private final S3Client worldStore; // cas store
     private final NatsPublisher nats;
     private final JedisPooled redis;
     private final PostHogClient posthog;
@@ -94,6 +83,7 @@ public final class MapServiceImpl implements MapService {
     public MapServiceImpl(
         ApiDatabase db,
         S3Client worlds,
+        S3Client worldStore,
         NatsPublisher nats,
         JedisPooled redis,
         PostHogClient posthog,
@@ -102,6 +92,7 @@ public final class MapServiceImpl implements MapService {
         this(
             db,
             worlds,
+            worldStore,
             nats,
             redis,
             posthog,
@@ -115,6 +106,7 @@ public final class MapServiceImpl implements MapService {
     MapServiceImpl(
         ApiDatabase db,
         S3Client worlds,
+        S3Client worldStore,
         NatsPublisher nats,
         JedisPooled redis,
         PostHogClient posthog,
@@ -124,6 +116,7 @@ public final class MapServiceImpl implements MapService {
     ) {
         this.db = db;
         this.worlds = worlds;
+        this.worldStore = worldStore;
         this.nats = nats;
         this.redis = redis;
         this.posthog = posthog;
@@ -308,6 +301,8 @@ public final class MapServiceImpl implements MapService {
 
     @Override
     public Blob getWorld(UUID mapId) {
+        // Read from the object every api-server build writes. A build before `map_world_versions`
+        // writes only this one, so the newest version row can be older than it.
         try {
             return worlds.get(mapId.toString());
         } catch (S3Client.NotFoundError e) {
@@ -316,22 +311,94 @@ public final class MapServiceImpl implements MapService {
     }
 
     @Override
-    public void updateWorld(UUID mapId, long loadTime, Blob world) {
-        try (world) {
-            // Uploaded under the row lock so that publish and the pending transition, which take
-            // the same lock, wait for an in-flight save rather than racing it.
-            db.tx(tx -> {
-                var map = tx.maps.getMapForUpdate(mapId);
-                if (map == null) throw world.refuse(404, "map not found");
-                if (verification(map) == MapVerification.PENDING)
-                    throw world.refuse(409, "map is being verified");
-                if (map.publishedAt() != null && loadTime < map.publishedAt().toEpochMilli())
-                    throw world.refuse(409, "map was published after this world was loaded");
-                worlds.put(mapId.toString(), world.stream(), world.length());
+    public OpenWorldResult openWorld(UUID mapId, String worldId, String serverId) {
+        try {
+            return db.txResult(tx -> {
+                if (tx.maps.getMapForUpdate(mapId) == null) throw notFound("map not found");
+
+                var holder = tx.worldVersions.getEditingWorld(mapId);
+                if (holder != null && !holder.id().equals(worldId))
+                    return new OpenWorldResult.OpenElsewhere(holder.serverId());
+
+                // Claim will fail for a unique constraint if we are racing
+                tx.worldVersions.claimEditingWorld(worldId, mapId, serverId);
+                return new OpenWorldResult.Opened();
             });
+        } catch (Exception e) {
+            if (!Jdbc.hasState(e, Jdbc.UNIQUE_VIOLATION)) throw e;
+
+            var holder = db.worldVersions.getEditingWorld(mapId);
+            if (holder == null) throw unavailable("could not claim the map for editing");
+            return new OpenWorldResult.OpenElsewhere(holder.serverId());
+        }
+    }
+
+    @Override
+    public SaveWorldResult saveWorld(UUID mapId, String worldId, long walSeq, Blob world) {
+        var saved = storeWorld(mapId, world, walSeq, worldId, (tx, _) -> {
+            var holder = tx.worldVersions.getEditingWorld(mapId);
+            return holder != null && holder.id().equals(worldId);
+        });
+        return saved ? new SaveWorldResult.Saved() : new SaveWorldResult.NotHeld();
+    }
+
+    @Override
+    public void closeWorld(String worldId) {
+        db.worldVersions.releaseWorld(worldId);
+    }
+
+    @Override
+    public void updateWorld(UUID mapId, long loadTime, Blob world) {
+        storeWorld(mapId, world, 0, null, (_, map) -> {
+            if (map.publishedAt() != null && loadTime < map.publishedAt().toEpochMilli())
+                throw conflict("map was published after this world was loaded");
+            return true;
+        });
+    }
+
+    private boolean storeWorld(
+        UUID mapId,
+        Blob world,
+        long walSeq,
+        @Nullable String worldId,
+        BiPredicate<ApiDatabase.Tx, Maps> mayWrite
+    ) {
+        byte[] bytes;
+        try (world) {
+            if (world.requireLength() > MAX_WORLD_BYTES)
+                throw world.refuse(413, "world is larger than " + MAX_WORLD_BYTES + " bytes");
+            bytes = world.read((int) world.length(), "world");
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }
+        var sha256 = Digest.sha256(bytes);
+
+        return db.txResult(tx -> {
+            var map = tx.maps.getMapForUpdate(mapId); // tx lock
+            if (map == null) throw notFound("map not found");
+
+            if (verification(map) == MapVerification.PENDING)
+                throw conflict("map is being verified");
+            if (!mayWrite.test(tx, map)) return false;
+
+            var head = tx.worldVersions.getHead(mapId);
+            var changed = head == null
+                || head.walSeq() != walSeq
+                || !Arrays.equals(head.sha256(), sha256);
+            if (changed) {
+                var key = worldKey(sha256);
+                if (!worldStore.exists(key))
+                    worldStore.put(key, new ByteArrayInputStream(bytes), bytes.length);
+                tx.worldVersions.insertVersion(mapId, sha256, bytes.length, walSeq, worldId);
+            }
+
+            worlds.put(mapId.toString(), new ByteArrayInputStream(bytes), bytes.length);
+            return true;
+        });
+    }
+
+    private static String worldKey(byte[] sha256) {
+        return "worlds/" + Digest.hex(sha256);
     }
 
     @Override
@@ -357,6 +424,8 @@ public final class MapServiceImpl implements MapService {
 
                     var publishedId = publishedIds.getAsLong();
                     var published = tx.maps.publishMap(publishedId, mapId);
+                    // If somehow an editor still exists for the world, drop its ownership
+                    tx.worldVersions.releaseEditingWorld(mapId);
                     tx.maps.removeSlots(mapId);
                     deleteInvites(tx, mapId, null);
                     JobSpec.INDEX_MAP.enqueue(tx.jobs, new IndexMap(mapId.toString(), "published"));
@@ -1006,11 +1075,7 @@ public final class MapServiceImpl implements MapService {
         var required = minimumBuildTime.toMillis();
         if (map.publishedAt() != null) return new PublishReadiness(List.of(), 0, required);
         var missing = new ArrayList<PublishRequirement>();
-        try {
-            worlds.stat(map.id().toString());
-        } catch (S3Client.NotFoundError e) {
-            missing.add(PublishRequirement.WORLD);
-        }
+        if (!worlds.exists(map.id().toString())) missing.add(PublishRequirement.WORLD);
         var buildTime = requireNonNullElse(queries.getLatestEditingTime(map.id(), map.owner()), 0L);
         if (buildTime < required) missing.add(PublishRequirement.BUILD_TIME);
         if (variant(map) == MapVariant.PARKOUR && verification(map) != MapVerification.VERIFIED)

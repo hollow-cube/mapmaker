@@ -4,10 +4,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
-import net.hollowcube.ipc.map.MapData;
-import net.hollowcube.ipc.map.MapVariant;
-import net.hollowcube.ipc.map.MapVerification;
-import net.hollowcube.ipc.map.SaveStateType;
+import net.hollowcube.ipc.map.*;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.editor.command.navigation.BackCommand;
@@ -28,7 +25,7 @@ import net.hollowcube.mapmaker.editor.vanilla.DisplayEntityEditor;
 import net.hollowcube.mapmaker.editor.vanilla.PickBlock;
 import net.hollowcube.mapmaker.editor.vanilla.SignEditor;
 import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.map.MapSettings;
+import net.hollowcube.mapmaker.map.MapServer;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEditorScreen;
 import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
@@ -88,8 +85,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
     private final SpawnMarkerEntity spawnEntity;
 
-    private final long createdAt = System.currentTimeMillis();
     private final ReentrantLock saveLock = new ReentrantLock();
+    private volatile boolean worldLost;
     private @Nullable Task autoSaveTask = null;
 
     private final ReentrantLock testWorldLock = new ReentrantLock();
@@ -187,7 +184,17 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
     @Override
     public void loadWorld() {
-        super.loadWorld();
+        var opened = server().api().maps.openWorld(map().id().toString(), worldId());
+        if (opened instanceof OpenWorldResult.OpenElsewhere(var serverId))
+            throw new IllegalStateException("map is open for editing on " + serverId);
+        if (!(opened instanceof OpenWorldResult.Opened))
+            throw new IllegalStateException("could not open the map for editing: " + opened);
+        try {
+            super.loadWorld();
+        } catch (RuntimeException e) {
+            server().api().maps.closeWorld(worldId());
+            throw e;
+        }
 
         var scriptSession = this.scriptSession;
         if (scriptSession != null) scriptSession.bootstrap();
@@ -246,6 +253,12 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                     .join();
             }
             save(false);
+            try {
+                server().api().maps.closeWorld(worldId());
+            } catch (Exception e) {
+                logger.error("Failed to release map {} from world {}", map().id(), worldId(), e);
+                ExceptionReporter.reportException(e);
+            }
 
             MinecraftServer.getSchedulerManager()
                 .scheduleEndOfTick(() -> {
@@ -279,9 +292,21 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             });
 
             // Save the world data (if it is unverified only)
-            if (map().verification() != MapVerification.PENDING) {
+            if (!worldLost && map().verification() != MapVerification.PENDING) {
                 var worldData = instance().save(new ReadWriteWorldAccess(this));
-                server().api().maps.updateWorld(map().id().toString(), worldData, createdAt);
+                var saved = server().api().maps.saveWorld(map().id().toString(), worldId(), worldData);
+                if (saved instanceof SaveWorldResult.NotHeld) {
+                    // Nothing this world does can be saved any more. Off this thread: closing the
+                    // world saves once more, which waits on the save lock held here.
+                    worldLost = true;
+                    logger.error("World {} no longer holds map {} for editing, closing it", worldId(), map().id());
+                    FutureUtil.submitVirtual(() -> server().destroyMapWorlds(
+                        map().id().toString(),
+                        Component.translatable("generic.map.closed.reason",
+                            Component.text("it was published or opened elsewhere"))
+                    ));
+                    return;
+                }
             }
 
             for (var player : Set.copyOf(players())) {

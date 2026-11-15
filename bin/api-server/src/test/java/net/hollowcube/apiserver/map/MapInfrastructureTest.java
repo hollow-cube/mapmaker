@@ -68,9 +68,19 @@ class MapInfrastructureTest {
                 "mapwritetest"
             );
             s3.createBucketIfAbsent();
+            var worldStore = new HttpS3Client(
+                HttpClient.newHttpClient(),
+                System.getenv("MAP_WRITE_TEST_S3"),
+                "mapmaker-worlds",
+                "us-east-1",
+                "mapwritetest",
+                "mapwritetest"
+            );
+            worldStore.createBucketIfAbsent();
             var service = new MapServiceImpl(
                 TEST_DB.database(ApiDatabase::new),
                 s3,
+                worldStore,
                 new NatsPublisher(nc, Wire.gson()),
                 redis,
                 PostHog.getClient(),

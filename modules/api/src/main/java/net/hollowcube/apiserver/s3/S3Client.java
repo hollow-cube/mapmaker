@@ -20,7 +20,16 @@ public interface S3Client {
     /// The object's length, without the object.
     long stat(String key);
 
-    /// The inclusive range, whose [Blob#length] is the range's rather than the object's.
+    default boolean exists(String key) {
+        try {
+            stat(key);
+            return true;
+        } catch (NotFoundError e) {
+            return false;
+        }
+    }
+
+    /// The inclusive range, whose length is the range's rather than the object's.
     Blob getRange(String key, long start, long endInclusive);
 
     /// Idempotent, including for a key that is not there, which is what lets an interrupted sweep

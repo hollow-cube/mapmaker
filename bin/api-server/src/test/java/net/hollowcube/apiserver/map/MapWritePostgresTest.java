@@ -42,6 +42,7 @@ class MapWritePostgresTest {
     private ApiDatabase db;
     private MapServiceImpl service;
     private MemoryS3Client storage;
+    private MemoryS3Client worldStore;
     private FakeMapClients clients;
     private UUID owner;
 
@@ -85,10 +86,12 @@ class MapWritePostgresTest {
         }
         db = new ApiDatabase(pool);
         storage = new MemoryS3Client();
+        worldStore = new MemoryS3Client();
         clients = new FakeMapClients();
         service = new MapServiceImpl(
             db,
             storage,
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,
@@ -180,6 +183,7 @@ class MapWritePostgresTest {
         var blocked = new MapServiceImpl(
             db,
             new BlockingStorage(storage, started, release),
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,
@@ -212,6 +216,7 @@ class MapWritePostgresTest {
         var blocked = new MapServiceImpl(
             db,
             new BlockingStorage(storage, started, release),
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,
@@ -247,6 +252,7 @@ class MapWritePostgresTest {
         var fixed = new MapServiceImpl(
             db,
             storage,
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,
@@ -262,6 +268,7 @@ class MapWritePostgresTest {
         var retrying = new MapServiceImpl(
             db,
             storage,
+            worldStore,
             clients.nats,
             clients.redis,
             clients.posthog,

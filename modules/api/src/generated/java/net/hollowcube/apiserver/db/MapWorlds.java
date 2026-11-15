@@ -6,11 +6,13 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.Jdbc;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A row of the `map_worlds` table.
  */
-public record MapWorlds(String id, UUID mapId, String serverId, Instant createdAt) {
+public record MapWorlds(String id, UUID mapId, String serverId, Instant createdAt,
+        @Nullable String type) {
     /**
      * Reads one `map_worlds` row, its first column at `col`.
      */
@@ -19,6 +21,7 @@ public record MapWorlds(String id, UUID mapId, String serverId, Instant createdA
                 rs.getString(col),
                 rs.getObject(col + 1, UUID.class),
                 rs.getString(col + 2),
-                Jdbc.getInstant(rs, col + 3));
+                Jdbc.getInstant(rs, col + 3),
+                rs.getString(col + 4));
     }
 }

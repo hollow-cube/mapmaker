@@ -267,6 +267,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     private <T extends AbstractMapWorld<?, ?>> @Nullable T createWorldInternal(
         @NotNull MapKey key, @NotNull MapData map, @NotNull Function<MapData, T> worldFactory, boolean tracked
     ) {
+        String announcedWorldId = null;
         try {
             var createdWorld = worldFactory.apply(map);
             if (tracked) {
@@ -309,6 +310,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 var worldMessage = MapWorldMessage.created(
                     createdWorld.worldId(), createdWorld.map().id().toString(), "todo");
                 jetStream.publish(worldMessage.subject(), worldMessage);
+                announcedWorldId = createdWorld.worldId();
             }
 
             createdWorld.loadWorld();
@@ -325,10 +327,20 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 worldLock.unlock();
             }
 
+            if (announcedWorldId != null) {
+                try {
+                    var destroyMessage = MapWorldMessage.destroyed(announcedWorldId);
+                    jetStream.publish(destroyMessage.subject(), destroyMessage);
+                } catch (RuntimeException publishError) {
+                    logger.error("Failed to announce the failed world {}", announcedWorldId, publishError);
+                }
+            }
+
             return null;
         }
     }
 
+    @Override
     public void destroyMapWorlds(@NotNull String mapId, @NotNull Component reason) {
         List<MapKey> keys = new ArrayList<>();
         worldLock.lock();
