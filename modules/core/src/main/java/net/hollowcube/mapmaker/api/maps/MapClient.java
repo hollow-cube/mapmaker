@@ -81,11 +81,15 @@ public interface MapClient {
         throw notImplemented();
     }
 
-    default SaveWorldResult saveWorld(String mapId, String worldId, byte[] worldData) {
+    default SaveWorldResult saveWorld(String mapId, String worldId, long walSeq, byte[] worldData) {
         throw notImplemented();
     }
 
     default void closeWorld(String worldId) {
+        throw notImplemented();
+    }
+
+    default String putWalBlob(String mapId, String worldId, byte[] batch) {
         throw notImplemented();
     }
 
@@ -221,13 +225,18 @@ public interface MapClient {
         }
 
         @Override
-        public SaveWorldResult saveWorld(String mapId, String worldId, byte[] bytes) {
-            return maps.saveWorld(UUID.fromString(mapId), worldId, 0, Blob.of(bytes));
+        public SaveWorldResult saveWorld(String mapId, String worldId, long walSeq, byte[] bytes) {
+            return maps.saveWorld(UUID.fromString(mapId), worldId, walSeq, Blob.of(bytes));
         }
 
         @Override
         public void closeWorld(String worldId) {
             maps.closeWorld(worldId);
+        }
+
+        @Override
+        public String putWalBlob(String mapId, String worldId, byte[] batch) {
+            return maps.putWalBlob(UUID.fromString(mapId), worldId, Blob.of(batch));
         }
 
         @Override
