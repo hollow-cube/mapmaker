@@ -106,6 +106,10 @@ public final class NatsPublisher implements AutoCloseable {
         return nc.getStatus() == Connection.Status.CONNECTED;
     }
 
+    public Connection connection() {
+        return nc;
+    }
+
     @Override
     public void close() {
         try {

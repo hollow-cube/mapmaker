@@ -4,6 +4,7 @@ import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.hud.PlayerHud;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
+import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.ipc.map.*;
 import net.hollowcube.mapmaker.ExceptionReporter;
 import net.hollowcube.mapmaker.api.ApiClient;
@@ -31,6 +32,8 @@ import net.hollowcube.mapmaker.map.entity.interaction.InteractionEntity;
 import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
+import net.hollowcube.mapmaker.map.wal.JetStreamWalSink;
+import net.hollowcube.mapmaker.map.wal.WalWriter;
 import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Button;
 import net.hollowcube.mapmaker.panels.Panel;
@@ -39,8 +42,11 @@ import net.hollowcube.mapmaker.runtime.parkour.action.Action;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionTriggerData;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ActionEditorView;
 import net.hollowcube.mapmaker.runtime.parkour.marker.TriggerMarkerHandler;
+import net.hollowcube.terraform.buffer.EditBuffer;
 import net.hollowcube.terraform.legacy.Terraform;
+import net.hollowcube.terraform.legacy.TerraformImpl;
 import net.hollowcube.terraform.legacy.instance.TerraformInstanceBiomes;
+import net.hollowcube.terraform.legacy.schem.SchemUpgrader;
 import net.hollowcube.terraform.legacy.storage.TerraformInstanceStorage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
@@ -49,6 +55,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.*;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
 import net.minestom.server.timer.Task;
@@ -87,6 +94,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
     private final ReentrantLock saveLock = new ReentrantLock();
     private volatile boolean worldLost;
+    private volatile @Nullable WalWriter wal;
     private @Nullable Task autoSaveTask = null;
 
     private final ReentrantLock testWorldLock = new ReentrantLock();
@@ -187,7 +195,7 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         var opened = server().api().maps.openWorld(map().id().toString(), worldId());
         if (opened instanceof OpenWorldResult.OpenElsewhere(var serverId))
             throw new IllegalStateException("map is open for editing on " + serverId);
-        if (!(opened instanceof OpenWorldResult.Opened))
+        if (!(opened instanceof OpenWorldResult.Opened(long headSeq)))
             throw new IllegalStateException("could not open the map for editing: " + opened);
         try {
             super.loadWorld();
@@ -195,6 +203,17 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
             server().api().maps.closeWorld(worldId());
             throw e;
         }
+
+        var wal = new WalWriter(
+            instance(),
+            TerraformImpl.ENTITIES,
+            EditBuffer.serializer(SchemUpgrader.INSTANCE, MinecraftServer.getBiomeRegistry()),
+            headSeq,
+            new JetStreamWalSink(server().jetStream(), server().api().maps, mapId(), worldId()),
+            FutureUtil.wrapVirtual(() -> save(true))
+        );
+        this.wal = wal;
+        wal.start();
 
         var scriptSession = this.scriptSession;
         if (scriptSession != null) scriptSession.bootstrap();
@@ -253,6 +272,8 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                     .join();
             }
             save(false);
+            var wal = this.wal;
+            if (wal != null) wal.close();
             try {
                 server().api().maps.closeWorld(worldId());
             } catch (Exception e) {
@@ -293,12 +314,16 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
 
             // Save the world data (if it is unverified only)
             if (!worldLost && map().verification() != MapVerification.PENDING) {
+                var wal = this.wal;
+                // Before the world is read, so that it holds every record up to this sequence.
+                long walSeq = wal != null ? wal.flush() : 0;
                 var worldData = instance().save(new ReadWriteWorldAccess(this));
-                var saved = server().api().maps.saveWorld(map().id().toString(), worldId(), worldData);
+                var saved = server().api().maps.saveWorld(map().id().toString(), worldId(), walSeq, worldData);
                 if (saved instanceof SaveWorldResult.NotHeld) {
                     // Nothing this world does can be saved any more. Off this thread: closing the
                     // world saves once more, which waits on the save lock held here.
                     worldLost = true;
+                    if (wal != null) wal.stop();
                     logger.error("World {} no longer holds map {} for editing, closing it", worldId(), map().id());
                     FutureUtil.submitVirtual(() -> server().destroyMapWorlds(
                         map().id().toString(),
@@ -515,6 +540,12 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         host.onClose(() -> {
             instance().setTag(SPAWN_CHECKPOINT_EFFECTS, checkpointData.toImmutable());
             ParkourMapWorld.applyGlobalSpawnActions(this);
+            var wal = this.wal;
+            if (wal != null) wal.setWorldTag(
+                DataFixer.maxVersion(),
+                SPAWN_CHECKPOINT_EFFECTS.getKey(),
+                instance().getTag(Tag.NBT(SPAWN_CHECKPOINT_EFFECTS.getKey()))
+            );
         });
     }
 

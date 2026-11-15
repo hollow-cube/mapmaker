@@ -26,8 +26,6 @@ import redis.clients.jedis.Response;
 import redis.clients.jedis.params.ZAddParams;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -322,7 +320,12 @@ public final class MapServiceImpl implements MapService {
 
                 // Claim will fail for a unique constraint if we are racing
                 tx.worldVersions.claimEditingWorld(worldId, mapId, serverId);
-                return new OpenWorldResult.Opened();
+
+                var head = tx.worldVersions.getHead(mapId);
+                var stored = requireNonNullElse(tx.mapWal.getHeadSeq(mapId), 0L);
+                return new OpenWorldResult.Opened(
+                    Math.max(stored, head == null ? 0 : head.walSeq())
+                );
             });
         } catch (Exception e) {
             if (!Jdbc.hasState(e, Jdbc.UNIQUE_VIOLATION)) throw e;
@@ -363,14 +366,7 @@ public final class MapServiceImpl implements MapService {
         @Nullable String worldId,
         BiPredicate<ApiDatabase.Tx, Maps> mayWrite
     ) {
-        byte[] bytes;
-        try (world) {
-            if (world.requireLength() > MAX_WORLD_BYTES)
-                throw world.refuse(413, "world is larger than " + MAX_WORLD_BYTES + " bytes");
-            bytes = world.read((int) world.length(), "world");
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+        var bytes = world.readMax(MAX_WORLD_BYTES, "world");
         var sha256 = Digest.sha256(bytes);
 
         return db.txResult(tx -> {
@@ -395,6 +391,20 @@ public final class MapServiceImpl implements MapService {
             worlds.put(mapId.toString(), new ByteArrayInputStream(bytes), bytes.length);
             return true;
         });
+    }
+
+    @Override
+    public String putWalBlob(UUID mapId, String worldId, Blob batch) {
+        var bytes = batch.readMax(MAX_WORLD_BYTES, "batch");
+        var holder = db.worldVersions.getEditingWorld(mapId);
+        if (holder == null || !holder.id().equals(worldId))
+            throw conflict("this world does not hold the map for editing");
+
+        var sha256 = Digest.hex(Digest.sha256(bytes));
+        var key = "wal/" + sha256;
+        if (!worldStore.exists(key))
+            worldStore.put(key, new ByteArrayInputStream(bytes), bytes.length);
+        return sha256;
     }
 
     private static String worldKey(byte[] sha256) {

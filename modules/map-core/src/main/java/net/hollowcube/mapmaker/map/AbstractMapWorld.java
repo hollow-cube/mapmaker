@@ -16,7 +16,6 @@ import net.hollowcube.mapmaker.map.instance.MapInstance;
 import net.hollowcube.mapmaker.map.item.handler.ItemRegistry;
 import net.hollowcube.mapmaker.map.monitoring.MapCoreJFR;
 import net.hollowcube.mapmaker.map.polar.ReadWorldAccess;
-import net.hollowcube.mapmaker.map.setting.MapSetting;
 import net.hollowcube.mapmaker.map.util.EventUtil;
 import net.hollowcube.mapmaker.map.util.MapWorldHelpers;
 import net.hollowcube.mapmaker.map.util.spatial.Octree;
@@ -116,6 +115,10 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             .addListener(PlayerDeathEvent.class, this::handlePlayerDeath);
 
         configureInstance();
+    }
+
+    public String mapId() {
+        return map().id().toString();
     }
 
     @Override

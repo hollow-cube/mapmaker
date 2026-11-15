@@ -4,10 +4,7 @@ import net.hollowcube.ipc.util.IpcException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.Closeable;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -62,6 +59,18 @@ public record Blob(long length, InputStream stream) implements Closeable {
                 what + " ended after " + bytes.length + " of " + count + " bytes"
             );
         return bytes;
+    }
+
+    /// The whole body in memory, closing the stream; refused when it announces no length or more
+    /// than `maxBytes`.
+    public byte[] readMax(int maxBytes, String what) {
+        try (this) {
+            if (requireLength() > maxBytes)
+                throw refuse(413, what + " is larger than " + maxBytes + " bytes");
+            return read((int) length, what);
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
     }
 
     /// Reads and throws away whatever is left, so a caller being refused gets its status rather than

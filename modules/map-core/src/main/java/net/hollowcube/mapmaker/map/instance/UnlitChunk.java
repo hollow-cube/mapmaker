@@ -2,6 +2,7 @@ package net.hollowcube.mapmaker.map.instance;
 
 import net.hollowcube.terraform.legacy.instance.TerraformBiomeChunk;
 import net.minestom.server.instance.DynamicChunk;
+import net.hollowcube.terraform.apply.ChangeTracker;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
@@ -56,6 +57,8 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     ) {
         super.setBlock(x, y, z, block, placement, destroy);
         heightmaps.update(x, y, z, block);
+        var tracker = ChangeTracker.of(instance);
+        if (tracker != null) tracker.markBlock(chunkX << 4 | (x & 15), y, chunkZ << 4 | (z & 15));
     }
 
     @Override
@@ -89,6 +92,8 @@ public class UnlitChunk extends DynamicChunk implements ChunkExt {
     public void setBiome(int x, int y, int z, RegistryKey<Biome> biome) {
         if (!TerraformBiomeChunk.setBiome(this, x, y, z, biome)) {
             super.setBiome(x, y, z, biome);
+            var tracker = ChangeTracker.of(instance);
+            if (tracker != null) tracker.markBiome(chunkX << 4 | (x & 15), y, chunkZ << 4 | (z & 15));
         }
     }
 

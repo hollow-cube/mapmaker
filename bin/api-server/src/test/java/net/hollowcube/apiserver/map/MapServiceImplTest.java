@@ -3,6 +3,9 @@ package net.hollowcube.apiserver.map;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
+import io.nats.client.Message;
+import io.nats.client.impl.Headers;
+import io.nats.client.impl.NatsMessage;
 import net.hollowcube.apiserver.common.Digest;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.s3.MemoryS3Client;
@@ -22,6 +25,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -528,6 +532,196 @@ class MapServiceImplTest {
         client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
         assertEquals(1, count("select count(*) from map_world_versions"));
         assertEquals(1, worldStore.puts());
+    }
+
+    @Test
+    void openWorld_answersTheNewestStoredOrSavedSeq() {
+        var id = create(OWNER).id();
+        TEST_DB.seed(
+            "insert into server_states(id,role) values ('editor','map') on conflict do nothing"
+        );
+        assertEquals(new OpenWorldResult.Opened(0), client.openWorld(id, "world", "editor"));
+
+        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 5, new byte[] {1}));
+        assertEquals(new OpenWorldResult.Opened(5), client.openWorld(id, "world", "editor"));
+
+        client.saveWorld(id, "world", 9, Blob.of(new byte[] {1, 2}));
+        assertEquals(new OpenWorldResult.Opened(9), client.openWorld(id, "world", "editor"));
+    }
+
+    @Test
+    void ingest_storesABatchFromTheHolder() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 3, new byte[] {7, 8}));
+        assertEquals(
+            1,
+            count(
+                """
+                select count(*) from map_wal
+                where map_id='%s' and first_seq=1 and last_seq=3 and world_id='world'
+                  and length=2 and data='\\x0708' and object_sha256 is null
+                """
+                    .formatted(id)
+            )
+        );
+    }
+
+    @Test
+    void ingest_dropsABatchWhenAnotherWorldHoldsTheMap() {
+        var id = create(OWNER).id();
+        open(id, "holder");
+        assertEquals(MapWalConsumer.Outcome.NOT_HELD, ingest(id, "other", 1, 1, new byte[] {1}));
+        assertEquals(0, count("select count(*) from map_wal"));
+    }
+
+    @Test
+    void ingest_storesTheLastBatchesOfAWorldThatLetGo() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        client.closeWorld("world");
+        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 1, new byte[] {1}));
+    }
+
+    @Test
+    void ingest_aRedeliveredBatchIsStoredOnce() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 1, new byte[] {1}));
+        assertEquals(MapWalConsumer.Outcome.DUPLICATE, ingest(id, "world", 1, 1, new byte[] {1}));
+        assertEquals(1, count("select count(*) from map_wal"));
+    }
+
+    @Test
+    void ingest_storesAnUploadedBatchByItsObject() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        var sha256 = client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
+        assertEquals(Digest.hex(Digest.sha256(new byte[] {4, 5, 6})), sha256);
+        assertArrayEquals(new byte[] {4, 5, 6}, worldStore.objects().get("wal/" + sha256));
+        client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
+        assertEquals(1, worldStore.puts());
+
+        var headers = headers("world", 1, 2, 3);
+        headers.put(MapWalConsumer.OBJECT, sha256);
+        assertEquals(
+            MapWalConsumer.Outcome.STORED,
+            new MapWalConsumer(clients.nats, db)
+                .ingest(message(MapWalConsumer.SUBJECT_PREFIX + id, headers, new byte[0]))
+        );
+        assertEquals(
+            1,
+            count(
+                "select count(*) from map_wal where data is null and length=3 and object_sha256 is not null"
+            )
+        );
+    }
+
+    @Test
+    void putWalBlob_refusesAWorldThatDoesNotHoldTheMap() {
+        var id = create(OWNER).id();
+        open(id, "holder");
+        assertEquals(
+            409,
+            assertThrows(
+                IpcException.class,
+                () -> client.putWalBlob(id, "other", Blob.of(new byte[] {1}))
+            ).status()
+        );
+        assertTrue(worldStore.objects().isEmpty());
+    }
+
+    @Test
+    void ingest_dropsAMalformedBatch() {
+        var id = create(OWNER).id();
+        open(id, "world");
+        var ingest = new MapWalConsumer(clients.nats, db);
+        var subject = MapWalConsumer.SUBJECT_PREFIX + id;
+
+        var noWorld = headers("world", 1, 1, 1);
+        noWorld.remove(MapWalConsumer.WORLD);
+        var wrongLength = headers("world", 1, 1, 5);
+        var backwards = headers("world", 3, 2, 1);
+        var objectAndBody = headers("world", 1, 1, 1);
+        objectAndBody.put(MapWalConsumer.OBJECT, "00".repeat(32));
+        var notADigest = headers("world", 1, 1, 1);
+        notADigest.put(MapWalConsumer.OBJECT, "abcd");
+
+        var body = new byte[] {1};
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(message(subject, noWorld, body))
+        );
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(message(subject, wrongLength, body))
+        );
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(message(subject, backwards, body))
+        );
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(message(subject, objectAndBody, body))
+        );
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(message(subject, notADigest, new byte[0]))
+        );
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(
+                message(
+                    MapWalConsumer.SUBJECT_PREFIX + "not-a-map",
+                    headers("world", 1, 1, 1),
+                    body
+                )
+            )
+        );
+        assertEquals(
+            MapWalConsumer.Outcome.MALFORMED,
+            ingest.ingest(message(subject, headers("world", 1, 1, 1), new byte[0]))
+        );
+        assertEquals(0, count("select count(*) from map_wal"));
+    }
+
+    private MapWalConsumer.Outcome ingest(
+        UUID mapId,
+        String worldId,
+        long firstSeq,
+        long lastSeq,
+        byte[] body
+    ) {
+        return new MapWalConsumer(clients.nats, db)
+            .ingest(
+                message(
+                    MapWalConsumer.SUBJECT_PREFIX + mapId,
+                    headers(worldId, firstSeq, lastSeq, body.length),
+                    body
+                )
+            );
+    }
+
+    private static Message message(String subject, Map<String, String> values, byte[] body) {
+        var headers = new Headers();
+        values.forEach(headers::put);
+        return NatsMessage.builder().subject(subject).headers(headers).data(body).build();
+    }
+
+    private static HashMap<String, String> headers(
+        String worldId,
+        long firstSeq,
+        long lastSeq,
+        int length
+    ) {
+        var headers = new HashMap<String, String>();
+        headers.put(MapWalConsumer.WORLD, worldId);
+        headers.put(MapWalConsumer.FIRST_SEQ, Long.toString(firstSeq));
+        headers.put(MapWalConsumer.LAST_SEQ, Long.toString(lastSeq));
+        headers.put(MapWalConsumer.FIRST_AT, "1794700000000");
+        headers.put(MapWalConsumer.LAST_AT, "1794700000500");
+        headers.put(MapWalConsumer.LENGTH, Integer.toString(length));
+        return headers;
     }
 
     private void open(UUID mapId, String worldId) {

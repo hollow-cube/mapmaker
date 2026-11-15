@@ -5,16 +5,11 @@ import net.hollowcube.apiserver.anticheat.AnticheatServiceImpl;
 import net.hollowcube.apiserver.anticheat.AnticheatTraceStore;
 import net.hollowcube.apiserver.chat.ChatServiceImpl;
 import net.hollowcube.apiserver.chatfilter.ChatFilter;
-import net.hollowcube.apiserver.common.Drain;
-import net.hollowcube.apiserver.common.Health;
-import net.hollowcube.apiserver.common.NatsPublisher;
-import net.hollowcube.apiserver.common.Pools;
-import net.hollowcube.apiserver.common.PostHogIds;
-import net.hollowcube.apiserver.common.PostgresUri;
-import net.hollowcube.apiserver.common.VaultSecrets;
+import net.hollowcube.apiserver.common.*;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
 import net.hollowcube.apiserver.map.MapServiceImpl;
+import net.hollowcube.apiserver.map.MapWalConsumer;
 import net.hollowcube.apiserver.notification.NotificationServiceImpl;
 import net.hollowcube.apiserver.player.PlayerServiceImpl;
 import net.hollowcube.apiserver.player.SocialServiceImpl;
@@ -167,6 +162,8 @@ public final class Main {
             Duration.ofSeconds(Long.parseLong(minimumBuild))
         );
 
+        var mapWal = MapWalConsumer.start(nats, db);
+
         var port = Integer.parseInt(secrets.get("http.port", "PORT", "9124"));
         var server = HttpServer.create(new InetSocketAddress(port), 0);
         // Every handler is a database call or two deep and blocks for all of it, which is what
@@ -228,6 +225,7 @@ public final class Main {
                         Thread.currentThread().interrupt();
                     }
                     server.stop(SHUTDOWN_SECONDS);
+                    mapWal.close();
                     redis.close();
                     nats.close();
                     PostHog.shutdown();

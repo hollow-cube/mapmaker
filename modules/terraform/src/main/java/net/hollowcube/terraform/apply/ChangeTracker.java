@@ -47,7 +47,7 @@ public final class ChangeTracker {
         return tracker;
     }
 
-    static @Nullable ChangeTracker of(Instance instance) {
+    public static @Nullable ChangeTracker of(Instance instance) {
         return instance.getTag(TAG);
     }
 

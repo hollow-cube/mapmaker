@@ -11,6 +11,7 @@ import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
 import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.map.MapServiceImpl;
+import net.hollowcube.apiserver.map.MapWalConsumer;
 import net.hollowcube.apiserver.notification.NotificationServiceImpl;
 import net.hollowcube.apiserver.player.PlayerServiceImpl;
 import net.hollowcube.apiserver.player.SocialServiceImpl;
@@ -160,6 +161,8 @@ public class DevServer extends AbstractMultiMapServer {
 
         var nats = NatsPublisher.connect(config.get(NatsConfig.class).servers(), Wire.gson());
         shutdowner().queue("dev-ipc-nats", nats::close);
+        var mapWal = MapWalConsumer.start(nats, db);
+        shutdowner().queue("dev-ipc-map-wal", mapWal::close);
 
         var s3 = new HttpS3Client(HttpClient.newHttpClient(), otel, COMPOSE_MINIO, REPLAY_BUCKET,
             "us-east-1", COMPOSE_MINIO_KEY, COMPOSE_MINIO_KEY);

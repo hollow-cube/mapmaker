@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 
 /// Wraps [JetStream] with otel tracing/propagation and some convenience methods.
-public final class JetStreamWrapper {
+public final class JetStreamWrapper implements JetStreamPublisher {
     private static final HeadersReadWriter HEADERS_READ_WRITER = new HeadersReadWriter();
 
     private final Connection nc;
@@ -47,8 +47,14 @@ public final class JetStreamWrapper {
 
     /// Publish a single message to JetStream. The payload will be serialized with GSON so must have the appropriate
     /// native image metadata and type adapters registered in {@link AbstractHttpService#GSON}.
-    @Blocking
+    @Override
     public PublishAck publish(String subject, Object payload) {
+        var data = AbstractHttpService.GSON.toJson(payload).getBytes(StandardCharsets.UTF_8);
+        return publish(subject, new Headers(), data);
+    }
+
+    @Override
+    public PublishAck publish(String subject, Headers headers, byte[] data) {
         Span span = tracer.spanBuilder("JetStream publish " + subject)
             .setSpanKind(SpanKind.PRODUCER)
             .setAttribute("messaging.system", "nats")
@@ -56,12 +62,8 @@ public final class JetStreamWrapper {
             .startSpan();
 
         try (var _ = span.makeCurrent()) {
-            Headers headers = new Headers();
             propagator.inject(Context.current(), headers, HEADERS_READ_WRITER);
-
-            final byte[] rawPayload = AbstractHttpService.GSON.toJson(payload).getBytes(StandardCharsets.UTF_8);
-
-            return jetStream.publish(subject, headers, rawPayload);
+            return jetStream.publish(subject, headers, data);
         } catch (IOException | JetStreamApiException e) {
             span.setStatus(io.opentelemetry.api.trace.StatusCode.ERROR, e.getMessage());
             span.recordException(e);

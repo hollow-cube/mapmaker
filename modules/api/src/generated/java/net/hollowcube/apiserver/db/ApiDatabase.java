@@ -28,6 +28,8 @@ public final class ApiDatabase {
 
     public final MapFeaturesQueries mapFeatures;
 
+    public final MapWalQueries mapWal;
+
     public final MapsQueries maps;
 
     public final NotificationsQueries notifications;
@@ -56,6 +58,7 @@ public final class ApiDatabase {
         this.jobs = new JobsQueriesImpl(source);
         this.leaderboards = new LeaderboardsQueriesImpl(source);
         this.mapFeatures = new MapFeaturesQueriesImpl(source);
+        this.mapWal = new MapWalQueriesImpl(source);
         this.maps = new MapsQueriesImpl(source);
         this.notifications = new NotificationsQueriesImpl(source);
         this.players = new PlayersQueriesImpl(source);
@@ -76,6 +79,7 @@ public final class ApiDatabase {
         this.jobs = fake.jobs;
         this.leaderboards = fake.leaderboards;
         this.mapFeatures = fake.mapFeatures;
+        this.mapWal = fake.mapWal;
         this.maps = fake.maps;
         this.notifications = fake.notifications;
         this.players = fake.players;
@@ -143,6 +147,8 @@ public final class ApiDatabase {
 
         public final MapFeaturesQueries mapFeatures;
 
+        public final MapWalQueries mapWal;
+
         public final MapsQueries maps;
 
         public final NotificationsQueries notifications;
@@ -171,6 +177,7 @@ public final class ApiDatabase {
             this.jobs = new JobsQueriesImpl(source);
             this.leaderboards = new LeaderboardsQueriesImpl(source);
             this.mapFeatures = new MapFeaturesQueriesImpl(source);
+            this.mapWal = new MapWalQueriesImpl(source);
             this.maps = new MapsQueriesImpl(source);
             this.notifications = new NotificationsQueriesImpl(source);
             this.players = new PlayersQueriesImpl(source);
@@ -214,6 +221,8 @@ public final class ApiDatabase {
         private LeaderboardsQueries leaderboards = new LeaderboardsQueries.Stub();
 
         private MapFeaturesQueries mapFeatures = new MapFeaturesQueries.Stub();
+
+        private MapWalQueries mapWal = new MapWalQueries.Stub();
 
         private MapsQueries maps = new MapsQueries.Stub();
 
@@ -265,6 +274,11 @@ public final class ApiDatabase {
 
         public Fake mapFeatures(MapFeaturesQueries mapFeatures) {
             this.mapFeatures = mapFeatures;
+            return this;
+        }
+
+        public Fake mapWal(MapWalQueries mapWal) {
+            this.mapWal = mapWal;
             return this;
         }
 

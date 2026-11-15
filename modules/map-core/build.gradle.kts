@@ -28,4 +28,5 @@ dependencies {
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
     implementation(libs.nats)
+    implementation(libs.zstd)
 }

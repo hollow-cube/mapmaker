@@ -13,6 +13,7 @@ dependencies {
     implementation(libs.slf4j)
     implementation(libs.slf4j.jul)
     implementation(libs.logback)
+    implementation(libs.nats)
 
     testImplementation(project(":tools:sql-gen:testing"))
     testImplementation(libs.nats)

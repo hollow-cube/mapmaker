@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.legacy.instance;
 
+import net.hollowcube.terraform.apply.ChangeTracker;
 import net.hollowcube.terraform.legacy.util.ProtocolUtil;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.instance.Chunk;
@@ -58,6 +59,10 @@ public final class TerraformBiomeChunk {
                         globalToSectionRelative(z) / 4,
                         index
                 );
+                var tracker = ChangeTracker.of(chunk.getInstance());
+                if (tracker != null) tracker.markBiome(
+                        chunk.getChunkX() << 4 | globalToSectionRelative(x), y,
+                        chunk.getChunkZ() << 4 | globalToSectionRelative(z));
                 return true;
             }
         }
@@ -78,6 +83,7 @@ public final class TerraformBiomeChunk {
         for (Section section : chunk.getSections()) {
             section.biomePalette().fill(id);
         }
+        markAllBiomes(chunk);
     }
 
     public static void fillBiome(
@@ -108,6 +114,18 @@ public final class TerraformBiomeChunk {
                 return predicate.test(x + xOffset, y + (index + yOffset) * 16, z + zOffset, oldBiome) ? id : old;
             });
             i++;
+        }
+        markAllBiomes(chunk);
+    }
+
+    private static void markAllBiomes(@NotNull Chunk chunk) {
+        var tracker = ChangeTracker.of(chunk.getInstance());
+        if (tracker == null) return;
+        int baseX = chunk.getChunkX() << 4, baseZ = chunk.getChunkZ() << 4;
+        for (int y = chunk.getMinSection() << 4; y < chunk.getMaxSection() << 4; y += 4) {
+            for (int z = 0; z < 16; z += 4) {
+                for (int x = 0; x < 16; x += 4) tracker.markBiome(baseX + x, y, baseZ + z);
+            }
         }
     }
 

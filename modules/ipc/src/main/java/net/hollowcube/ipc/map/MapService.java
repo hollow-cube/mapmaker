@@ -62,6 +62,11 @@ public interface MapService {
     /// Gives up the world's claim, after its last save.
     void closeWorld(String worldId);
 
+    /// Stores a write-ahead-log batch too large to publish and answers its sha256 in hex, which the
+    /// published message then names instead of carrying the batch. Refused unless `worldId` holds
+    /// the map.
+    String putWalBlob(UUID mapId, String worldId, Blob batch);
+
     /// `loadTime` is when the uploading server loaded the world; a world loaded before the map was
     /// published is refused, as is any upload while verification is pending.
     void updateWorld(UUID mapId, long loadTime, Blob world);

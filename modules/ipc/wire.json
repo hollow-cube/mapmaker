@@ -488,6 +488,25 @@
             "type": "net.hollowcube.ipc.map.PublishMapResult"
           }
         },
+        "put-wal-blob": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "worldId",
+              "type": "String"
+            },
+            {
+              "name": "batch",
+              "type": "net.hollowcube.ipc.Blob"
+            }
+          ],
+          "returns": {
+            "type": "String"
+          }
+        },
         "rebuild-leaderboard": {
           "params": [
             {
@@ -2346,7 +2365,12 @@
       "used": [
         "response"
       ],
-      "fields": []
+      "fields": [
+        {
+          "name": "headSeq",
+          "type": "long"
+        }
+      ]
     },
     "net.hollowcube.ipc.map.PlayerMapProgress": {
       "kind": "record",
