@@ -17,7 +17,6 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class MapWalQueriesImpl implements MapWalQueries {
     private static final String INSERT_BATCH = """
-        -- A redelivered batch is already there.
         insert into map_wal (map_id, first_seq, last_seq, world_id, first_at, last_at, length, data, object_sha256)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?)
         on conflict (map_id, first_seq) do nothing""";
