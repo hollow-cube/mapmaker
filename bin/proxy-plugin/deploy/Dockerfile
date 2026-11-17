@@ -10,4 +10,4 @@ COPY ./bin/proxy-plugin/build/proxy/stage /app
 ENV PROXY_HEAP=3g
 
 EXPOSE 25565 9124
-CMD ["sh", "-c", "exec java -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -Xms$PROXY_HEAP -Xmx$PROXY_HEAP -Dvelocity.max-plugin-message-payload-size=1048576 -jar velocity.jar"]
+CMD ["sh", "-c", "exec java -XX:+UseG1GC -XX:G1HeapRegionSize=4M -XX:+UnlockExperimentalVMOptions -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:MaxInlineLevel=15 -XX:-UseBASE64Intrinsics -Xms$PROXY_HEAP -Xmx$PROXY_HEAP -Dvelocity.max-plugin-message-payload-size=1048576 -jar velocity.jar"]

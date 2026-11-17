@@ -33,6 +33,7 @@ public class NoxesiumHandshakeAPI {
     }
 
     private static String decryptSecret(String encryptedSecret) {
+        if (encryptedSecret.length() % 4 != 0) return null;
         try {
             var bytes = Base64.getDecoder().decode(ENCRYPTION_KEY);
             var key = new SecretKeySpec(bytes, "AES");

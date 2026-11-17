@@ -4,4 +4,4 @@ WORKDIR /app
 COPY ./bin/map-isolate/build/libs/map-isolate-all.jar /app/server.jar
 
 EXPOSE 25565
-CMD ["java", "-jar", "server.jar"]
+CMD ["java", "-XX:-UseBASE64Intrinsics", "-jar", "server.jar"]

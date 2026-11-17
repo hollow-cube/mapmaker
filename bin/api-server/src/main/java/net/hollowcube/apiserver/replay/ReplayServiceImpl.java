@@ -11,11 +11,7 @@ import net.hollowcube.apiserver.job.CompactReplay;
 import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.ipc.Blob;
-import net.hollowcube.ipc.replay.ReplayCommit;
-import net.hollowcube.ipc.replay.ReplayCompaction;
-import net.hollowcube.ipc.replay.ReplayInfo;
-import net.hollowcube.ipc.replay.ReplayOutcome;
-import net.hollowcube.ipc.replay.ReplayService;
+import net.hollowcube.ipc.replay.*;
 import net.hollowcube.ipc.util.IpcException;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -32,11 +28,7 @@ import java.util.Base64;
 import java.util.HashSet;
 import java.util.regex.Pattern;
 
-import static net.hollowcube.apiserver.replay.ReplayCompat.COMPACTED;
-import static net.hollowcube.apiserver.replay.ReplayCompat.FINISHED;
-import static net.hollowcube.apiserver.replay.ReplayCompat.RECORDING;
-import static net.hollowcube.apiserver.replay.ReplayCompat.info;
-import static net.hollowcube.apiserver.replay.ReplayCompat.validate;
+import static net.hollowcube.apiserver.replay.ReplayCompat.*;
 
 /// Replay storage: the rows in Postgres, the segments and compacted objects in the bucket.
 ///
@@ -708,9 +700,11 @@ public final class ReplayServiceImpl implements ReplayService {
     }
 
     private byte[] digest(String contentDigest, Blob body) {
+        var encoded = contentDigest.strip();
+        if (encoded.length() != 44) throw body.refuse(400, "content digest is not a sha-256");
         byte[] decoded;
         try {
-            decoded = Base64.getDecoder().decode(contentDigest.strip());
+            decoded = Base64.getDecoder().decode(encoded);
         } catch (IllegalArgumentException e) {
             throw body.refuse(400, "content digest is not base64");
         }
