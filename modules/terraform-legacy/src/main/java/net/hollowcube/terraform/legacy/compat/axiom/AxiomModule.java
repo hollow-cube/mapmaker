@@ -132,7 +132,7 @@ public class AxiomModule implements TerraformModule {
                             passenger.getPassengers().stream().anyMatch(Player.class::isInstance) ||
                             passenger.getVehicle() != entity;
                     if (isInvalidPassenger) continue;
-                    entity.removePassenger(entity);
+                    entity.removePassenger(passenger);
                 }
             }
             case CLEAR -> Set.copyOf(entity.getPassengers()).forEach(entity::removePassenger);

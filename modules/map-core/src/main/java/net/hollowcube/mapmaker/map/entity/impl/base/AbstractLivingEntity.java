@@ -106,6 +106,7 @@ public class AbstractLivingEntity<M extends LivingEntityMeta> extends MapEntity<
     public void setEquipment(@NotNull EquipmentSlot slot, @NotNull ItemStack itemStack) {
         equipment[slot.ordinal()] = itemStack;
         sendPacketToViewersAndSelf(getEquipmentsPacket());
+        markChanged();
     }
 
     @Override
@@ -167,6 +168,7 @@ public class AbstractLivingEntity<M extends LivingEntityMeta> extends MapEntity<
 
     public void setAttribute(Attribute attribute, double value) {
         this.attributes.put(attribute, value);
+        markChanged();
         sendPacketToViewers(new EntityAttributesPacket(getEntityId(), List.of(
             new EntityAttributesPacket.Property(attribute, value, List.of())
         )));

@@ -6,11 +6,11 @@ import net.hollowcube.mapmaker.map.entity.info.MapEntityInfoType;
 import net.hollowcube.mapmaker.map.util.NbtUtil;
 import net.hollowcube.mapmaker.map.util.datafix.legacy.PreDataFixFixes;
 import net.hollowcube.mapmaker.util.ProtocolUtil;
+import net.hollowcube.terraform.apply.ChangeTracker;
 import net.hollowcube.terraform.legacy.entity.TerraformEntity;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.collision.CollisionUtils;
 import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Point;
@@ -20,10 +20,8 @@ import net.minestom.server.entity.*;
 import net.minestom.server.entity.metadata.EntityMeta;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.network.packet.server.play.EntityPositionAndRotationPacket;
-import net.minestom.server.network.packet.server.play.EntityPositionPacket;
-import net.minestom.server.network.packet.server.play.EntityPositionSyncPacket;
-import net.minestom.server.network.packet.server.play.EntityRotationPacket;
+import net.minestom.server.network.packet.server.SendablePacket;
+import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.packet.server.play.data.PositionPath;
 import net.minestom.server.network.packet.server.play.data.VecDelta;
 import net.minestom.server.property.ServerProperties;
@@ -66,6 +64,8 @@ public class MapEntity<M extends EntityMeta> extends Entity implements Terraform
     private boolean stepOnGround = false;
     private boolean flushedOnGround = false;
     private boolean reportedOnGround = false;
+
+    private Pos markedPosition = Pos.ZERO;
 
     protected MapEntity(@NotNull EntityType entityType) {
         super(entityType, UUID.randomUUID());
@@ -148,7 +148,61 @@ public class MapEntity<M extends EntityMeta> extends Entity implements Terraform
 
         if (this.position.y() < -2032.0) {
             this.remove();
+            return;
         }
+        if (!position.equals(markedPosition)) markChanged();
+    }
+
+    /// Reports a change to what [#writeData] saves, once it has been made. Position, metadata, passengers and
+    /// [#readData] report themselves; state a subclass keeps anywhere else must call this from its setter.
+    protected void markChanged() {
+        markedPosition = position;
+        TerraformEntity.markChanged(this);
+    }
+
+    @Override
+    public void spawn() {
+        super.spawn();
+        markChanged();
+    }
+
+    @Override
+    protected void remove(boolean permanent) {
+        if (isRemoved()) return;
+        var instance = getInstance();
+        var position = getPosition();
+        super.remove(permanent);
+
+        var tracker = instance == null ? null : ChangeTracker.of(instance);
+        if (tracker != null) tracker.markEntity(getUuid(), position);
+    }
+
+    @Override
+    public void addPassenger(@NotNull Entity entity) {
+        super.addPassenger(entity);
+        TerraformEntity.markChanged(entity);
+    }
+
+    @Override
+    public void removePassenger(@NotNull Entity entity) {
+        super.removePassenger(entity);
+        markChanged();
+        TerraformEntity.markChanged(entity);
+    }
+
+    @Override
+    public final void sendPacketToViewersAndSelf(@NotNull SendablePacket packet) {
+        if (packet instanceof EntityMetaDataPacket metadata) {
+            // The only way a metadata change is announced, so every one of them comes through here.
+            markChanged();
+            sendMetadata(metadata);
+        } else {
+            super.sendPacketToViewersAndSelf(packet);
+        }
+    }
+
+    protected void sendMetadata(@NotNull EntityMetaDataPacket packet) {
+        super.sendPacketToViewersAndSelf(packet);
     }
 
     // Physics
@@ -398,6 +452,8 @@ public class MapEntity<M extends EntityMeta> extends Entity implements Terraform
 
         // Vanilla
         this.getEntityMeta().setSilent(tag.getBoolean(SILENT_KEY, false));
+
+        markChanged();
     }
 
     @Override

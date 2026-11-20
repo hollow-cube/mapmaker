@@ -19,7 +19,6 @@ import net.minestom.server.entity.metadata.display.AbstractDisplayMeta;
 import net.minestom.server.entity.metadata.display.BlockDisplayMeta;
 import net.minestom.server.entity.metadata.display.ItemDisplayMeta;
 import net.minestom.server.entity.metadata.display.TextDisplayMeta;
-import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
 import net.minestom.server.tag.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -169,22 +168,18 @@ public sealed abstract class DisplayEntity<M extends AbstractDisplayMeta> extend
     }
 
     @Override
-    public void sendPacketToViewersAndSelf(@NotNull SendablePacket packet) {
-        if (packet instanceof EntityMetaDataPacket(int entity, Map<Integer, Metadata.Entry<?>> entries)) {
-            var glowingPacket = new EntityMetaDataPacket(entity, OpUtils.copyAndEdit(entries, it -> {
-                byte current = (Byte) it.getOrDefault(MetadataDef.HAS_GLOWING_EFFECT.index(), Metadata.Byte((byte) 0)).value();
-                it.put(MetadataDef.HAS_GLOWING_EFFECT.index(), Metadata.Byte((byte) (current | (byte) 0x40)));
-            }));
+    protected void sendMetadata(@NotNull EntityMetaDataPacket packet) {
+        var glowingPacket = new EntityMetaDataPacket(packet.entityId(), OpUtils.copyAndEdit(packet.entries(), it -> {
+            byte current = (Byte) it.getOrDefault(MetadataDef.HAS_GLOWING_EFFECT.index(), Metadata.Byte((byte) 0)).value();
+            it.put(MetadataDef.HAS_GLOWING_EFFECT.index(), Metadata.Byte((byte) (current | (byte) 0x40)));
+        }));
 
-            for (Player viewer : this.getViewers()) {
-                if (this.getUuid().equals(viewer.getTag(SELECTED_DISPLAY_ENTITY))) {
-                    viewer.sendPacket(glowingPacket);
-                } else {
-                    viewer.sendPacket(packet);
-                }
+        for (Player viewer : this.getViewers()) {
+            if (this.getUuid().equals(viewer.getTag(SELECTED_DISPLAY_ENTITY))) {
+                viewer.sendPacket(glowingPacket);
+            } else {
+                viewer.sendPacket(packet);
             }
-        } else {
-            super.sendPacketToViewersAndSelf(packet);
         }
     }
 
@@ -251,7 +246,7 @@ public sealed abstract class DisplayEntity<M extends AbstractDisplayMeta> extend
 
             final BlockDisplayMeta meta = getEntityMeta();
             final net.minestom.server.instance.block.Block block = meta.getBlockStateId();
-            if (!block.isAir())
+            if (!block.air())
                 tag.put("block_state", NbtUtil.writeBlock(block));
 
         }
@@ -263,7 +258,7 @@ public sealed abstract class DisplayEntity<M extends AbstractDisplayMeta> extend
             final BlockDisplayMeta meta = getEntityMeta();
             if (tag.get("block_state") instanceof CompoundBinaryTag blockState) {
                 var block = NbtUtil.readBlock(blockState);
-                if (!block.isAir()) meta.setBlockState(block);
+                if (!block.air()) meta.setBlockState(block);
             }
         }
 

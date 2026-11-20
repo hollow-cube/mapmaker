@@ -2,7 +2,7 @@ package net.hollowcube.mapmaker.map.entity.impl.other;
 
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.StringBinaryTag;
-import net.minestom.server.MinecraftServer;
+import net.hollowcube.mapmaker.map.entity.PhysicsTestEnv;
 import net.minestom.server.color.DyeColor;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class CushionEntityTest {
 
     static {
-        MinecraftServer.init();
+        PhysicsTestEnv.init();
     }
 
     private static final Vec ORIGIN = new Vec(0, 0, 0);

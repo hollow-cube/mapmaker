@@ -24,6 +24,8 @@ public final class TerraformEntityAccessor implements EntityAccessor {
     @Override
     public @Nullable EntityEdit capture(@NotNull Instance instance, @NotNull UUID id) {
         var entity = instance.getEntityByUuid(id);
+        // A passenger is carried in its vehicle's data, so on its own it does not exist.
+        if (entity == null || entity.getVehicle() != null) return null;
         return entity instanceof TerraformEntity editable ? edit(entity, editable) : null;
     }
 

@@ -1,6 +1,6 @@
 package net.hollowcube.mapmaker.map.block.interaction;
 
-import net.minestom.server.MinecraftServer;
+import net.hollowcube.mapmaker.map.entity.PhysicsTestEnv;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class ComposterInteractionRuleTest {
 
     static {
-        MinecraftServer.init();
+        PhysicsTestEnv.init();
     }
 
     @Test

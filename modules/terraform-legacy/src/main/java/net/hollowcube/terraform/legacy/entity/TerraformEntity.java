@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.legacy.entity;
 
+import net.hollowcube.terraform.apply.ChangeTracker;
 import net.hollowcube.terraform.legacy.compat.axiom.util.NbtUtil;
 import net.hollowcube.terraform.legacy.event.TerraformPreSpawnEntityEvent;
 import net.hollowcube.terraform.legacy.event.TerraformSpawnEntityEvent;
@@ -29,6 +30,17 @@ import java.util.concurrent.CompletableFuture;
  * <p>Not all of this functionality is necessarily Terraform specific, but needs to be accessed from Terraform.</p>
  */
 public interface TerraformEntity {
+
+    static void markChanged(@NotNull Entity entity) {
+        var instance = entity.getInstance();
+        if (instance == null) return;
+        var tracker = ChangeTracker.of(instance);
+        if (tracker == null) return;
+        tracker.markEntity(entity.getUuid(), entity.getPosition());
+        Entity root = entity;
+        while (root.getVehicle() != null) root = root.getVehicle();
+        if (root != entity) tracker.markEntity(root.getUuid(), root.getPosition());
+    }
 
     static @NotNull CompoundBinaryTag writeToTagWithPassengers(@NotNull TerraformEntity entity) {
         var compound = entity.writeToTag();

@@ -124,6 +124,18 @@ public abstract class ObjectEntity<M extends EntityMeta> extends MapEntity<M> im
         return getTag(REGION_MAX_TAG);
     }
 
+    @Override
+    public <T> void setTag(@NotNull Tag<T> tag, @Nullable T value) {
+        super.setTag(tag, value);
+        markChanged();
+    }
+
+    @Override
+    public void removeTag(@NotNull Tag<?> tag) {
+        super.removeTag(tag);
+        markChanged();
+    }
+
     public void setRegion(@Nullable Vec min, @Nullable Vec max) {
         setTag(REGION_MIN_TAG, min);
         setTag(REGION_MAX_TAG, max);
