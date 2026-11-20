@@ -19,7 +19,6 @@ import net.hollowcube.mapmaker.config.VelocityConfig;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.event.PlayerInstanceLeaveEvent;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
-import net.hollowcube.mapmaker.map.command.DebugRenderersCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.runtime.MapWorlds;
@@ -145,6 +144,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         var player = event.getPlayer();
         var pendingPlayerReserved = false;
         var keepPendingPlayerReservation = false;
+        AbstractMapWorld<?, ?> mapWorld = null;
         try {
             if (config.get(VelocityConfig.class).secret().isEmpty()) {
                 ProtocolVersions.unsafeSetProtocolVersion(player, MinecraftServer.PROTOCOL_VERSION);
@@ -174,7 +174,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             // TODO: Why don't we start loading the world when we receive the join request? we can always close it if they dont end up joining.
-            var mapWorld = FutureUtil.getUnchecked(createWorldForRequest(joinInfo));
+            mapWorld = FutureUtil.getUnchecked(createWorldForRequest(joinInfo));
             if (mapWorld == null) {
                 logger.error("Failed to create map world for {}: {}", joinInfo.playerId(), joinInfo.mapId());
                 player.kick(Component.text("Failed to create map world. Please try again later."));
@@ -191,7 +191,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
             }
 
             // Ensure resource pack was applied before allowing the player in
-            FutureUtil.getUnchecked(resourcePackFuture);
+            while (!resourcePackFuture.isDone() && player.isOnline())
+                FutureUtil.getUnchecked(resourcePackFuture, 1000);
             if (!player.isOnline()) return;
 
             // Setup the player in the world
@@ -203,6 +204,8 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
         } finally {
             if (pendingPlayerReserved && !keepPendingPlayerReservation)
                 releasePendingPlayer(player);
+            if (mapWorld != null && !keepPendingPlayerReservation)
+                destroyIfUnused(mapWorld);
         }
     }
 
@@ -360,6 +363,21 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
     private void destroy(@NotNull MapKey key, @NotNull Component reason) {
         destroy(key, reason, true);
+    }
+
+    private void destroyIfUnused(@NotNull AbstractMapWorld<?, ?> world) {
+        MapKey key = null;
+        worldLock.lock();
+        try {
+            for (var entry : worlds.entrySet()) {
+                var future = entry.getValue();
+                if (future.state() == Future.State.SUCCESS && future.resultNow() == world) key = entry.getKey();
+            }
+        } finally {
+            worldLock.unlock();
+        }
+        if (key == null || !world.instance().getPlayers().isEmpty()) return;
+        destroyIfNoPendingPlayers(key, Component.translatable("map.closed"));
     }
 
     private void destroyIfNoPendingPlayers(@NotNull MapKey key, @NotNull Component reason) {
