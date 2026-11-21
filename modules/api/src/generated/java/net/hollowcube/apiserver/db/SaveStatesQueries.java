@@ -48,7 +48,8 @@ public interface SaveStatesQueries {
      */
     record UpsertParams(UUID id, UUID mapId, UUID playerId, SaveStateType type, Instant created,
             boolean completed, long playtime, int ticks, @Nullable Double score, byte[] state,
-            int dataVersion, int protocolVersion, int resets, long totalPlaytime) {
+            int dataVersion, int protocolVersion, int resets, long totalPlaytime,
+            @Nullable String stateJson) {
     }
 
     /**

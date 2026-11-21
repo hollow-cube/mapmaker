@@ -152,6 +152,27 @@ class MapSaveStateTest {
     }
 
     @Test
+    void upsert_mirrorsIntoTheNewColumns() throws Exception {
+        var map = map("parkour");
+        var id = UUID.randomUUID();
+        var state = new JsonObject();
+        state.addProperty("checkpoint", 3);
+        client.upsertSaveState(map, PLAYER, id, playing(1000).state(state).build());
+        assertEquals(1, count("""
+            select count(*) from save_states
+            where created_at = created and updated_at = updated and state = convert_from(state_v2, 'UTF8')::jsonb
+            """));
+
+        state.addProperty("name", "a\u0000b");
+        client.upsertSaveState(map, PLAYER, id, playing(2000).state(state).build());
+        assertEquals(1, count("select count(*) from save_states where state is null and updated_at = updated"));
+        assertEquals(state, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).state());
+
+        db.saveStates.deleteForPlayer(map, PLAYER);
+        assertEquals(1, count("select count(*) from save_states where deleted_at = deleted"));
+    }
+
+    @Test
     void upsert_refusesACompletedState() {
         var map = map("parkour");
         var id = UUID.randomUUID();
@@ -450,13 +471,24 @@ class MapSaveStateTest {
                 "ticks",
                 "score",
                 "resets",
-                "total_playtime"
+                "total_playtime",
+                "created_at",
+                "updated_at",
+                "deleted_at",
+                "state"
             ),
             columnsOf("save_states")
         );
     }
 
     /// `pg_attribute` rather than `information_schema`, which pglite does not serve.
+    private static long count(String sql) throws Exception {
+        try (var st = TEST_DB.conn().createStatement(); var rs = st.executeQuery(sql)) {
+            rs.next();
+            return rs.getLong(1);
+        }
+    }
+
     private static List<String> columnsOf(String table) {
         var sql = """
             select a.attname

@@ -64,7 +64,6 @@ class MapWritePostgresTest {
         ) {
             for (var file : files.filter(p -> p.toString().endsWith(".sql")).sorted().toList())
                 st.execute(Files.readString(file));
-            st.execute(Files.readString(Path.of("src/test/resources/map-ratings-trigger.sql")));
         }
     }
 

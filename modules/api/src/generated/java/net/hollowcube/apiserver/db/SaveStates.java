@@ -14,7 +14,8 @@ import org.jetbrains.annotations.Nullable;
 public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type, Instant created,
         Instant updated, @Nullable Instant deleted, boolean completed, long playtime,
         byte[] stateV2, int dataVersion, @Nullable Integer protocolVersion, int ticks,
-        @Nullable Double score, int resets, long totalPlaytime) {
+        @Nullable Double score, int resets, long totalPlaytime, @Nullable Instant createdAt,
+        @Nullable Instant updatedAt, @Nullable Instant deletedAt, @Nullable String state) {
     /**
      * Reads one `save_states` row, its first column at `col`.
      */
@@ -35,6 +36,10 @@ public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type,
                 rs.getInt(col + 12),
                 rs.getObject(col + 13, Double.class),
                 rs.getInt(col + 14),
-                rs.getLong(col + 15));
+                rs.getLong(col + 15),
+                Jdbc.getInstant(rs, col + 16),
+                Jdbc.getInstant(rs, col + 17),
+                Jdbc.getInstant(rs, col + 18),
+                rs.getString(col + 19));
     }
 }

@@ -53,13 +53,17 @@ order by ss.player_id, case
                            end;
 
 -- name: upsert :exec
--- nullable: $score
+-- nullable: $score, $stateJson
 insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, ticks, score,
-                         state_v2, data_version, protocol_version, resets, total_playtime)
+                         state_v2, data_version, protocol_version, resets, total_playtime, created_at,
+                         updated_at, state)
 values ($id, $mapId, $playerId, $type, $created, now(), $completed, $playtime, $ticks, $score, $state,
-        $dataVersion, $protocolVersion, $resets, $totalPlaytime)
+        $dataVersion, $protocolVersion, $resets, $totalPlaytime, $created, now(),
+        $stateJson::text::jsonb)
 on conflict (id, map_id, player_id) do update
     set updated          = excluded.updated,
+        updated_at       = excluded.updated_at,
+        state            = excluded.state,
         completed        = excluded.completed,
         playtime         = excluded.playtime,
         ticks            = excluded.ticks,
@@ -85,7 +89,7 @@ on conflict (map_id) do update
 
 -- name: deleteForPlayer :exec
 update save_states
-set deleted = now()
+set deleted = now(), deleted_at = now()
 where deleted is null
   and map_id = $mapId
   and player_id = $playerId;
@@ -94,7 +98,7 @@ where deleted is null
 -- The maps touched, so their boards can drop the player.
 with deleted as (
     update save_states
-        set deleted = now()
+        set deleted = now(), deleted_at = now()
         where deleted is null
             and player_id = $playerId
         returning map_id)
@@ -103,7 +107,7 @@ from deleted;
 
 -- name: deleteMap :exec
 update save_states
-set deleted = now()
+set deleted = now(), deleted_at = now()
 where deleted is null
   and map_id = $mapId;
 
@@ -112,7 +116,7 @@ where deleted is null
 -- not-null: restored
 with restored as (
     update save_states
-        set deleted = null
+        set deleted = null, deleted_at = null
         where deleted is not null
             and map_id = $mapId
             and player_id = $playerId
@@ -127,7 +131,7 @@ from restored;
 -- The maps touched, with how many runs came back on each.
 with restored as (
     update save_states
-        set deleted = null
+        set deleted = null, deleted_at = null
         where deleted is not null
             and player_id = $playerId
             and ($deletedAfter::timestamptz is null or deleted >= $deletedAfter)
@@ -142,7 +146,7 @@ group by map_id;
 -- not-null: restored
 with restored as (
     update save_states
-        set deleted = null
+        set deleted = null, deleted_at = null
         where deleted is not null
             and map_id = $mapId
             and ($deletedAfter::timestamptz is null or deleted >= $deletedAfter)

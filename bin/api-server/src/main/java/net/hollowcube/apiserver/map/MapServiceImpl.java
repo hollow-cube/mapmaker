@@ -14,6 +14,12 @@ import net.hollowcube.ipc.Blob;
 import net.hollowcube.ipc.PaginatedList;
 import net.hollowcube.ipc.Wire;
 import net.hollowcube.ipc.map.*;
+import net.hollowcube.ipc.map.MapQuality;
+import net.hollowcube.ipc.map.MapRating;
+import net.hollowcube.ipc.map.MapReportCategory;
+import net.hollowcube.ipc.map.MapSize;
+import net.hollowcube.ipc.map.MapVariant;
+import net.hollowcube.ipc.map.MapVerification;
 import net.hollowcube.ipc.notification.NotificationUpdate;
 import net.hollowcube.posthog.PostHogClient;
 import net.hollowcube.sqlgen.runtime.Jdbc;
@@ -261,6 +267,7 @@ public final class MapServiceImpl implements MapService {
                     requireNonNullElse(patch.listed(), map.listed()),
                     quality,
                     protocolVersion,
+                    MapCompat.jsonbOrNull(extra.toString()),
                     mapId
                 )
             );
@@ -687,15 +694,18 @@ public final class MapServiceImpl implements MapService {
             c -> c != MapReportCategory.CHEATED && c != MapReportCategory.UNPLAYABLE
         );
         db.tx(tx -> {
-            var map = tx.maps.getMap(mapId);
+            var map = tx.maps.getMapForUpdate(mapId);
             if (map == null) throw notFound("map not found");
             tx.maps.insertReport(
                 mapId,
                 reporter,
-                categories.stream().map(Enum::ordinal).toList(),
+                categories.stream().map(MapCompat::reportCategoryColumn).toList(),
                 comment
             );
-            if (dislike) tx.maps.setRating(mapId, reporter, MapRating.DISLIKED.ordinal());
+            if (dislike) {
+                tx.maps.setRating(mapId, reporter, net.hollowcube.apiserver.db.MapRating.DISLIKED);
+                tx.maps.refreshLikes(mapId);
+            }
 
             var properties = new HashMap<String, Object>();
             properties.put("map_id", mapId.toString());
@@ -711,17 +721,19 @@ public final class MapServiceImpl implements MapService {
 
     @Override
     public MapRating getPlayerRating(UUID mapId, UUID playerId) {
-        var rating = db.maps.getRating(mapId, playerId);
-        if (rating == null || rating < 0 || rating >= MapRating.UNKNOWN.ordinal())
-            return MapRating.UNRATED;
-        return MapRating.values()[rating];
+        return MapCompat.rating(db.maps.getRating(mapId, playerId));
     }
 
     @Override
     public void setPlayerRating(UUID mapId, UUID playerId, MapRating rating) {
         if (rating == MapRating.UNKNOWN) throw badRequest("invalid rating");
-        if (db.maps.getMap(mapId) == null) throw notFound("map not found");
-        db.maps.setRating(mapId, playerId, rating.ordinal());
+        db.tx(tx -> {
+            if (tx.maps.getMapForUpdate(mapId) == null) throw notFound("map not found");
+            var column = MapCompat.ratingColumn(rating);
+            if (column == null) tx.maps.deleteRating(mapId, playerId);
+            else tx.maps.setRating(mapId, playerId, column);
+            tx.maps.refreshLikes(mapId);
+        });
     }
 
     /// What [#beginVerification] answers without draining anything, or null for a map that is
@@ -869,9 +881,11 @@ public final class MapServiceImpl implements MapService {
             : update.created() != null
                 ? update.created()
                 : Instant.now().minus(Duration.ofMillis(update.playtime()));
-        var state = update.state() != null
-            ? update.state().toString().getBytes(StandardCharsets.UTF_8)
-            : existing != null ? existing.stateV2() : NO_STATE;
+        var state = completed
+            ? NO_STATE
+            : update.state() != null
+                ? update.state().toString().getBytes(StandardCharsets.UTF_8)
+                : existing != null ? existing.stateV2() : NO_STATE;
         var score = completed ? update.score() : existing != null ? existing.score() : null;
         if (completed && score == null && type != SaveStateType.EDITING)
             score = (double) Math.max(update.playtime(), update.ticks() * TICK_MILLIS);
@@ -885,11 +899,12 @@ public final class MapServiceImpl implements MapService {
             update.playtime(),
             (int) update.ticks(),
             score,
-            completed ? NO_STATE : state,
+            state,
             update.dataVersion(),
             update.protocolVersion(),
             update.resets(),
-            Math.max(update.totalPlaytime(), update.playtime())
+            Math.max(update.totalPlaytime(), update.playtime()),
+            MapCompat.jsonbOrNull(new String(state, StandardCharsets.UTF_8))
         );
     }
 

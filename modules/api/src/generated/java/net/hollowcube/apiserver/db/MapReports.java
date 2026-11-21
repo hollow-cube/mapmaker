@@ -12,8 +12,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `map_reports` table.
  */
-public record MapReports(int id, UUID mapId, UUID playerId, Instant time, List<Integer> categories,
-        @Nullable String comment) {
+public record MapReports(int id, UUID mapId, UUID playerId, Instant time,
+        List<MapReportCategory> categories, @Nullable String comment) {
     /**
      * Reads one `map_reports` row, its first column at `col`.
      */
@@ -23,7 +23,7 @@ public record MapReports(int id, UUID mapId, UUID playerId, Instant time, List<I
                 rs.getObject(col + 1, UUID.class),
                 rs.getObject(col + 2, UUID.class),
                 Jdbc.getInstant(rs, col + 3),
-                Jdbc.getList(rs, col + 4, Integer.class),
+                MapReportCategory.listFromPg(Jdbc.getList(rs, col + 4, String.class)),
                 rs.getString(col + 5));
     }
 }

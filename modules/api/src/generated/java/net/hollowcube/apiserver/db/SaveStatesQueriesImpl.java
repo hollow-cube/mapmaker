@@ -71,11 +71,15 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String UPSERT = """
         insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, ticks, score,
-                                 state_v2, data_version, protocol_version, resets, total_playtime)
+                                 state_v2, data_version, protocol_version, resets, total_playtime, created_at,
+                                 updated_at, state)
         values (?, ?, ?, ?, ?, now(), ?, ?, ?, ?, ?,
-                ?, ?, ?, ?)
+                ?, ?, ?, ?, ?, now(),
+                ?::text::jsonb)
         on conflict (id, map_id, player_id) do update
             set updated          = excluded.updated,
+                updated_at       = excluded.updated_at,
+                state            = excluded.state,
                 completed        = excluded.completed,
                 playtime         = excluded.playtime,
                 ticks            = excluded.ticks,
@@ -101,7 +105,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String DELETE_FOR_PLAYER = """
         update save_states
-        set deleted = now()
+        set deleted = now(), deleted_at = now()
         where deleted is null
           and map_id = ?
           and player_id = ?""";
@@ -110,7 +114,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         -- The maps touched, so their boards can drop the player.
         with deleted as (
             update save_states
-                set deleted = now()
+                set deleted = now(), deleted_at = now()
                 where deleted is null
                     and player_id = ?
                 returning map_id)
@@ -119,14 +123,14 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String DELETE_MAP = """
         update save_states
-        set deleted = now()
+        set deleted = now(), deleted_at = now()
         where deleted is null
           and map_id = ?""";
 
     private static final String UNDELETE_FOR_PLAYER = """
         with restored as (
             update save_states
-                set deleted = null
+                set deleted = null, deleted_at = null
                 where deleted is not null
                     and map_id = ?
                     and player_id = ?
@@ -140,7 +144,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         -- The maps touched, with how many runs came back on each.
         with restored as (
             update save_states
-                set deleted = null
+                set deleted = null, deleted_at = null
                 where deleted is not null
                     and player_id = ?
                     and (?::timestamptz is null or deleted >= ?)
@@ -153,7 +157,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
     private static final String UNDELETE_MAP = """
         with restored as (
             update save_states
-                set deleted = null
+                set deleted = null, deleted_at = null
                 where deleted is not null
                     and map_id = ?
                     and (?::timestamptz is null or deleted >= ?)
@@ -265,6 +269,8 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
                 ps.setInt(12, params.protocolVersion());
                 ps.setInt(13, params.resets());
                 ps.setLong(14, params.totalPlaytime());
+                Jdbc.setInstant(ps, 15, params.created());
+                ps.setObject(16, params.stateJson(), Types.VARCHAR);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);

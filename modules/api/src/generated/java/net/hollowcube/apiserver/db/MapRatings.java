@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `map_ratings` table.
  */
-public record MapRatings(UUID mapId, UUID playerId, int rating, @Nullable String comment) {
+public record MapRatings(UUID mapId, UUID playerId, MapRating rating, @Nullable String comment) {
     /**
      * Reads one `map_ratings` row, its first column at `col`.
      */
@@ -17,7 +17,7 @@ public record MapRatings(UUID mapId, UUID playerId, int rating, @Nullable String
         return new MapRatings(
                 rs.getObject(col, UUID.class),
                 rs.getObject(col + 1, UUID.class),
-                rs.getInt(col + 2),
+                MapRating.fromPg(rs.getString(col + 2)),
                 rs.getString(col + 3));
     }
 }

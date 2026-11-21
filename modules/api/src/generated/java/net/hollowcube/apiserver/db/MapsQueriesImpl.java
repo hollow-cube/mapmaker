@@ -5,6 +5,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -83,12 +84,11 @@ final class MapsQueriesImpl implements MapsQueries {
             for update""";
 
     private static final String CREATE_MAP = """
-        -- The columns Go's `CreateDefaultMap` fills, with its values: `m_type`, `authz_key`, `file_id` and
-        -- `legacy_map_id` are dead but not null.
-        insert into maps (id, owner, m_type, created_at, updated_at, authz_key, file_id, legacy_map_id,
-                          opt_name, opt_icon, opt_variant, opt_spawn_point, size, protocol_version)
-        values (?, ?, 'default', now(), now(), '', '', '', '', '', 'parkour',
-                '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', ?, ?)
+        insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
+                          protocol_version, name, icon, variant, spawn_point, size_class, verification_state, quality)
+        values (?, ?, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', ?,
+                ?, '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}',
+                (enum_range(null::map_size))[(?::int8 + 1)::int], 'unverified', 'unrated')
         returning maps.*""";
 
     private static final String INSERT_OWNER_SLOT = """
@@ -124,7 +124,15 @@ final class MapsQueriesImpl implements MapsQueries {
             listed           = ?,
             quality_override = ?,
             protocol_version = ?,
-            updated_at       = now()
+            updated_at       = now(),
+            name             = ?::varchar,
+            icon             = ?::varchar,
+            variant          = case when ?::varchar = any (enum_range(null::map_variant)::text[]) then ?::varchar::map_variant end,
+            subvariant       = case when ?::varchar = any (enum_range(null::map_subvariant)::text[]) then ?::varchar::map_subvariant end,
+            spawn_point      = ?,
+            extra            = ?::text::jsonb,
+            size_class       = (enum_range(null::map_size))[(?::int8 + 1)::int],
+            quality          = (enum_range(null::map_quality))[(?::int8 + 1)::int]
         where id = ?""";
 
     private static final String DELETE_TAGS = """
@@ -142,7 +150,7 @@ final class MapsQueriesImpl implements MapsQueries {
     private static final String DELETE_IN_PROGRESS_STATES = """
         -- A completed run is somebody's record and stays.
         update save_states
-        set deleted = now()
+        set deleted = now(), deleted_at = now()
         where map_id = ?
           and deleted is null
           and not completed
@@ -150,13 +158,13 @@ final class MapsQueriesImpl implements MapsQueries {
 
     private static final String DELETE_ALL_STATES = """
         update save_states
-        set deleted = now()
+        set deleted = now(), deleted_at = now()
         where map_id = ?
           and deleted is null""";
 
     private static final String DELETE_VERIFYING_STATES = """
         update save_states
-        set deleted = now()
+        set deleted = now(), deleted_at = now()
         where map_id = ?
           and type = 'verifying'
           and deleted is null""";
@@ -183,14 +191,16 @@ final class MapsQueriesImpl implements MapsQueries {
 
     private static final String UPDATE_VERIFICATION = """
         update maps
-        set verification = ?
+        set verification       = ?,
+            verification_state = (enum_range(null::map_verification))[(?::int8 + 1)::int]
         where id = ?""";
 
     private static final String MARK_VERIFIED = """
         -- A verifying run that finished; the map is stamped with the version that verified it.
         update maps
-        set verification     = ?,
-            protocol_version = ?
+        set verification       = ?,
+            verification_state = (enum_range(null::map_verification))[(?::int8 + 1)::int],
+            protocol_version   = ?
         where id = ?""";
 
     private static final String GET_LATEST_EDITING_TIME = """
@@ -283,6 +293,20 @@ final class MapsQueriesImpl implements MapsQueries {
         values (?, ?, ?)
         on conflict (map_id, player_id) do update
             set rating = excluded.rating""";
+
+    private static final String DELETE_RATING = """
+        delete
+        from map_ratings
+        where map_id = ?
+          and player_id = ?""";
+
+    private static final String REFRESH_LIKES = """
+        -- Run under the map's row lock, so a rating committed just before is always counted.
+        update maps
+        set total_likes = (select count(*) filter (where rating = 'liked') - count(*) filter (where rating = 'disliked')
+                           from map_ratings
+                           where map_id = ?)
+        where id = ?""";
 
     private static final String INSERT_REPORT = """
         insert into map_reports (map_id, player_id, time, categories, comment)
@@ -526,6 +550,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setObject(2, owner);
                 ps.setLong(3, size);
                 ps.setInt(4, protocolVersion);
+                ps.setLong(5, size);
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next() ? Maps.read(rs, 1) : null;
                 }
@@ -592,7 +617,17 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setBoolean(14, params.listed());
                 ps.setLong(15, params.quality());
                 ps.setInt(16, params.protocolVersion());
-                ps.setObject(17, params.mapId());
+                ps.setString(17, params.name());
+                ps.setString(18, params.icon());
+                ps.setString(19, params.variant());
+                ps.setString(20, params.variant());
+                ps.setString(21, params.subvariant());
+                ps.setString(22, params.subvariant());
+                Jdbc.setInferred(ps, 23, params.spawnPoint());
+                ps.setObject(24, params.extraJson(), Types.VARCHAR);
+                ps.setLong(25, params.size());
+                ps.setLong(26, params.quality());
+                ps.setObject(27, params.mapId());
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -753,7 +788,8 @@ final class MapsQueriesImpl implements MapsQueries {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(UPDATE_VERIFICATION)) {
                 ps.setLong(1, verification);
-                ps.setObject(2, mapId);
+                ps.setLong(2, verification);
+                ps.setObject(3, mapId);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -769,8 +805,9 @@ final class MapsQueriesImpl implements MapsQueries {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(MARK_VERIFIED)) {
                 ps.setLong(1, verification);
-                ps.setInt(2, protocolVersion);
-                ps.setObject(3, mapId);
+                ps.setLong(2, verification);
+                ps.setInt(3, protocolVersion);
+                ps.setObject(4, mapId);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -984,14 +1021,14 @@ final class MapsQueriesImpl implements MapsQueries {
 
     @Nullable
     @Override
-    public Integer getRating(UUID mapId, UUID playerId) {
+    public MapRating getRating(UUID mapId, UUID playerId) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(GET_RATING)) {
                 ps.setObject(1, mapId);
                 ps.setObject(2, playerId);
                 try (ResultSet rs = ps.executeQuery()) {
-                    return rs.next() ? rs.getInt(1) : null;
+                    return rs.next() ? MapRating.fromPg(rs.getString(1)) : null;
                 }
             } finally {
                 source.release(conn);
@@ -1002,13 +1039,13 @@ final class MapsQueriesImpl implements MapsQueries {
     }
 
     @Override
-    public long setRating(UUID mapId, UUID playerId, int rating) {
+    public long setRating(UUID mapId, UUID playerId, MapRating rating) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(SET_RATING)) {
                 ps.setObject(1, mapId);
                 ps.setObject(2, playerId);
-                ps.setInt(3, rating);
+                Jdbc.setInferred(ps, 3, rating.pgLabel());
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -1019,13 +1056,46 @@ final class MapsQueriesImpl implements MapsQueries {
     }
 
     @Override
-    public long insertReport(UUID mapId, UUID playerId, List<Integer> categories, String comment) {
+    public long deleteRating(UUID mapId, UUID playerId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(DELETE_RATING)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, playerId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long refreshLikes(UUID mapId) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(REFRESH_LIKES)) {
+                ps.setObject(1, mapId);
+                ps.setObject(2, mapId);
+                return ps.executeLargeUpdate();
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public long insertReport(UUID mapId, UUID playerId, List<MapReportCategory> categories,
+            String comment) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(INSERT_REPORT)) {
                 ps.setObject(1, mapId);
                 ps.setObject(2, playerId);
-                Jdbc.setList(ps, 3, "int4", categories);
+                Jdbc.setList(ps, 3, "map_report_category", MapReportCategory.pgLabels(categories));
                 ps.setString(4, comment);
                 return ps.executeLargeUpdate();
             } finally {
@@ -1053,7 +1123,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(i++, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.SearchMapsRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 35, String.class), rs.getLong(36), rs.getLong(37), rs.getLong(38)));
+                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 44, String.class), rs.getLong(45), rs.getLong(46), rs.getLong(47)));
                     return rows;
                 }
             } finally {
@@ -1096,7 +1166,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(3, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.ListPlayerHistoryRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 35, String.class), rs.getLong(36), rs.getLong(37), rs.getLong(38)));
+                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 44, String.class), rs.getLong(45), rs.getLong(46), rs.getLong(47)));
                     return rows;
                 }
             } finally {

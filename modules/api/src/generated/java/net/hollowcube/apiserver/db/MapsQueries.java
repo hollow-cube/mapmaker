@@ -93,11 +93,16 @@ public interface MapsQueries {
     long insertNotification(UUID id, UUID playerId, String type, String key, String data);
 
     @Nullable
-    Integer getRating(UUID mapId, UUID playerId);
+    MapRating getRating(UUID mapId, UUID playerId);
 
-    long setRating(UUID mapId, UUID playerId, int rating);
+    long setRating(UUID mapId, UUID playerId, MapRating rating);
 
-    long insertReport(UUID mapId, UUID playerId, List<Integer> categories, String comment);
+    long deleteRating(UUID mapId, UUID playerId);
+
+    long refreshLikes(UUID mapId);
+
+    long insertReport(UUID mapId, UUID playerId, List<MapReportCategory> categories,
+            String comment);
 
     List<SearchMapsRow> searchMaps(long offset, long limit, @Nullable SqlFragment where,
             @Nullable SqlFragment orderBy);
@@ -112,7 +117,7 @@ public interface MapsQueries {
     record UpdateMapParams(String name, String icon, long size, String variant, String subvariant,
             String spawnPoint, String leaderboard, byte[] extra, boolean onlySprint,
             boolean noSprint, boolean noJump, boolean noSneak, boolean boat, boolean listed,
-            long quality, int protocolVersion, UUID mapId) {
+            long quality, int protocolVersion, @Nullable String extraJson, UUID mapId) {
     }
 
     /**
@@ -342,17 +347,27 @@ public interface MapsQueries {
 
         @Nullable
         @Override
-        public Integer getRating(UUID mapId, UUID playerId) {
+        public MapRating getRating(UUID mapId, UUID playerId) {
             throw new UnsupportedOperationException("MapsQueries.getRating is not stubbed on this fake");
         }
 
         @Override
-        public long setRating(UUID mapId, UUID playerId, int rating) {
+        public long setRating(UUID mapId, UUID playerId, MapRating rating) {
             throw new UnsupportedOperationException("MapsQueries.setRating is not stubbed on this fake");
         }
 
         @Override
-        public long insertReport(UUID mapId, UUID playerId, List<Integer> categories,
+        public long deleteRating(UUID mapId, UUID playerId) {
+            throw new UnsupportedOperationException("MapsQueries.deleteRating is not stubbed on this fake");
+        }
+
+        @Override
+        public long refreshLikes(UUID mapId) {
+            throw new UnsupportedOperationException("MapsQueries.refreshLikes is not stubbed on this fake");
+        }
+
+        @Override
+        public long insertReport(UUID mapId, UUID playerId, List<MapReportCategory> categories,
                 String comment) {
             throw new UnsupportedOperationException("MapsQueries.insertReport is not stubbed on this fake");
         }

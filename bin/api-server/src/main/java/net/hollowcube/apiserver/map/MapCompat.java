@@ -15,6 +15,8 @@ import net.hollowcube.ipc.map.MapData;
 import net.hollowcube.ipc.map.MapDifficulty;
 import net.hollowcube.ipc.map.MapLeaderboard;
 import net.hollowcube.ipc.map.MapQuality;
+import net.hollowcube.ipc.map.MapRating;
+import net.hollowcube.ipc.map.MapReportCategory;
 import net.hollowcube.ipc.map.MapSize;
 import net.hollowcube.ipc.map.MapVariant;
 import net.hollowcube.ipc.map.MapVerification;
@@ -123,6 +125,43 @@ final class MapCompat {
             case "building" -> MapVariant.BUILDING;
             case "freeform" -> MapVariant.FREEFORM;
             case null, default -> MapVariant.PARKOUR;
+        };
+    }
+
+    /// The document for a jsonb column, or null for one jsonb refuses: it cannot hold a `\u0000`
+    /// escape, and that is a hard error no `pg_input_is_valid` guard catches.
+    static @Nullable String jsonbOrNull(String json) {
+        return json.contains("\\u0000") ? null : json;
+    }
+
+    static MapRating rating(net.hollowcube.apiserver.db.@Nullable MapRating rating) {
+        return switch (rating) {
+            case LIKED -> MapRating.LIKED;
+            case DISLIKED -> MapRating.DISLIKED;
+            case null -> MapRating.UNRATED;
+        };
+    }
+
+    /// Null for [MapRating#UNRATED], which is stored as no row.
+    static net.hollowcube.apiserver.db.@Nullable MapRating ratingColumn(MapRating rating) {
+        return switch (rating) {
+            case LIKED -> net.hollowcube.apiserver.db.MapRating.LIKED;
+            case DISLIKED -> net.hollowcube.apiserver.db.MapRating.DISLIKED;
+            case UNRATED -> null;
+            case UNKNOWN -> throw badRequest("invalid rating");
+        };
+    }
+
+    static net.hollowcube.apiserver.db.MapReportCategory reportCategoryColumn(MapReportCategory category) {
+        return switch (category) {
+            case CHEATED -> net.hollowcube.apiserver.db.MapReportCategory.CHEATED;
+            case DISCRIMINATION -> net.hollowcube.apiserver.db.MapReportCategory.DISCRIMINATION;
+            case EXPLICIT_CONTENT -> net.hollowcube.apiserver.db.MapReportCategory.EXPLICIT_CONTENT;
+            case SPAM -> net.hollowcube.apiserver.db.MapReportCategory.SPAM;
+            case DMCA -> net.hollowcube.apiserver.db.MapReportCategory.DMCA;
+            case TROLL -> net.hollowcube.apiserver.db.MapReportCategory.TROLL;
+            case UNPLAYABLE -> net.hollowcube.apiserver.db.MapReportCategory.UNPLAYABLE;
+            case UNKNOWN -> throw badRequest("invalid report categories");
         };
     }
 

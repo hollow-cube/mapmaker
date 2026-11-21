@@ -12,16 +12,20 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `maps` table.
  */
-public record Maps(UUID id, UUID owner, String mType, Instant createdAt, Instant updatedAt,
-        @Nullable Long verification, @Nullable String authzKey, String fileId,
-        @Nullable String legacyMapId, @Nullable Long publishedId, @Nullable Instant publishedAt,
-        @Nullable Long qualityOverride, @Nullable String optName, @Nullable String optIcon,
-        long size, String optVariant, @Nullable String optSubvariant, String optSpawnPoint,
-        @Nullable Boolean optOnlySprint, @Nullable Boolean optNoSprint, @Nullable Boolean optNoJump,
-        @Nullable Boolean optNoSneak, @Nullable Boolean optBoat, @Nullable byte[] optExtra,
-        @Nullable List<String> optTags, String ext, @Nullable Instant deletedAt,
-        @Nullable UUID deletedBy, @Nullable String deletedReason, @Nullable Integer protocolVersion,
-        @Nullable UUID contest, boolean listed, int totalLikes, @Nullable String leaderboard) {
+public record Maps(UUID id, UUID owner, @Nullable String mType, Instant createdAt,
+        Instant updatedAt, @Nullable Long verification, @Nullable String authzKey,
+        @Nullable String fileId, @Nullable String legacyMapId, @Nullable Long publishedId,
+        @Nullable Instant publishedAt, @Nullable Long qualityOverride, @Nullable String optName,
+        @Nullable String optIcon, long size, String optVariant, @Nullable String optSubvariant,
+        String optSpawnPoint, @Nullable Boolean optOnlySprint, @Nullable Boolean optNoSprint,
+        @Nullable Boolean optNoJump, @Nullable Boolean optNoSneak, @Nullable Boolean optBoat,
+        @Nullable byte[] optExtra, @Nullable List<String> optTags, String ext,
+        @Nullable Instant deletedAt, @Nullable UUID deletedBy, @Nullable String deletedReason,
+        @Nullable Integer protocolVersion, @Nullable UUID contest, boolean listed, int totalLikes,
+        @Nullable String leaderboard, @Nullable String name, @Nullable String icon,
+        @Nullable MapVariant variant, @Nullable MapSubvariant subvariant,
+        @Nullable String spawnPoint, @Nullable String extra, @Nullable MapSize sizeClass,
+        @Nullable MapVerification verificationState, @Nullable MapQuality quality) {
     /**
      * Reads one `maps` row, its first column at `col`.
      */
@@ -60,6 +64,15 @@ public record Maps(UUID id, UUID owner, String mType, Instant createdAt, Instant
                 rs.getObject(col + 30, UUID.class),
                 rs.getBoolean(col + 31),
                 rs.getInt(col + 32),
-                rs.getString(col + 33));
+                rs.getString(col + 33),
+                rs.getString(col + 34),
+                rs.getString(col + 35),
+                MapVariant.fromPg(rs.getString(col + 36)),
+                MapSubvariant.fromPg(rs.getString(col + 37)),
+                rs.getString(col + 38),
+                rs.getString(col + 39),
+                MapSize.fromPg(rs.getString(col + 40)),
+                MapVerification.fromPg(rs.getString(col + 41)),
+                MapQuality.fromPg(rs.getString(col + 42)));
     }
 }

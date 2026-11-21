@@ -6,16 +6,22 @@ import java.util.List;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * The `api_client_kind` Postgres enum.
+ * The `map_size` Postgres enum.
  */
-public enum ApiClientKind {
-    WEB("web"),
+public enum MapSize {
+    NORMAL("normal"),
 
-    DESKTOP("desktop");
+    LARGE("large"),
+
+    MASSIVE("massive"),
+
+    COLOSSAL("colossal"),
+
+    UNLIMITED("unlimited");
 
     private final String pgLabel;
 
-    ApiClientKind(String pgLabel) {
+    MapSize(String pgLabel) {
         this.pgLabel = pgLabel;
     }
 
@@ -27,27 +33,27 @@ public enum ApiClientKind {
     }
 
     @Nullable
-    public static ApiClientKind fromPg(@Nullable String label) {
+    public static MapSize fromPg(@Nullable String label) {
         if (label == null) return null;
-        for (ApiClientKind value : values()) {
+        for (MapSize value : values()) {
             if (value.pgLabel.equals(label)) return value;
         }
-        throw new IllegalArgumentException("unknown api_client_kind label: " + label);
+        throw new IllegalArgumentException("unknown map_size label: " + label);
     }
 
     @Nullable
-    public static List<ApiClientKind> listFromPg(@Nullable List<String> labels) {
+    public static List<MapSize> listFromPg(@Nullable List<String> labels) {
         if (labels == null) return null;
-        List<ApiClientKind> values = new ArrayList<>(labels.size());
+        List<MapSize> values = new ArrayList<>(labels.size());
         for (String label : labels) values.add(fromPg(label));
         return values;
     }
 
     @Nullable
-    public static List<String> pgLabels(@Nullable List<ApiClientKind> values) {
+    public static List<String> pgLabels(@Nullable List<MapSize> values) {
         if (values == null) return null;
         List<String> labels = new ArrayList<>(values.size());
-        for (ApiClientKind value : values) labels.add(value == null ? null : value.pgLabel);
+        for (MapSize value : values) labels.add(value == null ? null : value.pgLabel);
         return labels;
     }
 }

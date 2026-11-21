@@ -26,8 +26,10 @@ final class MapSearchSql {
     /// The view's difficulty bucket, which reads the `map_stats` join the query already makes.
     private static final String DIFFICULTY = "(case"
         + " when coalesce(stats.play_count, 0) < 10 then -1"
-        + " when stats.clear_rate < 0.05 then 4" + " when stats.clear_rate < 0.25 then 3"
-        + " when stats.clear_rate < 0.5 then 2" + " when stats.clear_rate < 0.75 then 1"
+        + " when stats.win_count < 0.05 * stats.play_count then 4"
+        + " when stats.win_count < 0.25 * stats.play_count then 3"
+        + " when stats.win_count < 0.5 * stats.play_count then 2"
+        + " when stats.win_count < 0.75 * stats.play_count then 1"
         + " else 0 end)";
 
     private MapSearchSql() {}

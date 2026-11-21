@@ -63,12 +63,11 @@ order by id
     for update;
 
 -- name: createMap :one
--- The columns Go's `CreateDefaultMap` fills, with its values: `m_type`, `authz_key`, `file_id` and
--- `legacy_map_id` are dead but not null.
-insert into maps (id, owner, m_type, created_at, updated_at, authz_key, file_id, legacy_map_id,
-                  opt_name, opt_icon, opt_variant, opt_spawn_point, size, protocol_version)
-values ($mapId, $owner, 'default', now(), now(), '', '', '', '', '', 'parkour',
-        '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', $size, $protocolVersion)
+insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
+                  protocol_version, name, icon, variant, spawn_point, size_class, verification_state, quality)
+values ($mapId, $owner, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', $size,
+        $protocolVersion, '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}',
+        (enum_range(null::map_size))[($size::int8 + 1)::int], 'unverified', 'unrated')
 returning maps.*;
 
 -- name: insertOwnerSlot :exec
@@ -88,6 +87,7 @@ where s.player_id = $playerId
   and m.published_at is null;
 
 -- name: updateMap :exec
+-- nullable: $extraJson
 update maps
 set opt_name         = $name,
     opt_icon         = $icon,
@@ -105,7 +105,15 @@ set opt_name         = $name,
     listed           = $listed,
     quality_override = $quality,
     protocol_version = $protocolVersion,
-    updated_at       = now()
+    updated_at       = now(),
+    name             = $name::varchar,
+    icon             = $icon::varchar,
+    variant          = case when $variant::varchar = any (enum_range(null::map_variant)::text[]) then $variant::varchar::map_variant end,
+    subvariant       = case when $subvariant::varchar = any (enum_range(null::map_subvariant)::text[]) then $subvariant::varchar::map_subvariant end,
+    spawn_point      = $spawnPoint,
+    extra            = $extraJson::text::jsonb,
+    size_class       = (enum_range(null::map_size))[($size::int8 + 1)::int],
+    quality          = (enum_range(null::map_quality))[($quality::int8 + 1)::int]
 where id = $mapId;
 
 -- name: deleteTags :exec
@@ -124,7 +132,7 @@ select unnest(enum_range(null::map_tag))::text as tag;
 -- name: deleteInProgressStates :exec
 -- A completed run is somebody's record and stays.
 update save_states
-set deleted = now()
+set deleted = now(), deleted_at = now()
 where map_id = $mapId
   and deleted is null
   and not completed
@@ -132,13 +140,13 @@ where map_id = $mapId
 
 -- name: deleteAllStates :exec
 update save_states
-set deleted = now()
+set deleted = now(), deleted_at = now()
 where map_id = $mapId
   and deleted is null;
 
 -- name: deleteVerifyingStates :exec
 update save_states
-set deleted = now()
+set deleted = now(), deleted_at = now()
 where map_id = $mapId
   and type = 'verifying'
   and deleted is null;
@@ -165,14 +173,16 @@ returning maps.*;
 
 -- name: updateVerification :exec
 update maps
-set verification = $verification
+set verification       = $verification,
+    verification_state = (enum_range(null::map_verification))[($verification::int8 + 1)::int]
 where id = $mapId;
 
 -- name: markVerified :exec
 -- A verifying run that finished; the map is stamped with the version that verified it.
 update maps
-set verification     = $verification,
-    protocol_version = $protocolVersion
+set verification       = $verification,
+    verification_state = (enum_range(null::map_verification))[($verification::int8 + 1)::int],
+    protocol_version   = $protocolVersion
 where id = $mapId;
 
 -- name: getLatestEditingTime :one
@@ -266,6 +276,20 @@ insert into map_ratings (map_id, player_id, rating)
 values ($mapId, $playerId, $rating)
 on conflict (map_id, player_id) do update
     set rating = excluded.rating;
+
+-- name: deleteRating :exec
+delete
+from map_ratings
+where map_id = $mapId
+  and player_id = $playerId;
+
+-- name: refreshLikes :exec
+-- Run under the map's row lock, so a rating committed just before is always counted.
+update maps
+set total_likes = (select count(*) filter (where rating = 'liked') - count(*) filter (where rating = 'disliked')
+                   from map_ratings
+                   where map_id = $mapId)
+where id = $mapId;
 
 -- name: insertReport :exec
 insert into map_reports (map_id, player_id, time, categories, comment)

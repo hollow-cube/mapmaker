@@ -795,6 +795,7 @@ class MapServiceImplTest {
             clients.redis.deleted
         );
         assertEquals(2, count("select count(*) from save_states where deleted is null"));
+        assertEquals(0, count("select count(*) from save_states where deleted is distinct from deleted_at"));
     }
 
     @Test
@@ -899,6 +900,49 @@ class MapServiceImplTest {
         client.report(id, BUILDER, List.of(MapReportCategory.SPAM), "spam");
         assertEquals(MapRating.DISLIKED, client.getPlayerRating(id, BUILDER));
         assertEquals(2, count("select count(*) from map_reports"));
+    }
+
+    @Test
+    void setPlayerRating_keepsTotalLikesAndStoresUnratedAsNoRow() {
+        var id = create(OWNER).id();
+        client.setPlayerRating(id, OWNER, MapRating.LIKED);
+        client.setPlayerRating(id, BUILDER, MapRating.LIKED);
+        assertEquals(2, count("select total_likes from maps where id = '" + id + "'"));
+        client.setPlayerRating(id, BUILDER, MapRating.DISLIKED);
+        assertEquals(MapRating.DISLIKED, client.getPlayerRating(id, BUILDER));
+        assertEquals(0, count("select total_likes from maps where id = '" + id + "'"));
+        client.setPlayerRating(id, BUILDER, MapRating.UNRATED);
+        assertEquals(MapRating.UNRATED, client.getPlayerRating(id, BUILDER));
+        assertEquals(1, count("select total_likes from maps where id = '" + id + "'"));
+        assertEquals(1, count("select count(*) from map_ratings"));
+    }
+
+    @Test
+    void update_mirrorsIntoTheNewColumns() {
+        var id = create(OWNER).id();
+        var mirrored = """
+            select count(*) from maps
+            where name = opt_name and icon = opt_icon and variant::text = opt_variant
+              and subvariant is not distinct from opt_subvariant::map_subvariant
+              and spawn_point = opt_spawn_point
+              and extra is not distinct from convert_from(opt_extra, 'UTF8')::jsonb
+              and size_class = (enum_range(null::map_size))[size + 1]
+              and quality = (enum_range(null::map_quality))[quality_override + 1]
+              and verification_state = (enum_range(null::map_verification))[verification + 1]
+            """;
+        assertEquals(1, count(mirrored));
+        var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
+        patch.setName("named");
+        patch.setSubVariant("speedrun");
+        patch.setSize(MapSize.LARGE);
+        patch.setQualityOverride(MapQuality.GREAT);
+        client.update(id, patch.build());
+        client.update(id, patch(null, null, null, "{\"custom\":1}"));
+        assertEquals(1, count(mirrored));
+        assertEquals("speedrun", column("select subvariant from maps"));
+
+        client.update(id, patch(null, null, null, "{\"custom\":\"a\\u0000b\"}"));
+        assertEquals(1, count("select count(*) from maps where extra is null and opt_extra is not null"));
     }
 
     @Test
