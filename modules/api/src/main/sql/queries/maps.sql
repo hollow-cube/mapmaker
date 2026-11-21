@@ -155,11 +155,6 @@ delete
 from map_slots
 where map_id = $mapId;
 
--- name: removeLegacyBuilders :exec
-delete
-from map_builders
-where map_id = $mapId;
-
 -- name: publishMap :one
 update maps
 set published_id = $publishedId,

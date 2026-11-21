@@ -1,4 +1,3 @@
--- Describe-time mirror of Go migrations, preserving physical column order. Nothing to apply.
 create table if not exists maps
 (
     id               uuid primary key,

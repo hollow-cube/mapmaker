@@ -38,6 +38,19 @@ application {
     applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-local.xml")
 }
 
+// Applies modules/api's migrations to DATABASE_URL, or the compose postgres when it is unset.
+// `-Pbaseline=N` records 0001..N as applied without running them.
+tasks.register<JavaExec>("migrate") {
+    group = "database"
+    description = "Applies the api database migrations to DATABASE_URL."
+    classpath = sourceSets.main.get().runtimeClasspath
+    mainClass = "net.hollowcube.apiserver.Migrate"
+    jvmArgs("-Dlogback.configurationFile=logback-local.xml")
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    args(layout.projectDirectory.dir("../../modules/api/src/main/sql/migrations").asFile.normalize().path)
+    providers.gradleProperty("baseline").orNull?.let { args("--baseline", it) }
+}
+
 graalvmNative {
     // pgjdbc and Hikari both need reflection config that neither ships in its own jar.
     metadataRepository {

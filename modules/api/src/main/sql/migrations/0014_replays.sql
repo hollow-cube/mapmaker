@@ -1,10 +1,3 @@
--- The Go api-server's replay storage, as its `internal/mapdb` migrations 000034 and 000035 leave
--- the tables. Go owns the schema; this is what the queries here are described against, and has to
--- be kept in step with it by hand. Nothing to apply.
---
--- A replay is a preamble plus a run of immutable segments while recording, and one compacted object
--- once it is done. `recording_revision` counts only the commits that appended, which is what a
--- segment's `commit_revision` points back at.
 create table if not exists replays
 (
     id                        text        primary key,
@@ -53,13 +46,6 @@ create table if not exists replays
         )
 );
 
--- `data` and `object_reference` are exactly-one: a segment under the inline threshold is a column
--- of this row, and anything larger is an object. The read path branches on which is populated and
--- never on the current threshold, so moving the threshold cannot misroute an older segment.
---
--- Written as Go's two migrations rather than as the table they add up to. `data` was added by the
--- second, and Postgres appends an added column: flattening this would put `data` in the middle here
--- and at the end in production, and `select replay_segments.*` is read by column position.
 create table if not exists replay_segments
 (
     replay_id        text   not null references replays (id) on delete cascade,
@@ -86,8 +72,6 @@ alter table replay_segments
 alter table replay_segments
     add constraint replay_segment_storage_exclusive check ((data is null) <> (object_reference is null));
 
--- One row per successful write, so a recorder that lost the response can send the same request
--- again and be told what it was told the first time.
 create table if not exists replay_idempotency
 (
     replay_id           text        not null references replays (id) on delete cascade,

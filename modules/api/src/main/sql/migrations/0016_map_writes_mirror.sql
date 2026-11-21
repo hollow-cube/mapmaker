@@ -1,4 +1,3 @@
--- Describe-time mirror of existing Go objects. Nothing to apply.
 create table if not exists save_states
 (
     id        uuid        not null,

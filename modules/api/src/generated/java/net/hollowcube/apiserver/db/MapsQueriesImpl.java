@@ -173,11 +173,6 @@ final class MapsQueriesImpl implements MapsQueries {
         from map_slots
         where map_id = ?""";
 
-    private static final String REMOVE_LEGACY_BUILDERS = """
-        delete
-        from map_builders
-        where map_id = ?""";
-
     private static final String PUBLISH_MAP = """
         update maps
         set published_id = ?,
@@ -723,21 +718,6 @@ final class MapsQueriesImpl implements MapsQueries {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(REMOVE_SLOTS)) {
-                ps.setObject(1, mapId);
-                return ps.executeLargeUpdate();
-            } finally {
-                source.release(conn);
-            }
-        } catch (SQLException e) {
-            throw Sneaky.rethrow(e);
-        }
-    }
-
-    @Override
-    public long removeLegacyBuilders(UUID mapId) {
-        try {
-            Connection conn = source.acquire();
-            try (PreparedStatement ps = conn.prepareStatement(REMOVE_LEGACY_BUILDERS)) {
                 ps.setObject(1, mapId);
                 return ps.executeLargeUpdate();
             } finally {

@@ -1,3 +1,5 @@
+import java.time.Duration
+
 plugins {
     `java-library`
 }
@@ -48,4 +50,10 @@ tasks.withType<Test> {
     systemProperty("minestom.inside-test", "true")
 
     jvmArgs("--sun-misc-unsafe-memory-access=allow")
+
+    // A test that blocks (a dead socket, a missed latch) fails instead of stalling the run. The
+    // thread mode is what makes the timeout fire on a test stuck in uninterruptible I/O.
+    systemProperty("junit.jupiter.execution.timeout.default", "30s")
+    systemProperty("junit.jupiter.execution.timeout.thread.mode.default", "SEPARATE_THREAD")
+    timeout = Duration.ofMinutes(5)
 }

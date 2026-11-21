@@ -61,8 +61,6 @@ public interface MapsQueries {
 
     long removeSlots(UUID mapId);
 
-    long removeLegacyBuilders(UUID mapId);
-
     @Nullable
     Maps publishMap(long publishedId, UUID mapId);
 
@@ -265,11 +263,6 @@ public interface MapsQueries {
         @Override
         public long removeSlots(UUID mapId) {
             throw new UnsupportedOperationException("MapsQueries.removeSlots is not stubbed on this fake");
-        }
-
-        @Override
-        public long removeLegacyBuilders(UUID mapId) {
-            throw new UnsupportedOperationException("MapsQueries.removeLegacyBuilders is not stubbed on this fake");
         }
 
         @Nullable

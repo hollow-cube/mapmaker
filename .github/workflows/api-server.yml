@@ -128,9 +128,58 @@ jobs:
           name: api-server-java
           path: "bin/api-server/deploy/helm-chart"
 
+  # Runs between the image being built and it being deployed, so a failed migration stops the
+  # deploy. The binary still running at that point must cope with the migrated schema: renames and
+  # drops go in two deploys.
+  migrate:
+    needs: [ docker-build, helm-build ]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Import Secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: global/github
+      - name: Import database secrets
+        uses: hollow-cube/actions/secrets@main
+        with:
+          token: ${{ secrets.VAULT_TOKEN }}
+          path: prod/api-server
+      - name: Tailscale
+        uses: tailscale/github-action@main
+        with:
+          oauth-client-id: ${{ env.TAILSCALE_OAUTH_KEY }}
+          oauth-secret: ${{ env.TAILSCALE_OAUTH_SECRET }}
+          tags: tag:ci
+          version: 1.52.0
+
+      - uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+      - uses: actions/setup-java@v5
+        with:
+          java-version: '25'
+          distribution: 'graalvm'
+          cache: 'gradle'
+
+      - name: Migrate
+        run: |
+          set -euo pipefail
+          tailscale configure kubeconfig prod-v3
+          kubectl -n mapmaker port-forward svc/postgres-v1-rw 15432:5432 >/dev/null &
+          trap 'kill $!' EXIT
+          for _ in $(seq 1 30); do (echo > /dev/tcp/127.0.0.1/15432) 2>/dev/null && break; sleep 1; done
+
+          # The stored uri names the in-cluster service; the forward is what reaches it from here.
+          url=$(python3 -c 'import os, urllib.parse as u; p = u.urlsplit(os.environ["POSTGRES_MAPS_URI"]); \
+            auth = p.netloc.rpartition("@")[0]; \
+            print(u.urlunsplit(p._replace(netloc=(auth + "@" if auth else "") + "127.0.0.1:15432")))')
+          echo "::add-mask::$url"
+          DATABASE_URL="$url" ./gradlew :bin:api-server:migrate --no-daemon
+
   helm-deploy:
     name: Deploy API Server
-    needs: [ docker-build, helm-build ]
+    needs: [ docker-build, helm-build, migrate ]
     runs-on: ubuntu-latest
     steps:
       - name: Helm deploy

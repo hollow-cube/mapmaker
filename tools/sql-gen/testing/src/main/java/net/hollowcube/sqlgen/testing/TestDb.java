@@ -1,5 +1,6 @@
 package net.hollowcube.sqlgen.testing;
 
+import net.hollowcube.sqlgen.runtime.Migrator;
 import org.junit.jupiter.api.extension.AfterEachCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.BeforeEachCallback;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
@@ -135,13 +137,18 @@ public final class TestDb implements BeforeAllCallback, BeforeEachCallback, Afte
         try {
             // pglite4j keys its in-memory databases on the URL host and keeps each alive for the
             // life of the JVM, so one name per migration set gives one boot per set and no leak.
+            // pglite4j's backend can die mid-protocol, and pgjdbc would then wait on the socket
+            // forever, outside any test's timeout; a read timeout turns that into a failure.
+            var props = new Properties();
+            props.setProperty("socketTimeout", "10");
             var conn = DriverManager.getConnection("jdbc:pglite:memory://testdb-"
-                + Integer.toHexString(migrations.toString().hashCode()));
+                + Integer.toHexString(migrations.toString().hashCode()), props);
             try (Statement st = conn.createStatement()) {
                 // pglite4j sessions start with search_path at pg_catalog, so unqualified DDL would
                 // land in the system schema.
                 st.execute("set search_path to public");
-                for (var file : sqlFiles(migrations)) st.execute(Files.readString(file));
+                for (var file : sqlFiles(migrations))
+                    for (var statement : Migrator.statements(Files.readString(file))) st.execute(statement);
             }
             return new Instance(conn, userTables(conn));
         } catch (IOException e) {

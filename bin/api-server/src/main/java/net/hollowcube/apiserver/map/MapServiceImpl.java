@@ -294,7 +294,6 @@ public final class MapServiceImpl implements MapService {
             tx.maps.deleteAllStates(mapId);
             tx.maps.deleteMap(actorId, reasonRequired ? reason : USER_DELETION, mapId);
             tx.maps.removeSlots(mapId);
-            tx.maps.removeLegacyBuilders(mapId);
             deleteInvites(tx, mapId, null);
             tx.afterCommit(
                 () -> nats.publish(MAP_DELETE_SUBJECT, mapEvent(MAP_ACTION_DELETE, mapId))

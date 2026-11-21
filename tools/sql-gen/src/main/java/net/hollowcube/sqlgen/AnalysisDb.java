@@ -1,5 +1,7 @@
 package net.hollowcube.sqlgen;
 
+import net.hollowcube.sqlgen.runtime.Migrator;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -69,7 +71,7 @@ final class AnalysisDb implements AutoCloseable {
             st.execute("set search_path to public");
             for (var file : files) {
                 try {
-                    st.execute(Files.readString(file));
+                    for (var statement : Migrator.statements(Files.readString(file))) st.execute(statement);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 } catch (SQLException e) {

@@ -1,3 +1,5 @@
+import java.time.Duration
+
 plugins {
     java
     application
@@ -49,4 +51,12 @@ tasks.shadowJar {
         // duh, why anyone would want to exclude service files idk
         duplicatesStrategy = DuplicatesStrategy.INCLUDE
     }
+}
+
+tasks.withType<Test> {
+    // A test that blocks (a dead socket, a missed latch) fails instead of stalling the run. The
+    // thread mode is what makes the timeout fire on a test stuck in uninterruptible I/O.
+    systemProperty("junit.jupiter.execution.timeout.default", "30s")
+    systemProperty("junit.jupiter.execution.timeout.thread.mode.default", "SEPARATE_THREAD")
+    timeout = Duration.ofMinutes(5)
 }

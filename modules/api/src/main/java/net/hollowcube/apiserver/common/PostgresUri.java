@@ -10,6 +10,9 @@ import java.net.URI;
 ///
 /// A `jdbc:` URL is taken as already being one and passed through untouched.
 public record PostgresUri(String jdbcUrl, @Nullable String user, @Nullable String password) {
+    public static final String LOCAL_DEV =
+        "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable";
+
     private static final String JDBC_PREFIX = "jdbc:postgresql://";
 
     public static PostgresUri parse(String uri) {

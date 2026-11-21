@@ -1,5 +1,3 @@
--- One row per full world save. The object is `worlds/{hex sha256}` in the world store bucket and is
--- shared by every row, of any map, with that digest. A map's head is its row with the highest id.
 create table map_world_versions
 (
     map_id     uuid        not null,

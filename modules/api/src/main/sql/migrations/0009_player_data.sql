@@ -1,10 +1,3 @@
--- The Go api-server's player data, transcribed from its `internal/playerdb` migrations in the
--- order they ran, because `select player_data.*` reads columns by position and the production table
--- has the columns in the order the alters added them. Go owns the schema; this has to be kept in
--- step with it by hand. It lives in the players database, not the one every other table here is in.
-
--- 000001_init (the columns that survive; `ip_history` was dropped by 000004 and its position is a
--- hole in production, which is why it is created and dropped here too).
 create table if not exists player_data
 (
     id           uuid          not null primary key,

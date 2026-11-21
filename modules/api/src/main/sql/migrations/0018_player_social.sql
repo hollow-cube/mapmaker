@@ -1,8 +1,3 @@
--- The Go api-server's ip history and relationship tables, as its `internal/playerdb` migrations
--- 000003 and 000008 leave them (`player_notifications` is mirrored in 0016). Go owns the schema; this is what the queries
--- here are described against, and has to be kept in step with it by hand.
---
--- The legacy ip_history timestamps are converted to timestamptz in 0020.
 create table if not exists ip_history
 (
     player_id  uuid      not null references player_data (id),

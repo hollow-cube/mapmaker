@@ -1,0 +1,10 @@
+drop table if exists obungus_box_ratings;
+drop table if exists obungus_pending_boxes;
+drop table if exists map_player_data;
+drop table map_builders;
+drop table if exists map_orgs;
+drop table if exists player_backpack;
+drop table if exists vote_events;
+drop table if exists "map-service_migrations";
+drop table if exists "player-service_migrations";
+drop table if exists "session-service_migrations";

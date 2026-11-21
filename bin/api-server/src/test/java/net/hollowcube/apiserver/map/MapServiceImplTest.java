@@ -120,7 +120,7 @@ class MapServiceImplTest {
         );
         TEST_DB.seed(
             """
-            update player_data set hypercube_end = now() + interval '1 day' where id = '%s'
+            update player_data set hypercube_start = now(), hypercube_end = now() + interval '1 day' where id = '%s'
             """
                 .formatted(OWNER)
         );

@@ -81,10 +81,6 @@ import java.util.function.Predicate;
 
 public class DevServer extends AbstractMultiMapServer {
 
-    /// What `docker-compose.yml` publishes on the host, and the same database all three of the go
-    /// api-server's postgres uris point at in dev.
-    private static final String COMPOSE_POSTGRES = "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable";
-
     /// The minio `docker-compose.yml` publishes, and the credentials it comes up with. A fresh
     /// volume has no bucket, so one is made on startup as the Go api-server does.
     private static final String COMPOSE_MINIO = "http://localhost:9000";
@@ -153,7 +149,7 @@ public class DevServer extends AbstractMultiMapServer {
     @Override
     protected @NotNull IpcServices createIpcServices(@NotNull ConfigLoaderV3 config, @NotNull OpenTelemetry otel) {
         var url = System.getenv("DATABASE_URL");
-        if (url == null || url.isBlank()) url = COMPOSE_POSTGRES;
+        if (url == null || url.isBlank()) url = PostgresUri.LOCAL_DEV;
         var pool = Pools.postgres(PostgresUri.parse(url), "dev");
         shutdowner().queue("dev-ipc-pool", pool::close);
 
