@@ -42,8 +42,8 @@ import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
-import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.*;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.runtime.IpcServices;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.player.PlayerSkin;
@@ -254,8 +254,8 @@ public class DevServer extends AbstractMultiMapServer {
     }
 
     private void performHubInit() {
-        FutureUtil.getUnchecked(createWorld(HubRuntime.HUB_MAP_DATA,
-            false, map -> MapWorlds.forPlaying(this, map), false));
+        Thread.ofVirtual().name("hub-load").start(() -> FutureUtil.getUnchecked(createWorld(
+            HubRuntime.HUB_MAP_DATA, false, map -> MapWorlds.forPlaying(this, map), false)));
 
         HubRuntime.registerCommands(this, hubCommandManager, MinecraftServer.getSchedulerManager());
         hubCommandManager.register(PlayNbsCommand.INSTANCE);
