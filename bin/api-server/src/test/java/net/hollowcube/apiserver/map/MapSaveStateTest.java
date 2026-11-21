@@ -158,14 +158,22 @@ class MapSaveStateTest {
         var state = new JsonObject();
         state.addProperty("checkpoint", 3);
         client.upsertSaveState(map, PLAYER, id, playing(1000).state(state).build());
-        assertEquals(1, count("""
+        assertEquals(
+            1,
+            count(
+                """
             select count(*) from save_states
             where created_at = created and updated_at = updated and state = convert_from(state_v2, 'UTF8')::jsonb
-            """));
+            """
+            )
+        );
 
         state.addProperty("name", "a\u0000b");
         client.upsertSaveState(map, PLAYER, id, playing(2000).state(state).build());
-        assertEquals(1, count("select count(*) from save_states where state is null and updated_at = updated"));
+        assertEquals(
+            1,
+            count("select count(*) from save_states where state is null and updated_at = updated")
+        );
         assertEquals(state, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).state());
 
         db.saveStates.deleteForPlayer(map, PLAYER);

@@ -29,8 +29,7 @@ final class MapSearchSql {
         + " when stats.win_count < 0.05 * stats.play_count then 4"
         + " when stats.win_count < 0.25 * stats.play_count then 3"
         + " when stats.win_count < 0.5 * stats.play_count then 2"
-        + " when stats.win_count < 0.75 * stats.play_count then 1"
-        + " else 0 end)";
+        + " when stats.win_count < 0.75 * stats.play_count then 1" + " else 0 end)";
 
     private MapSearchSql() {}
 

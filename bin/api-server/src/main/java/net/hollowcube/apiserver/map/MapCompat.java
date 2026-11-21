@@ -152,7 +152,9 @@ final class MapCompat {
         };
     }
 
-    static net.hollowcube.apiserver.db.MapReportCategory reportCategoryColumn(MapReportCategory category) {
+    static net.hollowcube.apiserver.db.MapReportCategory reportCategoryColumn(
+        MapReportCategory category
+    ) {
         return switch (category) {
             case CHEATED -> net.hollowcube.apiserver.db.MapReportCategory.CHEATED;
             case DISCRIMINATION -> net.hollowcube.apiserver.db.MapReportCategory.DISCRIMINATION;

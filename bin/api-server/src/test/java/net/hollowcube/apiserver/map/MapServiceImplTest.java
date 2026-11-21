@@ -795,7 +795,10 @@ class MapServiceImplTest {
             clients.redis.deleted
         );
         assertEquals(2, count("select count(*) from save_states where deleted is null"));
-        assertEquals(0, count("select count(*) from save_states where deleted is distinct from deleted_at"));
+        assertEquals(
+            0,
+            count("select count(*) from save_states where deleted is distinct from deleted_at")
+        );
     }
 
     @Test
@@ -942,7 +945,10 @@ class MapServiceImplTest {
         assertEquals("speedrun", column("select subvariant from maps"));
 
         client.update(id, patch(null, null, null, "{\"custom\":\"a\\u0000b\"}"));
-        assertEquals(1, count("select count(*) from maps where extra is null and opt_extra is not null"));
+        assertEquals(
+            1,
+            count("select count(*) from maps where extra is null and opt_extra is not null")
+        );
     }
 
     @Test
