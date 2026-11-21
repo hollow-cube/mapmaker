@@ -82,11 +82,10 @@ public class DialogBuilder {
     }
 
     public Dialog buildActions(List<DialogActionButton> buttons, int columns) {
-        return new Dialog.MultiAction(
-            this.metadata(DialogAfterAction.CLOSE),
-            buttons,
-            DialogButtons.close(Component.translatable("dialog.generic.close"), 150),
-            columns
-        );
+        return buildActions(buttons, DialogButtons.close(Component.translatable("dialog.generic.close"), 150), columns);
+    }
+
+    public Dialog buildActions(List<DialogActionButton> buttons, @Nullable DialogActionButton exit, int columns) {
+        return new Dialog.MultiAction(this.metadata(DialogAfterAction.CLOSE), buttons, exit, columns);
     }
 }

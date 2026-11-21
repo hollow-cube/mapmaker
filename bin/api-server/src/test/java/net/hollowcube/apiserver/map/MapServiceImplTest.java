@@ -540,13 +540,64 @@ class MapServiceImplTest {
         TEST_DB.seed(
             "insert into server_states(id,role) values ('editor','map') on conflict do nothing"
         );
-        assertEquals(new OpenWorldResult.Opened(0), client.openWorld(id, "world", "editor"));
+        assertEquals(new OpenWorldResult.Opened(0, 0), client.openWorld(id, "world", "editor"));
 
         assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 5, new byte[] {1}));
-        assertEquals(new OpenWorldResult.Opened(5), client.openWorld(id, "world", "editor"));
+        assertEquals(new OpenWorldResult.Opened(5, 0), client.openWorld(id, "world", "editor"));
 
         client.saveWorld(id, "world", 9, Blob.of(new byte[] {1, 2}));
-        assertEquals(new OpenWorldResult.Opened(9), client.openWorld(id, "world", "editor"));
+        assertEquals(new OpenWorldResult.Opened(9, 9), client.openWorld(id, "world", "editor"));
+    }
+
+    @Test
+    void getWal_answersTheBatchesAfterASaveInOrder() throws Exception {
+        var id = create(OWNER).id();
+        open(id, "world");
+        ingest(id, "world", 1, 2, new byte[] {1});
+        client.saveWorld(id, "world", 2, Blob.of(new byte[] {9}));
+        ingest(id, "world", 3, 3, new byte[] {7, 8});
+        var sha256 = client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
+        var headers = headers("world", 4, 6, 3);
+        headers.put(MapWalConsumer.OBJECT, sha256);
+        new MapWalConsumer(clients.nats, db)
+            .ingest(message(MapWalConsumer.SUBJECT_PREFIX + id, headers, new byte[0]));
+        ingest(id, "world", 7, 7, new byte[] {2});
+
+        assertEquals(new OpenWorldResult.Opened(7, 2), client.openWorld(id, "world", "editor"));
+        try (var wal = client.getWal(id, 2, 6)) {
+            assertEquals(13, wal.length());
+            assertArrayEquals(
+                new byte[] {0, 0, 0, 2, 7, 8, 0, 0, 0, 3, 4, 5, 6},
+                wal.readAllBytes()
+            );
+        }
+        try (var wal = client.getWal(id, 7, 7)) {
+            assertEquals(0, wal.length());
+            assertEquals(0, wal.readAllBytes().length);
+        }
+    }
+
+    @Test
+    void getWal_readsALogLongerThanOnePage() throws Exception {
+        var id = create(OWNER).id();
+        open(id, "world");
+        for (int seq = 1; seq <= 40; seq++) ingest(id, "world", seq, seq, new byte[] {(byte) seq});
+        try (var wal = client.getWal(id, 0, 40)) {
+            var bytes = wal.readAllBytes();
+            assertEquals(200, wal.length());
+            assertEquals(200, bytes.length);
+            for (int seq = 1; seq <= 40; seq++) assertEquals(seq, bytes[seq * 5 - 1]);
+        }
+    }
+
+    @Test
+    void updateWorld_supersedesTheLogBeforeIt() throws Exception {
+        var id = create(OWNER).id();
+        open(id, "world");
+        ingest(id, "world", 1, 4, new byte[] {1});
+        client.closeWorld("world");
+        client.updateWorld(id, Long.MAX_VALUE, Blob.of(new byte[] {1, 2}));
+        assertEquals(new OpenWorldResult.Opened(4, 4), client.openWorld(id, "next", "editor"));
     }
 
     @Test

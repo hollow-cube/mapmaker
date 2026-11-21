@@ -26,6 +26,9 @@ import redis.clients.jedis.Response;
 import redis.clients.jedis.params.ZAddParams;
 
 import java.io.ByteArrayInputStream;
+import java.io.InputStream;
+import java.io.SequenceInputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.time.Instant;
@@ -67,6 +70,8 @@ public final class MapServiceImpl implements MapService {
     private static final byte[] HIGHEST = "+inf".getBytes(StandardCharsets.UTF_8);
 
     private static final int MAX_WORLD_BYTES = 1 << 30;
+    // A batch is at most 512 KiB inline, so a page is at most 8 MiB
+    private static final int WAL_PAGE_BATCHES = 16;
 
     private final ApiDatabase db;
     private final S3Client worlds; // pre-cas store
@@ -322,10 +327,9 @@ public final class MapServiceImpl implements MapService {
                 tx.worldVersions.claimEditingWorld(worldId, mapId, serverId);
 
                 var head = tx.worldVersions.getHead(mapId);
-                var stored = requireNonNullElse(tx.mapWal.getHeadSeq(mapId), 0L);
-                return new OpenWorldResult.Opened(
-                    Math.max(stored, head == null ? 0 : head.walSeq())
-                );
+                long saved = head == null ? 0 : head.walSeq();
+                long stored = requireNonNullElse(tx.mapWal.getHeadSeq(mapId), 0L);
+                return new OpenWorldResult.Opened(Math.max(stored, saved), saved);
             });
         } catch (Exception e) {
             if (!Jdbc.hasState(e, Jdbc.UNIQUE_VIOLATION)) throw e;
@@ -352,7 +356,7 @@ public final class MapServiceImpl implements MapService {
 
     @Override
     public void updateWorld(UUID mapId, long loadTime, Blob world) {
-        storeWorld(mapId, world, 0, null, (_, map) -> {
+        storeWorld(mapId, world, null, null, (_, map) -> {
             if (map.publishedAt() != null && loadTime < map.publishedAt().toEpochMilli())
                 throw conflict("map was published after this world was loaded");
             return true;
@@ -362,7 +366,7 @@ public final class MapServiceImpl implements MapService {
     private boolean storeWorld(
         UUID mapId,
         Blob world,
-        long walSeq,
+        @Nullable Long claimedSeq,
         @Nullable String worldId,
         BiPredicate<ApiDatabase.Tx, Maps> mayWrite
     ) {
@@ -377,6 +381,11 @@ public final class MapServiceImpl implements MapService {
                 throw conflict("map is being verified");
             if (!mayWrite.test(tx, map)) return false;
 
+            // A save from a server that keeps no log replaces whatever was logged before it; saved at 0 the
+            // next world to open the map would replay that log over it.
+            long walSeq = claimedSeq != null
+                ? claimedSeq
+                : requireNonNullElse(tx.mapWal.getHeadSeq(mapId), 0L);
             var head = tx.worldVersions.getHead(mapId);
             var changed = head == null
                 || head.walSeq() != walSeq
@@ -405,6 +414,46 @@ public final class MapServiceImpl implements MapService {
         if (!worldStore.exists(key))
             worldStore.put(key, new ByteArrayInputStream(bytes), bytes.length);
         return sha256;
+    }
+
+    @Override
+    public Blob getWal(UUID mapId, long afterSeq, long throughSeq) {
+        long length = db.mapWal.getLength(mapId, afterSeq, throughSeq);
+        // Read a page at a time as the caller consumes it, so a long log is never held here whole.
+        var batches = new Enumeration<InputStream>() {
+            private final ArrayDeque<InputStream> page = new ArrayDeque<>();
+            private long cursor = afterSeq;
+            private boolean done;
+
+            @Override
+            public boolean hasMoreElements() {
+                if (page.isEmpty() && !done) {
+                    var rows = db.mapWal.listBatches(mapId, cursor, throughSeq, WAL_PAGE_BATCHES);
+                    done = rows.size() < WAL_PAGE_BATCHES;
+                    for (var row : rows) {
+                        page.add(
+                            new ByteArrayInputStream(
+                                ByteBuffer.allocate(4).putInt(row.length()).array()
+                            )
+                        );
+                        page.add(
+                            row.data() != null
+                                ? new ByteArrayInputStream(row.data())
+                                : worldStore.get("wal/" + Digest.hex(row.objectSha256())).stream()
+                        );
+                        cursor = row.lastSeq();
+                    }
+                }
+                return !page.isEmpty();
+            }
+
+            @Override
+            public InputStream nextElement() {
+                if (!hasMoreElements()) throw new NoSuchElementException();
+                return page.poll();
+            }
+        };
+        return new Blob(length, new SequenceInputStream(batches));
     }
 
     private static String worldKey(byte[] sha256) {

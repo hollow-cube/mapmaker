@@ -1,5 +1,6 @@
 package net.hollowcube.terraform.legacy;
 
+import net.hollowcube.terraform.apply.ApplyEngine;
 import net.hollowcube.command.CommandCondition;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
@@ -41,6 +42,8 @@ public sealed interface Terraform permits TerraformImpl {
     interface Provider {
         @NotNull Terraform terraform();
     }
+
+    @NotNull ApplyEngine applyEngine();
 
     static @NotNull Builder builder() {
         return new Builder();

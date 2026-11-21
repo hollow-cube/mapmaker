@@ -24,7 +24,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.minestom.server.FeatureFlag;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.ServerFlag;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
@@ -34,6 +33,7 @@ import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.event.trait.PlayerEvent;
 import net.minestom.server.event.trait.PlayerInstanceEvent;
 import net.minestom.server.instance.WorldBorder;
+import net.minestom.server.property.ServerProperties;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
@@ -48,9 +48,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 
 @NotNullByDefault
-public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W extends AbstractMapWorld<S, W>> implements MapWorld {
+public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W extends AbstractMapWorld<S, W>> implements
+    MapWorld {
     @SuppressWarnings("rawtypes")
-    protected static final Tag<PlayerState> PLAYER_INITIAL_STATE = Tag.Transient("player_initial_state");
+    protected static final Tag<PlayerState> PLAYER_INITIAL_STATE = Tag.Transient(
+        "player_initial_state"
+    );
     static final Tag<MapWorld> ROOT_MAP_WORLD_TAG = Tag.Transient("root_map_world");
 
     private final String worldId = UUID.randomUUID().toString();
@@ -60,6 +63,7 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     private final MapInstance instance;
 
     private final Set<Player> players = new HashSet<>();
+    private volatile int loadProgress = -1;
     private final Set<Player> playersImmutable = Collections.unmodifiableSet(players);
     private final EventNode<InstanceEvent> eventNode = EventNode.event(
         UUID.randomUUID().toString(), EventFilter.INSTANCE,
@@ -74,17 +78,24 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     // pendingStateChanges is a map to deduplicate single tick changes (it should be
     // impossible to change a player's state multiple times per tick, latest wins).
     private final Map<Player, PlayerStateChange<S, W>> pendingStateChanges = new HashMap<>();
-    private final Map<Player, CompletableFuture<@Nullable Void>> pendingRemovals = new ConcurrentHashMap<>();
+    private final Map<Player, CompletableFuture<@Nullable Void>> pendingRemovals =
+        new ConcurrentHashMap<>();
     protected volatile boolean isClosed;
 
     private final BiomeContainer biomeContainer = new BiomeContainer();
     private final ItemRegistry itemRegistry = new ItemRegistry();
-    private final ObjectEntityHandlerRegistry objectEntityHandlerRegistry = new ObjectEntityHandlerRegistry();
+    private final ObjectEntityHandlerRegistry objectEntityHandlerRegistry =
+        new ObjectEntityHandlerRegistry();
 
     private PlayerHud.@Nullable Module titleHud;
 
     @SuppressWarnings("unchecked")
-    protected AbstractMapWorld(MapServer server, MapData map, MapInstance instance, Class<S> stateClass) {
+    protected AbstractMapWorld(
+        MapServer server,
+        MapData map,
+        MapInstance instance,
+        Class<S> stateClass
+    ) {
         this.server = server;
         this.mapPatch = new MapPatch.Builder(map);
         this.instance = instance;
@@ -96,17 +107,22 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         for (int i = 0; i < stateSubclasses.size(); i++) {
             this.playersByState[i] = new HashSet<>();
             final var stateSubclass = stateSubclasses.get(i);
-            this.eventNodesByState[i] = OpUtils.build(EventNode.event(
-                UUID.randomUUID().toString(),
-                EventUtil.PLAYER_INSTANCE_FILTER,
-                (e) -> stateSubclass.isInstance(getPlayerState(e.getPlayer()))
-            ), eventNode()::addChild);
+            this.eventNodesByState[i] = OpUtils.build(
+                EventNode.event(
+                    UUID.randomUUID().toString(),
+                    EventUtil.PLAYER_INSTANCE_FILTER,
+                    e -> stateSubclass.isInstance(getPlayerState(e.getPlayer()))
+                ),
+                eventNode()::addChild
+            );
         }
 
         // Only set the root tag if this is the root, otherwise we rely on the parent to
         // return this world in canonicalWorld implementations.
-        instance.updateTag(ROOT_MAP_WORLD_TAG, existing ->
-            Objects.requireNonNullElse(existing, this));
+        instance.updateTag(
+            ROOT_MAP_WORLD_TAG,
+            existing -> Objects.requireNonNullElse(existing, this)
+        );
 
         instance.eventNode()
             .addChild(eventNode)
@@ -136,7 +152,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     }
 
     @Override
-    public MapPatch.Builder mapPatch() { return mapPatch; }
+    public MapPatch.Builder mapPatch() {
+        return mapPatch;
+    }
 
     @Override
     public MapData map() {
@@ -243,7 +261,11 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         //noinspection unchecked
         final var initialState = (S) Objects.requireNonNull(player.getTag(PLAYER_INITIAL_STATE));
 
-        var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), null, initialState.getClass());
+        var stateChangeEvent = new MapCoreJFR.StateChange(
+            getClass(),
+            null,
+            initialState.getClass()
+        );
         stateChangeEvent.begin();
         try {
             playerStates.put(player, initialState);
@@ -268,7 +290,9 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     public void removePlayer(Player player) {
         if (!this.players.contains(player)) return;
         if (!(Thread.currentThread() instanceof TickSchedulerThread))
-            throw new UnsupportedOperationException("removePlayer must be called from the scheduler thread!");
+            throw new UnsupportedOperationException(
+                "removePlayer must be called from the scheduler thread!"
+            );
 
         callEvent(new MapPlayerLeaveEvent(this, (MapPlayer) player));
 
@@ -320,7 +344,11 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
             final var change = entry.getValue();
             final var nextState = change.state();
 
-            var stateChangeEvent = new MapCoreJFR.StateChange(getClass(), lastState.getClass(), nextState.getClass());
+            var stateChangeEvent = new MapCoreJFR.StateChange(
+                getClass(),
+                lastState.getClass(),
+                nextState.getClass()
+            );
             stateChangeEvent.begin();
             try {
                 if (change.canChange(player)) {
@@ -361,10 +389,18 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
         instance().setGenerator(MapGenerators.voidWorld());
 
         var diameter = map().settings().size().size();
-        instance().setWorldBorder(new WorldBorder(diameter,
-            0f, 0f, 0,
-            0, ServerFlag.WORLD_BORDER_SIZE
-        ));
+        instance().setWorldBorder(
+            new WorldBorder(diameter, 0f, 0f, 0, 0, ServerProperties.WORLD_BORDER_SIZE.get())
+        );
+    }
+
+    /// Current load progress between 0-100, or -1 when not loading.
+    public int loadProgress() {
+        return loadProgress;
+    }
+
+    protected void setLoadProgress(int percent) {
+        this.loadProgress = percent;
     }
 
     @Blocking
@@ -376,14 +412,17 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
     public CompletableFuture<Void> close() {
         if (!(Thread.currentThread() instanceof TickSchedulerThread))
-            throw new UnsupportedOperationException("close must be called from the scheduler thread!");
+            throw new UnsupportedOperationException(
+                "close must be called from the scheduler thread!"
+            );
         if (!players().isEmpty())
             throw new IllegalStateException("Cannot close a map world with players!");
         this.isClosed = true;
 
         // At the beginning of the _next_ tick (as in, after this safe point tick), unregister the instance.
-        MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
-            MinecraftServer.getInstanceManager().unregisterInstance(instance()));
+        MinecraftServer.getSchedulerManager().scheduleNextTick(
+            () -> MinecraftServer.getInstanceManager().unregisterInstance(instance())
+        );
 
         // We dont need to wait for the instance unregister, its fine.
         return CompletableFuture.completedFuture(null);
@@ -422,7 +461,12 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
 
     private int stateIndex(Class<? extends S> state) {
         int index = stateSubclasses.indexOf(state);
-        Check.argCondition(index == -1, "State {0} is not a permitted subclass of {1}", state, stateClass);
+        Check.argCondition(
+            index == -1,
+            "State {0} is not a permitted subclass of {1}",
+            state,
+            stateClass
+        );
         return index;
     }
 
@@ -431,11 +475,16 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
     }
 
     protected static MapInstance makeMapInstance(
-        MapData map, char classifier,
+        MapData map,
+        char classifier,
         @Nullable MapInstance.LightingMode lightingOverride
     ) {
-        var lightingMode = Objects.requireNonNullElseGet(lightingOverride,
-            () -> MapSettings.get(map.settings(), MapSettings.LIGHTING) ? MapInstance.LightingMode.GENERATED : MapInstance.LightingMode.FULL_BRIGHT);
+        var lightingMode = Objects.requireNonNullElseGet(
+            lightingOverride,
+            () -> MapSettings.get(map.settings(), MapSettings.LIGHTING)
+                ? MapInstance.LightingMode.GENERATED
+                : MapInstance.LightingMode.FULL_BRIGHT
+        );
         return new MapInstance(MapPresentation.dimensionName(map, classifier), lightingMode);
     }
 
@@ -449,13 +498,14 @@ public non-sealed abstract class AbstractMapWorld<S extends PlayerState<S, W>, W
                 if (subclass.isSealed() && subclass.isInterface())
                     stateSubclasses.addAll(List.of(subclass.getPermittedSubclasses()));
             }
-
         } while (size != stateSubclasses.size());
         return List.copyOf(stateSubclasses);
     }
 
     public void appendDebugText(TextComponent.Builder builder) {
-        builder.appendNewline().append(Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50)));
+        builder.appendNewline().append(
+            Component.text("  ᴀɢᴇ: " + NumberUtil.formatDuration(instance().getWorldAge() * 50))
+        );
         builder.appendNewline()
             .append(Component.text("  ᴘʟᴀʏᴇʀѕ: " + players().size()))
             .append(Component.text(" ɪɴꜱᴛᴀɴᴄᴇ: " + instance().getPlayers().size()));

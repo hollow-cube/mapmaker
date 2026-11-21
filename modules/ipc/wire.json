@@ -398,6 +398,25 @@
             "type": "net.hollowcube.ipc.map.MapStatus"
           }
         },
+        "get-wal": {
+          "params": [
+            {
+              "name": "mapId",
+              "type": "UUID"
+            },
+            {
+              "name": "afterSeq",
+              "type": "long"
+            },
+            {
+              "name": "throughSeq",
+              "type": "long"
+            }
+          ],
+          "returns": {
+            "type": "net.hollowcube.ipc.Blob"
+          }
+        },
         "get-world": {
           "params": [
             {
@@ -2368,6 +2387,10 @@
       "fields": [
         {
           "name": "headSeq",
+          "type": "long"
+        },
+        {
+          "name": "savedSeq",
           "type": "long"
         }
       ]

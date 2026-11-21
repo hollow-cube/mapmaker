@@ -42,6 +42,7 @@ import net.hollowcube.mapmaker.dev.commands.AcDevCommand;
 import net.hollowcube.mapmaker.dev.commands.PlayNbsCommand;
 import net.hollowcube.mapmaker.editor.EditorMapWorld;
 import net.hollowcube.mapmaker.editor.EditorState;
+import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.*;
 import net.hollowcube.mapmaker.map.runtime.IpcServices;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
@@ -209,6 +210,15 @@ public class DevServer extends AbstractMultiMapServer {
     @Override
     protected @NotNull ServerBridge createBridge() {
         return new DevServerBridge(this);
+    }
+
+    @Override
+    protected @NotNull DebugCommand createDebugCommand() {
+        var cmd = super.createDebugCommand();
+        // halt runs no shutdown hooks, so nothing is saved or released: the same as the process being killed.
+        cmd.createLocalSubcommand("crash", (_, _) -> Runtime.getRuntime().halt(137),
+            "kill the server without saving anything");
+        return cmd;
     }
 
     @Override

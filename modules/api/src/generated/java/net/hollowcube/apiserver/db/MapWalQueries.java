@@ -2,6 +2,7 @@
 package net.hollowcube.apiserver.db;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,11 +16,23 @@ public interface MapWalQueries {
     @Nullable
     Long getHeadSeq(UUID mapId);
 
+    @Nullable
+    Long getLength(UUID mapId, long afterSeq, long throughSeq);
+
+    List<ListBatchesRow> listBatches(UUID mapId, long afterSeq, long throughSeq, long count);
+
     /**
      * The arguments of `insertBatch`.
      */
     record InsertBatchParams(UUID mapId, long firstSeq, long lastSeq, String worldId,
             Instant firstAt, Instant lastAt, int length, byte[] data, byte[] objectSha256) {
+    }
+
+    /**
+     * A row of `listBatches`.
+     */
+    record ListBatchesRow(long firstSeq, long lastSeq, int length, @Nullable byte[] data,
+            @Nullable byte[] objectSha256) {
     }
 
     /**
@@ -35,6 +48,18 @@ public interface MapWalQueries {
         @Override
         public Long getHeadSeq(UUID mapId) {
             throw new UnsupportedOperationException("MapWalQueries.getHeadSeq is not stubbed on this fake");
+        }
+
+        @Nullable
+        @Override
+        public Long getLength(UUID mapId, long afterSeq, long throughSeq) {
+            throw new UnsupportedOperationException("MapWalQueries.getLength is not stubbed on this fake");
+        }
+
+        @Override
+        public List<ListBatchesRow> listBatches(UUID mapId, long afterSeq, long throughSeq,
+                long count) {
+            throw new UnsupportedOperationException("MapWalQueries.listBatches is not stubbed on this fake");
         }
     }
 }

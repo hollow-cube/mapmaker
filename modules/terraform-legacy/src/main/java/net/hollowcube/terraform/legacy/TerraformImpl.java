@@ -190,6 +190,11 @@ public final class TerraformImpl implements Terraform {
 
 
     @Override
+    public @NotNull ApplyEngine applyEngine() {
+        return applyEngine;
+    }
+
+    @Override
     public @NotNull CompletableFuture<Void> closeInstance(@NotNull Instance instance) {
         return applyEngine.close(instance);
     }

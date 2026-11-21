@@ -33,6 +33,7 @@ import net.hollowcube.mapmaker.map.event.MapPlayerTeleportingEvent;
 import net.hollowcube.mapmaker.map.item.vanilla.DebugStickItem;
 import net.hollowcube.mapmaker.map.polar.ReadWriteWorldAccess;
 import net.hollowcube.mapmaker.map.wal.JetStreamWalSink;
+import net.hollowcube.mapmaker.map.wal.WalBatch;
 import net.hollowcube.mapmaker.map.wal.WalWriter;
 import net.hollowcube.mapmaker.misc.TitleHud;
 import net.hollowcube.mapmaker.panels.Button;
@@ -55,6 +56,7 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.*;
 import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.tag.TagWritable;
@@ -68,6 +70,10 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.DataInputStream;
+import java.io.EOFException;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.HashMap;
 import java.util.Objects;
 import java.util.Set;
@@ -195,10 +201,14 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         var opened = server().api().maps.openWorld(map().id().toString(), worldId());
         if (opened instanceof OpenWorldResult.OpenElsewhere(var serverId))
             throw new IllegalStateException("map is open for editing on " + serverId);
-        if (!(opened instanceof OpenWorldResult.Opened(long headSeq)))
+        if (!(opened instanceof OpenWorldResult.Opened(long headSeq, long savedSeq)))
             throw new IllegalStateException("could not open the map for editing: " + opened);
+        var isBehindWal = headSeq > savedSeq;
+
+        var edits = EditBuffer.serializer(SchemUpgrader.INSTANCE, MinecraftServer.getBiomeRegistry());
         try {
             super.loadWorld();
+            if (isBehindWal) recover(edits, savedSeq, headSeq);
         } catch (RuntimeException e) {
             server().api().maps.closeWorld(worldId());
             throw e;
@@ -207,13 +217,23 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
         var wal = new WalWriter(
             instance(),
             TerraformImpl.ENTITIES,
-            EditBuffer.serializer(SchemUpgrader.INSTANCE, MinecraftServer.getBiomeRegistry()),
+            edits,
             headSeq,
             new JetStreamWalSink(server().jetStream(), server().api().maps, mapId(), worldId()),
             FutureUtil.wrapVirtual(() -> save(true))
         );
         this.wal = wal;
         wal.start();
+        if (isBehindWal) {
+            try {
+                // Save the missed state immediately so next open doesnt have to recover
+                save(true);
+            } catch (RuntimeException e) {
+                // If we failed its kinda fine we will continue to try, or next load will rerun wal recovery
+                logger.error("Failed to save map {} after recovering it", mapId(), e);
+                ExceptionReporter.reportException(e);
+            }
+        }
 
         var scriptSession = this.scriptSession;
         if (scriptSession != null) scriptSession.bootstrap();
@@ -227,6 +247,27 @@ public class EditorMapWorld extends AbstractMapWorld<EditorState, EditorMapWorld
                 .repeat(MAP_AUTOSAVE_INTERVAL_SEC, TimeUnit.SECOND)
                 .schedule();
         }
+    }
+
+    private void recover(NetworkBuffer.Type<EditBuffer> edits, long savedSeq, long headSeq) {
+        var engine = Objects.requireNonNull(terraform, "terraform").applyEngine();
+        setLoadProgress(0);
+        try (var log = server().api().maps.getWal(mapId(), savedSeq, headSeq)) {
+            logger.info("Recovering map {} from records {} to {} ({} bytes)", mapId(), savedSeq + 1, headSeq, log.length());
+            var in = new DataInputStream(log.stream());
+            for (long read = 0; read < log.length(); ) {
+                int length = in.readInt();
+                byte[] batch = in.readNBytes(length);
+                if (batch.length != length) throw new EOFException("write-ahead log ended inside a batch");
+                read += 4 + length;
+                WalBatch.decode(NetworkBuffer.wrap(batch, 0, length), edits).apply(engine, instance(), savedSeq);
+                setLoadProgress((int) (read * 100 / log.length()));
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        ParkourMapWorld.applyGlobalSpawnActions(this);
+        setLoadProgress(-1);
     }
 
     @Override

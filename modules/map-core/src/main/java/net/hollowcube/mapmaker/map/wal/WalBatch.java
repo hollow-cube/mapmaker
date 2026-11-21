@@ -2,8 +2,12 @@ package net.hollowcube.mapmaker.map.wal;
 
 import com.github.luben.zstd.Zstd;
 import com.github.luben.zstd.ZstdCompressCtx;
+import net.hollowcube.terraform.apply.ApplyEngine;
+import net.hollowcube.terraform.apply.UnloadedChunkPolicy;
 import net.hollowcube.terraform.buffer.EditBuffer;
+import net.minestom.server.instance.Instance;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.tag.Tag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,17 @@ public record WalBatch(long firstSeq, List<WalRecord> records) {
 
     public long lastSeq() {
         return firstSeq + records.size() - 1;
+    }
+
+    public void apply(ApplyEngine engine, Instance instance, long afterSeq) {
+        long seq = firstSeq;
+        for (WalRecord record : records) {
+            if (seq++ <= afterSeq) continue;
+            switch (record) {
+                case WalRecord.Edit edit -> engine.apply(instance, edit.buffer(), UnloadedChunkPolicy.LOAD, false);
+                case WalRecord.WorldTag tag -> instance.setTag(Tag.NBT(tag.key()), tag.value());
+            }
+        }
     }
 
     // Writes one batch, safe to write multiple in a row (they mark their own end)

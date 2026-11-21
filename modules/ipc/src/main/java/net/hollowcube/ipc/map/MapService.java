@@ -67,6 +67,10 @@ public interface MapService {
     /// the map.
     String putWalBlob(UUID mapId, String worldId, Blob batch);
 
+    /// The stored write-ahead-log batches numbered after `afterSeq` and up to `throughSeq`, oldest first,
+    /// each behind its length as a 4 byte big-endian integer.
+    Blob getWal(UUID mapId, long afterSeq, long throughSeq);
+
     /// `loadTime` is when the uploading server loaded the world; a world loaded before the map was
     /// published is refused, as is any upload while verification is pending.
     void updateWorld(UUID mapId, long loadTime, Blob world);

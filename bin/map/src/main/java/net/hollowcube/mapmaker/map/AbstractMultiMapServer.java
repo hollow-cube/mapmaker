@@ -6,6 +6,13 @@ import io.nats.client.api.ConsumerConfiguration;
 import io.nats.client.api.DeliverPolicy;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
+import net.hollowcube.common.dialogs.DialogBuilder;
+import net.hollowcube.common.dialogs.DialogButtons;
+import net.hollowcube.common.util.font.FontSpacing;
+import net.hollowcube.common.util.FontUtil;
+import net.hollowcube.common.hud.HudText;
+import net.hollowcube.common.hud.BackgroundSpriteSet;
+import net.hollowcube.common.hud.HudAnchor;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.common.util.FutureUtil;
 import net.hollowcube.common.util.ProtocolVersions;
@@ -25,10 +32,16 @@ import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.session.Presence;
 import net.hollowcube.mapmaker.util.AbstractHttpService;
 import net.hollowcube.mapmaker.util.ComponentUtil;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.network.packet.server.common.ClearDialogPacket;
+import net.minestom.server.network.packet.server.common.ShowDialogPacket;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.player.PlayerConfigCustomClickEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
@@ -50,6 +63,16 @@ import static net.hollowcube.mapmaker.player.LocalPlayer.localPlayer;
 
 public abstract class AbstractMultiMapServer extends AbstractMapServer {
     private static final Logger logger = LoggerFactory.getLogger(AbstractMultiMapServer.class);
+    private static final long LOAD_PROGRESS_INTERVAL_MS = 250;
+    private static final BackgroundSpriteSet LOAD_PROGRESS_BAR = new BackgroundSpriteSet("hud/progress");
+    private static final String LOAD_PROGRESS_LABEL = "Restoring unsaved changes...";
+    // Offsets from the middle of the screen of a title line, which is drawn 9 pixels below where the shader
+    // expects its text. The bar is 5 pixels down its line, so these put its top 10 below the label's bottom.
+    private static final int LOAD_PROGRESS_LABEL_Y = -19;
+    private static final int LOAD_PROGRESS_BAR_Y = -6;
+    private static final int LOAD_PROGRESS_BAR_WIDTH = 180;
+    private static final TextColor LOAD_PROGRESS_COLOR = TextColor.color(56, 140, 249);
+    private static final Key RETURN_TO_HUB = Key.key("hollowcube", "return_to_hub");
     private static final long WORLD_CLOSE_TIMEOUT_SEC = 15;
 
     private record MapKey(String mapId, boolean editing) {
@@ -79,6 +102,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     // all happen during login (Minestom pre login event).
     // Note that we will separately hold them in the configuration phase until the map world is ready.
     private final Map<String, CompletableFuture<@Nullable MapJoinInfo>> pendingPlayerJoins = new ConcurrentHashMap<>();
+    private final Set<AbstractMapWorld<?, ?>> loadingWorlds = ConcurrentHashMap.newKeySet();
     private final Set<AbstractMapWorld<?, ?>> closingWorlds = new ConcurrentHashMap<AbstractMapWorld<?, ?>, Integer>().keySet(1);
 
     private Tracer tracer;
@@ -92,6 +116,11 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
         MinecraftServer.getGlobalEventHandler().addChild(EventNode.all("map-init")
             .addListener(AsyncPlayerConfigurationEvent.class, this::handleConfigPhase)
+            .addListener(PlayerConfigCustomClickEvent.class, event -> {
+                if (!event.getKey().equals(RETURN_TO_HUB)) return;
+                // joinHub waits for the player to leave
+                FutureUtil.submitVirtual(() -> bridge().joinHub(event.getPlayer()));
+            })
             .addListener(PlayerSpawnEvent.class, this::handleSpawn)
             .addListener(PlayerDisconnectEvent.class, this::handleDisconnect));
 
@@ -174,7 +203,7 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
 
             // Create the world, holding the player here until it is ready for them to join.
             // TODO: Why don't we start loading the world when we receive the join request? we can always close it if they dont end up joining.
-            mapWorld = FutureUtil.getUnchecked(createWorldForRequest(joinInfo));
+            mapWorld = awaitWorld(player, joinInfo.mapId(), createWorldForRequest(joinInfo));
             if (mapWorld == null) {
                 logger.error("Failed to create map world for {}: {}", joinInfo.playerId(), joinInfo.mapId());
                 player.kick(Component.text("Failed to create map world. Please try again later."));
@@ -228,6 +257,71 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
     }
 
     protected abstract @NotNull Future<AbstractMapWorld<?, ?>> createWorldForRequest(@NotNull MapJoinInfo joinInfo);
+
+    /// Waits for the world, showing the player how far a slow load has got. The dialog is replaced each
+    /// time the figure changes, which is the only way to update one.
+    private @Nullable AbstractMapWorld<?, ?> awaitWorld(
+        @NotNull Player player, @NotNull String mapId, @NotNull Future<AbstractMapWorld<?, ?>> future
+    ) {
+        int shown = -1;
+        try {
+            while (true) {
+                try {
+                    return future.get(LOAD_PROGRESS_INTERVAL_MS, TimeUnit.MILLISECONDS);
+                } catch (TimeoutException _) {
+                    int progress = -1;
+                    for (var world : loadingWorlds) {
+                        if (world.mapId().equals(mapId)) progress = Math.max(progress, world.loadProgress());
+                    }
+                    if (progress == shown || progress == -1 || !player.isOnline()) continue;
+                    shown = progress;
+                    showLoadProgress(player, progress);
+                }
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (shown != -1) player.sendPacket(new ClearDialogPacket());
+        }
+    }
+
+    private void showLoadProgress(@NotNull Player player, int percent) {
+        // The body of a dialog is clipped to its own box, so the text is the title, which is not, moved to the
+        // middle of the screen by the text shader. The title is laid out centred together with a 10 pixel gap
+        // and the 20 pixel warning button, which this leading space cancels to start from the centre.
+        int filled = LOAD_PROGRESS_BAR_WIDTH * Math.clamp(percent, 0, 100) / 100;
+        var title = Component.text()
+            .append(Component.text(FontSpacing.compute(30)))
+            .append(centered(
+                HudText.anchored(LOAD_PROGRESS_LABEL, HudAnchor.CENTER, LOAD_PROGRESS_LABEL_Y, NamedTextColor.WHITE),
+                FontUtil.measureText(LOAD_PROGRESS_LABEL)
+            ))
+            .append(centered(
+                Component.text()
+                    .append(loadProgressBar(filled, LOAD_PROGRESS_COLOR))
+                    .append(loadProgressBar(LOAD_PROGRESS_BAR_WIDTH - filled, NamedTextColor.BLACK))
+                    .build(),
+                LOAD_PROGRESS_BAR_WIDTH
+            ))
+            .build();
+        player.sendPacket(new ShowDialogPacket(DialogBuilder.create()
+            .title(title)
+            .buildNotice(DialogButtons.button(Component.text("Return to Hub"), 150, RETURN_TO_HUB, null))));
+    }
+
+    private static Component loadProgressBar(int width, TextColor color) {
+        if (width == 0) return Component.empty();
+        return HudText.anchored(LOAD_PROGRESS_BAR.build(width, false, false), HudAnchor.CENTER, LOAD_PROGRESS_BAR_Y, color);
+    }
+
+    /// `component` drawn around the cursor, which it leaves where it found it.
+    private static Component centered(Component component, int width) {
+        return Component.text()
+            .append(Component.text(FontSpacing.compute(-(width / 2))))
+            .append(component)
+            .append(Component.text(FontSpacing.compute(-(width - width / 2))))
+            .build();
+    }
 
     //endregion
 
@@ -316,7 +410,12 @@ public abstract class AbstractMultiMapServer extends AbstractMapServer {
                 announcedWorldId = createdWorld.worldId();
             }
 
-            createdWorld.loadWorld();
+            loadingWorlds.add(createdWorld);
+            try {
+                createdWorld.loadWorld();
+            } finally {
+                loadingWorlds.remove(createdWorld);
+            }
 
             return createdWorld;
         } catch (Exception e) {

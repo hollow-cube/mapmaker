@@ -5,6 +5,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.ConnectionSource;
 import net.hollowcube.sqlgen.runtime.Jdbc;
@@ -25,6 +27,23 @@ final class MapWalQueriesImpl implements MapWalQueries {
         select coalesce(max(last_seq), 0)::bigint as head_seq
         from map_wal
         where map_id = ?""";
+
+    private static final String GET_LENGTH = """
+        -- Each batch is sent behind a 4 byte length.
+        select coalesce(sum(length::bigint + 4), 0)::bigint as bytes
+        from map_wal
+        where map_id = ?
+          and first_seq > ?
+          and last_seq <= ?""";
+
+    private static final String LIST_BATCHES = """
+        select first_seq, last_seq, length, data, object_sha256
+        from map_wal
+        where map_id = ?
+          and first_seq > ?
+          and last_seq <= ?
+        order by first_seq
+        limit ?""";
 
     private final ConnectionSource source;
 
@@ -64,6 +83,49 @@ final class MapWalQueriesImpl implements MapWalQueries {
                 ps.setObject(1, mapId);
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next() ? rs.getLong(1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Long getLength(UUID mapId, long afterSeq, long throughSeq) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(GET_LENGTH)) {
+                ps.setObject(1, mapId);
+                ps.setLong(2, afterSeq);
+                ps.setLong(3, throughSeq);
+                try (ResultSet rs = ps.executeQuery()) {
+                    return rs.next() ? rs.getLong(1) : null;
+                }
+            } finally {
+                source.release(conn);
+            }
+        } catch (SQLException e) {
+            throw Sneaky.rethrow(e);
+        }
+    }
+
+    @Override
+    public List<MapWalQueries.ListBatchesRow> listBatches(UUID mapId, long afterSeq,
+            long throughSeq, long count) {
+        try {
+            Connection conn = source.acquire();
+            try (PreparedStatement ps = conn.prepareStatement(LIST_BATCHES)) {
+                ps.setObject(1, mapId);
+                ps.setLong(2, afterSeq);
+                ps.setLong(3, throughSeq);
+                ps.setLong(4, count);
+                try (ResultSet rs = ps.executeQuery()) {
+                    List<MapWalQueries.ListBatchesRow> rows = new ArrayList<>();
+                    while (rs.next()) rows.add(new MapWalQueries.ListBatchesRow(rs.getLong(1), rs.getLong(2), rs.getInt(3), rs.getBytes(4), rs.getBytes(5)));
+                    return rows;
                 }
             } finally {
                 source.release(conn);

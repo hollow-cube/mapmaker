@@ -93,6 +93,11 @@ public interface MapClient {
         throw notImplemented();
     }
 
+    /// See [MapService#getWal]. The caller closes it.
+    default Blob getWal(String mapId, long afterSeq, long throughSeq) {
+        throw notImplemented();
+    }
+
     default MapStatus getStatus(String mapId) {
         throw notImplemented();
     }
@@ -237,6 +242,11 @@ public interface MapClient {
         @Override
         public String putWalBlob(String mapId, String worldId, byte[] batch) {
             return maps.putWalBlob(UUID.fromString(mapId), worldId, Blob.of(batch));
+        }
+
+        @Override
+        public Blob getWal(String mapId, long afterSeq, long throughSeq) {
+            return maps.getWal(UUID.fromString(mapId), afterSeq, throughSeq);
         }
 
         @Override
