@@ -81,10 +81,11 @@ jobs:
             --endpoint-url https://bdb9cb2904188b760591dc1589a1ccf3.r2.cloudflarestorage.com \
             "s3://assets-private/models/chat-filter/$CHAT_FILTER_VERSION/" "$image/chat-filter/"
 
-          ort="onnxruntime-linux-x64-$ONNXRUNTIME_VERSION"
-          curl -fsSL "https://github.com/microsoft/onnxruntime/releases/download/v$ONNXRUNTIME_VERSION/$ort.tgz" \
-            | tar -xz -C "$RUNNER_TEMP"
-          cp "$RUNNER_TEMP/$ort/lib/libonnxruntime.so.$ONNXRUNTIME_VERSION" "$image/lib/libonnxruntime.so"
+          # The GitHub release downloads went away with microsoft/onnxruntime; the Maven Central jar
+          # bundles the same native library.
+          curl -fsSL -o "$RUNNER_TEMP/onnxruntime.jar" \
+            "https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime/$ONNXRUNTIME_VERSION/onnxruntime-$ONNXRUNTIME_VERSION.jar"
+          unzip -p "$RUNNER_TEMP/onnxruntime.jar" ai/onnxruntime/native/linux-x64/libonnxruntime.so > "$image/lib/libonnxruntime.so"
 
       # --static-nolibc needs the static glibc that only the native-image image has.
       - name: Build standalone binary
