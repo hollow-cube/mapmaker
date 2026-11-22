@@ -12,10 +12,10 @@ import org.jetbrains.annotations.Nullable;
  * A row of the `player_sessions` table.
  */
 public record PlayerSessions(UUID playerId, Instant createdAt, String proxyId,
-        @Nullable String serverId, boolean hidden, @Nullable String username, String skinTexture,
-        String skinSignature, @Nullable String pType, @Nullable String pState,
-        @Nullable String pInstanceId, @Nullable String pMapId, @Nullable Instant pStartTime,
-        @Nullable Instant lastSeen, int protocolVersion, @Nullable UUID replyTarget) {
+        @Nullable String serverId, boolean hidden, String skinTexture, String skinSignature,
+        @Nullable String pType, @Nullable String pState, @Nullable String pInstanceId,
+        @Nullable String pMapId, @Nullable Instant pStartTime, @Nullable Instant lastSeen,
+        int protocolVersion, @Nullable UUID replyTarget) {
     /**
      * Reads one `player_sessions` row, its first column at `col`.
      */
@@ -32,10 +32,9 @@ public record PlayerSessions(UUID playerId, Instant createdAt, String proxyId,
                 rs.getString(col + 8),
                 rs.getString(col + 9),
                 rs.getString(col + 10),
-                rs.getString(col + 11),
+                Jdbc.getInstant(rs, col + 11),
                 Jdbc.getInstant(rs, col + 12),
-                Jdbc.getInstant(rs, col + 13),
-                rs.getInt(col + 14),
-                rs.getObject(col + 15, UUID.class));
+                rs.getInt(col + 13),
+                rs.getObject(col + 14, UUID.class));
     }
 }

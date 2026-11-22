@@ -1,6 +1,7 @@
 package net.hollowcube.sqlgen;
 
 import net.hollowcube.sqlgen.runtime.Migrator;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -32,7 +33,7 @@ final class AnalysisDb implements AutoCloseable {
         this.conn = conn;
     }
 
-    static AnalysisDb boot(Path migrations) {
+    static AnalysisDb boot(Path migrations, @Nullable Path overlay) {
         try {
             var conn = DriverManager.getConnection(URL);
             try {
@@ -41,6 +42,7 @@ final class AnalysisDb implements AutoCloseable {
                     st.execute("create schema public");
                 }
                 applyMigrations(conn, migrationFiles(migrations));
+                if (overlay != null) Overlay.apply(conn, overlay);
             } catch (Throwable t) {
                 conn.close();
                 throw t;

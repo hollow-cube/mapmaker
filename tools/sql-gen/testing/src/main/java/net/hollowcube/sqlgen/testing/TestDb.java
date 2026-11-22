@@ -23,7 +23,8 @@ import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-/// A real Postgres for a test class, built from the same migrations the generator was pointed at.
+/// A real Postgres for a test class, built from the same migrations the generator was pointed at,
+/// plus the `overlay.sql` beside the migrations directory when there is one.
 ///
 /// ```java
 /// @RegisterExtension
@@ -149,6 +150,9 @@ public final class TestDb implements BeforeAllCallback, BeforeEachCallback, Afte
                 st.execute("set search_path to public");
                 for (var file : sqlFiles(migrations))
                     for (var statement : Migrator.pgliteStatements(Files.readString(file))) st.execute(statement);
+                var overlay = migrations.resolveSibling("overlay.sql");
+                if (Files.isRegularFile(overlay))
+                    for (var statement : Migrator.pgliteStatements(Files.readString(overlay))) st.execute(statement);
             }
             return new Instance(conn, userTables(conn));
         } catch (IOException e) {

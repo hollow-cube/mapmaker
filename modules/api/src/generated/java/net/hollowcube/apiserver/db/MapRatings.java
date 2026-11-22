@@ -3,12 +3,15 @@ package net.hollowcube.apiserver.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.UUID;
+import net.hollowcube.sqlgen.runtime.Jdbc;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A row of the `map_ratings` table.
  */
-public record MapRatings(UUID mapId, UUID playerId, MapRating rating) {
+public record MapRatings(UUID mapId, UUID playerId, MapRating rating, @Nullable Instant ratedAt) {
     /**
      * Reads one `map_ratings` row, its first column at `col`.
      */
@@ -16,6 +19,7 @@ public record MapRatings(UUID mapId, UUID playerId, MapRating rating) {
         return new MapRatings(
                 rs.getObject(col, UUID.class),
                 rs.getObject(col + 1, UUID.class),
-                MapRating.fromPg(rs.getString(col + 2)));
+                MapRating.fromPg(rs.getString(col + 2)),
+                Jdbc.getInstant(rs, col + 3));
     }
 }

@@ -50,6 +50,7 @@ fun sqlGenTask(name: String, vararg extraArgs: String) = tasks.register<JavaExec
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     args(
         "--migrations", layout.projectDirectory.dir("src/main/sql/migrations").asFile.path,
+        "--overlay", layout.projectDirectory.file("src/main/sql/overlay.sql").asFile.path,
         "--queries", layout.projectDirectory.dir("src/main/sql/queries").asFile.path,
         "--out", layout.projectDirectory.dir("src/generated/java").asFile.path,
         "--package", "net.hollowcube.apiserver.db",

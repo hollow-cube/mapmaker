@@ -20,6 +20,9 @@ class SessionsQueriesTest {
         assertEquals(0, db.sessions.countPlayerSessions());
 
         TEST_DB.seed("""
+            insert into player_data (id, username, first_join, last_online, online) values
+                ('6a7b0f9e-0000-4000-8000-000000000001', 'a', now(), now(), true),
+                ('6a7b0f9e-0000-4000-8000-000000000002', 'b', now(), now(), true);
             insert into player_sessions (player_id, proxy_id, skin_texture, skin_signature, hidden) values
                 ('6a7b0f9e-0000-4000-8000-000000000001', 'proxy-1', 'tex', 'sig', false),
                 ('6a7b0f9e-0000-4000-8000-000000000002', 'proxy-1', 'tex', 'sig', true)""");

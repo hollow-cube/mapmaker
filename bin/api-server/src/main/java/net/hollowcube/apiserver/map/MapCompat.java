@@ -36,7 +36,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
 
-import static java.util.Objects.requireNonNullElse;
 import static net.hollowcube.ipc.util.IpcException.badRequest;
 
 /// What the Go api-server and this one have to spell identically: the column values of `maps`, the
@@ -46,10 +45,6 @@ import static net.hollowcube.ipc.util.IpcException.badRequest;
 final class MapCompat {
 
     private static final Logger logger = LoggerFactory.getLogger(MapCompat.class);
-
-    /// `maps.verification`.
-    /// The column default, which is what a row Go wrote before the column existed reads as.
-    static final int DEFAULT_PROTOCOL_VERSION = 769;
 
     /// Go's `MapManagementAction`, and the subjects it goes out on.
     static final int MAP_ACTION_DELETE = 1;
@@ -410,7 +405,7 @@ final class MapCompat {
             state.createdAt(),
             state.updatedAt(),
             state.dataVersion(),
-            requireNonNullElse(state.protocolVersion(), DEFAULT_PROTOCOL_VERSION),
+            state.protocolVersion(),
             state.playtime(),
             state.ticks(),
             state.resets(),

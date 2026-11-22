@@ -12,9 +12,9 @@ import org.jetbrains.annotations.Nullable;
  * A row of the `save_states` table.
  */
 public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type, boolean completed,
-        long playtime, int dataVersion, @Nullable Integer protocolVersion, int ticks,
-        @Nullable Double score, int resets, long totalPlaytime, Instant createdAt,
-        Instant updatedAt, @Nullable Instant deletedAt, String state) {
+        long playtime, int dataVersion, int protocolVersion, int ticks, @Nullable Double score,
+        int resets, long totalPlaytime, Instant createdAt, Instant updatedAt,
+        @Nullable Instant deletedAt, String state) {
     /**
      * Reads one `save_states` row, its first column at `col`.
      */
@@ -27,7 +27,7 @@ public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type,
                 rs.getBoolean(col + 4),
                 rs.getLong(col + 5),
                 rs.getInt(col + 6),
-                rs.getObject(col + 7, Integer.class),
+                rs.getInt(col + 7),
                 rs.getInt(col + 8),
                 rs.getObject(col + 9, Double.class),
                 rs.getInt(col + 10),

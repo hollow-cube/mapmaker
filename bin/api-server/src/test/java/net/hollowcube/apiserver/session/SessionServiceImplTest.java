@@ -55,6 +55,10 @@ class SessionServiceImplTest {
     void onlinePlayers_countsEveryRowHiddenOrNot() {
         TEST_DB.seed(
             """
+            insert into player_data (id, username, first_join, last_online, online) values
+                ('11111111-1111-1111-1111-111111111111', 'a', now(), now(), true),
+                ('22222222-2222-2222-2222-222222222222', 'b', now(), now(), true),
+                ('33333333-3333-3333-3333-333333333333', 'c', now(), now(), true);
             insert into player_sessions (player_id, proxy_id, skin_texture, skin_signature, hidden) values
                 ('11111111-1111-1111-1111-111111111111', 'proxy-a', '', '', false),
                 ('22222222-2222-2222-2222-222222222222', 'proxy-b', '', '', false),

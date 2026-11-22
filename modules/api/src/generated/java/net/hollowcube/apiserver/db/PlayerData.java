@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * A row of the `player_data` table.
  */
 public record PlayerData(UUID id, String username, Instant firstJoin, Instant lastOnline,
-        long playtime, long experience, @Nullable Boolean betaEnabled, String settings, long coins,
+        long playtime, long experience, boolean betaEnabled, String settings, long coins,
         long cubits, @Nullable String skin, boolean online, @Nullable Instant hypercubeStart,
         @Nullable Instant hypercubeEnd, RoleType role, int extraMapSlots, int maxMapSize,
         int mapBuilders) {
@@ -27,7 +27,7 @@ public record PlayerData(UUID id, String username, Instant firstJoin, Instant la
                 Jdbc.getInstant(rs, col + 3),
                 rs.getLong(col + 4),
                 rs.getLong(col + 5),
-                rs.getObject(col + 6, Boolean.class),
+                rs.getBoolean(col + 6),
                 rs.getString(col + 7),
                 rs.getLong(col + 8),
                 rs.getLong(col + 9),

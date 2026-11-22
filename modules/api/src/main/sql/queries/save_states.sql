@@ -54,11 +54,12 @@ order by ss.player_id, case
 
 -- name: upsert :exec
 -- nullable: $score
+-- An id already held by another map's or player's row updates nothing, which the caller refuses.
 insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, ticks,
                          score, state, data_version, protocol_version, resets, total_playtime)
 values ($id, $mapId, $playerId, $type, $created, now(), $completed, $playtime, $ticks, $score, $state::jsonb,
         $dataVersion, $protocolVersion, $resets, $totalPlaytime)
-on conflict (id, map_id, player_id) do update
+on conflict (id) do update
     set updated_at       = excluded.updated_at,
         completed        = excluded.completed,
         playtime         = excluded.playtime,
@@ -68,7 +69,9 @@ on conflict (id, map_id, player_id) do update
         data_version     = excluded.data_version,
         protocol_version = excluded.protocol_version,
         resets           = excluded.resets,
-        total_playtime   = excluded.total_playtime;
+        total_playtime   = excluded.total_playtime
+where save_states.map_id = excluded.map_id
+  and save_states.player_id = excluded.player_id;
 
 -- name: refreshStats :exec
 -- `map_stats` counts every player who ever had a state on the map, deleted ones included, and

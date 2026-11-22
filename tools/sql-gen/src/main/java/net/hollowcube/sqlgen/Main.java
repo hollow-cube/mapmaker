@@ -23,14 +23,14 @@ public final class Main {
             parsed = Args.parse(args);
         } catch (GenException e) {
             System.err.println("sql-gen: " + e.getMessage());
-            System.err.println("usage: sql-gen --migrations <dir> --queries <dir> --out <dir> "
+            System.err.println("usage: sql-gen --migrations <dir> --overlay <file> --queries <dir> --out <dir> "
                 + "--package <name> --name <Database> [--check]");
             System.exit(2);
             return;
         }
 
         try {
-            var generated = SqlGen.generate(parsed.migrations, parsed.queries, parsed.packageName, parsed.databaseName);
+            var generated = SqlGen.generate(parsed.migrations, parsed.overlay, parsed.queries, parsed.packageName, parsed.databaseName);
             if (parsed.check) {
                 check(parsed, generated);
             } else {
@@ -106,7 +106,7 @@ public final class Main {
         return out;
     }
 
-    private record Args(Path migrations, Path queries, Path out, String packageName, String databaseName, boolean check) {
+    private record Args(Path migrations, Path overlay, Path queries, Path out, String packageName, String databaseName, boolean check) {
 
         static Args parse(String[] args) {
             var values = new LinkedHashMap<String, String>();
@@ -123,6 +123,7 @@ public final class Main {
             }
             return new Args(
                 Path.of(required(values, "migrations")),
+                Path.of(required(values, "overlay")),
                 Path.of(required(values, "queries")),
                 Path.of(required(values, "out")),
                 required(values, "package"),

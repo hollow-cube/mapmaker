@@ -8,7 +8,7 @@ import java.util.UUID;
 /**
  * A row of the `map_tags` table.
  */
-public record MapTags(UUID mapId, MapTag tag, int index) {
+public record MapTags(UUID mapId, MapTag tag, int position) {
     /**
      * Reads one `map_tags` row, its first column at `col`.
      */

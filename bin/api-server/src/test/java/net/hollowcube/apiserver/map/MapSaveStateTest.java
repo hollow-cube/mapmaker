@@ -179,6 +179,21 @@ class MapSaveStateTest {
     }
 
     @Test
+    void upsert_refusesAnIdAnotherPlayerHolds() {
+        var map = map("parkour");
+        var id = UUID.randomUUID();
+        client.upsertSaveState(map, PLAYER, id, playing(1000).build());
+
+        var refused = assertThrows(
+            IpcException.class,
+            () -> client.upsertSaveState(map, OTHER, id, playing(2000).build())
+        );
+        assertEquals(409, refused.status());
+        assertEquals(1000, db.saveStates.get(id, map, PLAYER).playtime());
+        assertNull(db.saveStates.get(id, map, OTHER));
+    }
+
+    @Test
     void upsert_unknownMapIs404() {
         var refused = assertThrows(
             IpcException.class,
@@ -404,14 +419,13 @@ class MapSaveStateTest {
         TEST_DB.seed(
             """
             insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, ticks,
-                                     state, protocol_version)
-            values ('%s', '%s', '%s', 'playing', now(), now(), false, 4000, 100, 'null', null)
+                                     state)
+            values ('%s', '%s', '%s', 'playing', now(), now(), false, 4000, 100, 'null')
             """
                 .formatted(id, map, PLAYER)
         );
 
         var latest = client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING);
-        assertEquals(769, latest.protocolVersion());
         assertEquals(4000, latest.totalPlaytime());
         assertEquals(new JsonObject(), latest.state());
     }

@@ -1,5 +1,7 @@
 package net.hollowcube.sqlgen;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
@@ -17,10 +19,18 @@ import java.util.Map;
 public final class SqlGen {
 
     public static Map<String, String> generate(Path migrations, Path queries, String packageName, String databaseName) {
+        return generate(migrations, null, queries, packageName, databaseName);
+    }
+
+    /// As [#generate(Path, Path, String, String)], against the migrations with `overlay`'s drops
+    /// applied on top (see [Overlay]).
+    public static Map<String, String> generate(
+        Path migrations, @Nullable Path overlay, Path queries, String packageName, String databaseName
+    ) {
         var files = new ArrayList<QueryFile>();
         for (var path : sqlFiles(queries, "queries")) files.add(QueryFileParser.parse(path));
 
-        try (var db = AnalysisDb.boot(migrations)) {
+        try (var db = AnalysisDb.boot(migrations, overlay)) {
             Catalog catalog;
             try {
                 catalog = Catalog.read(db.conn());

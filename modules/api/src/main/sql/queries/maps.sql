@@ -37,7 +37,7 @@ where published_id = $publishedId
 select tag::text as tag
 from map_tags
 where map_id = $mapId
-order by index;
+order by position;
 
 -- name: getStats :one
 select map_stats.*
@@ -70,8 +70,8 @@ values ($mapId, $owner, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"y
 returning maps.*;
 
 -- name: insertOwnerSlot :exec
--- The owner's own slot has index -1; bought slots count up from 0.
-insert into map_slots (player_id, map_id, index)
+-- The owner's own slot has position -1; bought slots count up from 0.
+insert into map_slots (player_id, map_id, position)
 values ($playerId, $mapId, -1);
 
 -- name: countSlots :one
@@ -113,7 +113,7 @@ from map_tags
 where map_id = $mapId;
 
 -- name: insertTags :exec
-insert into map_tags (map_id, tag, index)
+insert into map_tags (map_id, tag, position)
 select $mapId, tag::map_tag, ordinality - 1
 from unnest($tags::text[]) with ordinality as tags(tag, ordinality);
 
@@ -264,7 +264,8 @@ where map_id = $mapId
 insert into map_ratings (map_id, player_id, rating)
 values ($mapId, $playerId, $rating)
 on conflict (map_id, player_id) do update
-    set rating = excluded.rating;
+    set rating   = excluded.rating,
+        rated_at = now();
 
 -- name: deleteRating :exec
 delete
@@ -281,7 +282,7 @@ set total_likes = (select count(*) filter (where rating = 'liked') - count(*) fi
 where id = $mapId;
 
 -- name: insertReport :exec
-insert into map_reports (map_id, player_id, time, categories, comment)
+insert into map_reports (map_id, player_id, created_at, categories, comment)
 values ($mapId, $playerId, now(), $categories, $comment);
 
 -- name: searchMaps :many
@@ -290,7 +291,7 @@ values ($mapId, $playerId, now(), $categories, $comment);
 -- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
 -- sort the `order by` fragment, both built in `MapSearchSql`.
 select maps.*,
-       array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
+       array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
        count(*) over ()                                                              as total_count
@@ -327,7 +328,7 @@ group by map_id;
 -- not-null: tags, play_count, win_count, total_count
 -- Maps drop out here once deleted instead of 404ing the page in the client.
 select maps.*,
-       array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
+       array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
        count(*) over ()                                                              as total_count

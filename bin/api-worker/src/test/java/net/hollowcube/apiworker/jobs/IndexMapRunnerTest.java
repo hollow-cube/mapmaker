@@ -50,6 +50,13 @@ class IndexMapRunnerTest {
 
     @Test
     void writesTheRow_andReplacesItWhenRunAgain() {
+        TEST_DB.seed(
+            """
+            insert into maps (id, owner, created_at, updated_at, name, icon, variant, spawn_point, size_class,
+                              verification_state, quality)
+            values ('%s', '%s', now(), now(), '', '', 'parkour', '{}', 'normal', 'unverified', 'unrated')"""
+                .formatted(MAP, UUID.randomUUID())
+        );
         var runner = new IndexMapRunner(db, MAPS);
         runner.run(new IndexMap(MAP.toString(), "test"));
 

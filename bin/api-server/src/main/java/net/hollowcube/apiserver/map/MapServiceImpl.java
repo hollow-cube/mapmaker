@@ -835,7 +835,8 @@ public final class MapServiceImpl implements MapService {
                 );
             if (written.completed() && written.playtime() == 0)
                 logger.warn("save state {} completed with zero playtime", stateId);
-            tx.saveStates.upsert(written);
+            if (tx.saveStates.upsert(written) == 0)
+                throw conflict("save state belongs to another map or player");
 
             // Only the run the map is actually waiting on may finish its verification: a
             // `deleteVerification` that won the lock has already put the map back to unverified

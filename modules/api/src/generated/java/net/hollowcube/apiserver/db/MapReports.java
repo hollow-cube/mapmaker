@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `map_reports` table.
  */
-public record MapReports(int id, UUID mapId, UUID playerId, Instant time,
+public record MapReports(int id, UUID mapId, UUID playerId, Instant createdAt,
         List<MapReportCategory> categories, @Nullable String comment) {
     /**
      * Reads one `map_reports` row, its first column at `col`.

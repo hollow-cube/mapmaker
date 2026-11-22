@@ -10,7 +10,8 @@ import net.hollowcube.sqlgen.runtime.Jdbc;
 /**
  * A row of the `map_slots` table.
  */
-public record MapSlots(UUID playerId, UUID mapId, int index, Instant createdAt, boolean isPending) {
+public record MapSlots(UUID playerId, UUID mapId, int position, Instant createdAt,
+        boolean isPending) {
     /**
      * Reads one `map_slots` row, its first column at `col`.
      */
