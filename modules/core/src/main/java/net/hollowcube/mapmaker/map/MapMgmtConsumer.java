@@ -16,10 +16,16 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.time.Duration;
-import java.time.ZonedDateTime;
 
 public abstract class MapMgmtConsumer implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(MapMgmtConsumer.class);
+
+    private static final ConsumerConfiguration CONSUMER_CONFIG = ConsumerConfiguration.builder()
+            .filterSubjects("map.>")
+            .deliverPolicy(DeliverPolicy.New)
+            .ackPolicy(AckPolicy.None)
+            .inactiveThreshold(Duration.ofMinutes(5))
+            .build();
 
     @RuntimeGson
     public record MapUpdateMessage(
@@ -46,17 +52,7 @@ public abstract class MapMgmtConsumer implements Closeable {
     private final MessageConsumer consumer;
 
     public MapMgmtConsumer(@NotNull JetStreamWrapper jetStream) {
-        // We must initialize this at runtime so its not initialized in the graal build,
-        // aka giving us every message since build on start :)
-        var consumerConfig = ConsumerConfiguration.builder()
-            .filterSubjects("map.>")
-            // Process anything 1m prior in case we are starting as the map is drained/deleted
-            .deliverPolicy(DeliverPolicy.ByStartTime)
-            .startTime(ZonedDateTime.now().minus(Duration.ofMinutes(1)))
-            .ackPolicy(AckPolicy.None)
-            .inactiveThreshold(Duration.ofMinutes(5))
-            .build();
-        this.consumer = jetStream.subscribe(STREAM_NAME, consumerConfig, MapUpdateMessage.class, this::handleMapUpdate);
+        this.consumer = jetStream.subscribe(STREAM_NAME, CONSUMER_CONFIG, MapUpdateMessage.class, this::handleMapUpdate);
     }
 
     @Override

@@ -9,15 +9,15 @@ import net.hollowcube.mapmaker.MapCommands;
 import net.hollowcube.mapmaker.api.maps.MapWorldMessage;
 import net.hollowcube.mapmaker.config.ConfigLoaderV3;
 import net.hollowcube.mapmaker.config.VelocityConfig;
+import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.map.command.DebugCommand;
 import net.hollowcube.mapmaker.map.runtime.AbstractMapServer;
 import net.hollowcube.mapmaker.map.runtime.ServerBridge;
 import net.hollowcube.mapmaker.misc.ResourcePackManager;
 import net.hollowcube.mapmaker.runtime.MapWorlds;
 import net.hollowcube.mapmaker.runtime.hub.HubRuntime;
-import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
-import net.hollowcube.mapmaker.map.AbstractMapWorld;
 import net.hollowcube.mapmaker.session.Presence;
+import net.hollowcube.mapmaker.util.ServerBeginShutdownEvent;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventNode;
@@ -52,7 +52,7 @@ public class MapIsolateServer extends AbstractMapServer {
     // Its only kinda unknown. it's not created in the constructor, but after prepareState
     // it is always not-null which should cover any reasonable logic.
     // TODO: pretty sure we could do init in constructor, should investigate.
-    private @UnknownNullability AbstractMapWorld<?, ?> world;
+    private volatile @UnknownNullability AbstractMapWorld<?, ?> world;
     private @UnknownNullability MapData map;
     private boolean isHub;
 
@@ -101,6 +101,10 @@ public class MapIsolateServer extends AbstractMapServer {
 
     @Override
     protected void prepareStart() {
+        // Subscribe immediately so we see a /drain message before loading
+        var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(jetStream, this);
+        shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
+
         // Before super so the commands it registers can depend on whether this is the hub.
         try {
             map = api().maps.get(this.mapId);
@@ -147,9 +151,6 @@ public class MapIsolateServer extends AbstractMapServer {
         var serverId = ServerRuntime.getRuntime().hostname();
         var worldMessage = MapWorldMessage.created(serverId, mapId, "playing");
         jetStream.publish(worldMessage.subject(), worldMessage);
-
-        var mapMgmtConsumer = new MapIsolateMapMgmtConsumerImpl(jetStream, this);
-        shutdowner().queue("map-mgmt-listener", mapMgmtConsumer::close);
     }
 
     @Override
@@ -160,6 +161,13 @@ public class MapIsolateServer extends AbstractMapServer {
     @Blocking
     public void shutdown(@Nullable Component reason) {
         FutureUtil.assertThread();
+
+        // A drain can arrive while prepareStart is still running, before the world exists.
+        var world = this.world;
+        if (world == null) {
+            shutdowner().performShutdown();
+            return;
+        }
 
         var players = List.copyOf(world.players());
         var futures = new CompletableFuture[players.size()];
