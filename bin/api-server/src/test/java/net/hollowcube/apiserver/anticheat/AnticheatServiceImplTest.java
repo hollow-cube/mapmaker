@@ -190,18 +190,7 @@ class AnticheatServiceImplTest {
         assertEquals(
             400,
             refused(
-                new TraceMeta(
-                    "seg-5",
-                    CAPTURE,
-                    "nope",
-                    null,
-                    null,
-                    0,
-                    "run",
-                    STARTED,
-                    null,
-                    1
-                ),
+                new TraceMeta("seg-5", CAPTURE, "nope", null, null, 0, "run", STARTED, null, 1),
                 body
             )
         );
@@ -222,8 +211,10 @@ class AnticheatServiceImplTest {
     }
 
     private int refused(TraceMeta meta, byte[] body) {
-        return assertThrows(IpcException.class, () -> this.traces.putTrace(meta, Blob.of(body)))
-            .status();
+        return assertThrows(
+            IpcException.class,
+            () -> this.traces.putTrace(meta, Blob.of(body))
+        ).status();
     }
 
     private static TraceMeta meta(String id, String captureId, long startedAt) {

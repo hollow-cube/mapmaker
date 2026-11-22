@@ -142,7 +142,10 @@ class HttpS3ClientTest {
 
         try (var blob = s3.get("k")) {
             assertEquals(10, blob.length());
-            assertEquals("0123456789", new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8));
+            assertEquals(
+                "0123456789",
+                new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8)
+            );
         }
         try (var blob = s3.getRange("k", 2, 5)) {
             assertEquals(4, blob.length());
@@ -185,7 +188,10 @@ class HttpS3ClientTest {
         fake.objects.put("k", "recovered".getBytes(StandardCharsets.UTF_8));
         fake.internalErrors = 2;
         try (var blob = s3.get("k")) {
-            assertEquals("recovered", new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8));
+            assertEquals(
+                "recovered",
+                new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8)
+            );
         }
         assertEquals(3, fake.requests.size());
 

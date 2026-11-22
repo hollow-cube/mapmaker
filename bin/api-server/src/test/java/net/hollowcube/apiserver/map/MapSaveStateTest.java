@@ -75,7 +75,12 @@ class MapSaveStateTest {
         var created = Instant.parse("2026-09-01T10:00:00Z");
         var state = new JsonObject();
         state.addProperty("name", "a\u0000b");
-        client.upsertSaveState(map, PLAYER, id, playing(1000).created(created).state(state).build());
+        client.upsertSaveState(
+            map,
+            PLAYER,
+            id,
+            playing(1000).created(created).state(state).build()
+        );
 
         client.upsertSaveState(
             map,

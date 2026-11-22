@@ -17,7 +17,7 @@ import com.google.auto.service.AutoService;
 public final class ApiLogConfigurator extends ContextAwareBase implements Configurator {
     // %kvp renders the key values RequestLog attaches, and nothing (so no trailing space) without.
     private static final String TEXT_PATTERN =
-            "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%replace( %kvp){'^ $', ''}%n";
+        "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%replace( %kvp){'^ $', ''}%n";
 
     @Override
     public ExecutionStatus configure(LoggerContext loggerContext) {

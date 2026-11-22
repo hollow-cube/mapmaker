@@ -112,7 +112,17 @@ public final class HttpS3Client implements S3Client {
         String accessKey,
         String secretKey
     ) {
-        this(http, otel, endpoint, bucket, region, accessKey, secretKey, Instant::now, FIRST_BACKOFF);
+        this(
+            http,
+            otel,
+            endpoint,
+            bucket,
+            region,
+            accessKey,
+            secretKey,
+            Instant::now,
+            FIRST_BACKOFF
+        );
     }
 
     @TestOnly

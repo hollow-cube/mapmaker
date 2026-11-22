@@ -193,7 +193,13 @@ public final class MapServiceImpl implements MapService {
         return PaginatedList.of(
             rows,
             MapsQueries.SearchMapsRow::totalCount,
-            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount(), row.totalLikes())
+            row -> MapCompat.mapData(
+                row.maps(),
+                row.tags(),
+                row.playCount(),
+                row.winCount(),
+                row.totalLikes()
+            )
         );
     }
 
@@ -211,7 +217,13 @@ public final class MapServiceImpl implements MapService {
         return PaginatedList.of(
             db.maps.listPlayerHistory(playerId, offset(page, pageSize), limit(pageSize)),
             MapsQueries.ListPlayerHistoryRow::totalCount,
-            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount(), row.totalLikes())
+            row -> MapCompat.mapData(
+                row.maps(),
+                row.tags(),
+                row.playCount(),
+                row.winCount(),
+                row.totalLikes()
+            )
         );
     }
 

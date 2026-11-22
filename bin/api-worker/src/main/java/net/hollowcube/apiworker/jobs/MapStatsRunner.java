@@ -25,7 +25,9 @@ public final class MapStatsRunner implements JobRunner<Void> {
     @Override
     public void run(@Nullable Void data) {
         var last = db.mapStats.lastRefresh();
-        var ids = full || last == null ? db.mapStats.listAll() : db.mapStats.changedSince(last.minus(OVERLAP));
+        var ids = full || last == null
+            ? db.mapStats.listAll()
+            : db.mapStats.changedSince(last.minus(OVERLAP));
         for (int i = 0; i < ids.size(); i += BATCH)
             db.mapStats.refresh(ids.subList(i, Math.min(i + BATCH, ids.size())));
         if (!ids.isEmpty()) logger.info("refreshed stats for {} maps", ids.size());

@@ -22,7 +22,12 @@ public final class Jobs {
         Duration recordingIdle
     ) {}
 
-    public static void register(Worker worker, ApiDatabase db, MapClient maps, @Nullable Jobs.ReplayConfig replays) {
+    public static void register(
+        Worker worker,
+        ApiDatabase db,
+        MapClient maps,
+        @Nullable Jobs.ReplayConfig replays
+    ) {
         worker.handle(JobSpec.PLAYER_COUNT, new PlayerCountRunner(db, PostHog.getClient()));
         worker.handle(JobSpec.MAP_STATS, new MapStatsRunner(db, false));
         worker.handle(JobSpec.MAP_STATS_FULL, new MapStatsRunner(db, true));
@@ -31,7 +36,10 @@ public final class Jobs {
 
         var client = replays.client();
         worker.handle(JobSpec.COMPACT_REPLAY, new CompactReplayRunner(client));
-        worker.handle(JobSpec.RECONCILE_REPLAYS, new ReconcileReplaysRunner(db, replays.reconcileBatch()));
+        worker.handle(
+            JobSpec.RECONCILE_REPLAYS,
+            new ReconcileReplaysRunner(db, replays.reconcileBatch())
+        );
         worker.handle(
             JobSpec.SWEEP_REPLAY_SOURCES,
             new SweepReplaySourcesRunner(db, client, replays.sweepBatch(), replays.sweepSources())
@@ -40,8 +48,14 @@ public final class Jobs {
             JobSpec.SWEEP_RECORDING_SOURCES,
             new SweepRecordingSourcesRunner(db, client, replays.sweepSources())
         );
-        worker.handle(JobSpec.SWEEP_REPLAY_OBJECTS, new SweepReplayObjectsRunner(client, replays.sweepObjects()));
-        worker.handle(JobSpec.TRANSCODE_REPLAY, new TranscodeReplayRunner(client, replays.recordingIdle()));
+        worker.handle(
+            JobSpec.SWEEP_REPLAY_OBJECTS,
+            new SweepReplayObjectsRunner(client, replays.sweepObjects())
+        );
+        worker.handle(
+            JobSpec.TRANSCODE_REPLAY,
+            new TranscodeReplayRunner(client, replays.recordingIdle())
+        );
     }
 
     private Jobs() {}

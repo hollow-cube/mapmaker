@@ -30,13 +30,30 @@ class MapStatsRunnerTest {
         return id;
     }
 
-    private void run(UUID map, UUID player, String type, boolean completed, long playtime, String age) {
+    private void run(
+        UUID map,
+        UUID player,
+        String type,
+        boolean completed,
+        long playtime,
+        String age
+    ) {
         TEST_DB.seed(
             """
             insert into save_states (id, map_id, player_id, type, completed, playtime, total_playtime, state,
                                      created_at, updated_at)
             values ('%s', '%s', '%s', '%s', %s, %s, %s, '{}', now() - interval '%s', now() - interval '%s')"""
-                .formatted(UUID.randomUUID(), map, player, type, completed, playtime, playtime, age, age)
+                .formatted(
+                    UUID.randomUUID(),
+                    map,
+                    player,
+                    type,
+                    completed,
+                    playtime,
+                    playtime,
+                    age,
+                    age
+                )
         );
     }
 
@@ -95,13 +112,19 @@ class MapStatsRunnerTest {
         var runner = new MapStatsRunner(db, false);
         runner.run(null);
 
-        TEST_DB.seed("insert into map_ratings (map_id, player_id, rating) values ('%s', '%s', 'liked')"
-            .formatted(map, UUID.randomUUID()));
+        TEST_DB.seed(
+            "insert into map_ratings (map_id, player_id, rating) values ('%s', '%s', 'liked')".formatted(
+                map,
+                UUID.randomUUID()
+            )
+        );
         runner.run(null);
 
         assertEquals(1, stats(map).likes());
 
-        TEST_DB.seed("update map_ratings set rating = null, rated_at = now() where map_id = '" + map + "'");
+        TEST_DB.seed(
+            "update map_ratings set rating = null, rated_at = now() where map_id = '" + map + "'"
+        );
         runner.run(null);
 
         assertEquals(0, stats(map).likes());

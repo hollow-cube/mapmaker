@@ -123,7 +123,9 @@ class CompactReplayRunnerTest {
     /// A 412 is a commit that landed while the runner was compacting, and there is a fresh row for
     /// it already; anything else parks the row.
     @Test
-    void run_returnsQuietlyOnALostPreconditionAndThrowsOnAnythingElse(@TempDir Path directory) throws Exception {
+    void run_returnsQuietlyOnALostPreconditionAndThrowsOnAnythingElse(
+        @TempDir Path directory
+    ) throws Exception {
         var storage = new FakeStorage();
         record(directory, storage);
 

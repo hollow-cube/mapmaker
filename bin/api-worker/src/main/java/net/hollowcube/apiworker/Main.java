@@ -92,16 +92,29 @@ public final class Main {
 
         var slots = Integer.parseInt(secrets.get("worker.slots", "SLOTS", "4"));
         var worker = new Worker(db, hostName(), slots);
-        Jobs.register(worker, db, maps, new Jobs.ReplayConfig(
-            replays,
-            Integer.parseInt(secrets.get("replay.batch", "REPLAY_BATCH", "1000")),
-            Integer.parseInt(secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")),
-            Boolean.parseBoolean(secrets.get("replay.sweep_sources", "REPLAY_SWEEP_SOURCES", "false")),
-            Boolean.parseBoolean(secrets.get("replay.sweep_objects", "REPLAY_SWEEP_OBJECTS", "false")),
-            Duration.parse(
-                secrets.get("replay.transcode.recording_idle", "REPLAY_TRANSCODE_RECORDING_IDLE", "P7D")
+        Jobs.register(
+            worker,
+            db,
+            maps,
+            new Jobs.ReplayConfig(
+                replays,
+                Integer.parseInt(secrets.get("replay.batch", "REPLAY_BATCH", "1000")),
+                Integer.parseInt(secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")),
+                Boolean.parseBoolean(
+                    secrets.get("replay.sweep_sources", "REPLAY_SWEEP_SOURCES", "false")
+                ),
+                Boolean.parseBoolean(
+                    secrets.get("replay.sweep_objects", "REPLAY_SWEEP_OBJECTS", "false")
+                ),
+                Duration.parse(
+                    secrets.get(
+                        "replay.transcode.recording_idle",
+                        "REPLAY_TRANSCODE_RECORDING_IDLE",
+                        "P7D"
+                    )
+                )
             )
-        ));
+        );
 
         Runtime.getRuntime().addShutdownHook(
             new Thread(

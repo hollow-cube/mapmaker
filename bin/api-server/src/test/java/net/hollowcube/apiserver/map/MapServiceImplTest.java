@@ -794,7 +794,9 @@ class MapServiceImplTest {
         state(second, BUILDER, "editing", false, 1);
         TEST_DB.seed("update save_states set updated_at = now() - interval '1 hour'");
         state(second, BUILDER, "playing", true, 1);
-        TEST_DB.seed("update save_states set updated_at = now() - interval '1 minute' where updated_at = now()");
+        TEST_DB.seed(
+            "update save_states set updated_at = now() - interval '1 minute' where updated_at = now()"
+        );
         state(first, BUILDER, "playing", false, 1);
         client.delete(OWNER, gone, null);
 

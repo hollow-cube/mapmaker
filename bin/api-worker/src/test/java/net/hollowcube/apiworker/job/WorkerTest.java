@@ -141,7 +141,9 @@ class WorkerTest {
         var runner = new Recording<IndexMap>();
         var worker = new Worker(db, "test", 2, Runnable::run);
         worker.handle(INDEX, runner);
-        TEST_DB.seed("insert into jobs (job, instance, data) values ('index', 'bad', '[1, 2]'), ('index', 'bare', null)");
+        TEST_DB.seed(
+            "insert into jobs (job, instance, data) values ('index', 'bad', '[1, 2]'), ('index', 'bare', null)"
+        );
 
         assertEquals(2, worker.pollOnce());
         assertEquals(0, runner.runs);

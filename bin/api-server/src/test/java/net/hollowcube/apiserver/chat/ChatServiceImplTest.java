@@ -387,7 +387,8 @@ class ChatServiceImplTest {
     /// Against the real model, so only where `CHAT_FILTER_DIR` and `ONNXRUNTIME_LIBRARY` say
     /// where it is (see ChatFilterTest).
     @Test
-    void send_logsWhatTheFilterScoredAndCensorsWhatOnlyItCatches() throws IOException,
+    void send_logsWhatTheFilterScoredAndCensorsWhatOnlyItCatches() throws
+        IOException,
         SQLException {
         var dir = System.getenv("CHAT_FILTER_DIR");
         var library = System.getenv("ONNXRUNTIME_LIBRARY");
