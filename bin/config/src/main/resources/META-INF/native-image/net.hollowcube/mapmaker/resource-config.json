@@ -11,6 +11,9 @@
         "pattern": "\\Qchar_widths.bin\\E"
       },
       {
+        "pattern": "\\Qsound_durations.txt\\E"
+      },
+      {
         "pattern": "\\Qhub/\\E.*"
       }
     ]

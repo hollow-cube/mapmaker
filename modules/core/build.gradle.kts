@@ -18,7 +18,6 @@ dependencies {
     implementation(libs.posthog)
     implementation(libs.polar)
     implementation(libs.similarity)
-    implementation(libs.completely)
     implementation(libs.gson)
     implementation(libs.jctools)
     implementation(libs.caffeine)

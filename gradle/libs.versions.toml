@@ -14,7 +14,6 @@ otel = "1.67.0"
 otel-semconv = "1.44.0"
 polar = "1.16.0"
 similarity = "2.0.0"
-completely = "0.9.0"
 jctools = "4.0.7"
 caffeine = "3.3.0"
 prometheus = "0.16.0"
@@ -53,7 +52,6 @@ logback = { group = "ch.qos.logback", name = "logback-classic", version.ref = "l
 zstd = { group = "com.github.luben", name = "zstd-jni", version.ref = "zstd" }
 polar = { group = "dev.hollowcube", name = "polar", version.ref = "polar" }
 similarity = { group = "info.debatty", name = "java-string-similarity", version.ref = "similarity" }
-completely = { group = "com.miguelfonseca.completely", name = "completely-core", version.ref = "completely" }
 jctools = { group = "org.jctools", name = "jctools-core", version.ref = "jctools" }
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 json5 = { group = "de.marhali", name = "json5-java", version.ref = "json5" }

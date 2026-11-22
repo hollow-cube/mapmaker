@@ -4,11 +4,13 @@ import net.hollowcube.common.util.FontUtil;
 import net.hollowcube.common.util.OpUtils;
 import net.hollowcube.mapmaker.panels.AnvilSearchView;
 import net.hollowcube.mapmaker.panels.Button;
+import net.hollowcube.mapmaker.panels.Sprite;
 import net.hollowcube.mapmaker.panels.Text;
 import net.hollowcube.mapmaker.runtime.parkour.action.ActionList;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.AbstractActionEditorPanel;
 import net.hollowcube.mapmaker.runtime.parkour.action.gui.ControlledNumberInput;
 import net.hollowcube.mapmaker.runtime.parkour.action.impl.PlaySoundAction;
+import net.hollowcube.mapmaker.runtime.parkour.action.impl.SoundDurations;
 import net.hollowcube.mapmaker.util.Autocompletors;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -18,18 +20,27 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.timer.Task;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.List;
 
 import static net.hollowcube.mapmaker.gui.common.ExtraPanels.LORE_POSTFIX_CLICKEDIT;
 
 public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoundAction> {
 
+    private static final Sprite TEST_PLAY_SPRITE = new Sprite("icon2/1_1/volume_max", 1, 1);
+    private static final Sprite TEST_STOP_SPRITE = new Sprite("icon2/1_1/volume_x", 1, 1);
+
     private final Text soundInput;
+    private final Button testButton;
     private final ControlledNumberInput volumeInput;
     private final ControlledNumberInput pitchInput;
+
+    private @Nullable PlaySoundAction testing;
+    private @Nullable Task testEndTask;
 
     public PlaySoundEditor(ActionList.Ref ref) {
         super(ref);
@@ -42,9 +53,9 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
             AbstractActionEditorPanel.groupText(7, "Sound")
                 .translationKey("gui.action.play_sound.sound")
         );
-        this.soundInput = add(1, 2, new Text("gui.action.play_sound.sound", 7, 1, ""));
+        this.soundInput = add(1, 2, new Text("gui.action.play_sound.sound", 6, 1, ""));
         this.soundInput.align(6, 5);
-        this.soundInput.background("generic2/input/7_1_shadow");
+        this.soundInput.background("generic2/input/6_1_shadow");
         this.soundInput.lorePostfix(LORE_POSTFIX_CLICKEDIT);
         this.soundInput.onLeftClick(
             () -> host.pushView(
@@ -57,6 +68,11 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
                 )
             )
         );
+
+        this.testButton = add(7, 2, new Button(1, 1)
+            .background("generic2/btn/default/1_1_shadow")
+            .onLeftClick(this::toggleTest));
+        resetTestButton();
 
         this.volumeInput = add(
             1,
@@ -97,10 +113,57 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
             this.soundInput.text("");
         } else {
             var name = data.event().key().asMinimalString();
-            this.soundInput.text(FontUtil.shorten(name, 115, 5));
+            this.soundInput.text(FontUtil.shorten(name, 97, 5));
         }
         this.volumeInput.update((int) (data.volume() * 100));
         this.pitchInput.update((int) (data.pitch() * 100));
+    }
+
+    @Override
+    protected void unmount() {
+        stopTest();
+        super.unmount();
+    }
+
+    private void toggleTest() {
+        if (this.testing != null) {
+            stopTest();
+            return;
+        }
+
+        var action = this.ref.<PlaySoundAction>cast();
+        if (action.event() == null) return;
+
+        var player = host.player();
+        action.play(player);
+        this.testing = action;
+        this.testButton.translationKey("gui.action.play_sound.test.stop").sprite(TEST_STOP_SPRITE);
+
+        // Unknown durations stay in the stop state until clicked or the menu is left.
+        int durationMs = SoundDurations.durationMs(action.event(), action.pitch());
+        if (durationMs >= 0) {
+            this.testEndTask = player.scheduler().buildTask(() -> {
+                    this.testEndTask = null;
+                    resetTestButton();
+                })
+                .delay(Duration.ofMillis(durationMs))
+                .schedule();
+        }
+    }
+
+    private void stopTest() {
+        if (this.testing == null) return;
+        this.testing.stop(host.player());
+        resetTestButton();
+    }
+
+    private void resetTestButton() {
+        this.testing = null;
+        if (this.testEndTask != null) {
+            this.testEndTask.cancel();
+            this.testEndTask = null;
+        }
+        this.testButton.translationKey("gui.action.play_sound.test").sprite(TEST_PLAY_SPRITE);
     }
 
     public static Button makeSoundButton(@Nullable SoundEvent sound) {
@@ -124,7 +187,7 @@ public class PlaySoundEditor extends AbstractActionEditorPanel<@NotNull PlaySoun
         var icon = switch (key) {
             case "block" -> OpUtils.mapOr(
                 Block.fromKey(path),
-                it -> it.registry().material(),
+                Block::material,
                 Material.BARRIER
             );
             case "entity" -> {

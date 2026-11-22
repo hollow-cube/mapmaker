@@ -63,13 +63,22 @@ public record PlaySoundAction(
 
     @Override
     public void applyTo(Player player, PlayState state) {
+        play(player);
+    }
+
+    public void play(Player player) {
         if (this.event == null) return;
 
-        player.stopSound(SoundStop.named(this.event));
+        stop(player);
         player.playSound(
             Sound.sound(this.event, getSoundSource(this.event), this.volume, this.pitch),
             Sound.Emitter.self()
         );
+    }
+
+    public void stop(Player player) {
+        if (this.event == null) return;
+        player.stopSound(SoundStop.named(this.event));
     }
 
     public static Sound.Source getSoundSource(SoundEvent event) {

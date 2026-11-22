@@ -11,7 +11,6 @@ dependencies {
     implementation(libs.minestom)
     implementation(libs.fastutil)
     implementation(libs.polar)
-    implementation(libs.completely)
     implementation(libs.bundles.adventure)
     implementation(libs.bundles.otel) {
         exclude(group = "io.opentelemetry", module = "opentelemetry-exporter-sender-okhttp")
