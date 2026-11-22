@@ -53,22 +53,18 @@ order by ss.player_id, case
                            end;
 
 -- name: upsert :exec
--- nullable: $score, $stateJson
-insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, ticks, score,
-                         state_v2, data_version, protocol_version, resets, total_playtime, created_at,
-                         updated_at, state)
-values ($id, $mapId, $playerId, $type, $created, now(), $completed, $playtime, $ticks, $score, $state,
-        $dataVersion, $protocolVersion, $resets, $totalPlaytime, $created, now(),
-        $stateJson::text::jsonb)
+-- nullable: $score
+insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, ticks,
+                         score, state, data_version, protocol_version, resets, total_playtime)
+values ($id, $mapId, $playerId, $type, $created, now(), $completed, $playtime, $ticks, $score, $state::jsonb,
+        $dataVersion, $protocolVersion, $resets, $totalPlaytime)
 on conflict (id, map_id, player_id) do update
-    set updated          = excluded.updated,
-        updated_at       = excluded.updated_at,
-        state            = excluded.state,
+    set updated_at       = excluded.updated_at,
         completed        = excluded.completed,
         playtime         = excluded.playtime,
         ticks            = excluded.ticks,
         score            = excluded.score,
-        state_v2         = excluded.state_v2,
+        state            = excluded.state,
         data_version     = excluded.data_version,
         protocol_version = excluded.protocol_version,
         resets           = excluded.resets,
@@ -76,7 +72,7 @@ on conflict (id, map_id, player_id) do update
 
 -- name: refreshStats :exec
 -- `map_stats` counts every player who ever had a state on the map, deleted ones included, and
--- every one of them who finished; `clear_rate` is generated from the two.
+-- every one of them who finished.
 insert into map_stats (map_id, play_count, win_count)
 select $mapId,
        count(distinct player_id),
@@ -89,7 +85,7 @@ on conflict (map_id) do update
 
 -- name: deleteForPlayer :exec
 update save_states
-set deleted = now(), deleted_at = now()
+set deleted_at = now()
 where deleted_at is null
   and map_id = $mapId
   and player_id = $playerId;
@@ -98,7 +94,7 @@ where deleted_at is null
 -- The maps touched, so their boards can drop the player.
 with deleted as (
     update save_states
-        set deleted = now(), deleted_at = now()
+        set deleted_at = now()
         where deleted_at is null
             and player_id = $playerId
         returning map_id)
@@ -107,7 +103,7 @@ from deleted;
 
 -- name: deleteMap :exec
 update save_states
-set deleted = now(), deleted_at = now()
+set deleted_at = now()
 where deleted_at is null
   and map_id = $mapId;
 
@@ -116,7 +112,7 @@ where deleted_at is null
 -- not-null: restored
 with restored as (
     update save_states
-        set deleted = null, deleted_at = null
+        set deleted_at = null
         where deleted_at is not null
             and map_id = $mapId
             and player_id = $playerId
@@ -131,7 +127,7 @@ from restored;
 -- The maps touched, with how many runs came back on each.
 with restored as (
     update save_states
-        set deleted = null, deleted_at = null
+        set deleted_at = null
         where deleted_at is not null
             and player_id = $playerId
             and ($deletedAfter::timestamptz is null or deleted_at >= $deletedAfter)
@@ -146,7 +142,7 @@ group by map_id;
 -- not-null: restored
 with restored as (
     update save_states
-        set deleted = null, deleted_at = null
+        set deleted_at = null
         where deleted_at is not null
             and map_id = $mapId
             and ($deletedAfter::timestamptz is null or deleted_at >= $deletedAfter)

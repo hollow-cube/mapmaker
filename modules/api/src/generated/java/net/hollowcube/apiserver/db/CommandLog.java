@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
  * A row of the `command_log` table.
  */
 public record CommandLog(long id, Instant timestamp, UUID playerId, String serverId,
-        @Nullable String mapId, @Nullable String instanceId, String command, boolean remote,
+        @Nullable UUID mapId, @Nullable UUID instanceId, String command, boolean remote,
         String outcome, @Nullable String error, int durationMs) {
     /**
      * Reads one `command_log` row, its first column at `col`.
@@ -23,8 +23,8 @@ public record CommandLog(long id, Instant timestamp, UUID playerId, String serve
                 Jdbc.getInstant(rs, col + 1),
                 rs.getObject(col + 2, UUID.class),
                 rs.getString(col + 3),
-                rs.getString(col + 4),
-                rs.getString(col + 5),
+                rs.getObject(col + 4, UUID.class),
+                rs.getObject(col + 5, UUID.class),
                 rs.getString(col + 6),
                 rs.getBoolean(col + 7),
                 rs.getString(col + 8),

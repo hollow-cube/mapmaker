@@ -69,7 +69,7 @@ public final class MapServiceImpl implements MapService {
     private static final int PUBLISH_ATTEMPTS = 10;
 
     /// What a completed save state stores in place of its state.
-    private static final byte[] NO_STATE = "null".getBytes(StandardCharsets.UTF_8);
+    private static final String NO_STATE = "null";
 
     private static final int LEADERBOARD_TOP = 10;
     private static final byte[] LOWEST = "-inf".getBytes(StandardCharsets.UTF_8);
@@ -148,7 +148,12 @@ public final class MapServiceImpl implements MapService {
             var limit = Roles.mapSlots(player.extraMapSlots(), flags);
             if (tx.maps.countSlots(owner) >= limit) return new CreateMapResult.NoSlots(limit);
 
-            var map = tx.maps.createMap(UUID.randomUUID(), owner, size.id(), protocolVersion);
+            var map = tx.maps.createMap(
+                UUID.randomUUID(),
+                owner,
+                MapCompat.sizeColumn(size),
+                protocolVersion
+            );
             tx.maps.insertOwnerSlot(owner, map.id());
             tx.afterCommit(
                 () -> posthog.capture(
@@ -232,12 +237,13 @@ public final class MapServiceImpl implements MapService {
             // A null in a patch is "unchanged", so `MapPatch.Builder` spells clearing the
             // subvariant as "none".
             var subvariant = patch.subvariant() == null
-                ? MapCompat.subvariant(map)
-                : patch.subvariant();
-            if ("none".equals(subvariant)) subvariant = null;
+                ? map.subvariant()
+                : "none".equals(patch.subvariant())
+                    ? null
+                    : MapCompat.subvariantColumn(patch.subvariant());
             var variant = patch.variant() == null
-                ? map.variant().pgLabel()
-                : patch.variant().name().toLowerCase(Locale.ROOT);
+                ? map.variant()
+                : MapCompat.variantColumn(patch.variant());
             var spawnPoint = patch.spawnPoint() == null
                 ? map.spawnPoint()
                 : Wire.gson().toJson(patch.spawnPoint());
@@ -245,22 +251,22 @@ public final class MapServiceImpl implements MapService {
                 ? map.leaderboard()
                 : leaderboardColumn(patch.leaderboard());
             var quality = patch.qualityOverride() == null
-                ? (long) MapCompat.quality(map).ordinal()
-                : (long) patch.qualityOverride().ordinal();
+                ? map.quality()
+                : MapCompat.qualityColumn(patch.qualityOverride());
             var protocolVersion = requireNonNullElse(
                 patch.protocolVersion(),
-                requireNonNullElse(map.protocolVersion(), DEFAULT_PROTOCOL_VERSION)
+                map.protocolVersion()
             );
             tx.maps.updateMap(
                 new MapsQueries.UpdateMapParams(
                     requireNonNullElse(patch.name(), map.name()),
                     requireNonNullElse(patch.icon(), map.icon()),
-                    patch.size() == null ? MapCompat.size(map).id() : patch.size().id(),
+                    patch.size() == null ? map.sizeClass() : MapCompat.sizeColumn(patch.size()),
                     variant,
                     subvariant,
                     spawnPoint,
                     leaderboard,
-                    extra.toString().getBytes(StandardCharsets.UTF_8),
+                    MapCompat.jsonb(extra),
                     onlySprint,
                     noSprint,
                     noJump,
@@ -269,7 +275,6 @@ public final class MapServiceImpl implements MapService {
                     requireNonNullElse(patch.listed(), map.listed()),
                     quality,
                     protocolVersion,
-                    MapCompat.jsonbOrNull(extra.toString()),
                     mapId
                 )
             );
@@ -549,7 +554,7 @@ public final class MapServiceImpl implements MapService {
         return db.txResult(tx -> {
             var decided = answerWithoutDrain(tx.maps.getMapForUpdate(mapId));
             if (decided != null) return decided;
-            tx.maps.updateVerification(VERIFICATION_PENDING, mapId);
+            tx.maps.updateVerification(net.hollowcube.apiserver.db.MapVerification.PENDING, mapId);
             return BeginVerificationResult.READY;
         });
     }
@@ -561,7 +566,10 @@ public final class MapServiceImpl implements MapService {
             if (map == null) return DeleteVerificationResult.MAP_NOT_FOUND;
             if (map.publishedAt() != null) return DeleteVerificationResult.MAP_PUBLISHED;
             tx.maps.deleteVerifyingStates(mapId);
-            tx.maps.updateVerification(VERIFICATION_NONE, mapId);
+            tx.maps.updateVerification(
+                net.hollowcube.apiserver.db.MapVerification.UNVERIFIED,
+                mapId
+            );
             tx.afterCommit(() -> redis.del(leaderboardKey(mapId)));
             return DeleteVerificationResult.RESET;
         });
@@ -835,7 +843,11 @@ public final class MapServiceImpl implements MapService {
             // the row the upsert leaves soft-deleted.
             var stale = verifying && verification(map) != MapVerification.PENDING;
             if (verifying && !stale)
-                tx.maps.markVerified(VERIFICATION_VERIFIED, written.protocolVersion(), mapId);
+                tx.maps.markVerified(
+                    net.hollowcube.apiserver.db.MapVerification.VERIFIED,
+                    written.protocolVersion(),
+                    mapId
+                );
 
             var run = written.completed() && !stale && written.type() != SaveStateType.EDITING;
             if (run && variant(map) == MapVariant.PARKOUR) {
@@ -889,8 +901,8 @@ public final class MapServiceImpl implements MapService {
         var state = completed
             ? NO_STATE
             : update.state() != null
-                ? update.state().toString().getBytes(StandardCharsets.UTF_8)
-                : existing != null ? existing.stateV2() : NO_STATE;
+                ? MapCompat.jsonb(update.state())
+                : existing != null ? existing.state() : NO_STATE;
         var score = completed ? update.score() : existing != null ? existing.score() : null;
         if (completed && score == null && type != SaveStateType.EDITING)
             score = (double) Math.max(update.playtime(), update.ticks() * TICK_MILLIS);
@@ -908,8 +920,7 @@ public final class MapServiceImpl implements MapService {
             update.dataVersion(),
             update.protocolVersion(),
             update.resets(),
-            Math.max(update.totalPlaytime(), update.playtime()),
-            MapCompat.jsonbOrNull(new String(state, StandardCharsets.UTF_8))
+            Math.max(update.totalPlaytime(), update.playtime())
         );
     }
 

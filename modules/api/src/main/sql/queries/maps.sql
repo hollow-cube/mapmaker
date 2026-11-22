@@ -63,11 +63,10 @@ order by id
     for update;
 
 -- name: createMap :one
-insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
-                  protocol_version, name, icon, variant, spawn_point, size_class, verification_state, quality)
+insert into maps (id, owner, created_at, updated_at, name, icon, variant, spawn_point, size_class,
+                  verification_state, quality, protocol_version)
 values ($mapId, $owner, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', $size,
-        $protocolVersion, '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}',
-        (enum_range(null::map_size))[($size::int8 + 1)::int], 'unverified', 'unrated')
+        'unverified', 'unrated', $protocolVersion)
 returning maps.*;
 
 -- name: insertOwnerSlot :exec
@@ -87,33 +86,25 @@ where s.player_id = $playerId
   and m.published_at is null;
 
 -- name: updateMap :exec
--- nullable: $extraJson
+-- nullable: $subvariant
 update maps
-set opt_name         = $name,
-    opt_icon         = $icon,
-    size             = $size,
-    opt_variant      = $variant,
-    opt_subvariant   = $subvariant,
-    opt_spawn_point  = $spawnPoint,
+set name             = $name,
+    icon             = $icon,
+    size_class       = $size,
+    variant          = $variant,
+    subvariant       = $subvariant,
+    spawn_point      = $spawnPoint,
     leaderboard      = $leaderboard,
-    opt_extra        = $extra,
+    extra            = $extra::jsonb,
     opt_only_sprint  = $onlySprint,
     opt_no_sprint    = $noSprint,
     opt_no_jump      = $noJump,
     opt_no_sneak     = $noSneak,
     opt_boat         = $boat,
     listed           = $listed,
-    quality_override = $quality,
+    quality          = $quality,
     protocol_version = $protocolVersion,
-    updated_at       = now(),
-    name             = $name::varchar,
-    icon             = $icon::varchar,
-    variant          = case when $variant::varchar = any (enum_range(null::map_variant)::text[]) then $variant::varchar::map_variant end,
-    subvariant       = case when $subvariant::varchar = any (enum_range(null::map_subvariant)::text[]) then $subvariant::varchar::map_subvariant end,
-    spawn_point      = $spawnPoint,
-    extra            = $extraJson::text::jsonb,
-    size_class       = (enum_range(null::map_size))[($size::int8 + 1)::int],
-    quality          = (enum_range(null::map_quality))[($quality::int8 + 1)::int]
+    updated_at       = now()
 where id = $mapId;
 
 -- name: deleteTags :exec
@@ -132,7 +123,7 @@ select unnest(enum_range(null::map_tag))::text as tag;
 -- name: deleteInProgressStates :exec
 -- A completed run is somebody's record and stays.
 update save_states
-set deleted = now(), deleted_at = now()
+set deleted_at = now()
 where map_id = $mapId
   and deleted_at is null
   and not completed
@@ -140,13 +131,13 @@ where map_id = $mapId
 
 -- name: deleteAllStates :exec
 update save_states
-set deleted = now(), deleted_at = now()
+set deleted_at = now()
 where map_id = $mapId
   and deleted_at is null;
 
 -- name: deleteVerifyingStates :exec
 update save_states
-set deleted = now(), deleted_at = now()
+set deleted_at = now()
 where map_id = $mapId
   and type = 'verifying'
   and deleted_at is null;
@@ -173,15 +164,13 @@ returning maps.*;
 
 -- name: updateVerification :exec
 update maps
-set verification       = $verification,
-    verification_state = (enum_range(null::map_verification))[($verification::int8 + 1)::int]
+set verification_state = $verification
 where id = $mapId;
 
 -- name: markVerified :exec
 -- A verifying run that finished; the map is stamped with the version that verified it.
 update maps
-set verification       = $verification,
-    verification_state = (enum_range(null::map_verification))[($verification::int8 + 1)::int],
+set verification_state = $verification,
     protocol_version   = $protocolVersion
 where id = $mapId;
 

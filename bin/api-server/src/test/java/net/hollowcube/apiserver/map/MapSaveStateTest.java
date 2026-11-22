@@ -152,32 +152,16 @@ class MapSaveStateTest {
     }
 
     @Test
-    void upsert_mirrorsIntoTheNewColumns() throws Exception {
+    void upsert_dropsANulFromTheStateRatherThanFailing() {
         var map = map("parkour");
         var id = UUID.randomUUID();
         var state = new JsonObject();
-        state.addProperty("checkpoint", 3);
-        client.upsertSaveState(map, PLAYER, id, playing(1000).state(state).build());
-        assertEquals(
-            1,
-            count(
-                """
-            select count(*) from save_states
-            where created_at = created and updated_at = updated and state = convert_from(state_v2, 'UTF8')::jsonb
-            """
-            )
-        );
-
         state.addProperty("name", "a\u0000b");
-        client.upsertSaveState(map, PLAYER, id, playing(2000).state(state).build());
-        assertEquals(
-            1,
-            count("select count(*) from save_states where state is null and updated_at = updated")
-        );
-        assertEquals(state, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).state());
+        client.upsertSaveState(map, PLAYER, id, playing(1000).state(state).build());
 
-        db.saveStates.deleteForPlayer(map, PLAYER);
-        assertEquals(1, count("select count(*) from save_states where deleted_at = deleted"));
+        var stored = new JsonObject();
+        stored.addProperty("name", "ab");
+        assertEquals(stored, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).state());
     }
 
     @Test
@@ -223,7 +207,7 @@ class MapSaveStateTest {
 
         var row = db.saveStates.get(id, map, PLAYER);
         assertTrue(row.completed());
-        assertEquals("null", new String(row.stateV2()));
+        assertEquals("null", row.state());
         assertEquals(1500.0, row.score(), "ticks are the floor of a completed run's time");
         assertNull(client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING));
         assertNull(client.getBestSaveState(map, PLAYER).state());
@@ -319,10 +303,7 @@ class MapSaveStateTest {
     @Test
     void upsert_completingAVerificationMarksTheMapVerifiedAtThatVersion() {
         var map = map("parkour");
-        TEST_DB.seed(
-            "update maps set verification = 1, verification_state = 'pending' where id = '" + map
-                + "'"
-        );
+        TEST_DB.seed("update maps set verification_state = 'pending' where id = '" + map + "'");
         client.upsertSaveState(
             map,
             PLAYER,
@@ -335,7 +316,7 @@ class MapSaveStateTest {
         );
 
         var row = db.maps.getMap(map);
-        assertEquals(2L, row.verification());
+        assertEquals(net.hollowcube.apiserver.db.MapVerification.VERIFIED, row.verificationState());
         assertEquals(777, row.protocolVersion());
         assertEquals(1000.0, board(map, PLAYER));
     }
@@ -344,10 +325,7 @@ class MapSaveStateTest {
     void upsert_doesNotVerifyOrBoardAVerificationTheResetAlreadyStruck() {
         var map = map("parkour");
         var state = UUID.randomUUID();
-        TEST_DB.seed(
-            "update maps set verification = 1, verification_state = 'pending' where id = '" + map
-                + "'"
-        );
+        TEST_DB.seed("update maps set verification_state = 'pending' where id = '" + map + "'");
         client.upsertSaveState(
             map,
             PLAYER,
@@ -371,7 +349,10 @@ class MapSaveStateTest {
                 .build()
         );
 
-        assertEquals(0L, db.maps.getMap(map).verification());
+        assertEquals(
+            net.hollowcube.apiserver.db.MapVerification.UNVERIFIED,
+            db.maps.getMap(map).verificationState()
+        );
         assertNull(board(map, PLAYER), "the struck run must not come back on the board");
         assertNull(client.getBestSaveState(map, PLAYER));
     }
@@ -406,7 +387,7 @@ class MapSaveStateTest {
         client.upsertSaveState(map, PLAYER, first, playing(1000).build());
         client.upsertSaveState(map, PLAYER, second, playing(1000).build());
         TEST_DB.seed(
-            "update save_states set updated = updated - interval '1 minute', updated_at = updated_at - interval '1 minute' where id = '"
+            "update save_states set updated_at = updated_at - interval '1 minute' where id = '"
                 + second + "'"
         );
         assertEquals(first, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).id());
@@ -422,9 +403,9 @@ class MapSaveStateTest {
         var id = UUID.randomUUID();
         TEST_DB.seed(
             """
-            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, ticks,
-                                     state_v2, protocol_version, created_at, updated_at)
-            values ('%s', '%s', '%s', 'playing', now(), now(), false, 4000, 100, 'not json', null, now(), now())
+            insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, ticks,
+                                     state, protocol_version)
+            values ('%s', '%s', '%s', 'playing', now(), now(), false, 4000, 100, 'null', null)
             """
                 .formatted(id, map, PLAYER)
         );
@@ -474,12 +455,8 @@ class MapSaveStateTest {
                 "map_id",
                 "player_id",
                 "type",
-                "created",
-                "updated",
-                "deleted",
                 "completed",
                 "playtime",
-                "state_v2",
                 "data_version",
                 "protocol_version",
                 "ticks",
@@ -542,13 +519,12 @@ class MapSaveStateTest {
         var id = UUID.randomUUID();
         TEST_DB.seed(
             """
-            insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
-                              protocol_version, name, icon, variant, spawn_point, size_class, verification_state,
-                              quality)
-            values ('%s', '%s', now(), now(), 'A map', '', '%s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 1, 776,
-                    'A map', '', '%s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 'large', 'unverified', 'unrated')
+            insert into maps (id, owner, created_at, updated_at, protocol_version, name, icon, variant, spawn_point,
+                              size_class, verification_state, quality)
+            values ('%s', '%s', now(), now(), 776, 'A map', '', '%s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}',
+                    'large', 'unverified', 'unrated')
             """
-                .formatted(id, PLAYER, variant, variant)
+                .formatted(id, PLAYER, variant)
         );
         return id;
     }

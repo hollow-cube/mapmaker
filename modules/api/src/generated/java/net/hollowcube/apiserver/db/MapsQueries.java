@@ -37,7 +37,7 @@ public interface MapsQueries {
     List<GetPlayersForUpdateRow> getPlayersForUpdate(List<UUID> ids);
 
     @Nullable
-    Maps createMap(UUID mapId, UUID owner, long size, int protocolVersion);
+    Maps createMap(UUID mapId, UUID owner, MapSize size, int protocolVersion);
 
     long insertOwnerSlot(UUID playerId, UUID mapId);
 
@@ -64,9 +64,9 @@ public interface MapsQueries {
     @Nullable
     Maps publishMap(long publishedId, UUID mapId);
 
-    long updateVerification(long verification, UUID mapId);
+    long updateVerification(MapVerification verification, UUID mapId);
 
-    long markVerified(long verification, int protocolVersion, UUID mapId);
+    long markVerified(MapVerification verification, int protocolVersion, UUID mapId);
 
     @Nullable
     Long getLatestEditingTime(UUID mapId, UUID playerId);
@@ -114,10 +114,10 @@ public interface MapsQueries {
     /**
      * The arguments of `updateMap`.
      */
-    record UpdateMapParams(String name, String icon, long size, String variant, String subvariant,
-            String spawnPoint, String leaderboard, byte[] extra, boolean onlySprint,
-            boolean noSprint, boolean noJump, boolean noSneak, boolean boat, boolean listed,
-            long quality, int protocolVersion, @Nullable String extraJson, UUID mapId) {
+    record UpdateMapParams(String name, String icon, MapSize size, MapVariant variant,
+            @Nullable MapSubvariant subvariant, String spawnPoint, String leaderboard, String extra,
+            boolean onlySprint, boolean noSprint, boolean noJump, boolean noSneak, boolean boat,
+            boolean listed, MapQuality quality, int protocolVersion, UUID mapId) {
     }
 
     /**
@@ -211,7 +211,7 @@ public interface MapsQueries {
 
         @Nullable
         @Override
-        public Maps createMap(UUID mapId, UUID owner, long size, int protocolVersion) {
+        public Maps createMap(UUID mapId, UUID owner, MapSize size, int protocolVersion) {
             throw new UnsupportedOperationException("MapsQueries.createMap is not stubbed on this fake");
         }
 
@@ -277,12 +277,12 @@ public interface MapsQueries {
         }
 
         @Override
-        public long updateVerification(long verification, UUID mapId) {
+        public long updateVerification(MapVerification verification, UUID mapId) {
             throw new UnsupportedOperationException("MapsQueries.updateVerification is not stubbed on this fake");
         }
 
         @Override
-        public long markVerified(long verification, int protocolVersion, UUID mapId) {
+        public long markVerified(MapVerification verification, int protocolVersion, UUID mapId) {
             throw new UnsupportedOperationException("MapsQueries.markVerified is not stubbed on this fake");
         }
 

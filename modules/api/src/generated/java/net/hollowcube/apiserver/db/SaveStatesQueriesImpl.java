@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class SaveStatesQueriesImpl implements SaveStatesQueries {
     private static final String GET = """
-        select save_states.id, save_states.map_id, save_states.player_id, save_states.type, save_states.created, save_states.updated, save_states.deleted, save_states.completed, save_states.playtime, save_states.state_v2, save_states.data_version, save_states.protocol_version, save_states.ticks, save_states.score, save_states.resets, save_states.total_playtime, save_states.created_at, save_states.updated_at, save_states.deleted_at, save_states.state
+        select save_states.id, save_states.map_id, save_states.player_id, save_states.type, save_states.completed, save_states.playtime, save_states.data_version, save_states.protocol_version, save_states.ticks, save_states.score, save_states.resets, save_states.total_playtime, save_states.created_at, save_states.updated_at, save_states.deleted_at, save_states.state
         from save_states
         where deleted_at is null
           and id = ?
@@ -29,7 +29,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
           and player_id = ?""";
 
     private static final String LATEST = """
-        select save_states.id, save_states.map_id, save_states.player_id, save_states.type, save_states.created, save_states.updated, save_states.deleted, save_states.completed, save_states.playtime, save_states.state_v2, save_states.data_version, save_states.protocol_version, save_states.ticks, save_states.score, save_states.resets, save_states.total_playtime, save_states.created_at, save_states.updated_at, save_states.deleted_at, save_states.state
+        select save_states.id, save_states.map_id, save_states.player_id, save_states.type, save_states.completed, save_states.playtime, save_states.data_version, save_states.protocol_version, save_states.ticks, save_states.score, save_states.resets, save_states.total_playtime, save_states.created_at, save_states.updated_at, save_states.deleted_at, save_states.state
         from save_states
         where deleted_at is null
           and map_id = ?
@@ -39,7 +39,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         limit 1""";
 
     private static final String BEST = """
-        select ss.id, ss.map_id, ss.player_id, ss.type, ss.created, ss.updated, ss.deleted, ss.completed, ss.playtime, ss.state_v2, ss.data_version, ss.protocol_version, ss.ticks, ss.score, ss.resets, ss.total_playtime, ss.created_at, ss.updated_at, ss.deleted_at, ss.state
+        select ss.id, ss.map_id, ss.player_id, ss.type, ss.completed, ss.playtime, ss.data_version, ss.protocol_version, ss.ticks, ss.score, ss.resets, ss.total_playtime, ss.created_at, ss.updated_at, ss.deleted_at, ss.state
         from save_states ss
                  join maps m on m.id = ss.map_id
         where ss.deleted_at is null
@@ -56,7 +56,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String BEST_PER_PLAYER = """
         -- Every player's best completed run on the map, which is what its board holds.
-        select distinct on (ss.player_id) ss.id, ss.map_id, ss.player_id, ss.type, ss.created, ss.updated, ss.deleted, ss.completed, ss.playtime, ss.state_v2, ss.data_version, ss.protocol_version, ss.ticks, ss.score, ss.resets, ss.total_playtime, ss.created_at, ss.updated_at, ss.deleted_at, ss.state
+        select distinct on (ss.player_id) ss.id, ss.map_id, ss.player_id, ss.type, ss.completed, ss.playtime, ss.data_version, ss.protocol_version, ss.ticks, ss.score, ss.resets, ss.total_playtime, ss.created_at, ss.updated_at, ss.deleted_at, ss.state
         from save_states ss
                  join maps m on m.id = ss.map_id
         where ss.deleted_at is null
@@ -70,21 +70,17 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
                                    end""";
 
     private static final String UPSERT = """
-        insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, ticks, score,
-                                 state_v2, data_version, protocol_version, resets, total_playtime, created_at,
-                                 updated_at, state)
-        values (?, ?, ?, ?, ?, now(), ?, ?, ?, ?, ?,
-                ?, ?, ?, ?, ?, now(),
-                ?::text::jsonb)
+        insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, ticks,
+                                 score, state, data_version, protocol_version, resets, total_playtime)
+        values (?, ?, ?, ?, ?, now(), ?, ?, ?, ?, ?::jsonb,
+                ?, ?, ?, ?)
         on conflict (id, map_id, player_id) do update
-            set updated          = excluded.updated,
-                updated_at       = excluded.updated_at,
-                state            = excluded.state,
+            set updated_at       = excluded.updated_at,
                 completed        = excluded.completed,
                 playtime         = excluded.playtime,
                 ticks            = excluded.ticks,
                 score            = excluded.score,
-                state_v2         = excluded.state_v2,
+                state            = excluded.state,
                 data_version     = excluded.data_version,
                 protocol_version = excluded.protocol_version,
                 resets           = excluded.resets,
@@ -92,7 +88,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String REFRESH_STATS = """
         -- `map_stats` counts every player who ever had a state on the map, deleted ones included, and
-        -- every one of them who finished; `clear_rate` is generated from the two.
+        -- every one of them who finished.
         insert into map_stats (map_id, play_count, win_count)
         select ?,
                count(distinct player_id),
@@ -105,7 +101,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String DELETE_FOR_PLAYER = """
         update save_states
-        set deleted = now(), deleted_at = now()
+        set deleted_at = now()
         where deleted_at is null
           and map_id = ?
           and player_id = ?""";
@@ -114,7 +110,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         -- The maps touched, so their boards can drop the player.
         with deleted as (
             update save_states
-                set deleted = now(), deleted_at = now()
+                set deleted_at = now()
                 where deleted_at is null
                     and player_id = ?
                 returning map_id)
@@ -123,14 +119,14 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String DELETE_MAP = """
         update save_states
-        set deleted = now(), deleted_at = now()
+        set deleted_at = now()
         where deleted_at is null
           and map_id = ?""";
 
     private static final String UNDELETE_FOR_PLAYER = """
         with restored as (
             update save_states
-                set deleted = null, deleted_at = null
+                set deleted_at = null
                 where deleted_at is not null
                     and map_id = ?
                     and player_id = ?
@@ -144,7 +140,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         -- The maps touched, with how many runs came back on each.
         with restored as (
             update save_states
-                set deleted = null, deleted_at = null
+                set deleted_at = null
                 where deleted_at is not null
                     and player_id = ?
                     and (?::timestamptz is null or deleted_at >= ?)
@@ -157,7 +153,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
     private static final String UNDELETE_MAP = """
         with restored as (
             update save_states
-                set deleted = null, deleted_at = null
+                set deleted_at = null
                 where deleted_at is not null
                     and map_id = ?
                     and (?::timestamptz is null or deleted_at >= ?)
@@ -264,13 +260,11 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
                 ps.setLong(7, params.playtime());
                 ps.setInt(8, params.ticks());
                 ps.setObject(9, params.score(), Types.DOUBLE);
-                ps.setBytes(10, params.state());
+                Jdbc.setInferred(ps, 10, params.state());
                 ps.setInt(11, params.dataVersion());
                 ps.setInt(12, params.protocolVersion());
                 ps.setInt(13, params.resets());
                 ps.setLong(14, params.totalPlaytime());
-                Jdbc.setInstant(ps, 15, params.created());
-                ps.setObject(16, params.stateJson(), Types.VARCHAR);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);

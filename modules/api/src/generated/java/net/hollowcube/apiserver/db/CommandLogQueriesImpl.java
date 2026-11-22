@@ -32,8 +32,8 @@ final class CommandLogQueriesImpl implements CommandLogQueries {
                 Jdbc.setInstant(ps, 1, params.timestamp());
                 ps.setObject(2, params.playerId());
                 ps.setString(3, params.serverId());
-                ps.setString(4, params.mapId());
-                ps.setString(5, params.instanceId());
+                ps.setObject(4, params.mapId());
+                ps.setObject(5, params.instanceId());
                 ps.setString(6, params.command());
                 ps.setBoolean(7, params.remote());
                 ps.setString(8, params.outcome());

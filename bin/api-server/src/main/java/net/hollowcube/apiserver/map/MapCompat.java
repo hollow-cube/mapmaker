@@ -1,8 +1,11 @@
 package net.hollowcube.apiserver.map;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonPrimitive;
 import net.hollowcube.apiserver.common.Json;
 import net.hollowcube.apiserver.db.MapSlots;
 import net.hollowcube.apiserver.db.MapStats;
@@ -45,10 +48,6 @@ final class MapCompat {
     private static final Logger logger = LoggerFactory.getLogger(MapCompat.class);
 
     /// `maps.verification`.
-    static final long VERIFICATION_NONE = 0;
-    static final long VERIFICATION_PENDING = 1;
-    static final long VERIFICATION_VERIFIED = 2;
-
     /// The column default, which is what a row Go wrote before the column existed reads as.
     static final int DEFAULT_PROTOCOL_VERSION = 769;
 
@@ -92,7 +91,7 @@ final class MapCompat {
         return new MapData(
             map.id(),
             map.owner(),
-            requireNonNullElse(map.protocolVersion(), DEFAULT_PROTOCOL_VERSION),
+            map.protocolVersion(),
             new MapData.Settings(
                 map.name(),
                 map.icon(),
@@ -153,10 +152,70 @@ final class MapCompat {
         };
     }
 
-    /// The document for a jsonb column, or null for one jsonb refuses: it cannot hold a `\u0000`
-    /// escape, and that is a hard error no `pg_input_is_valid` guard catches.
-    static @Nullable String jsonbOrNull(String json) {
-        return json.contains("\\u0000") ? null : json;
+    /// `json` as a jsonb document. jsonb cannot hold a NUL character, so any are dropped from its
+    /// strings and keys rather than failing the write.
+    static String jsonb(JsonElement json) {
+        var text = json.toString();
+        return text.contains("\\u0000") ? withoutNul(json).toString() : text;
+    }
+
+    private static JsonElement withoutNul(JsonElement json) {
+        if (json.isJsonObject()) {
+            var out = new JsonObject();
+            for (var entry : json.getAsJsonObject().entrySet())
+                out.add(entry.getKey().replace("\0", ""), withoutNul(entry.getValue()));
+            return out;
+        }
+        if (json.isJsonArray()) {
+            var out = new JsonArray();
+            for (var element : json.getAsJsonArray()) out.add(withoutNul(element));
+            return out;
+        }
+        if (json.isJsonPrimitive() && json.getAsJsonPrimitive().isString())
+            return new JsonPrimitive(json.getAsString().replace("\0", ""));
+        return json;
+    }
+
+    static net.hollowcube.apiserver.db.MapVariant variantColumn(MapVariant variant) {
+        return switch (variant) {
+            case PARKOUR -> net.hollowcube.apiserver.db.MapVariant.PARKOUR;
+            case BUILDING -> net.hollowcube.apiserver.db.MapVariant.BUILDING;
+            case ADVENTURE -> net.hollowcube.apiserver.db.MapVariant.ADVENTURE;
+            case FREEFORM -> net.hollowcube.apiserver.db.MapVariant.FREEFORM;
+            case UNKNOWN -> throw badRequest("unknown map variant");
+        };
+    }
+
+    static net.hollowcube.apiserver.db.@Nullable MapSubvariant subvariantColumn(
+        @Nullable String subvariant
+    ) {
+        if (subvariant == null) return null;
+        for (var value : net.hollowcube.apiserver.db.MapSubvariant.values())
+            if (value.pgLabel().equals(subvariant)) return value;
+        throw badRequest("unknown map subvariant");
+    }
+
+    static net.hollowcube.apiserver.db.MapSize sizeColumn(MapSize size) {
+        return switch (size) {
+            case NORMAL -> net.hollowcube.apiserver.db.MapSize.NORMAL;
+            case LARGE -> net.hollowcube.apiserver.db.MapSize.LARGE;
+            case MASSIVE -> net.hollowcube.apiserver.db.MapSize.MASSIVE;
+            case COLOSSAL -> net.hollowcube.apiserver.db.MapSize.COLOSSAL;
+            case UNLIMITED -> net.hollowcube.apiserver.db.MapSize.UNLIMITED;
+            case UNKNOWN -> throw badRequest("unknown map size");
+        };
+    }
+
+    static net.hollowcube.apiserver.db.MapQuality qualityColumn(MapQuality quality) {
+        return switch (quality) {
+            case UNRATED -> net.hollowcube.apiserver.db.MapQuality.UNRATED;
+            case GOOD -> net.hollowcube.apiserver.db.MapQuality.GOOD;
+            case GREAT -> net.hollowcube.apiserver.db.MapQuality.GREAT;
+            case EXCELLENT -> net.hollowcube.apiserver.db.MapQuality.EXCELLENT;
+            case OUTSTANDING -> net.hollowcube.apiserver.db.MapQuality.OUTSTANDING;
+            case MASTERPIECE -> net.hollowcube.apiserver.db.MapQuality.MASTERPIECE;
+            case UNKNOWN -> throw badRequest("unknown map quality");
+        };
     }
 
     static MapRating rating(net.hollowcube.apiserver.db.@Nullable MapRating rating) {
@@ -225,14 +284,12 @@ final class MapCompat {
 
     /// `extra` with the dedicated boolean columns folded in, which is how every server reads them.
     static JsonObject extra(Maps map) {
-        var extra = map.extra() == null
-            ? new JsonObject()
-            : JsonParser.parseString(map.extra()).getAsJsonObject();
-        if (Boolean.TRUE.equals(map.optOnlySprint())) extra.addProperty("only_sprint", true);
-        if (Boolean.TRUE.equals(map.optNoSprint())) extra.addProperty("no_sprint", true);
-        if (Boolean.TRUE.equals(map.optNoJump())) extra.addProperty("no_jump", true);
-        if (Boolean.TRUE.equals(map.optNoSneak())) extra.addProperty("no_sneak", true);
-        if (Boolean.TRUE.equals(map.optBoat())) extra.addProperty("boat", true);
+        var extra = JsonParser.parseString(map.extra()).getAsJsonObject();
+        if (map.optOnlySprint()) extra.addProperty("only_sprint", true);
+        if (map.optNoSprint()) extra.addProperty("no_sprint", true);
+        if (map.optNoJump()) extra.addProperty("no_jump", true);
+        if (map.optNoSneak()) extra.addProperty("no_sneak", true);
+        if (map.optBoat()) extra.addProperty("boat", true);
         return extra;
     }
 
@@ -333,17 +390,12 @@ final class MapCompat {
     }
 
     /// A row Go could not read answered with an empty state rather than refusing the player their
-    /// map, and so does this. `state` is null only where jsonb refused the document, which
-    /// `state_v2` still holds.
+    /// map, and so does this.
     static SaveStateData saveStateData(SaveStates state) {
         JsonObject data = null;
         if (!state.completed()) {
             try {
-                var json = JsonParser.parseString(
-                    state.state() != null
-                        ? state.state()
-                        : new String(state.stateV2(), StandardCharsets.UTF_8)
-                );
+                var json = JsonParser.parseString(state.state());
                 data = json.isJsonObject() ? json.getAsJsonObject() : new JsonObject();
             } catch (JsonParseException e) {
                 logger.error("save state {} holds unreadable state", state.id(), e);

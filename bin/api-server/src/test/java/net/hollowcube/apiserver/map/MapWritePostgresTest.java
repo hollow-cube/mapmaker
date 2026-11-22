@@ -324,9 +324,8 @@ class MapWritePostgresTest {
         service.update(map, patch.build());
         sql(
             """
-            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, state_v2,
-                                     created_at, updated_at, state)
-            values ('%s', '%s', '%s', 'editing', now(), now(), false, 1, '{}', now(), now(), '{}')
+            insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, state)
+            values ('%s', '%s', '%s', 'editing', now(), now(), false, 1, '{}')
             """
                 .formatted(UUID.randomUUID(), map, owner)
         );

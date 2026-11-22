@@ -51,6 +51,7 @@ class ChatServiceImplTest {
     private static final String SENDER = "11111111-1111-1111-1111-111111111111";
     private static final String TARGET = "22222222-2222-2222-2222-222222222222";
     private static final String MAP = "33333333-3333-3333-3333-333333333333";
+    private static final String WORLD = "44444444-4444-4444-4444-444444444444";
 
     /// Every publish the service made, in order, as (subject, body).
     private final RecordingNats nats = new RecordingNats();
@@ -68,10 +69,9 @@ class ChatServiceImplTest {
             insert into player_sessions (player_id, proxy_id, skin_texture, skin_signature) values
                 ('%s', 'proxy', '', ''),
                 ('%s', 'proxy', '', '');
-            insert into maps (id, owner, created_at, updated_at, opt_variant, opt_spawn_point, published_id, name, icon,
-                              variant, spawn_point, size_class, verification_state, quality)
-                values ('%s', '%s', now(), now(), 'parkour', '{}', 7, '', '', 'parkour', '{}', 'normal', 'unverified',
-                        'unrated')"""
+            insert into maps (id, owner, created_at, updated_at, published_id, name, icon, variant, spawn_point,
+                              size_class, verification_state, quality)
+                values ('%s', '%s', now(), now(), 7, '', '', 'parkour', '{}', 'normal', 'unverified', 'unrated')"""
                 .formatted(SENDER, TARGET, SENDER, TARGET, MAP, SENDER)
         );
 
@@ -511,8 +511,8 @@ class ChatServiceImplTest {
             Instant.ofEpochMilli(at),
             player,
             "server-1",
-            "map-1",
-            "world-1",
+            MAP,
+            WORLD,
             command,
             false,
             CommandOutcome.SUCCESS,
@@ -527,8 +527,8 @@ class ChatServiceImplTest {
 
         assertEquals(
             List.of(
-                "1970-01-01 00:00:01|" + SENDER
-                    + "|server-1|map-1|world-1|spawn|false|success|null|3"
+                "1970-01-01 00:00:01|" + SENDER + "|server-1|" + MAP + "|" + WORLD
+                    + "|spawn|false|success|null|3"
             ),
             commandRows()
         );
@@ -607,7 +607,7 @@ class ChatServiceImplTest {
         return commandQuery(
             """
             select to_char(timestamp at time zone 'utc', 'YYYY-MM-DD HH24:MI:SS') || '|' || player_id || '|' ||
-                   server_id || '|' || coalesce(map_id, 'null') || '|' || coalesce(instance_id, 'null') || '|' ||
+                   server_id || '|' || coalesce(map_id::text, 'null') || '|' || coalesce(instance_id::text, 'null') || '|' ||
                    command || '|' || remote || '|' || outcome || '|' || coalesce(error, 'null') || '|' || duration_ms
             from command_log
             order by timestamp"""

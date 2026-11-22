@@ -14,8 +14,8 @@ public interface CommandLogQueries {
     /**
      * The arguments of `insertCommandLog`.
      */
-    record InsertCommandLogParams(Instant timestamp, UUID playerId, String serverId, String mapId,
-            String instanceId, String command, boolean remote, String outcome, String error,
+    record InsertCommandLogParams(Instant timestamp, UUID playerId, String serverId, UUID mapId,
+            UUID instanceId, String command, boolean remote, String outcome, String error,
             int durationMs) {
     }
 

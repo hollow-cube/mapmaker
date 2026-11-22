@@ -5,7 +5,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -29,26 +28,26 @@ final class MapsQueriesImpl implements MapsQueries {
           and published_id is not null""";
 
     private static final String GET_MAP = """
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?
           and deleted_at is null""";
 
     private static final String GET_MAP_FOR_UPDATE = """
         -- The lock every map write takes first. Preconditions are checked in Java against the locked row.
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?
           and deleted_at is null
             for update""";
 
     private static final String GET_MAP_INCLUDING_DELETED = """
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?""";
 
     private static final String GET_MAP_BY_PUBLISHED_ID = """
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where published_id = ?
           and published_at is not null
@@ -61,7 +60,7 @@ final class MapsQueriesImpl implements MapsQueries {
         order by index""";
 
     private static final String GET_STATS = """
-        select map_stats.map_id, map_stats.play_count, map_stats.win_count, map_stats.clear_rate
+        select map_stats.map_id, map_stats.play_count, map_stats.win_count
         from map_stats
         where map_id = ?""";
 
@@ -84,12 +83,11 @@ final class MapsQueriesImpl implements MapsQueries {
             for update""";
 
     private static final String CREATE_MAP = """
-        insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
-                          protocol_version, name, icon, variant, spawn_point, size_class, verification_state, quality)
+        insert into maps (id, owner, created_at, updated_at, name, icon, variant, spawn_point, size_class,
+                          verification_state, quality, protocol_version)
         values (?, ?, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', ?,
-                ?, '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}',
-                (enum_range(null::map_size))[(?::int8 + 1)::int], 'unverified', 'unrated')
-        returning maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
+                'unverified', 'unrated', ?)
+        returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
 
     private static final String INSERT_OWNER_SLOT = """
         -- The owner's own slot has index -1; bought slots count up from 0.
@@ -108,31 +106,23 @@ final class MapsQueriesImpl implements MapsQueries {
 
     private static final String UPDATE_MAP = """
         update maps
-        set opt_name         = ?,
-            opt_icon         = ?,
-            size             = ?,
-            opt_variant      = ?,
-            opt_subvariant   = ?,
-            opt_spawn_point  = ?,
+        set name             = ?,
+            icon             = ?,
+            size_class       = ?,
+            variant          = ?,
+            subvariant       = ?,
+            spawn_point      = ?,
             leaderboard      = ?,
-            opt_extra        = ?,
+            extra            = ?::jsonb,
             opt_only_sprint  = ?,
             opt_no_sprint    = ?,
             opt_no_jump      = ?,
             opt_no_sneak     = ?,
             opt_boat         = ?,
             listed           = ?,
-            quality_override = ?,
+            quality          = ?,
             protocol_version = ?,
-            updated_at       = now(),
-            name             = ?::varchar,
-            icon             = ?::varchar,
-            variant          = case when ?::varchar = any (enum_range(null::map_variant)::text[]) then ?::varchar::map_variant end,
-            subvariant       = case when ?::varchar = any (enum_range(null::map_subvariant)::text[]) then ?::varchar::map_subvariant end,
-            spawn_point      = ?,
-            extra            = ?::text::jsonb,
-            size_class       = (enum_range(null::map_size))[(?::int8 + 1)::int],
-            quality          = (enum_range(null::map_quality))[(?::int8 + 1)::int]
+            updated_at       = now()
         where id = ?""";
 
     private static final String DELETE_TAGS = """
@@ -150,7 +140,7 @@ final class MapsQueriesImpl implements MapsQueries {
     private static final String DELETE_IN_PROGRESS_STATES = """
         -- A completed run is somebody's record and stays.
         update save_states
-        set deleted = now(), deleted_at = now()
+        set deleted_at = now()
         where map_id = ?
           and deleted_at is null
           and not completed
@@ -158,13 +148,13 @@ final class MapsQueriesImpl implements MapsQueries {
 
     private static final String DELETE_ALL_STATES = """
         update save_states
-        set deleted = now(), deleted_at = now()
+        set deleted_at = now()
         where map_id = ?
           and deleted_at is null""";
 
     private static final String DELETE_VERIFYING_STATES = """
         update save_states
-        set deleted = now(), deleted_at = now()
+        set deleted_at = now()
         where map_id = ?
           and type = 'verifying'
           and deleted_at is null""";
@@ -187,19 +177,17 @@ final class MapsQueriesImpl implements MapsQueries {
             published_at = now(),
             updated_at   = now()
         where id = ?
-        returning maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
+        returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
 
     private static final String UPDATE_VERIFICATION = """
         update maps
-        set verification       = ?,
-            verification_state = (enum_range(null::map_verification))[(?::int8 + 1)::int]
+        set verification_state = ?
         where id = ?""";
 
     private static final String MARK_VERIFIED = """
         -- A verifying run that finished; the map is stamped with the version that verified it.
         update maps
-        set verification       = ?,
-            verification_state = (enum_range(null::map_verification))[(?::int8 + 1)::int],
+        set verification_state = ?,
             protocol_version   = ?
         where id = ?""";
 
@@ -236,7 +224,7 @@ final class MapsQueriesImpl implements MapsQueries {
         order by s.created_at desc""";
 
     private static final String LIST_PLAYER_PUBLISHED_MAPS = """
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where owner = ?
           and published_at is not null
@@ -316,7 +304,7 @@ final class MapsQueriesImpl implements MapsQueries {
         -- Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
         -- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
         -- sort the `order by` fragment, both built in `MapSearchSql`.
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
                array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
                coalesce(stats.play_count, 0)                                                 as play_count,
                coalesce(stats.win_count, 0)                                                  as win_count,
@@ -354,7 +342,7 @@ final class MapsQueriesImpl implements MapsQueries {
 
     private static final String LIST_PLAYER_HISTORY = """
         -- Maps drop out here once deleted instead of 404ing the page in the client.
-        select maps.id, maps.owner, maps.m_type, maps.created_at, maps.updated_at, maps.verification, maps.authz_key, maps.file_id, maps.legacy_map_id, maps.published_id, maps.published_at, maps.quality_override, maps.opt_name, maps.opt_icon, maps.size, maps.opt_variant, maps.opt_subvariant, maps.opt_spawn_point, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.opt_extra, maps.opt_tags, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.ext, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
                array(select tag::text from map_tags where map_id = maps.id order by index) as tags,
                coalesce(stats.play_count, 0)                                                 as play_count,
                coalesce(stats.win_count, 0)                                                  as win_count,
@@ -542,15 +530,14 @@ final class MapsQueriesImpl implements MapsQueries {
 
     @Nullable
     @Override
-    public Maps createMap(UUID mapId, UUID owner, long size, int protocolVersion) {
+    public Maps createMap(UUID mapId, UUID owner, MapSize size, int protocolVersion) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(CREATE_MAP)) {
                 ps.setObject(1, mapId);
                 ps.setObject(2, owner);
-                ps.setLong(3, size);
+                Jdbc.setInferred(ps, 3, size.pgLabel());
                 ps.setInt(4, protocolVersion);
-                ps.setLong(5, size);
                 try (ResultSet rs = ps.executeQuery()) {
                     return rs.next() ? Maps.read(rs, 1) : null;
                 }
@@ -603,31 +590,21 @@ final class MapsQueriesImpl implements MapsQueries {
             try (PreparedStatement ps = conn.prepareStatement(UPDATE_MAP)) {
                 ps.setString(1, params.name());
                 ps.setString(2, params.icon());
-                ps.setLong(3, params.size());
-                ps.setString(4, params.variant());
-                ps.setString(5, params.subvariant());
+                Jdbc.setInferred(ps, 3, params.size().pgLabel());
+                Jdbc.setInferred(ps, 4, params.variant().pgLabel());
+                Jdbc.setInferred(ps, 5, params.subvariant() == null ? null : params.subvariant().pgLabel());
                 Jdbc.setInferred(ps, 6, params.spawnPoint());
                 Jdbc.setInferred(ps, 7, params.leaderboard());
-                ps.setBytes(8, params.extra());
+                Jdbc.setInferred(ps, 8, params.extra());
                 ps.setBoolean(9, params.onlySprint());
                 ps.setBoolean(10, params.noSprint());
                 ps.setBoolean(11, params.noJump());
                 ps.setBoolean(12, params.noSneak());
                 ps.setBoolean(13, params.boat());
                 ps.setBoolean(14, params.listed());
-                ps.setLong(15, params.quality());
+                Jdbc.setInferred(ps, 15, params.quality().pgLabel());
                 ps.setInt(16, params.protocolVersion());
-                ps.setString(17, params.name());
-                ps.setString(18, params.icon());
-                ps.setString(19, params.variant());
-                ps.setString(20, params.variant());
-                ps.setString(21, params.subvariant());
-                ps.setString(22, params.subvariant());
-                Jdbc.setInferred(ps, 23, params.spawnPoint());
-                ps.setObject(24, params.extraJson(), Types.VARCHAR);
-                ps.setLong(25, params.size());
-                ps.setLong(26, params.quality());
-                ps.setObject(27, params.mapId());
+                ps.setObject(17, params.mapId());
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -783,13 +760,12 @@ final class MapsQueriesImpl implements MapsQueries {
     }
 
     @Override
-    public long updateVerification(long verification, UUID mapId) {
+    public long updateVerification(MapVerification verification, UUID mapId) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(UPDATE_VERIFICATION)) {
-                ps.setLong(1, verification);
-                ps.setLong(2, verification);
-                ps.setObject(3, mapId);
+                Jdbc.setInferred(ps, 1, verification.pgLabel());
+                ps.setObject(2, mapId);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -800,14 +776,13 @@ final class MapsQueriesImpl implements MapsQueries {
     }
 
     @Override
-    public long markVerified(long verification, int protocolVersion, UUID mapId) {
+    public long markVerified(MapVerification verification, int protocolVersion, UUID mapId) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(MARK_VERIFIED)) {
-                ps.setLong(1, verification);
-                ps.setLong(2, verification);
-                ps.setInt(3, protocolVersion);
-                ps.setObject(4, mapId);
+                Jdbc.setInferred(ps, 1, verification.pgLabel());
+                ps.setInt(2, protocolVersion);
+                ps.setObject(3, mapId);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -1123,7 +1098,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(i++, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.SearchMapsRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 44, String.class), rs.getLong(45), rs.getLong(46), rs.getLong(47)));
+                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 30, String.class), rs.getLong(31), rs.getLong(32), rs.getLong(33)));
                     return rows;
                 }
             } finally {
@@ -1166,7 +1141,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(3, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.ListPlayerHistoryRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 44, String.class), rs.getLong(45), rs.getLong(46), rs.getLong(47)));
+                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 30, String.class), rs.getLong(31), rs.getLong(32), rs.getLong(33)));
                     return rows;
                 }
             } finally {

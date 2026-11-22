@@ -4,7 +4,6 @@ package net.hollowcube.apiserver.db;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.Jdbc;
 import org.jetbrains.annotations.Nullable;
@@ -12,19 +11,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `maps` table.
  */
-public record Maps(UUID id, UUID owner, @Nullable String mType, Instant createdAt,
-        Instant updatedAt, @Nullable Long verification, @Nullable String authzKey,
-        @Nullable String fileId, @Nullable String legacyMapId, @Nullable Long publishedId,
-        @Nullable Instant publishedAt, @Nullable Long qualityOverride, @Nullable String optName,
-        @Nullable String optIcon, long size, String optVariant, @Nullable String optSubvariant,
-        String optSpawnPoint, @Nullable Boolean optOnlySprint, @Nullable Boolean optNoSprint,
-        @Nullable Boolean optNoJump, @Nullable Boolean optNoSneak, @Nullable Boolean optBoat,
-        @Nullable byte[] optExtra, @Nullable List<String> optTags, String ext,
+public record Maps(UUID id, UUID owner, Instant createdAt, Instant updatedAt,
+        @Nullable Long publishedId, @Nullable Instant publishedAt, boolean optOnlySprint,
+        boolean optNoSprint, boolean optNoJump, boolean optNoSneak, boolean optBoat, String ext,
         @Nullable Instant deletedAt, @Nullable UUID deletedBy, @Nullable String deletedReason,
-        @Nullable Integer protocolVersion, @Nullable UUID contest, boolean listed, int totalLikes,
+        int protocolVersion, @Nullable UUID contest, boolean listed, int totalLikes,
         @Nullable String leaderboard, String name, String icon, MapVariant variant,
-        @Nullable MapSubvariant subvariant, String spawnPoint, @Nullable String extra,
-        MapSize sizeClass, MapVerification verificationState, MapQuality quality) {
+        @Nullable MapSubvariant subvariant, String spawnPoint, String extra, MapSize sizeClass,
+        MapVerification verificationState, MapQuality quality) {
     /**
      * Reads one `maps` row, its first column at `col`.
      */
@@ -32,46 +26,32 @@ public record Maps(UUID id, UUID owner, @Nullable String mType, Instant createdA
         return new Maps(
                 rs.getObject(col, UUID.class),
                 rs.getObject(col + 1, UUID.class),
-                rs.getString(col + 2),
+                Jdbc.getInstant(rs, col + 2),
                 Jdbc.getInstant(rs, col + 3),
-                Jdbc.getInstant(rs, col + 4),
-                rs.getObject(col + 5, Long.class),
-                rs.getString(col + 6),
-                rs.getString(col + 7),
-                rs.getString(col + 8),
-                rs.getObject(col + 9, Long.class),
-                Jdbc.getInstant(rs, col + 10),
-                rs.getObject(col + 11, Long.class),
-                rs.getString(col + 12),
-                rs.getString(col + 13),
-                rs.getLong(col + 14),
-                rs.getString(col + 15),
-                rs.getString(col + 16),
-                rs.getString(col + 17),
-                rs.getObject(col + 18, Boolean.class),
-                rs.getObject(col + 19, Boolean.class),
-                rs.getObject(col + 20, Boolean.class),
-                rs.getObject(col + 21, Boolean.class),
-                rs.getObject(col + 22, Boolean.class),
-                rs.getBytes(col + 23),
-                Jdbc.getList(rs, col + 24, String.class),
+                rs.getObject(col + 4, Long.class),
+                Jdbc.getInstant(rs, col + 5),
+                rs.getBoolean(col + 6),
+                rs.getBoolean(col + 7),
+                rs.getBoolean(col + 8),
+                rs.getBoolean(col + 9),
+                rs.getBoolean(col + 10),
+                rs.getString(col + 11),
+                Jdbc.getInstant(rs, col + 12),
+                rs.getObject(col + 13, UUID.class),
+                rs.getString(col + 14),
+                rs.getInt(col + 15),
+                rs.getObject(col + 16, UUID.class),
+                rs.getBoolean(col + 17),
+                rs.getInt(col + 18),
+                rs.getString(col + 19),
+                rs.getString(col + 20),
+                rs.getString(col + 21),
+                MapVariant.fromPg(rs.getString(col + 22)),
+                MapSubvariant.fromPg(rs.getString(col + 23)),
+                rs.getString(col + 24),
                 rs.getString(col + 25),
-                Jdbc.getInstant(rs, col + 26),
-                rs.getObject(col + 27, UUID.class),
-                rs.getString(col + 28),
-                rs.getObject(col + 29, Integer.class),
-                rs.getObject(col + 30, UUID.class),
-                rs.getBoolean(col + 31),
-                rs.getInt(col + 32),
-                rs.getString(col + 33),
-                rs.getString(col + 34),
-                rs.getString(col + 35),
-                MapVariant.fromPg(rs.getString(col + 36)),
-                MapSubvariant.fromPg(rs.getString(col + 37)),
-                rs.getString(col + 38),
-                rs.getString(col + 39),
-                MapSize.fromPg(rs.getString(col + 40)),
-                MapVerification.fromPg(rs.getString(col + 41)),
-                MapQuality.fromPg(rs.getString(col + 42)));
+                MapSize.fromPg(rs.getString(col + 26)),
+                MapVerification.fromPg(rs.getString(col + 27)),
+                MapQuality.fromPg(rs.getString(col + 28)));
     }
 }

@@ -218,7 +218,7 @@ class MapServiceImplTest {
         var id = create(OWNER).id();
         TEST_DB.seed(
             """
-            update maps set opt_variant='building', variant='building', published_id=5, published_at=now() where id='%s'
+            update maps set variant='building', published_id=5, published_at=now() where id='%s'
             """
                 .formatted(id)
         );
@@ -227,16 +227,16 @@ class MapServiceImplTest {
         state(id, BUILDER, "playing", false, 30);
         state(id, BUILDER, "verifying", false, 30);
         client.update(id, patch(null, MapVariant.PARKOUR, null, null));
-        assertEquals(2, count("select count(*) from save_states where deleted is null"));
+        assertEquals(2, count("select count(*) from save_states where deleted_at is null"));
         assertEquals(
             1,
-            count("select count(*) from save_states where completed and deleted is null")
+            count("select count(*) from save_states where completed and deleted_at is null")
         );
         assertEquals(99L, db.maps.getLatestEditingTime(id, OWNER));
         // A repeated patch is not a second cleanup of newly started runs.
         state(id, BUILDER, "playing", false, 30);
         client.update(id, patch(null, MapVariant.PARKOUR, null, null));
-        assertEquals(3, count("select count(*) from save_states where deleted is null"));
+        assertEquals(3, count("select count(*) from save_states where deleted_at is null"));
     }
 
     @Test
@@ -326,7 +326,7 @@ class MapServiceImplTest {
         assertEquals(id, client.get("000-000-007").id());
         TEST_DB.seed(
             """
-            update maps set opt_variant='parkour', variant='parkour' where id='%s';
+            update maps set variant='parkour' where id='%s';
             insert into map_stats(map_id,play_count,win_count) values ('%s',100,90)
             """
                 .formatted(id, id)
@@ -347,7 +347,7 @@ class MapServiceImplTest {
         TEST_DB.seed(
             """
             update map_stats set play_count=100 where map_id='%s';
-            update maps set opt_variant='building', variant='building' where id='%s'
+            update maps set variant='building' where id='%s'
             """
                 .formatted(id, id)
         );
@@ -360,9 +360,7 @@ class MapServiceImplTest {
         assertEquals(BeginVerificationResult.MAP_NOT_FOUND, client.beginVerification(absent));
         assertEquals(DeleteVerificationResult.MAP_NOT_FOUND, client.deleteVerification(absent));
         var id = create(OWNER).id();
-        TEST_DB.seed(
-            "update maps set verification=2, verification_state='verified' where id='" + id + "'"
-        );
+        TEST_DB.seed("update maps set verification_state='verified' where id='" + id + "'");
         assertEquals(BeginVerificationResult.READY, client.beginVerification(id));
         assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
         preparePublish(id);
@@ -796,11 +794,7 @@ class MapServiceImplTest {
             List.of("map:" + id + ":lb_playtime", "map:" + id + ":lb_playtime"),
             clients.redis.deleted
         );
-        assertEquals(2, count("select count(*) from save_states where deleted is null"));
-        assertEquals(
-            0,
-            count("select count(*) from save_states where deleted is distinct from deleted_at")
-        );
+        assertEquals(2, count("select count(*) from save_states where deleted_at is null"));
     }
 
     @Test
@@ -923,33 +917,29 @@ class MapServiceImplTest {
     }
 
     @Test
-    void update_mirrorsIntoTheNewColumns() {
+    void update_writesTheSettingsAndDropsANulFromExtra() {
         var id = create(OWNER).id();
-        var mirrored = """
-            select count(*) from maps
-            where name = opt_name and icon = opt_icon and variant::text = opt_variant
-              and subvariant is not distinct from opt_subvariant::map_subvariant
-              and spawn_point = opt_spawn_point
-              and extra is not distinct from convert_from(opt_extra, 'UTF8')::jsonb
-              and size_class = (enum_range(null::map_size))[size + 1]
-              and quality = (enum_range(null::map_quality))[quality_override + 1]
-              and verification_state = (enum_range(null::map_verification))[verification + 1]
-            """;
-        assertEquals(1, count(mirrored));
         var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
         patch.setName("named");
         patch.setSubVariant("speedrun");
-        patch.setSize(MapSize.LARGE);
         patch.setQualityOverride(MapQuality.GREAT);
         client.update(id, patch.build());
-        client.update(id, patch(null, null, null, "{\"custom\":1}"));
-        assertEquals(1, count(mirrored));
-        assertEquals("speedrun", column("select subvariant from maps"));
+        var settings = client.get(id.toString()).settings();
+        assertEquals("named", settings.name());
+        assertEquals("speedrun", settings.subvariant());
+        assertEquals(MapQuality.GREAT, client.get(id.toString()).quality());
+
+        var unknown = new MapPatch.Builder(MapData.draft(id, OWNER));
+        unknown.setSubVariant("sideways");
+        assertEquals(
+            400,
+            assertThrows(IpcException.class, () -> client.update(id, unknown.build())).status()
+        );
 
         client.update(id, patch(null, null, null, "{\"custom\":\"a\\u0000b\"}"));
         assertEquals(
-            1,
-            count("select count(*) from maps where extra is null and opt_extra is not null")
+            "ab",
+            client.get(id.toString()).settings().extra().get("custom").getAsString()
         );
     }
 
@@ -968,7 +958,7 @@ class MapServiceImplTest {
         client.delete(OWNER, id, null);
         assertNull(client.get(id.toString()));
         assertEquals(0, db.maps.countSlots(OWNER));
-        assertEquals(0, count("select count(*) from save_states where deleted is null"));
+        assertEquals(0, count("select count(*) from save_states where deleted_at is null"));
         assertEquals(
             0,
             count("select count(*) from player_notifications where deleted_at is null")
@@ -1099,8 +1089,8 @@ class MapServiceImplTest {
         state(done, BUILDER, "playing", false, 1_000);
         state(going, BUILDER, "verifying", false, 4_000);
         TEST_DB.seed(
-            "update save_states set updated = now() - interval '1 hour', updated_at = now() - interval '1 hour' where map_id = '"
-                + going + "'"
+            "update save_states set updated_at = now() - interval '1 hour' where map_id = '" + going
+                + "'"
         );
         state(going, BUILDER, "playing", false, 7_000);
         state(going, OWNER, "playing", true, 1);
@@ -1127,9 +1117,7 @@ class MapServiceImplTest {
         state(first, BUILDER, "playing", false, 1);
         state(gone, BUILDER, "playing", false, 1);
         state(second, BUILDER, "editing", false, 1);
-        TEST_DB.seed(
-            "update save_states set updated = now() - interval '1 hour', updated_at = now() - interval '1 hour'"
-        );
+        TEST_DB.seed("update save_states set updated_at = now() - interval '1 hour'");
         state(second, BUILDER, "playing", true, 1);
         state(first, BUILDER, "playing", false, 1);
         client.delete(OWNER, gone, null);
@@ -1156,11 +1144,11 @@ class MapServiceImplTest {
         client.update(id, patch.build());
         TEST_DB.seed(
             """
-            update maps set published_id = %s, published_at = '%s', quality_override = %s,
+            update maps set published_id = %s, published_at = '%s',
                             quality = (enum_range(null::map_quality))[%s + 1], total_likes = %s
             where id = '%s'
             """
-                .formatted(publishedIdCounter++, publishedAt, quality, quality, likes, id)
+                .formatted(publishedIdCounter++, publishedAt, quality, likes, id)
         );
         return id;
     }
@@ -1218,9 +1206,8 @@ class MapServiceImplTest {
     private void state(UUID map, UUID player, String type, boolean completed, long playtime) {
         TEST_DB.seed(
             """
-            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, state_v2,
-                                     created_at, updated_at, state)
-            values ('%s', '%s', '%s', '%s', now(), now(), %s, %s, '{}', now(), now(), '{}')
+            insert into save_states (id, map_id, player_id, type, created_at, updated_at, completed, playtime, state)
+            values ('%s', '%s', '%s', '%s', now(), now(), %s, %s, '{}')
             """
                 .formatted(UUID.randomUUID(), map, player, type, completed, playtime)
         );

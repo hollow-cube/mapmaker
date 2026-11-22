@@ -11,11 +11,10 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `save_states` table.
  */
-public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type, Instant created,
-        Instant updated, @Nullable Instant deleted, boolean completed, long playtime,
-        byte[] stateV2, int dataVersion, @Nullable Integer protocolVersion, int ticks,
+public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type, boolean completed,
+        long playtime, int dataVersion, @Nullable Integer protocolVersion, int ticks,
         @Nullable Double score, int resets, long totalPlaytime, Instant createdAt,
-        Instant updatedAt, @Nullable Instant deletedAt, @Nullable String state) {
+        Instant updatedAt, @Nullable Instant deletedAt, String state) {
     /**
      * Reads one `save_states` row, its first column at `col`.
      */
@@ -25,21 +24,17 @@ public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type,
                 rs.getObject(col + 1, UUID.class),
                 rs.getObject(col + 2, UUID.class),
                 SaveStateType.fromPg(rs.getString(col + 3)),
-                Jdbc.getInstant(rs, col + 4),
-                Jdbc.getInstant(rs, col + 5),
-                Jdbc.getInstant(rs, col + 6),
-                rs.getBoolean(col + 7),
-                rs.getLong(col + 8),
-                rs.getBytes(col + 9),
+                rs.getBoolean(col + 4),
+                rs.getLong(col + 5),
+                rs.getInt(col + 6),
+                rs.getObject(col + 7, Integer.class),
+                rs.getInt(col + 8),
+                rs.getObject(col + 9, Double.class),
                 rs.getInt(col + 10),
-                rs.getObject(col + 11, Integer.class),
-                rs.getInt(col + 12),
-                rs.getObject(col + 13, Double.class),
-                rs.getInt(col + 14),
-                rs.getLong(col + 15),
-                Jdbc.getInstant(rs, col + 16),
-                Jdbc.getInstant(rs, col + 17),
-                Jdbc.getInstant(rs, col + 18),
-                rs.getString(col + 19));
+                rs.getLong(col + 11),
+                Jdbc.getInstant(rs, col + 12),
+                Jdbc.getInstant(rs, col + 13),
+                Jdbc.getInstant(rs, col + 14),
+                rs.getString(col + 15));
     }
 }
