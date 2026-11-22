@@ -2,7 +2,6 @@ package net.hollowcube.mapmaker.util;
 
 import net.minestom.server.network.packet.server.play.MapDataPacket;
 
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,23 +31,6 @@ public class ImageBuffer {
 
     public void setPixel(int x, int y, int argb) {
         this.data[y * SIZE + x] = colorIndex(argb);
-    }
-
-    public void draw(BufferedImage image, boolean center) {
-        int width = image.getWidth();
-        int height = image.getHeight();
-
-        int u = width > SIZE ? (width - SIZE) / 2 : 0;
-        int v = height > SIZE ? (height - SIZE) / 2 : 0;
-
-        int xOff = center ? Math.max(0, (SIZE - width) / 2) : 0;
-        int yOff = center ? Math.max(0, (SIZE - height) / 2) : 0;
-
-        for (int x = 0; x < Math.min(SIZE, width); x++) {
-            for (int y = 0; y < Math.min(SIZE, height); y++) {
-                this.setPixel(x + xOff, y + yOff, image.getRGB(u + x, v + y));
-            }
-        }
     }
 
     public MapDataPacket preparePacket(int mapId) {

@@ -1,5 +1,6 @@
 package net.hollowcube.mapmaker.cosmetic.impl.victory;
 
+import net.hollowcube.common.util.ColorUtil;
 import net.hollowcube.mapmaker.cosmetic.Cosmetic;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
@@ -81,6 +82,6 @@ public class FireworkVictoryEffectImpl extends AbstractVictoryEffectImpl {
 
     public static int randomRGB() {
         var random = ThreadLocalRandom.current();
-        return java.awt.Color.HSBtoRGB(random.nextFloat(), 1f, 1f);
+        return ColorUtil.hsvToRgb(random.nextFloat(), 1f, 1f);
     }
 }

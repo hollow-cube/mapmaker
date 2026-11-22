@@ -6,7 +6,6 @@ import net.hollowcube.mapmaker.panels.Panel;
 import net.hollowcube.mapmaker.util.ImageBuffer;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.image.BufferedImage;
 import java.util.Base64;
 import java.util.BitSet;
 
@@ -14,7 +13,8 @@ public class QrCodeView extends AbstractImagePanel {
 
     private static final int SIZE = ImageBuffer.SIZE;
 
-    private final BufferedImage qrCode;
+    private final BitSet bits;
+    private final int size;
     private final Panel toOpen;
 
     /**
@@ -23,7 +23,8 @@ public class QrCodeView extends AbstractImagePanel {
      */
     public QrCodeView(String base64, int size, Panel toOpen) {
         super("info");
-        this.qrCode = createQrCode(base64, size);
+        this.bits = BitSet.valueOf(Base64.getDecoder().decode(base64));
+        this.size = size;
         this.toOpen = toOpen;
     }
 
@@ -32,7 +33,7 @@ public class QrCodeView extends AbstractImagePanel {
         super.mount(host, isInitial);
         this.updateImage(buffer -> {
             buffer.fill(0x00000000);
-            buffer.draw(this.qrCode, true);
+            drawQrCode(buffer);
         });
     }
 
@@ -41,24 +42,18 @@ public class QrCodeView extends AbstractImagePanel {
         this.host.pushTransientView(this.toOpen);
     }
 
-    private static BufferedImage createQrCode(String base64Bits, int size) {
-        var bits = BitSet.valueOf(Base64.getDecoder().decode(base64Bits));
+    private void drawQrCode(ImageBuffer buffer) {
         int scale = size < SIZE ? Math.floorDiv(SIZE, size) : 1;
-        var image = new BufferedImage(size * scale, size * scale, BufferedImage.TYPE_INT_ARGB);
+        int drawn = Math.min(SIZE, size * scale);
+        int offset = (SIZE - drawn) / 2;
+        int crop = (size * scale - drawn) / 2;
 
-        for (int x = 0; x < size; x++) {
-            for (int y = 0; y < size; y++) {
-                int index = (y * size) + x;
-                int pixel = index < bits.length() && bits.get(index) ? 0xFF000000 : 0xFFFFFFFF;
-
-                for (int dx = 0; dx < scale; dx++) {
-                    for (int dy = 0; dy < scale; dy++) {
-                        image.setRGB(x * scale + dx, y * scale + dy, pixel);
-                    }
-                }
+        for (int px = 0; px < drawn; px++) {
+            for (int py = 0; py < drawn; py++) {
+                int index = ((py + crop) / scale) * size + ((px + crop) / scale);
+                int pixel = bits.get(index) ? 0xFF000000 : 0xFFFFFFFF;
+                buffer.setPixel(px + offset, py + offset, pixel);
             }
         }
-
-        return image;
     }
 }
