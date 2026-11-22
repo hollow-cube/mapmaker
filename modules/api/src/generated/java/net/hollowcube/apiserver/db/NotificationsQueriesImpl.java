@@ -18,7 +18,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 @SuppressWarnings("UnusedReturnValue")
 final class NotificationsQueriesImpl implements NotificationsQueries {
     private static final String LIST = """
-        select player_notifications.*,
+        select player_notifications.id, player_notifications.player_id, player_notifications.type, player_notifications.key, player_notifications.data, player_notifications.created_at, player_notifications.read_at, player_notifications.expires_at, player_notifications.deleted_at,
                count(*) over () as total_count
         from player_notifications
         where player_id = ?

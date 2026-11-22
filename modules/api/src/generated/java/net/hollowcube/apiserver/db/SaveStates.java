@@ -14,8 +14,8 @@ import org.jetbrains.annotations.Nullable;
 public record SaveStates(UUID id, UUID mapId, UUID playerId, SaveStateType type, Instant created,
         Instant updated, @Nullable Instant deleted, boolean completed, long playtime,
         byte[] stateV2, int dataVersion, @Nullable Integer protocolVersion, int ticks,
-        @Nullable Double score, int resets, long totalPlaytime, @Nullable Instant createdAt,
-        @Nullable Instant updatedAt, @Nullable Instant deletedAt, @Nullable String state) {
+        @Nullable Double score, int resets, long totalPlaytime, Instant createdAt,
+        Instant updatedAt, @Nullable Instant deletedAt, @Nullable String state) {
     /**
      * Reads one `save_states` row, its first column at `col`.
      */

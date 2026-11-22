@@ -5,29 +5,14 @@ import com.google.gson.reflect.TypeToken;
 import net.hollowcube.common.ServerRuntime;
 import net.hollowcube.datafix.DataFixer;
 import net.hollowcube.ipc.Blob;
-import net.hollowcube.ipc.map.BeginVerificationResult;
-import net.hollowcube.ipc.map.BuilderResult;
-import net.hollowcube.ipc.map.CreateMapResult;
-import net.hollowcube.ipc.map.DeleteVerificationResult;
-import net.hollowcube.ipc.map.MapBuilder;
-import net.hollowcube.ipc.map.MapData;
-import net.hollowcube.ipc.map.MapPatch;
-import net.hollowcube.ipc.map.MapReportCategory;
-import net.hollowcube.ipc.map.MapService;
-import net.hollowcube.ipc.map.MapSize;
-import net.hollowcube.ipc.map.MapSlot;
-import net.hollowcube.ipc.map.MapStatus;
-import net.hollowcube.ipc.map.OpenWorldResult;
-import net.hollowcube.ipc.map.PublishMapResult;
-import net.hollowcube.ipc.map.SaveStateType;
-import net.hollowcube.ipc.map.SaveStateUpdate;
-import net.hollowcube.ipc.map.SaveWorldResult;
+import net.hollowcube.ipc.map.*;
 import net.hollowcube.ipc.util.IpcException;
+import net.hollowcube.ipc.util.IpcRetry;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.api.ResultList;
-import net.hollowcube.mapmaker.map.*;
-import net.hollowcube.mapmaker.util.AbstractHttpService;
+import net.hollowcube.mapmaker.map.ReadableMapData;
+import net.hollowcube.mapmaker.map.SaveState;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.codec.Transcoder;
 import net.minestom.server.registry.RegistryTranscoder;
@@ -39,12 +24,9 @@ import java.io.UncheckedIOException;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.channels.Channels;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import static net.hollowcube.mapmaker.api.ApiClient.notImplemented;
-import static net.hollowcube.mapmaker.api.HttpClientWrapper.query;
 
 public interface MapClient {
 
@@ -361,7 +343,12 @@ public interface MapClient {
 
         @Override
         public void updateSaveState(String mapId, String playerId, String saveStateId, SaveStateUpdate update) {
-            maps.upsertSaveState(UUID.fromString(mapId), UUID.fromString(playerId), UUID.fromString(saveStateId), update);
+            IpcRetry.run(() -> maps.upsertSaveState(
+                UUID.fromString(mapId),
+                UUID.fromString(playerId),
+                UUID.fromString(saveStateId),
+                update
+            ));
         }
 
         @Override

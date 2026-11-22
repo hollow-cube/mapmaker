@@ -55,7 +55,7 @@ final class JobsQueriesImpl implements JobsQueries {
                                               for update skip locked
                                           limit ?)
                 returning *)
-        select picked.*
+        select picked.job, picked.instance, picked.data, picked.run_at, picked.picked_by, picked.picked_at, picked.heartbeat, picked.attempts, picked.last_error, picked.last_success, picked.parked_at, picked.version
         from picked
         order by run_at nulls last, job, instance""";
 
@@ -156,10 +156,10 @@ final class JobsQueriesImpl implements JobsQueries {
             last_error = 'lost by ' || picked_by
         where picked_by is not null
           and heartbeat < now() - ?::int * interval '1 second'
-        returning jobs.*""";
+        returning jobs.job, jobs.instance, jobs.data, jobs.run_at, jobs.picked_by, jobs.picked_at, jobs.heartbeat, jobs.attempts, jobs.last_error, jobs.last_success, jobs.parked_at, jobs.version""";
 
     private static final String LIST_JOBS = """
-        select jobs.*
+        select jobs.job, jobs.instance, jobs.data, jobs.run_at, jobs.picked_by, jobs.picked_at, jobs.heartbeat, jobs.attempts, jobs.last_error, jobs.last_success, jobs.parked_at, jobs.version
         from jobs
         order by job, instance""";
 

@@ -46,17 +46,23 @@ final class MapSearchSql {
         }
         if (search.query() != null) {
             // `%` and `_` in the query are wildcards, as they were for Go.
-            sql.append(" and maps.opt_name ilike ?");
+            sql.append(" and maps.name ilike ?");
             params.add("%" + search.query() + "%");
         }
         in(
             sql,
             params,
-            "maps.opt_variant",
+            "maps.variant::text",
             search.variants(),
             v -> v.name().toLowerCase(Locale.ROOT)
         );
-        in(sql, params, "maps.quality_override", search.qualities(), q -> (long) q.ordinal());
+        in(
+            sql,
+            params,
+            "maps.quality::text",
+            search.qualities(),
+            q -> q.name().toLowerCase(Locale.ROOT)
+        );
         in(sql, params, DIFFICULTY, search.difficulties(), MapCompat::difficultyId);
         return new SqlFragment(sql.toString(), params);
     }
@@ -66,7 +72,7 @@ final class MapSearchSql {
         var direction = search.ascending() ? " asc" : " desc";
         return switch (search.sort()) {
             case BEST -> SqlFragment.of(
-                "maps.quality_override" + direction
+                "maps.quality" + direction
                     + ", maps.total_likes desc, maps.published_at desc, maps.id"
             );
             case PUBLISHED -> SqlFragment.of("maps.published_at" + direction + ", maps.id");

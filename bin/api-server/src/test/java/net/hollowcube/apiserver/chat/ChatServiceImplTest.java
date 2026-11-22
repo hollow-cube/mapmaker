@@ -68,8 +68,10 @@ class ChatServiceImplTest {
             insert into player_sessions (player_id, proxy_id, skin_texture, skin_signature) values
                 ('%s', 'proxy', '', ''),
                 ('%s', 'proxy', '', '');
-            insert into maps (id, owner, m_type, created_at, updated_at, file_id, opt_variant, opt_spawn_point, published_id)
-                values ('%s', '%s', 'parkour', now(), now(), 'f', 'v', '{}', 7)"""
+            insert into maps (id, owner, created_at, updated_at, opt_variant, opt_spawn_point, published_id, name, icon,
+                              variant, spawn_point, size_class, verification_state, quality)
+                values ('%s', '%s', now(), now(), 'parkour', '{}', 7, '', '', 'parkour', '{}', 'normal', 'unverified',
+                        'unrated')"""
                 .formatted(SENDER, TARGET, SENDER, TARGET, MAP, SENDER)
         );
 

@@ -11,6 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.regex.Pattern;
 
 /// Turns described queries into the [Model] the emitters read: picks row shapes, resolves embeds,
@@ -25,6 +26,8 @@ final class Resolver {
     /// record the way the query referred to it — the alias if it gave one, else the table name —
     /// and the count has to match the embeds the server describes.
     private static final Pattern STAR = Pattern.compile("(\\w+)\\s*\\.\\s*\\*");
+
+    private static final Pattern PLAIN_IDENTIFIER = Pattern.compile("[a-z_][a-z0-9_$]*");
 
     private final Connection conn;
     private final Catalog catalog;
@@ -94,9 +97,41 @@ final class Resolver {
             ? group.nestedClass(Names.pascal(query.name()) + "Params")
             : null;
 
-        return new Model.Query(query.name(), Names.constant(query.name()), query.sql(), query.tag(),
-            List.copyOf(params), query.binds(), query.holes(), paramsClass, result(group, query, described),
-            query.alwaysOneRow());
+        var result = result(group, query, described);
+        var embeds = result.components().stream()
+            .filter(Model.Embed.class::isInstance).map(c -> ((Model.Embed) c).table()).toList();
+        var expanded = expandStars(query.sql(), query.holes(), embeds);
+        return new Model.Query(query.name(), Names.constant(query.name()), expanded.sql(), query.tag(),
+            List.copyOf(params), query.binds(), expanded.holes(), paramsClass, result, query.alwaysOneRow());
+    }
+
+    private record Expanded(String sql, List<QueryFile.Hole> holes) {}
+
+    /// Writes each `ref.*` out as the table's columns as they are now, so a column added later does
+    /// not change what an already deployed statement returns: a server-side prepared plan for
+    /// `t.*` fails with "cached plan must not change result type", and anything selected after it
+    /// would be read at the wrong position.
+    private static Expanded expandStars(String sql, List<QueryFile.Hole> holes, List<Catalog.Table> embeds) {
+        var matcher = STAR.matcher(sql);
+        var out = new StringBuilder();
+        var shifted = new ArrayList<>(holes);
+        int last = 0;
+        int embed = 0;
+        while (matcher.find()) {
+            var alias = matcher.group(1);
+            var columns = new StringJoiner(", ");
+            for (var column : embeds.get(embed++).columns()) columns.add(alias + "." + identifier(column.name()));
+            out.append(sql, last, matcher.start()).append(columns);
+            int delta = columns.length() - (matcher.end() - matcher.start());
+            for (int h = 0; h < shifted.size(); h++) {
+                var hole = shifted.get(h);
+                if (hole.sqlOffset() >= matcher.end())
+                    shifted.set(h, new QueryFile.Hole(hole.kind(), hole.sqlOffset() + delta, hole.bindOffset()));
+            }
+            last = matcher.end();
+        }
+        out.append(sql, last, sql.length());
+        return new Expanded(out.toString(), List.copyOf(shifted));
     }
 
     private Model.Result result(ClassName group, QueryFile.Query query, Describe.Result described) {
@@ -261,6 +296,12 @@ final class Resolver {
         var out = new ArrayList<String>();
         while (matcher.find()) out.add(matcher.group(1));
         return out;
+    }
+
+    /// A column name as SQL text. After `alias.` even a reserved word needs no quotes, so only a name
+    /// Postgres would fold or reject unquoted is quoted.
+    private static String identifier(String name) {
+        return PLAIN_IDENTIFIER.matcher(name).matches() ? name : "\"" + name.replace("\"", "\"\"") + "\"";
     }
 
     private static String unique(Set<String> taken, String name) {

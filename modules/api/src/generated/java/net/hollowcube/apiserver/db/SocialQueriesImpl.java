@@ -30,7 +30,7 @@ final class SocialQueriesImpl implements SocialQueries {
                          from player_friends pf
                          where pf.player_id = ?)
         select count(*) over () as total_count,
-               player.*,
+               player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                f.online,
                f.created_at   as friends_since
         from friends f
@@ -72,7 +72,7 @@ final class SocialQueriesImpl implements SocialQueries {
 
     private static final String GET_INCOMING_FRIEND_REQUESTS = """
         select count(*) over () as total_count,
-               player.*,
+               player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pfr.created_at   as sent_at
         from player_friend_requests pfr
                  join player_data player on player.id = pfr.player_id
@@ -82,7 +82,7 @@ final class SocialQueriesImpl implements SocialQueries {
 
     private static final String GET_OUTGOING_FRIEND_REQUESTS = """
         select count(*) over () as total_count,
-               player.*,
+               player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pfr.created_at   as sent_at
         from player_friend_requests pfr
                  join player_data player on player.id = pfr.target_id
@@ -109,7 +109,7 @@ final class SocialQueriesImpl implements SocialQueries {
         from player_friend_requests
         where (player_id = ? and target_id = ?)
            or (?::bool and player_id = ? and target_id = ?)
-        returning player_friend_requests.*""";
+        returning player_friend_requests.player_id, player_friend_requests.target_id, player_friend_requests.created_at""";
 
     private static final String IS_BLOCKED = """
         select exists(select 1
@@ -132,7 +132,7 @@ final class SocialQueriesImpl implements SocialQueries {
         -- Staff are filtered here rather than after paging, so the page is full and the total is the
         -- number of lines the player will see.
         select count(*) over () as total_count,
-               player.*,
+               player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pb.created_at    as blocked_at
         from player_blocks pb
                  join player_data player on player.id = pb.target_id
@@ -143,7 +143,7 @@ final class SocialQueriesImpl implements SocialQueries {
 
     private static final String GET_BLOCKS_BETWEEN = """
         select pb.player_id as blocker_id,
-               player.*,
+               player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pb.created_at as blocked_at
         from player_blocks pb
                  join player_data player on player.id = pb.target_id

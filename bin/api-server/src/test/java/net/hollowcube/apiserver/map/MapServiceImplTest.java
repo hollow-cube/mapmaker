@@ -218,7 +218,7 @@ class MapServiceImplTest {
         var id = create(OWNER).id();
         TEST_DB.seed(
             """
-            update maps set opt_variant='building', published_id=5, published_at=now() where id='%s'
+            update maps set opt_variant='building', variant='building', published_id=5, published_at=now() where id='%s'
             """
                 .formatted(id)
         );
@@ -326,7 +326,7 @@ class MapServiceImplTest {
         assertEquals(id, client.get("000-000-007").id());
         TEST_DB.seed(
             """
-            update maps set opt_variant='parkour' where id='%s';
+            update maps set opt_variant='parkour', variant='parkour' where id='%s';
             insert into map_stats(map_id,play_count,win_count) values ('%s',100,90)
             """
                 .formatted(id, id)
@@ -347,7 +347,7 @@ class MapServiceImplTest {
         TEST_DB.seed(
             """
             update map_stats set play_count=100 where map_id='%s';
-            update maps set opt_variant='building' where id='%s'
+            update maps set opt_variant='building', variant='building' where id='%s'
             """
                 .formatted(id, id)
         );
@@ -360,7 +360,9 @@ class MapServiceImplTest {
         assertEquals(BeginVerificationResult.MAP_NOT_FOUND, client.beginVerification(absent));
         assertEquals(DeleteVerificationResult.MAP_NOT_FOUND, client.deleteVerification(absent));
         var id = create(OWNER).id();
-        TEST_DB.seed("update maps set verification=2 where id='" + id + "'");
+        TEST_DB.seed(
+            "update maps set verification=2, verification_state='verified' where id='" + id + "'"
+        );
         assertEquals(BeginVerificationResult.READY, client.beginVerification(id));
         assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
         preparePublish(id);
@@ -1097,8 +1099,8 @@ class MapServiceImplTest {
         state(done, BUILDER, "playing", false, 1_000);
         state(going, BUILDER, "verifying", false, 4_000);
         TEST_DB.seed(
-            "update save_states set updated = now() - interval '1 hour' where map_id = '" + going
-                + "'"
+            "update save_states set updated = now() - interval '1 hour', updated_at = now() - interval '1 hour' where map_id = '"
+                + going + "'"
         );
         state(going, BUILDER, "playing", false, 7_000);
         state(going, OWNER, "playing", true, 1);
@@ -1125,7 +1127,9 @@ class MapServiceImplTest {
         state(first, BUILDER, "playing", false, 1);
         state(gone, BUILDER, "playing", false, 1);
         state(second, BUILDER, "editing", false, 1);
-        TEST_DB.seed("update save_states set updated = now() - interval '1 hour'");
+        TEST_DB.seed(
+            "update save_states set updated = now() - interval '1 hour', updated_at = now() - interval '1 hour'"
+        );
         state(second, BUILDER, "playing", true, 1);
         state(first, BUILDER, "playing", false, 1);
         client.delete(OWNER, gone, null);
@@ -1152,10 +1156,11 @@ class MapServiceImplTest {
         client.update(id, patch.build());
         TEST_DB.seed(
             """
-            update maps set published_id = %s, published_at = '%s', quality_override = %s, total_likes = %s
+            update maps set published_id = %s, published_at = '%s', quality_override = %s,
+                            quality = (enum_range(null::map_quality))[%s + 1], total_likes = %s
             where id = '%s'
             """
-                .formatted(publishedIdCounter++, publishedAt, quality, likes, id)
+                .formatted(publishedIdCounter++, publishedAt, quality, quality, likes, id)
         );
         return id;
     }
@@ -1213,8 +1218,9 @@ class MapServiceImplTest {
     private void state(UUID map, UUID player, String type, boolean completed, long playtime) {
         TEST_DB.seed(
             """
-            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, state_v2)
-            values ('%s', '%s', '%s', '%s', now(), now(), %s, %s, '{}')
+            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, state_v2,
+                                     created_at, updated_at, state)
+            values ('%s', '%s', '%s', '%s', now(), now(), %s, %s, '{}', now(), now(), '{}')
             """
                 .formatted(UUID.randomUUID(), map, player, type, completed, playtime)
         );

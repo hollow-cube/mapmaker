@@ -45,12 +45,12 @@ final class PlayersQueriesImpl implements PlayersQueries {
                                     limit 1) mute on true""";
 
     private static final String GET_PLAYER_BY_ID = """
-        select player_data.*
+        select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where id = ?""";
 
     private static final String GET_PLAYER_BY_USERNAME = """
-        select player_data.*
+        select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where lower(username) = lower(?)""";
 
@@ -84,7 +84,7 @@ final class PlayersQueriesImpl implements PlayersQueries {
         -- Substring match, prefix matches first, then the shorter name. `pg_trgm` is not available at
         -- describe time so this is plain `like`; in production the planner still uses Go's trigram index
         -- for the `%q%` predicate.
-        select player_data.*
+        select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where id <> all (?::uuid[])
           and lower(username) like '%' || lower(?::text) || '%'
@@ -93,7 +93,7 @@ final class PlayersQueriesImpl implements PlayersQueries {
 
     private static final String GET_PLAYER_ALTS = """
         -- Everyone who has shared an address with the player.
-        select player_data.*
+        select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where id in (select theirs.player_id
                      from ip_history mine

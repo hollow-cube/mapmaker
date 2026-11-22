@@ -134,7 +134,7 @@ select unnest(enum_range(null::map_tag))::text as tag;
 update save_states
 set deleted = now(), deleted_at = now()
 where map_id = $mapId
-  and deleted is null
+  and deleted_at is null
   and not completed
   and type in ('playing', 'verifying');
 
@@ -142,14 +142,14 @@ where map_id = $mapId
 update save_states
 set deleted = now(), deleted_at = now()
 where map_id = $mapId
-  and deleted is null;
+  and deleted_at is null;
 
 -- name: deleteVerifyingStates :exec
 update save_states
 set deleted = now(), deleted_at = now()
 where map_id = $mapId
   and type = 'verifying'
-  and deleted is null;
+  and deleted_at is null;
 
 -- name: deleteMap :exec
 update maps
@@ -191,8 +191,8 @@ from save_states
 where map_id = $mapId
   and player_id = $playerId
   and type = 'editing'
-  and deleted is null
-order by updated desc
+  and deleted_at is null
+order by updated_at desc
 limit 1;
 
 -- name: countWorlds :one
@@ -225,7 +225,7 @@ where owner = $playerId
   and published_at is not null
   and deleted_at is null
   and listed
-  and opt_variant in ('parkour', 'building')
+  and variant in ('parkour', 'building')
 order by published_at desc;
 
 -- name: getBuilderSlot :one
@@ -319,17 +319,17 @@ offset $offset limit $limit;
 with runs as (select ss.map_id,
                      ss.completed,
                      (greatest((ss.playtime + 25) / 50, ss.ticks) * 50)::int8 as playtime,
-                     ss.updated
+                     ss.updated_at
               from save_states ss
               where ss.player_id = $playerId
                 and ss.map_id = any ($mapIds::uuid[])
-                and ss.deleted is null
+                and ss.deleted_at is null
                 and ss.type in ('playing', 'verifying'))
 select map_id,
        bool_or(completed) as completed,
        case
            when bool_or(completed) then min(playtime) filter (where completed)
-           else (select r.playtime from runs r where r.map_id = runs.map_id order by r.updated desc limit 1)
+           else (select r.playtime from runs r where r.map_id = runs.map_id order by r.updated_at desc limit 1)
            end            as playtime
 from runs
 group by map_id;
@@ -342,11 +342,11 @@ select maps.*,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
        count(*) over ()                                                              as total_count
-from (select map_id, max(updated) as last_played
+from (select map_id, max(updated_at) as last_played
       from save_states
       where player_id = $playerId
         and type = 'playing'
-        and deleted is null
+        and deleted_at is null
       group by map_id) recent
          join maps on maps.id = recent.map_id and maps.deleted_at is null
          left join map_stats stats on stats.map_id = maps.id

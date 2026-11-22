@@ -22,7 +22,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
                                            min((greatest((playtime + 25) / 50, ticks) * 50)::bigint) as min_playtime
                                     from save_states
                                              join maps on save_states.map_id = maps.id
-                                    where deleted is null
+                                    where save_states.deleted_at is null
                                       and completed
                                       and playtime != 0
                                       and type in ('playing', 'verifying')
@@ -36,7 +36,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
                  join save_states s1
                       on s1.map_id = shortest_playtimes.map_id
                           and (greatest((s1.playtime + 25) / 50, s1.ticks) * 50)::bigint = shortest_playtimes.min_playtime
-        where s1.deleted is null
+        where s1.deleted_at is null
           and s1.completed
         group by s1.player_id
         order by top_times desc
@@ -47,7 +47,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
         from save_states s1
                  join maps on s1.map_id = maps.id
         where s1.player_id = ?
-          and s1.deleted is null
+          and s1.deleted_at is null
           and s1.completed
           and s1.playtime != 0
           and s1.type in ('playing', 'verifying')
@@ -58,7 +58,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
           and not exists (select 1
                           from save_states s2
                           where s2.map_id = s1.map_id
-                            and s2.deleted is null
+                            and s2.deleted_at is null
                             and s2.completed
                             and s2.playtime != 0
                             and s2.type in ('playing', 'verifying')
@@ -69,7 +69,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
         select s1.player_id, count(distinct s1.map_id) as maps_beaten
         from save_states s1
                  join maps on s1.map_id = maps.id
-        where s1.deleted is null
+        where s1.deleted_at is null
           and s1.completed
           and s1.type in ('playing', 'verifying')
           and maps.published_at is not null
@@ -81,7 +81,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
         select count(distinct map_id)::int as maps_beaten
         from save_states
                  join maps on save_states.map_id = maps.id
-        where deleted is null
+        where save_states.deleted_at is null
           and completed
           and type in ('playing', 'verifying')
           and player_id = ?
@@ -92,11 +92,11 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
         -- score, which is what the top-times rank is measured against.
         select distinct on (save_states.map_id) save_states.map_id,
                                                 save_states.playtime,
-                                                maps.opt_name as map_name,
+                                                maps.name as map_name,
                                                 maps.published_id
         from save_states
                  join maps on save_states.map_id = maps.id
-        where save_states.deleted is null
+        where save_states.deleted_at is null
           and save_states.completed
           and save_states.player_id = ?
           and save_states.type in ('playing', 'verifying')

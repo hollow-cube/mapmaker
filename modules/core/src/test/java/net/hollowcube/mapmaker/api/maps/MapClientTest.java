@@ -3,6 +3,7 @@ package net.hollowcube.mapmaker.api.maps;
 import com.sun.net.httpserver.HttpServer;
 import io.opentelemetry.api.OpenTelemetry;
 import net.hollowcube.ipc.map.*;
+import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.mapmaker.api.ApiClient;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
 import net.hollowcube.mapmaker.map.MapSettings;
@@ -17,8 +18,11 @@ import java.lang.reflect.Proxy;
 import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.time.Instant;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,6 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 class MapClientTest {
     private final MapData map = MapData.draft(UUID.randomUUID(), UUID.randomUUID());
     private final AtomicReference<Object[]> invocation = new AtomicReference<>();
+    private final Deque<IpcException> saveFailures = new ArrayDeque<>();
+    private final AtomicInteger saves = new AtomicInteger();
     private HttpServer server;
     private MapClient client;
 
@@ -40,6 +46,12 @@ class MapClientTest {
                     case "getPlayerSlots" -> List.of(new MapSlot(map, Instant.EPOCH, true,
                         List.of(new MapBuilder(UUID.randomUUID(), Instant.EPOCH, true))));
                     case "update" -> null;
+                    case "upsertSaveState" -> {
+                        saves.incrementAndGet();
+                        var failure = saveFailures.poll();
+                        if (failure != null) throw failure;
+                        yield null;
+                    }
                     default -> throw new UnsupportedOperationException(method.getName());
                 };
             });
@@ -54,6 +66,26 @@ class MapClientTest {
     @AfterEach
     void stop() {
         server.stop(0);
+    }
+
+    @Test
+    void updateSaveState_retriesAFailureButNotARefusal() {
+        var update = SaveStateUpdate.builder(SaveStateType.PLAYING).playtime(1000).build();
+        var id = UUID.randomUUID().toString();
+
+        saveFailures.add(IpcException.unavailable("draining"));
+        client.updateSaveState(map.id().toString(), map.owner().toString(), id, update);
+        assertEquals(2, saves.getAndSet(0));
+
+        saveFailures.add(IpcException.internal("lost the answer"));
+        saveFailures.add(IpcException.conflict("save state is completed"));
+        client.updateSaveState(map.id().toString(), map.owner().toString(), id, update);
+        assertEquals(2, saves.getAndSet(0));
+
+        saveFailures.add(IpcException.badRequest("unknown save state type"));
+        assertThrows(IpcException.class,
+            () -> client.updateSaveState(map.id().toString(), map.owner().toString(), id, update));
+        assertEquals(1, saves.get());
     }
 
     @Test

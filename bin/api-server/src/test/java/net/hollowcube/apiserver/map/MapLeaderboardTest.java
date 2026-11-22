@@ -460,8 +460,8 @@ class MapLeaderboardTest {
         TEST_DB.seed(
             """
             insert into save_states (id, map_id, player_id, type, created, updated, deleted, completed, playtime,
-                                     state_v2)
-            values ('%s', '%s', '%s', 'playing', now(), now(), %s, true, %s, 'null')
+                                     state_v2, created_at, updated_at, deleted_at, state)
+            values ('%1$s', '%2$s', '%3$s', 'playing', now(), now(), %4$s, true, %5$s, 'null', now(), now(), %4$s, 'null')
             """
                 .formatted(
                     UUID.randomUUID(),
@@ -477,11 +477,12 @@ class MapLeaderboardTest {
         var id = UUID.randomUUID();
         TEST_DB.seed(
             """
-            insert into maps (id, owner, m_type, created_at, updated_at, authz_key, file_id, legacy_map_id,
-                              opt_name, opt_icon, opt_variant, opt_spawn_point, size, protocol_version,
-                              published_at, published_id, leaderboard)
-            values ('%s', '%s', 'default', now(), now(), '', '', '', 'A map', '', '%s',
-                    '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 1, 776, %s, %s, %s)
+            insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
+                              protocol_version, published_at, published_id, leaderboard, name, icon, variant,
+                              spawn_point, size_class, verification_state, quality)
+            values ('%1$s', '%2$s', now(), now(), 'A map', '', '%3$s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 1, 776,
+                    %4$s, %5$s, %6$s, 'A map', '', '%3$s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 'large', 'unverified',
+                    'unrated')
             """
                 .formatted(
                     id,

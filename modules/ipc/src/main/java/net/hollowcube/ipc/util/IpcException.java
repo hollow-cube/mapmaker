@@ -62,4 +62,10 @@ public class IpcException extends RuntimeException {
     public @Nullable String call() {
         return call;
     }
+
+    /// Whether the call failed without being refused, so sending it again may succeed: it got no
+    /// answer (other than by being interrupted), or a 5xx.
+    public boolean isTransient() {
+        return status >= 500 || (status == 0 && !(getCause() instanceof InterruptedException));
+    }
 }

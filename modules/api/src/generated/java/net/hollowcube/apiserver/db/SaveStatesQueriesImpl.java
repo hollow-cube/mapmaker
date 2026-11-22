@@ -21,28 +21,28 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class SaveStatesQueriesImpl implements SaveStatesQueries {
     private static final String GET = """
-        select save_states.*
+        select save_states.id, save_states.map_id, save_states.player_id, save_states.type, save_states.created, save_states.updated, save_states.deleted, save_states.completed, save_states.playtime, save_states.state_v2, save_states.data_version, save_states.protocol_version, save_states.ticks, save_states.score, save_states.resets, save_states.total_playtime, save_states.created_at, save_states.updated_at, save_states.deleted_at, save_states.state
         from save_states
-        where deleted is null
+        where deleted_at is null
           and id = ?
           and map_id = ?
           and player_id = ?""";
 
     private static final String LATEST = """
-        select save_states.*
+        select save_states.id, save_states.map_id, save_states.player_id, save_states.type, save_states.created, save_states.updated, save_states.deleted, save_states.completed, save_states.playtime, save_states.state_v2, save_states.data_version, save_states.protocol_version, save_states.ticks, save_states.score, save_states.resets, save_states.total_playtime, save_states.created_at, save_states.updated_at, save_states.deleted_at, save_states.state
         from save_states
-        where deleted is null
+        where deleted_at is null
           and map_id = ?
           and player_id = ?
           and type = ?
-        order by updated desc
+        order by updated_at desc
         limit 1""";
 
     private static final String BEST = """
-        select ss.*
+        select ss.id, ss.map_id, ss.player_id, ss.type, ss.created, ss.updated, ss.deleted, ss.completed, ss.playtime, ss.state_v2, ss.data_version, ss.protocol_version, ss.ticks, ss.score, ss.resets, ss.total_playtime, ss.created_at, ss.updated_at, ss.deleted_at, ss.state
         from save_states ss
                  join maps m on m.id = ss.map_id
-        where ss.deleted is null
+        where ss.deleted_at is null
           and ss.map_id = ?
           and ss.player_id = ?
           and ss.type in ('playing', 'verifying')
@@ -56,10 +56,10 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
 
     private static final String BEST_PER_PLAYER = """
         -- Every player's best completed run on the map, which is what its board holds.
-        select distinct on (ss.player_id) ss.*
+        select distinct on (ss.player_id) ss.id, ss.map_id, ss.player_id, ss.type, ss.created, ss.updated, ss.deleted, ss.completed, ss.playtime, ss.state_v2, ss.data_version, ss.protocol_version, ss.ticks, ss.score, ss.resets, ss.total_playtime, ss.created_at, ss.updated_at, ss.deleted_at, ss.state
         from save_states ss
                  join maps m on m.id = ss.map_id
-        where ss.deleted is null
+        where ss.deleted_at is null
           and ss.map_id = ?
           and ss.type in ('playing', 'verifying')
           and ss.completed
@@ -106,7 +106,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
     private static final String DELETE_FOR_PLAYER = """
         update save_states
         set deleted = now(), deleted_at = now()
-        where deleted is null
+        where deleted_at is null
           and map_id = ?
           and player_id = ?""";
 
@@ -115,7 +115,7 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         with deleted as (
             update save_states
                 set deleted = now(), deleted_at = now()
-                where deleted is null
+                where deleted_at is null
                     and player_id = ?
                 returning map_id)
         select distinct map_id
@@ -124,18 +124,18 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
     private static final String DELETE_MAP = """
         update save_states
         set deleted = now(), deleted_at = now()
-        where deleted is null
+        where deleted_at is null
           and map_id = ?""";
 
     private static final String UNDELETE_FOR_PLAYER = """
         with restored as (
             update save_states
                 set deleted = null, deleted_at = null
-                where deleted is not null
+                where deleted_at is not null
                     and map_id = ?
                     and player_id = ?
-                    and (?::timestamptz is null or deleted >= ?)
-                    and (?::timestamptz is null or deleted <= ?)
+                    and (?::timestamptz is null or deleted_at >= ?)
+                    and (?::timestamptz is null or deleted_at <= ?)
                 returning 1)
         select count(*)::int as restored
         from restored""";
@@ -145,10 +145,10 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         with restored as (
             update save_states
                 set deleted = null, deleted_at = null
-                where deleted is not null
+                where deleted_at is not null
                     and player_id = ?
-                    and (?::timestamptz is null or deleted >= ?)
-                    and (?::timestamptz is null or deleted <= ?)
+                    and (?::timestamptz is null or deleted_at >= ?)
+                    and (?::timestamptz is null or deleted_at <= ?)
                 returning map_id)
         select map_id, count(*)::int as restored
         from restored
@@ -158,10 +158,10 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         with restored as (
             update save_states
                 set deleted = null, deleted_at = null
-                where deleted is not null
+                where deleted_at is not null
                     and map_id = ?
-                    and (?::timestamptz is null or deleted >= ?)
-                    and (?::timestamptz is null or deleted <= ?)
+                    and (?::timestamptz is null or deleted_at >= ?)
+                    and (?::timestamptz is null or deleted_at <= ?)
                 returning 1)
         select count(*)::int as restored
         from restored""";

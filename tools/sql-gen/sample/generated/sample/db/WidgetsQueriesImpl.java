@@ -18,20 +18,20 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class WidgetsQueriesImpl implements WidgetsQueries {
     private static final String LIST_WIDGETS = """
-        select widget.*
+        select widget.id, widget.name, widget.labels, widget.note
         from widget
         order by id
         limit ?""";
 
     private static final String SEARCH_WIDGETS = """
-        select widget.*,
+        select widget.id, widget.name, widget.labels, widget.note,
                count(*) over () as total_count
         from widget
         where name ilike ?
         limit ? offset ?""";
 
     private static final String LIST_WIDGETS_ABOVE = """
-        select widget.*
+        select widget.id, widget.name, widget.labels, widget.note
         from widget
         where ?::int is null
            or id > ?

@@ -35,7 +35,7 @@ public interface LeaderboardsQueries {
     /**
      * A row of `playerBestTimes`.
      */
-    record PlayerBestTimesRow(UUID mapId, long playtime, @Nullable String mapName,
+    record PlayerBestTimesRow(UUID mapId, long playtime, String mapName,
             @Nullable Long publishedId) {
     }
 

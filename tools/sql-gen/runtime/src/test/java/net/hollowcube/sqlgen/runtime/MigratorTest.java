@@ -119,6 +119,45 @@ class MigratorTest {
         assertEquals(List.of("a"), columns("other"));
     }
 
+    @Test
+    void noTransactionFileCommitsEachStatement() throws Exception {
+        write("0001_create.sql", "create table thing (a int);");
+        write("0002_index.sql", """
+            --> no-transaction
+            insert into thing values (1);
+            --> statement-breakpoint
+            create index if not exists thing_a on thing (a);
+            """);
+
+        assertEquals(List.of(1, 2), versions(Migrator.migrate(conn, dir)));
+        assertEquals(List.of(1, 2), recorded());
+    }
+
+    @Test
+    void pgliteBuildsConcurrentIndexesPlainly() {
+        assertEquals(
+            List.of("create index  if not exists a on t (a)", "create unique index  b on t (b)"),
+            Migrator.pgliteStatements("""
+                create index concurrently if not exists a on t (a)
+                --> statement-breakpoint
+                create unique index concurrently b on t (b)""").stream().map(String::strip).toList()
+        );
+    }
+
+    @Test
+    void failedNoTransactionFileIsNotRecorded() throws Exception {
+        write("0001_create.sql", "create table thing (a int);");
+        write("0002_broken.sql", """
+            --> no-transaction
+            create table other (a int);
+            --> statement-breakpoint
+            select * from missing;
+            """);
+
+        assertThrows(SQLException.class, () -> Migrator.migrate(conn, dir));
+        assertEquals(List.of(1), recorded());
+    }
+
     private void write(String name, String sql) throws IOException {
         Files.writeString(dir.resolve(name), sql);
     }

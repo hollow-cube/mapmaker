@@ -40,14 +40,14 @@ final class AnticheatQueriesImpl implements AnticheatQueries {
                 path           = excluded.path""";
 
     private static final String GET_ANTICHEAT_TRACE = """
-        select anticheat_traces.*
+        select anticheat_traces.id, anticheat_traces.capture_id, anticheat_traces.player_id, anticheat_traces.proxy_version, anticheat_traces.proxy, anticheat_traces.client_pvn, anticheat_traces.reason, anticheat_traces.format_version, anticheat_traces.started_at, anticheat_traces.ended_at, anticheat_traces.bytes, anticheat_traces.path, anticheat_traces.pinned, anticheat_traces.expires_at, anticheat_traces.created_at
         from anticheat_traces
         where id = ?""";
 
     private static final String LIST_ANTICHEAT_TRACES_BY_CAPTURE = """
         -- One capture is a handful of traces — a server switch or a ring flush each start a new one — so
         -- this is unpaged on purpose, and ordered the way they were recorded.
-        select anticheat_traces.*
+        select anticheat_traces.id, anticheat_traces.capture_id, anticheat_traces.player_id, anticheat_traces.proxy_version, anticheat_traces.proxy, anticheat_traces.client_pvn, anticheat_traces.reason, anticheat_traces.format_version, anticheat_traces.started_at, anticheat_traces.ended_at, anticheat_traces.bytes, anticheat_traces.path, anticheat_traces.pinned, anticheat_traces.expires_at, anticheat_traces.created_at
         from anticheat_traces
         where capture_id = ?
         order by started_at, id""";
@@ -60,7 +60,7 @@ final class AnticheatQueriesImpl implements AnticheatQueries {
         where expires_at is not null
           and expires_at <= now()
           and not pinned
-        returning anticheat_traces.*""";
+        returning anticheat_traces.id, anticheat_traces.capture_id, anticheat_traces.player_id, anticheat_traces.proxy_version, anticheat_traces.proxy, anticheat_traces.client_pvn, anticheat_traces.reason, anticheat_traces.format_version, anticheat_traces.started_at, anticheat_traces.ended_at, anticheat_traces.bytes, anticheat_traces.path, anticheat_traces.pinned, anticheat_traces.expires_at, anticheat_traces.created_at""";
 
     private final ConnectionSource source;
 

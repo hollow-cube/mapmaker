@@ -231,19 +231,21 @@ public final class MapServiceImpl implements MapService {
 
             // A null in a patch is "unchanged", so `MapPatch.Builder` spells clearing the
             // subvariant as "none".
-            var subvariant = patch.subvariant() == null ? map.optSubvariant() : patch.subvariant();
+            var subvariant = patch.subvariant() == null
+                ? MapCompat.subvariant(map)
+                : patch.subvariant();
             if ("none".equals(subvariant)) subvariant = null;
             var variant = patch.variant() == null
-                ? map.optVariant()
+                ? map.variant().pgLabel()
                 : patch.variant().name().toLowerCase(Locale.ROOT);
             var spawnPoint = patch.spawnPoint() == null
-                ? map.optSpawnPoint()
+                ? map.spawnPoint()
                 : Wire.gson().toJson(patch.spawnPoint());
             var leaderboard = patch.leaderboard() == null
                 ? map.leaderboard()
                 : leaderboardColumn(patch.leaderboard());
             var quality = patch.qualityOverride() == null
-                ? requireNonNullElse(map.qualityOverride(), 0L)
+                ? (long) MapCompat.quality(map).ordinal()
                 : (long) patch.qualityOverride().ordinal();
             var protocolVersion = requireNonNullElse(
                 patch.protocolVersion(),
@@ -251,9 +253,9 @@ public final class MapServiceImpl implements MapService {
             );
             tx.maps.updateMap(
                 new MapsQueries.UpdateMapParams(
-                    requireNonNullElse(patch.name(), requireNonNullElse(map.optName(), "")),
-                    requireNonNullElse(patch.icon(), requireNonNullElse(map.optIcon(), "")),
-                    patch.size() == null ? map.size() : patch.size().id(),
+                    requireNonNullElse(patch.name(), map.name()),
+                    requireNonNullElse(patch.icon(), map.icon()),
+                    patch.size() == null ? MapCompat.size(map).id() : patch.size().id(),
                     variant,
                     subvariant,
                     spawnPoint,
@@ -498,9 +500,12 @@ public final class MapServiceImpl implements MapService {
                     var properties = new HashMap<String, Object>();
                     properties.put("map_id", mapId.toString());
                     properties.put("published_map_id", publishedId);
-                    properties.put("map_name", requireNonNullElse(map.optName(), ""));
-                    properties.put("variant", map.optVariant());
-                    properties.put("sub_variant", requireNonNullElse(map.optSubvariant(), ""));
+                    properties.put("map_name", map.name());
+                    properties.put("variant", map.variant().pgLabel());
+                    properties.put(
+                        "sub_variant",
+                        requireNonNullElse(MapCompat.subvariant(map), "")
+                    );
                     properties.put("owner_build_time", readiness.buildTime());
                     properties.put("world_data_size", worlds.stat(mapId.toString()));
                     properties.put(
@@ -709,7 +714,7 @@ public final class MapServiceImpl implements MapService {
 
             var properties = new HashMap<String, Object>();
             properties.put("map_id", mapId.toString());
-            properties.put("map_name", requireNonNullElse(map.optName(), ""));
+            properties.put("map_name", map.name());
             properties.put(
                 "categories",
                 categories.stream().map(c -> c.name().toLowerCase(Locale.ROOT)).toList()
@@ -842,7 +847,7 @@ public final class MapServiceImpl implements MapService {
                     "map_id",
                     mapId.toString(),
                     "variant",
-                    map.optVariant(),
+                    map.variant().pgLabel(),
                     "playtime",
                     written.playtime(),
                     "score",
@@ -877,7 +882,7 @@ public final class MapServiceImpl implements MapService {
         if (existing != null) type = existing.type();
         var completed = update.completed();
         var created = existing != null
-            ? existing.created()
+            ? existing.createdAt()
             : update.created() != null
                 ? update.created()
                 : Instant.now().minus(Duration.ofMillis(update.playtime()));
@@ -1153,8 +1158,8 @@ public final class MapServiceImpl implements MapService {
         if (buildTime < required) missing.add(PublishRequirement.BUILD_TIME);
         if (variant(map) == MapVariant.PARKOUR && verification(map) != MapVerification.VERIFIED)
             missing.add(PublishRequirement.VERIFICATION);
-        if (map.optName() == null || map.optName().isBlank()) missing.add(PublishRequirement.NAME);
-        if (map.optIcon() == null || map.optIcon().isBlank()) missing.add(PublishRequirement.ICON);
+        if (map.name().isBlank()) missing.add(PublishRequirement.NAME);
+        if (map.icon().isBlank()) missing.add(PublishRequirement.ICON);
         if (queries.getTags(map.id()).isEmpty()) missing.add(PublishRequirement.TAGS);
         return new PublishReadiness(missing, buildTime, required);
     }

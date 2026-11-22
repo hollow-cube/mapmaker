@@ -6,7 +6,7 @@
 -- name: get :one
 select save_states.*
 from save_states
-where deleted is null
+where deleted_at is null
   and id = $id
   and map_id = $mapId
   and player_id = $playerId;
@@ -14,18 +14,18 @@ where deleted is null
 -- name: latest :one
 select save_states.*
 from save_states
-where deleted is null
+where deleted_at is null
   and map_id = $mapId
   and player_id = $playerId
   and type = $type
-order by updated desc
+order by updated_at desc
 limit 1;
 
 -- name: best :one
 select ss.*
 from save_states ss
          join maps m on m.id = ss.map_id
-where ss.deleted is null
+where ss.deleted_at is null
   and ss.map_id = $mapId
   and ss.player_id = $playerId
   and ss.type in ('playing', 'verifying')
@@ -42,7 +42,7 @@ limit 1;
 select distinct on (ss.player_id) ss.*
 from save_states ss
          join maps m on m.id = ss.map_id
-where ss.deleted is null
+where ss.deleted_at is null
   and ss.map_id = $mapId
   and ss.type in ('playing', 'verifying')
   and ss.completed
@@ -90,7 +90,7 @@ on conflict (map_id) do update
 -- name: deleteForPlayer :exec
 update save_states
 set deleted = now(), deleted_at = now()
-where deleted is null
+where deleted_at is null
   and map_id = $mapId
   and player_id = $playerId;
 
@@ -99,7 +99,7 @@ where deleted is null
 with deleted as (
     update save_states
         set deleted = now(), deleted_at = now()
-        where deleted is null
+        where deleted_at is null
             and player_id = $playerId
         returning map_id)
 select distinct map_id
@@ -108,7 +108,7 @@ from deleted;
 -- name: deleteMap :exec
 update save_states
 set deleted = now(), deleted_at = now()
-where deleted is null
+where deleted_at is null
   and map_id = $mapId;
 
 -- name: undeleteForPlayer :one
@@ -117,11 +117,11 @@ where deleted is null
 with restored as (
     update save_states
         set deleted = null, deleted_at = null
-        where deleted is not null
+        where deleted_at is not null
             and map_id = $mapId
             and player_id = $playerId
-            and ($deletedAfter::timestamptz is null or deleted >= $deletedAfter)
-            and ($deletedBefore::timestamptz is null or deleted <= $deletedBefore)
+            and ($deletedAfter::timestamptz is null or deleted_at >= $deletedAfter)
+            and ($deletedBefore::timestamptz is null or deleted_at <= $deletedBefore)
         returning 1)
 select count(*)::int as restored
 from restored;
@@ -132,10 +132,10 @@ from restored;
 with restored as (
     update save_states
         set deleted = null, deleted_at = null
-        where deleted is not null
+        where deleted_at is not null
             and player_id = $playerId
-            and ($deletedAfter::timestamptz is null or deleted >= $deletedAfter)
-            and ($deletedBefore::timestamptz is null or deleted <= $deletedBefore)
+            and ($deletedAfter::timestamptz is null or deleted_at >= $deletedAfter)
+            and ($deletedBefore::timestamptz is null or deleted_at <= $deletedBefore)
         returning map_id)
 select map_id, count(*)::int as restored
 from restored
@@ -147,10 +147,10 @@ group by map_id;
 with restored as (
     update save_states
         set deleted = null, deleted_at = null
-        where deleted is not null
+        where deleted_at is not null
             and map_id = $mapId
-            and ($deletedAfter::timestamptz is null or deleted >= $deletedAfter)
-            and ($deletedBefore::timestamptz is null or deleted <= $deletedBefore)
+            and ($deletedAfter::timestamptz is null or deleted_at >= $deletedAfter)
+            and ($deletedBefore::timestamptz is null or deleted_at <= $deletedBefore)
         returning 1)
 select count(*)::int as restored
 from restored;

@@ -22,10 +22,9 @@ public record Maps(UUID id, UUID owner, @Nullable String mType, Instant createdA
         @Nullable byte[] optExtra, @Nullable List<String> optTags, String ext,
         @Nullable Instant deletedAt, @Nullable UUID deletedBy, @Nullable String deletedReason,
         @Nullable Integer protocolVersion, @Nullable UUID contest, boolean listed, int totalLikes,
-        @Nullable String leaderboard, @Nullable String name, @Nullable String icon,
-        @Nullable MapVariant variant, @Nullable MapSubvariant subvariant,
-        @Nullable String spawnPoint, @Nullable String extra, @Nullable MapSize sizeClass,
-        @Nullable MapVerification verificationState, @Nullable MapQuality quality) {
+        @Nullable String leaderboard, String name, String icon, MapVariant variant,
+        @Nullable MapSubvariant subvariant, String spawnPoint, @Nullable String extra,
+        MapSize sizeClass, MapVerification verificationState, MapQuality quality) {
     /**
      * Reads one `maps` row, its first column at `col`.
      */

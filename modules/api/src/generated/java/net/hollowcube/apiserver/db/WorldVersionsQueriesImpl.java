@@ -23,7 +23,7 @@ final class WorldVersionsQueriesImpl implements WorldVersionsQueries {
         on conflict (id) do update set type = 'editing'""";
 
     private static final String GET_EDITING_WORLD = """
-        select map_worlds.*
+        select map_worlds.id, map_worlds.map_id, map_worlds.server_id, map_worlds.created_at, map_worlds.type
         from map_worlds
         where map_id = ?
           and type = 'editing'""";
@@ -40,7 +40,7 @@ final class WorldVersionsQueriesImpl implements WorldVersionsQueries {
           and type = 'editing'""";
 
     private static final String GET_HEAD = """
-        select map_world_versions.*
+        select map_world_versions.map_id, map_world_versions.id, map_world_versions.sha256, map_world_versions.length, map_world_versions.wal_seq, map_world_versions.world_id, map_world_versions.created_at
         from map_world_versions
         where map_id = ?
         order by id desc

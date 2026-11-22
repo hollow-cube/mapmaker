@@ -7,11 +7,11 @@ import net.hollowcube.apiserver.s3.MemoryS3Client;
 import net.hollowcube.apiserver.s3.S3Client;
 import net.hollowcube.ipc.Blob;
 import net.hollowcube.ipc.map.*;
+import net.hollowcube.sqlgen.runtime.Migrator;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import java.io.InputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.DriverManager;
 import java.time.Duration;
@@ -57,13 +57,8 @@ class MapWritePostgresTest {
         config.setSchema(SCHEMA);
         config.setMaximumPoolSize(16);
         pool = new HikariDataSource(config);
-        try (
-            var conn = pool.getConnection();
-            var st = conn.createStatement();
-            var files = Files.list(Path.of("../../modules/api/src/main/sql/migrations"))
-        ) {
-            for (var file : files.filter(p -> p.toString().endsWith(".sql")).sorted().toList())
-                st.execute(Files.readString(file));
+        try (var conn = pool.getConnection()) {
+            Migrator.migrate(conn, Path.of("../../modules/api/src/main/sql/migrations"));
         }
     }
 
@@ -329,8 +324,9 @@ class MapWritePostgresTest {
         service.update(map, patch.build());
         sql(
             """
-            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, state_v2)
-            values ('%s', '%s', '%s', 'editing', now(), now(), false, 1, '{}')
+            insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, state_v2,
+                                     created_at, updated_at, state)
+            values ('%s', '%s', '%s', 'editing', now(), now(), false, 1, '{}', now(), now(), '{}')
             """
                 .formatted(UUID.randomUUID(), map, owner)
         );

@@ -32,11 +32,17 @@ import java.util.regex.Pattern;
 /// treats every socket read as a whole protocol message, so a query that does not arrive in one read
 /// intermittently kills its backend (a 9.7KB file did, 5.6KB ones never have); long migrations must
 /// be split.
+///
+/// A file whose first line is `--> no-transaction` runs statement by statement outside a
+/// transaction, for what Postgres refuses inside one (`create index concurrently`). Its row is recorded only once every statement has
+/// succeeded, so a failure reruns the whole file: every statement in one has to be safe to repeat.
 public final class Migrator {
 
     private static final Logger logger = LoggerFactory.getLogger(Migrator.class);
     private static final Pattern FILE_NAME = Pattern.compile("(\\d+)_(.+)\\.sql");
     private static final Pattern BREAKPOINT = Pattern.compile("(?m)^-->\\s*statement-breakpoint\\s*$");
+    private static final Pattern NO_TRANSACTION = Pattern.compile("^\\s*-->\\s*no-transaction\\s*\n");
+    private static final Pattern CONCURRENTLY = Pattern.compile("(?i)(?<=\\bindex\\s)\\s*concurrently\\b");
 
     /// Session advisory lock key, so two runs against one database queue instead of racing.
     private static final long LOCK_KEY = 0x5c4e_4d16_4a70_0001L;
@@ -96,6 +102,12 @@ public final class Migrator {
         return BREAKPOINT.splitAsStream(sql).filter(part -> !part.isBlank()).toList();
     }
 
+    /// [#statements] as pglite can run them: it is a single backend and wedges on
+    /// `create index concurrently`, which commits mid-statement, so the index is built plainly.
+    public static List<String> pgliteStatements(String sql) {
+        return statements(sql).stream().map(s -> CONCURRENTLY.matcher(s).replaceAll("")).toList();
+    }
+
     private static List<Migration> pending(Connection conn, Path dir) throws SQLException, IOException {
         var applied = applied(conn);
         var files = read(dir);
@@ -148,6 +160,10 @@ public final class Migrator {
 
     private static void apply(Connection conn, Migration migration) throws SQLException, IOException {
         var sql = Files.readString(migration.file());
+        if (NO_TRANSACTION.matcher(sql).lookingAt()) {
+            applyWithoutTransaction(conn, migration, sql);
+            return;
+        }
         conn.setAutoCommit(false);
         try {
             try (var st = conn.createStatement()) {
@@ -162,6 +178,17 @@ public final class Migrator {
                 e.getSQLState(), e);
         } finally {
             conn.setAutoCommit(true);
+        }
+    }
+
+    private static void applyWithoutTransaction(Connection conn, Migration migration, String sql) throws SQLException {
+        try (var st = conn.createStatement()) {
+            for (var statement : statements(NO_TRANSACTION.matcher(sql).replaceFirst(""))) st.execute(statement);
+            record(conn, migration);
+            logger.info("applied migration {}", migration.file().getFileName());
+        } catch (SQLException e) {
+            throw new SQLException("migration " + migration.file().getFileName() + " failed: " + e.getMessage(),
+                e.getSQLState(), e);
         }
     }
 

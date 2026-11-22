@@ -94,12 +94,12 @@ final class MapCompat {
             map.owner(),
             requireNonNullElse(map.protocolVersion(), DEFAULT_PROTOCOL_VERSION),
             new MapData.Settings(
-                requireNonNullElse(map.optName(), ""),
-                requireNonNullElse(map.optIcon(), ""),
-                MapSize.fromId(map.size()),
+                map.name(),
+                map.icon(),
+                size(map),
                 variant(map),
-                map.optSubvariant(),
-                Wire.gson().fromJson(map.optSpawnPoint(), Position.class),
+                subvariant(map),
+                Wire.gson().fromJson(map.spawnPoint(), Position.class),
                 tags,
                 leaderboard(map.leaderboard()),
                 extra(map)
@@ -108,7 +108,7 @@ final class MapCompat {
             map.publishedId() == null ? null : MapData.formatPublishedId(map.publishedId()),
             map.publishedAt(),
             map.listed(),
-            MapQuality.fromId(requireNonNullElse(map.qualityOverride(), 0L).intValue()),
+            quality(map),
             difficulty(variant(map), plays, winRate),
             plays,
             winRate,
@@ -119,12 +119,37 @@ final class MapCompat {
         );
     }
 
-    /// Anything that is not a building or freeform map is a parkour one; adventure maps were never written.
     static MapVariant variant(Maps map) {
-        return switch (map.optVariant()) {
-            case "building" -> MapVariant.BUILDING;
-            case "freeform" -> MapVariant.FREEFORM;
-            case null, default -> MapVariant.PARKOUR;
+        return switch (map.variant()) {
+            case PARKOUR -> MapVariant.PARKOUR;
+            case BUILDING -> MapVariant.BUILDING;
+            case ADVENTURE -> MapVariant.ADVENTURE;
+            case FREEFORM -> MapVariant.FREEFORM;
+        };
+    }
+
+    static @Nullable String subvariant(Maps map) {
+        return map.subvariant() == null ? null : map.subvariant().pgLabel();
+    }
+
+    static MapSize size(Maps map) {
+        return switch (map.sizeClass()) {
+            case NORMAL -> MapSize.NORMAL;
+            case LARGE -> MapSize.LARGE;
+            case MASSIVE -> MapSize.MASSIVE;
+            case COLOSSAL -> MapSize.COLOSSAL;
+            case UNLIMITED -> MapSize.UNLIMITED;
+        };
+    }
+
+    static MapQuality quality(Maps map) {
+        return switch (map.quality()) {
+            case UNRATED -> MapQuality.UNRATED;
+            case GOOD -> MapQuality.GOOD;
+            case GREAT -> MapQuality.GREAT;
+            case EXCELLENT -> MapQuality.EXCELLENT;
+            case OUTSTANDING -> MapQuality.OUTSTANDING;
+            case MASTERPIECE -> MapQuality.MASTERPIECE;
         };
     }
 
@@ -168,10 +193,11 @@ final class MapCompat {
     }
 
     static MapVerification verification(Maps map) {
-        var value = requireNonNullElse(map.verification(), VERIFICATION_NONE);
-        if (value == VERIFICATION_PENDING) return MapVerification.PENDING;
-        if (value == VERIFICATION_VERIFIED) return MapVerification.VERIFIED;
-        return MapVerification.UNVERIFIED;
+        return switch (map.verificationState()) {
+            case UNVERIFIED -> MapVerification.UNVERIFIED;
+            case PENDING -> MapVerification.PENDING;
+            case VERIFIED -> MapVerification.VERIFIED;
+        };
     }
 
     /// The number the search filter compares against: Go's `mapDifficultyIndex`, where unrated
@@ -197,13 +223,11 @@ final class MapCompat {
         return MapDifficulty.EASY;
     }
 
-    /// `opt_extra` with the dedicated boolean columns folded in, which is how every server reads
-    /// them.
+    /// `extra` with the dedicated boolean columns folded in, which is how every server reads them.
     static JsonObject extra(Maps map) {
-        var extra = map.optExtra() == null
+        var extra = map.extra() == null
             ? new JsonObject()
-            : JsonParser.parseString(new String(map.optExtra(), StandardCharsets.UTF_8))
-                .getAsJsonObject();
+            : JsonParser.parseString(map.extra()).getAsJsonObject();
         if (Boolean.TRUE.equals(map.optOnlySprint())) extra.addProperty("only_sprint", true);
         if (Boolean.TRUE.equals(map.optNoSprint())) extra.addProperty("no_sprint", true);
         if (Boolean.TRUE.equals(map.optNoJump())) extra.addProperty("no_jump", true);
@@ -308,14 +332,17 @@ final class MapCompat {
         };
     }
 
-    /// `state_v2` holds json text; a row Go could not read it answered with an empty state rather
-    /// than refusing the player their map, and so does this.
+    /// A row Go could not read answered with an empty state rather than refusing the player their
+    /// map, and so does this. `state` is null only where jsonb refused the document, which
+    /// `state_v2` still holds.
     static SaveStateData saveStateData(SaveStates state) {
         JsonObject data = null;
         if (!state.completed()) {
             try {
                 var json = JsonParser.parseString(
-                    new String(state.stateV2(), StandardCharsets.UTF_8)
+                    state.state() != null
+                        ? state.state()
+                        : new String(state.stateV2(), StandardCharsets.UTF_8)
                 );
                 data = json.isJsonObject() ? json.getAsJsonObject() : new JsonObject();
             } catch (JsonParseException e) {
@@ -328,8 +355,8 @@ final class MapCompat {
             state.mapId(),
             state.playerId(),
             saveStateType(state.type()),
-            state.created(),
-            state.updated(),
+            state.createdAt(),
+            state.updatedAt(),
             state.dataVersion(),
             requireNonNullElse(state.protocolVersion(), DEFAULT_PROTOCOL_VERSION),
             state.playtime(),

@@ -319,7 +319,10 @@ class MapSaveStateTest {
     @Test
     void upsert_completingAVerificationMarksTheMapVerifiedAtThatVersion() {
         var map = map("parkour");
-        TEST_DB.seed("update maps set verification = 1 where id = '" + map + "'");
+        TEST_DB.seed(
+            "update maps set verification = 1, verification_state = 'pending' where id = '" + map
+                + "'"
+        );
         client.upsertSaveState(
             map,
             PLAYER,
@@ -341,7 +344,10 @@ class MapSaveStateTest {
     void upsert_doesNotVerifyOrBoardAVerificationTheResetAlreadyStruck() {
         var map = map("parkour");
         var state = UUID.randomUUID();
-        TEST_DB.seed("update maps set verification = 1 where id = '" + map + "'");
+        TEST_DB.seed(
+            "update maps set verification = 1, verification_state = 'pending' where id = '" + map
+                + "'"
+        );
         client.upsertSaveState(
             map,
             PLAYER,
@@ -400,8 +406,8 @@ class MapSaveStateTest {
         client.upsertSaveState(map, PLAYER, first, playing(1000).build());
         client.upsertSaveState(map, PLAYER, second, playing(1000).build());
         TEST_DB.seed(
-            "update save_states set updated = updated - interval '1 minute' where id = '" + second
-                + "'"
+            "update save_states set updated = updated - interval '1 minute', updated_at = updated_at - interval '1 minute' where id = '"
+                + second + "'"
         );
         assertEquals(first, client.getLatestSaveState(map, PLAYER, SaveStateType.PLAYING).id());
         assertNull(client.getLatestSaveState(map, PLAYER, SaveStateType.EDITING));
@@ -417,8 +423,8 @@ class MapSaveStateTest {
         TEST_DB.seed(
             """
             insert into save_states (id, map_id, player_id, type, created, updated, completed, playtime, ticks,
-                                     state_v2, protocol_version)
-            values ('%s', '%s', '%s', 'playing', now(), now(), false, 4000, 100, 'not json', null)
+                                     state_v2, protocol_version, created_at, updated_at)
+            values ('%s', '%s', '%s', 'playing', now(), now(), false, 4000, 100, 'not json', null, now(), now())
             """
                 .formatted(id, map, PLAYER)
         );
@@ -536,12 +542,13 @@ class MapSaveStateTest {
         var id = UUID.randomUUID();
         TEST_DB.seed(
             """
-            insert into maps (id, owner, m_type, created_at, updated_at, authz_key, file_id, legacy_map_id,
-                              opt_name, opt_icon, opt_variant, opt_spawn_point, size, protocol_version)
-            values ('%s', '%s', 'default', now(), now(), '', '', '', 'A map', '', '%s',
-                    '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 1, 776)
+            insert into maps (id, owner, created_at, updated_at, opt_name, opt_icon, opt_variant, opt_spawn_point, size,
+                              protocol_version, name, icon, variant, spawn_point, size_class, verification_state,
+                              quality)
+            values ('%s', '%s', now(), now(), 'A map', '', '%s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 1, 776,
+                    'A map', '', '%s', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', 'large', 'unverified', 'unrated')
             """
-                .formatted(id, PLAYER, variant)
+                .formatted(id, PLAYER, variant, variant)
         );
         return id;
     }

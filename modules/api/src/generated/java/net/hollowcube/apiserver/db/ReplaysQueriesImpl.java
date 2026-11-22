@@ -19,14 +19,14 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class ReplaysQueriesImpl implements ReplaysQueries {
     private static final String GET_REPLAY = """
-        select replays.*
+        select replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome
         from replays
         where id = ?""";
 
     private static final String GET_REPLAY_FOR_UPDATE = """
         -- The lock every write takes first. Preconditions are checked in Java against the locked row rather
         -- than as a `where version =` guard, which is what Go does.
-        select replays.*
+        select replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome
         from replays
         where id = ?
             for update""";
@@ -37,7 +37,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
                              current_preamble, current_preamble_digest, outcome)
         values (?, 1, 1, ?, 'segmented', ?, ?, ?, ?)
         on conflict (id) do nothing
-        returning replays.*""";
+        returning replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome""";
 
     private static final String UPDATE_REPLAY_RECORDING = """
         -- `version` moves on every write; `recording_revision` moves only here, so a segment's
@@ -52,7 +52,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
             outcome                 = ?,
             updated_at              = now()
         where id = ?
-        returning replays.*""";
+        returning replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome""";
 
     private static final String PUBLISH_REPLAY_COMPACTED = """
         -- The pointer swap. `state` and `outcome` are untouched: compaction does not change why a recording
@@ -68,7 +68,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
             compacted_digest          = ?,
             updated_at                = now()
         where id = ?
-        returning replays.*""";
+        returning replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome""";
 
     private static final String CREATE_REPLAY_SEGMENT = """
         -- Exactly one of `objectReference` and `data` is non-null; a check constraint enforces it.
@@ -76,13 +76,13 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         values (?, ?, ?, ?, ?, ?, ?)""";
 
     private static final String GET_REPLAY_SEGMENT = """
-        select replay_segments.*
+        select replay_segments.replay_id, replay_segments.segment_index, replay_segments.object_reference, replay_segments.length, replay_segments.digest, replay_segments.commit_revision, replay_segments.data
         from replay_segments
         where replay_id = ?
           and segment_index = ?""";
 
     private static final String GET_REPLAY_IDEMPOTENCY = """
-        select replay_idempotency.*
+        select replay_idempotency.replay_id, replay_idempotency.idempotency_key, replay_idempotency.request_fingerprint, replay_idempotency.response_status, replay_idempotency.response_etag, replay_idempotency.response_metadata, replay_idempotency.created_at
         from replay_idempotency
         where replay_id = ?
           and idempotency_key = ?""";

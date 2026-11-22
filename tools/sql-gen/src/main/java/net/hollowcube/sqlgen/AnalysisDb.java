@@ -71,7 +71,7 @@ final class AnalysisDb implements AutoCloseable {
             st.execute("set search_path to public");
             for (var file : files) {
                 try {
-                    for (var statement : Migrator.statements(Files.readString(file))) st.execute(statement);
+                    for (var statement : Migrator.pgliteStatements(Files.readString(file))) st.execute(statement);
                 } catch (IOException e) {
                     throw new UncheckedIOException(e);
                 } catch (SQLException e) {

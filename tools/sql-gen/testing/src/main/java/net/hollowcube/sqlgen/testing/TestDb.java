@@ -148,7 +148,7 @@ public final class TestDb implements BeforeAllCallback, BeforeEachCallback, Afte
                 // land in the system schema.
                 st.execute("set search_path to public");
                 for (var file : sqlFiles(migrations))
-                    for (var statement : Migrator.statements(Files.readString(file))) st.execute(statement);
+                    for (var statement : Migrator.pgliteStatements(Files.readString(file))) st.execute(statement);
             }
             return new Instance(conn, userTables(conn));
         } catch (IOException e) {
