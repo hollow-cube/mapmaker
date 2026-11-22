@@ -79,6 +79,7 @@ public final class HttpS3Client implements S3Client {
     private final String accessKey;
     private final String secretKey;
     private final Supplier<Instant> clock;
+    private final Duration firstBackoff;
 
     /// An untraced client, for a caller that has no [OpenTelemetry].
     public HttpS3Client(
@@ -97,7 +98,8 @@ public final class HttpS3Client implements S3Client {
             region,
             accessKey,
             secretKey,
-            Instant::now
+            Instant::now,
+            FIRST_BACKOFF
         );
     }
 
@@ -110,7 +112,7 @@ public final class HttpS3Client implements S3Client {
         String accessKey,
         String secretKey
     ) {
-        this(http, otel, endpoint, bucket, region, accessKey, secretKey, Instant::now);
+        this(http, otel, endpoint, bucket, region, accessKey, secretKey, Instant::now, FIRST_BACKOFF);
     }
 
     @TestOnly
@@ -122,7 +124,8 @@ public final class HttpS3Client implements S3Client {
         String region,
         String accessKey,
         String secretKey,
-        Supplier<Instant> clock
+        Supplier<Instant> clock,
+        Duration firstBackoff
     ) {
         this.http = http;
         this.tracer = otel.getTracer("net.hollowcube.apiserver.s3");
@@ -132,6 +135,7 @@ public final class HttpS3Client implements S3Client {
         this.bucket = bucket;
         this.region = region;
         this.accessKey = accessKey;
+        this.firstBackoff = firstBackoff;
         this.secretKey = secretKey;
         this.clock = clock;
     }
@@ -352,7 +356,7 @@ public final class HttpS3Client implements S3Client {
         HttpResponse.BodyHandler<T> handler,
         boolean repeatable
     ) {
-        var backoff = FIRST_BACKOFF;
+        var backoff = firstBackoff;
         for (var attempt = 1;; attempt++) {
             var last = !repeatable || attempt == MAX_ATTEMPTS;
             var span = tracer.spanBuilder("s3/" + operation)

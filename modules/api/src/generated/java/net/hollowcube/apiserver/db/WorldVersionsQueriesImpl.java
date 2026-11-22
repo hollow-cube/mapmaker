@@ -16,30 +16,33 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class WorldVersionsQueriesImpl implements WorldVersionsQueries {
     private static final String CLAIM_EDITING_WORLD = """
-        -- Fails on `map_worlds_edit_map_idx` when another world holds the map for editing. The tracker may
-        -- already have inserted this world from its "created" message, untyped, so this takes that row over.
+        -- name: world_versions.claimEditingWorld
         insert into map_worlds (id, map_id, server_id, type)
         values (?, ?, ?, 'editing')
         on conflict (id) do update set type = 'editing'""";
 
     private static final String GET_EDITING_WORLD = """
+        -- name: world_versions.getEditingWorld
         select map_worlds.id, map_worlds.map_id, map_worlds.server_id, map_worlds.created_at, map_worlds.type
         from map_worlds
         where map_id = ?
           and type = 'editing'""";
 
     private static final String RELEASE_WORLD = """
+        -- name: world_versions.releaseWorld
         delete
         from map_worlds
         where id = ?""";
 
     private static final String RELEASE_EDITING_WORLD = """
+        -- name: world_versions.releaseEditingWorld
         delete
         from map_worlds
         where map_id = ?
           and type = 'editing'""";
 
     private static final String GET_HEAD = """
+        -- name: world_versions.getHead
         select map_world_versions.map_id, map_world_versions.id, map_world_versions.sha256, map_world_versions.length, map_world_versions.wal_seq, map_world_versions.world_id, map_world_versions.created_at
         from map_world_versions
         where map_id = ?
@@ -47,6 +50,7 @@ final class WorldVersionsQueriesImpl implements WorldVersionsQueries {
         limit 1""";
 
     private static final String INSERT_VERSION = """
+        -- name: world_versions.insertVersion
         insert into map_world_versions (map_id, sha256, length, wal_seq, world_id)
         values (?, ?, ?, ?, ?)""";
 

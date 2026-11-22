@@ -10,7 +10,6 @@ import net.hollowcube.ipc.replay.ReplayCommit;
 import net.hollowcube.ipc.replay.ReplayCompaction;
 import net.hollowcube.ipc.replay.ReplayInfo;
 import net.hollowcube.ipc.replay.ReplayService;
-import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.sqlgen.testing.TestDb;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.network.NetworkBuffer;
@@ -19,7 +18,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HexFormat;
 import java.util.List;
@@ -28,7 +26,6 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /// The timed jobs that stand behind the per-commit enqueue: the one that finds the replays nothing
 /// asked to compact, and the ones that remove what compaction and rewriting made redundant.
@@ -48,36 +45,15 @@ class ReplaySweepsTest {
         replay("just-finished", "finished", "segmented", Duration.ofMinutes(1));
 
         new ReconcileReplaysRunner(db, 100).run(null);
-
         assertEquals(List.of("old-finished"), enqueued());
-    }
 
-    @Test
-    void reconcile_asksAgainForOneWhoseRowWasParked() throws Exception {
-        replay("old-finished", "finished", "segmented", Duration.ofHours(2));
-        new ReconcileReplaysRunner(db, 100).run(null);
         TEST_DB.seed(
             "update jobs set parked_at = now(), attempts = 5 where job = 'compact-replay'"
         );
-
         new ReconcileReplaysRunner(db, 100).run(null);
-
-        assertEquals(List.of("old-finished"), enqueued());
         var row = db.jobs.listJobs().getFirst();
-        assertNull(row.parkedAt());
+        assertNull(row.parkedAt(), "a parked row is asked for again");
         assertEquals(0, row.attempts());
-    }
-
-    @Test
-    void sweep_withDeletingOffTouchesNothing() throws Exception {
-        replay("compacted", "finished", "compacted", Duration.ofDays(2));
-        segment("compacted", 0, "replays/ab/segments/0/cd");
-        var replays = new FakeReplayService();
-
-        new SweepReplaySourcesRunner(db, replays, 100, false).run(null);
-
-        assertEquals(List.of(), replays.dropped);
-        assertEquals(1, db.replays.listReplaySegmentObjects("compacted").size());
     }
 
     @Test
@@ -92,8 +68,11 @@ class ReplaySweepsTest {
         segment("segmented", 0, "replays/ij/segments/0/kl");
         var replays = new FakeReplayService();
 
-        new SweepReplaySourcesRunner(db, replays, 100, true).run(null);
+        new SweepReplaySourcesRunner(db, replays, 100, false).run(null);
+        assertEquals(List.of(), replays.dropped, "deleting off touches nothing");
+        assertEquals(1, db.replays.listReplaySegmentObjects("compacted").size());
 
+        new SweepReplaySourcesRunner(db, replays, 100, true).run(null);
         assertEquals(List.of("compacted"), replays.dropped);
     }
 
@@ -124,21 +103,11 @@ class ReplaySweepsTest {
         segment("fresh", 1, "replays/ef/segments/1/f");
         var replays = new FakeReplayService();
 
-        new SweepRecordingSourcesRunner(db, replays, true).run(null);
-
-        assertEquals(List.of("rewritten@2"), replays.cut);
-    }
-
-    @Test
-    void recordingSweep_withDeletingOffTouchesNothing() throws Exception {
-        recording("rewritten", 1, Duration.ofDays(2));
-        segment("rewritten", 0, "replays/ab/segments/0/a");
-        segment("rewritten", 1, "replays/ab/segments/1/b");
-        var replays = new FakeReplayService();
-
         new SweepRecordingSourcesRunner(db, replays, false).run(null);
+        assertEquals(List.of(), replays.cut, "deleting off touches nothing");
 
-        assertEquals(List.of(), replays.cut);
+        new SweepRecordingSourcesRunner(db, replays, true).run(null);
+        assertEquals(List.of("rewritten@2"), replays.cut);
     }
 
     private List<String> enqueued() {

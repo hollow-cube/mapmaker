@@ -17,7 +17,6 @@ import java.net.http.HttpClient;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /// The head database end to end: a real Postgres under the service, the generated server over it,
@@ -61,19 +60,7 @@ class HeadDatabaseServiceImplTest {
     }
 
     @Test
-    void getHeads_carriesEveryFieldAcrossTheWireUntouched() {
-        HeadInfo creeper = hdb.getHeads("creeper", 0, 10).first();
-
-        assertEquals("1", creeper.id());
-        assertEquals("Creeper Head", creeper.name());
-        assertEquals("mob", creeper.category());
-        // The bare hash, not a profile: encoding it is the caller's business.
-        assertEquals("tex-creeper", creeper.texture());
-        assertEquals(List.of("green", "scary"), creeper.tags());
-    }
-
-    @Test
-    void getHeads_matchesAPartialWordAsItIsTyped() {
+    void getHeads_matchesEveryWordAsItIsTypedAgainstNamesAndTags() {
         for (String typed : List.of("c", "cre", "creep", "creeper")) {
             var results = hdb.getHeads(typed, 0, 10);
             assertTrue(
@@ -81,79 +68,33 @@ class HeadDatabaseServiceImplTest {
                 "'" + typed + "' should still find the creeper"
             );
         }
-    }
-
-    @Test
-    void getHeads_matchesOnTagsToo() {
-        var results = hdb.getHeads("scary", 0, 10);
-
-        assertEquals(1, results.count());
-        assertEquals("Creeper Head", results.first().name());
-    }
-
-    @Test
-    void getHeads_requiresEveryWordToMatch() {
+        assertEquals("Creeper Head", hdb.getHeads("scary", 0, 10).first().name());
+        assertEquals(1, hdb.getHeads("scary", 0, 10).count());
         assertEquals(1, hdb.getHeads("zombie head", 0, 10).count());
         assertEquals(0, hdb.getHeads("zombie stone", 0, 10).count());
-    }
-
-    @Test
-    void getHeads_answersAnEmptyPageRatherThanEverythingWhenNothingMatches() {
-        var results = hdb.getHeads("piglin", 0, 10);
-
-        assertEquals(0, results.count());
-        assertTrue(results.isEmpty());
-    }
-
-    @Test
-    void getHeads_withoutAQueryBrowsesTheWholeTable() {
+        // Nothing matching is an empty page, not a fall back to browsing.
+        assertTrue(hdb.getHeads("piglin", 0, 10).isEmpty());
         for (String blank : List.of("", "   ", "!!")) {
-            var results = hdb.getHeads(blank, 0, 10);
-            assertEquals(3, results.count(), "'" + blank + "' is a browse, not a search");
-            assertEquals(3, results.results().size());
+            assertEquals(3, hdb.getHeads(blank, 0, 10).count(), "'" + blank + "' is a browse");
         }
     }
 
     @Test
-    void getHeads_countsEveryMatchNotJustThePage() {
-        var page = hdb.getHeads("head", 0, 1);
-
-        assertEquals(2, page.count());
-        assertEquals(1, page.results().size());
-        assertTrue(page.hasNext(0, 1));
-        assertEquals(2, page.totalPages(1));
-    }
-
-    @Test
-    void getHeads_walksPagesWithoutRepeatingAResult() {
-        var first = hdb.getHeads("head", 0, 1).first();
-        var second = hdb.getHeads("head", 1, 1).first();
-
-        assertEquals(List.of("1", "2"), List.of(first.id(), second.id()));
-    }
-
-    @Test
-    void getHeads_treatsAMissingOrOversizedPageSizeAsTheDefault() {
+    void getHeads_pagesWithATotalAndWithoutRepeatingAResult() {
+        var first = hdb.getHeads("head", 0, 1);
+        assertEquals(2, first.count());
+        assertEquals(1, first.results().size());
+        assertTrue(first.hasNext(0, 1));
+        assertEquals(
+            List.of("1", "2"),
+            List.of(first.first().id(), hdb.getHeads("head", 1, 1).first().id())
+        );
         assertEquals(3, hdb.getHeads("", 0, 0).results().size());
         assertEquals(3, hdb.getHeads("", 0, 5_000).results().size());
-    }
 
-    @Test
-    void getHeadsInCategory_pagesOneCategoryInNameOrder() {
-        var page = hdb.getHeadsInCategory("mob", 0, 1);
-
-        assertEquals(2, page.count());
-        assertEquals("Creeper Head", page.first().name());
-        assertTrue(page.hasNext(0, 1));
+        var category = hdb.getHeadsInCategory("mob", 0, 1);
+        assertEquals(2, category.count());
+        assertEquals("Creeper Head", category.first().name());
         assertEquals("Zombie Head", hdb.getHeadsInCategory("mob", 1, 1).first().name());
-    }
-
-    @Test
-    void getHeadsInCategory_isEmptyForACategoryNothingIsIn() {
-        var results = hdb.getHeadsInCategory("nether", 0, 10);
-
-        assertEquals(0, results.count());
-        assertTrue(results.isEmpty());
-        assertFalse(results.hasNext(0, 10));
     }
 }

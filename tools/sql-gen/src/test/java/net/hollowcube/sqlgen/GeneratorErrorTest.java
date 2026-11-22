@@ -69,11 +69,8 @@ class GeneratorErrorTest {
 
         assertTrue(message.contains("no Java type for Postgres type 'interval'"), message);
         assertTrue(message.contains("getInterval"), message);
-    }
 
-    @Test
-    void timestampsWithoutTimeZoneAreRejected() throws IOException {
-        var message = generate("""
+        message = generate("""
             -- name: getTimestamp :one
             select timestamp '2026-09-06 12:00:00' as created_at;
             """);
@@ -83,18 +80,15 @@ class GeneratorErrorTest {
     }
 
     @Test
-    void execMustNotReturnColumns() throws IOException {
+    void theTagMustAgreeWithWhetherTheStatementReturnsColumns() throws IOException {
         var message = generate("""
             -- name: insertThing :exec
             insert into thing (id, name) values ($id, $name) returning thing.*;
             """);
 
         assertTrue(message.contains("tagged :exec but returns columns"), message);
-    }
 
-    @Test
-    void aStatementWithNoResultCannotBeTaggedOne() throws IOException {
-        var message = generate("""
+        message = generate("""
             -- name: insertThing :one
             insert into thing (id, name) values ($id, $name);
             """);
@@ -111,11 +105,8 @@ class GeneratorErrorTest {
             """);
 
         assertTrue(message.contains("does not name a result column"), message);
-    }
 
-    @Test
-    void aNullableParameterThatDoesNotExistIsAnError() throws IOException {
-        var message = generate("""
+        message = generate("""
             -- name: getThing :one
             -- nullable: $missing
             select thing.* from thing where id = $id;
@@ -125,7 +116,7 @@ class GeneratorErrorTest {
     }
 
     @Test
-    void notNullOnAColumnTheServerAlreadyKnowsIsRedundant() throws IOException {
+    void aDirectiveTheServerAlreadyImpliesIsRedundant() throws IOException {
         var message = generate("""
             -- name: getThingName :one
             -- not-null: name
@@ -133,11 +124,8 @@ class GeneratorErrorTest {
             """);
 
         assertTrue(message.contains("redundant"), message);
-    }
 
-    @Test
-    void nullableOnAnAlreadyNullableColumnIsRedundant() throws IOException {
-        var message = generate("""
+        message = generate("""
             -- name: getThingNote :one
             -- nullable: note
             select note from thing where id = $id;

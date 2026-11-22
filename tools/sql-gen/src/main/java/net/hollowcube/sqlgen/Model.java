@@ -30,6 +30,9 @@ final class Model {
     record Query(
         String name,
         String constantName,
+        String doc,
+        /// Prefixed with a `-- name:` line naming the group and query, so the statement says where
+        /// it came from in the server's logs.
         String sql,
         QueryFile.Tag tag,
         List<Param> params,

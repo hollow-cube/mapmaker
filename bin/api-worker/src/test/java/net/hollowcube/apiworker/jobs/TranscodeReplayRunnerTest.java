@@ -30,7 +30,6 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TranscodeReplayRunnerTest {
 
@@ -48,9 +47,9 @@ class TranscodeReplayRunnerTest {
         assertEquals("transcode:" + ID + ":3", published.meta().idempotencyKey());
         assertEquals(3, published.meta().expectedRevision());
         assertCurrent(published.body());
-        assertEquals(StaleReplays.play(original), StaleReplays.play(published.body()));
-        assertEquals(StaleReplays.EVENTS, StaleReplays.play(published.body()).subList(0, 2));
-        assertEquals(StaleReplays.play(original), StaleReplays.events(published.body()));
+        var played = StaleReplays.play(published.body());
+        assertEquals(StaleReplays.play(original), played);
+        assertEquals(StaleReplays.EVENTS, played.subList(0, 2));
     }
 
     @Test
@@ -68,10 +67,9 @@ class TranscodeReplayRunnerTest {
             untranscoded.getReplay(ID),
             recording.preamble()
         );
-        var stale = stored.untranscoded();
-        assertEquals(StaleReplays.play(stale), StaleReplays.play(published.body()));
-        assertEquals(StaleReplays.EVENTS, StaleReplays.play(published.body()).subList(0, 2));
-        assertEquals(StaleReplays.play(stale), StaleReplays.events(published.body()));
+        var played = StaleReplays.play(published.body());
+        assertEquals(StaleReplays.play(stored.untranscoded()), played);
+        assertEquals(StaleReplays.EVENTS, played.subList(0, 2));
     }
 
     @Test
@@ -141,48 +139,32 @@ class TranscodeReplayRunnerTest {
         var stale = StoredReplay
             .read(FakeStorage.segmented(recording), storage.getReplay(ID), recording.preamble())
             .untranscoded();
-        assertEquals(StaleReplays.play(stale), StaleReplays.play(rewritten.data()));
-        assertEquals(StaleReplays.EVENTS, StaleReplays.play(rewritten.data()).subList(0, 2));
+        var played = StaleReplays.play(rewritten.data());
+        assertEquals(StaleReplays.play(stale), played);
+        assertEquals(StaleReplays.EVENTS, played.subList(0, 2));
     }
 
     @Test
-    void run_returnsQuietlyWhenARecordingMovedOnUnderTheRewrite() throws Exception {
+    void run_returnsQuietlyWhenTheReplayMovedOnAndThrowsOnAnythingElse() throws Exception {
         for (var status : List.of(412, 409)) {
             var storage = FakeStorage.segmented(StaleReplays.recording());
             storage.state = ReplayState.RECORDING;
             storage.commitStatus = status;
-
             new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
-
             assertEquals(1, storage.committed.size());
         }
-    }
 
-    @Test
-    void run_returnsQuietlyWhenItLosesThePublication() throws Exception {
+        var beforePreamble = FakeStorage.compacted(StaleReplays.compacted());
+        beforePreamble.preambleStatus = 412;
+        new TranscodeReplayRunner(beforePreamble, IDLE).run(new TranscodeReplay(ID, "backfill"));
+        assertEquals(List.of(), beforePreamble.published);
+
         var storage = FakeStorage.compacted(StaleReplays.compacted());
         storage.publishStatus = 412;
-
         new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
-
         assertEquals(1, storage.published.size());
-    }
 
-    @Test
-    void run_returnsQuietlyWhenTheReplayMovedOnBeforeItsPreambleWasRead() throws Exception {
-        var storage = FakeStorage.compacted(StaleReplays.compacted());
-        storage.preambleStatus = 412;
-
-        new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"));
-
-        assertEquals(List.of(), storage.published);
-    }
-
-    @Test
-    void run_letsAnythingElseTheStoreSaysFailTheRow() {
-        var storage = FakeStorage.compacted(StaleReplays.compacted());
         storage.publishStatus = 500;
-
         assertThrows(
             IpcException.class,
             () -> new TranscodeReplayRunner(storage, IDLE).run(new TranscodeReplay(ID, "backfill"))

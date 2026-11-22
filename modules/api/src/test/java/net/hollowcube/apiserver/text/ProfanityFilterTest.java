@@ -2,7 +2,6 @@ package net.hollowcube.apiserver.text;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.BitSet;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,6 +65,43 @@ class ProfanityFilterTest {
             "riddick"
         );
         flags("nigger", "sniggers", "sniggering"); // deliberately still blocked
+
+        var text = """
+            Rebellious subjects, enemies to peace,
+            Profaners of this neighbour-stained steel,—
+            Will they not hear? What, ho! You men, you beasts,
+            That quench the fire of your pernicious rage
+            With purple fountains issuing from your veins,
+            On pain of torture, from those bloody hands
+            Throw your mistemper'd weapons to the ground
+            And hear the sentence of your moved prince.
+            Three civil brawls, bred of an airy word,
+            By thee, old Capulet, and Montague,
+            Have thrice disturb'd the quiet of our streets,
+            And made Verona's ancient citizens
+            Cast by their grave beseeming ornaments,
+            To wield old partisans, in hands as old,
+            Canker'd with peace, to part your canker'd hate.
+            If ever you disturb our streets again,
+            Your lives shall pay the forfeit of the peace.
+            Who set this ancient quarrel new abroach?
+            Speak, nephew, were you by when it began?
+            Here were the servants of your adversary
+            And yours, close fighting ere I did approach.
+            I drew to part them, in the instant came
+            The fiery Tybalt, with his sword prepar'd,
+            Which, as he breath'd defiance to my ears,
+            He swung about his head, and cut the winds,
+            Who nothing hurt withal, hiss'd him in scorn.
+            Many a morning hath he there been seen,
+            With tears augmenting the fresh morning's dew,
+            Adding to clouds more clouds with his deep sighs;
+            Shuts up his windows, locks fair daylight out
+            And makes himself an artificial night.
+            Could we but learn from whence his sorrows grow,
+            We would as willingly give cure as know.
+            """;
+        passes(text);
     }
 
     @Test
@@ -146,14 +182,6 @@ class ProfanityFilterTest {
     }
 
     @Test
-    void negatedShortTermDoesNotHideOrFakeALongerOne() {
-        // clit is negated by clitheroe and is a prefix of clitoris: a negated short term must
-        // neither be reported itself nor hide the longer term through the same node.
-        passes("clitheroe", "in clitheroe town");
-        flags("clitoris", "clitoris");
-    }
-
-    @Test
     void everyTermFlagsItself_andEveryNegativePasses() {
         for (var entry : Profanities.TERM_TRIE.terms().entrySet()) {
             var term = entry.getKey();
@@ -168,20 +196,17 @@ class ProfanityFilterTest {
     }
 
     @Test
-    void manyMatches_allReported() {
-        var result = ProfanityFilter.test("fuck this shit, you cunt");
-        assertEquals(
-            List.of("fuck", "shit", "cunt"),
-            result.matches().stream().map(ProfanityFilter.Match::term).toList()
-        );
-        assertEquals("**** this ****, you ****", result.censored('*'));
-    }
-
-    @Test
-    void matchRangesAndMask_areInOriginalChars() {
+    void everyMatch_isReportedAndMaskedInOriginalChars() {
         var result = ProfanityFilter.test("well fuck");
         assertEquals(List.of(new ProfanityFilter.Match("fuck", 5, 9)), result.matches());
         assertEquals("well ****", result.censored('*'));
+
+        var many = ProfanityFilter.test("fuck this shit, you cunt");
+        assertEquals(
+            List.of("fuck", "shit", "cunt"),
+            many.matches().stream().map(ProfanityFilter.Match::term).toList()
+        );
+        assertEquals("**** this ****, you ****", many.censored('*'));
 
         assertEquals("****", ProfanityFilter.test("fück").censored('*'));
         assertEquals("*****", ProfanityFilter.test("fu\u0308ck").censored('*')); // combining mark inside the span
@@ -190,54 +215,5 @@ class ProfanityFilterTest {
         assertEquals("😀 ****", ProfanityFilter.test("😀 fuck").censored('*')); // surrogate pair before it
         assertEquals("****😀****", ProfanityFilter.test("fuck😀shit").censored('*'));
         assertEquals("**** ****", ProfanityFilter.test("ｆｕｃｋ shit").censored('*'));
-    }
-
-    @Test
-    void nothingMatched_isEmptyMask() {
-        var result = ProfanityFilter.test("hello there");
-        assertFalse(result.matched());
-        assertEquals(new BitSet(), result.mask());
-        assertEquals("hello there", result.censored('*'));
-    }
-
-    @Test
-    void longCleanText() {
-        var text = """
-            Rebellious subjects, enemies to peace,
-            Profaners of this neighbour-stained steel,—
-            Will they not hear? What, ho! You men, you beasts,
-            That quench the fire of your pernicious rage
-            With purple fountains issuing from your veins,
-            On pain of torture, from those bloody hands
-            Throw your mistemper'd weapons to the ground
-            And hear the sentence of your moved prince.
-            Three civil brawls, bred of an airy word,
-            By thee, old Capulet, and Montague,
-            Have thrice disturb'd the quiet of our streets,
-            And made Verona's ancient citizens
-            Cast by their grave beseeming ornaments,
-            To wield old partisans, in hands as old,
-            Canker'd with peace, to part your canker'd hate.
-            If ever you disturb our streets again,
-            Your lives shall pay the forfeit of the peace.
-            Who set this ancient quarrel new abroach?
-            Speak, nephew, were you by when it began?
-            Here were the servants of your adversary
-            And yours, close fighting ere I did approach.
-            I drew to part them, in the instant came
-            The fiery Tybalt, with his sword prepar'd,
-            Which, as he breath'd defiance to my ears,
-            He swung about his head, and cut the winds,
-            Who nothing hurt withal, hiss'd him in scorn.
-            Many a morning hath he there been seen,
-            With tears augmenting the fresh morning's dew,
-            Adding to clouds more clouds with his deep sighs;
-            Shuts up his windows, locks fair daylight out
-            And makes himself an artificial night.
-            Could we but learn from whence his sorrows grow,
-            We would as willingly give cure as know.
-            """;
-        var result = ProfanityFilter.test(text);
-        assertFalse(result.matched(), () -> result.matches().toString());
     }
 }

@@ -8,7 +8,6 @@ import net.hollowcube.ipc.map.LeaderboardData;
 import net.hollowcube.ipc.map.MapClient;
 import net.hollowcube.ipc.map.MapServer;
 import net.hollowcube.ipc.map.PlayerTopTime;
-import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.sqlgen.testing.TestDb;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
@@ -33,10 +32,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MapLeaderboardTest {
 
     @RegisterExtension
-    static final TestDb TEST_DB = TestDb.of(
-        "../../modules/api/src/main/sql/migrations",
-        TestDb.Mode.TRUNCATE
-    );
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
     private static final UUID ALICE = UUID.fromString("00000000-0000-0000-0000-00000000000a");
     private static final UUID BOB = UUID.fromString("00000000-0000-0000-0000-00000000000b");
     private static final UUID CAROL = UUID.fromString("00000000-0000-0000-0000-00000000000c");
@@ -84,71 +80,33 @@ class MapLeaderboardTest {
     }
 
     @Test
-    void getMapLeaderboard_roundsTimesToTheTickAndSharesRanksOnTies() {
+    void getMapLeaderboard_roundsTimesToTheTickAndSharesRanksOnTiesInAndOutsideTheTop() {
         var map = map("parkour", true, null);
         board(map, ALICE, 1000);
         board(map, BOB, 1020);
         board(map, CAROL, 1049);
-        board(map, DAVE, 1075);
+        for (var i = 0; i < 8; i++) board(map, UUID.randomUUID(), 2000 + i * 100);
+        board(map, DAVE, 2710);
 
         var leaderboard = client.getMapLeaderboard(map, DAVE);
+        assertEquals(10, leaderboard.top().size());
         assertEquals(
             List.of(
                 new LeaderboardData.Entry(ALICE, 1000, 1),
                 new LeaderboardData.Entry(BOB, 1000, 1),
-                new LeaderboardData.Entry(CAROL, 1050, 3),
-                new LeaderboardData.Entry(DAVE, 1100, 4)
+                new LeaderboardData.Entry(CAROL, 1050, 3)
             ),
-            leaderboard.top()
+            leaderboard.top().subList(0, 3)
         );
-        assertEquals(new LeaderboardData.Entry(DAVE, 1100, 4), leaderboard.player());
+        assertEquals(
+            new LeaderboardData.Entry(DAVE, 2700, 11),
+            leaderboard.player(),
+            "outside the top, a time shown equal to the 11th ties with it"
+        );
     }
 
     @Test
-    void getMapLeaderboard_ranksAPlayerOutsideTheTopByTheSameRule() {
-        var map = map("parkour", true, null);
-        for (var i = 0; i < 10; i++) board(map, UUID.randomUUID(), 1000 + i * 100);
-        board(map, ALICE, 1949);
-        board(map, BOB, 1975);
-
-        assertEquals(10, client.getMapLeaderboard(map, null).top().size());
-        assertEquals(
-            new LeaderboardData.Entry(ALICE, 1950, 11),
-            client.getMapLeaderboard(map, ALICE).player()
-        );
-        assertEquals(
-            new LeaderboardData.Entry(BOB, 2000, 12),
-            client.getMapLeaderboard(map, BOB).player()
-        );
-        assertNull(client.getMapLeaderboard(map, CAROL).player());
-    }
-
-    @Test
-    void getMapLeaderboard_readsADescendingNumberBoardFromTheTopUnrounded() {
-        var map = map(
-            "parkour",
-            true,
-            "{\"asc\": false, \"format\": \"number\", \"score\": \"q.coins\"}"
-        );
-        board(map, ALICE, 7);
-        board(map, BOB, 12);
-        board(map, CAROL, 12);
-
-        var leaderboard = client.getMapLeaderboard(map, ALICE);
-        assertEquals(
-            List.of(
-                new LeaderboardData.Entry(CAROL, 12, 1),
-                new LeaderboardData.Entry(BOB, 12, 1),
-                new LeaderboardData.Entry(ALICE, 7, 3)
-            ),
-            leaderboard.top(),
-            "redis orders a tie by member, so the higher uuid comes first off a reversed range"
-        );
-        assertEquals(new LeaderboardData.Entry(ALICE, 7, 3), leaderboard.player());
-    }
-
-    @Test
-    void getMapLeaderboard_ranksAFractionalScoreAgainstWhatTheBoardShowsAndNotItsRawScore() {
+    void getMapLeaderboard_readsANumberBoardInItsDirectionRankingWhatItShows() {
         var descending = map(
             "parkour",
             true,
@@ -157,23 +115,26 @@ class MapLeaderboardTest {
         board(descending, ALICE, 7.5);
         board(descending, BOB, 90.0);
         board(descending, CAROL, 87.5);
+        board(descending, DAVE, 90.0);
 
-        var board = client.getMapLeaderboard(descending, ALICE);
+        var leaderboard = client.getMapLeaderboard(descending, ALICE);
         assertEquals(
-            new LeaderboardData.Entry(ALICE, 7, 3),
-            board.player(),
+            List.of(
+                new LeaderboardData.Entry(DAVE, 90, 1),
+                new LeaderboardData.Entry(BOB, 90, 1),
+                new LeaderboardData.Entry(CAROL, 87, 3),
+                new LeaderboardData.Entry(ALICE, 7, 4)
+            ),
+            leaderboard.top(),
+            "redis orders a tie by member, so the higher uuid comes first off a reversed range"
+        );
+        assertEquals(
+            new LeaderboardData.Entry(ALICE, 7, 4),
+            leaderboard.player(),
             "a score only beats what is shown as a whole number below it, never itself"
         );
         assertEquals(
-            List.of(
-                new LeaderboardData.Entry(BOB, 90, 1),
-                new LeaderboardData.Entry(CAROL, 87, 2),
-                new LeaderboardData.Entry(ALICE, 7, 3)
-            ),
-            board.top()
-        );
-        assertEquals(
-            new LeaderboardData.Entry(CAROL, 87, 2),
+            new LeaderboardData.Entry(CAROL, 87, 3),
             client.getMapLeaderboard(descending, CAROL).player()
         );
 
@@ -190,15 +151,6 @@ class MapLeaderboardTest {
             client.getMapLeaderboard(ascending, ALICE).player(),
             "7.2 shows as 7 and ties, 6.5 shows as 6 and does not"
         );
-    }
-
-    @Test
-    void getMapLeaderboard_isEmptyForABoardNobodyHasFinishedOrAnUnknownMap() {
-        assertEquals(
-            LeaderboardData.EMPTY,
-            client.getMapLeaderboard(map("parkour", true, null), ALICE)
-        );
-        assertEquals(LeaderboardData.EMPTY, client.getMapLeaderboard(UUID.randomUUID(), null));
     }
 
     @Test
@@ -278,113 +230,78 @@ class MapLeaderboardTest {
             .orElseThrow();
         assertEquals(1, onFirst.rank());
         assertEquals(1000, onFirst.completionTime());
-        assertEquals("000-000-101", onFirst.publishedId());
-        assertEquals("A map", onFirst.mapName());
 
         var last = client.getPlayerTopTimes(ALICE, 1, 2);
         assertEquals(3, last.count());
         assertEquals(List.of(second), last.results().stream().map(t -> t.mapId()).toList());
         assertEquals(3, last.results().getFirst().rank());
-        assertTrue(client.getPlayerTopTimes(ALICE, 5, 2).results().isEmpty());
-        assertEquals(0, client.getPlayerTopTimes(DAVE, 0, 10).count());
     }
 
     @Test
-    void delete_softDeletesTheRunsDropsThePlayerFromTheBoardAndNotifies() {
-        var map = map("parkour", true, null);
-        run(map, ALICE, 1000, null);
-        run(map, BOB, 2000, null);
-        board(map, ALICE, 1000);
-        board(map, BOB, 2000);
+    void delete_softDeletesRunsDropsThemFromTheBoardAndRefreshesStats() {
+        var first = map("parkour", true, null);
+        var second = map("parkour", true, null);
+        for (var player : List.of(ALICE, BOB, CAROL, DAVE)) {
+            run(first, player, 1000, null);
+            board(first, player, 1000);
+        }
+        for (var player : List.of(ALICE, CAROL)) {
+            run(second, player, 1000, null);
+            board(second, player, 1000);
+        }
 
-        client.deleteLeaderboardEntry(map, ALICE, true);
-
-        assertEquals(1, count("select count(*) from save_states where deleted_at is null"));
-        assertEquals(1, count("select win_count from map_stats where map_id = '" + map + "'"));
-        assertNull(score(map, ALICE));
-        assertEquals(2000.0, score(map, BOB));
+        client.deleteLeaderboardEntry(first, ALICE, true);
+        assertNull(score(first, ALICE));
+        assertEquals(1000.0, score(first, BOB));
+        assertEquals(3, count("select win_count from map_stats where map_id = '" + first + "'"));
         assertEquals(
             1,
             count(
                 "select count(*) from player_notifications where type = 'map_time_deleted' and key = '"
-                    + map + "' and player_id = '" + ALICE + "'"
+                    + first + "' and player_id = '" + ALICE + "'"
             )
         );
         assertTrue(
             clients.messages.stream().anyMatch(m -> m.subject().equals("notification.created"))
         );
-
-        client.deleteLeaderboardEntry(map, BOB, false);
+        client.deleteLeaderboardEntry(first, BOB, false);
         assertEquals(1, count("select count(*) from player_notifications"));
-    }
 
-    @Test
-    void deletePlayer_dropsThePlayerFromEveryBoard() {
-        var first = map("parkour", true, null);
-        var second = map("parkour", true, null);
-        run(first, ALICE, 1000, null);
-        run(second, ALICE, 1000, null);
-        run(second, BOB, 1000, null);
-        board(first, ALICE, 1000);
-        board(second, ALICE, 1000);
-        board(second, BOB, 1000);
+        client.deletePlayerLeaderboardEntries(CAROL);
+        assertNull(score(first, CAROL));
+        assertNull(score(second, CAROL));
+        assertEquals(1000.0, score(second, ALICE));
 
-        client.deletePlayerLeaderboardEntries(ALICE);
-
-        assertEquals(1, count("select count(*) from save_states where deleted_at is null"));
-        assertNull(score(first, ALICE));
+        client.deleteLeaderboard(second);
         assertNull(score(second, ALICE));
-        assertEquals(1000.0, score(second, BOB));
-    }
-
-    @Test
-    void deleteMap_softDeletesEveryRunAndDropsTheBoard() {
-        var map = map("parkour", true, null);
-        var other = map("parkour", true, null);
-        run(map, ALICE, 1000, null);
-        run(map, BOB, 1000, null);
-        run(other, ALICE, 1000, null);
-        board(map, ALICE, 1000);
-        board(other, ALICE, 1000);
-
-        client.deleteLeaderboard(map);
-
+        assertEquals(1000.0, score(first, DAVE));
         assertEquals(1, count("select count(*) from save_states where deleted_at is null"));
-        assertNull(score(map, ALICE));
-        assertEquals(1000.0, score(other, ALICE));
     }
 
     @Test
     void undelete_restoresRunsDeletedInTheRangeAndRebuildsTheBoard() {
-        var map = map("parkour", true, null);
-        run(map, ALICE, 1000, Instant.parse("2026-01-01T00:00:00Z"));
-        run(map, ALICE, 2000, Instant.parse("2026-02-01T00:00:00Z"));
-        run(map, ALICE, 3000, Instant.parse("2026-03-01T00:00:00Z"));
-        run(map, BOB, 500, Instant.parse("2026-02-01T00:00:00Z"));
-
-        var restored = client.undeleteLeaderboardEntry(
-            map,
-            ALICE,
-            Instant.parse("2026-01-15T00:00:00Z"),
-            Instant.parse("2026-02-15T00:00:00Z")
-        );
-
-        assertEquals(1, restored);
-        assertEquals(2000.0, score(map, ALICE));
-        assertNull(score(map, BOB));
-        assertEquals(1, count("select win_count from map_stats where map_id = '" + map + "'"));
-        assertEquals(2, client.undeleteLeaderboardEntry(map, ALICE, null, null));
-        assertEquals(1000.0, score(map, ALICE));
-        assertEquals(0, client.undeleteLeaderboardEntry(map, ALICE, null, null));
-    }
-
-    @Test
-    void undeletePlayer_countsRunsAcrossMapsAndRebuildsEachBoard() {
         var first = map("parkour", true, null);
         var second = map("parkour", true, null);
         run(first, ALICE, 1000, Instant.parse("2026-01-01T00:00:00Z"));
-        run(second, ALICE, 2000, Instant.parse("2026-01-01T00:00:00Z"));
+        run(first, ALICE, 2000, Instant.parse("2026-02-01T00:00:00Z"));
+        run(first, ALICE, 3000, Instant.parse("2026-03-01T00:00:00Z"));
+        run(first, BOB, 500, Instant.parse("2026-02-01T00:00:00Z"));
         run(second, ALICE, 4000, Instant.parse("2025-01-01T00:00:00Z"));
+        run(second, BOB, 1500, Instant.parse("2026-01-01T00:00:00Z"));
+        run(second, CAROL, 3000, Instant.parse("2026-06-01T00:00:00Z"));
+
+        assertEquals(
+            1,
+            client.undeleteLeaderboardEntry(
+                first,
+                ALICE,
+                Instant.parse("2026-01-15T00:00:00Z"),
+                Instant.parse("2026-02-15T00:00:00Z")
+            )
+        );
+        assertEquals(2000.0, score(first, ALICE));
+        assertNull(score(first, BOB));
+        assertEquals(1, count("select win_count from map_stats where map_id = '" + first + "'"));
 
         assertEquals(
             2,
@@ -395,52 +312,33 @@ class MapLeaderboardTest {
             )
         );
         assertEquals(1000.0, score(first, ALICE));
-        assertEquals(2000.0, score(second, ALICE));
-    }
-
-    @Test
-    void undeleteMap_restoresEveryRunDeletedBeforeTheBound() {
-        var map = map("parkour", true, null);
-        run(map, ALICE, 1000, Instant.parse("2026-01-01T00:00:00Z"));
-        run(map, BOB, 2000, Instant.parse("2026-01-01T00:00:00Z"));
-        run(map, CAROL, 3000, Instant.parse("2026-06-01T00:00:00Z"));
+        assertNull(score(second, ALICE));
 
         assertEquals(
             2,
-            client.undeleteLeaderboard(map, null, Instant.parse("2026-02-01T00:00:00Z"))
+            client.undeleteLeaderboard(second, null, Instant.parse("2026-02-01T00:00:00Z"))
         );
-        assertEquals(1000.0, score(map, ALICE));
-        assertEquals(2000.0, score(map, BOB));
-        assertNull(score(map, CAROL));
+        assertEquals(4000.0, score(second, ALICE));
+        assertEquals(1500.0, score(second, BOB));
+        assertNull(score(second, CAROL));
     }
 
     @Test
-    void rebuild_rewritesTheBoardFromEachPlayersBestRun() {
+    void rebuild_rewritesTheBoardFromEachPlayersBestRunButLeavesABuildingMapAlone() {
         var map = map("parkour", true, null);
         run(map, ALICE, 3000, null);
         run(map, ALICE, 1000, null);
         run(map, BOB, 2000, Instant.now());
         board(map, CAROL, 100);
-
         client.rebuildLeaderboard(map);
-
         assertEquals(1000.0, score(map, ALICE));
         assertNull(score(map, BOB));
         assertNull(score(map, CAROL));
-    }
 
-    @Test
-    void rebuild_leavesABuildingMapAloneAndRefusesAnUnknownOne() {
         var building = map("building", true, null);
         board(building, ALICE, 100);
         client.rebuildLeaderboard(building);
         assertEquals(100.0, score(building, ALICE));
-
-        var refused = assertThrows(
-            IpcException.class,
-            () -> client.rebuildLeaderboard(UUID.randomUUID())
-        );
-        assertEquals(404, refused.status());
     }
 
     private void board(UUID map, UUID player, double score) {

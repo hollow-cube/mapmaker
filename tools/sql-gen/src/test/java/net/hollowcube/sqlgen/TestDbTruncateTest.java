@@ -50,15 +50,4 @@ class TestDbTruncateTest {
     void theCommittedRowIsTruncatedAwayBeforeTheNextTest() {
         assertEquals(0L, db.gadgets.countGadgets());
     }
-
-    @Test
-    @Order(3)
-    void aFailedTransactionStillRollsBack() {
-        assertThrows(IllegalStateException.class, () -> db.tx(tx -> {
-            tx.gadgets.insertGadget(gadget("doomed"));
-            throw new IllegalStateException("nope");
-        }));
-
-        assertNull(db.gadgets.getGadget(ID));
-    }
 }

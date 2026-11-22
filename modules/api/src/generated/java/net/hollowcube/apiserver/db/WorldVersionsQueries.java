@@ -9,6 +9,10 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface WorldVersionsQueries {
+    /**
+     * Fails on `map_worlds_edit_map_idx` when another world holds the map for editing. The tracker may
+     * already have inserted this world from its "created" message, untyped, so this takes that row over.
+     */
     long claimEditingWorld(String worldId, UUID mapId, String serverId);
 
     @Nullable

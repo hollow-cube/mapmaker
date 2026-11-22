@@ -20,12 +20,12 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class MapStatsQueriesImpl implements MapStatsQueries {
     private static final String LAST_REFRESH = """
+        -- name: map_stats.lastRefresh
         select max(refreshed_at) as last
         from map_stats""";
 
     private static final String CHANGED_SINCE = """
-        -- Deleting or restoring a run leaves `updated_at` alone, so those paths refresh their maps
-        -- themselves.
+        -- name: map_stats.changedSince
         select map_id
         from save_states
         where updated_at > ?
@@ -35,6 +35,7 @@ final class MapStatsQueriesImpl implements MapStatsQueries {
         where rated_at > ?""";
 
     private static final String LIST_ALL = """
+        -- name: map_stats.listAll
         select map_id
         from save_states
         union
@@ -42,9 +43,8 @@ final class MapStatsQueriesImpl implements MapStatsQueries {
         from map_ratings""";
 
     private static final String REFRESH = """
+        -- name: map_stats.refresh
         insert into map_stats (map_id, play_count, win_count, likes, est_length_ms, refreshed_at)
-        -- a median of first clear over verify time on all maps with 20+ first clears.
-        -- up-to-date as of 2026-11-22, should be refreshed occasionally
         with params as (select 1.03::float8 as length_ratio),
              targets as (select unnest(?::uuid[]) as map_id),
              ratings as (select map_id,
@@ -52,8 +52,6 @@ final class MapStatsQueriesImpl implements MapStatsQueries {
                          from map_ratings
                          where map_id = any (?::uuid[])
                          group by map_id),
-             -- Players with a playing run, and players who completed one. Deleted runs are struck, so they
-             -- count for nothing.
              counts as (select map_id,
                                count(distinct player_id)                          as plays,
                                count(distinct player_id) filter (where completed) as wins
@@ -62,8 +60,6 @@ final class MapStatsQueriesImpl implements MapStatsQueries {
                           and type = 'playing'
                           and deleted_at is null
                         group by map_id),
-             -- Each player's earliest clear, not their best, timed with resets included (`total_playtime`,
-             -- zero on runs from before it existed, hence `greatest`).
              first_clears as (select distinct on (map_id, player_id) map_id, greatest(total_playtime, playtime) as ms
                               from save_states
                               where map_id = any (?::uuid[])
@@ -72,11 +68,9 @@ final class MapStatsQueriesImpl implements MapStatsQueries {
                                 and playtime > 0
                                 and deleted_at is null
                               order by map_id, player_id, created_at),
-             -- The median, so one player idling for an hour does not move it.
              evidence as (select map_id, count(*) as clears, percentile_cont(0.5) within group (order by ms) as median_ms
                           from first_clears
                           group by map_id),
-             -- single author verification state
              verify as (select distinct on (map_id) map_id, greatest(total_playtime, playtime) as ms
                         from save_states
                         where map_id = any (?::uuid[])
@@ -88,15 +82,12 @@ final class MapStatsQueriesImpl implements MapStatsQueries {
                coalesce(counts.plays, 0),
                coalesce(counts.wins, 0),
                coalesce(ratings.likes, 0),
-               -- With both, the prior counts as ten clears against the players' median, blended in log time
-               -- because clear times spread multiplicatively: 30s and 60s should meet near 42s, not 45s.
                case
                    when verify.ms is null then evidence.median_ms
                    when evidence.median_ms is null then verify.ms * params.length_ratio
                    else exp((10 * ln(verify.ms * params.length_ratio) + evidence.clears * ln(evidence.median_ms))
                        / (10 + evidence.clears))
                    end::int8,
-               -- The transaction's start, which the next run's watermark is taken from.
                now()
         from targets
                  cross join params

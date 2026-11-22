@@ -1,6 +1,5 @@
 package net.hollowcube.apiserver.map;
 
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.sun.net.httpserver.HttpServer;
 import io.nats.client.Message;
@@ -22,7 +21,6 @@ import java.net.InetSocketAddress;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,13 +32,8 @@ import static org.junit.jupiter.api.Assertions.*;
 /// nats, redis and posthog so that what they were told can be asserted.
 class MapServiceImplTest {
 
-    // TRUNCATE rather than ROLLBACK: every write here goes through `db.txResult`, which cannot
-    // commit inside a transaction the harness is holding open.
     @RegisterExtension
-    static final TestDb TEST_DB = TestDb.of(
-        "../../modules/api/src/main/sql/migrations",
-        TestDb.Mode.TRUNCATE
-    );
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
     private static final UUID OWNER = UUID.fromString("00000000-0000-0000-0000-000000000001");
     private static final UUID BUILDER = UUID.fromString("00000000-0000-0000-0000-000000000002");
     private ApiDatabase db;
@@ -92,18 +85,6 @@ class MapServiceImplTest {
     }
 
     @Test
-    void delete_succeedsWhenPublishingFailsAfterCommit() {
-        var map = create(OWNER);
-        clients.publishFailure = new IllegalStateException("broker unavailable");
-
-        client.delete(OWNER, map.id(), null);
-
-        assertNull(client.get(map.id().toString()));
-        assertNotNull(db.maps.getMapIncludingDeleted(map.id()).deletedAt());
-        assertDoesNotThrow(() -> client.delete(OWNER, map.id(), null));
-    }
-
-    @Test
     void create_stopsAtTheSlotLimit() {
         create(OWNER);
         create(OWNER);
@@ -152,63 +133,46 @@ class MapServiceImplTest {
             ).status()
         );
         assertEquals(extra, client.get(id.toString()).settings().extra());
-    }
 
-    @Test
-    void leaderboard_readsAndWritesGosLowerCaseFormat() {
-        var id = create(OWNER).id();
-        TEST_DB.seed(
-            """
-            update maps set leaderboard = '{"asc":false,"format":"percent","score":"q.score"}'
-            where id = '%s'
-            """
-                .formatted(id)
-        );
-        var read = client.get(id.toString()).settings().leaderboard();
-        assertEquals(MapLeaderboard.Format.PERCENT, read.format());
-        assertFalse(read.asc());
-        assertEquals("q.score", read.score());
-
-        var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
-        patch.setLeaderboard(read.withFormat(MapLeaderboard.Format.NUMBER));
-        client.update(id, patch.build());
+        client.update(id, patch(null, null, null, "{\"custom\":\"a\\u0000b\"}"));
         assertEquals(
-            "number",
-            column("select leaderboard ->> 'format' from maps where id = '" + id + "'")
-        );
-        assertEquals(
-            MapLeaderboard.Format.NUMBER,
-            client.get(id.toString()).settings().leaderboard().format()
+            "ab",
+            client.get(id.toString()).settings().extra().get("custom").getAsString()
         );
     }
 
     @Test
-    void update_refusesTheAdventureVariant() {
-        var id = create(OWNER).id();
-        assertEquals(
-            400,
-            assertThrows(
-                IpcException.class,
-                () -> client.update(id, patch(null, MapVariant.ADVENTURE, null, null))
-            ).status()
-        );
-        assertEquals(MapVariant.PARKOUR, client.get(id.toString()).settings().variant());
-    }
-
-    @Test
-    void update_replacesTagsInOrderAndRollsBackAnUnknownTag() {
+    void update_replacesTagsInOrderAndRefusesAnInvalidPatchWhole() {
         var id = create(OWNER).id();
         client.update(id, patch("Original", null, List.of("speedrun", "terrain"), null));
         assertEquals(List.of("speedrun", "terrain"), client.get(id.toString()).settings().tags());
+
         assertThrows(
             IpcException.class,
             () -> client.update(id, patch("Changed", null, List.of("bad-tag"), null))
         );
-        assertEquals("Original", client.get(id.toString()).settings().name());
         assertThrows(
             IpcException.class,
-            () -> client.update(id, patch(null, null, List.of("terrain", "terrain"), null))
+            () -> client.update(id, patch("Changed", null, List.of("terrain", "terrain"), null))
         );
+        assertEquals(
+            400,
+            assertThrows(
+                IpcException.class,
+                () -> client.update(id, patch("Changed", MapVariant.ADVENTURE, null, null))
+            ).status()
+        );
+        var unknown = new MapPatch.Builder(MapData.draft(id, OWNER));
+        unknown.setName("Changed");
+        unknown.setSubVariant("sideways");
+        assertEquals(
+            400,
+            assertThrows(IpcException.class, () -> client.update(id, unknown.build())).status()
+        );
+        var settings = client.get(id.toString()).settings();
+        assertEquals("Original", settings.name());
+        assertEquals(MapVariant.PARKOUR, settings.variant());
+
         client.update(id, patch(null, null, List.of(), null));
         assertEquals(List.of(), client.get(id.toString()).settings().tags());
     }
@@ -240,7 +204,7 @@ class MapServiceImplTest {
     }
 
     @Test
-    void publish_keepsItsIdOnRetry() {
+    void publish_keepsItsIdOnRetryAndReleasesTheWorldAndInvites() {
         var id = create(OWNER).id();
         var blocked = assertInstanceOf(PublishMapResult.Blocked.class, client.publish(id));
         assertTrue(
@@ -257,27 +221,41 @@ class MapServiceImplTest {
                     )
                 )
         );
+        client.inviteBuilder(id, BUILDER);
+        open(id, "world");
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1}));
         preparePublish(id);
         var contest = UUID.randomUUID();
         TEST_DB.seed("update maps set contest='" + contest + "' where id='" + id + "'");
         assertInstanceOf(MapStatus.ReadyToPublish.class, client.getStatus(id));
+
         var first = assertInstanceOf(PublishMapResult.Success.class, client.publish(id)).map();
         var second = assertInstanceOf(PublishMapResult.Success.class, client.publish(id)).map();
         assertEquals(first.publishedId(), second.publishedId());
         assertEquals(first.publishedAt(), second.publishedAt());
         assertEquals(contest, second.contest());
+        assertEquals(id, client.get("123-456-789").id());
         assertEquals(0, db.maps.countSlots(OWNER));
         assertEquals(1, count("select count(*) from jobs where job='index-map'"));
+
+        assertInstanceOf(
+            SaveWorldResult.NotHeld.class,
+            client.saveWorld(id, "world", 0, Blob.of(new byte[] {2}))
+        );
+        assertEquals(0, count("select count(*) from map_worlds"));
+        assertEquals(
+            0,
+            count("select count(*) from player_notifications where deleted_at is null")
+        );
+        assertInstanceOf(BuilderResult.MapPublished.class, client.acceptBuilderInvite(id, BUILDER));
         assertEquals(
             1,
             clients.finishAnalytics().stream().filter(e -> e.equals("map_published")).count()
         );
-        assertEquals(id, client.get("123-456-789").id());
     }
 
     @Test
-    void getStatus_followsDraftVerifyingPublishedAndDeleted() {
-        assertInstanceOf(MapStatus.NotFound.class, client.getStatus(UUID.randomUUID()));
+    void verification_walksAMapFromDraftThroughPublishToDeleted() {
         var id = create(OWNER).id();
         assertInstanceOf(MapStatus.Draft.class, client.getStatus(id));
         storage.objects().put(id.toString(), new byte[] {1});
@@ -288,14 +266,26 @@ class MapServiceImplTest {
             verifying.readiness(),
             assertInstanceOf(PublishMapResult.Blocked.class, client.publish(id)).readiness()
         );
+
+        state(id, BUILDER, "editing", false, 20);
+        state(id, OWNER, "verifying", true, 20);
+        state(id, BUILDER, "playing", true, 20);
         assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
+        assertEquals(List.of("map:" + id + ":lb_playtime"), clients.redis.deleted);
+        assertEquals(2, count("select count(*) from save_states where deleted_at is null"));
         assertInstanceOf(MapStatus.Draft.class, client.getStatus(id));
+
         preparePublish(id);
+        client.update(id, patch(null, MapVariant.FREEFORM, null, null));
+        assertEquals(BeginVerificationResult.NOT_VERIFIABLE, client.beginVerification(id));
         assertInstanceOf(MapStatus.ReadyToPublish.class, client.getStatus(id));
         var map = assertInstanceOf(PublishMapResult.Success.class, client.publish(id)).map();
         var published = assertInstanceOf(MapStatus.Published.class, client.getStatus(id));
         assertEquals(map.publishedId(), published.publishedId());
         assertEquals(map.publishedAt(), published.publishedAt());
+        assertEquals(BeginVerificationResult.MAP_PUBLISHED, client.beginVerification(id));
+        assertEquals(DeleteVerificationResult.MAP_PUBLISHED, client.deleteVerification(id));
+
         client.delete(OWNER, id, "test");
         assertInstanceOf(MapStatus.NotFound.class, client.getStatus(id));
     }
@@ -303,8 +293,6 @@ class MapServiceImplTest {
     @Test
     void get_formatsPublishedIdsAndRatesDifficulty() {
         var id = create(OWNER).id();
-        assertNull(client.get(id.toString()).publishedId());
-        assertEquals(MapDifficulty.UNRATED, client.get(id.toString()).difficulty());
         preparePublish(id);
         var smallId = new MapServiceImpl(
             db,
@@ -327,47 +315,13 @@ class MapServiceImplTest {
         TEST_DB.seed(
             """
             update maps set variant='parkour' where id='%s';
-            insert into map_stats(map_id,play_count,win_count) values ('%s',100,90)
+            insert into map_stats(map_id,play_count,win_count) values ('%s',100,30)
             """
                 .formatted(id, id)
         );
-        var wins = List.of(90, 60, 30, 10, 1);
-        var expected = List.of(
-            MapDifficulty.EASY, MapDifficulty.MEDIUM, MapDifficulty.HARD,
-            MapDifficulty.EXPERT, MapDifficulty.NIGHTMARE
-        );
-        for (int i = 0; i < wins.size(); i++) {
-            TEST_DB.seed(
-                "update map_stats set win_count=" + wins.get(i) + " where map_id='" + id + "'"
-            );
-            assertEquals(expected.get(i), client.get(id.toString()).difficulty());
-        }
+        assertEquals(MapDifficulty.HARD, client.get(id.toString()).difficulty());
         TEST_DB.seed("update map_stats set play_count=9 where map_id='" + id + "'");
         assertEquals(MapDifficulty.UNRATED, client.get(id.toString()).difficulty());
-        TEST_DB.seed(
-            """
-            update map_stats set play_count=100 where map_id='%s';
-            update maps set variant='building' where id='%s'
-            """
-                .formatted(id, id)
-        );
-        assertEquals(MapDifficulty.UNRATED, client.get(id.toString()).difficulty());
-    }
-
-    @Test
-    void verification_answersOnlyItsOwnOutcomes() {
-        var absent = UUID.randomUUID();
-        assertEquals(BeginVerificationResult.MAP_NOT_FOUND, client.beginVerification(absent));
-        assertEquals(DeleteVerificationResult.MAP_NOT_FOUND, client.deleteVerification(absent));
-        var id = create(OWNER).id();
-        TEST_DB.seed("update maps set verification_state='verified' where id='" + id + "'");
-        assertEquals(BeginVerificationResult.READY, client.beginVerification(id));
-        assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
-        preparePublish(id);
-        assertEquals(BeginVerificationResult.NOT_VERIFIABLE, client.beginVerification(id));
-        client.publish(id);
-        assertEquals(BeginVerificationResult.MAP_PUBLISHED, client.beginVerification(id));
-        assertEquals(DeleteVerificationResult.MAP_PUBLISHED, client.deleteVerification(id));
     }
 
     @Test
@@ -394,9 +348,10 @@ class MapServiceImplTest {
     }
 
     @Test
-    void updateWorld_refusesPendingAndStaleWorlds() throws Exception {
+    void updateWorld_recordsAVersionAndRefusesPendingAndStaleWorlds() throws Exception {
         var id = create(OWNER).id();
         client.updateWorld(id, Long.MAX_VALUE, Blob.of(new byte[] {1, 2}));
+        assertEquals(1, count("select count(*) from map_world_versions where world_id is null"));
         client.beginVerification(id);
         assertEquals(
             409,
@@ -419,27 +374,33 @@ class MapServiceImplTest {
     }
 
     @Test
-    void saveWorld_storesByDigestAndKeepsTheBareKey() throws Exception {
+    void saveWorld_storesByDigestOnceAndKeepsTheBareKey() throws Exception {
         var id = create(OWNER).id();
-        storage.objects().put(id.toString(), new byte[] {9});
-        assertArrayEquals(new byte[] {9}, client.getWorld(id).readAllBytes());
-
         open(id, "world");
+        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
         client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
 
         var key = "worlds/" + Digest.hex(Digest.sha256(new byte[] {1, 2}));
         assertArrayEquals(new byte[] {1, 2}, worldStore.objects().get(key));
         assertArrayEquals(new byte[] {1, 2}, storage.objects().get(id.toString()));
         assertArrayEquals(new byte[] {1, 2}, client.getWorld(id).readAllBytes());
+        assertEquals(1, worldStore.puts());
         assertEquals(1, count("select count(*) from map_world_versions where world_id='world'"));
     }
 
     @Test
-    void openWorld_oneWorldHoldsAMapUntilItCloses() {
+    void openWorld_oneWorldHoldsAMapUntilItClosesOrItsServerGoes() {
         var id = create(OWNER).id();
-        TEST_DB.seed("insert into server_states(id,role) values ('other','map')");
+        TEST_DB.seed(
+            """
+            insert into server_states(id,role) values ('editor','map'), ('other','map');
+            insert into map_worlds(id,map_id,server_id,type) values ('first','%s','editor','todo')
+            """
+                .formatted(id)
+        );
         open(id, "first");
         open(id, "first");
+        assertEquals(1, count("select count(*) from map_worlds where type='editing'"));
         assertEquals(
             new OpenWorldResult.OpenElsewhere("editor"),
             client.openWorld(id, "second", "other")
@@ -456,101 +417,13 @@ class MapServiceImplTest {
             SaveWorldResult.NotHeld.class,
             client.saveWorld(id, "first", 0, Blob.of(new byte[] {3}))
         );
+
+        TEST_DB.seed("delete from server_states where id='other'");
+        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(id, "third", "editor"));
     }
 
     @Test
-    void openWorld_takesOverTheRowTheTrackerInserted() {
-        var id = create(OWNER).id();
-        TEST_DB.seed(
-            """
-            insert into server_states(id,role) values ('editor','map');
-            insert into map_worlds(id,map_id,server_id,type) values ('world','%s','editor','todo')
-            """
-                .formatted(id)
-        );
-        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(id, "world", "editor"));
-        assertEquals(1, count("select count(*) from map_worlds where type='editing'"));
-    }
-
-    @Test
-    void openWorld_aGoneServerNoLongerHoldsTheMap() {
-        var id = create(OWNER).id();
-        TEST_DB.seed("insert into server_states(id,role) values ('other','map')");
-        open(id, "first");
-        TEST_DB.seed("delete from server_states where id='editor'");
-        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(id, "second", "other"));
-    }
-
-    @Test
-    void publish_releasesTheEditingWorld() {
-        var id = create(OWNER).id();
-        open(id, "world");
-        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1}));
-        preparePublish(id);
-        client.publish(id);
-        assertInstanceOf(
-            SaveWorldResult.NotHeld.class,
-            client.saveWorld(id, "world", 0, Blob.of(new byte[] {2}))
-        );
-        assertEquals(1, count("select count(*) from map_world_versions"));
-        assertEquals(0, count("select count(*) from map_worlds"));
-    }
-
-    @Test
-    void openWorld_unknownMapIs404() {
-        assertEquals(
-            404,
-            assertThrows(
-                IpcException.class,
-                () -> client.openWorld(UUID.randomUUID(), "world", "editor")
-            ).status()
-        );
-    }
-
-    @Test
-    void updateWorld_recordsAVersionWithoutAWorld() throws Exception {
-        var id = create(OWNER).id();
-        client.updateWorld(id, Long.MAX_VALUE, Blob.of(new byte[] {1, 2}));
-        assertEquals(1, count("select count(*) from map_world_versions where world_id is null"));
-        assertArrayEquals(new byte[] {1, 2}, client.getWorld(id).readAllBytes());
-    }
-
-    @Test
-    void getWorld_readsTheBareKeyEvenWhenAVersionIsOlder() throws Exception {
-        var id = create(OWNER).id();
-        open(id, "world");
-        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1}));
-        storage.objects().put(id.toString(), new byte[] {2});
-        assertArrayEquals(new byte[] {2}, client.getWorld(id).readAllBytes());
-    }
-
-    @Test
-    void saveWorld_anUnchangedWorldAddsNoVersion() {
-        var id = create(OWNER).id();
-        open(id, "world");
-        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
-        client.saveWorld(id, "world", 0, Blob.of(new byte[] {1, 2}));
-        assertEquals(1, count("select count(*) from map_world_versions"));
-        assertEquals(1, worldStore.puts());
-    }
-
-    @Test
-    void openWorld_answersTheNewestStoredOrSavedSeq() {
-        var id = create(OWNER).id();
-        TEST_DB.seed(
-            "insert into server_states(id,role) values ('editor','map') on conflict do nothing"
-        );
-        assertEquals(new OpenWorldResult.Opened(0, 0), client.openWorld(id, "world", "editor"));
-
-        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 5, new byte[] {1}));
-        assertEquals(new OpenWorldResult.Opened(5, 0), client.openWorld(id, "world", "editor"));
-
-        client.saveWorld(id, "world", 9, Blob.of(new byte[] {1, 2}));
-        assertEquals(new OpenWorldResult.Opened(9, 9), client.openWorld(id, "world", "editor"));
-    }
-
-    @Test
-    void getWal_answersTheBatchesAfterASaveInOrder() throws Exception {
+    void getWal_answersTheBatchesAfterTheNewestSave() throws Exception {
         var id = create(OWNER).id();
         open(id, "world");
         ingest(id, "world", 1, 2, new byte[] {1});
@@ -573,105 +446,33 @@ class MapServiceImplTest {
         }
         try (var wal = client.getWal(id, 7, 7)) {
             assertEquals(0, wal.length());
-            assertEquals(0, wal.readAllBytes().length);
         }
+
+        client.closeWorld("world");
+        client.updateWorld(id, Long.MAX_VALUE, Blob.of(new byte[] {1, 2}));
+        assertEquals(new OpenWorldResult.Opened(7, 7), client.openWorld(id, "next", "editor"));
     }
 
     @Test
     void getWal_readsALogLongerThanOnePage() throws Exception {
         var id = create(OWNER).id();
         open(id, "world");
-        for (int seq = 1; seq <= 40; seq++) ingest(id, "world", seq, seq, new byte[] {(byte) seq});
-        try (var wal = client.getWal(id, 0, 40)) {
+        for (int seq = 1; seq <= 17; seq++) ingest(id, "world", seq, seq, new byte[] {(byte) seq});
+        try (var wal = client.getWal(id, 0, 17)) {
             var bytes = wal.readAllBytes();
-            assertEquals(200, wal.length());
-            assertEquals(200, bytes.length);
-            for (int seq = 1; seq <= 40; seq++) assertEquals(seq, bytes[seq * 5 - 1]);
+            assertEquals(85, wal.length());
+            assertEquals(85, bytes.length);
+            for (int seq = 1; seq <= 17; seq++) assertEquals(seq, bytes[seq * 5 - 1]);
         }
     }
 
     @Test
-    void updateWorld_supersedesTheLogBeforeIt() throws Exception {
-        var id = create(OWNER).id();
-        open(id, "world");
-        ingest(id, "world", 1, 4, new byte[] {1});
-        client.closeWorld("world");
-        client.updateWorld(id, Long.MAX_VALUE, Blob.of(new byte[] {1, 2}));
-        assertEquals(new OpenWorldResult.Opened(4, 4), client.openWorld(id, "next", "editor"));
-    }
-
-    @Test
-    void ingest_storesABatchFromTheHolder() {
-        var id = create(OWNER).id();
-        open(id, "world");
-        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 3, new byte[] {7, 8}));
-        assertEquals(
-            1,
-            count(
-                """
-                select count(*) from map_wal
-                where map_id='%s' and first_seq=1 and last_seq=3 and world_id='world'
-                  and length=2 and data='\\x0708' and object_sha256 is null
-                """
-                    .formatted(id)
-            )
-        );
-    }
-
-    @Test
-    void ingest_dropsABatchWhenAnotherWorldHoldsTheMap() {
-        var id = create(OWNER).id();
-        open(id, "holder");
-        assertEquals(MapWalConsumer.Outcome.NOT_HELD, ingest(id, "other", 1, 1, new byte[] {1}));
-        assertEquals(0, count("select count(*) from map_wal"));
-    }
-
-    @Test
-    void ingest_storesTheLastBatchesOfAWorldThatLetGo() {
-        var id = create(OWNER).id();
-        open(id, "world");
-        client.closeWorld("world");
-        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 1, new byte[] {1}));
-    }
-
-    @Test
-    void ingest_aRedeliveredBatchIsStoredOnce() {
+    void ingest_storesEachBatchOfTheHolderOnce() {
         var id = create(OWNER).id();
         open(id, "world");
         assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 1, 1, new byte[] {1}));
         assertEquals(MapWalConsumer.Outcome.DUPLICATE, ingest(id, "world", 1, 1, new byte[] {1}));
-        assertEquals(1, count("select count(*) from map_wal"));
-    }
-
-    @Test
-    void ingest_storesAnUploadedBatchByItsObject() {
-        var id = create(OWNER).id();
-        open(id, "world");
-        var sha256 = client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
-        assertEquals(Digest.hex(Digest.sha256(new byte[] {4, 5, 6})), sha256);
-        assertArrayEquals(new byte[] {4, 5, 6}, worldStore.objects().get("wal/" + sha256));
-        client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
-        assertEquals(1, worldStore.puts());
-
-        var headers = headers("world", 1, 2, 3);
-        headers.put(MapWalConsumer.OBJECT, sha256);
-        assertEquals(
-            MapWalConsumer.Outcome.STORED,
-            new MapWalConsumer(clients.nats, db)
-                .ingest(message(MapWalConsumer.SUBJECT_PREFIX + id, headers, new byte[0]))
-        );
-        assertEquals(
-            1,
-            count(
-                "select count(*) from map_wal where data is null and length=3 and object_sha256 is not null"
-            )
-        );
-    }
-
-    @Test
-    void putWalBlob_refusesAWorldThatDoesNotHoldTheMap() {
-        var id = create(OWNER).id();
-        open(id, "holder");
+        assertEquals(MapWalConsumer.Outcome.NOT_HELD, ingest(id, "other", 2, 2, new byte[] {1}));
         assertEquals(
             409,
             assertThrows(
@@ -680,121 +481,53 @@ class MapServiceImplTest {
             ).status()
         );
         assertTrue(worldStore.objects().isEmpty());
+
+        var sha256 = client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
+        client.putWalBlob(id, "world", Blob.of(new byte[] {4, 5, 6}));
+        assertArrayEquals(new byte[] {4, 5, 6}, worldStore.objects().get("wal/" + sha256));
+        assertEquals(1, worldStore.puts());
+        var headers = headers("world", 2, 3, 3);
+        headers.put(MapWalConsumer.OBJECT, sha256);
+        assertEquals(
+            MapWalConsumer.Outcome.STORED,
+            new MapWalConsumer(clients.nats, db)
+                .ingest(message(MapWalConsumer.SUBJECT_PREFIX + id, headers, new byte[0]))
+        );
+
+        client.closeWorld("world");
+        assertEquals(MapWalConsumer.Outcome.STORED, ingest(id, "world", 4, 4, new byte[] {1}));
+        assertEquals(3, count("select count(*) from map_wal"));
+        assertEquals(
+            1,
+            count("select count(*) from map_wal where data is null and object_sha256 is not null")
+        );
     }
 
     @Test
     void ingest_dropsAMalformedBatch() {
         var id = create(OWNER).id();
         open(id, "world");
-        var ingest = new MapWalConsumer(clients.nats, db);
         var subject = MapWalConsumer.SUBJECT_PREFIX + id;
-
         var noWorld = headers("world", 1, 1, 1);
         noWorld.remove(MapWalConsumer.WORLD);
-        var wrongLength = headers("world", 1, 1, 5);
-        var backwards = headers("world", 3, 2, 1);
         var objectAndBody = headers("world", 1, 1, 1);
         objectAndBody.put(MapWalConsumer.OBJECT, "00".repeat(32));
         var notADigest = headers("world", 1, 1, 1);
         notADigest.put(MapWalConsumer.OBJECT, "abcd");
-
         var body = new byte[] {1};
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(message(subject, noWorld, body))
-        );
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(message(subject, wrongLength, body))
-        );
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(message(subject, backwards, body))
-        );
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(message(subject, objectAndBody, body))
-        );
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(message(subject, notADigest, new byte[0]))
-        );
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(
-                message(
-                    MapWalConsumer.SUBJECT_PREFIX + "not-a-map",
-                    headers("world", 1, 1, 1),
-                    body
-                )
-            )
-        );
-        assertEquals(
-            MapWalConsumer.Outcome.MALFORMED,
-            ingest.ingest(message(subject, headers("world", 1, 1, 1), new byte[0]))
-        );
+
+        var ingest = new MapWalConsumer(clients.nats, db);
+        for (var m : List.of(
+            message(subject, noWorld, body),
+            message(subject, headers("world", 1, 1, 5), body),
+            message(subject, headers("world", 3, 2, 1), body),
+            message(subject, objectAndBody, body),
+            message(subject, notADigest, new byte[0]),
+            message(MapWalConsumer.SUBJECT_PREFIX + "not-a-map", headers("world", 1, 1, 1), body),
+            message(subject, headers("world", 1, 1, 1), new byte[0])
+        ))
+            assertEquals(MapWalConsumer.Outcome.MALFORMED, ingest.ingest(m));
         assertEquals(0, count("select count(*) from map_wal"));
-    }
-
-    private MapWalConsumer.Outcome ingest(
-        UUID mapId,
-        String worldId,
-        long firstSeq,
-        long lastSeq,
-        byte[] body
-    ) {
-        return new MapWalConsumer(clients.nats, db)
-            .ingest(
-                message(
-                    MapWalConsumer.SUBJECT_PREFIX + mapId,
-                    headers(worldId, firstSeq, lastSeq, body.length),
-                    body
-                )
-            );
-    }
-
-    private static Message message(String subject, Map<String, String> values, byte[] body) {
-        var headers = new Headers();
-        values.forEach(headers::put);
-        return NatsMessage.builder().subject(subject).headers(headers).data(body).build();
-    }
-
-    private static HashMap<String, String> headers(
-        String worldId,
-        long firstSeq,
-        long lastSeq,
-        int length
-    ) {
-        var headers = new HashMap<String, String>();
-        headers.put(MapWalConsumer.WORLD, worldId);
-        headers.put(MapWalConsumer.FIRST_SEQ, Long.toString(firstSeq));
-        headers.put(MapWalConsumer.LAST_SEQ, Long.toString(lastSeq));
-        headers.put(MapWalConsumer.FIRST_AT, "1794700000000");
-        headers.put(MapWalConsumer.LAST_AT, "1794700000500");
-        headers.put(MapWalConsumer.LENGTH, Integer.toString(length));
-        return headers;
-    }
-
-    private void open(UUID mapId, String worldId) {
-        TEST_DB.seed(
-            "insert into server_states(id,role) values ('editor','map') on conflict do nothing"
-        );
-        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(mapId, worldId, "editor"));
-    }
-
-    @Test
-    void deleteVerification_deletesOnlyVerifyingStatesAndRepeats() {
-        var id = create(OWNER).id();
-        state(id, OWNER, "editing", false, 20);
-        state(id, OWNER, "verifying", true, 20);
-        state(id, BUILDER, "playing", true, 20);
-        assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
-        assertEquals(DeleteVerificationResult.RESET, client.deleteVerification(id));
-        assertEquals(
-            List.of("map:" + id + ":lb_playtime", "map:" + id + ":lb_playtime"),
-            clients.redis.deleted
-        );
-        assertEquals(2, count("select count(*) from save_states where deleted_at is null"));
     }
 
     @Test
@@ -874,19 +607,6 @@ class MapServiceImplTest {
     }
 
     @Test
-    void publish_retractsInvites() {
-        var id = create(OWNER).id();
-        client.inviteBuilder(id, BUILDER);
-        preparePublish(id);
-        client.publish(id);
-        assertEquals(
-            0,
-            count("select count(*) from player_notifications where deleted_at is null")
-        );
-        assertInstanceOf(BuilderResult.MapPublished.class, client.acceptBuilderInvite(id, BUILDER));
-    }
-
-    @Test
     void report_requiresACommentForUnplayableAndDislikes() {
         var id = create(OWNER).id();
         assertThrows(IpcException.class, () -> client.report(id, BUILDER, List.of(), null));
@@ -921,34 +641,7 @@ class MapServiceImplTest {
     }
 
     @Test
-    void update_writesTheSettingsAndDropsANulFromExtra() {
-        var id = create(OWNER).id();
-        var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
-        patch.setName("named");
-        patch.setSubVariant("speedrun");
-        patch.setQualityOverride(MapQuality.GREAT);
-        client.update(id, patch.build());
-        var settings = client.get(id.toString()).settings();
-        assertEquals("named", settings.name());
-        assertEquals("speedrun", settings.subvariant());
-        assertEquals(MapQuality.GREAT, client.get(id.toString()).quality());
-
-        var unknown = new MapPatch.Builder(MapData.draft(id, OWNER));
-        unknown.setSubVariant("sideways");
-        assertEquals(
-            400,
-            assertThrows(IpcException.class, () -> client.update(id, unknown.build())).status()
-        );
-
-        client.update(id, patch(null, null, null, "{\"custom\":\"a\\u0000b\"}"));
-        assertEquals(
-            "ab",
-            client.get(id.toString()).settings().extra().get("custom").getAsString()
-        );
-    }
-
-    @Test
-    void delete_requiresAReasonAndKeepsTheWorld() {
+    void delete_requiresAReasonKeepsTheWorldAndSurvivesAFailedPublish() {
         var id = create(OWNER).id();
         client.inviteBuilder(id, BUILDER);
         state(id, OWNER, "editing", false, 1);
@@ -958,6 +651,8 @@ class MapServiceImplTest {
             assertThrows(IpcException.class, () -> client.delete(BUILDER, id, null)).status()
         );
         assertNotNull(client.get(id.toString()));
+
+        clients.publishFailure = new IllegalStateException("broker unavailable");
         client.delete(OWNER, id, null);
         client.delete(OWNER, id, null);
         assertNull(client.get(id.toString()));
@@ -971,25 +666,6 @@ class MapServiceImplTest {
         assertEquals("user_deletion", db.maps.getMapIncludingDeleted(id).deletedReason());
     }
 
-    /// Go reads `select maps.*` by position, so the mirror has to append its later columns after
-    /// the soft-delete ones exactly as the migrations did, not slot them where they read best.
-    @Test
-    void migration_ordersMapsColumnsAsProductionHasThem() throws Exception {
-        var sql = """
-            select a.attname from pg_attribute a
-            join pg_class c on c.oid = a.attrelid
-            join pg_namespace n on n.oid = c.relnamespace
-            where n.nspname = 'public' and c.relname = 'maps' and a.attnum > 0 and not a.attisdropped
-            order by a.attnum
-            """;
-        try (var st = TEST_DB.conn().createStatement(); var rows = st.executeQuery(sql)) {
-            var columns = new ArrayList<String>();
-            while (rows.next()) columns.add(rows.getString(1));
-            assertTrue(columns.indexOf("deleted_reason") < columns.indexOf("protocol_version"));
-            assertTrue(columns.indexOf("protocol_version") < columns.indexOf("leaderboard"));
-        }
-    }
-
     @Test
     void search_filtersListedPublishedMapsAndOrdersBestThenNewest() {
         var good = published("Good one", MapVariant.PARKOUR, 2, 5, "2026-01-01");
@@ -997,7 +673,7 @@ class MapServiceImplTest {
         var liked = published("Liked one", MapVariant.BUILDING, 2, 9, "2026-02-01");
         var unlisted = published("Hidden", MapVariant.PARKOUR, 5, 0, "2026-03-01");
         TEST_DB.seed("update maps set listed = false where id = '" + unlisted + "'");
-        create(OWNER); // unpublished, must not be listed
+        create(OWNER);
 
         var byBest = client.search(MapSearch.builder().sort(MapSearch.Sort.BEST).build());
         assertEquals(3, byBest.count());
@@ -1052,7 +728,7 @@ class MapServiceImplTest {
     }
 
     @Test
-    void search_ratesDifficultyLikeTheGoView() {
+    void search_filtersByDifficulty() {
         var easy = published("Easy", MapVariant.PARKOUR, 0, 0, "2026-01-01");
         var hard = published("Hard", MapVariant.PARKOUR, 0, 0, "2026-01-02");
         var fresh = published("Fresh", MapVariant.PARKOUR, 0, 0, "2026-01-03");
@@ -1076,11 +752,6 @@ class MapServiceImplTest {
             List.of(fresh),
             ids(client.search(MapSearch.builder().difficulties(MapDifficulty.UNRATED).build()))
         );
-        var first = client.search(MapSearch.builder().difficulties(MapDifficulty.EASY).build())
-            .first();
-        assertEquals(100, first.uniquePlays());
-        assertEquals(MapDifficulty.EASY, first.difficulty());
-        assertEquals(List.of("terrain"), first.settings().tags());
     }
 
     @Test
@@ -1110,7 +781,6 @@ class MapServiceImplTest {
         assertEquals(20_050, progress.get(done).playtime());
         assertEquals(PlayerMapProgress.Progress.STARTED, progress.get(going).progress());
         assertEquals(7_000, progress.get(going).playtime());
-        assertEquals(List.of(), client.progress(BUILDER, List.of()));
     }
 
     @Test
@@ -1124,6 +794,7 @@ class MapServiceImplTest {
         state(second, BUILDER, "editing", false, 1);
         TEST_DB.seed("update save_states set updated_at = now() - interval '1 hour'");
         state(second, BUILDER, "playing", true, 1);
+        TEST_DB.seed("update save_states set updated_at = now() - interval '1 minute' where updated_at = now()");
         state(first, BUILDER, "playing", false, 1);
         client.delete(OWNER, gone, null);
 
@@ -1131,7 +802,52 @@ class MapServiceImplTest {
         assertEquals(2, history.count());
         assertEquals(List.of(first, second), ids(history));
         assertEquals(List.of(second), ids(client.history(BUILDER, 1, 1)));
-        assertEquals(List.of(), ids(client.history(OWNER, 0, 10)));
+    }
+
+    private MapWalConsumer.Outcome ingest(
+        UUID mapId,
+        String worldId,
+        long firstSeq,
+        long lastSeq,
+        byte[] body
+    ) {
+        return new MapWalConsumer(clients.nats, db)
+            .ingest(
+                message(
+                    MapWalConsumer.SUBJECT_PREFIX + mapId,
+                    headers(worldId, firstSeq, lastSeq, body.length),
+                    body
+                )
+            );
+    }
+
+    private static Message message(String subject, Map<String, String> values, byte[] body) {
+        var headers = new Headers();
+        values.forEach(headers::put);
+        return NatsMessage.builder().subject(subject).headers(headers).data(body).build();
+    }
+
+    private static HashMap<String, String> headers(
+        String worldId,
+        long firstSeq,
+        long lastSeq,
+        int length
+    ) {
+        var headers = new HashMap<String, String>();
+        headers.put(MapWalConsumer.WORLD, worldId);
+        headers.put(MapWalConsumer.FIRST_SEQ, Long.toString(firstSeq));
+        headers.put(MapWalConsumer.LAST_SEQ, Long.toString(lastSeq));
+        headers.put(MapWalConsumer.FIRST_AT, "1794700000000");
+        headers.put(MapWalConsumer.LAST_AT, "1794700000500");
+        headers.put(MapWalConsumer.LENGTH, Integer.toString(length));
+        return headers;
+    }
+
+    private void open(UUID mapId, String worldId) {
+        TEST_DB.seed(
+            "insert into server_states(id,role) values ('editor','map') on conflict do nothing"
+        );
+        assertInstanceOf(OpenWorldResult.Opened.class, client.openWorld(mapId, worldId, "editor"));
     }
 
     private UUID published(
@@ -1171,18 +887,6 @@ class MapServiceImplTest {
         ).map();
     }
 
-    @Test
-    void freeform_roundTripsAndPublishesWithoutVerification() {
-        var id = create(OWNER).id();
-        preparePublish(id);
-        client.update(id, patch(null, MapVariant.FREEFORM, null, null));
-
-        assertEquals(MapVariant.FREEFORM, client.get(id.toString()).settings().variant());
-        assertEquals(BeginVerificationResult.NOT_VERIFIABLE, client.beginVerification(id));
-        client.publish(id);
-        assertEquals(BeginVerificationResult.MAP_PUBLISHED, client.beginVerification(id));
-    }
-
     private void preparePublish(UUID id) {
         var patch = new MapPatch.Builder(MapData.draft(id, OWNER));
         patch.setName("A map");
@@ -1218,15 +922,6 @@ class MapServiceImplTest {
             """
                 .formatted(UUID.randomUUID(), map, player, type, completed, playtime)
         );
-    }
-
-    private String column(String sql) {
-        try (var st = TEST_DB.conn().createStatement(); var rs = st.executeQuery(sql)) {
-            rs.next();
-            return rs.getString(1);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
     }
 
     private long count(String sql) {

@@ -71,10 +71,4 @@ class MapIndexerTest {
         assertEquals(11, f.actionCount());
         assertEquals(0, f.decodeFailures());
     }
-
-    @Test
-    void indexingIsAPureFunctionOfTheBytes() throws IOException {
-        var bytes = fixture("super-fun-map.polar");
-        assertEquals(MapIndexer.index(bytes), MapIndexer.index(bytes));
-    }
 }

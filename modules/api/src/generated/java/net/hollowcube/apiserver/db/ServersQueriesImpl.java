@@ -15,7 +15,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class ServersQueriesImpl implements ServersQueries {
     private static final String FIND_HUB = """
-        -- Ready as of the Go tracker's last pod sync, which runs every 5s.
+        -- name: servers.findHub
         select id, cluster_ip, protocol_version
         from server_states
         where role = 'hub'
@@ -24,7 +24,7 @@ final class ServersQueriesImpl implements ServersQueries {
         limit 1""";
 
     private static final String FIND_SERVER = """
-        -- The tracker deletes a row once its pod is gone.
+        -- name: servers.findServer
         select id, cluster_ip, protocol_version
         from server_states
         where id = ?

@@ -2,7 +2,6 @@ package net.hollowcube.apiworker.jobs;
 
 import com.github.luben.zstd.Zstd;
 import dev.hollowcube.replay.ReplayPlayer;
-import dev.hollowcube.replay.ReplayVisitor;
 import dev.hollowcube.replay.data.ChunkIndex;
 import dev.hollowcube.replay.data.ReplayHeader;
 import dev.hollowcube.replay.event.ReplayEvent;
@@ -108,21 +107,6 @@ final class StaleReplays {
             while (player.advance() == ReplayPlayer.Advance.ADVANCED) {}
         }
         return played;
-    }
-
-    static List<ReplayEvent> events(byte[] compacted) {
-        var events = new ArrayList<ReplayEvent>();
-        try (var reader = new CompactedReplayReader(compacted)) {
-            ReplayVisitor.walk(reader, (chunk, decoded) -> {
-                for (var tick = 0; tick < chunk.tickCount(); tick++) {
-                    decoded.read(NetworkBuffer.VAR_INT);
-                    var count = decoded.read(NetworkBuffer.SHORT);
-                    for (var event = 0; event < count; event++)
-                        events.add(ReplayManager.REGISTRY.read(decoded, chunk));
-                }
-            });
-        }
-        return events;
     }
 
     @SafeVarargs

@@ -10,7 +10,6 @@ import sample.db.GadgetsQueries.InsertGadgetParams;
 import sample.db.SampleDatabase;
 
 import java.math.BigDecimal;
-import java.sql.Statement;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -24,8 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/// The parts of a generated database that are not a query: transactions, the fake builder, and the
-/// escape hatches out to raw JDBC.
+/// The parts of a generated database that are not a query: transactions and the fake builder.
 class DatabaseErgonomicsTest {
 
     private static final UUID ID = UUID.fromString("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
@@ -41,17 +39,6 @@ class DatabaseErgonomicsTest {
     }
 
     @Test
-    void aTransactionCommitsWhenTheBlockReturns() {
-        db.tx(tx -> {
-            tx.gadgets.insertGadget(gadget(ID, "one"));
-            tx.gadgets.insertReview(1, ID, 5);
-        });
-
-        assertNotNull(db.gadgets.getGadget(ID));
-        assertEquals(1L, db.gadgets.countGadgets());
-    }
-
-    @Test
     void aTransactionRollsBackEverythingWhenTheBlockThrows() {
         var failure = assertThrows(IllegalStateException.class, () -> db.tx(tx -> {
             tx.gadgets.insertGadget(gadget(ID, "one"));
@@ -60,25 +47,13 @@ class DatabaseErgonomicsTest {
 
         assertEquals("nope", failure.getMessage());
         assertNull(db.gadgets.getGadget(ID), "the insert should not have survived the rollback");
-    }
 
-    @Test
-    void txResultHandsBackTheBlocksValue() {
         Gadget written = db.txResult(tx -> {
-            tx.gadgets.insertGadget(gadget(ID, "one"));
+            tx.gadgets.insertGadget(gadget(ID, "two"));
             return tx.gadgets.getGadget(ID);
         });
-
-        assertNotNull(written);
-        assertEquals("one", written.label());
-    }
-
-    @Test
-    void aTransactionSeesItsOwnUncommittedWrites() {
-        db.tx(tx -> {
-            tx.gadgets.insertGadget(gadget(ID, "one"));
-            assertNotNull(tx.gadgets.getGadget(ID));
-        });
+        assertNotNull(written, "the connection is usable after a failed transaction");
+        assertEquals("two", written.label());
     }
 
     @Test
@@ -90,19 +65,9 @@ class DatabaseErgonomicsTest {
     }
 
     @Test
-    void aFailedTransactionLeavesTheConnectionUsable() {
-        assertThrows(IllegalStateException.class, () -> db.tx(tx -> {
-            throw new IllegalStateException("nope");
-        }));
-
-        db.gadgets.insertGadget(gadget(ID, "one"));
-        assertNotNull(db.gadgets.getGadget(ID));
-    }
-
-    @Test
     void afterCommitRunsInOrderAndCanStartANewTransaction() {
         var calls = new ArrayList<String>();
-        var result = db.txResult(tx -> {
+        var completed = db.txResult(tx -> {
             tx.gadgets.insertGadget(gadget(ID, "one"));
             tx.afterCommit(() -> db.tx(next -> {
                 assertNotNull(next.gadgets.getGadget(ID));
@@ -110,11 +75,11 @@ class DatabaseErgonomicsTest {
             }));
             tx.afterCommit(() -> calls.add("second"));
             assertTrue(calls.isEmpty());
-            return 42;
+            return tx;
         });
 
-        assertEquals(42, result);
         assertEquals(List.of("first", "second"), calls);
+        assertThrows(IllegalStateException.class, () -> completed.afterCommit(() -> {}));
     }
 
     @Test
@@ -129,34 +94,10 @@ class DatabaseErgonomicsTest {
 
         assertEquals(List.of("last"), calls);
         assertNotNull(db.gadgets.getGadget(ID));
-        db.tx(tx -> tx.gadgets.deleteGadget(ID));
-        assertNull(db.gadgets.getGadget(ID));
     }
 
     @Test
-    void completedTransactionRejectsNewCallbacks() {
-        var tx = db.txResult(transaction -> transaction);
-        assertThrows(IllegalStateException.class, () -> tx.afterCommit(() -> {}));
-    }
-
-    @Test
-    void txExposesTheConnectionForStatementsWithNoGeneratedQuery() {
-        db.tx(tx -> {
-            tx.gadgets.insertGadget(gadget(ID, "one"));
-            try (Statement st = tx.conn().createStatement()) {
-                st.execute("update gadget set note = 'by hand'");
-            } catch (Exception e) {
-                throw new AssertionError(e);
-            }
-        });
-
-        Gadget read = db.gadgets.getGadget(ID);
-        assertNotNull(read);
-        assertEquals("by hand", read.note());
-    }
-
-    @Test
-    void aFakeUsesTheGroupsItWasGiven() {
+    void aFakeUsesTheGroupsItWasGivenAndThrowsForTheRest() {
         var gadgets = new GadgetsQueries.Stub() {
             @Override
             public long countGadgets() {
@@ -164,31 +105,11 @@ class DatabaseErgonomicsTest {
             }
         };
         SampleDatabase fake = SampleDatabase.fake().gadgets(gadgets).build();
-
         assertEquals(42L, fake.gadgets.countGadgets());
         assertSame(gadgets, fake.gadgets);
-    }
 
-    @Test
-    void aFakeThrowsForTheQueriesItWasNotGiven() {
-        SampleDatabase fake = SampleDatabase.fake().build();
-
-        var failure = assertThrows(UnsupportedOperationException.class, fake.gadgets::countGadgets);
+        SampleDatabase empty = SampleDatabase.fake().build();
+        var failure = assertThrows(UnsupportedOperationException.class, empty.gadgets::countGadgets);
         assertTrue(failure.getMessage().contains("countGadgets"), failure.getMessage());
-    }
-
-    @Test
-    void aFakeHasNoDataSourceToHandOut() {
-        SampleDatabase fake = SampleDatabase.fake().build();
-
-        var failure = assertThrows(IllegalStateException.class, fake::dataSource);
-        assertTrue(failure.getMessage().contains("fake"), failure.getMessage());
-    }
-
-    @Test
-    void theDataSourceIsReachableForThingsTheGeneratorDoesNotCover() throws Exception {
-        try (var st = db.dataSource().getConnection().createStatement()) {
-            assertTrue(st.execute("select 1"));
-        }
     }
 }

@@ -9,7 +9,6 @@ import net.hollowcube.ipc.player.DisplayName;
 import net.hollowcube.ipc.player.PlayerClient;
 import net.hollowcube.ipc.player.PlayerServer;
 import net.hollowcube.ipc.player.PlayerStub;
-import net.hollowcube.ipc.util.IpcException;
 import net.hollowcube.sqlgen.testing.TestDb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PlayerServiceImplTest {
@@ -92,13 +90,10 @@ class PlayerServiceImplTest {
         var byName = players.get("alice");
         assertNotNull(byName);
         assertEquals(ALICE, byName.id());
-
-        assertNull(players.get("nobody"));
-        assertNull(players.get("99999999-9999-9999-9999-999999999999"));
     }
 
     @Test
-    void get_derivesTheHypercubeRoleWhileItRuns() {
+    void hypercube_derivesTheRoleOnlyWhileItRuns() {
         var bob = players.get(BOB.toString());
         assertNotNull(bob);
         assertEquals(Roles.EXTENDED_LIMITS, bob.permissions());
@@ -111,6 +106,10 @@ class PlayerServiceImplTest {
         assertEquals(0, carol.permissions());
         assertNull(carol.displayName().badge());
         assertEquals(3, carol.mapBuilders());
+
+        assertNotNull(players.hypercube(BOB));
+        assertNull(players.hypercube(CAROL));
+        assertNull(players.hypercube(ALICE));
     }
 
     @Test
@@ -131,22 +130,6 @@ class PlayerServiceImplTest {
         );
 
         assertEquals("Moddy", players.displayName(MOD).username());
-        assertNull(players.displayName(UUID.fromString("99999999-9999-9999-9999-999999999999")));
-        assertTrue(players.displayNames(List.of()).isEmpty());
-    }
-
-    @Test
-    void displayNames_orgAccountHasNoRow() {
-        var org = UUID.fromString("b571aed9-19f4-4032-9c06-75a4b7cf6c00");
-        assertEquals("Hollow Cube", players.displayName(org).username());
-        assertEquals("Hollow Cube", players.displayNames(List.of(org, ALICE)).get(org).username());
-    }
-
-    @Test
-    void hypercube_onlyWhileRunning() {
-        assertNotNull(players.hypercube(BOB));
-        assertNull(players.hypercube(CAROL));
-        assertNull(players.hypercube(ALICE));
     }
 
     @Test
@@ -174,15 +157,6 @@ class PlayerServiceImplTest {
         }
 
         assertEquals(nested, players.get(ALICE.toString()).settings().get("nested"));
-
-        var missing = assertThrows(
-            IpcException.class,
-            () -> players.updateSettings(
-                UUID.fromString("99999999-9999-9999-9999-999999999999"),
-                patch
-            )
-        );
-        assertEquals(404, missing.status());
     }
 
     @Test

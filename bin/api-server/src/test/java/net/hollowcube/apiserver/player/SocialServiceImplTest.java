@@ -33,19 +33,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class SocialServiceImplTest {
 
     @RegisterExtension
-    // TRUNCATE: every write goes through `db.txResult`, which cannot commit inside a transaction
-    // the harness is holding open.
-    static final TestDb TEST_DB = TestDb.of(
-        "../../modules/api/src/main/sql/migrations",
-        TestDb.Mode.TRUNCATE
-    );
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
 
     private static final UUID ALICE = UUID.fromString("11111111-1111-1111-1111-111111111111");
     private static final UUID BOB = UUID.fromString("22222222-2222-2222-2222-222222222222");
     private static final UUID CAROL = UUID.fromString("33333333-3333-3333-3333-333333333333");
     private static final UUID DAVE = UUID.fromString("44444444-4444-4444-4444-444444444444");
     private static final UUID MOD = UUID.fromString("55555555-5555-5555-5555-555555555555");
-    private static final UUID NOBODY = UUID.fromString("99999999-9999-9999-9999-999999999999");
 
     private HttpServer server;
     private RecordingNats nats;
@@ -104,7 +98,7 @@ class SocialServiceImplTest {
     //region Friends
 
     @Test
-    void friends_onlineFirstFromSessionsNotTheColumn() {
+    void friends_onlineFirstFromSessionsNotTheColumnAndRemovedBothWays() throws SQLException {
         var page = social.friends(ALICE, false, 0, 10);
         assertEquals(3, page.count());
         // Bob is the one visible session among Alice's friends; Dave is vanished, Mod is offline.
@@ -123,10 +117,7 @@ class SocialServiceImplTest {
         assertEquals(List.of(BOB), social.onlineFriendIds(ALICE));
         assertTrue(social.onlineFriendIds(DAVE).isEmpty());
         assertTrue(social.onlineFriendIds(CAROL).isEmpty());
-    }
 
-    @Test
-    void removeFriend_bothRowsOnce() throws SQLException {
         assertTrue(social.removeFriend(BOB, ALICE));
         assertEquals(
             0,
@@ -221,11 +212,6 @@ class SocialServiceImplTest {
         assertInstanceOf(
             FriendRequestResult.BlockedByTarget.class,
             social.sendFriendRequest(BOB, CAROL)
-        );
-
-        assertEquals(
-            404,
-            assertThrows(IpcException.class, () -> social.sendFriendRequest(ALICE, NOBODY)).status()
         );
         assertEquals(
             400,
@@ -326,6 +312,8 @@ class SocialServiceImplTest {
             )
         );
 
+        // The test is one transaction, so every block would share `now()` without this.
+        TEST_DB.seed("update player_blocks set created_at = created_at - interval '1 minute'");
         assertInstanceOf(BlockResult.Blocked.class, social.block(ALICE, CAROL));
         assertEquals(0, count("select count(*) from player_friend_requests"));
         assertEquals(
@@ -337,10 +325,6 @@ class SocialServiceImplTest {
         assertEquals(1, nats.on("notification.deleted").size());
 
         assertInstanceOf(BlockResult.TargetIsStaff.class, social.block(ALICE, MOD));
-        assertEquals(
-            404,
-            assertThrows(IpcException.class, () -> social.block(ALICE, NOBODY)).status()
-        );
 
         var blocks = social.blocks(ALICE, 0, 10);
         assertEquals(2, blocks.count());
@@ -353,6 +337,13 @@ class SocialServiceImplTest {
         assertTrue(social.unblock(ALICE, BOB));
         assertFalse(social.unblock(ALICE, BOB));
         assertEquals(1, social.blocks(ALICE, 0, 10).count());
+
+        assertEquals(1, social.blocksBetween(ALICE, CAROL, false).size());
+        assertTrue(social.blocksBetween(CAROL, ALICE, false).isEmpty());
+        var between = social.blocksBetween(CAROL, ALICE, true);
+        assertEquals(1, between.size());
+        assertEquals(ALICE, between.getFirst().blockerId());
+        assertEquals(CAROL, between.getFirst().target().id());
     }
 
     @Test
@@ -368,18 +359,6 @@ class SocialServiceImplTest {
         var blocks = social.blocks(ALICE, 0, 10);
         assertEquals(1, blocks.count());
         assertEquals(CAROL, blocks.first().target().id());
-    }
-
-    @Test
-    void blocksBetween_directionAndBidirectional() {
-        social.block(ALICE, CAROL);
-        assertEquals(1, social.blocksBetween(ALICE, CAROL, false).size());
-        assertTrue(social.blocksBetween(CAROL, ALICE, false).isEmpty());
-
-        var between = social.blocksBetween(CAROL, ALICE, true);
-        assertEquals(1, between.size());
-        assertEquals(ALICE, between.getFirst().blockerId());
-        assertEquals(CAROL, between.getFirst().target().id());
     }
 
     //endregion

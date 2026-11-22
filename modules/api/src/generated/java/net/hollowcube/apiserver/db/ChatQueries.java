@@ -10,13 +10,30 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface ChatQueries {
+    /**
+     * Every message, censored or not: a message nobody saw is the one a moderator most wants to read.
+     * `channel` keeps Go's convention — 'global'/'local'/'staff', or the target's uuid for a direct
+     * message — so a row written here and a row written by Go read alike. `target` is Go's "unused,
+     * should delete" column and stays unwritten.
+     */
     long insertChatMessage(InsertChatMessageParams params);
 
+    /**
+     * Null for a player with nobody to reply to and for one with no session at all, which want the
+     * same answer.
+     */
     @Nullable
     UUID getReplyTarget(UUID playerId);
 
+    /**
+     * Both sides of a direct message in one statement: answering someone makes you the person they
+     * reply to, so each of the pair points at the other.
+     */
     long setReplyTargets(UUID sender, UUID target);
 
+    /**
+     * Anywhere in the network, which is what having a session row means.
+     */
     boolean playerOnline(UUID playerId);
 
     /**

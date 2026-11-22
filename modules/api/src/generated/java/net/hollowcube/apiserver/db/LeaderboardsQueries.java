@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface LeaderboardsQueries {
+    /**
+     * The players holding the fastest time on the most published, ascending time boards.
+     */
     List<TopTimesRow> topTimes();
 
     int topTimesForPlayer(UUID playerId);
@@ -18,6 +21,10 @@ public interface LeaderboardsQueries {
 
     int mapsBeatenForPlayer(UUID playerId);
 
+    /**
+     * The player's fastest run on every published map they have finished, by playtime rather than by
+     * score, which is what the top-times rank is measured against.
+     */
     List<PlayerBestTimesRow> playerBestTimes(UUID playerId);
 
     /**

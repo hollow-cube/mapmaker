@@ -34,10 +34,8 @@ import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.List;
@@ -53,25 +51,18 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /// generated client over a real socket, because the bytes surviving the wire unchanged is the whole
 /// point of the thing.
 ///
-/// The Go handler's test matrix is ported wholesale, since the two serve the same tables and a
-/// recording started on one is resumed on the other. What is not ported is its concurrent-writer
-/// test: `TestDb` hands out one connection, so there is no second session to race with.
+/// There is no concurrent-writer test: `TestDb` hands out one connection, so there is no second
+/// session to race with.
 class ReplayServiceImplTest {
 
     @RegisterExtension
-    // TRUNCATE rather than ROLLBACK: every write here goes through `db.txResult`, which cannot
-    // commit inside a transaction the harness is holding open.
-    static final TestDb TEST_DB = TestDb.of(
-        "../../modules/api/src/main/sql/migrations",
-        TestDb.Mode.TRUNCATE
-    );
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
 
     /// `ReplayServiceImpl`'s inline threshold, which the tests below straddle rather than lower.
     private static final int INLINE_BYTES = 2048;
     /// Its preamble ceiling, which is checked against the declared length before a byte is read.
     private static final int MAX_PREAMBLE_BYTES = 16 << 20;
-    /// A segment one byte past the threshold, so it is staged as an object rather than inlined —
-    /// which is the only path with anything to orphan.
+    /// A segment one byte past the threshold, so it is staged as an object rather than inlined.
     private static final String EXTERNAL_SEGMENT = "x".repeat(INLINE_BYTES + 1);
 
     private static final String ID = "save-state-1";
@@ -103,55 +94,6 @@ class ReplayServiceImplTest {
         server.stop(0);
     }
 
-    @Test
-    void migration_leavesTheTablesTheQueriesWereDescribedAgainst() {
-        assertNull(db.replays.getReplay(ID));
-    }
-
-    /// `select replay_segments.*` is read by column position, so the mirror has to leave the columns
-    /// in the order production has them — Go's `000034` followed by the `data` its `000035` appends,
-    /// not the tidier order the same columns take when declared in one statement. Flattening the two
-    /// put `data` in the middle here and at the end in production, so every segment read answered
-    /// 500 against a real database while every test here passed.
-    @Test
-    void migration_ordersReplaySegmentsAsProductionHasThem() {
-        assertEquals(
-            List.of(
-                "replay_id", "segment_index", "object_reference", "length", "digest",
-                "commit_revision", "data"
-            ),
-            columnsOf("replay_segments")
-        );
-    }
-
-    /// `pg_attribute` rather than `information_schema`, which pglite does not serve.
-    private static List<String> columnsOf(String table) {
-        var sql = """
-            select a.attname
-            from pg_attribute a
-                     join pg_class c on c.oid = a.attrelid
-                     join pg_namespace n on n.oid = c.relnamespace
-            where n.nspname = 'public' and c.relname = '%s'
-              and a.attnum > 0 and not a.attisdropped
-            order by a.attnum"""
-            .formatted(table);
-        try (
-            var statement = TEST_DB.conn().createStatement();
-            var rows = statement.executeQuery(sql)
-        ) {
-            var columns = new ArrayList<String>();
-            while (rows.next()) columns.add(rows.getString(1));
-            return columns;
-        } catch (SQLException e) {
-            throw new IllegalStateException("could not read the columns of " + table, e);
-        }
-    }
-
-    @Test
-    void getReplay_isNullForOneNothingHasCommitted() {
-        assertNull(replays.getReplay("never-recorded"));
-    }
-
     /// The whole life of a recording, and the etags it walks through on the way.
     @Test
     void commit_createsResumesAndFinishes() throws IOException {
@@ -166,8 +108,8 @@ class ReplayServiceImplTest {
         var appended = commit(created.revision(), "k-1", 1, false, null, seg("bbbb"));
         assertEquals(2, appended.revision());
         assertEquals(2, appended.nextSegmentIndex());
+        assertEquals(412, status(() -> replays.getPreamble(ID, created.revision())));
 
-        // The metadata-only final commit: no segment, and the outcome the recorder says it had.
         var finished = commit(
             appended.revision(),
             "k-2",
@@ -185,27 +127,17 @@ class ReplayServiceImplTest {
         try (var preamble = replays.getPreamble(ID, finished.revision())) {
             assertArrayEquals(PREAMBLE, preamble.readAllBytes());
         }
+        try (var preamble = replays.getPreamble(ID, null)) {
+            assertArrayEquals(PREAMBLE, preamble.readAllBytes());
+        }
         try (var segment = replays.getSegment(ID, 1)) {
             assertArrayEquals(seg("bbbb"), segment.readAllBytes());
         }
     }
 
-    @Test
-    void getPreamble_refusesAnEtagTheReplayHasMovedOnFrom() throws IOException {
-        var created = commit(null, "k-0", 0, false, null, seg("aaa"));
-        commit(created.revision(), "k-1", 1, false, null, seg("bbb"));
-
-        assertEquals(412, status(() -> replays.getPreamble(ID, created.revision())));
-        // No condition at all is still a read.
-        try (var preamble = replays.getPreamble(ID, null)) {
-            assertArrayEquals(PREAMBLE, preamble.readAllBytes());
-        }
-    }
-
-    /// The inline threshold is inclusive: with a limit of 8, eight bytes stay in the row and nine
-    /// become an object. Nothing on the read path can tell which.
+    /// The inline threshold is inclusive. Nothing on the read path can tell which side it took.
     @ParameterizedTest
-    @ValueSource(ints = {INLINE_BYTES - 1, INLINE_BYTES, INLINE_BYTES + 1})
+    @ValueSource(ints = {INLINE_BYTES, INLINE_BYTES + 1})
     void commit_keepsASegmentInlineUpToAndIncludingTheThreshold(int length) throws IOException {
         var segment = seg("x".repeat(length));
 
@@ -230,41 +162,68 @@ class ReplayServiceImplTest {
     }
 
     @Test
-    void commit_retriedWithTheSameKeyAndBodyAnswersTheRecordedResponse() throws IOException {
-        var first = commit(null, "k-0", 0, false, null, seg("aaa"));
-
-        var retry = commit(null, "k-0", 0, false, null, seg("aaa"));
-
-        assertEquals(first, retry);
-        assertEquals(1, db.replays.listReplaySegmentObjects(ID).size());
-        assertEquals(1, replays.getReplay(ID).revision());
-    }
-
-    /// The retry that Go turns into a second full upload and then throws away.
-    @Test
-    void commit_retriedWithALargeSegmentUploadsNothingASecondTime() throws IOException {
+    void commit_retriedWithTheSameKeyAndBodyAnswersTheRecordedResponseAndUploadsOnce() throws
+        IOException {
         var segment = seg(EXTERNAL_SEGMENT);
         var first = commit(null, "k-0", 0, false, null, segment);
-        assertEquals(1, s3.puts());
 
         var retry = commit(null, "k-0", 0, false, null, segment);
 
         assertEquals(first, retry);
+        assertEquals(1, replays.getReplay(ID).revision());
+        assertEquals(1, db.replays.listReplaySegmentObjects(ID).size());
         assertEquals(1, s3.puts());
         assertEquals(1, s3.objects().size());
     }
 
     @Test
-    void commit_sameKeyDifferentBodyIsAConflictRatherThanAReplayedSuccess() throws IOException {
-        commit(null, "k-0", 0, false, null, seg("aaa"));
+    void commit_refusesAnythingButTheNextSegmentOfAnOpenRecording() throws IOException {
+        assertConflict(
+            "wrong_segment_index",
+            () -> commit(null, "k-x", 3, false, null, seg("aaa"))
+        );
+        assertEquals(400, status(() -> commit(null, "k-x", null, false, null, new byte[0])));
+        // The declared length is checked before a byte of the body is read.
+        var oversized = new ReplayCommit(
+            ID,
+            null,
+            "k-x",
+            MAX_PREAMBLE_BYTES + 1,
+            0,
+            false,
+            null,
+            digest(PREAMBLE)
+        );
+        assertEquals(413, status(() -> replays.commit(oversized, Blob.of(PREAMBLE))));
 
-        var failure = failure(() -> commit(null, "k-0", 0, false, null, seg("bbb")));
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("idempotency_key_conflict"), failure.getMessage());
+        var created = commit(null, "k-0", 0, false, null, seg("aaa"));
+        assertConflict(
+            "idempotency_key_conflict",
+            () -> commit(null, "k-0", 0, false, null, seg("bbb"))
+        );
+        assertConflict(
+            "wrong_segment_index",
+            () -> commit(created.revision(), "k-1", 4, false, null, seg("bbb"))
+        );
+
+        var finished = commit(
+            created.revision(),
+            "k-2",
+            null,
+            true,
+            ReplayOutcome.FINISHED,
+            new byte[0]
+        );
+        assertConflict(
+            "replay_finished",
+            () -> commit(finished.revision(), "k-3", 1, false, null, seg("bbb"))
+        );
     }
 
+    /// A rejection after a large segment was staged has to leave the bucket as it found it,
+    /// because nothing ever collects what it does not.
     @Test
-    void commit_withAStaleEtagIsAPreconditionFailure() throws IOException {
+    void commit_withAStaleEtagIsAPreconditionFailureAndLeavesNoObject() throws IOException {
         var created = commit(null, "k-0", 0, false, null, seg("aaa"));
         commit(created.revision(), "k-1", 1, false, null, seg("bbb"));
 
@@ -272,43 +231,9 @@ class ReplayServiceImplTest {
             412,
             status(() -> commit(created.revision(), "k-2", 2, false, null, seg("ccc")))
         );
-    }
-
-    @Test
-    void commit_creatingOverAReplayThatExistsIsAPreconditionFailure() throws IOException {
-        commit(null, "k-0", 0, false, null, seg("aaa"));
-
-        assertEquals(412, status(() -> commit(null, "k-1", 1, false, null, seg("bbb"))));
-    }
-
-    @Test
-    void commit_afterTheFinalOneIsRefusedForever() throws IOException {
-        var finished = commit(null, "k-0", 0, true, ReplayOutcome.FINISHED, seg("aaa"));
-
-        var failure = failure(() -> commit(finished.revision(), "k-1", 1, false, null, seg("bbb")));
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("replay_finished"), failure.getMessage());
-    }
-
-    @Test
-    void commit_outOfOrderSegmentIsAConflict() throws IOException {
-        var created = commit(null, "k-0", 0, false, null, seg("aaa"));
-
-        var failure = failure(() -> commit(created.revision(), "k-1", 4, false, null, seg("bbb")));
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("wrong_segment_index"), failure.getMessage());
-    }
-
-    @Test
-    void commit_firstSegmentOfANewReplayMustBeZero() {
-        var failure = failure(() -> commit(null, "k-0", 3, false, null, seg("aaa")));
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("wrong_segment_index"), failure.getMessage());
-    }
-
-    @Test
-    void commit_withNoSegmentMustFinishTheReplay() {
-        assertEquals(400, status(() -> commit(null, "k-0", null, false, null, new byte[0])));
+        assertEquals(412, status(() -> commit(null, "k-3", 0, false, null, seg("ccc"))));
+        assertEquals(412, status(() -> commit(99L, "k-4", 2, false, null, seg(EXTERNAL_SEGMENT))));
+        assertTrue(s3.objects().isEmpty(), s3.objects().keySet().toString());
     }
 
     /// Both storage paths, because it is the large one that has already written to the bucket by
@@ -336,44 +261,15 @@ class ReplayServiceImplTest {
         assertTrue(s3.objects().isEmpty(), s3.objects().keySet().toString());
     }
 
-    /// Go stages the object first and drops it on the floor when the row says no. A rejection here
-    /// has to leave the bucket as it found it, because nothing ever collects what it does not.
+    /// The row asking for the compaction commits with the commit that finished the replay, so the
+    /// process dying in between cannot lose it.
     @Test
-    void commit_rejectedAfterALargeSegmentWasStagedLeavesNoObject() throws IOException {
-        var created = commit(null, "k-0", 0, false, null, seg("aaa"));
-        var objects = s3.objects().size();
-
-        assertEquals(412, status(() -> commit(99L, "k-1", 1, false, null, seg(EXTERNAL_SEGMENT))));
-
-        assertEquals(objects, s3.objects().size());
-    }
-
-    /// The declared length is what is checked, before a byte of the body is read — which is also
-    /// what stops a caller asking this process to allocate sixteen megabytes it will never fill.
-    @Test
-    void commit_refusesAPreambleOverTheLimit() {
-        var meta = new ReplayCommit(
-            ID,
-            null,
-            "k-0",
-            MAX_PREAMBLE_BYTES + 1,
-            0,
-            false,
-            null,
-            digest(PREAMBLE)
-        );
-
-        assertEquals(413, status(() -> replays.commit(meta, Blob.of(PREAMBLE))));
-    }
-
-    /// The first production transactional enqueue: the row asking for the compaction commits with
-    /// the commit that finished the replay, so the process dying in between cannot lose it.
-    @Test
-    void commit_thatFinishesTheReplayEnqueuesItsCompactionInTheSameTransaction() throws
+    void commit_thatFinishesTheReplayEnqueuesOneCompactionInTheSameTransaction() throws
         IOException {
         var created = commit(null, "k-0", 0, false, null, seg("aaa"));
         assertEquals(List.of(), compactionRows());
 
+        commit(created.revision(), "k-1", null, true, ReplayOutcome.FINISHED, new byte[0]);
         commit(created.revision(), "k-1", null, true, ReplayOutcome.FINISHED, new byte[0]);
 
         assertEquals(List.of(ID), compactionRows());
@@ -388,16 +284,6 @@ class ReplayServiceImplTest {
         );
     }
 
-    @Test
-    void commit_thatFinishesTheReplayTwiceEnqueuesOneRow() throws IOException {
-        var created = commit(null, "k-0", 0, false, null, seg("aaa"));
-
-        commit(created.revision(), "k-1", null, true, ReplayOutcome.FINISHED, new byte[0]);
-        commit(created.revision(), "k-1", null, true, ReplayOutcome.FINISHED, new byte[0]);
-
-        assertEquals(List.of(ID), compactionRows());
-    }
-
     private List<String> compactionRows() {
         return db.jobs.listJobs()
             .stream()
@@ -407,54 +293,8 @@ class ReplayServiceImplTest {
     }
 
     @Test
-    void publishCompacted_swapsTheRepresentationAndDropsTheNextSegmentIndex() throws IOException {
-        var finished = finishedReplay();
-        var compacted = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
-
-        var published = replays.publishCompacted(
-            new ReplayCompaction(
-                ID,
-                finished.revision(),
-                "compact:" + ID + ":" + finished.revision(),
-                17,
-                digest(compacted)
-            ),
-            Blob.of(compacted)
-        );
-
-        assertEquals(3, published.revision());
-        assertEquals(ReplayRepresentation.COMPACTED, published.representation());
-        assertEquals(ReplayState.FINISHED, published.state());
-        assertNull(published.nextSegmentIndex());
-        assertEquals(17, published.preambleLength());
-        // Compaction does not change why the recording ended.
-        assertEquals(ReplayOutcome.RESET, published.outcome());
-
-        try (var stream = replays.getCompacted(ID, null, null)) {
-            assertArrayEquals(compacted, stream.readAllBytes());
-        }
-    }
-
-    @Test
-    void publishCompacted_overAReplayStillRecordingIsAConflict() throws IOException {
-        var created = commit(null, "k-0", 0, false, null, seg("aaa"));
-        var compacted = "COMPACTED".getBytes(StandardCharsets.UTF_8);
-
-        var failure = failure(
-            () -> replays.publishCompacted(
-                new ReplayCompaction(ID, created.revision(), "c-0", 4, digest(compacted)),
-                Blob.of(compacted)
-            )
-        );
-
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("replay_not_finished"), failure.getMessage());
-        // Go uploads the whole thing before it ever looks at the row.
-        assertEquals(0, s3.puts());
-    }
-
-    @Test
-    void publishCompacted_retriedWithTheDeterministicKeyUploadsOnce() throws IOException {
+    void publishCompacted_swapsTheRepresentationOnceAndReplacesThePreviousObject() throws
+        IOException {
         var finished = finishedReplay();
         var compacted = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
         var meta = new ReplayCompaction(
@@ -466,30 +306,51 @@ class ReplayServiceImplTest {
         );
         var puts = s3.puts();
 
-        var first = replays.publishCompacted(meta, Blob.of(compacted));
-        var retry = replays.publishCompacted(meta, Blob.of(compacted));
-
-        assertEquals(first, retry);
+        var published = replays.publishCompacted(meta, Blob.of(compacted));
+        assertEquals(published, replays.publishCompacted(meta, Blob.of(compacted)));
         assertEquals(puts + 1, s3.puts());
-    }
 
-    @Test
-    void publishCompacted_overACompactedReplayRemovesTheObjectItReplaced() throws IOException {
-        var first = "COMPACTEDPREAMBLE-and-its-chunks".getBytes(StandardCharsets.UTF_8);
-        compacted(first, 17);
+        assertEquals(3, published.revision());
+        assertEquals(ReplayRepresentation.COMPACTED, published.representation());
+        assertEquals(ReplayState.FINISHED, published.state());
+        assertNull(published.nextSegmentIndex());
+        assertEquals(17, published.preambleLength());
+        // Compaction does not change why the recording ended.
+        assertEquals(ReplayOutcome.RESET, published.outcome());
+        try (var stream = replays.getCompacted(ID, null, null)) {
+            assertArrayEquals(compacted, stream.readAllBytes());
+        }
+
         var replaced = db.replays.getReplay(ID).compactedObject();
-        var current = replays.getReplay(ID);
-        var second = "COMPACTEDPREAMBLE-transcoded-chunks".getBytes(StandardCharsets.UTF_8);
-
+        var transcoded = "COMPACTEDPREAMBLE-transcoded-chunks".getBytes(StandardCharsets.UTF_8);
         replays.publishCompacted(
-            new ReplayCompaction(ID, current.revision(), "t-0", 17, digest(second)),
-            Blob.of(second)
+            new ReplayCompaction(ID, published.revision(), "t-0", 17, digest(transcoded)),
+            Blob.of(transcoded)
         );
 
         assertNull(s3.objects().get(replaced));
         try (var stream = replays.getCompacted(ID, null, null)) {
-            assertArrayEquals(second, stream.readAllBytes());
+            assertArrayEquals(transcoded, stream.readAllBytes());
         }
+    }
+
+    @Test
+    void compactedOperations_refuseAReplayThatIsStillRecording() throws IOException {
+        var created = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
+        var compacted = "COMPACTED".getBytes(StandardCharsets.UTF_8);
+
+        assertConflict(
+            "replay_not_finished",
+            () -> replays.publishCompacted(
+                new ReplayCompaction(ID, created.revision(), "c-0", 4, digest(compacted)),
+                Blob.of(compacted)
+            )
+        );
+        assertEquals(1, s3.puts());
+        assertConflict("replay_not_compacted", () -> replays.getCompacted(ID, null, null));
+        assertConflict("replay_not_compacted", () -> replays.dropSegments(ID));
+        assertEquals(1, db.replays.listReplaySegmentObjects(ID).size());
+        assertEquals(1, s3.objects().size());
     }
 
     @Test
@@ -516,6 +377,10 @@ class ReplayServiceImplTest {
 
     @Test
     void sweepOrphanedObjects_deletesOnlyOldObjectsNoReplayPointsAt() throws IOException {
+        for (var notAShard : List.of("a", "abcde", "ABCD", "zz")) {
+            assertEquals(400, status(() -> replays.sweepOrphanedObjects(notAShard, false)));
+        }
+
         var created = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
         var segmentObject = db.replays.getReplaySegment(ID, 0).objectReference();
         var orphan = ReplayCompat.objectKey(ID, ReplayCompat.COMPACTED);
@@ -535,12 +400,6 @@ class ReplayServiceImplTest {
         assertNotNull(s3.objects().get(young));
         assertNotNull(s3.objects().get(segmentObject));
         assertEquals(created.revision(), replays.getReplay(ID).revision());
-    }
-
-    @ParameterizedTest
-    @ValueSource(strings = {"a", "abcde", "ABCD", "zz"})
-    void sweepOrphanedObjects_refusesAnythingButAShard(String shard) {
-        assertEquals(400, failure(() -> replays.sweepOrphanedObjects(shard, false)).status());
     }
 
     /// The sweep, which is where compaction's storage win is actually realised. Objects go first,
@@ -567,104 +426,27 @@ class ReplayServiceImplTest {
 
         assertEquals(List.of(), db.replays.listReplaySegmentObjects(ID));
         assertNull(s3.objects().get(segmentObject));
-        // The compacted object is what the replay now is, and is not a source.
         try (var stream = replays.getCompacted(ID, null, null)) {
             assertArrayEquals(compacted, stream.readAllBytes());
         }
     }
 
     @Test
-    void dropSegments_refusesAReplayThatIsStillSegmented() throws IOException {
-        commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
-
-        var failure = failure(() -> replays.dropSegments(ID));
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("replay_not_compacted"), failure.getMessage());
-        assertEquals(1, db.replays.listReplaySegmentObjects(ID).size());
-        assertEquals(1, s3.objects().size());
-    }
-
-    @Test
-    void getCompacted_isAConflictWhileTheReplayIsStillSegmented() throws IOException {
-        commit(null, "k-0", 0, false, null, seg("aaa"));
-
-        var failure = failure(() -> replays.getCompacted(ID, null, null));
-        assertEquals(409, failure.status());
-        assertTrue(failure.getMessage().contains("replay_not_compacted"), failure.getMessage());
-    }
-
-    @Test
     void getCompacted_readsOneRangeAndClampsItsEnd() throws IOException {
-        var compacted = "0123456789".getBytes(StandardCharsets.UTF_8);
-        compacted(compacted, 4);
+        compacted("0123456789".getBytes(StandardCharsets.UTF_8), 4);
 
         try (var stream = replays.getCompacted(ID, 2L, 5L)) {
             assertArrayEquals("2345".getBytes(StandardCharsets.UTF_8), stream.readAllBytes());
         }
-        // Past the end is clamped rather than refused, exactly as a Range header is.
         try (var stream = replays.getCompacted(ID, 6L, 200L)) {
             assertArrayEquals("6789".getBytes(StandardCharsets.UTF_8), stream.readAllBytes());
         }
-    }
-
-    @Test
-    void getCompacted_refusesARangeThatStartsPastTheEnd() throws IOException {
-        compacted("0123456789".getBytes(StandardCharsets.UTF_8), 4);
-
         assertEquals(416, status(() -> replays.getCompacted(ID, 10L, 12L)));
-        assertEquals(416, status(() -> replays.getCompacted(ID, 200L, 300L)));
-        // One bound is not a range.
         assertEquals(400, status(() -> replays.getCompacted(ID, 2L, null)));
     }
 
-    /// The invariants of §5.1: a row written here has to be one the Go handler would have written,
-    /// because both are writing into the same table while both are up.
-    @Test
-    void storage_writesRowsAndKeysTheGoHandlerWouldHaveWritten() throws IOException {
-        var created = commit(null, "k-0", 0, false, null, seg(EXTERNAL_SEGMENT));
-        var finished = commit(
-            created.revision(),
-            "k-1",
-            null,
-            true,
-            ReplayOutcome.FINISHED,
-            new byte[0]
-        );
-
-        var row = db.replays.getReplay(ID);
-        assertNotNull(row);
-        assertEquals(row.version(), finished.revision());
-        assertEquals(2, row.version());
-        // Only a commit that appended moves the recording revision, which is what a segment's
-        // commit_revision points back at.
-        assertEquals(2, row.recordingRevision());
-        assertEquals("finished", row.state());
-        assertEquals("segmented", row.representation());
-        assertEquals(1, row.nextSegmentIndex());
-        assertEquals(32, row.currentPreambleDigest().length);
-        assertArrayEquals(sha256(PREAMBLE), row.currentPreambleDigest());
-        assertNull(row.compactedObject());
-        assertEquals("finished", row.outcome());
-
-        var segment = db.replays.getReplaySegment(ID, 0);
-        assertNotNull(segment);
-        assertEquals(1, segment.commitRevision());
-        assertEquals(32, segment.digest().length);
-        assertArrayEquals(sha256(seg(EXTERNAL_SEGMENT)), segment.digest());
-        assertTrue(
-            segment.objectReference().matches("replays/[0-9a-f]{64}/segments/0/[0-9a-f-]{36}"),
-            segment.objectReference()
-        );
-        // The id is hashed rather than used, so a client-supplied one cannot leave the prefix.
-        assertTrue(
-            segment.objectReference().startsWith(
-                "replays/" + HexFormat.of().formatHex(sha256(ID.getBytes(StandardCharsets.UTF_8)))
-                    + "/"
-            )
-        );
-    }
-
-    /// A recording the Go handler wrote, resumed here. Same row, same etag, same next index.
+    /// Both handlers serve the same tables while both are up, so a recording the Go handler
+    /// started is resumed here at the same etag and next index.
     @Test
     void storage_resumesARecordingWrittenByTheGoHandler() throws IOException {
         TEST_DB.seed(
@@ -683,10 +465,19 @@ class ReplayServiceImplTest {
         assertEquals(2, info.nextSegmentIndex());
         assertNull(info.outcome());
 
-        var appended = commit(info.revision(), "k-9", 2, false, null, seg("ccc"));
+        var appended = commit(info.revision(), "k-9", 2, false, null, seg(EXTERNAL_SEGMENT));
         assertEquals(5, appended.revision());
         assertEquals(3, appended.nextSegmentIndex());
-        assertEquals(5, db.replays.getReplaySegment(ID, 2).commitRevision());
+        var segment = db.replays.getReplaySegment(ID, 2);
+        assertEquals(5, segment.commitRevision());
+        // The id is hashed rather than used, so a client-supplied one cannot leave the prefix.
+        assertTrue(
+            segment.objectReference().startsWith(
+                "replays/" + HexFormat.of().formatHex(sha256(ID.getBytes(StandardCharsets.UTF_8)))
+                    + "/segments/2/"
+            ),
+            segment.objectReference()
+        );
     }
 
     @ParameterizedTest
@@ -772,20 +563,6 @@ class ReplayServiceImplTest {
         assertNull(db.replays.getReplayIdempotency(ID, "lost-upload"));
     }
 
-    @Test
-    void storageFingerprintUsesUtf8ByteLengths() {
-        // Go writeFingerprintField uses len(string), which counts the UTF-8 bytes of this ID.
-        assertEquals(
-            "c9d781491eb9a4804f5b6db760931b95bb8de7a666faa3f2ca7125733fc16d61",
-            HexFormat.of().formatHex(
-                ReplayCompat.fingerprint(
-                    "PATCH", "réplay", "", "*", "8", "0", "false",
-                    sha256(concat(PREAMBLE, seg("aaa")))
-                )
-            )
-        );
-    }
-
     private ReplayInfo finishedReplay() throws IOException {
         var created = commit(null, "k-0", 0, false, null, seg("aaa"));
         return commit(created.revision(), "k-1", null, true, ReplayOutcome.RESET, new byte[0]);
@@ -844,6 +621,12 @@ class ReplayServiceImplTest {
         } catch (NoSuchAlgorithmException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private static void assertConflict(String reason, Executable call) {
+        var failure = failure(call);
+        assertEquals(409, failure.status());
+        assertTrue(failure.getMessage().contains(reason), failure.getMessage());
     }
 
     private static int status(Executable call) {

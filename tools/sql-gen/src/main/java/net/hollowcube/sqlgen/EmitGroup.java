@@ -47,7 +47,9 @@ final class EmitGroup {
             .addAnnotation(Emitter.unusedReturnValue())
             .addModifiers(Modifier.PUBLIC);
         for (var query : group.queries()) {
-            type.addMethod(signature(query).addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT).build());
+            var method = signature(query).addModifiers(Modifier.PUBLIC, Modifier.ABSTRACT);
+            if (!query.doc().isEmpty()) method.addJavadoc("$L\n", query.doc().replace("*/", "*&#47;"));
+            type.addMethod(method.build());
         }
         for (var record : records()) type.addType(record);
         return type.addType(stub()).build();

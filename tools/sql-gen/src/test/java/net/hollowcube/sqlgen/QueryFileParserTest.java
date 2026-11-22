@@ -56,14 +56,6 @@ class QueryFileParserTest {
     }
 
     @Test
-    void theFileNameIsTheGroup() {
-        assertEquals("things", parse("""
-            -- name: q :many
-            select 1;
-            """).group());
-    }
-
-    @Test
     void placeholdersBecomeQuestionMarksInOrderOfFirstAppearance() {
         var query = parse("""
             -- name: q :many
@@ -76,7 +68,7 @@ class QueryFileParserTest {
     }
 
     @Test
-    void stringsAndCommentsKeepTheirDollarSigns() {
+    void stringsCommentsAndDollarQuotesKeepTheirDollarSigns() {
         var query = parse("""
             -- name: q :many
             select '$notAParam' as literal, /* $alsoNot */ $real as bound
@@ -86,17 +78,13 @@ class QueryFileParserTest {
         assertEquals(List.of("real"), query.params());
         assertTrue(query.sql().contains("'$notAParam'"), query.sql());
         assertTrue(query.sql().contains("/* $alsoNot */"), query.sql());
-        assertTrue(query.sql().contains("-- $neither"), query.sql());
-    }
+        assertTrue(query.sql().endsWith("from thing"), query.sql());
 
-    @Test
-    void dollarQuotedBodiesAreNotPlaceholders() {
-        var query = parse("""
+        var quoted = parse("""
             -- name: q :many
             select $tag$ raw $body$ text $tag$ as quoted, $real as bound from thing;
             """).queries().getFirst();
-
-        assertEquals(List.of("real"), query.params());
+        assertEquals(List.of("real"), quoted.params());
     }
 
     @Test
@@ -111,7 +99,25 @@ class QueryFileParserTest {
 
         assertEquals(java.util.Set.of("a", "b"), query.nullable());
         assertEquals(java.util.Set.of("c"), query.notNull());
-        assertEquals("-- an ordinary comment\nselect 1", query.sql());
+        assertEquals("an ordinary comment", query.doc());
+        assertEquals("select 1", query.sql());
+    }
+
+    @Test
+    void lineCommentsAreDroppedWithTheLinesTheyHadToThemselves() {
+        var query = parse("""
+            -- name: q :many
+            -- What it is for.
+            --
+            -- More of it.
+            select a, -- the first
+                   -- on its own
+                   b
+            from thing;
+            """).queries().getFirst();
+
+        assertEquals("What it is for.\n\nMore of it.", query.doc());
+        assertEquals("select a,\n       b\nfrom thing", query.sql());
     }
 
     @Test
@@ -124,6 +130,7 @@ class QueryFileParserTest {
             delete from thing;
             """);
 
+        assertEquals("things", file.group(), "the file name is the group");
         assertEquals(List.of("first", "second"), file.queries().stream().map(QueryFile.Query::name).toList());
         assertEquals(QueryFile.Tag.ONE, file.queries().getFirst().tag());
         assertEquals(QueryFile.Tag.EXEC, file.queries().getLast().tag());
@@ -144,15 +151,11 @@ class QueryFileParserTest {
         assertEquals(List.of(0, 0), query.holes().stream().map(QueryFile.Hole::bindOffset).toList());
         assertTrue(!query.sql().contains("where"), query.sql());
         assertTrue(query.sql().endsWith("limit ?"), query.sql());
-    }
 
-    @Test
-    void aHoleAfterAPlaceholderRemembersHowManyCameBefore() {
-        var query = parse("""
+        var afterPlaceholder = parse("""
             -- name: q :many
             select * from thing where id > $id /* order by */ limit $limit;
             """).queries().getFirst();
-
-        assertEquals(1, query.holes().getFirst().bindOffset());
+        assertEquals(1, afterPlaceholder.holes().getFirst().bindOffset());
     }
 }

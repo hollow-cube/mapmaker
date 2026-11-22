@@ -13,18 +13,36 @@ public interface ReplaysQueries {
     @Nullable
     Replays getReplay(String id);
 
+    /**
+     * The lock every write takes first. Preconditions are checked in Java against the locked row rather
+     * than as a `where version =` guard, which is what Go does.
+     */
     @Nullable
     Replays getReplayForUpdate(String id);
 
+    /**
+     * Null when someone else won the insert; the caller re-locks and evaluates that row instead.
+     */
     @Nullable
     Replays createReplayIfAbsent(CreateReplayIfAbsentParams params);
 
+    /**
+     * `version` moves on every write; `recording_revision` moves only here, so a segment's
+     * `commit_revision` names the commit that inserted it.
+     */
     @Nullable
     Replays updateReplayRecording(UpdateReplayRecordingParams params);
 
+    /**
+     * The pointer swap. `state` and `outcome` are untouched: compaction does not change why a recording
+     * ended.
+     */
     @Nullable
     Replays publishReplayCompacted(PublishReplayCompactedParams params);
 
+    /**
+     * Exactly one of `objectReference` and `data` is non-null; a check constraint enforces it.
+     */
     long createReplaySegment(CreateReplaySegmentParams params);
 
     @Nullable
@@ -35,23 +53,50 @@ public interface ReplaysQueries {
 
     long createReplayIdempotency(CreateReplayIdempotencyParams params);
 
+    /**
+     * The reconciler's backstop for a compaction row never enqueued, parked, or finished by the Go
+     * server. `before` keeps it off a commit that is still in flight.
+     */
     List<String> listUncompactedReplays(Instant before, long limit);
 
+    /**
+     * Compacted replays whose sources are past the grace period.
+     */
     List<String> listCompactedReplaysWithSegments(Instant before, long limit);
 
+    /**
+     * A null `object_reference` is an inline segment, with nothing to unlink.
+     */
     List<ListReplaySegmentObjectsRow> listReplaySegmentObjects(String replayId);
 
+    /**
+     * After the objects are gone, never before: an interrupted sweep must leave rows pointing at
+     * deleted objects rather than orphan the objects.
+     */
     long deleteReplaySegments(String replayId);
 
+    /**
+     * Keyset over recordings untouched since $before, with the lowest segment each still has.
+     */
     List<ListIdleRecordingsRow> listIdleRecordings(Instant before, String after, long limit);
 
     List<ListReplaySegmentObjectsBeforeRow> listReplaySegmentObjectsBefore(String replayId,
             long before);
 
+    /**
+     * After the objects are gone, never before, as with deleteReplaySegments.
+     */
     long deleteReplaySegmentsBefore(String replayId, long before);
 
+    /**
+     * A record only has to outlive the retries of the request it recorded, which is minutes.
+     */
     long deleteExpiredReplayIdempotency(Instant before);
 
+    /**
+     * Which of `keys` a replay still points at. Uses replays_compacted_object_idx and the unique
+     * constraint on replay_segments.object_reference.
+     */
     List<String> listReferencedReplayObjects(List<String> keys);
 
     /**

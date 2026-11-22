@@ -16,6 +16,9 @@ public interface MapWalQueries {
     @Nullable
     Long getHeadSeq(UUID mapId);
 
+    /**
+     * Each batch is sent behind a 4 byte length.
+     */
     @Nullable
     Long getLength(UUID mapId, long afterSeq, long throughSeq);
 

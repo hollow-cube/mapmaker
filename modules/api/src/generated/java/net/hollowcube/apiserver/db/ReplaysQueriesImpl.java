@@ -19,20 +19,20 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class ReplaysQueriesImpl implements ReplaysQueries {
     private static final String GET_REPLAY = """
+        -- name: replays.getReplay
         select replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome
         from replays
         where id = ?""";
 
     private static final String GET_REPLAY_FOR_UPDATE = """
-        -- The lock every write takes first. Preconditions are checked in Java against the locked row rather
-        -- than as a `where version =` guard, which is what Go does.
+        -- name: replays.getReplayForUpdate
         select replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome
         from replays
         where id = ?
             for update""";
 
     private static final String CREATE_REPLAY_IF_ABSENT = """
-        -- Null when someone else won the insert; the caller re-locks and evaluates that row instead.
+        -- name: replays.createReplayIfAbsent
         insert into replays (id, version, recording_revision, state, representation, next_segment_index,
                              current_preamble, current_preamble_digest, outcome)
         values (?, 1, 1, ?, 'segmented', ?, ?, ?, ?)
@@ -40,8 +40,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         returning replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome""";
 
     private static final String UPDATE_REPLAY_RECORDING = """
-        -- `version` moves on every write; `recording_revision` moves only here, so a segment's
-        -- `commit_revision` names the commit that inserted it.
+        -- name: replays.updateReplayRecording
         update replays
         set version                 = version + 1,
             recording_revision      = recording_revision + 1,
@@ -55,8 +54,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         returning replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome""";
 
     private static final String PUBLISH_REPLAY_COMPACTED = """
-        -- The pointer swap. `state` and `outcome` are untouched: compaction does not change why a recording
-        -- ended.
+        -- name: replays.publishReplayCompacted
         update replays
         set version                   = version + 1,
             representation            = 'compacted',
@@ -71,30 +69,32 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         returning replays.id, replays.version, replays.recording_revision, replays.state, replays.representation, replays.next_segment_index, replays.current_preamble, replays.current_preamble_digest, replays.compacted_source_revision, replays.compacted_object, replays.compacted_length, replays.compacted_digest, replays.created_at, replays.updated_at, replays.outcome""";
 
     private static final String CREATE_REPLAY_SEGMENT = """
-        -- Exactly one of `objectReference` and `data` is non-null; a check constraint enforces it.
+        -- name: replays.createReplaySegment
         insert into replay_segments (replay_id, segment_index, object_reference, data, length, digest, commit_revision)
         values (?, ?, ?, ?, ?, ?, ?)""";
 
     private static final String GET_REPLAY_SEGMENT = """
+        -- name: replays.getReplaySegment
         select replay_segments.replay_id, replay_segments.segment_index, replay_segments.object_reference, replay_segments.length, replay_segments.digest, replay_segments.commit_revision, replay_segments.data
         from replay_segments
         where replay_id = ?
           and segment_index = ?""";
 
     private static final String GET_REPLAY_IDEMPOTENCY = """
+        -- name: replays.getReplayIdempotency
         select replay_idempotency.replay_id, replay_idempotency.idempotency_key, replay_idempotency.request_fingerprint, replay_idempotency.response_status, replay_idempotency.response_etag, replay_idempotency.response_metadata, replay_idempotency.created_at
         from replay_idempotency
         where replay_id = ?
           and idempotency_key = ?""";
 
     private static final String CREATE_REPLAY_IDEMPOTENCY = """
+        -- name: replays.createReplayIdempotency
         insert into replay_idempotency (replay_id, idempotency_key, request_fingerprint, response_status,
                                         response_etag, response_metadata)
         values (?, ?, ?, ?, ?, ?)""";
 
     private static final String LIST_UNCOMPACTED_REPLAYS = """
-        -- The reconciler's backstop for a compaction row never enqueued, parked, or finished by the Go
-        -- server. `before` keeps it off a commit that is still in flight.
+        -- name: replays.listUncompactedReplays
         select id
         from replays
         where state = 'finished'
@@ -104,7 +104,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         limit ?""";
 
     private static final String LIST_COMPACTED_REPLAYS_WITH_SEGMENTS = """
-        -- Compacted replays whose sources are past the grace period.
+        -- name: replays.listCompactedReplaysWithSegments
         select id
         from replays
         where representation = 'compacted'
@@ -114,21 +114,20 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         limit ?""";
 
     private static final String LIST_REPLAY_SEGMENT_OBJECTS = """
-        -- A null `object_reference` is an inline segment, with nothing to unlink.
+        -- name: replays.listReplaySegmentObjects
         select segment_index, object_reference
         from replay_segments
         where replay_id = ?
         order by segment_index""";
 
     private static final String DELETE_REPLAY_SEGMENTS = """
-        -- After the objects are gone, never before: an interrupted sweep must leave rows pointing at
-        -- deleted objects rather than orphan the objects.
+        -- name: replays.deleteReplaySegments
         delete
         from replay_segments
         where replay_id = ?""";
 
     private static final String LIST_IDLE_RECORDINGS = """
-        -- Keyset over recordings untouched since $before, with the lowest segment each still has.
+        -- name: replays.listIdleRecordings
         select id,
                version,
                current_preamble,
@@ -141,6 +140,7 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         limit ?""";
 
     private static final String LIST_REPLAY_SEGMENT_OBJECTS_BEFORE = """
+        -- name: replays.listReplaySegmentObjectsBefore
         select segment_index, object_reference
         from replay_segments
         where replay_id = ?
@@ -148,21 +148,20 @@ final class ReplaysQueriesImpl implements ReplaysQueries {
         order by segment_index""";
 
     private static final String DELETE_REPLAY_SEGMENTS_BEFORE = """
-        -- After the objects are gone, never before, as with deleteReplaySegments.
+        -- name: replays.deleteReplaySegmentsBefore
         delete
         from replay_segments
         where replay_id = ?
           and segment_index < ?""";
 
     private static final String DELETE_EXPIRED_REPLAY_IDEMPOTENCY = """
-        -- A record only has to outlive the retries of the request it recorded, which is minutes.
+        -- name: replays.deleteExpiredReplayIdempotency
         delete
         from replay_idempotency
         where created_at < ?""";
 
     private static final String LIST_REFERENCED_REPLAY_OBJECTS = """
-        -- Which of `keys` a replay still points at. Uses replays_compacted_object_idx and the unique
-        -- constraint on replay_segments.object_reference.
+        -- name: replays.listReferencedReplayObjects
         select key
         from unnest(?::text[]) as listed(key)
         where exists (select 1 from replays where compacted_object = listed.key)

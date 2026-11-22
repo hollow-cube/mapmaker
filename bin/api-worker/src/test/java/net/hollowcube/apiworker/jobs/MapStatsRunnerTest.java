@@ -14,10 +14,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class MapStatsRunnerTest {
 
     @RegisterExtension
-    static final TestDb TEST_DB = TestDb.of(
-        "../../modules/api/src/main/sql/migrations",
-        TestDb.Mode.TRUNCATE
-    );
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
 
     private final ApiDatabase db = TEST_DB.database(ApiDatabase::new);
 
@@ -79,12 +76,15 @@ class MapStatsRunnerTest {
         run(busy, UUID.randomUUID(), "playing", true, 1_000, "2 days");
         var runner = new MapStatsRunner(db, false);
         runner.run(null);
+        // The test is one transaction, so the first run is made to have happened a while ago.
+        TEST_DB.seed("update map_stats set refreshed_at = now() - interval '10 minutes'");
         var quietAt = stats(quiet).refreshedAt();
 
         run(busy, UUID.randomUUID(), "playing", false, 1_000, "0 seconds");
         runner.run(null);
 
         assertEquals(quietAt, stats(quiet).refreshedAt());
+        assertNotEquals(quietAt, stats(busy).refreshedAt());
         assertEquals(2, stats(busy).playCount());
     }
 

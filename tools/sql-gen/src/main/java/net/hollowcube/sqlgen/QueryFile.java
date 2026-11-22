@@ -11,7 +11,10 @@ record QueryFile(String group, List<Query> queries) {
     record Query(
         String name,
         Tag tag,
-        /// The statement as it will be prepared: `?` in place of every `$param`.
+        /// The comment lines between the header and the SQL, which become the method's javadoc.
+        String doc,
+        /// The statement as it will be prepared: `?` in place of every `$param`, and no `--`
+        /// comments.
         String sql,
         /// Distinct placeholder names in order of first appearance; these are the method arguments.
         List<String> params,

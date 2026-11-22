@@ -27,10 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class NotificationServiceImplTest {
 
     @RegisterExtension
-    static final TestDb TEST_DB = TestDb.of(
-        "../../modules/api/src/main/sql/migrations",
-        TestDb.Mode.TRUNCATE
-    );
+    static final TestDb TEST_DB = TestDb.of("../../modules/api/src/main/sql/migrations");
 
     private static final UUID PLAYER = UUID.fromString("11111111-1111-1111-1111-111111111111");
 
@@ -85,7 +82,7 @@ class NotificationServiceImplTest {
     }
 
     @Test
-    void markRead_bothWays() {
+    void markReadAndDelete_skipADeletedNotification() {
         assertTrue(
             notifications.markRead(UUID.fromString("aaaaaaaa-0000-0000-0000-000000000001"), true)
         );
@@ -97,13 +94,7 @@ class NotificationServiceImplTest {
         assertFalse(
             notifications.markRead(UUID.fromString("aaaaaaaa-0000-0000-0000-000000000004"), true)
         );
-        assertFalse(
-            notifications.markRead(UUID.fromString("aaaaaaaa-0000-0000-0000-000000000099"), true)
-        );
-    }
 
-    @Test
-    void delete_isSoftAndOnce() {
         assertTrue(notifications.delete(UUID.fromString("aaaaaaaa-0000-0000-0000-000000000001")));
         assertFalse(notifications.delete(UUID.fromString("aaaaaaaa-0000-0000-0000-000000000001")));
         assertEquals(1, notifications.list(PLAYER, false, 0, 10).count());

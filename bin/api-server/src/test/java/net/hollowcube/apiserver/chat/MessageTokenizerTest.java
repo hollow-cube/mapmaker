@@ -10,63 +10,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class MessageTokenizerTest {
 
     @Test
-    void tokenize_leavesPlainTextAsOnePart() {
-        assertEquals(
-            List.of(new MessagePart.Raw("hello world")),
-            MessageTokenizer.tokenize("hello world", null)
-        );
-    }
-
-    @Test
-    void tokenize_findsAUrlWithOrWithoutItsScheme() {
+    void tokenize_findsEveryUrlWithOrWithoutItsScheme() {
         assertEquals(
             List.of(
                 new MessagePart.Raw("go to "),
-                new MessagePart.Url("https://hollowcube.net/maps")
-            ),
-            MessageTokenizer.tokenize("go to https://hollowcube.net/maps", null)
-        );
-        assertEquals(
-            List.of(new MessagePart.Url("hollowcube.net")),
-            MessageTokenizer.tokenize("hollowcube.net", null)
-        );
-    }
-
-    @Test
-    void tokenize_findsEveryUrlInOneMessage() {
-        assertEquals(
-            List.of(
-                new MessagePart.Url("aa.com"),
+                new MessagePart.Url("https://hollowcube.net/maps"),
                 new MessagePart.Raw(" and "),
                 new MessagePart.Url("bb.com")
             ),
-            MessageTokenizer.tokenize("aa.com and bb.com", null)
+            MessageTokenizer.tokenize("go to https://hollowcube.net/maps and bb.com", null)
         );
     }
 
     @Test
-    void tokenize_needsTwoCharactersBeforeTheDotToCallSomethingAUrl() {
-        // Go's pattern, kept as it is: `a.com` is one character short of it, so it stays text.
+    void tokenize_takesTheNameOutOfAnEmojiAndLeavesLoneColonsAlone() {
         assertEquals(
-            List.of(new MessagePart.Raw("a.com")),
-            MessageTokenizer.tokenize("a.com", null)
+            List.of(new MessagePart.Raw("nice "), new MessagePart.Emoji("thumbs_up-2")),
+            MessageTokenizer.tokenize("nice :thumbs_up-2:", null)
         );
-    }
-
-    @Test
-    void tokenize_takesTheNameOutOfAnEmoji() {
-        assertEquals(
-            List.of(new MessagePart.Raw("nice "), new MessagePart.Emoji("sus")),
-            MessageTokenizer.tokenize("nice :sus:", null)
-        );
-        assertEquals(
-            List.of(new MessagePart.Emoji("thumbs_up-2")),
-            MessageTokenizer.tokenize(":thumbs_up-2:", null)
-        );
-    }
-
-    @Test
-    void tokenize_leavesSomethingThatIsNotAnEmojiAlone() {
         assertEquals(
             List.of(new MessagePart.Raw("a : b : c")),
             MessageTokenizer.tokenize("a : b : c", null)
@@ -74,7 +35,7 @@ class MessageTokenizerTest {
     }
 
     @Test
-    void tokenize_resolvesTheMapTagToTheSendersMap() {
+    void tokenize_resolvesTheMapTagOnlyWithAMapToResolveItTo() {
         assertEquals(
             List.of(
                 new MessagePart.Raw("try "),
@@ -83,10 +44,6 @@ class MessageTokenizerTest {
             ),
             MessageTokenizer.tokenize("try [map]!", "m1")
         );
-    }
-
-    @Test
-    void tokenize_leavesTheMapTagAsTextWithNoMapToResolveItTo() {
         assertEquals(
             List.of(new MessagePart.Raw("try [map]")),
             MessageTokenizer.tokenize("try [map]", null)

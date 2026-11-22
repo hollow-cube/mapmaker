@@ -18,10 +18,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class AnticheatQueriesImpl implements AnticheatQueries {
     private static final String UPSERT_ANTICHEAT_TRACE = """
-        -- Filed after the blob is in place. Keyed on the id the proxy generated, so a ship that retried
-        -- after the row was already written replaces it rather than failing: the file it just wrote is the
-        -- same file, at the same path, and its header may only have grown more complete.
-        -- `pinned` and `created_at` are the two columns that are not the header's, so they survive.
+        -- name: anticheat.upsertAnticheatTrace
         insert into anticheat_traces (id, capture_id, player_id, proxy_version, proxy, client_pvn, reason,
                                         format_version, started_at, ended_at, bytes, path)
         values (?, ?, ?, ?, ?, ?, ?,
@@ -40,21 +37,20 @@ final class AnticheatQueriesImpl implements AnticheatQueries {
                 path           = excluded.path""";
 
     private static final String GET_ANTICHEAT_TRACE = """
+        -- name: anticheat.getAnticheatTrace
         select anticheat_traces.id, anticheat_traces.capture_id, anticheat_traces.player_id, anticheat_traces.proxy_version, anticheat_traces.proxy, anticheat_traces.client_pvn, anticheat_traces.reason, anticheat_traces.format_version, anticheat_traces.started_at, anticheat_traces.ended_at, anticheat_traces.bytes, anticheat_traces.path, anticheat_traces.pinned, anticheat_traces.expires_at, anticheat_traces.created_at
         from anticheat_traces
         where id = ?""";
 
     private static final String LIST_ANTICHEAT_TRACES_BY_CAPTURE = """
-        -- One capture is a handful of traces — a server switch or a ring flush each start a new one — so
-        -- this is unpaged on purpose, and ordered the way they were recorded.
+        -- name: anticheat.listAnticheatTracesByCapture
         select anticheat_traces.id, anticheat_traces.capture_id, anticheat_traces.player_id, anticheat_traces.proxy_version, anticheat_traces.proxy, anticheat_traces.client_pvn, anticheat_traces.reason, anticheat_traces.format_version, anticheat_traces.started_at, anticheat_traces.ended_at, anticheat_traces.bytes, anticheat_traces.path, anticheat_traces.pinned, anticheat_traces.expires_at, anticheat_traces.created_at
         from anticheat_traces
         where capture_id = ?
         order by started_at, id""";
 
     private static final String DELETE_EXPIRED_ANTICHEAT_TRACES = """
-        -- For the sweeper there is no retention policy for yet: nothing sets expires_at today. Returns the
-        -- rows so the caller can unlink the blobs the paths point at, which is the only reason to run it.
+        -- name: anticheat.deleteExpiredAnticheatTraces
         delete
         from anticheat_traces
         where expires_at is not null

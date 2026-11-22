@@ -8,7 +8,6 @@ import sample.db.GadgetReview;
 import sample.db.GadgetStatus;
 import sample.db.GadgetsQueries.InsertGadgetParams;
 import sample.db.GadgetsQueries.ListGadgetsWithReviewRow;
-import sample.db.GadgetsQueries.ListGadgetsWithStarsRow;
 import sample.db.GadgetsQueries.PairGadgetsRow;
 import sample.db.SampleDatabase;
 
@@ -65,21 +64,10 @@ class SampleRoundTripTest {
         assertEquals(LocalDate.of(2026, 8, 25), read.releasedOn());
         assertEquals(List.of("alpha", "beta"), read.tags());
         assertEquals(List.of(3, 1, 4), read.ranks());
-    }
-
-    @Test
-    void nullableColumnsComeBackNull() {
-        db.gadgets.insertGadget(gadget(ID, "widget one"));
-
-        Gadget read = db.gadgets.getGadget(ID);
-        assertNotNull(read);
         assertNull(read.note());
         assertNull(read.retiredAt());
-    }
 
-    @Test
-    void oneReturnsNullWhenNothingMatches() {
-        assertNull(db.gadgets.getGadget(UUID.randomUUID()));
+        assertNull(db.gadgets.getGadget(UUID.randomUUID()), "a :one that matches nothing is null");
     }
 
     @Test
@@ -111,36 +99,19 @@ class SampleRoundTripTest {
     }
 
     @Test
-    void returningFeedsAnOneQuery() {
+    void nullableDirectiveWidensOuterJoinColumnsAndEmbeddedTables() {
         db.gadgets.insertGadget(gadget(ID, "widget one"));
 
-        GadgetReview review = db.gadgets.insertReview(1, ID, 5);
-        assertNotNull(review);
-        assertEquals(1, review.id());
-        assertEquals(ID, review.gadgetId());
-        assertEquals(5, review.stars());
-    }
-
-    @Test
-    void nullableDirectiveWidensAnOuterJoinColumn() {
-        db.gadgets.insertGadget(gadget(ID, "widget one"));
-
-        ListGadgetsWithStarsRow unrated = db.gadgets.listGadgetsWithStars().getFirst();
-        assertNull(unrated.stars(), "a left join with no match has to come back null");
-
-        db.gadgets.insertReview(1, ID, 4);
-        assertEquals(4, db.gadgets.listGadgetsWithStars().getFirst().stars());
-    }
-
-    @Test
-    void nullableDirectiveWidensAnEmbeddedTable() {
-        db.gadgets.insertGadget(gadget(ID, "widget one"));
-
+        assertNull(db.gadgets.listGadgetsWithStars().getFirst().stars(), "a left join with no match has to come back null");
         ListGadgetsWithReviewRow unrated = db.gadgets.listGadgetsWithReview().getFirst();
         assertEquals(ID, unrated.gadget().id());
         assertNull(unrated.review());
 
-        db.gadgets.insertReview(1, ID, 4);
+        GadgetReview review = db.gadgets.insertReview(1, ID, 4);
+        assertNotNull(review, "returning feeds a :one");
+        assertEquals(ID, review.gadgetId());
+
+        assertEquals(4, db.gadgets.listGadgetsWithStars().getFirst().stars());
         ListGadgetsWithReviewRow rated = db.gadgets.listGadgetsWithReview().getFirst();
         assertNotNull(rated.review());
         assertEquals(4, rated.review().stars());

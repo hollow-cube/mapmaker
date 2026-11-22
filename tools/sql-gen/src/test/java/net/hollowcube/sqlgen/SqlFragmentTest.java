@@ -45,19 +45,16 @@ class SqlFragmentTest {
     }
 
     @Test
-    void bothHolesEmptyRunsTheBaseQuery() {
-        var rows = db.gadgets.searchGadgets(2, 10, 0, null, null);
+    void aWhereFragmentNarrowsTheResultAndItsWindowCount() {
+        var all = db.gadgets.searchGadgets(2, 10, 0, null, null);
+        assertEquals(3, all.size());
+        assertEquals(3, all.getFirst().totalCount());
 
-        assertEquals(3, rows.size());
-        assertEquals(3, rows.getFirst().totalCount());
-    }
+        var narrowed = db.gadgets.searchGadgets(2, 10, 0, SqlFragment.of("quantity > ?", 2), null);
+        assertEquals(2, narrowed.size());
+        assertEquals(2, narrowed.getFirst().totalCount());
 
-    @Test
-    void aWhereFragmentNarrowsTheResult() {
-        var rows = db.gadgets.searchGadgets(2, 10, 0, SqlFragment.of("quantity > ?", 2), null);
-
-        assertEquals(2, rows.size());
-        assertEquals(2, rows.getFirst().totalCount(), "the window count sees the fragment too");
+        assertEquals(List.of(), db.gadgets.searchGadgets(2, 10, 0, SqlFragment.of("label = ?", "nothing"), null));
     }
 
     @Test
@@ -70,16 +67,11 @@ class SqlFragmentTest {
     }
 
     @Test
-    void bothHolesFilledBindInStatementOrder() {
-        var rows = db.gadgets.searchGadgets(2, 10, 0,
-            SqlFragment.of("quantity between ? and ?", 1, 4),
-            SqlFragment.of("label desc"));
-
-        assertEquals(List.of("charlie", "alpha"), labels(rows));
-    }
-
-    @Test
     void theHoleParametersSitBetweenTheGeneratedOnes() {
+        assertEquals(List.of("charlie", "alpha"), labels(db.gadgets.searchGadgets(2, 10, 0,
+            SqlFragment.of("quantity between ? and ?", 1, 4),
+            SqlFragment.of("label desc"))));
+
         // prefixLength binds before the fragment, limit and offset after it: if the splice were off
         // by one, the fragment's argument would land in limit and this would come back wrong.
         var rows = db.gadgets.searchGadgets(3, 1, 1,
@@ -88,12 +80,5 @@ class SqlFragmentTest {
         assertEquals(List.of("charlie"), labels(rows));
         assertEquals(2, rows.getFirst().totalCount());
         assertEquals("cha", rows.getFirst().labelPrefix());
-    }
-
-    @Test
-    void aFragmentThatMatchesNothingIsStillAValidQuery() {
-        var rows = db.gadgets.searchGadgets(2, 10, 0, SqlFragment.of("label = ?", "nothing"), null);
-
-        assertEquals(List.of(), labels(rows));
     }
 }

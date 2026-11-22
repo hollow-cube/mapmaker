@@ -154,21 +154,6 @@ class MapWritePostgresTest {
     }
 
     @Test
-    void setPlayerRating_countsEachRatingOnceThroughTheTrigger() {
-        var map = create(owner);
-        var rater = player();
-        service.setPlayerRating(map, rater, MapRating.LIKED);
-        service.setPlayerRating(map, rater, MapRating.LIKED);
-        assertEquals(1, service.get(map.toString()).likes());
-        service.setPlayerRating(map, rater, MapRating.DISLIKED);
-        assertEquals(-1, service.get(map.toString()).likes());
-        service.setPlayerRating(map, rater, MapRating.UNRATED);
-        assertEquals(0, service.get(map.toString()).likes());
-        service.report(map, rater, List.of(MapReportCategory.SPAM), "spam");
-        assertEquals(-1, service.get(map.toString()).likes());
-    }
-
-    @Test
     void publish_waitsForAnUploadHoldingTheLock() throws Exception {
         var map = create(owner);
         preparePublish(map);

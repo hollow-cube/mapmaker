@@ -15,6 +15,7 @@ import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.net.http.HttpClient;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -61,7 +62,8 @@ class HttpS3ClientTest {
             "us-east-1",
             ACCESS_KEY,
             SECRET_KEY,
-            () -> FIXED
+            () -> FIXED,
+            Duration.ofMillis(1)
         );
     }
 
@@ -130,42 +132,24 @@ class HttpS3ClientTest {
         fake.objects.put("world", new byte[123]);
         assertEquals(123, s3.stat("world"));
         assertEquals("HEAD", fake.requests.getFirst().method());
-    }
 
-    @Test
-    void stat_ofAKeyNothingIsUnderIsNotFound() {
         assertThrows(S3Client.NotFoundError.class, () -> s3.stat("missing"));
     }
 
     @Test
-    void get_readsTheObjectBackWithItsLength() throws IOException {
-        fake.objects.put(
-            "replays/ab/compacted/cd",
-            "a compacted replay".getBytes(StandardCharsets.UTF_8)
-        );
-
-        try (var blob = s3.get("replays/ab/compacted/cd")) {
-            assertEquals(18, blob.length());
-            assertEquals(
-                "a compacted replay",
-                new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8)
-            );
-        }
-    }
-
-    @Test
-    void getRange_asksForTheInclusiveRangeAndGetsExactlyIt() throws IOException {
+    void get_readsTheObjectOrTheInclusiveRangeBack() throws IOException {
         fake.objects.put("k", "0123456789".getBytes(StandardCharsets.UTF_8));
 
+        try (var blob = s3.get("k")) {
+            assertEquals(10, blob.length());
+            assertEquals("0123456789", new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8));
+        }
         try (var blob = s3.getRange("k", 2, 5)) {
             assertEquals(4, blob.length());
             assertEquals("2345", new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8));
         }
-        assertEquals("bytes=2-5", fake.requests.getFirst().headers().get("Range"));
-    }
+        assertEquals("bytes=2-5", fake.requests.getLast().headers().get("Range"));
 
-    @Test
-    void get_ofAKeyNothingIsUnderIsNotFound() {
         assertThrows(S3Client.NotFoundError.class, () -> s3.get("nothing"));
     }
 
@@ -193,37 +177,25 @@ class HttpS3ClientTest {
         );
     }
 
-    /// The R2 brownout of 2026-09-15, which lost ~140 replay writes in a hundred seconds because
-    /// the first `InternalError` was the last word.
+    /// The R2 brownout of 2026-09-15 lost ~140 replay writes in a hundred seconds because the first
+    /// `InternalError` was the last word. A PUT is still sent once: its body is the inbound ipc
+    /// stream, already read by the time the status arrives, so the caller retries instead.
     @Test
-    void get_triesAgainWhenTheStoreAnswersInternalError() throws IOException {
+    void internalError_isTriedAgainExceptOnAPut() throws IOException {
         fake.objects.put("k", "recovered".getBytes(StandardCharsets.UTF_8));
         fake.internalErrors = 2;
-
         try (var blob = s3.get("k")) {
-            assertEquals(
-                "recovered",
-                new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8)
-            );
+            assertEquals("recovered", new String(blob.stream().readAllBytes(), StandardCharsets.UTF_8));
         }
         assertEquals(3, fake.requests.size());
-    }
 
-    @Test
-    void get_givesUpOnAStoreThatStaysUnwell() {
-        fake.objects.put("k", new byte[] {1});
+        fake.requests.clear();
         fake.internalErrors = 99;
-
         assertThrows(S3Client.RequestFailedError.class, () -> s3.get("k"));
-        assertEquals(4, fake.requests.size());
-    }
+        assertEquals(4, fake.requests.size(), "gives up on a store that stays unwell");
 
-    /// A body is the inbound ipc stream, already read and already digested by the time the status
-    /// arrives, so a second attempt would upload nothing. The caller retries instead.
-    @Test
-    void put_isSentOnceEvenWhenTheStoreCouldBeTriedAgain() {
+        fake.requests.clear();
         fake.internalErrors = 1;
-
         assertThrows(
             S3Client.RequestFailedError.class,
             () -> s3.put("k", new ByteArrayInputStream(new byte[] {1, 2, 3}), 3)

@@ -9,6 +9,9 @@ import java.util.UUID;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface CommandLogQueries {
+    /**
+     * One row per command, written as it is run.
+     */
     long insertCommandLog(InsertCommandLogParams params);
 
     /**

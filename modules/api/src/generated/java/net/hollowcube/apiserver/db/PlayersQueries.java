@@ -11,6 +11,17 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface PlayersQueries {
+    /**
+     * Everything chat asks about the people in a message, in one round trip: whether they take direct
+     * messages, whether their emoji render for everyone, and whether they may talk at all.
+     *
+     * Driven off the ids rather than off player_data, so every id asked about comes back whether or not
+     * it has a row — a mute is on `punishments` and applies to someone this table has never seen.
+     * `allow_direct_messages` is a key in the settings blob rather than a column, and defaults to on;
+     * `hypercube` is Go's FlagExtendedLimits. The mute is Go's GetActivePunishment(type = 'mute'),
+     * longest-lasting first since that is the one the player is actually under; `muted` is what says
+     * there is one at all, because a permanent mute and no mute both have a null expiry.
+     */
     List<GetChatPlayersRow> getChatPlayers(List<UUID> ids);
 
     @Nullable
@@ -19,14 +30,34 @@ public interface PlayersQueries {
     @Nullable
     PlayerData getPlayerByUsername(String username);
 
+    /**
+     * The columns a display name is computed from, for a batch of ids. Ids with no row are simply
+     * absent; the caller's map says so.
+     */
     List<GetPlayerNamesRow> getPlayerNames(List<UUID> ids);
 
+    /**
+     * The names a message is likely to mention, for the chat filter to mask before scoring. Anyone
+     * gone longer is left unmasked, which costs little: the model also trained on raw names.
+     */
     List<String> getActiveUsernames();
 
+    /**
+     * One statement rather than read-modify-write, so two servers patching different keys both land.
+     * Null deletes only a top-level key; nested objects remain opaque.
+     */
     long updatePlayerSettings(String patch, UUID id);
 
+    /**
+     * Substring match, prefix matches first, then the shorter name. `pg_trgm` is not available at
+     * describe time so this is plain `like`; in production the planner still uses Go's trigram index
+     * for the `%q%` predicate.
+     */
     List<PlayerData> searchPlayers(List<UUID> exclude, String query, long limit);
 
+    /**
+     * Everyone who has shared an address with the player.
+     */
     List<PlayerData> getPlayerAlts(UUID playerId);
 
     /**

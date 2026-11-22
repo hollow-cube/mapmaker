@@ -17,10 +17,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class MapFeaturesQueriesImpl implements MapFeaturesQueries {
     private static final String UPSERT_MAP_FEATURES = """
-        -- The whole row, replaced: a map's features are a function of its world, so there is nothing in
-        -- an old row worth keeping. Parameters cannot be null, so the two nullable columns are nulled
-        -- here: a data version of -1 is a world that predates one, and spacing means nothing under two
-        -- checkpoints.
+        -- name: map_features.upsertMapFeatures
         insert into map_features (map_id, feature_version, data_version,
                                   block_count, extent_x, extent_y, extent_z, occupied_cells, distinct_blocks, dominant_block_frac,
                                   entity_count, text_display_count,
@@ -56,6 +53,7 @@ final class MapFeaturesQueriesImpl implements MapFeaturesQueries {
                 decode_failures     = excluded.decode_failures""";
 
     private static final String GET_MAP_FEATURES = """
+        -- name: map_features.getMapFeatures
         select map_features.map_id, map_features.feature_version, map_features.indexed_at, map_features.data_version, map_features.block_count, map_features.extent_x, map_features.extent_y, map_features.extent_z, map_features.occupied_cells, map_features.distinct_blocks, map_features.dominant_block_frac, map_features.entity_count, map_features.text_display_count, map_features.checkpoint_count, map_features.checkpoint_spacing, map_features.finish_count, map_features.status_count, map_features.mechanics, map_features.attributes, map_features.potion_effects, map_features.settings, map_features.action_count, map_features.decode_failures
         from map_features
         where map_id = ?""";

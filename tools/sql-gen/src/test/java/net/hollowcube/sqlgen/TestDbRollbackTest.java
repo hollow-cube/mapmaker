@@ -9,15 +9,15 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import sample.db.SampleDatabase;
 import sample.db.Widget;
 
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-/// [TestDb] in its default mode, used the way a consumer would.
-///
-/// The two ordered tests are the point: the first writes, the second has to find none of it.
+/// [TestDb] in its default mode, used the way a consumer would. The first test writes, the second
+/// has to find none of it.
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TestDbRollbackTest {
 
@@ -28,12 +28,18 @@ class TestDbRollbackTest {
 
     @Test
     @Order(1)
-    void writesAreVisibleWithinTheTest() {
-        TEST_DB.seed("insert into widget values (1, 'first', array['a'], null)");
+    void aTransactionCommitsOrUndoesOnlyItselfInsideTheTest() {
+        TEST_DB.seed("insert into widget values (1, 'seeded', array['a'], null)");
+        db.tx(tx -> insert(tx.conn(), 2, "committed"));
+        assertThrows(IllegalStateException.class, () -> db.tx(tx -> {
+            insert(tx.conn(), 3, "rolled back");
+            throw new IllegalStateException("boom");
+        }));
 
-        List<Widget> widgets = db.widgets.listWidgets(10);
-        assertEquals(1, widgets.size());
-        assertEquals("first", widgets.getFirst().name());
+        assertEquals(
+            List.of("seeded", "committed"),
+            db.widgets.listWidgets(10).stream().map(Widget::name).toList()
+        );
     }
 
     @Test
@@ -42,21 +48,11 @@ class TestDbRollbackTest {
         assertEquals(List.of(), db.widgets.listWidgets(10));
     }
 
-    @Test
-    @Order(3)
-    void aTransactionIsRefusedBecauseItWouldCommitPastTheRollback() {
-        var failure = assertThrows(IllegalStateException.class, () -> db.tx(tx -> {
-        }));
-
-        assertTrue(failure.getMessage().contains("Mode.TRUNCATE"), failure.getMessage());
-    }
-
-    @Test
-    @Order(4)
-    void theConnectionIsReachableForRawStatements() throws Exception {
-        try (var st = TEST_DB.conn().createStatement(); var rs = st.executeQuery("select 1")) {
-            assertTrue(rs.next());
-            assertEquals(1, rs.getInt(1));
+    private static void insert(Connection conn, int id, String name) {
+        try (var st = conn.createStatement()) {
+            st.execute("insert into widget values (" + id + ", '" + name + "', array['a'], null)");
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
     }
 }

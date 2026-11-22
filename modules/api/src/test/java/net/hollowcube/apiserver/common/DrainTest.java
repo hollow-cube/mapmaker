@@ -48,18 +48,14 @@ class DrainTest {
     }
 
     @Test
-    void servesNormallyUntilDraining() throws Exception {
+    void drainingFailsReadinessAndClosesEveryConnection() throws Exception {
         assertEquals(200, get("/ready").statusCode());
         var first = get("/echo");
         var second = get("/echo");
         assertTrue(first.headers().firstValue("Connection").isEmpty());
         assertTrue(second.headers().firstValue("Connection").isEmpty());
         assertEquals(callerPorts.get(0), callerPorts.get(1), "keep-alive was not reused");
-    }
 
-    @Test
-    void drainingFailsReadinessAndClosesEveryConnection() throws Exception {
-        get("/echo");
         drain.begin();
 
         var ready = get("/ready");
@@ -69,7 +65,7 @@ class DrainTest {
         var served = get("/echo");
         assertEquals(200, served.statusCode());
         assertEquals("close", served.headers().firstValue("Connection").orElseThrow());
-        assertNotEquals(callerPorts.get(0), callerPorts.get(1), "the pooled connection survived");
+        assertNotEquals(callerPorts.get(1), callerPorts.get(2), "the pooled connection survived");
     }
 
     private HttpResponse<Void> get(String path) throws Exception {

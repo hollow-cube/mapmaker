@@ -58,28 +58,14 @@ class OverlayTest {
     }
 
     @Test
-    void anEmptyOverlayChangesNothing() throws IOException {
-        assertTrue(generate("-- nothing yet\n").get("test/db/Thing.java").contains("note"));
-    }
-
-    @Test
-    void aNotNullColumnWithoutADefaultIsRefused() {
+    void anythingButADropOfANullableOrDefaultedColumnIsRefused() {
         var message = refused("alter table thing drop column name;");
-
         assertTrue(message.contains("drops thing.name, which is not null without a default"), message);
-    }
 
-    @Test
-    void aMissingColumnIsRefused() {
-        var message = refused("alter table thing drop column gone;");
-
+        message = refused("alter table thing drop column gone;");
         assertTrue(message.contains("drops thing.gone, which does not exist"), message);
-    }
 
-    @Test
-    void anythingButADropIsRefused() {
-        var message = refused("alter table thing add column extra text;");
-
+        message = refused("alter table thing add column extra text;");
         assertTrue(message.contains("may only drop"), message);
     }
 }

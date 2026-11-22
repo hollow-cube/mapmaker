@@ -52,6 +52,7 @@ public final class AnticheatServiceImpl implements AnticheatService {
             throw new IpcException(400, "not a trace id: " + meta.id());
         if (meta.reason() != null && !REASONS.contains(meta.reason()))
             throw new IpcException(400, "no such capture reason: " + meta.reason());
+        var playerId = uuid(meta.playerId(), "playerId");
 
         var startedAt = Instant.ofEpochMilli(meta.startedAt());
         var path = AnticheatTraceStore.pathOf(meta.id(), startedAt);
@@ -75,7 +76,7 @@ public final class AnticheatServiceImpl implements AnticheatService {
                     new AnticheatQueries.UpsertAnticheatTraceParams(
                         meta.id(),
                         meta.captureId(),
-                        uuid(meta.playerId(), "playerId"),
+                        playerId,
                         meta.proxyVersion(),
                         meta.proxy(),
                         meta.clientPvn(),

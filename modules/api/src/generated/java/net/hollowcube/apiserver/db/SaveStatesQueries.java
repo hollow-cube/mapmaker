@@ -20,12 +20,21 @@ public interface SaveStatesQueries {
     @Nullable
     SaveStates best(UUID mapId, UUID playerId);
 
+    /**
+     * Every player's best completed run on the map, which is what its board holds.
+     */
     List<SaveStates> bestPerPlayer(UUID mapId);
 
+    /**
+     * An id already held by another map's or player's row updates nothing, which the caller refuses.
+     */
     long upsert(UpsertParams params);
 
     long deleteForPlayer(UUID mapId, UUID playerId);
 
+    /**
+     * The maps touched, so their boards can drop the player.
+     */
     List<UUID> deletePlayer(UUID playerId);
 
     long deleteMap(UUID mapId);
@@ -34,6 +43,9 @@ public interface SaveStatesQueries {
     Integer undeleteForPlayer(UUID mapId, UUID playerId, @Nullable Instant deletedAfter,
             @Nullable Instant deletedBefore);
 
+    /**
+     * The maps touched, with how many runs came back on each.
+     */
     List<UndeletePlayerRow> undeletePlayer(UUID playerId, @Nullable Instant deletedAfter,
             @Nullable Instant deletedBefore);
 

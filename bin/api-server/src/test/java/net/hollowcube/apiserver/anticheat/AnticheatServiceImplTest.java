@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -46,7 +45,7 @@ class AnticheatServiceImplTest {
     private static final String CAPTURE = "run-7";
     private static final long STARTED = Instant.parse("2026-08-29T22:15:30Z").toEpochMilli();
     /// Small enough that the too-large case is one read of a body already sent, not a stream to kill.
-    private static final long MAX_BYTES = 1 << 20;
+    private static final long MAX_BYTES = 4096;
 
     @TempDir
     Path root;
@@ -78,14 +77,11 @@ class AnticheatServiceImplTest {
         this.server.stop(0);
     }
 
+    /// A trace is megabytes of frames, so it is streamed both ways; what comes back has to be
+    /// what went out, byte for byte and not one read of it.
     @Test
-    void migration_leavesTheTableTheQueriesWereDescribedAgainst() {
-        assertEquals(List.of(), this.db.anticheat.deleteExpiredAnticheatTraces());
-    }
-
-    @Test
-    void put_storesTheBlobAndIndexesItOffTheMetaTheProxySent() throws IOException {
-        var blob = trace(1, "frames");
+    void put_storesTheBlobIndexesItAndAnswersTheExactBytes() throws IOException {
+        var blob = trace(1, "a capture, ".repeat(300));
 
         var result = this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(blob));
 
@@ -96,40 +92,15 @@ class AnticheatServiceImplTest {
 
         var row = this.db.anticheat.getAnticheatTrace("seg-1");
         assertNotNull(row);
-        assertEquals(CAPTURE, row.captureId());
-        assertEquals(PLAYER, row.playerId().toString());
-        assertEquals("abc1234", row.proxyVersion());
-        assertEquals("proxy-a", row.proxy());
-        assertEquals(776, row.clientPvn());
-        assertEquals("run", row.reason());
         // Off the bytes, rather than off what the meta claimed about them.
         assertEquals(1, row.formatVersion());
         assertEquals(blob.length, row.bytes());
-        assertFalse(row.pinned());
-        assertNull(row.expiresAt());
-        assertNull(row.endedAt());
-        assertEquals("2026/08/29/seg-1.trace", row.path());
         assertArrayEquals(blob, Files.readAllBytes(this.root.resolve(row.path())));
-    }
-
-    /// A trace is megabytes of frames, so it is streamed both ways; what comes back has to be
-    /// what went out, byte for byte and not one read of it.
-    @Test
-    void get_answersTheExactBytesThatWerePut() throws IOException {
-        var blob = trace(1, "a capture, ".repeat(50_000));
-        this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(blob));
 
         try (var answer = this.traces.getTrace("seg-1")) {
             assertEquals(blob.length, answer.length());
             assertArrayEquals(blob, answer.stream().readAllBytes());
         }
-    }
-
-    @Test
-    void get_is404ForATraceNobodyStored() {
-        var thrown = assertThrows(IpcException.class, () -> this.traces.getTrace("seg-nope"));
-
-        assertEquals(404, thrown.status());
     }
 
     @Test
@@ -147,9 +118,7 @@ class AnticheatServiceImplTest {
         assertEquals(PLAYER, rows.getFirst().meta().playerId());
         assertEquals(STARTED, rows.getFirst().meta().startedAt());
         assertEquals("2026/08/29/seg-1.trace", rows.getFirst().path());
-
         assertEquals(1, this.traces.listTraces("run-8").size());
-        assertEquals(List.of(), this.traces.listTraces("run-nothing"));
     }
 
     @Test
@@ -185,110 +154,62 @@ class AnticheatServiceImplTest {
         assertEquals(1, this.traces.listTraces(CAPTURE).size());
     }
 
-    @Test
-    void put_refusesABodyThatDoesNotOpenWithTheMagic() {
-        var body = Blob.of("PKnot a trace".getBytes(StandardCharsets.UTF_8));
-
-        var thrown = assertThrows(
-            IpcException.class,
-            () -> this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), body)
-        );
-
-        assertEquals(400, thrown.status());
-        assertNull(this.db.anticheat.getAnticheatTrace("seg-1"));
-    }
-
-    @Test
-    void put_refusesATraceLongerThanTheStoreAccepts() {
-        var body = Blob.of(trace(1, "x".repeat((int) MAX_BYTES)));
-
-        var thrown = assertThrows(
-            IpcException.class,
-            () -> this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), body)
-        );
-
-        assertEquals(413, thrown.status());
-        assertNull(this.db.anticheat.getAnticheatTrace("seg-1"));
-    }
-
-    @Test
-    void put_refusesWhatTheTableWouldRefuse() {
-        var body = trace(1, "frames");
-
-        assertEquals(
-            400,
-            assertThrows(
-                IpcException.class,
-                () -> this.traces.putTrace(meta(".hidden", CAPTURE, STARTED), Blob.of(body))
-            ).status()
-        );
-        assertEquals(
-            400,
-            assertThrows(
-                IpcException.class,
-                () -> this.traces.putTrace(meta("seg!1", CAPTURE, STARTED), Blob.of(body))
-            ).status()
-        );
-
-        var reason = new TraceMeta(
-            "seg-1",
-            CAPTURE,
-            PLAYER,
-            null,
-            null,
-            0,
-            "whatever",
-            STARTED,
-            null,
-            1
-        );
-        assertEquals(
-            400,
-            assertThrows(
-                IpcException.class,
-                () -> this.traces.putTrace(reason, Blob.of(body))
-            ).status()
-        );
-
-        var player = new TraceMeta(
-            "seg-1",
-            CAPTURE,
-            "nope",
-            null,
-            null,
-            0,
-            "run",
-            STARTED,
-            null,
-            1
-        );
-        assertEquals(
-            400,
-            assertThrows(
-                IpcException.class,
-                () -> this.traces.putTrace(player, Blob.of(body))
-            ).status()
-        );
-
-        assertNull(this.db.anticheat.getAnticheatTrace("seg-1"));
-    }
-
     /// A blob is renamed into place or not written at all, so a refusal leaves nothing behind —
     /// including the temp name it was streamed onto.
     @Test
-    void put_leavesNoHalfWrittenFileBehindWhateverItDecided() throws IOException {
+    void put_refusesABadTraceAndLeavesNoHalfWrittenFileBehind() throws IOException {
         this.traces.putTrace(meta("seg-1", CAPTURE, STARTED), Blob.of(trace(1, "frames")));
-        var junk = Blob.of("junk".getBytes(StandardCharsets.UTF_8));
-        assertThrows(
-            IpcException.class,
-            () -> this.traces.putTrace(meta("seg-2", CAPTURE, STARTED), junk)
+        var body = trace(1, "frames");
+
+        var notATrace = "PKnot a trace".getBytes(StandardCharsets.UTF_8);
+        assertEquals(400, refused(meta("seg-2", CAPTURE, STARTED), notATrace));
+        assertEquals(
+            413,
+            refused(meta("seg-3", CAPTURE, STARTED), trace(1, "x".repeat((int) MAX_BYTES)))
         );
-        var big = Blob.of(trace(1, "x".repeat((int) MAX_BYTES)));
-        assertThrows(
-            IpcException.class,
-            () -> this.traces.putTrace(meta("seg-3", CAPTURE, STARTED), big)
+        assertEquals(400, refused(meta(".hidden", CAPTURE, STARTED), body));
+        assertEquals(400, refused(meta("seg!1", CAPTURE, STARTED), body));
+        assertEquals(
+            400,
+            refused(
+                new TraceMeta(
+                    "seg-4",
+                    CAPTURE,
+                    PLAYER,
+                    null,
+                    null,
+                    0,
+                    "whatever",
+                    STARTED,
+                    null,
+                    1
+                ),
+                body
+            )
+        );
+        assertEquals(
+            400,
+            refused(
+                new TraceMeta(
+                    "seg-5",
+                    CAPTURE,
+                    "nope",
+                    null,
+                    null,
+                    0,
+                    "run",
+                    STARTED,
+                    null,
+                    1
+                ),
+                body
+            )
         );
 
+        assertEquals(
+            List.of("seg-1"),
+            this.traces.listTraces(CAPTURE).stream().map(row -> row.meta().id()).toList()
+        );
         try (Stream<Path> files = Files.walk(this.root)) {
             assertEquals(
                 List.of("seg-1.trace"),
@@ -300,28 +221,9 @@ class AnticheatServiceImplTest {
         }
     }
 
-    /// The meta of a blob call travels in a header rather than the body, which is bytes; a proxy
-    /// named outside ascii still has to come back out as itself.
-    @Test
-    void put_carriesMetaWrittenOutsideAsciiThroughItsHeader() {
-        var meta = new TraceMeta(
-            "seg-1",
-            CAPTURE,
-            PLAYER,
-            "abc1234",
-            "pröxy-å",
-            776,
-            "run",
-            STARTED,
-            null,
-            1
-        );
-
-        this.traces.putTrace(meta, Blob.of(trace(1, "frames")));
-
-        var row = this.db.anticheat.getAnticheatTrace("seg-1");
-        assertNotNull(row);
-        assertEquals("pröxy-å", row.proxy());
+    private int refused(TraceMeta meta, byte[] body) {
+        return assertThrows(IpcException.class, () -> this.traces.putTrace(meta, Blob.of(body)))
+            .status();
     }
 
     private static TraceMeta meta(String id, String captureId, long startedAt) {

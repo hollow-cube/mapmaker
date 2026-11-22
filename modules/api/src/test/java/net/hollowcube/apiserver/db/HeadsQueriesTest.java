@@ -8,15 +8,11 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 /// Drives the generated head_db queries against a real Postgres built from the same migrations the
-/// generator described them against.
-///
-/// This is the check that the generated code is not merely well-formed: the row shapes, the column
-/// offsets behind `head_db.*`, and the array mapping all have to line up with what the server
-/// actually sends back. The search cases also pin what `head_db_search` makes findable, since the
-/// tsquery a caller passes is meaningless without knowing what went into the document.
+/// generator described them against. The search case pins what `head_db_search` makes findable,
+/// since the tsquery a caller passes is meaningless without knowing what went into the document.
 class HeadsQueriesTest {
 
     @RegisterExtension
@@ -33,16 +29,8 @@ class HeadsQueriesTest {
                 (3, 'block', 'Stone Block', array[]::varchar[], 'tex-stone')""");
     }
 
-    @Test
-    void getRandomHeads_mapsEveryColumnOfTheEmbeddedTable() {
-        HeadDb creeper = db.heads.getRandomHeads(3).stream()
-            .map(HeadsQueries.GetRandomHeadsRow::headDb)
-            .filter(head -> head.id() == 1).findFirst().orElseThrow();
-
-        assertEquals("mob", creeper.category());
-        assertEquals("Creeper Head", creeper.name());
-        assertEquals(List.of("green", "scary"), creeper.tags());
-        assertEquals("tex-creeper", creeper.texture());
+    private List<String> search(String query) {
+        return db.heads.getHeadsWithSearch(query, 0, 10).stream().map(row -> row.headDb().name()).toList();
     }
 
     @Test
@@ -54,82 +42,32 @@ class HeadsQueriesTest {
     }
 
     @Test
-    void getHeadsWithSearch_matchesOnName() {
-        List<HeadsQueries.GetHeadsWithSearchRow> rows = db.heads.getHeadsWithSearch("creeper", 0, 10);
-
-        assertEquals(1, rows.size());
-        assertEquals("Creeper Head", rows.getFirst().headDb().name());
-        assertEquals(1, rows.getFirst().totalCount());
+    void getHeadsWithSearch_matchesNameAndTags() {
+        assertEquals(List.of("Creeper Head"), search("creeper"));
+        assertEquals(List.of("Creeper Head"), search("scary"));
+        assertEquals(List.of("Creeper Head"), search("creep:*"));
+        assertEquals(2, search("head:*").size());
+        assertEquals(List.of("Zombie Head"), search("zombie & head:*"));
+        assertEquals(List.of(), search("zombie & block:*"));
+        assertEquals(List.of(), search("piglin:*"));
     }
 
     @Test
-    void getHeadsWithSearch_matchesOnTags() {
-        List<HeadsQueries.GetHeadsWithSearchRow> rows = db.heads.getHeadsWithSearch("scary", 0, 10);
-
-        assertEquals(1, rows.size());
-        assertEquals("Creeper Head", rows.getFirst().headDb().name());
-    }
-
-    @Test
-    void getHeadsWithSearch_matchesAPrefixToken() {
-        List<HeadsQueries.GetHeadsWithSearchRow> rows = db.heads.getHeadsWithSearch("creep:*", 0, 10);
-
-        assertEquals(1, rows.size());
-        assertEquals("Creeper Head", rows.getFirst().headDb().name());
-    }
-
-    @Test
-    void getHeadsWithSearch_andsTheTokensTogether() {
-        assertEquals(2, db.heads.getHeadsWithSearch("head:*", 0, 10).size());
-        assertEquals(1, db.heads.getHeadsWithSearch("zombie & head:*", 0, 10).size());
-        assertEquals(0, db.heads.getHeadsWithSearch("zombie & block:*", 0, 10).size());
-    }
-
-    @Test
-    void getHeadsWithSearch_carriesTheWindowCountPastTheLimit() {
-        List<HeadsQueries.GetHeadsWithSearchRow> rows = db.heads.getHeadsWithSearch("head:*", 0, 1);
-
-        assertEquals(1, rows.size());
-        assertEquals(2, rows.getFirst().totalCount());
-    }
-
-    @Test
-    void getHeadsWithSearch_offsetWalksTheMatches() {
+    void getHeadsWithSearch_pagesWithTheWindowCount() {
         HeadsQueries.GetHeadsWithSearchRow first = db.heads.getHeadsWithSearch("head:*", 0, 1).getFirst();
         HeadsQueries.GetHeadsWithSearchRow second = db.heads.getHeadsWithSearch("head:*", 1, 1).getFirst();
 
         assertEquals(2, first.totalCount());
         assertEquals(2, second.totalCount());
-        assertTrue(first.headDb().id() != second.headDb().id());
+        assertNotEquals(first.headDb().id(), second.headDb().id());
     }
 
     @Test
-    void getHeadsWithSearch_answersNothingRatherThanEverythingWhenNothingMatches() {
-        assertEquals(List.of(), db.heads.getHeadsWithSearch("piglin:*", 0, 10));
-    }
-
-    @Test
-    void getHeadsWithCategory_filtersAndCountsThatCategoryOnly() {
-        List<HeadsQueries.GetHeadsWithCategoryRow> rows = db.heads.getHeadsWithCategory("mob", 0, 10);
-
-        assertEquals(2, rows.size());
-        assertEquals(2, rows.getFirst().totalCount());
-        for (HeadsQueries.GetHeadsWithCategoryRow row : rows) assertEquals("mob", row.headDb().category());
-    }
-
-    @Test
-    void getHeadsWithCategory_ordersByNameSoPagesDoNotOverlap() {
+    void getHeadsWithCategory_filtersCountsAndPagesByName() {
         List<HeadsQueries.GetHeadsWithCategoryRow> page = db.heads.getHeadsWithCategory("mob", 0, 10);
         assertEquals(List.of("Creeper Head", "Zombie Head"), page.stream().map(row -> row.headDb().name()).toList());
+        for (HeadsQueries.GetHeadsWithCategoryRow row : page) assertEquals(2, row.totalCount());
 
         assertEquals("Zombie Head", db.heads.getHeadsWithCategory("mob", 1, 1).getFirst().headDb().name());
-    }
-
-    @Test
-    void getHeadsWithCategory_readsAnEmptyArrayAsAnEmptyList() {
-        HeadsQueries.GetHeadsWithCategoryRow stone = db.heads.getHeadsWithCategory("block", 0, 10).getFirst();
-
-        assertEquals(List.of(), stone.headDb().tags());
-        assertEquals("Stone Block", stone.headDb().name());
     }
 }

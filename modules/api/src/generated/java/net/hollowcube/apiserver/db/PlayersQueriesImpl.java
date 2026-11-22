@@ -19,15 +19,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class PlayersQueriesImpl implements PlayersQueries {
     private static final String GET_CHAT_PLAYERS = """
-        -- Everything chat asks about the people in a message, in one round trip: whether they take direct
-        -- messages, whether their emoji render for everyone, and whether they may talk at all.
-        --
-        -- Driven off the ids rather than off player_data, so every id asked about comes back whether or not
-        -- it has a row — a mute is on `punishments` and applies to someone this table has never seen.
-        -- `allow_direct_messages` is a key in the settings blob rather than a column, and defaults to on;
-        -- `hypercube` is Go's FlagExtendedLimits. The mute is Go's GetActivePunishment(type = 'mute'),
-        -- longest-lasting first since that is the one the player is actually under; `muted` is what says
-        -- there is one at all, because a permanent mute and no mute both have a null expiry.
+        -- name: players.getChatPlayers
         select asked.id,
                coalesce((pd.settings ->> 'allow_direct_messages')::bool, true)     as allow_dms,
                coalesce(pd.role <> 'default' or pd.hypercube_end > now(), false)   as hypercube,
@@ -45,32 +37,31 @@ final class PlayersQueriesImpl implements PlayersQueries {
                                     limit 1) mute on true""";
 
     private static final String GET_PLAYER_BY_ID = """
+        -- name: players.getPlayerById
         select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where id = ?""";
 
     private static final String GET_PLAYER_BY_USERNAME = """
+        -- name: players.getPlayerByUsername
         select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where lower(username) = lower(?)""";
 
     private static final String GET_PLAYER_NAMES = """
-        -- The columns a display name is computed from, for a batch of ids. Ids with no row are simply
-        -- absent; the caller's map says so.
+        -- name: players.getPlayerNames
         select id, username, role, hypercube_end
         from player_data
         where id = any (?::uuid[])""";
 
     private static final String GET_ACTIVE_USERNAMES = """
-        -- The names a message is likely to mention, for the chat filter to mask before scoring. Anyone
-        -- gone longer is left unmasked, which costs little: the model also trained on raw names.
+        -- name: players.getActiveUsernames
         select username
         from player_data
         where last_online > now() - interval '90 days'""";
 
     private static final String UPDATE_PLAYER_SETTINGS = """
-        -- One statement rather than read-modify-write, so two servers patching different keys both land.
-        -- Null deletes only a top-level key; nested objects remain opaque.
+        -- name: players.updatePlayerSettings
         update player_data
         set settings = (settings - coalesce((select array_agg(key)
                                              from jsonb_each(?::jsonb)
@@ -81,9 +72,7 @@ final class PlayersQueriesImpl implements PlayersQueries {
         where id = ?""";
 
     private static final String SEARCH_PLAYERS = """
-        -- Substring match, prefix matches first, then the shorter name. `pg_trgm` is not available at
-        -- describe time so this is plain `like`; in production the planner still uses Go's trigram index
-        -- for the `%q%` predicate.
+        -- name: players.searchPlayers
         select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where id <> all (?::uuid[])
@@ -92,7 +81,7 @@ final class PlayersQueriesImpl implements PlayersQueries {
         limit ?""";
 
     private static final String GET_PLAYER_ALTS = """
-        -- Everyone who has shared an address with the player.
+        -- name: players.getPlayerAlts
         select player_data.id, player_data.username, player_data.first_join, player_data.last_online, player_data.playtime, player_data.experience, player_data.beta_enabled, player_data.settings, player_data.coins, player_data.cubits, player_data.skin, player_data.online, player_data.hypercube_start, player_data.hypercube_end, player_data.role, player_data.extra_map_slots, player_data.max_map_size, player_data.map_builders
         from player_data
         where id in (select theirs.player_id

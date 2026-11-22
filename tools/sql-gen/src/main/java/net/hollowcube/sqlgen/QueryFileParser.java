@@ -11,8 +11,8 @@ import java.util.Locale;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-/// Splits a query file into `-- name:` blocks and rewrites our `$identifier` placeholders into the
-/// `?` JDBC wants.
+/// Splits a query file into `-- name:` blocks, rewrites our `$identifier` placeholders into the `?`
+/// JDBC wants, and strips `--` comments, the leading ones becoming the query's doc.
 ///
 /// This is deliberately not a SQL parser: everything the generator needs to know about the shape of
 /// a query comes back from the server in [Describe]. All that happens here is finding the block
@@ -59,6 +59,7 @@ final class QueryFileParser {
         private final String name;
         private final QueryFile.Tag tag;
         private final int line;
+        private final StringBuilder doc = new StringBuilder();
         private final StringBuilder sql = new StringBuilder();
         private final Set<String> nullable = new LinkedHashSet<>();
         private final Set<String> notNull = new LinkedHashSet<>();
@@ -81,6 +82,13 @@ final class QueryFileParser {
                 }
                 return;
             }
+            var stripped = text.strip();
+            if (sql.isEmpty() && stripped.startsWith("--")) {
+                var line = stripped.substring(2);
+                doc.append(line.startsWith(" ") ? line.substring(1) : line).append('\n');
+                return;
+            }
+            if (sql.isEmpty() && stripped.isEmpty()) return;
             sql.append(text).append('\n');
         }
 
@@ -90,7 +98,7 @@ final class QueryFileParser {
             if (text.isEmpty()) throw new GenException("query '" + name + "' in " + group + ".sql has no SQL");
 
             var rewrite = rewritePlaceholders(text, name);
-            return new QueryFile.Query(name, tag, rewrite.sql(), rewrite.params(), rewrite.binds(),
+            return new QueryFile.Query(name, tag, doc.toString().strip(), rewrite.sql(), rewrite.params(), rewrite.binds(),
                 Set.copyOf(nullable), Set.copyOf(notNull), rewrite.holes(), line,
                 tag == QueryFile.Tag.ONE && aggregateOnly(text));
         }
@@ -202,8 +210,9 @@ final class QueryFileParser {
     }
 
     /// Replaces every `$identifier` outside a string, dollar-quoted body, or comment with `?`,
-    /// recording which argument each `?` binds. Repeating a placeholder binds the same argument
-    /// again rather than adding one.
+    /// recording which argument each `?` binds, and drops `--` comments along with the whitespace
+    /// before them, and the whole line when nothing else was on it. Repeating a placeholder binds
+    /// the same argument again rather than adding one.
     private static Rewrite rewritePlaceholders(String sql, String queryName) {
         var out = new StringBuilder(sql.length());
         var params = new ArrayList<String>();
@@ -216,7 +225,12 @@ final class QueryFileParser {
             if (c == '\'') {
                 i = copyQuoted(sql, i, out);
             } else if (c == '-' && next(sql, i) == '-') {
-                i = copyUntil(sql, i, "\n", out);
+                int floor = holes.isEmpty() ? 0 : holes.getLast().sqlOffset();
+                while (out.length() > floor && (out.charAt(out.length() - 1) == ' ' || out.charAt(out.length() - 1) == '\t'))
+                    out.setLength(out.length() - 1);
+                int end = sql.indexOf('\n', i);
+                boolean alone = out.isEmpty() || out.charAt(out.length() - 1) == '\n';
+                i = end < 0 ? sql.length() : alone ? end + 1 : end;
             } else if (c == '/' && next(sql, i) == '*') {
                 int close = sql.indexOf("*/", i + 2);
                 var kind = close < 0 ? null : QueryFile.Hole.Kind.of(collapse(sql.substring(i + 2, close)));

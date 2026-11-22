@@ -18,6 +18,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 @SuppressWarnings("UnusedReturnValue")
 final class NotificationsQueriesImpl implements NotificationsQueries {
     private static final String LIST = """
+        -- name: notifications.list
         select player_notifications.id, player_notifications.player_id, player_notifications.type, player_notifications.key, player_notifications.data, player_notifications.created_at, player_notifications.read_at, player_notifications.expires_at, player_notifications.deleted_at,
                count(*) over () as total_count
         from player_notifications
@@ -29,24 +30,26 @@ final class NotificationsQueriesImpl implements NotificationsQueries {
         offset ? limit ?""";
 
     private static final String MARK_READ = """
+        -- name: notifications.markRead
         update player_notifications
         set read_at = case when ?::bool then now() else null end
         where id = ?
           and deleted_at is null""";
 
     private static final String DELETE = """
+        -- name: notifications.delete
         update player_notifications
         set deleted_at = now()
         where id = ?
           and deleted_at is null""";
 
     private static final String INSERT = """
+        -- name: notifications.insert
         insert into player_notifications (id, type, key, player_id, data, expires_at)
         values (?, ?, ?, ?, ?, ?)""";
 
     private static final String REPLACE = """
-        -- Go's Unsafe_DeleteNotification, run before an insert that replaces what is there: read or not,
-        -- the row goes, so the player has one notification for the key rather than a history of them.
+        -- name: notifications.replace
         delete
         from player_notifications
         where type = ?
@@ -54,7 +57,7 @@ final class NotificationsQueriesImpl implements NotificationsQueries {
           and player_id = ?""";
 
     private static final String DELETE_BY_KEY = """
-        -- What a friend request's cancel, decline or the block that swallowed it leaves behind.
+        -- name: notifications.deleteByKey
         update player_notifications
         set deleted_at = now()
         where type = ?

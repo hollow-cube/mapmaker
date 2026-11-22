@@ -19,7 +19,6 @@ import net.hollowcube.ipc.replay.ReplayRepresentation;
 import net.hollowcube.ipc.replay.ReplayService;
 import net.hollowcube.ipc.replay.ReplayState;
 import net.hollowcube.ipc.util.IpcException;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import org.jetbrains.annotations.Nullable;
@@ -121,24 +120,17 @@ class CompactReplayRunnerTest {
         assertEquals(List.of(), storage.published);
     }
 
-    /// A commit that landed while the runner was compacting. There is a fresh row for it already.
+    /// A 412 is a commit that landed while the runner was compacting, and there is a fresh row for
+    /// it already; anything else parks the row.
     @Test
-    void run_returnsQuietlyWhenThePublicationLosesItsPrecondition(
-        @TempDir Path directory
-    ) throws Exception {
+    void run_returnsQuietlyOnALostPreconditionAndThrowsOnAnythingElse(@TempDir Path directory) throws Exception {
         var storage = new FakeStorage();
         record(directory, storage);
+
         storage.publishStatus = 412;
-
         new CompactReplayRunner(storage).run(new CompactReplay(ID, "final-commit"));
-    }
 
-    @Test
-    void run_letsAnythingElseTheStoreSaysParkTheRow(@TempDir Path directory) throws Exception {
-        var storage = new FakeStorage();
-        record(directory, storage);
         storage.publishStatus = 500;
-
         assertThrows(
             IpcException.class,
             () -> new CompactReplayRunner(storage).run(new CompactReplay(ID, "final-commit"))

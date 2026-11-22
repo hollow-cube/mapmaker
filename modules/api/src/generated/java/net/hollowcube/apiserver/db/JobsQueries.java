@@ -10,30 +10,68 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface JobsQueries {
+    /**
+     * One row per recurring job, created once; a row that already exists keeps its own run_at.
+     */
     long scheduleJob(String job, String instance, Instant runAt);
 
+    /**
+     * Asks for a run, whenever there is room. An existing row is made due again — its backoff and its
+     * failures forgotten, unparked, its data replaced if there is new data — and bumped, so that a run
+     * already in flight does not delete it when it completes.
+     */
     long enqueueJob(String job, String instance, String data);
 
+    /**
+     * Takes up to $limit due rows of the named jobs for $who, in one statement. `skip locked` is what
+     * keeps two replicas from taking the same row; the limit is the caller's free slots, never more,
+     * so a replica cannot hold work it is not running. Timed rows first, oldest first. picked_at is the
+     * wall clock rather than the transaction's now(), so that two picks are never the same pick.
+     */
     List<Jobs> pickJobs(String who, List<String> jobs, long limit);
 
+    /**
+     * Everything $who holds, in one statement.
+     */
     long heartbeatJobs(String who);
 
+    /**
+     * A recurring run succeeded; the row goes back to waiting for its next time.
+     */
     long completeJob(Instant runAt, String job, String instance, String who, Instant pickedAt);
 
+    /**
+     * A one-shot run succeeded. Deletes nothing if the row was re-enqueued while it ran — the version
+     * moved — in which case it is due again and releaseJob lets it go.
+     */
     long finishJob(String job, String instance, String who, Instant pickedAt, long version);
 
     long releaseJob(String job, String instance, String who, Instant pickedAt);
 
+    /**
+     * The run failed; the row is due again at $runAt, which for a one-shot is its backoff.
+     */
     long failJob(FailJobParams params);
 
     long parkJob(String error, String job, String instance, String who, Instant pickedAt);
 
+    /**
+     * The process is stopping mid-run: hand the row straight back, due now and ahead of the queue,
+     * without it counting as a failure — a deploy is not the job's fault.
+     */
     long yieldJob(String job, String instance, String who, Instant pickedAt);
 
+    /**
+     * Rows whose holder stopped heartbeating are put back as due now. The run it was in counts as an
+     * attempt, so a job that keeps killing its worker still parks eventually.
+     */
     List<Jobs> reviveDeadJobs(int deadSeconds);
 
     List<Jobs> listJobs();
 
+    /**
+     * Rows of $job not yet done, running or not, leaving out the parked.
+     */
     @Nullable
     Integer countWaitingJobs(String job);
 

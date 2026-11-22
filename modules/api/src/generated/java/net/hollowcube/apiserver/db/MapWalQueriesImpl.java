@@ -19,17 +19,19 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class MapWalQueriesImpl implements MapWalQueries {
     private static final String INSERT_BATCH = """
+        -- name: map_wal.insertBatch
         insert into map_wal (map_id, first_seq, last_seq, world_id, first_at, last_at, length, data, object_sha256)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?)
         on conflict (map_id, first_seq) do nothing""";
 
     private static final String GET_HEAD_SEQ = """
+        -- name: map_wal.getHeadSeq
         select coalesce(max(last_seq), 0)::bigint as head_seq
         from map_wal
         where map_id = ?""";
 
     private static final String GET_LENGTH = """
-        -- Each batch is sent behind a 4 byte length.
+        -- name: map_wal.getLength
         select coalesce(sum(length::bigint + 4), 0)::bigint as bytes
         from map_wal
         where map_id = ?
@@ -37,6 +39,7 @@ final class MapWalQueriesImpl implements MapWalQueries {
           and last_seq <= ?""";
 
     private static final String LIST_BATCHES = """
+        -- name: map_wal.listBatches
         select first_seq, last_seq, length, data, object_sha256
         from map_wal
         where map_id = ?

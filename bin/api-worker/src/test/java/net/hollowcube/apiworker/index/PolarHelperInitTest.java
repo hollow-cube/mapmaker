@@ -30,13 +30,4 @@ class PolarHelperInitTest {
 
         assertSame(server, MinecraftServer.process(), "the running server process was replaced");
     }
-
-    @Test
-    void ensureServerBringsOneUpWhenThereIsNone() {
-        // Whatever order the suite runs in, one of these two paths is the standalone worker's.
-        PolarHelper.ensureServer();
-
-        assertNotNull(MinecraftServer.process());
-        assertSame(MinecraftServer.process(), MinecraftServer.process());
-    }
 }

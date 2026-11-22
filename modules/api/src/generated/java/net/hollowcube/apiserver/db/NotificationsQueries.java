@@ -18,8 +18,15 @@ public interface NotificationsQueries {
 
     long insert(InsertParams params);
 
+    /**
+     * Go's Unsafe_DeleteNotification, run before an insert that replaces what is there: read or not,
+     * the row goes, so the player has one notification for the key rather than a history of them.
+     */
     long replace(String type, String key, UUID playerId);
 
+    /**
+     * What a friend request's cancel, decline or the block that swallowed it leaves behind.
+     */
     long deleteByKey(String type, String key, UUID playerId);
 
     /**

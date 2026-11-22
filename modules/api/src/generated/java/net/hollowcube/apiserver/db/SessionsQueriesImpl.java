@@ -14,6 +14,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 @SuppressWarnings("UnusedReturnValue")
 final class SessionsQueriesImpl implements SessionsQueries {
     private static final String COUNT_PLAYER_SESSIONS = """
+        -- name: sessions.countPlayerSessions
         select count(*) as count
         from player_sessions""";
 

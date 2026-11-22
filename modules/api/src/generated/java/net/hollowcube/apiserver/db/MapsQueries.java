@@ -12,11 +12,18 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface MapsQueries {
+    /**
+     * Whether `[map]` in a message is a map the people reading it could open. Matches what a map server
+     * used to answer for itself out of `MapData.isPublished`.
+     */
     boolean isMapPublished(UUID mapId);
 
     @Nullable
     Maps getMap(UUID mapId);
 
+    /**
+     * The lock every map write takes first. Preconditions are checked in Java against the locked row.
+     */
     @Nullable
     Maps getMapForUpdate(UUID mapId);
 
@@ -31,16 +38,31 @@ public interface MapsQueries {
     @Nullable
     MapStats getStats(UUID mapId);
 
+    /**
+     * The row lock is what makes "count the slots, then take one" atomic: two creates, or a create and
+     * an accepted invitation, for the same player queue here instead of both seeing the last free slot.
+     * Go read the count unlocked and could hand out one more than the limit.
+     */
     @Nullable
     GetPlayerForUpdateRow getPlayerForUpdate(UUID playerId);
 
+    /**
+     * As getPlayerForUpdate, for the owner and the invitee together; ordered so that two invitations
+     * between the same pair cannot deadlock.
+     */
     List<GetPlayersForUpdateRow> getPlayersForUpdate(List<UUID> ids);
 
     @Nullable
     Maps createMap(UUID mapId, UUID owner, MapSize size, int protocolVersion);
 
+    /**
+     * The owner's own slot has position -1; bought slots count up from 0.
+     */
     long insertOwnerSlot(UUID playerId, UUID mapId);
 
+    /**
+     * Slots in use: every unpublished map the player owns or has accepted an invitation to.
+     */
     int countSlots(UUID playerId);
 
     long updateMap(UpdateMapParams params);
@@ -51,6 +73,9 @@ public interface MapsQueries {
 
     List<String> listKnownTags();
 
+    /**
+     * A completed run is somebody's record and stays.
+     */
     long deleteInProgressStates(UUID mapId);
 
     long deleteAllStates(UUID mapId);
@@ -66,11 +91,17 @@ public interface MapsQueries {
 
     long updateVerification(MapVerification verification, UUID mapId);
 
+    /**
+     * A verifying run that finished; the map is stamped with the version that verified it.
+     */
     long markVerified(MapVerification verification, int protocolVersion, UUID mapId);
 
     @Nullable
     Long getLatestEditingTime(UUID mapId, UUID playerId);
 
+    /**
+     * Editors still registered for the map; zero once a drain has completed.
+     */
     int countWorlds(UUID mapId);
 
     List<MapSlots> listBuilders(UUID mapId);
@@ -88,6 +119,10 @@ public interface MapsQueries {
 
     long removeBuilder(UUID mapId, UUID playerId);
 
+    /**
+     * Every notification of one type under a key, or one player's when `playerId` is given; the rows
+     * come back so their deletion can be published.
+     */
     List<PlayerNotifications> deleteNotifications(String type, String key, UUID playerId);
 
     long insertNotification(UUID id, UUID playerId, String type, String key, String data);
@@ -95,16 +130,32 @@ public interface MapsQueries {
     @Nullable
     MapRating getRating(UUID mapId, UUID playerId);
 
+    /**
+     * Null is unrated.
+     */
     long setRating(UUID mapId, UUID playerId, @Nullable MapRating rating);
 
     long insertReport(UUID mapId, UUID playerId, List<MapReportCategory> categories,
             String comment);
 
+    /**
+     * Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
+     * maps table record. The listing predicate and the caller's filters are the `where` fragment and the
+     * sort the `order by` fragment, both built in `MapSearchSql`.
+     */
     List<SearchMapsRow> searchMaps(long offset, long limit, @Nullable SqlFragment where,
             @Nullable SqlFragment orderBy);
 
+    /**
+     * Go's `GetMultiMapProgress`: complete if any playing or verifying run finished, and the playtime
+     * of the best finished run, else of the run touched last. Playtime is tick-rounded milliseconds;
+     * Go's `round(playtime / 50.0)` is spelt as integer arithmetic because pglite cannot inline `round`.
+     */
     List<GetMultiMapProgressRow> getMultiMapProgress(UUID playerId, List<UUID> mapIds);
 
+    /**
+     * Maps drop out here once deleted instead of 404ing the page in the client.
+     */
     List<ListPlayerHistoryRow> listPlayerHistory(UUID playerId, long offset, long limit);
 
     /**

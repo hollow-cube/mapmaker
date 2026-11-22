@@ -17,7 +17,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 @SuppressWarnings("UnusedReturnValue")
 final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
     private static final String TOP_TIMES = """
-        -- The players holding the fastest time on the most published, ascending time boards.
+        -- name: leaderboards.topTimes
         with shortest_playtimes as (select map_id,
                                            min((greatest((playtime + 25) / 50, ticks) * 50)::bigint) as min_playtime
                                     from save_states
@@ -43,6 +43,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
         limit 10""";
 
     private static final String TOP_TIMES_FOR_PLAYER = """
+        -- name: leaderboards.topTimesForPlayer
         select count(distinct s1.map_id)::int as top_times
         from save_states s1
                  join maps on s1.map_id = maps.id
@@ -66,6 +67,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
                               < (greatest((s1.playtime + 25) / 50, s1.ticks) * 50)::bigint)""";
 
     private static final String MAPS_BEATEN = """
+        -- name: leaderboards.mapsBeaten
         select s1.player_id, count(distinct s1.map_id) as maps_beaten
         from save_states s1
                  join maps on s1.map_id = maps.id
@@ -78,6 +80,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
         limit 10""";
 
     private static final String MAPS_BEATEN_FOR_PLAYER = """
+        -- name: leaderboards.mapsBeatenForPlayer
         select count(distinct map_id)::int as maps_beaten
         from save_states
                  join maps on save_states.map_id = maps.id
@@ -88,8 +91,7 @@ final class LeaderboardsQueriesImpl implements LeaderboardsQueries {
           and maps.published_at is not null""";
 
     private static final String PLAYER_BEST_TIMES = """
-        -- The player's fastest run on every published map they have finished, by playtime rather than by
-        -- score, which is what the top-times rank is measured against.
+        -- name: leaderboards.playerBestTimes
         select distinct on (save_states.map_id) save_states.map_id,
                                                 save_states.playtime,
                                                 maps.name as map_name,

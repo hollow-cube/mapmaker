@@ -20,26 +20,31 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class GadgetsQueriesImpl implements GadgetsQueries {
     private static final String INSERT_GADGET = """
+        -- name: gadgets.insertGadget
         insert into gadget (id, status, label, quantity, weight, price, payload, metadata, created_at,
                             released_on, tags, ranks)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?,
                 ?, ?, ?)""";
 
     private static final String GET_GADGET = """
+        -- name: gadgets.getGadget
         select gadget.id, gadget.status, gadget.label, gadget.quantity, gadget.weight, gadget.price, gadget.payload, gadget.metadata, gadget.created_at, gadget.released_on, gadget.tags, gadget.ranks, gadget.note, gadget.retired_at
         from gadget
         where id = ?""";
 
     private static final String COUNT_GADGETS = """
+        -- name: gadgets.countGadgets
         select count(*)
         from gadget""";
 
     private static final String LIST_GADGET_LABELS = """
+        -- name: gadgets.listGadgetLabels
         select label
         from gadget
         order by label""";
 
     private static final String FIND_GADGETS_BY_TEXT = """
+        -- name: gadgets.findGadgetsByText
         select gadget.id, gadget.status, gadget.label, gadget.quantity, gadget.weight, gadget.price, gadget.payload, gadget.metadata, gadget.created_at, gadget.released_on, gadget.tags, gadget.ranks, gadget.note, gadget.retired_at
         from gadget
         where label = ?
@@ -47,34 +52,40 @@ final class GadgetsQueriesImpl implements GadgetsQueries {
         order by id""";
 
     private static final String LIST_GADGETS_WITH_STARS = """
+        -- name: gadgets.listGadgetsWithStars
         select gadget.id, gadget.status, gadget.label, gadget.quantity, gadget.weight, gadget.price, gadget.payload, gadget.metadata, gadget.created_at, gadget.released_on, gadget.tags, gadget.ranks, gadget.note, gadget.retired_at, review.stars
         from gadget
                  left join gadget_review review on review.gadget_id = gadget.id
         order by gadget.id""";
 
     private static final String LIST_GADGETS_WITH_REVIEW = """
+        -- name: gadgets.listGadgetsWithReview
         select gadget.id, gadget.status, gadget.label, gadget.quantity, gadget.weight, gadget.price, gadget.payload, gadget.metadata, gadget.created_at, gadget.released_on, gadget.tags, gadget.ranks, gadget.note, gadget.retired_at, review.id, review.gadget_id, review.stars
         from gadget
                  left join gadget_review review on review.gadget_id = gadget.id
         order by gadget.id""";
 
     private static final String PAIR_GADGETS = """
+        -- name: gadgets.pairGadgets
         select a.id, a.status, a.label, a.quantity, a.weight, a.price, a.payload, a.metadata, a.created_at, a.released_on, a.tags, a.ranks, a.note, a.retired_at, b.id, b.status, b.label, b.quantity, b.weight, b.price, b.payload, b.metadata, b.created_at, b.released_on, b.tags, b.ranks, b.note, b.retired_at
         from gadget a
                  join gadget b on b.label = a.label and b.id > a.id
         order by a.id, b.id""";
 
     private static final String INSERT_REVIEW = """
+        -- name: gadgets.insertReview
         insert into gadget_review (id, gadget_id, stars)
         values (?, ?, ?)
         returning gadget_review.id, gadget_review.gadget_id, gadget_review.stars""";
 
     private static final String DELETE_GADGET = """
+        -- name: gadgets.deleteGadget
         delete
         from gadget
         where id = ?""";
 
     private static final String SEARCH_GADGETS_0 = """
+        -- name: gadgets.searchGadgets
         select gadget.id, gadget.status, gadget.label, gadget.quantity, gadget.weight, gadget.price, gadget.payload, gadget.metadata, gadget.created_at, gadget.released_on, gadget.tags, gadget.ranks, gadget.note, gadget.retired_at,
                count(*) over ()                     as total_count,
                left(gadget.label, ?)    as label_prefix

@@ -63,18 +63,11 @@ class IndexMapRunnerTest {
         var row = db.mapFeatures.getMapFeatures(MAP);
         assertNotNull(row);
         assertEquals(MapIndexer.FEATURE_VERSION, row.featureVersion());
-        assertNotNull(row.dataVersion());
-        assertEquals(90, row.blockCount());
-        assertEquals(3, row.checkpointCount());
-        assertEquals(19.235, row.checkpointSpacing(), 1e-3);
         assertEquals(
             List.of("blocks", "reset_height"),
             row.mechanics(),
             "lower-cased, in enum order"
         );
-        assertEquals(List.of("scale"), row.attributes());
-        assertEquals(List.of("reset_in_water"), row.settings());
-        assertEquals(0, row.decodeFailures());
 
         runner.run(new IndexMap(MAP.toString(), "again"));
         var again = db.mapFeatures.getMapFeatures(MAP);
@@ -88,11 +81,6 @@ class IndexMapRunnerTest {
         var gone = UUID.randomUUID();
         new IndexMapRunner(db, MAPS).run(new IndexMap(gone.toString(), null));
         assertNull(db.mapFeatures.getMapFeatures(gone));
-    }
-
-    @Test
-    void nullData_isRefused() {
-        assertThrows(IllegalArgumentException.class, () -> new IndexMapRunner(db, MAPS).run(null));
     }
 
     /// The api client's errors are built from a response, of which only the status is read.

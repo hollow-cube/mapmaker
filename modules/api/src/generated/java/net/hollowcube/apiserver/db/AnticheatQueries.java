@@ -11,13 +11,27 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface AnticheatQueries {
+    /**
+     * Filed after the blob is in place. Keyed on the id the proxy generated, so a ship that retried
+     * after the row was already written replaces it rather than failing: the file it just wrote is the
+     * same file, at the same path, and its header may only have grown more complete.
+     * `pinned` and `created_at` are the two columns that are not the header's, so they survive.
+     */
     long upsertAnticheatTrace(UpsertAnticheatTraceParams params);
 
     @Nullable
     AnticheatTraces getAnticheatTrace(String id);
 
+    /**
+     * One capture is a handful of traces — a server switch or a ring flush each start a new one — so
+     * this is unpaged on purpose, and ordered the way they were recorded.
+     */
     List<AnticheatTraces> listAnticheatTracesByCapture(String captureId);
 
+    /**
+     * For the sweeper there is no retention policy for yet: nothing sets expires_at today. Returns the
+     * rows so the caller can unlink the blobs the paths point at, which is the only reason to run it.
+     */
     List<AnticheatTraces> deleteExpiredAnticheatTraces();
 
     /**

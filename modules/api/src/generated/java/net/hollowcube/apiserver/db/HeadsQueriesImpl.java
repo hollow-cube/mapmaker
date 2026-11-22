@@ -16,6 +16,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 @SuppressWarnings("UnusedReturnValue")
 final class HeadsQueriesImpl implements HeadsQueries {
     private static final String GET_RANDOM_HEADS = """
+        -- name: heads.getRandomHeads
         select head_db.id, head_db.category, head_db.name, head_db.tags, head_db.texture,
                count(*) over () as total_count
         from head_db
@@ -23,6 +24,7 @@ final class HeadsQueriesImpl implements HeadsQueries {
         limit ?""";
 
     private static final String GET_HEADS_WITH_SEARCH = """
+        -- name: heads.getHeadsWithSearch
         select head_db.id, head_db.category, head_db.name, head_db.tags, head_db.texture,
                count(*) over () as total_count
         from head_db
@@ -31,6 +33,7 @@ final class HeadsQueriesImpl implements HeadsQueries {
         offset ? limit ?""";
 
     private static final String GET_HEADS_WITH_CATEGORY = """
+        -- name: heads.getHeadsWithCategory
         select head_db.id, head_db.category, head_db.name, head_db.tags, head_db.texture,
                count(*) over () as total_count
         from head_db

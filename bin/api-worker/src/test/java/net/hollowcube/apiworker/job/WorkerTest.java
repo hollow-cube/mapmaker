@@ -86,6 +86,8 @@ class WorkerTest {
         var worker = new Worker(db, "test", 1, Runnable::run);
         worker.handle(INDEX, runner);
         INDEX.enqueue(db.jobs, new IndexMap("map-1", "publish"));
+        INDEX.enqueue(db.jobs, new IndexMap("map-1", "publish"));
+        assertEquals(1, db.jobs.listJobs().size(), "keyed by the data's instance");
 
         assertEquals(1, worker.pollOnce());
         assertEquals(new IndexMap("map-1", "publish"), runner.seen.getFirst());
@@ -135,31 +137,20 @@ class WorkerTest {
     }
 
     @Test
-    void undecodableData_isParkedAtOnce() {
+    void undecodableOrMissingData_isParkedAtOnce() {
         var runner = new Recording<IndexMap>();
-        var worker = new Worker(db, "test", 1, Runnable::run);
+        var worker = new Worker(db, "test", 2, Runnable::run);
         worker.handle(INDEX, runner);
-        TEST_DB.seed("insert into jobs (job, instance, data) values ('index', 'bad', '[1, 2]')");
+        TEST_DB.seed("insert into jobs (job, instance, data) values ('index', 'bad', '[1, 2]'), ('index', 'bare', null)");
 
-        assertEquals(1, worker.pollOnce());
+        assertEquals(2, worker.pollOnce());
         assertEquals(0, runner.runs);
-        var row = row("index", "bad");
-        assertNotNull(row.parkedAt());
-        assertTrue(row.lastError().startsWith("data is not a IndexMap"), row.lastError());
-    }
-
-    @Test
-    void missingData_isParkedAtOnce() {
-        var runner = new Recording<IndexMap>();
-        var worker = new Worker(db, "test", 1, Runnable::run);
-        worker.handle(INDEX, runner);
-        TEST_DB.seed("insert into jobs (job, instance) values ('index', 'bare')");
-
-        assertEquals(1, worker.pollOnce());
-        assertEquals(0, runner.runs);
-        var row = row("index", "bare");
-        assertNotNull(row.parkedAt());
-        assertTrue(row.lastError().startsWith("data is missing"), row.lastError());
+        var bad = row("index", "bad");
+        assertNotNull(bad.parkedAt());
+        assertTrue(bad.lastError().startsWith("data is not a IndexMap"), bad.lastError());
+        var bare = row("index", "bare");
+        assertNotNull(bare.parkedAt());
+        assertTrue(bare.lastError().startsWith("data is missing"), bare.lastError());
     }
 
     @Test

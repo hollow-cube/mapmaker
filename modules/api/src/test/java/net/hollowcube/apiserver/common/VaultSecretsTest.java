@@ -19,6 +19,7 @@ class VaultSecretsTest {
             """
             postgres.maps_uri = postgres://mapmaker:hunter2@postgres.mapmaker:5432/map-service
             posthog.personal_api_key = phx_abc
+            keyring.key = aGVsbG8=
 
             """
         );
@@ -30,13 +31,7 @@ class VaultSecretsTest {
             secrets.get("postgres.maps_uri", "DATABASE_URL_NOT_SET")
         );
         assertEquals("phx_abc", secrets.get("posthog.personal_api_key", "NOT_SET"));
-    }
-
-    @Test
-    void testValueMayContainEquals(@TempDir Path dir) throws IOException {
-        var file = Files.writeString(dir.resolve("service"), "keyring.key = aGVsbG8=\n");
-
-        assertEquals("aGVsbG8=", VaultSecrets.load(file).get("keyring.key", "NOT_SET"));
+        assertEquals("aGVsbG8=", secrets.get("keyring.key", "NOT_SET"));
     }
 
     @Test

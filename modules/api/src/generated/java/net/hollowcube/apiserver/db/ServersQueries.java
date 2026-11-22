@@ -8,9 +8,15 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface ServersQueries {
+    /**
+     * Ready as of the Go tracker's last pod sync, which runs every 5s.
+     */
     @Nullable
     FindHubRow findHub(String exclude);
 
+    /**
+     * The tracker deletes a row once its pod is gone.
+     */
     @Nullable
     FindServerRow findServer(String id);
 

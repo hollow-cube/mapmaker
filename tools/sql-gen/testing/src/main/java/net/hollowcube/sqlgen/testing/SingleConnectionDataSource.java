@@ -6,9 +6,9 @@ import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
+import java.sql.Savepoint;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
-import java.util.Set;
 import java.util.logging.Logger;
 import javax.sql.DataSource;
 
@@ -19,20 +19,18 @@ import javax.sql.DataSource;
 /// connection the test also seeds and rolls back through.
 public final class SingleConnectionDataSource implements DataSource {
 
-    private static final Set<String> TRANSACTION_CONTROL =
-        Set.of("setAutoCommit", "commit", "rollback", "setSavepoint", "releaseSavepoint");
-
     private final Connection conn;
     private final Connection handle;
+    private @Nullable Savepoint savepoint;
 
     public SingleConnectionDataSource(Connection conn) {
-        this(conn, null);
+        this(conn, false);
     }
 
-    /// As above, but refusing every transaction-control call with `refuseTransactions` as the
-    /// message. [TestDb] uses this in rollback mode, where a commit would escape the rollback that
-    /// is supposed to undo the test.
-    public SingleConnectionDataSource(Connection conn, @Nullable String refuseTransactions) {
+    /// As above, but for a connection already inside the transaction a test rolls back: a
+    /// transaction the code under test opens becomes a savepoint in it, its commit a release and
+    /// its rollback a rollback to the savepoint, so nothing it does outlives the test.
+    public SingleConnectionDataSource(Connection conn, boolean nested) {
         this.conn = conn;
         // Generated code closes the connection it borrowed, which for a pool means "give it back".
         // There is nothing to give it back to here, so close is the one call that gets swallowed.
@@ -41,8 +39,30 @@ public final class SingleConnectionDataSource implements DataSource {
             new Class<?>[]{Connection.class},
             (proxy, method, args) -> {
                 if (method.getName().equals("close")) return null;
-                if (refuseTransactions != null && TRANSACTION_CONTROL.contains(method.getName())) {
-                    throw new IllegalStateException(refuseTransactions);
+                if (nested) {
+                    switch (method.getName()) {
+                        case "getAutoCommit" -> {
+                            return savepoint == null;
+                        }
+                        case "setAutoCommit" -> {
+                            if (!(boolean) args[0] && savepoint == null) savepoint = conn.setSavepoint();
+                            return null;
+                        }
+                        case "commit" -> {
+                            if (savepoint != null) conn.releaseSavepoint(savepoint);
+                            savepoint = null;
+                            return null;
+                        }
+                        case "rollback" -> {
+                            if (args == null || args.length == 0) {
+                                if (savepoint != null) conn.rollback(savepoint);
+                                savepoint = null;
+                                return null;
+                            }
+                        }
+                        default -> {
+                        }
+                    }
                 }
                 try {
                     return method.invoke(conn, args);

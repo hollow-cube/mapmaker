@@ -10,6 +10,12 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface MapFeaturesQueries {
+    /**
+     * The whole row, replaced: a map's features are a function of its world, so there is nothing in
+     * an old row worth keeping. Parameters cannot be null, so the two nullable columns are nulled
+     * here: a data version of -1 is a world that predates one, and spacing means nothing under two
+     * checkpoints.
+     */
     long upsertMapFeatures(UpsertMapFeaturesParams params);
 
     @Nullable

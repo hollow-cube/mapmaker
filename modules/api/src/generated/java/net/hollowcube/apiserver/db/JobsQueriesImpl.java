@@ -19,15 +19,13 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class JobsQueriesImpl implements JobsQueries {
     private static final String SCHEDULE_JOB = """
-        -- One row per recurring job, created once; a row that already exists keeps its own run_at.
+        -- name: jobs.scheduleJob
         insert into jobs (job, instance, run_at)
         values (?, ?, ?)
         on conflict (job, instance) do nothing""";
 
     private static final String ENQUEUE_JOB = """
-        -- Asks for a run, whenever there is room. An existing row is made due again — its backoff and its
-        -- failures forgotten, unparked, its data replaced if there is new data — and bumped, so that a run
-        -- already in flight does not delete it when it completes.
+        -- name: jobs.enqueueJob
         insert into jobs (job, instance, data)
         values (?, ?, ?)
         on conflict (job, instance) do update
@@ -38,10 +36,7 @@ final class JobsQueriesImpl implements JobsQueries {
                 version   = jobs.version + 1""";
 
     private static final String PICK_JOBS = """
-        -- Takes up to $limit due rows of the named jobs for $who, in one statement. `skip locked` is what
-        -- keeps two replicas from taking the same row; the limit is the caller's free slots, never more,
-        -- so a replica cannot hold work it is not running. Timed rows first, oldest first. picked_at is the
-        -- wall clock rather than the transaction's now(), so that two picks are never the same pick.
+        -- name: jobs.pickJobs
         with picked as (
             update jobs
                 set picked_by = ?, picked_at = clock_timestamp(), heartbeat = now()
@@ -60,13 +55,13 @@ final class JobsQueriesImpl implements JobsQueries {
         order by run_at nulls last, job, instance""";
 
     private static final String HEARTBEAT_JOBS = """
-        -- Everything $who holds, in one statement.
+        -- name: jobs.heartbeatJobs
         update jobs
         set heartbeat = now()
         where picked_by = ?""";
 
     private static final String COMPLETE_JOB = """
-        -- A recurring run succeeded; the row goes back to waiting for its next time.
+        -- name: jobs.completeJob
         update jobs
         set picked_by    = null,
             picked_at    = null,
@@ -81,8 +76,7 @@ final class JobsQueriesImpl implements JobsQueries {
           and picked_at = ?""";
 
     private static final String FINISH_JOB = """
-        -- A one-shot run succeeded. Deletes nothing if the row was re-enqueued while it ran — the version
-        -- moved — in which case it is due again and releaseJob lets it go.
+        -- name: jobs.finishJob
         delete
         from jobs
         where job = ?
@@ -92,6 +86,7 @@ final class JobsQueriesImpl implements JobsQueries {
           and version = ?""";
 
     private static final String RELEASE_JOB = """
+        -- name: jobs.releaseJob
         update jobs
         set picked_by    = null,
             picked_at    = null,
@@ -105,7 +100,7 @@ final class JobsQueriesImpl implements JobsQueries {
           and picked_at = ?""";
 
     private static final String FAIL_JOB = """
-        -- The run failed; the row is due again at $runAt, which for a one-shot is its backoff.
+        -- name: jobs.failJob
         update jobs
         set picked_by  = null,
             picked_at  = null,
@@ -119,6 +114,7 @@ final class JobsQueriesImpl implements JobsQueries {
           and picked_at = ?""";
 
     private static final String PARK_JOB = """
+        -- name: jobs.parkJob
         update jobs
         set picked_by  = null,
             picked_at  = null,
@@ -132,8 +128,7 @@ final class JobsQueriesImpl implements JobsQueries {
           and picked_at = ?""";
 
     private static final String YIELD_JOB = """
-        -- The process is stopping mid-run: hand the row straight back, due now and ahead of the queue,
-        -- without it counting as a failure — a deploy is not the job's fault.
+        -- name: jobs.yieldJob
         update jobs
         set picked_by = null,
             picked_at = null,
@@ -145,8 +140,7 @@ final class JobsQueriesImpl implements JobsQueries {
           and picked_at = ?""";
 
     private static final String REVIVE_DEAD_JOBS = """
-        -- Rows whose holder stopped heartbeating are put back as due now. The run it was in counts as an
-        -- attempt, so a job that keeps killing its worker still parks eventually.
+        -- name: jobs.reviveDeadJobs
         update jobs
         set picked_by  = null,
             picked_at  = null,
@@ -159,12 +153,13 @@ final class JobsQueriesImpl implements JobsQueries {
         returning jobs.job, jobs.instance, jobs.data, jobs.run_at, jobs.picked_by, jobs.picked_at, jobs.heartbeat, jobs.attempts, jobs.last_error, jobs.last_success, jobs.parked_at, jobs.version""";
 
     private static final String LIST_JOBS = """
+        -- name: jobs.listJobs
         select jobs.job, jobs.instance, jobs.data, jobs.run_at, jobs.picked_by, jobs.picked_at, jobs.heartbeat, jobs.attempts, jobs.last_error, jobs.last_success, jobs.parked_at, jobs.version
         from jobs
         order by job, instance""";
 
     private static final String COUNT_WAITING_JOBS = """
-        -- Rows of $job not yet done, running or not, leaving out the parked.
+        -- name: jobs.countWaitingJobs
         select count(*)::int as waiting
         from jobs
         where job = ?

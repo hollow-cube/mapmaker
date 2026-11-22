@@ -18,12 +18,14 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class WidgetsQueriesImpl implements WidgetsQueries {
     private static final String LIST_WIDGETS = """
+        -- name: widgets.listWidgets
         select widget.id, widget.name, widget.labels, widget.note
         from widget
         order by id
         limit ?""";
 
     private static final String SEARCH_WIDGETS = """
+        -- name: widgets.searchWidgets
         select widget.id, widget.name, widget.labels, widget.note,
                count(*) over () as total_count
         from widget
@@ -31,6 +33,7 @@ final class WidgetsQueriesImpl implements WidgetsQueries {
         limit ? offset ?""";
 
     private static final String LIST_WIDGETS_ABOVE = """
+        -- name: widgets.listWidgetsAbove
         select widget.id, widget.name, widget.labels, widget.note
         from widget
         where ?::int is null

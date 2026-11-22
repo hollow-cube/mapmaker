@@ -14,6 +14,10 @@ public interface MapStatsQueries {
     @Nullable
     Instant lastRefresh();
 
+    /**
+     * Deleting or restoring a run leaves `updated_at` alone, so those paths refresh their maps
+     * themselves.
+     */
     List<UUID> changedSince(Instant since);
 
     List<UUID> listAll();

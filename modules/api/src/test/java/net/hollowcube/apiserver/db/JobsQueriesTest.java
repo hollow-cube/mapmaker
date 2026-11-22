@@ -89,30 +89,6 @@ class JobsQueriesTest {
     }
 
     @Test
-    void finishJob_leavesARowThatWasReEnqueuedWhileItRan() {
-        due("index", "m");
-        var picked = db.jobs.pickJobs("w1", List.of("index"), 1).getFirst();
-        db.jobs.enqueueJob("index", "m", null);
-
-        assertEquals(0, db.jobs.finishJob("index", "m", "w1", picked.pickedAt(), picked.version()));
-        assertEquals(1, db.jobs.releaseJob("index", "m", "w1", picked.pickedAt()));
-
-        var row = row("index", "m");
-        assertNull(row.pickedBy());
-        assertNull(row.parkedAt());
-        assertNotNull(row.lastSuccess());
-    }
-
-    @Test
-    void finishJob_deletesARowNobodyTouched() {
-        due("index", "m");
-        var picked = db.jobs.pickJobs("w1", List.of("index"), 1).getFirst();
-
-        assertEquals(1, db.jobs.finishJob("index", "m", "w1", picked.pickedAt(), picked.version()));
-        assertTrue(db.jobs.listJobs().isEmpty());
-    }
-
-    @Test
     void completeFailAndPark_releaseTheRowInTheirOwnWays() {
         due("count", "-");
         var picked = db.jobs.pickJobs("w1", List.of("count"), 1).getFirst();
@@ -143,16 +119,6 @@ class JobsQueriesTest {
 
     @Test
     void releases_onlyTouchTheHolderOfThatPick() {
-        due("count", "-");
-        var picked = db.jobs.pickJobs("w1", List.of("count"), 1).getFirst();
-
-        assertEquals(0, db.jobs.completeJob(Instant.now(), "count", "-", "w2", picked.pickedAt()));
-        assertEquals(0, db.jobs.yieldJob("count", "-", "w2", picked.pickedAt()));
-        assertEquals("w1", row("count", "-").pickedBy());
-    }
-
-    @Test
-    void aRunWhoseRowWasRevivedAndPickedAgainNoLongerSpeaksForIt() {
         due("index", "m");
         var stale = db.jobs.pickJobs("w1", List.of("index"), 1).getFirst();
         TEST_DB.seed("update jobs set heartbeat = now() - interval '1 hour' where instance = 'm'");
@@ -161,6 +127,8 @@ class JobsQueriesTest {
         var fresh = db.jobs.pickJobs("w1", List.of("index"), 1).getFirst();
         assertNotEquals(stale.pickedAt(), fresh.pickedAt());
 
+        assertEquals(0, db.jobs.completeJob(Instant.now(), "index", "m", "w2", fresh.pickedAt()));
+        assertEquals(0, db.jobs.yieldJob("index", "m", "w2", fresh.pickedAt()));
         assertEquals(0, db.jobs.finishJob("index", "m", "w1", stale.pickedAt(), stale.version()));
         assertEquals(0, db.jobs.releaseJob("index", "m", "w1", stale.pickedAt()));
         assertEquals("w1", row("index", "m").pickedBy(), "the fresh run still holds it");
@@ -168,7 +136,7 @@ class JobsQueriesTest {
     }
 
     @Test
-    void heartbeatJobs_touchesEverythingTheHolderHasAndNothingElse() {
+    void reviveDeadJobs_putsBackRowsWhoseHolderStoppedHeartbeating() {
         due("index", "mine");
         due("index", "theirs");
         db.jobs.pickJobs("w1", List.of("index"), 1);
@@ -177,22 +145,11 @@ class JobsQueriesTest {
 
         assertEquals(1, db.jobs.heartbeatJobs("w1"));
         assertEquals(List.of("theirs"), db.jobs.reviveDeadJobs(40).stream().map(Jobs::instance).toList());
-    }
 
-    @Test
-    void reviveDeadJobs_putsBackRowsWhoseHolderStoppedHeartbeating() {
-        TEST_DB.seed("""
-            insert into jobs (job, instance, run_at, picked_by, heartbeat) values
-                ('index', 'dead', now() - interval '1 hour', 'w1', now() - interval '1 hour'),
-                ('index', 'alive', now() - interval '1 hour', 'w1', now())""");
-
-        var revived = db.jobs.reviveDeadJobs(40);
-        assertEquals(List.of("dead"), revived.stream().map(Jobs::instance).toList());
-
-        var dead = row("index", "dead");
+        var dead = row("index", "theirs");
         assertNull(dead.pickedBy());
         assertEquals(1, dead.attempts());
-        assertEquals("lost by w1", dead.lastError());
-        assertEquals("w1", row("index", "alive").pickedBy());
+        assertEquals("lost by w2", dead.lastError());
+        assertEquals("w1", row("index", "mine").pickedBy());
     }
 }

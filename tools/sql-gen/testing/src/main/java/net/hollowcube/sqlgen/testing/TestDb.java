@@ -44,12 +44,12 @@ public final class TestDb implements BeforeAllCallback, BeforeEachCallback, Afte
 
     /// How a test's writes get undone before the next one.
     public enum Mode {
-        /// Wrap each test in a transaction and roll it back. Milliseconds per test, but the database
-        /// is already inside a transaction, so a generated `db.tx(...)` throws rather than committing
-        /// past the rollback.
+        /// Wrap each test in a transaction and roll it back. Milliseconds per test; a generated
+        /// `db.tx(...)` runs as a savepoint inside it. `now()` is the test transaction's start
+        /// throughout, so a test that needs time to pass seeds its own timestamps.
         ROLLBACK,
-        /// Let each test commit for real, and truncate every table afterwards. Slower, and the only
-        /// way to exercise `db.tx(...)` itself.
+        /// Let each test commit for real, and truncate every table afterwards. Seconds per test on
+        /// pglite; only for testing the transaction machinery itself.
         TRUNCATE
     }
 
@@ -100,11 +100,7 @@ public final class TestDb implements BeforeAllCallback, BeforeEachCallback, Afte
     }
 
     public DataSource dataSource() {
-        var refusal = mode == Mode.ROLLBACK
-            ? "this test runs in TestDb.Mode.ROLLBACK, which already holds a transaction open; use "
-                + "Mode.TRUNCATE to test code that commits"
-            : null;
-        return new SingleConnectionDataSource(conn(), refusal);
+        return new SingleConnectionDataSource(conn(), mode == Mode.ROLLBACK);
     }
 
     @Override

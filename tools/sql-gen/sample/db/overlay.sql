@@ -1,0 +1,1 @@
+-- The sample corpus drops nothing; sql-gen requires the file.

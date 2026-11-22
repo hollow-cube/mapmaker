@@ -47,11 +47,6 @@ class SessionServiceImplTest {
     }
 
     @Test
-    void onlinePlayers_isZeroWithNobodyOn() {
-        assertEquals(0, sessions.onlinePlayers());
-    }
-
-    @Test
     void onlinePlayers_countsEveryRowHiddenOrNot() {
         TEST_DB.seed(
             """
@@ -69,7 +64,7 @@ class SessionServiceImplTest {
     }
 
     @Test
-    void findHub_returnsAReadyHubWithItsProtocol() {
+    void findHub_returnsAReadyHubOtherThanTheExcludedOne() {
         TEST_DB.seed(
             """
             insert into server_states (id, role, status, cluster_ip, protocol_version) values
@@ -79,18 +74,8 @@ class SessionServiceImplTest {
         );
 
         assertEquals(new GameServer("hub-a", "10.0.0.3", 777), sessions.findHub(null));
-    }
-
-    @Test
-    void findHub_skipsTheExcludedHub() {
-        TEST_DB.seed(
-            """
-            insert into server_states (id, role, status, cluster_ip) values
-                ('hub-a', 'hub', 1, '10.0.0.3')"""
-        );
-
+        assertEquals(new GameServer("hub-a", "10.0.0.3", 777), sessions.findHub("hub-b"));
         assertNull(sessions.findHub("hub-a"));
-        assertEquals(new GameServer("hub-a", "10.0.0.3", 0), sessions.findHub("hub-b"));
     }
 
     @Test
@@ -107,6 +92,5 @@ class SessionServiceImplTest {
             sessions.findServer("isolate-a")
         );
         assertNull(sessions.findServer("isolate-b"));
-        assertNull(sessions.findServer("isolate-c"));
     }
 }

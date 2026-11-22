@@ -48,7 +48,7 @@ final class Resolver {
             // The interface is named first because the records a query needs are nested in it.
             var interfaceName = ClassName.get(packageName, Names.pascal(file.group()) + "Queries");
             var queries = new ArrayList<Model.Query>();
-            for (var query : file.queries()) queries.add(resolve(interfaceName, query));
+            for (var query : file.queries()) queries.add(resolve(file.group(), interfaceName, query));
 
             groups.add(new Model.Group(
                 Names.camel(file.group()),
@@ -66,7 +66,7 @@ final class Resolver {
             tables, List.copyOf(nullableEmbeds), enums, List.copyOf(groups));
     }
 
-    private Model.Query resolve(ClassName group, QueryFile.Query query) {
+    private Model.Query resolve(String file, ClassName group, QueryFile.Query query) {
         var described = Describe.describe(conn, query);
 
         var params = new ArrayList<Model.Param>(query.params().size());
@@ -101,8 +101,12 @@ final class Resolver {
         var embeds = result.components().stream()
             .filter(Model.Embed.class::isInstance).map(c -> ((Model.Embed) c).table()).toList();
         var expanded = expandStars(query.sql(), query.holes(), embeds);
-        return new Model.Query(query.name(), Names.constant(query.name()), expanded.sql(), query.tag(),
-            List.copyOf(params), query.binds(), expanded.holes(), paramsClass, result, query.alwaysOneRow());
+        var label = "-- name: " + file + "." + query.name() + "\n";
+        var holes = expanded.holes().stream()
+            .map(h -> new QueryFile.Hole(h.kind(), h.sqlOffset() + label.length(), h.bindOffset()))
+            .toList();
+        return new Model.Query(query.name(), Names.constant(query.name()), query.doc(), label + expanded.sql(),
+            query.tag(), List.copyOf(params), query.binds(), holes, paramsClass, result, query.alwaysOneRow());
     }
 
     private record Expanded(String sql, List<QueryFile.Hole> holes) {}

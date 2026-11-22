@@ -11,6 +11,10 @@ import org.jetbrains.annotations.Nullable;
  */
 @SuppressWarnings("UnusedReturnValue")
 public interface SocialQueries {
+    /**
+     * Online friends first, most recently befriended first among them; offline friends by when they
+     * were last seen, which is Go's ordering.
+     */
     List<GetFriendsRow> getFriends(UUID playerId, boolean onlineOnly, long offset, long limit);
 
     List<UUID> getOnlineFriendIds(UUID playerId);
@@ -21,6 +25,9 @@ public interface SocialQueries {
     @Nullable
     Boolean isFriend(UUID playerId, UUID targetId);
 
+    /**
+     * Both directions at once; `on conflict do nothing` makes a retried accept harmless.
+     */
     long insertFriendship(UUID playerId, UUID targetId);
 
     long deleteFriendship(UUID playerId, UUID targetId);
@@ -34,8 +41,15 @@ public interface SocialQueries {
     @Nullable
     Boolean hasFriendRequest(UUID playerId, UUID targetId);
 
+    /**
+     * Rows affected says whether it was new; a duplicate is an outcome, not an exception.
+     */
     long insertFriendRequest(UUID playerId, UUID targetId);
 
+    /**
+     * The player's request to the target, and with `bidirectional` the target's to the player.
+     * Returns what went, with the sender so the caller knows which way each pointed.
+     */
     List<PlayerFriendRequests> deleteFriendRequests(UUID playerId, UUID targetId,
             boolean bidirectional);
 
@@ -46,6 +60,10 @@ public interface SocialQueries {
 
     long deleteBlock(UUID playerId, UUID targetId);
 
+    /**
+     * Staff are filtered here rather than after paging, so the page is full and the total is the
+     * number of lines the player will see.
+     */
     List<GetBlocksRow> getBlocks(UUID playerId, long offset, long limit);
 
     List<GetBlocksBetweenRow> getBlocksBetween(UUID playerId, UUID targetId, boolean bidirectional);

@@ -20,21 +20,21 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class MapsQueriesImpl implements MapsQueries {
     private static final String IS_MAP_PUBLISHED = """
-        -- Whether `[map]` in a message is a map the people reading it could open. Matches what a map server
-        -- used to answer for itself out of `MapData.isPublished`.
+        -- name: maps.isMapPublished
         select count(*) > 0 as published
         from maps
         where id = ?
           and published_id is not null""";
 
     private static final String GET_MAP = """
+        -- name: maps.getMap
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?
           and deleted_at is null""";
 
     private static final String GET_MAP_FOR_UPDATE = """
-        -- The lock every map write takes first. Preconditions are checked in Java against the locked row.
+        -- name: maps.getMapForUpdate
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?
@@ -42,11 +42,13 @@ final class MapsQueriesImpl implements MapsQueries {
             for update""";
 
     private static final String GET_MAP_INCLUDING_DELETED = """
+        -- name: maps.getMapIncludingDeleted
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?""";
 
     private static final String GET_MAP_BY_PUBLISHED_ID = """
+        -- name: maps.getMapByPublishedId
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where published_id = ?
@@ -54,28 +56,27 @@ final class MapsQueriesImpl implements MapsQueries {
           and deleted_at is null""";
 
     private static final String GET_TAGS = """
+        -- name: maps.getTags
         select tag::text as tag
         from map_tags
         where map_id = ?
         order by position""";
 
     private static final String GET_STATS = """
+        -- name: maps.getStats
         select map_stats.map_id, map_stats.play_count, map_stats.win_count, map_stats.likes, map_stats.est_length_ms, map_stats.refreshed_at
         from map_stats
         where map_id = ?""";
 
     private static final String GET_PLAYER_FOR_UPDATE = """
-        -- The row lock is what makes "count the slots, then take one" atomic: two creates, or a create and
-        -- an accepted invitation, for the same player queue here instead of both seeing the last free slot.
-        -- Go read the count unlocked and could hand out one more than the limit.
+        -- name: maps.getPlayerForUpdate
         select id, role, hypercube_end, extra_map_slots, max_map_size, map_builders, settings
         from player_data
         where id = ?
             for update""";
 
     private static final String GET_PLAYERS_FOR_UPDATE = """
-        -- As getPlayerForUpdate, for the owner and the invitee together; ordered so that two invitations
-        -- between the same pair cannot deadlock.
+        -- name: maps.getPlayersForUpdate
         select id, role, hypercube_end, extra_map_slots, max_map_size, map_builders, settings
         from player_data
         where id = any(?::uuid[])
@@ -83,6 +84,7 @@ final class MapsQueriesImpl implements MapsQueries {
             for update""";
 
     private static final String CREATE_MAP = """
+        -- name: maps.createMap
         insert into maps (id, owner, created_at, updated_at, name, icon, variant, spawn_point, size_class,
                           verification_state, quality, protocol_version)
         values (?, ?, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', ?,
@@ -90,12 +92,12 @@ final class MapsQueriesImpl implements MapsQueries {
         returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
 
     private static final String INSERT_OWNER_SLOT = """
-        -- The owner's own slot has position -1; bought slots count up from 0.
+        -- name: maps.insertOwnerSlot
         insert into map_slots (player_id, map_id, position)
         values (?, ?, -1)""";
 
     private static final String COUNT_SLOTS = """
-        -- Slots in use: every unpublished map the player owns or has accepted an invitation to.
+        -- name: maps.countSlots
         select count(*)::int as count
         from map_slots s
                  join maps m on m.id = s.map_id
@@ -105,6 +107,7 @@ final class MapsQueriesImpl implements MapsQueries {
           and m.published_at is null""";
 
     private static final String UPDATE_MAP = """
+        -- name: maps.updateMap
         update maps
         set name             = ?,
             icon             = ?,
@@ -126,19 +129,23 @@ final class MapsQueriesImpl implements MapsQueries {
         where id = ?""";
 
     private static final String DELETE_TAGS = """
+        -- name: maps.deleteTags
         delete
         from map_tags
         where map_id = ?""";
 
     private static final String INSERT_TAGS = """
+        -- name: maps.insertTags
         insert into map_tags (map_id, tag, position)
         select ?, tag::map_tag, ordinality - 1
         from unnest(?::text[]) with ordinality as tags(tag, ordinality)""";
 
-    private static final String LIST_KNOWN_TAGS = "select unnest(enum_range(null::map_tag))::text as tag";
+    private static final String LIST_KNOWN_TAGS = """
+        -- name: maps.listKnownTags
+        select unnest(enum_range(null::map_tag))::text as tag""";
 
     private static final String DELETE_IN_PROGRESS_STATES = """
-        -- A completed run is somebody's record and stays.
+        -- name: maps.deleteInProgressStates
         update save_states
         set deleted_at = now()
         where map_id = ?
@@ -147,12 +154,14 @@ final class MapsQueriesImpl implements MapsQueries {
           and type in ('playing', 'verifying')""";
 
     private static final String DELETE_ALL_STATES = """
+        -- name: maps.deleteAllStates
         update save_states
         set deleted_at = now()
         where map_id = ?
           and deleted_at is null""";
 
     private static final String DELETE_VERIFYING_STATES = """
+        -- name: maps.deleteVerifyingStates
         update save_states
         set deleted_at = now()
         where map_id = ?
@@ -160,6 +169,7 @@ final class MapsQueriesImpl implements MapsQueries {
           and deleted_at is null""";
 
     private static final String DELETE_MAP = """
+        -- name: maps.deleteMap
         update maps
         set deleted_at     = now(),
             deleted_by     = ?,
@@ -167,11 +177,13 @@ final class MapsQueriesImpl implements MapsQueries {
         where id = ?""";
 
     private static final String REMOVE_SLOTS = """
+        -- name: maps.removeSlots
         delete
         from map_slots
         where map_id = ?""";
 
     private static final String PUBLISH_MAP = """
+        -- name: maps.publishMap
         update maps
         set published_id = ?,
             published_at = now(),
@@ -180,18 +192,20 @@ final class MapsQueriesImpl implements MapsQueries {
         returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
 
     private static final String UPDATE_VERIFICATION = """
+        -- name: maps.updateVerification
         update maps
         set verification_state = ?
         where id = ?""";
 
     private static final String MARK_VERIFIED = """
-        -- A verifying run that finished; the map is stamped with the version that verified it.
+        -- name: maps.markVerified
         update maps
         set verification_state = ?,
             protocol_version   = ?
         where id = ?""";
 
     private static final String GET_LATEST_EDITING_TIME = """
+        -- name: maps.getLatestEditingTime
         select playtime
         from save_states
         where map_id = ?
@@ -202,18 +216,20 @@ final class MapsQueriesImpl implements MapsQueries {
         limit 1""";
 
     private static final String COUNT_WORLDS = """
-        -- Editors still registered for the map; zero once a drain has completed.
+        -- name: maps.countWorlds
         select count(*)::int as count
         from map_worlds
         where map_id = ?""";
 
     private static final String LIST_BUILDERS = """
+        -- name: maps.listBuilders
         select map_slots.player_id, map_slots.map_id, map_slots.position, map_slots.created_at, map_slots.is_pending
         from map_slots
         where map_id = ?
         order by created_at, player_id""";
 
     private static final String LIST_PLAYER_SLOTS = """
+        -- name: maps.listPlayerSlots
         select s.player_id, s.map_id, s.position, s.created_at, s.is_pending
         from map_slots s
                  join maps m on m.id = s.map_id
@@ -224,6 +240,7 @@ final class MapsQueriesImpl implements MapsQueries {
         order by s.created_at desc""";
 
     private static final String LIST_PLAYER_PUBLISHED_MAPS = """
+        -- name: maps.listPlayerPublishedMaps
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where owner = ?
@@ -234,30 +251,33 @@ final class MapsQueriesImpl implements MapsQueries {
         order by published_at desc""";
 
     private static final String GET_BUILDER_SLOT = """
+        -- name: maps.getBuilderSlot
         select map_slots.player_id, map_slots.map_id, map_slots.position, map_slots.created_at, map_slots.is_pending
         from map_slots
         where map_id = ?
           and player_id = ?""";
 
     private static final String INVITE_BUILDER = """
+        -- name: maps.inviteBuilder
         insert into map_slots (map_id, player_id, is_pending)
         values (?, ?, true)""";
 
     private static final String ACCEPT_BUILDER = """
+        -- name: maps.acceptBuilder
         update map_slots
         set is_pending = false
         where map_id = ?
           and player_id = ?""";
 
     private static final String REMOVE_BUILDER = """
+        -- name: maps.removeBuilder
         delete
         from map_slots
         where map_id = ?
           and player_id = ?""";
 
     private static final String DELETE_NOTIFICATIONS = """
-        -- Every notification of one type under a key, or one player's when `playerId` is given; the rows
-        -- come back so their deletion can be published.
+        -- name: maps.deleteNotifications
         update player_notifications
         set deleted_at = now()
         where type = ?
@@ -267,17 +287,19 @@ final class MapsQueriesImpl implements MapsQueries {
         returning player_notifications.id, player_notifications.player_id, player_notifications.type, player_notifications.key, player_notifications.data, player_notifications.created_at, player_notifications.read_at, player_notifications.expires_at, player_notifications.deleted_at""";
 
     private static final String INSERT_NOTIFICATION = """
+        -- name: maps.insertNotification
         insert into player_notifications (id, player_id, type, key, data)
         values (?, ?, ?, ?, ?)""";
 
     private static final String GET_RATING = """
+        -- name: maps.getRating
         select rating
         from map_ratings
         where map_id = ?
           and player_id = ?""";
 
     private static final String SET_RATING = """
-        -- Null is unrated.
+        -- name: maps.setRating
         insert into map_ratings (map_id, player_id, rating)
         values (?, ?, ?)
         on conflict (map_id, player_id) do update
@@ -285,13 +307,12 @@ final class MapsQueriesImpl implements MapsQueries {
                 rated_at = now()""";
 
     private static final String INSERT_REPORT = """
+        -- name: maps.insertReport
         insert into map_reports (map_id, player_id, created_at, categories, comment)
         values (?, ?, now(), ?, ?)""";
 
     private static final String SEARCH_MAPS_0 = """
-        -- Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
-        -- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
-        -- sort the `order by` fragment, both built in `MapSearchSql`.
+        -- name: maps.searchMaps
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
                array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
                coalesce(stats.play_count, 0)                                                 as play_count,
@@ -308,9 +329,7 @@ final class MapsQueriesImpl implements MapsQueries {
         offset ? limit ?""";
 
     private static final String GET_MULTI_MAP_PROGRESS = """
-        -- Go's `GetMultiMapProgress`: complete if any playing or verifying run finished, and the playtime
-        -- of the best finished run, else of the run touched last. Playtime is tick-rounded milliseconds;
-        -- Go's `round(playtime / 50.0)` is spelt as integer arithmetic because pglite cannot inline `round`.
+        -- name: maps.getMultiMapProgress
         with runs as (select ss.map_id,
                              ss.completed,
                              (greatest((ss.playtime + 25) / 50, ss.ticks) * 50)::int8 as playtime,
@@ -330,7 +349,7 @@ final class MapsQueriesImpl implements MapsQueries {
         group by map_id""";
 
     private static final String LIST_PLAYER_HISTORY = """
-        -- Maps drop out here once deleted instead of 404ing the page in the client.
+        -- name: maps.listPlayerHistory
         select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
                array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
                coalesce(stats.play_count, 0)                                                 as play_count,

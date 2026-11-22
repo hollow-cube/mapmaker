@@ -37,6 +37,7 @@ tasks.register<JavaExec>("sqlGenSample") {
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     args(
         "--migrations", layout.projectDirectory.dir("sample/db/migrations").asFile.path,
+        "--overlay", layout.projectDirectory.file("sample/db/overlay.sql").asFile.path,
         "--queries", layout.projectDirectory.dir("sample/db/queries").asFile.path,
         "--out", layout.projectDirectory.dir("sample/generated").asFile.path,
         "--package", "sample.db",

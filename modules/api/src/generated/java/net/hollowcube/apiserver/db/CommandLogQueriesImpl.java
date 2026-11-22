@@ -14,7 +14,7 @@ import net.hollowcube.sqlgen.runtime.Sneaky;
 @SuppressWarnings("UnusedReturnValue")
 final class CommandLogQueriesImpl implements CommandLogQueries {
     private static final String INSERT_COMMAND_LOG = """
-        -- One row per command, written as it is run.
+        -- name: command_log.insertCommandLog
         insert into command_log (timestamp, player_id, server_id, map_id, instance_id, command, remote, outcome, error, duration_ms)
         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""";
 

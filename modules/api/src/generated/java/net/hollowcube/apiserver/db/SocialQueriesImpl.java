@@ -19,8 +19,7 @@ import org.jetbrains.annotations.Nullable;
 @SuppressWarnings("UnusedReturnValue")
 final class SocialQueriesImpl implements SocialQueries {
     private static final String GET_FRIENDS = """
-        -- Online friends first, most recently befriended first among them; offline friends by when they
-        -- were last seen, which is Go's ordering.
+        -- name: social.getFriends
         with friends as (select pf.target_id,
                                 pf.created_at,
                                 exists (select 1
@@ -42,35 +41,40 @@ final class SocialQueriesImpl implements SocialQueries {
         offset ? limit ?""";
 
     private static final String GET_ONLINE_FRIEND_IDS = """
+        -- name: social.getOnlineFriendIds
         select pf.target_id
         from player_friends pf
                  join player_sessions s on s.player_id = pf.target_id and not s.hidden
         where pf.player_id = ?""";
 
     private static final String GET_FRIEND_USAGE = """
+        -- name: social.getFriendUsage
         select (select count(*) from player_friends where player_id = ?)::int         as friend_count,
                (select count(*) from player_friend_requests where player_id = ?)::int as outgoing_request_count""";
 
     private static final String IS_FRIEND = """
+        -- name: social.isFriend
         select exists(select 1
                       from player_friends
                       where player_id = ?
                         and target_id = ?) as is_friend""";
 
     private static final String INSERT_FRIENDSHIP = """
-        -- Both directions at once; `on conflict do nothing` makes a retried accept harmless.
+        -- name: social.insertFriendship
         insert into player_friends (player_id, target_id)
         values (?, ?),
                (?, ?)
         on conflict do nothing""";
 
     private static final String DELETE_FRIENDSHIP = """
+        -- name: social.deleteFriendship
         delete
         from player_friends
         where (player_id = ? and target_id = ?)
            or (player_id = ? and target_id = ?)""";
 
     private static final String GET_INCOMING_FRIEND_REQUESTS = """
+        -- name: social.getIncomingFriendRequests
         select count(*) over () as total_count,
                player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pfr.created_at   as sent_at
@@ -81,6 +85,7 @@ final class SocialQueriesImpl implements SocialQueries {
         offset ? limit ?""";
 
     private static final String GET_OUTGOING_FRIEND_REQUESTS = """
+        -- name: social.getOutgoingFriendRequests
         select count(*) over () as total_count,
                player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pfr.created_at   as sent_at
@@ -91,20 +96,20 @@ final class SocialQueriesImpl implements SocialQueries {
         offset ? limit ?""";
 
     private static final String HAS_FRIEND_REQUEST = """
+        -- name: social.hasFriendRequest
         select exists(select 1
                       from player_friend_requests
                       where player_id = ?
                         and target_id = ?) as has_request""";
 
     private static final String INSERT_FRIEND_REQUEST = """
-        -- Rows affected says whether it was new; a duplicate is an outcome, not an exception.
+        -- name: social.insertFriendRequest
         insert into player_friend_requests (player_id, target_id)
         values (?, ?)
         on conflict do nothing""";
 
     private static final String DELETE_FRIEND_REQUESTS = """
-        -- The player's request to the target, and with `bidirectional` the target's to the player.
-        -- Returns what went, with the sender so the caller knows which way each pointed.
+        -- name: social.deleteFriendRequests
         delete
         from player_friend_requests
         where (player_id = ? and target_id = ?)
@@ -112,25 +117,27 @@ final class SocialQueriesImpl implements SocialQueries {
         returning player_friend_requests.player_id, player_friend_requests.target_id, player_friend_requests.created_at""";
 
     private static final String IS_BLOCKED = """
+        -- name: social.isBlocked
         select exists(select 1
                       from player_blocks
                       where player_id = ?
                         and target_id = ?) as is_blocked""";
 
     private static final String INSERT_BLOCK = """
+        -- name: social.insertBlock
         insert into player_blocks (player_id, target_id)
         values (?, ?)
         on conflict do nothing""";
 
     private static final String DELETE_BLOCK = """
+        -- name: social.deleteBlock
         delete
         from player_blocks
         where player_id = ?
           and target_id = ?""";
 
     private static final String GET_BLOCKS = """
-        -- Staff are filtered here rather than after paging, so the page is full and the total is the
-        -- number of lines the player will see.
+        -- name: social.getBlocks
         select count(*) over () as total_count,
                player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pb.created_at    as blocked_at
@@ -142,6 +149,7 @@ final class SocialQueriesImpl implements SocialQueries {
         offset ? limit ?""";
 
     private static final String GET_BLOCKS_BETWEEN = """
+        -- name: social.getBlocksBetween
         select pb.player_id as blocker_id,
                player.id, player.username, player.first_join, player.last_online, player.playtime, player.experience, player.beta_enabled, player.settings, player.coins, player.cubits, player.skin, player.online, player.hypercube_start, player.hypercube_end, player.role, player.extra_map_slots, player.max_map_size, player.map_builders,
                pb.created_at as blocked_at
