@@ -95,11 +95,7 @@ public interface MapsQueries {
     @Nullable
     MapRating getRating(UUID mapId, UUID playerId);
 
-    long setRating(UUID mapId, UUID playerId, MapRating rating);
-
-    long deleteRating(UUID mapId, UUID playerId);
-
-    long refreshLikes(UUID mapId);
+    long setRating(UUID mapId, UUID playerId, @Nullable MapRating rating);
 
     long insertReport(UUID mapId, UUID playerId, List<MapReportCategory> categories,
             String comment);
@@ -138,7 +134,7 @@ public interface MapsQueries {
      * A row of `searchMaps`.
      */
     record SearchMapsRow(Maps maps, List<String> tags, long playCount, long winCount,
-            long totalCount) {
+            int totalLikes, long totalCount) {
     }
 
     /**
@@ -151,7 +147,7 @@ public interface MapsQueries {
      * A row of `listPlayerHistory`.
      */
     record ListPlayerHistoryRow(Maps maps, List<String> tags, long playCount, long winCount,
-            long totalCount) {
+            int totalLikes, long totalCount) {
     }
 
     /**
@@ -352,18 +348,8 @@ public interface MapsQueries {
         }
 
         @Override
-        public long setRating(UUID mapId, UUID playerId, MapRating rating) {
+        public long setRating(UUID mapId, UUID playerId, @Nullable MapRating rating) {
             throw new UnsupportedOperationException("MapsQueries.setRating is not stubbed on this fake");
-        }
-
-        @Override
-        public long deleteRating(UUID mapId, UUID playerId) {
-            throw new UnsupportedOperationException("MapsQueries.deleteRating is not stubbed on this fake");
-        }
-
-        @Override
-        public long refreshLikes(UUID mapId) {
-            throw new UnsupportedOperationException("MapsQueries.refreshLikes is not stubbed on this fake");
         }
 
         @Override

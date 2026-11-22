@@ -3,12 +3,16 @@ package net.hollowcube.apiserver.db;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.UUID;
+import net.hollowcube.sqlgen.runtime.Jdbc;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A row of the `map_stats` table.
  */
-public record MapStats(UUID mapId, long playCount, long winCount) {
+public record MapStats(UUID mapId, long playCount, long winCount, int likes,
+        @Nullable Long estLengthMs, @Nullable Instant refreshedAt) {
     /**
      * Reads one `map_stats` row, its first column at `col`.
      */
@@ -16,6 +20,9 @@ public record MapStats(UUID mapId, long playCount, long winCount) {
         return new MapStats(
                 rs.getObject(col, UUID.class),
                 rs.getLong(col + 1),
-                rs.getLong(col + 2));
+                rs.getLong(col + 2),
+                rs.getInt(col + 3),
+                rs.getObject(col + 4, Long.class),
+                Jdbc.getInstant(rs, col + 5));
     }
 }

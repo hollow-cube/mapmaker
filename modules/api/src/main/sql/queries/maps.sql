@@ -261,32 +261,20 @@ where map_id = $mapId
   and player_id = $playerId;
 
 -- name: setRating :exec
+-- nullable: $rating
+-- Null is unrated.
 insert into map_ratings (map_id, player_id, rating)
 values ($mapId, $playerId, $rating)
 on conflict (map_id, player_id) do update
     set rating   = excluded.rating,
         rated_at = now();
 
--- name: deleteRating :exec
-delete
-from map_ratings
-where map_id = $mapId
-  and player_id = $playerId;
-
--- name: refreshLikes :exec
--- Run under the map's row lock, so a rating committed just before is always counted.
-update maps
-set total_likes = (select count(*) filter (where rating = 'liked') - count(*) filter (where rating = 'disliked')
-                   from map_ratings
-                   where map_id = $mapId)
-where id = $mapId;
-
 -- name: insertReport :exec
 insert into map_reports (map_id, player_id, created_at, categories, comment)
 values ($mapId, $playerId, now(), $categories, $comment);
 
 -- name: searchMaps :many
--- not-null: tags, play_count, win_count, total_count
+-- not-null: tags, play_count, win_count, total_likes, total_count
 -- Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
 -- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
 -- sort the `order by` fragment, both built in `MapSearchSql`.
@@ -294,6 +282,7 @@ select maps.*,
        array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
+       coalesce(stats.likes, 0)                                                      as total_likes,
        count(*) over ()                                                              as total_count
 from maps
          left join map_stats stats on stats.map_id = maps.id
@@ -325,12 +314,13 @@ from runs
 group by map_id;
 
 -- name: listPlayerHistory :many
--- not-null: tags, play_count, win_count, total_count
+-- not-null: tags, play_count, win_count, total_likes, total_count
 -- Maps drop out here once deleted instead of 404ing the page in the client.
 select maps.*,
        array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
+       coalesce(stats.likes, 0)                                                      as total_likes,
        count(*) over ()                                                              as total_count
 from (select map_id, max(updated_at) as last_played
       from save_states

@@ -6,16 +6,7 @@ import net.hollowcube.apiserver.common.PostHogIds;
 import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.common.VaultSecrets;
 import net.hollowcube.apiserver.db.ApiDatabase;
-import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiworker.job.Worker;
-import net.hollowcube.apiworker.jobs.CompactReplayRunner;
-import net.hollowcube.apiworker.jobs.IndexMapRunner;
-import net.hollowcube.apiworker.jobs.PlayerCountRunner;
-import net.hollowcube.apiworker.jobs.ReconcileReplaysRunner;
-import net.hollowcube.apiworker.jobs.SweepRecordingSourcesRunner;
-import net.hollowcube.apiworker.jobs.SweepReplayObjectsRunner;
-import net.hollowcube.apiworker.jobs.SweepReplaySourcesRunner;
-import net.hollowcube.apiworker.jobs.TranscodeReplayRunner;
 import net.hollowcube.ipc.replay.ReplayClient;
 import net.hollowcube.ipc.util.FailureGroups;
 import net.hollowcube.mapmaker.api.HttpClientWrapper;
@@ -101,45 +92,16 @@ public final class Main {
 
         var slots = Integer.parseInt(secrets.get("worker.slots", "SLOTS", "4"));
         var worker = new Worker(db, hostName(), slots);
-        worker.handle(JobSpec.PLAYER_COUNT, new PlayerCountRunner(db, PostHog.getClient()));
-        worker.handle(JobSpec.INDEX_MAP, new IndexMapRunner(db, maps));
-        worker.handle(JobSpec.COMPACT_REPLAY, new CompactReplayRunner(replays));
-        worker.handle(
-            JobSpec.RECONCILE_REPLAYS,
-            new ReconcileReplaysRunner(
-                db,
-                Integer.parseInt(secrets.get("replay.batch", "REPLAY_BATCH", "1000"))
+        Jobs.register(worker, db, maps, new Jobs.ReplayConfig(
+            replays,
+            Integer.parseInt(secrets.get("replay.batch", "REPLAY_BATCH", "1000")),
+            Integer.parseInt(secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")),
+            Boolean.parseBoolean(secrets.get("replay.sweep_sources", "REPLAY_SWEEP_SOURCES", "false")),
+            Boolean.parseBoolean(secrets.get("replay.sweep_objects", "REPLAY_SWEEP_OBJECTS", "false")),
+            Duration.parse(
+                secrets.get("replay.transcode.recording_idle", "REPLAY_TRANSCODE_RECORDING_IDLE", "P7D")
             )
-        );
-        var sweepSources = Boolean.parseBoolean(
-            secrets.get("replay.sweep_sources", "REPLAY_SWEEP_SOURCES", "false")
-        );
-        worker.handle(
-            JobSpec.SWEEP_REPLAY_SOURCES,
-            new SweepReplaySourcesRunner(
-                db,
-                replays,
-                Integer.parseInt(secrets.get("replay.sweep.batch", "REPLAY_SWEEP_BATCH", "1000")),
-                sweepSources
-            )
-        );
-        worker.handle(
-            JobSpec.SWEEP_RECORDING_SOURCES,
-            new SweepRecordingSourcesRunner(db, replays, sweepSources)
-        );
-        worker.handle(
-            JobSpec.SWEEP_REPLAY_OBJECTS,
-            new SweepReplayObjectsRunner(
-                replays,
-                Boolean.parseBoolean(
-                    secrets.get("replay.sweep_objects", "REPLAY_SWEEP_OBJECTS", "false")
-                )
-            )
-        );
-        var recordingIdle = Duration.parse(
-            secrets.get("replay.transcode.recording_idle", "REPLAY_TRANSCODE_RECORDING_IDLE", "P7D")
-        );
-        worker.handle(JobSpec.TRANSCODE_REPLAY, new TranscodeReplayRunner(replays, recordingIdle));
+        ));
 
         Runtime.getRuntime().addShutdownHook(
             new Thread(

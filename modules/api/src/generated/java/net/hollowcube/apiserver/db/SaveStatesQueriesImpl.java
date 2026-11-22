@@ -89,19 +89,6 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
         where save_states.map_id = excluded.map_id
           and save_states.player_id = excluded.player_id""";
 
-    private static final String REFRESH_STATS = """
-        -- `map_stats` counts every player who ever had a state on the map, deleted ones included, and
-        -- every one of them who finished.
-        insert into map_stats (map_id, play_count, win_count)
-        select ?,
-               count(distinct player_id),
-               count(distinct case when completed then player_id end)
-        from save_states
-        where map_id = ?
-        on conflict (map_id) do update
-            set play_count = excluded.play_count,
-                win_count  = excluded.win_count""";
-
     private static final String DELETE_FOR_PLAYER = """
         update save_states
         set deleted_at = now()
@@ -268,22 +255,6 @@ final class SaveStatesQueriesImpl implements SaveStatesQueries {
                 ps.setInt(12, params.protocolVersion());
                 ps.setInt(13, params.resets());
                 ps.setLong(14, params.totalPlaytime());
-                return ps.executeLargeUpdate();
-            } finally {
-                source.release(conn);
-            }
-        } catch (SQLException e) {
-            throw Sneaky.rethrow(e);
-        }
-    }
-
-    @Override
-    public long refreshStats(UUID mapId) {
-        try {
-            Connection conn = source.acquire();
-            try (PreparedStatement ps = conn.prepareStatement(REFRESH_STATS)) {
-                ps.setObject(1, mapId);
-                ps.setObject(2, mapId);
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);

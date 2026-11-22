@@ -28,6 +28,8 @@ public record JobSpec<D>(
     public static final String TIMED_INSTANCE = "-";
 
     public static final JobSpec<Void> PLAYER_COUNT = timed("player-count", "*/5 * * * *");
+    public static final JobSpec<Void> MAP_STATS = timed("map-stats", "*/5 * * * *");
+    public static final JobSpec<Void> MAP_STATS_FULL = timed("map-stats-full", "23 4 * * *");
     public static final JobSpec<IndexMap> INDEX_MAP = queued(
         "index-map",
         IndexMap.class,

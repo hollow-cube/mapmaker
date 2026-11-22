@@ -24,8 +24,6 @@ public interface SaveStatesQueries {
 
     long upsert(UpsertParams params);
 
-    long refreshStats(UUID mapId);
-
     long deleteForPlayer(UUID mapId, UUID playerId);
 
     List<UUID> deletePlayer(UUID playerId);
@@ -87,11 +85,6 @@ public interface SaveStatesQueries {
         @Override
         public long upsert(UpsertParams params) {
             throw new UnsupportedOperationException("SaveStatesQueries.upsert is not stubbed on this fake");
-        }
-
-        @Override
-        public long refreshStats(UUID mapId) {
-            throw new UnsupportedOperationException("SaveStatesQueries.refreshStats is not stubbed on this fake");
         }
 
         @Override

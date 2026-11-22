@@ -28,26 +28,26 @@ final class MapsQueriesImpl implements MapsQueries {
           and published_id is not null""";
 
     private static final String GET_MAP = """
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?
           and deleted_at is null""";
 
     private static final String GET_MAP_FOR_UPDATE = """
         -- The lock every map write takes first. Preconditions are checked in Java against the locked row.
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?
           and deleted_at is null
             for update""";
 
     private static final String GET_MAP_INCLUDING_DELETED = """
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where id = ?""";
 
     private static final String GET_MAP_BY_PUBLISHED_ID = """
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where published_id = ?
           and published_at is not null
@@ -60,7 +60,7 @@ final class MapsQueriesImpl implements MapsQueries {
         order by position""";
 
     private static final String GET_STATS = """
-        select map_stats.map_id, map_stats.play_count, map_stats.win_count
+        select map_stats.map_id, map_stats.play_count, map_stats.win_count, map_stats.likes, map_stats.est_length_ms, map_stats.refreshed_at
         from map_stats
         where map_id = ?""";
 
@@ -87,7 +87,7 @@ final class MapsQueriesImpl implements MapsQueries {
                           verification_state, quality, protocol_version)
         values (?, ?, now(), now(), '', '', 'parkour', '{"x":0,"y":40,"z":0,"yaw":90,"pitch":0}', ?,
                 'unverified', 'unrated', ?)
-        returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
+        returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
 
     private static final String INSERT_OWNER_SLOT = """
         -- The owner's own slot has position -1; bought slots count up from 0.
@@ -177,7 +177,7 @@ final class MapsQueriesImpl implements MapsQueries {
             published_at = now(),
             updated_at   = now()
         where id = ?
-        returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
+        returning maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality""";
 
     private static final String UPDATE_VERIFICATION = """
         update maps
@@ -224,7 +224,7 @@ final class MapsQueriesImpl implements MapsQueries {
         order by s.created_at desc""";
 
     private static final String LIST_PLAYER_PUBLISHED_MAPS = """
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality
         from maps
         where owner = ?
           and published_at is not null
@@ -277,25 +277,12 @@ final class MapsQueriesImpl implements MapsQueries {
           and player_id = ?""";
 
     private static final String SET_RATING = """
+        -- Null is unrated.
         insert into map_ratings (map_id, player_id, rating)
         values (?, ?, ?)
         on conflict (map_id, player_id) do update
             set rating   = excluded.rating,
                 rated_at = now()""";
-
-    private static final String DELETE_RATING = """
-        delete
-        from map_ratings
-        where map_id = ?
-          and player_id = ?""";
-
-    private static final String REFRESH_LIKES = """
-        -- Run under the map's row lock, so a rating committed just before is always counted.
-        update maps
-        set total_likes = (select count(*) filter (where rating = 'liked') - count(*) filter (where rating = 'disliked')
-                           from map_ratings
-                           where map_id = ?)
-        where id = ?""";
 
     private static final String INSERT_REPORT = """
         insert into map_reports (map_id, player_id, created_at, categories, comment)
@@ -305,10 +292,11 @@ final class MapsQueriesImpl implements MapsQueries {
         -- Go's `maps_published` view (`map_stats` join, difficulty bucket) written out so the row keeps the
         -- maps table record. The listing predicate and the caller's filters are the `where` fragment and the
         -- sort the `order by` fragment, both built in `MapSearchSql`.
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
                array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
                coalesce(stats.play_count, 0)                                                 as play_count,
                coalesce(stats.win_count, 0)                                                  as win_count,
+               coalesce(stats.likes, 0)                                                      as total_likes,
                count(*) over ()                                                              as total_count
         from maps
                  left join map_stats stats on stats.map_id = maps.id""";
@@ -343,10 +331,11 @@ final class MapsQueriesImpl implements MapsQueries {
 
     private static final String LIST_PLAYER_HISTORY = """
         -- Maps drop out here once deleted instead of 404ing the page in the client.
-        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.total_likes, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
+        select maps.id, maps.owner, maps.created_at, maps.updated_at, maps.published_id, maps.published_at, maps.opt_only_sprint, maps.opt_no_sprint, maps.opt_no_jump, maps.opt_no_sneak, maps.opt_boat, maps.deleted_at, maps.deleted_by, maps.deleted_reason, maps.protocol_version, maps.contest, maps.listed, maps.leaderboard, maps.name, maps.icon, maps.variant, maps.subvariant, maps.spawn_point, maps.extra, maps.size_class, maps.verification_state, maps.quality,
                array(select tag::text from map_tags where map_id = maps.id order by position) as tags,
                coalesce(stats.play_count, 0)                                                 as play_count,
                coalesce(stats.win_count, 0)                                                  as win_count,
+               coalesce(stats.likes, 0)                                                      as total_likes,
                count(*) over ()                                                              as total_count
         from (select map_id, max(updated_at) as last_played
               from save_states
@@ -1015,45 +1004,13 @@ final class MapsQueriesImpl implements MapsQueries {
     }
 
     @Override
-    public long setRating(UUID mapId, UUID playerId, MapRating rating) {
+    public long setRating(UUID mapId, UUID playerId, @Nullable MapRating rating) {
         try {
             Connection conn = source.acquire();
             try (PreparedStatement ps = conn.prepareStatement(SET_RATING)) {
                 ps.setObject(1, mapId);
                 ps.setObject(2, playerId);
-                Jdbc.setInferred(ps, 3, rating.pgLabel());
-                return ps.executeLargeUpdate();
-            } finally {
-                source.release(conn);
-            }
-        } catch (SQLException e) {
-            throw Sneaky.rethrow(e);
-        }
-    }
-
-    @Override
-    public long deleteRating(UUID mapId, UUID playerId) {
-        try {
-            Connection conn = source.acquire();
-            try (PreparedStatement ps = conn.prepareStatement(DELETE_RATING)) {
-                ps.setObject(1, mapId);
-                ps.setObject(2, playerId);
-                return ps.executeLargeUpdate();
-            } finally {
-                source.release(conn);
-            }
-        } catch (SQLException e) {
-            throw Sneaky.rethrow(e);
-        }
-    }
-
-    @Override
-    public long refreshLikes(UUID mapId) {
-        try {
-            Connection conn = source.acquire();
-            try (PreparedStatement ps = conn.prepareStatement(REFRESH_LIKES)) {
-                ps.setObject(1, mapId);
-                ps.setObject(2, mapId);
+                Jdbc.setInferred(ps, 3, rating == null ? null : rating.pgLabel());
                 return ps.executeLargeUpdate();
             } finally {
                 source.release(conn);
@@ -1099,7 +1056,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(i++, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.SearchMapsRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 29, String.class), rs.getLong(30), rs.getLong(31), rs.getLong(32)));
+                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 28, String.class), rs.getLong(29), rs.getLong(30), rs.getInt(31), rs.getLong(32)));
                     return rows;
                 }
             } finally {
@@ -1142,7 +1099,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(3, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.ListPlayerHistoryRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 29, String.class), rs.getLong(30), rs.getLong(31), rs.getLong(32)));
+                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 28, String.class), rs.getLong(29), rs.getLong(30), rs.getInt(31), rs.getLong(32)));
                     return rows;
                 }
             } finally {

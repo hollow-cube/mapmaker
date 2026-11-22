@@ -5,3 +5,4 @@
 --
 -- Only drops are allowed, and a dropped column must be nullable or have a default, since inserts
 -- that leave it out still run against the real table until the migration lands.
+alter table maps drop column total_likes;

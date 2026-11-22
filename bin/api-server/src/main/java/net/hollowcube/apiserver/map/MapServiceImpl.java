@@ -193,7 +193,7 @@ public final class MapServiceImpl implements MapService {
         return PaginatedList.of(
             rows,
             MapsQueries.SearchMapsRow::totalCount,
-            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount())
+            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount(), row.totalLikes())
         );
     }
 
@@ -211,7 +211,7 @@ public final class MapServiceImpl implements MapService {
         return PaginatedList.of(
             db.maps.listPlayerHistory(playerId, offset(page, pageSize), limit(pageSize)),
             MapsQueries.ListPlayerHistoryRow::totalCount,
-            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount())
+            row -> MapCompat.mapData(row.maps(), row.tags(), row.playCount(), row.winCount(), row.totalLikes())
         );
     }
 
@@ -715,10 +715,8 @@ public final class MapServiceImpl implements MapService {
                 categories.stream().map(MapCompat::reportCategoryColumn).toList(),
                 comment
             );
-            if (dislike) {
+            if (dislike)
                 tx.maps.setRating(mapId, reporter, net.hollowcube.apiserver.db.MapRating.DISLIKED);
-                tx.maps.refreshLikes(mapId);
-            }
 
             var properties = new HashMap<String, Object>();
             properties.put("map_id", mapId.toString());
@@ -742,10 +740,7 @@ public final class MapServiceImpl implements MapService {
         if (rating == MapRating.UNKNOWN) throw badRequest("invalid rating");
         db.tx(tx -> {
             if (tx.maps.getMapForUpdate(mapId) == null) throw notFound("map not found");
-            var column = MapCompat.ratingColumn(rating);
-            if (column == null) tx.maps.deleteRating(mapId, playerId);
-            else tx.maps.setRating(mapId, playerId, column);
-            tx.maps.refreshLikes(mapId);
+            tx.maps.setRating(mapId, playerId, MapCompat.ratingColumn(rating));
         });
     }
 
@@ -878,7 +873,6 @@ public final class MapServiceImpl implements MapService {
                     () -> posthog.capture(playerId.toString(), "map_completed", properties)
                 );
             }
-            tx.afterCommit(() -> db.saveStates.refreshStats(mapId));
         });
     }
 
@@ -1023,6 +1017,7 @@ public final class MapServiceImpl implements MapService {
     public void deleteLeaderboardEntry(UUID mapId, UUID playerId, boolean notify) {
         db.tx(tx -> {
             tx.saveStates.deleteForPlayer(mapId, playerId);
+            tx.mapStats.refresh(List.of(mapId));
             tx.afterCommit(() -> redis.zrem(leaderboardKey(mapId), leaderboardMember(playerId)));
             if (notify) {
                 tx.notifications.replace(MAP_TIME_DELETED_NOTIFICATION, mapId.toString(), playerId);
@@ -1040,7 +1035,9 @@ public final class MapServiceImpl implements MapService {
     @Override
     public void deletePlayerLeaderboardEntries(UUID playerId) {
         db.tx(tx -> {
-            for (var mapId : tx.saveStates.deletePlayer(playerId))
+            var mapIds = tx.saveStates.deletePlayer(playerId);
+            tx.mapStats.refresh(mapIds);
+            for (var mapId : mapIds)
                 tx.afterCommit(
                     () -> redis.zrem(leaderboardKey(mapId), leaderboardMember(playerId))
                 );
@@ -1051,6 +1048,7 @@ public final class MapServiceImpl implements MapService {
     public void deleteLeaderboard(UUID mapId) {
         db.tx(tx -> {
             tx.saveStates.deleteMap(mapId);
+            tx.mapStats.refresh(List.of(mapId));
             tx.afterCommit(() -> redis.del(leaderboardKey(mapId)));
         });
     }
@@ -1067,7 +1065,10 @@ public final class MapServiceImpl implements MapService {
                 tx.saveStates.undeleteForPlayer(mapId, playerId, deletedAfter, deletedBefore),
                 0
             );
-            if (restored > 0) tx.afterCommit(() -> rebuildLeaderboard(db.maps.getMap(mapId)));
+            if (restored > 0) {
+                tx.mapStats.refresh(List.of(mapId));
+                tx.afterCommit(() -> rebuildLeaderboard(db.maps.getMap(mapId)));
+            }
             return restored;
         });
     }
@@ -1080,10 +1081,13 @@ public final class MapServiceImpl implements MapService {
     ) {
         return db.txResult(tx -> {
             var restored = 0;
+            var mapIds = new ArrayList<UUID>();
             for (var row : tx.saveStates.undeletePlayer(playerId, deletedAfter, deletedBefore)) {
                 restored += requireNonNullElse(row.restored(), 0);
+                mapIds.add(row.mapId());
                 tx.afterCommit(() -> rebuildLeaderboard(db.maps.getMap(row.mapId())));
             }
+            tx.mapStats.refresh(mapIds);
             return restored;
         });
     }
@@ -1099,7 +1103,10 @@ public final class MapServiceImpl implements MapService {
                 tx.saveStates.undeleteMap(mapId, deletedAfter, deletedBefore),
                 0
             );
-            if (restored > 0) tx.afterCommit(() -> rebuildLeaderboard(db.maps.getMap(mapId)));
+            if (restored > 0) {
+                tx.mapStats.refresh(List.of(mapId));
+                tx.afterCommit(() -> rebuildLeaderboard(db.maps.getMap(mapId)));
+            }
             return restored;
         });
     }

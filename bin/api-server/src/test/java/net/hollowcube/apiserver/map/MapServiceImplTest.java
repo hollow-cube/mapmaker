@@ -902,18 +902,22 @@ class MapServiceImplTest {
     }
 
     @Test
-    void setPlayerRating_keepsTotalLikesAndStoresUnratedAsNoRow() {
+    void setPlayerRating_storesUnratedAsNull_andCountsOnTheNextStatsRefresh() {
         var id = create(OWNER).id();
+        var likes = "select likes from map_stats where map_id = '" + id + "'";
         client.setPlayerRating(id, OWNER, MapRating.LIKED);
         client.setPlayerRating(id, BUILDER, MapRating.LIKED);
-        assertEquals(2, count("select total_likes from maps where id = '" + id + "'"));
+        db.mapStats.refresh(List.of(id));
+        assertEquals(2, count(likes));
         client.setPlayerRating(id, BUILDER, MapRating.DISLIKED);
         assertEquals(MapRating.DISLIKED, client.getPlayerRating(id, BUILDER));
-        assertEquals(0, count("select total_likes from maps where id = '" + id + "'"));
+        db.mapStats.refresh(List.of(id));
+        assertEquals(0, count(likes));
         client.setPlayerRating(id, BUILDER, MapRating.UNRATED);
         assertEquals(MapRating.UNRATED, client.getPlayerRating(id, BUILDER));
-        assertEquals(1, count("select total_likes from maps where id = '" + id + "'"));
-        assertEquals(1, count("select count(*) from map_ratings"));
+        db.mapStats.refresh(List.of(id));
+        assertEquals(1, count(likes));
+        assertEquals(1, count("select count(*) from map_ratings where rating is null"));
     }
 
     @Test
@@ -1056,6 +1060,7 @@ class MapServiceImplTest {
             """
             insert into map_stats (map_id, play_count, win_count)
             values ('%s', 100, 90), ('%s', 100, 30), ('%s', 5, 5)
+            on conflict (map_id) do update set play_count = excluded.play_count, win_count = excluded.win_count
             """
                 .formatted(easy, hard, fresh)
         );
@@ -1145,10 +1150,12 @@ class MapServiceImplTest {
         TEST_DB.seed(
             """
             update maps set published_id = %s, published_at = '%s',
-                            quality = (enum_range(null::map_quality))[%s + 1], total_likes = %s
-            where id = '%s'
+                            quality = (enum_range(null::map_quality))[%s + 1]
+            where id = '%s';
+            insert into map_stats (map_id, likes) values ('%s', %s)
+            on conflict (map_id) do update set likes = excluded.likes;
             """
-                .formatted(publishedIdCounter++, publishedAt, quality, likes, id)
+                .formatted(publishedIdCounter++, publishedAt, quality, id, id, likes)
         );
         return id;
     }

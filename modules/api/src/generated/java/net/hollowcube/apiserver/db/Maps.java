@@ -15,10 +15,10 @@ public record Maps(UUID id, UUID owner, Instant createdAt, Instant updatedAt,
         @Nullable Long publishedId, @Nullable Instant publishedAt, boolean optOnlySprint,
         boolean optNoSprint, boolean optNoJump, boolean optNoSneak, boolean optBoat,
         @Nullable Instant deletedAt, @Nullable UUID deletedBy, @Nullable String deletedReason,
-        int protocolVersion, @Nullable UUID contest, boolean listed, int totalLikes,
-        @Nullable String leaderboard, String name, String icon, MapVariant variant,
-        @Nullable MapSubvariant subvariant, String spawnPoint, String extra, MapSize sizeClass,
-        MapVerification verificationState, MapQuality quality) {
+        int protocolVersion, @Nullable UUID contest, boolean listed, @Nullable String leaderboard,
+        String name, String icon, MapVariant variant, @Nullable MapSubvariant subvariant,
+        String spawnPoint, String extra, MapSize sizeClass, MapVerification verificationState,
+        MapQuality quality) {
     /**
      * Reads one `maps` row, its first column at `col`.
      */
@@ -41,16 +41,15 @@ public record Maps(UUID id, UUID owner, Instant createdAt, Instant updatedAt,
                 rs.getInt(col + 14),
                 rs.getObject(col + 15, UUID.class),
                 rs.getBoolean(col + 16),
-                rs.getInt(col + 17),
+                rs.getString(col + 17),
                 rs.getString(col + 18),
                 rs.getString(col + 19),
-                rs.getString(col + 20),
-                MapVariant.fromPg(rs.getString(col + 21)),
-                MapSubvariant.fromPg(rs.getString(col + 22)),
+                MapVariant.fromPg(rs.getString(col + 20)),
+                MapSubvariant.fromPg(rs.getString(col + 21)),
+                rs.getString(col + 22),
                 rs.getString(col + 23),
-                rs.getString(col + 24),
-                MapSize.fromPg(rs.getString(col + 25)),
-                MapVerification.fromPg(rs.getString(col + 26)),
-                MapQuality.fromPg(rs.getString(col + 27)));
+                MapSize.fromPg(rs.getString(col + 24)),
+                MapVerification.fromPg(rs.getString(col + 25)),
+                MapQuality.fromPg(rs.getString(col + 26)));
     }
 }

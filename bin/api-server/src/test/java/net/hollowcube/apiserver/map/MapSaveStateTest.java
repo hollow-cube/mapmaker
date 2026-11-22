@@ -373,28 +373,6 @@ class MapSaveStateTest {
     }
 
     @Test
-    void upsert_refreshesTheMapsStats() {
-        var map = map("parkour");
-        client.upsertSaveState(map, PLAYER, UUID.randomUUID(), playing(1000).build());
-        client.upsertSaveState(
-            map,
-            OTHER,
-            UUID.randomUUID(),
-            playing(1000).completed(true, null).build()
-        );
-        client.upsertSaveState(
-            map,
-            OTHER,
-            UUID.randomUUID(),
-            playing(1000).completed(true, null).build()
-        );
-
-        var stats = db.maps.getStats(map);
-        assertEquals(2, stats.playCount());
-        assertEquals(1, stats.winCount());
-    }
-
-    @Test
     void getLatest_isTheNewestOfTheTypeAndNullOnceCompleted() {
         var map = map("parkour");
         var first = UUID.randomUUID();

@@ -73,7 +73,7 @@ final class MapSearchSql {
         return switch (search.sort()) {
             case BEST -> SqlFragment.of(
                 "maps.quality" + direction
-                    + ", maps.total_likes desc, maps.published_at desc, maps.id"
+                    + ", coalesce(stats.likes, 0) desc, maps.published_at desc, maps.id"
             );
             case PUBLISHED -> SqlFragment.of("maps.published_at" + direction + ", maps.id");
             case UNKNOWN -> throw new IllegalArgumentException("unknown sort");

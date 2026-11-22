@@ -77,11 +77,12 @@ final class MapCompat {
             map,
             tags,
             stats == null ? 0 : stats.playCount(),
-            stats == null ? 0 : stats.winCount()
+            stats == null ? 0 : stats.winCount(),
+            stats == null ? 0 : stats.likes()
         );
     }
 
-    static MapData mapData(Maps map, List<String> tags, long plays, long wins) {
+    static MapData mapData(Maps map, List<String> tags, long plays, long wins, int likes) {
         var winRate = plays == 0 ? 0.0 : (double) wins / plays;
         return new MapData(
             map.id(),
@@ -106,7 +107,7 @@ final class MapCompat {
             difficulty(variant(map), plays, winRate),
             plays,
             winRate,
-            map.totalLikes(),
+            likes,
             map.contest(),
             map.createdAt(),
             map.updatedAt()
@@ -221,7 +222,7 @@ final class MapCompat {
         };
     }
 
-    /// Null for [MapRating#UNRATED], which is stored as no row.
+    /// Null for [MapRating#UNRATED].
     static net.hollowcube.apiserver.db.@Nullable MapRating ratingColumn(MapRating rating) {
         return switch (rating) {
             case LIKED -> net.hollowcube.apiserver.db.MapRating.LIKED;

@@ -9,7 +9,6 @@ import net.hollowcube.apiserver.common.Pools;
 import net.hollowcube.apiserver.common.PostgresUri;
 import net.hollowcube.apiserver.db.ApiDatabase;
 import net.hollowcube.apiserver.hdb.HeadDatabaseServiceImpl;
-import net.hollowcube.apiserver.job.JobSpec;
 import net.hollowcube.apiserver.map.MapServiceImpl;
 import net.hollowcube.apiserver.map.MapWalConsumer;
 import net.hollowcube.apiserver.notification.NotificationServiceImpl;
@@ -18,9 +17,8 @@ import net.hollowcube.apiserver.player.SocialServiceImpl;
 import net.hollowcube.apiserver.replay.ReplayServiceImpl;
 import net.hollowcube.apiserver.s3.HttpS3Client;
 import net.hollowcube.apiserver.session.SessionServiceImpl;
+import net.hollowcube.apiworker.Jobs;
 import net.hollowcube.apiworker.job.Worker;
-import net.hollowcube.apiworker.jobs.IndexMapRunner;
-import net.hollowcube.apiworker.jobs.PlayerCountRunner;
 import net.hollowcube.command.CommandManager;
 import net.hollowcube.command.CommandManagerImpl;
 import net.hollowcube.common.ServerRuntime;
@@ -122,11 +120,10 @@ public class DevServer extends AbstractMultiMapServer {
     ///
     /// Its jobs are how a map gets indexed after it is published, so a development server without
     /// one silently never indexes anything. It picks rows out of the same `jobs` table as the real
-    /// worker, under a name that says which this is.
+    /// worker, under a name that says which this is. The replay jobs are left to the real worker.
     private void startApiWorker() {
         var worker = new Worker(db, "dev-server", WORKER_SLOTS);
-        worker.handle(JobSpec.PLAYER_COUNT, new PlayerCountRunner(db, PostHog.getClient()));
-        worker.handle(JobSpec.INDEX_MAP, new IndexMapRunner(db, api().maps));
+        Jobs.register(worker, db, api().maps, null);
         shutdowner().queue("api-worker", () -> worker.close(WORKER_STOP_GRACE));
         worker.start();
     }

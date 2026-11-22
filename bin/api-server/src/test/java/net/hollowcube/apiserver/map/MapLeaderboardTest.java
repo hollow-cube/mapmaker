@@ -300,6 +300,7 @@ class MapLeaderboardTest {
         client.deleteLeaderboardEntry(map, ALICE, true);
 
         assertEquals(1, count("select count(*) from save_states where deleted_at is null"));
+        assertEquals(1, count("select win_count from map_stats where map_id = '" + map + "'"));
         assertNull(score(map, ALICE));
         assertEquals(2000.0, score(map, BOB));
         assertEquals(
@@ -371,6 +372,7 @@ class MapLeaderboardTest {
         assertEquals(1, restored);
         assertEquals(2000.0, score(map, ALICE));
         assertNull(score(map, BOB));
+        assertEquals(1, count("select win_count from map_stats where map_id = '" + map + "'"));
         assertEquals(2, client.undeleteLeaderboardEntry(map, ALICE, null, null));
         assertEquals(1000.0, score(map, ALICE));
         assertEquals(0, client.undeleteLeaderboardEntry(map, ALICE, null, null));

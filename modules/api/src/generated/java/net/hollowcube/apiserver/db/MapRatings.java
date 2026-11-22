@@ -11,7 +11,8 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `map_ratings` table.
  */
-public record MapRatings(UUID mapId, UUID playerId, MapRating rating, @Nullable Instant ratedAt) {
+public record MapRatings(UUID mapId, UUID playerId, @Nullable MapRating rating,
+        @Nullable Instant ratedAt) {
     /**
      * Reads one `map_ratings` row, its first column at `col`.
      */

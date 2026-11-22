@@ -73,19 +73,6 @@ on conflict (id) do update
 where save_states.map_id = excluded.map_id
   and save_states.player_id = excluded.player_id;
 
--- name: refreshStats :exec
--- `map_stats` counts every player who ever had a state on the map, deleted ones included, and
--- every one of them who finished.
-insert into map_stats (map_id, play_count, win_count)
-select $mapId,
-       count(distinct player_id),
-       count(distinct case when completed then player_id end)
-from save_states
-where map_id = $mapId
-on conflict (map_id) do update
-    set play_count = excluded.play_count,
-        win_count  = excluded.win_count;
-
 -- name: deleteForPlayer :exec
 update save_states
 set deleted_at = now()
