@@ -32,10 +32,6 @@ tasks.withType<Test> {
 
 application {
     mainClass = "net.hollowcube.apiserver.Main"
-    // Named rather than `logback.xml`, so that a process which puts this on its classpath alongside
-    // its own — the development server hosts both of these — does not end up with several and a
-    // warning about which one won. The image passes logback-prod.xml the same way.
-    applicationDefaultJvmArgs = listOf("-Dlogback.configurationFile=logback-local.xml")
 }
 
 // Applies modules/api's migrations to DATABASE_URL, or the compose postgres when it is unset.
@@ -45,7 +41,6 @@ tasks.register<JavaExec>("migrate") {
     description = "Applies the api database migrations to DATABASE_URL."
     classpath = sourceSets.main.get().runtimeClasspath
     mainClass = "net.hollowcube.apiserver.Migrate"
-    jvmArgs("-Dlogback.configurationFile=logback-local.xml")
     javaLauncher = javaToolchains.launcherFor(java.toolchain)
     args(layout.projectDirectory.dir("../../modules/api/src/main/sql/migrations").asFile.normalize().path)
     providers.gradleProperty("baseline").orNull?.let { args("--baseline", it) }
@@ -55,6 +50,9 @@ graalvmNative {
     // pgjdbc and Hikari both need reflection config that neither ships in its own jar.
     metadataRepository {
         enabled = true
+        // Its entries are all for configuring from xml, and registering the Joran configurators
+        // for reflection is what keeps xerces in the image; we configure in code.
+        excludedModules.add("ch.qos.logback:logback-classic")
     }
 
     // Both G1 and static linking are linux-only in native-image, and CI is the only place this is

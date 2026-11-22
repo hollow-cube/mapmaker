@@ -52,7 +52,7 @@ public final class RequestLog extends Filter {
         // that fails is exactly what someone reading these logs is looking for.
         if (status == 200 && (path.endsWith("/alive") || path.endsWith("/ready"))) return;
 
-        // Key values rather than a formatted string: under logback-prod.xml these come out as top
+        // Key values rather than a formatted string: under LOG_FORMAT=json these come out as top
         // level json fields, so `| json | status >= 500` works in Loki without a pattern to match.
         var line = logger.atInfo()
             .setMessage("served")

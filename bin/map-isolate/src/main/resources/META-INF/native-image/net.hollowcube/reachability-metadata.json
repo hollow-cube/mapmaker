@@ -1,6 +1,12 @@
 {
   "resources": [
     {
+      "glob": "ch/qos/logback/classic/logback-classic-version.properties"
+    },
+    {
+      "glob": "ch/qos/logback/core/logback-core-version.properties"
+    },
+    {
       "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator"
     },
     {

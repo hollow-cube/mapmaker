@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":modules:datafix"))
 
     implementation(libs.minestom)
+    implementation(libs.logback)
 
     if (loadAnticheat) {
         implementation(files(rootProject.projectDir.resolve("anticheat.jar")))

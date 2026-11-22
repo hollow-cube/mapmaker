@@ -63,10 +63,12 @@ graalvmNative {
         // These entries are for older versions and register (conditionally) methods that no longer exist,
         // which --exact-reachability-metadata refuses to parse. bin/config carries copies without those conditions.
         excludedModules.addAll(
-            "ch.qos.logback:logback-classic",
             "io.opentelemetry:opentelemetry-sdk-metrics",
             "io.opentelemetry:opentelemetry-sdk-trace",
         )
+        // Its entries are all for configuring from xml, and registering the Joran configurators
+        // for reflection is what keeps xerces in the image; we configure in code.
+        excludedModules.add("ch.qos.logback:logback-classic")
     }
 
     binaries {

@@ -9,6 +9,7 @@ COPY ./bin/api-server/build/image/chat-filter/ /app/chat-filter/
 COPY ./bin/api-server/build/image/lib/ /app/lib/
 COPY ./bin/api-server/build/native/nativeCompile/api-server /app/api-server
 
+ENV LOG_FORMAT=json
 EXPOSE 9124
 
-ENTRYPOINT ["/app/api-server", "-Xmx384m", "-Dlogback.configurationFile=logback-prod.xml"]
+ENTRYPOINT ["/app/api-server", "-Xmx384m"]

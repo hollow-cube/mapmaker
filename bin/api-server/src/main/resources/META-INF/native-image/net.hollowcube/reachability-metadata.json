@@ -21,8 +21,8 @@
   ],
   "resources": [
     { "glob": "redis/clients/jedis/pom.properties" },
-    { "glob": "logback.xml" },
-    { "glob": "logback-prod.xml" },
+    { "glob": "ch/qos/logback/classic/logback-classic-version.properties" },
+    { "glob": "ch/qos/logback/core/logback-core-version.properties" },
     { "glob": "META-INF/services/ch.qos.logback.classic.spi.Configurator" },
     { "glob": "META-INF/services/com.sun.net.httpserver.spi.HttpServerProvider" },
     { "glob": "META-INF/services/java.net.spi.InetAddressResolverProvider" },
