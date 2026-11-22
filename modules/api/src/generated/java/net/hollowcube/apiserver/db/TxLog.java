@@ -11,14 +11,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `tx_log` table.
  */
-public record TxLog(int id, UUID playerId, Instant timestamp, String reason, String currency,
+public record TxLog(long id, UUID playerId, Instant timestamp, String reason, String currency,
         long amount, @Nullable String meta) {
     /**
      * Reads one `tx_log` row, its first column at `col`.
      */
     static TxLog read(ResultSet rs, int col) throws SQLException {
         return new TxLog(
-                rs.getInt(col),
+                rs.getLong(col),
                 rs.getObject(col + 1, UUID.class),
                 Jdbc.getInstant(rs, col + 2),
                 rs.getString(col + 3),

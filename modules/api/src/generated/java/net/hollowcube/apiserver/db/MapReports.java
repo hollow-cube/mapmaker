@@ -12,14 +12,14 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `map_reports` table.
  */
-public record MapReports(int id, UUID mapId, UUID playerId, Instant createdAt,
+public record MapReports(long id, UUID mapId, UUID playerId, Instant createdAt,
         List<MapReportCategory> categories, @Nullable String comment) {
     /**
      * Reads one `map_reports` row, its first column at `col`.
      */
     static MapReports read(ResultSet rs, int col) throws SQLException {
         return new MapReports(
-                rs.getInt(col),
+                rs.getLong(col),
                 rs.getObject(col + 1, UUID.class),
                 rs.getObject(col + 2, UUID.class),
                 Jdbc.getInstant(rs, col + 3),

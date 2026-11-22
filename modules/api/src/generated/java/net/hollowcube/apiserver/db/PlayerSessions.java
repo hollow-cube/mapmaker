@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public record PlayerSessions(UUID playerId, Instant createdAt, String proxyId,
         @Nullable String serverId, boolean hidden, String skinTexture, String skinSignature,
         @Nullable String pType, @Nullable String pState, @Nullable String pInstanceId,
-        @Nullable String pMapId, @Nullable Instant pStartTime, @Nullable Instant lastSeen,
+        @Nullable String pMapId, @Nullable Instant pStartTime, Instant lastSeen,
         int protocolVersion, @Nullable UUID replyTarget) {
     /**
      * Reads one `player_sessions` row, its first column at `col`.

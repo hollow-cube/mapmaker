@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
 /**
  * A row of the `api_keys` table.
  */
-public record ApiKeys(UUID id, String keyHash, UUID playerId, @Nullable Instant createdAt,
+public record ApiKeys(UUID id, String keyHash, UUID playerId, Instant createdAt,
         @Nullable Instant deletedAt) {
     /**
      * Reads one `api_keys` row, its first column at `col`.

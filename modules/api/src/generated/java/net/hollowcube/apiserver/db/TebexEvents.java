@@ -9,13 +9,13 @@ import net.hollowcube.sqlgen.runtime.Jdbc;
 /**
  * A row of the `tebex_events` table.
  */
-public record TebexEvents(int id, String eventId, Instant timestamp, byte[] raw) {
+public record TebexEvents(long id, String eventId, Instant timestamp, byte[] raw) {
     /**
      * Reads one `tebex_events` row, its first column at `col`.
      */
     static TebexEvents read(ResultSet rs, int col) throws SQLException {
         return new TebexEvents(
-                rs.getInt(col),
+                rs.getLong(col),
                 rs.getString(col + 1),
                 Jdbc.getInstant(rs, col + 2),
                 rs.getBytes(col + 3));

@@ -7,13 +7,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import net.hollowcube.sqlgen.runtime.Jdbc;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * A row of the `player_totp` table.
  */
-public record PlayerTotp(UUID playerId, @Nullable Instant createdAt, @Nullable Boolean active,
-        byte[] key, List<String> recoveryCodes) {
+public record PlayerTotp(UUID playerId, Instant createdAt, boolean active, byte[] key,
+        List<String> recoveryCodes) {
     /**
      * Reads one `player_totp` row, its first column at `col`.
      */
@@ -21,7 +20,7 @@ public record PlayerTotp(UUID playerId, @Nullable Instant createdAt, @Nullable B
         return new PlayerTotp(
                 rs.getObject(col, UUID.class),
                 Jdbc.getInstant(rs, col + 1),
-                rs.getObject(col + 2, Boolean.class),
+                rs.getBoolean(col + 2),
                 rs.getBytes(col + 3),
                 Jdbc.getList(rs, col + 4, String.class));
     }
