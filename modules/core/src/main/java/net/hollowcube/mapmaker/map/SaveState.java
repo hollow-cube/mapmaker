@@ -153,7 +153,7 @@ public class SaveState {
     }
 
     public long getEffectivePlaytime() {
-        return Math.max(playtime, ticks * 50);
+        return Math.max(getRealPlaytime(), ticks * 50);
     }
 
     /// Hard resets that preceded this save state for this player on this map.
