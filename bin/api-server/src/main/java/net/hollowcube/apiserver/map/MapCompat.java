@@ -78,11 +78,19 @@ final class MapCompat {
             tags,
             stats == null ? 0 : stats.playCount(),
             stats == null ? 0 : stats.winCount(),
-            stats == null ? 0 : stats.likes()
+            stats == null ? 0 : stats.likes(),
+            stats == null ? null : stats.estLengthMs()
         );
     }
 
-    static MapData mapData(Maps map, List<String> tags, long plays, long wins, int likes) {
+    static MapData mapData(
+        Maps map,
+        List<String> tags,
+        long plays,
+        long wins,
+        int likes,
+        @Nullable Long estLengthMs
+    ) {
         var winRate = plays == 0 ? 0.0 : (double) wins / plays;
         return new MapData(
             map.id(),
@@ -108,6 +116,7 @@ final class MapCompat {
             plays,
             winRate,
             likes,
+            estLengthMs,
             map.contest(),
             map.createdAt(),
             map.updatedAt()

@@ -185,7 +185,7 @@ public interface MapsQueries {
      * A row of `searchMaps`.
      */
     record SearchMapsRow(Maps maps, List<String> tags, long playCount, long winCount,
-            int totalLikes, long totalCount) {
+            int totalLikes, @Nullable Long estLengthMs, long totalCount) {
     }
 
     /**
@@ -198,7 +198,7 @@ public interface MapsQueries {
      * A row of `listPlayerHistory`.
      */
     record ListPlayerHistoryRow(Maps maps, List<String> tags, long playCount, long winCount,
-            int totalLikes, long totalCount) {
+            int totalLikes, @Nullable Long estLengthMs, long totalCount) {
     }
 
     /**

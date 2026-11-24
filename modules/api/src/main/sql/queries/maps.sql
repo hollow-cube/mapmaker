@@ -283,6 +283,7 @@ select maps.*,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
        coalesce(stats.likes, 0)                                                      as total_likes,
+       stats.est_length_ms,
        count(*) over ()                                                              as total_count
 from maps
          left join map_stats stats on stats.map_id = maps.id
@@ -321,6 +322,7 @@ select maps.*,
        coalesce(stats.play_count, 0)                                                 as play_count,
        coalesce(stats.win_count, 0)                                                  as win_count,
        coalesce(stats.likes, 0)                                                      as total_likes,
+       stats.est_length_ms,
        count(*) over ()                                                              as total_count
 from (select map_id, max(updated_at) as last_played
       from save_states

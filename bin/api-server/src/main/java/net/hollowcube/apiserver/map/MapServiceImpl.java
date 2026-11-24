@@ -198,7 +198,8 @@ public final class MapServiceImpl implements MapService {
                 row.tags(),
                 row.playCount(),
                 row.winCount(),
-                row.totalLikes()
+                row.totalLikes(),
+                row.estLengthMs()
             )
         );
     }
@@ -222,7 +223,8 @@ public final class MapServiceImpl implements MapService {
                 row.tags(),
                 row.playCount(),
                 row.winCount(),
-                row.totalLikes()
+                row.totalLikes(),
+                row.estLengthMs()
             )
         );
     }

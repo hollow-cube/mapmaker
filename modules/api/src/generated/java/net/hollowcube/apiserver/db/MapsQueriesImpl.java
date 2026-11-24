@@ -318,6 +318,7 @@ final class MapsQueriesImpl implements MapsQueries {
                coalesce(stats.play_count, 0)                                                 as play_count,
                coalesce(stats.win_count, 0)                                                  as win_count,
                coalesce(stats.likes, 0)                                                      as total_likes,
+               stats.est_length_ms,
                count(*) over ()                                                              as total_count
         from maps
                  left join map_stats stats on stats.map_id = maps.id""";
@@ -355,6 +356,7 @@ final class MapsQueriesImpl implements MapsQueries {
                coalesce(stats.play_count, 0)                                                 as play_count,
                coalesce(stats.win_count, 0)                                                  as win_count,
                coalesce(stats.likes, 0)                                                      as total_likes,
+               stats.est_length_ms,
                count(*) over ()                                                              as total_count
         from (select map_id, max(updated_at) as last_played
               from save_states
@@ -1075,7 +1077,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(i++, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.SearchMapsRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 28, String.class), rs.getLong(29), rs.getLong(30), rs.getInt(31), rs.getLong(32)));
+                    while (rs.next()) rows.add(new MapsQueries.SearchMapsRow(Maps.read(rs, 1), Jdbc.getList(rs, 28, String.class), rs.getLong(29), rs.getLong(30), rs.getInt(31), rs.getObject(32, Long.class), rs.getLong(33)));
                     return rows;
                 }
             } finally {
@@ -1118,7 +1120,7 @@ final class MapsQueriesImpl implements MapsQueries {
                 ps.setLong(3, limit);
                 try (ResultSet rs = ps.executeQuery()) {
                     List<MapsQueries.ListPlayerHistoryRow> rows = new ArrayList<>();
-                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 28, String.class), rs.getLong(29), rs.getLong(30), rs.getInt(31), rs.getLong(32)));
+                    while (rs.next()) rows.add(new MapsQueries.ListPlayerHistoryRow(Maps.read(rs, 1), Jdbc.getList(rs, 28, String.class), rs.getLong(29), rs.getLong(30), rs.getInt(31), rs.getObject(32, Long.class), rs.getLong(33)));
                     return rows;
                 }
             } finally {

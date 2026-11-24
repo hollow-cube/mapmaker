@@ -108,6 +108,7 @@ public record MapPatch(
             map.uniquePlays(),
             map.clearRate(),
             map.likes(),
+            map.estLengthMs(),
             map.contest(),
             map.createdAt(),
             map.lastModified()

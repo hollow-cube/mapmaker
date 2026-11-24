@@ -25,6 +25,7 @@ public record MapData(
     long uniquePlays,
     double clearRate,
     int likes,
+    @Nullable Long estLengthMs,
     @Nullable UUID contest,
     Instant createdAt,
     Instant lastModified
@@ -60,6 +61,7 @@ public record MapData(
             0,
             0,
             0,
+            null,
             null,
             Instant.EPOCH,
             Instant.EPOCH
@@ -101,6 +103,7 @@ public record MapData(
             uniquePlays,
             clearRate,
             likes,
+            estLengthMs,
             contest,
             createdAt,
             lastModified

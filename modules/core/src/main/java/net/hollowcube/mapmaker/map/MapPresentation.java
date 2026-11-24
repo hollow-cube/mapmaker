@@ -62,6 +62,15 @@ public final class MapPresentation {
         return TOOLTIP_BORDERS[value == MapQuality.UNKNOWN ? 0 : value.ordinal()];
     }
 
+    public static String lengthLabel(long estLengthMs) {
+        var minutes = estLengthMs / 60_000;
+        if (minutes < 1) return "<1m";
+        if (minutes < 5) return "1-5m";
+        if (minutes < 20) return "5-20m";
+        if (minutes < 60) return "20-60m";
+        return "1h+";
+    }
+
     public static String sizeIcon(MapSize size) {
         return switch (size) {
             case NORMAL, UNKNOWN -> "house_1";
@@ -97,6 +106,10 @@ public final class MapPresentation {
             static final BadSprite LIKES_ICON = BadSprite.require("icon/map_tooltip/likes");
             static final Component LIKES_ICON_TEXT = Component.text(
                 LIKES_ICON.fontChar() + FontUtil.computeOffset(2)
+            );
+            static final BadSprite LENGTH_ICON = BadSprite.require("icon/map_tooltip/length");
+            static final Component LENGTH_ICON_TEXT = Component.text(
+                LENGTH_ICON.fontChar() + FontUtil.computeOffset(2)
             );
 
             static final int QUALITY_BORDER_WIDTH = 30;
@@ -152,6 +165,13 @@ public final class MapPresentation {
             : Component.empty();
         playsLikes = playsLikes.append(Holder.LIKES_ICON_TEXT)
             .append(Component.text(map.likes(), TextColor.color(0xaeaeae)));
+        if (isParkour && map.estLengthMs() != null) {
+            playsLikes = playsLikes.append(Component.text(FontUtil.computeOffset(6)))
+                .append(Holder.LENGTH_ICON_TEXT)
+                .append(
+                    Component.text(lengthLabel(map.estLengthMs()), TextColor.color(0xaeaeae))
+                );
+        }
         lore.add(
             Component.empty()
                 .color(NamedTextColor.WHITE)
