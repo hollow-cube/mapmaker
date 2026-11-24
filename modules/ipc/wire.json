@@ -1987,6 +1987,11 @@
           "type": "int"
         },
         {
+          "name": "estLengthMs",
+          "type": "Long",
+          "nullable": true
+        },
+        {
           "name": "contest",
           "type": "UUID",
           "nullable": true

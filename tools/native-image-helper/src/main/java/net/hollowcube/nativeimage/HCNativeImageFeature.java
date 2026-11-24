@@ -41,7 +41,10 @@ public class HCNativeImageFeature implements Feature {
                 .forEach(ci -> processRecordClass(access, ci));
 
             scanResult.getClassesWithAnnotation("net.hollowcube.common.util.RuntimeGson")
-                .forEach(ci -> processRuntimeGsonClass(access, ci));
+                .forEach(ci -> processRuntimeGsonClass(access.findClassByName(ci.getName())));
+            // Minestom types embedded in @RuntimeGson records (eg HubTransferData)
+            processRuntimeGsonClass(access.findClassByName("net.minestom.server.coordinate.Pos"));
+            processRuntimeGsonClass(access.findClassByName("net.minestom.server.coordinate.Vec"));
 
             scanResult.getSubclasses("net.hollowcube.canvas.View")
                 .forEach(classInfo -> processViewClass(access, canvasClasses, classInfo));
@@ -100,8 +103,7 @@ public class HCNativeImageFeature implements Feature {
         RuntimeReflection.registerAllRecordComponents(recordClass);
     }
 
-    private void processRuntimeGsonClass(BeforeAnalysisAccess access, ClassInfo info) {
-        var gsonClass = access.findClassByName(info.getName());
+    private void processRuntimeGsonClass(Class<?> gsonClass) {
         if (gsonClass == null) return;
 
         RuntimeReflection.register(gsonClass);
